@@ -13,7 +13,7 @@ import tiktoken
 
 from backend.parser import convert_to_json, ParserError
 
-import vector_store as vs  # your FAISS helper
+import vector_store as vs  
 
 # ── basic setup ────────────────────────────────────────────────────────────
 load_dotenv()
@@ -40,7 +40,6 @@ def _chunk(text: str, max_toks: int = 300) -> List[str]:  # naive splitter
 
 
 def _embed(texts: List[str]) -> np.ndarray:  # stub for local dev
-    # Replace with client.embeddings.create to get real vectors.
     return np.random.rand(len(texts), 384).astype("float32")
 
 
@@ -92,7 +91,7 @@ def ask():
    return jsonify({"answer": answer})
 
    prompt = (
-        "You are AutoChemGPT, an AI assistant that designs nanomaterial syntheses. "
+        "You are NanoChemGPT, an AI assistant that designs nanomaterial syntheses. "
         "Use the provided context unless general chemistry knowledge is required. "
         "Provide concrete numerical parameters on the same volume scale as the paper. "
         "Response format (replace []):\n\n"
@@ -102,14 +101,18 @@ def ask():
         f"Context:\n{context}\n\nUser question: {q}"
     )
 
-   response = client.chat.completions.create(
-        model="gpt-4o-mini",
-        messages=[{"role": "user", "content": prompt}],
-        temperature=0.2,
-    )
-   answer = response.choices[0].message.content
-   return jsonify({"answer": answer})
+    try:
+        response = client.chat.completions.create(
+            model="gpt-4o-mini",
+            messages=[{"role": "user", "content": prompt}],
+            temperature=0.2,
+        )
+        answer = response.choices[0].message.content
+        return jsonify({"answer": answer})
 
+    except OpenAIError as err:
+        print("[OpenAI] error:", err)
+        abort(502, "OpenAI API failed: " + str(err))
 
 @app.route("/parse", methods=["POST"])
 def parse_route():
