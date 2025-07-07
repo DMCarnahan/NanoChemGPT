@@ -1,18 +1,3 @@
-# app.py – single Flask back‑end (fixed)
-"""
-✓ Upload a PDF  → /upload (multipart form)
-✓ Ask a question → /ask   (form‑urlencoded)
-✓ Convert answer → /parse (JSON)  via backend.parser.convert_to_json()
-
-Changes vs. previous version
----------------------------
-1. Finished the /ask route (prompt concat, returns JSON).
-2. Implemented _extract_text() with PyPDF2 so /upload works.
-3. Provided no‑op stubs for _embed/_chunk to avoid NameErrors.
-4. Removed unused send_from_directory import.
-5. Added try/except around vector‑store calls so the app
-   still responds even if FAISS isn’t initialised yet.
-"""
 from __future__ import annotations
 
 import io
@@ -116,19 +101,7 @@ def ask():
         "3. **Characterization**:\n[]\n\n"
         f"Context:\n{context}\n\nUser question: {q}"
     )
-    try:
-        response = client.chat.completions.create(
-            model="gpt-4o-mini",
-            messages=[{"role": "user", "content": prompt}],
-            temperature=0.2,
-        )
-        answer = response.choices[0].message.content
-        return jsonify({"answer": answer})
 
-    except OpenAIError as err:
-        print("[OpenAI] error:", err)
-        abort(502, "OpenAI API failed: " + str(err))
-       
    response = client.chat.completions.create(
         model="gpt-4o-mini",
         messages=[{"role": "user", "content": prompt}],
