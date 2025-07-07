@@ -11,9 +11,8 @@ from PyPDF2 import PdfReader
 import numpy as np
 import tiktoken
 
+import vector_store as vs
 from backend.parser import convert_to_json, ParserError
-
-import vector_store as vs  
 
 # ── basic setup ────────────────────────────────────────────────────────────
 load_dotenv()
@@ -26,29 +25,25 @@ MAX_TOKENS  = 256
 
 # ── utilities ──────────────────────────────────────────────────────────────
 
-def _chunk(text: str, max_toks: int = 300) -> List[str]:  # naive splitter
-    words = text.split()
-    chunks, buf = [], []
+def _chunk(text: str, max_toks: int = 300) -> List[str]:
+    words, buf, out = text.split(), [], []
     for w in words:
         buf.append(w)
-        if len(buf) >= max_toks:
-            chunks.append(" ".join(buf))
+        if len(ENC.encode(" ".join(buf))) >= max_toks:
+            out.append(" ".join(buf))
             buf = []
     if buf:
-        chunks.append(" ".join(buf))
-    return chunks
+        out.append(" ".join(buf))
+    return out
 
 
-def _embed(texts: List[str]) -> np.ndarray:  # stub for local dev
+def _embed(texts: List[str]) -> np.ndarray:  # stub for dev
     return np.random.rand(len(texts), 384).astype("float32")
 
 
 def _extract_text(pdf_bytes: bytes) -> str:
-    try:
-        reader = PdfReader(io.BytesIO(pdf_bytes))
-        return "\n".join(page.extract_text() or "" for page in reader.pages)
-    except Exception as exc:  # noqa: BLE001
-        raise ValueError("Could not read PDF: %s" % exc) from exc
+    reader = PdfReader(io.BytesIO(pdf_bytes))
+    return "\n".join(page.extract_text() or "" for page in reader.pages)
 
 # ── routes ────────────────────────────────────────────────────────────────
 
@@ -65,33 +60,29 @@ def upload():
     if file.mimetype != "application/pdf":
         abort(400, "Only PDFs accepted.")
 
-    try:
-        text = _extract_text(file.read())
-    except ValueError as err:
-        abort(400, str(err))
-
+    text = _extract_text(file.read())
     try:
         vs.add_to_store(text)
     except Exception as err:  # noqa: BLE001
-        # Log but still succeed so front‑end isn’t blocked during dev
         print("[vector_store] add_to_store failed:", err)
     return jsonify({"status": "ok", "filename": file.filename})
 
 
 @app.route("/ask", methods=["POST"])
 def ask():
-   q = request.form.get("question", "").strip()
-   if not q:
-      abort(400, "No question.")
-   try:
-      context = vs.search(q, k=4)  # returns str
-   except Exception as err:  # noqa: BLE001
-      print("[vector_store] search failed:", err)
-      context = ""
-   return jsonify({"answer": answer})
+    """LLM Q&A with robust error handling so `answer` is always defined."""
+    q = request.form.get("question", "").strip()
+    if not q:
+        abort(400, "No question.")
 
-   prompt = (
-        "You are NanoChemGPT, an AI assistant that designs nanomaterial syntheses. "
+    try:
+        context = vs.search(q, k=4)
+    except Exception as err:  # noqa: BLE001
+        print("[vector_store] search failed:", err)
+        context = ""
+
+    prompt = (
+        "You are ChatAuNP, an AI assistant that designs gold nanomaterial syntheses. "
         "Use the provided context unless general chemistry knowledge is required. "
         "Provide concrete numerical parameters on the same volume scale as the paper. "
         "Response format (replace []):\n\n"
@@ -100,18 +91,20 @@ def ask():
         "3. **Characterization**:\n[]\n\n"
         f"Context:\n{context}\n\nUser question: {q}"
     )
-  
+
     try:
-        response = client.chat.completions.create(
+        resp = client.chat.completions.create(
             model="gpt-4o-mini",
             messages=[{"role": "user", "content": prompt}],
             temperature=0.2,
         )
-        answer = response.choices[0].message.content
-        return jsonify({"answer": answer})
-    except OpenAIError as err:
+        answer = resp.choices[0].message.content
+    except Exception as err:  # noqa: BLE001
         print("[OpenAI] error:", err)
         abort(502, "OpenAI API failed: " + str(err))
+
+    return jsonify({"answer": answer})
+
 
 @app.route("/parse", methods=["POST"])
 def parse_route():
@@ -130,13 +123,14 @@ def parse_route():
 def ping():
     return jsonify({"status": "alive"})
 
+# ── unified JSON error handler ────────────────────────────────────────────
 @app.errorhandler(400)
 @app.errorhandler(422)
+@app.errorhandler(502)
 @app.errorhandler(500)
-def handle_error(e):
+def handle_err(e):  # noqa: ANN001
     return jsonify(error=str(e)), getattr(e, "code", 500)
 
 # ── local dev helper ──────────────────────────────────────────────────────
 if __name__ == "__main__":
-    port = int(os.getenv("PORT", 5000))
-    app.run(host="0.0.0.0", port=port, debug=True)
+    app.run(host="0.0.0.0", port=int(os.getenv("PORT", 5000)), debug=True)
