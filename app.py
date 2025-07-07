@@ -101,15 +101,15 @@ def ask():
         f"Context:\n{context}\n\nUser question: {q}"
     )
 
-    try:
+    try:    
         response = client.chat.completions.create(
-            model="gpt-4o-mini",
-            messages=[{"role": "user", "content": prompt}],
-            temperature=0.2,
+        model="gpt-4o-mini",
+        messages=[{"role": "user", "content": prompt}],
+        temperature=0.2,
         )
         answer = response.choices[0].message.content
         return jsonify({"answer": answer})
-
+        
     except OpenAIError as err:
         print("[OpenAI] error:", err)
         abort(502, "OpenAI API failed: " + str(err))
