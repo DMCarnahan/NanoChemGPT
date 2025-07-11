@@ -33,7 +33,9 @@ from dotenv import load_dotenv
 from sentence_transformers import SentenceTransformer
 
 import nltk
-nltk.download("punkt")
+nltk.data.path.append("/opt/render/nltk_data")
+
+from nltk.tokenize import sent_tokenize
 # ── config ────────────────────────────────────────────────────────────────
 load_dotenv()
 DATA_DIR = pathlib.Path("data")
