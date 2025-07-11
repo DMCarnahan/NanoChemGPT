@@ -2,12 +2,5 @@ services:
   - type: web
     name: nanochemgpt
     runtime: python
-    buildCommand: |
-      pip install -r requirements.txt
-      python - <<'PY'
-      import nltk, os, pathlib
-      nltk.data.path.append("/opt/render/nltk_data")
-      pathlib.Path("/opt/render/nltk_data").mkdir(parents=True, exist_ok=True)
-      nltk.download("punkt", download_dir="/opt/render/nltk_data")
-      PY
+    buildCommand: pip install -r requirements.txt
     startCommand: gunicorn app:app --bind 0.0.0.0:$PORT
