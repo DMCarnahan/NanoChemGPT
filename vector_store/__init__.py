@@ -31,11 +31,6 @@ import numpy as np
 import tiktoken
 from dotenv import load_dotenv
 from sentence_transformers import SentenceTransformer
-
-import nltk
-nltk.data.path.append("/opt/render/nltk_data")
-
-from nltk.tokenize import sent_tokenize
 # ── config ────────────────────────────────────────────────────────────────
 load_dotenv()
 DATA_DIR = pathlib.Path("data")
@@ -69,16 +64,7 @@ assert len(_meta) == index.ntotal, "Index / metadata length mismatch"
 
 # ── helpers ───────────────────────────────────────────────────────────────
 
-from nltk.tokenize import sent_tokenize
-
 def _chunk(text: str) -> list[str]:
-    """
-    Split *text* into ~CHUNK_TOKS-token passages that end on whole sentences.
-
-    Uses NLTK's sent_tokenize, then greedily packs sentences until adding the
-    next one would exceed CHUNK_TOKS tokens.
-    """
-    sentences = sent_tokenize(text)
     chunks, buf = [], []
 
     def buf_tokens() -> int:
