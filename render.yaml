@@ -2,5 +2,11 @@ services:
   - type: web
     name: nanochemgpt
     runtime: python
-    buildCommand: pip install -r requirements.txt
-    startCommand: gunicorn app:app --bind 0.0.0.0:$PORT --timeout 120
+    buildCommand: |
+      pip install -r requirements.txt
+      python - <<'PY'
+      from sentence_transformers import SentenceTransformer
+      SentenceTransformer("intfloat/e5-large-v2")
+      import nltk, os; nltk.download("punkt", download_dir=os.getenv("NLTK_DATA", "/opt/render/nltk_data"))
+      PY
+    startCommand: gunicorn app:app --bind 0.0.0.0:$PORT
