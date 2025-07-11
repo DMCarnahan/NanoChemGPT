@@ -48,12 +48,8 @@ def _get_embedder():
 
 def _embed(texts: list[str]) -> np.ndarray:
     emb = _get_embedder()
-    vecs = emb.encode(
-        [f"query: {t}" if i == 0 else f"passage: {t}" for i, t in enumerate(texts)],
-        normalize_embeddings=True,
-        convert_to_numpy=True
-    ).astype("float32")
-    return vecs
+    vecs = emb.encode( … )
+    return vecs.astype("float32")
 
 def _extract_text(pdf_bytes: bytes) -> str:
     reader = PdfReader(io.BytesIO(pdf_bytes))
