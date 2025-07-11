@@ -42,14 +42,18 @@ _embedder = None
 def _get_embedder():
     global _embedder
     if _embedder is None:
-        print("[vector_store] loading e5-large-v2 …")
-        _embedder = SentenceTransformer("intfloat/e5-large-v2")
+        print("[vector_store] loading all-MiniLM-L6-v2 …")
+        _embedder = SentenceTransformer("all-MiniLM-L6-v2")
     return _embedder
 
 def _embed(texts: list[str]) -> np.ndarray:
     emb = _get_embedder()
-    vecs = emb.encode( … )
-    return vecs.astype("float32")
+    vecs = emb.encode(
+        [f"query: {t}" if i == 0 else f"passage: {t}" for i, t in enumerate(texts)],
+        normalize_embeddings=True,
+        convert_to_numpy=True
+    ).astype("float32")
+    return vecs
 
 def _extract_text(pdf_bytes: bytes) -> str:
     reader = PdfReader(io.BytesIO(pdf_bytes))
