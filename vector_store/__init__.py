@@ -105,7 +105,7 @@ def _chunk(text: str) -> list[str]:
 
     return chunks
   
-embedder = SentenceTransformer("intfloat/e5-large-v2")
+embedder = SentenceTransformer("all-MiniLM-L6-v2")
 
 def _embed_passages(texts: list[str]) -> np.ndarray:
     return embedder.encode(
