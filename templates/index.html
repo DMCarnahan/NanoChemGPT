@@ -122,8 +122,6 @@
       const jsonData = await res.json();
       const pretty   = JSON.stringify(jsonData, null, 2);
       const outputEl = document.getElementById('output');
-      outputEl.textContent = pretty;
-      outputEl.classList.remove('d-none');  // reveal block
 
     // Download file
       const blob = new Blob([pretty], { type: 'application/json' });
