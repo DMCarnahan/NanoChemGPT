@@ -23,8 +23,14 @@
   <div class="mb-3">
     <label for="question" class="form-label fw-semibold">Ask NanoChemGPT</label>
     <textarea id="question" class="form-control" rows="3" placeholder="e.g. Best way to generate monodisperse 15 nm AuNPs?"></textarea>
-  </div>
-  <button id="sendBtn" class="btn btn-success mb-4">Send</button>
+    </div>
+    <button id="sendBtn" class="btn btn-success mb-4">Send</button>
+    answerEl.textContent    = data.answer || '[no response]';
+  rationaleEl.textContent = data.rationale || '';      // new element
+  if (data.rationale) {
+    rationaleEl.classList.remove('d-none');
+    rtxtBtn.classList.remove('d-none');
+  }
 
   <!-- Answer + buttons row -->
   <div class="d-flex flex-column flex-md-row align-items-start gap-3">
@@ -32,18 +38,26 @@
       <h4>Answer</h4>
       <pre id="answer" class="border p-3 bg-light"
            style="min-height:8rem; white-space:pre-wrap;"></pre>
-    </div>
+      </div>
+    <h4 class="mt-4">Rationale</h4>
+  <pre id="rationale" class="border p-3 bg-light d-none"
+       style="white-space:pre-wrap;"></pre>
   
+  <button id="rtxtBtn"
+          class="btn btn-outline-secondary mt-2 d-none">
+    Download Rationale .txt
+  </button>
+
     <!-- both buttons carry d-none until shown by JS -->
     <div class="pt-md-4">
       <button id="exportBtn"
               class="btn btn-outline-secondary d-none">
-        Export → JSON
+        Export as JSON
       </button>
   
       <button id="txtBtn"
               class="btn btn-outline-secondary mt-2 d-none">
-        Download → TXT
+        Download as .txt
       </button>
     </div>
   </div>
@@ -101,6 +115,25 @@
         txtBtn.classList.remove('d-none');
       }
     });
+    rtxtBtn.addEventListener('click', async () => {
+      const rationale = document.getElementById('rationale').textContent.trim();
+      const question  = document.getElementById('question').value.trim();
+      if (!rationale) { alert('No rationale to save!'); return; }
+    
+      const res = await fetch('/save_txt', {              // reuse the same route
+        method : 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body   : JSON.stringify({ question, answer: rationale })
+      });
+      const blob = await res.blob();
+      const url  = URL.createObjectURL(blob);
+      Object.assign(document.createElement('a'), {
+        href: url,
+        download: 'rationale.txt'
+      }).click();
+      URL.revokeObjectURL(url);
+    });
+
 
     // Export to JSON
     document.getElementById('exportBtn').addEventListener('click', async () => {
