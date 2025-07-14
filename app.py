@@ -144,13 +144,16 @@ from datetime import datetime
 @app.post("/save_txt")
 def save_txt():
     data = request.get_json(silent=True) or {}
-    text = data.get("answer", "").strip()
-    if not text:
+    answer   = data.get("answer", "").strip()
+    question = data.get("question", "").strip()
+    if not answer:
         abort(400, "answer is empty")
 
-    buf = io.BytesIO(text.encode("utf-8"))
+    full_text = f"Q: {question}\n\nA:\n{answer}\n"
+    buf = io.BytesIO(full_text.encode("utf-8"))
     buf.seek(0)
-    filename = f"chatau_{datetime.utcnow().strftime('%Y%m%d_%H%M%S')}.txt"
+
+    filename = f"chatau_{datetime.utcnow():%Y%m%d_%H%M%S}.txt"
     return send_file(
         buf,
         mimetype="text/plain",
