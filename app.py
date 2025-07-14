@@ -109,6 +109,28 @@ def save_txt():
     fname = f"chatau_{datetime.utcnow():%Y%m%d_%H%M%S}.txt"
     return send_file(buf, mimetype="text/plain", as_attachment=True, download_name=fname)
 
+# ── optional one-time seeding route ───────────────────────────────────────
+import pathlib
+SEED_FOLDER = pathlib.Path("seed_pdfs")   # put your reference PDFs here
+
+@app.post("/seed")
+def seed():
+    """Ingest every PDF inside seed_pdfs/ and add it to the vector store.
+       Call once, then remove or protect with SEED_TOKEN."""
+    token = request.headers.get("X-SEED-TOKEN")
+    if token != os.getenv("SEED_TOKEN"):          # simple gate
+        abort(403)
+
+    pdfs = list(SEED_FOLDER.glob("*.pdf"))
+    if not pdfs:
+        return {"status": "no PDFs found", "folder": str(SEED_FOLDER)}
+
+    for pdf in pdfs:
+        with pdf.open("rb") as f:
+            vs.add_to_store(_extract_text(f.read()))
+        print("seeded", pdf.name)
+
+    return {"status": "seeded", "files": len(pdfs)}
 
 @app.get("/ping")
 def ping():
