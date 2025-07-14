@@ -12,8 +12,9 @@
   <!--PDF upload-->
   <form id="uploadForm" action="/upload" method="post" enctype="multipart/form-data" class="mb-4 p-3 border rounded bg-light">
     <div class="mb-3">
-      <label class="form-label fw-semibold">Add a PDF paper</label>
-      <input class="form-control" type="file" name="pdf" accept="application/pdf" required />
+      <label class="form-label fw-semibold">Add a paper</label>
+      <input class="form-control" type="file" name="file"
+        accept=".pdf,application/pdf,.json,application/json" required>
     </div>
     <button class="btn btn-primary">Upload</button>
     <span id="uploadStatus" class="ms-3 text-success"></span>
