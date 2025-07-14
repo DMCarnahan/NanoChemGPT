@@ -106,7 +106,11 @@ def ask():
         f"Context:\n{context}\n\nUser question: {q}"
     )
 
-    resp = client.chat.completions.create(…)
+    resp = client.chat.completions.create(
+        model="gpt-4o-mini",
+        messages=[{"role": "user", "content": prompt}],
+        temperature=0.2,
+    )
     raw = resp.choices[0].message.content
     
     # split answer vs rationale
