@@ -47,8 +47,6 @@
       </button>
     </div>
   </div>
-  
-        <button id="txtBtn" class="btn btn-outline-secondary mt-2">Download → TXT</button>
 
   <!-- Hidden until JSON produced -->
   <pre id="output" class="border p-3 bg-light mt-3 d-none" style="white-space:pre-wrap;"></pre>
@@ -130,24 +128,23 @@
     // Download file
       const blob = new Blob([pretty], { type: 'application/json' });
       const url  = URL.createObjectURL(blob);
-      Object.assign(document.createElement('a'), { href: url, download: 'protocol.json' }).click();
+      Object.assign(document.createElement('a'), { href: url, download: 'procedure.json' }).click();
       URL.revokeObjectURL(url);
     });
 
-    // Download answer as .txt
+    // Download txt file
     document.getElementById('txtBtn').addEventListener('click', async () => {
-      const answer = document.getElementById('answer').textContent.trim();
+      const answer   = document.getElementById('answer').textContent.trim();
+      const question = document.getElementById('question').value.trim();
       if (!answer) { alert('No answer to save!'); return; }
     
       const res = await fetch('/save_txt', {
         method : 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body   : JSON.stringify({ answer })
+        body   : JSON.stringify({ question, answer })
       });
-    
       if (!res.ok) { alert('Server error'); return; }
     
-      // Blob-download dance
       const blob = await res.blob();
       const url  = URL.createObjectURL(blob);
       Object.assign(document.createElement('a'), {
