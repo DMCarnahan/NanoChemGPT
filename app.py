@@ -137,6 +137,27 @@ def parse_route():
 def ping():
     return jsonify({"status": "alive"})
 
+import io
+from flask import send_file
+from datetime import datetime
+
+@app.post("/save_txt")
+def save_txt():
+    data = request.get_json(silent=True) or {}
+    text = data.get("answer", "").strip()
+    if not text:
+        abort(400, "answer is empty")
+
+    buf = io.BytesIO(text.encode("utf-8"))
+    buf.seek(0)
+    filename = f"chatau_{datetime.utcnow().strftime('%Y%m%d_%H%M%S')}.txt"
+    return send_file(
+        buf,
+        mimetype="text/plain",
+        as_attachment=True,
+        download_name=filename,
+    )
+
 # ── unified JSON error handler ────────────────────────────────────────────
 @app.errorhandler(400)
 @app.errorhandler(422)
