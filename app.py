@@ -106,18 +106,18 @@ def ask():
         f"Context:\n{context}\n\nUser question: {q}"
     )
 
-    try:
-        resp = client.chat.completions.create(
-            model="gpt-4o-mini",
-            messages=[{"role": "user", "content": prompt}],
-            temperature=0.2,
-        )
-        answer = resp.choices[0].message.content
-    except Exception as err:  # noqa: BLE001
-        print("[OpenAI] error:", err)
-        abort(502, "OpenAI API failed: " + str(err))
-
-    return jsonify({"answer": answer})
+    resp = client.chat.completions.create(…)
+    raw = resp.choices[0].message.content
+    
+    # split answer vs rationale
+    if "```reason" in raw:
+        answer, rationale_block = raw.split("```reason", 1)
+        rationale = rationale_block.split("```", 1)[0].strip()
+    else:
+        answer, rationale = raw, ""
+    
+    return jsonify({"answer": answer.strip(),
+                    "rationale": rationale})
 
 
 @app.route("/parse", methods=["POST"])
