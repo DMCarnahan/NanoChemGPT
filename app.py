@@ -56,9 +56,9 @@ def ask():
 
     context = vs.search(q, k=4)
     prompt  = (
-        "You are ChatAuNP, an AI assistant that proposes gold‑nanomaterial syntheses. "
+        "You are NanoChemGPT, an AI assistant that proposes nanomaterial syntheses. "
         "Use the context unless general chemistry knowledge is required. "
-        "Provide concrete numerical parameters on the same volume scale as the paper.\n\n"
+        "Provide concrete numerical parameters on the same volume scale as the paper. You should alway think about your response before submitting. \n\n"
         "Return **two blocks** in order:\n"
         "## SynthesisProtocol\n"
         "1. **Materials**: \n[]\n"
