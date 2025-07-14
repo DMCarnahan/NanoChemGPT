@@ -37,16 +37,18 @@ def _extract_text(pdf_bytes: bytes) -> str:
 def home():
     return render_template("index.html")
 
-
 @app.post("/upload")
 def upload():
-    file = request.files.get("pdf")
-    if not file or file.filename == "" or file.mimetype != "application/pdf":
-        abort(400, "Please upload a PDF file.")
-
-    vs.add_to_store(_extract_text(file.read()))
-    return jsonify(status="ok", filename=file.filename)
-
+    file = request.files.get("file")
+    if not file or file.filename == "":
+        abort(400, "No file.")
+    if file.mimetype == "application/pdf":
+        vs.add_to_store(_extract_text(file.read()))
+    elif file.mimetype == "application/json":
+        vs.add_json_to_store(file.read())
+    else:
+        abort(400, "Only PDF or JSON accepted.")
+    return {"status": "ok", "filename": file.filename}
 
 @app.post("/ask")
 def ask():
@@ -94,7 +96,6 @@ def parse_route():
     except ParserError as e:
         abort(422, str(e))
     return jsonify(parsed)
-
 
 @app.post("/save_txt")
 def save_txt():
