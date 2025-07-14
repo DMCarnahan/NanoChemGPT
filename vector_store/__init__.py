@@ -30,6 +30,17 @@ def _get_embedder() -> SentenceTransformer:
 
 # helpers -------------------------------------------------------------------
 
+def _json_to_lines(obj, prefix=""):
+    """Yield 'key.path: value' lines from any nested mapping / list."""
+    if isinstance(obj, dict):
+        for k, v in obj.items():
+            yield from _json_to_lines(v, f"{prefix}{k}.")
+    elif isinstance(obj, list):
+        for i, v in enumerate(obj):
+            yield from _json_to_lines(v, f"{prefix}{i}.")
+    else:                                  # leaf → value
+        yield f"{prefix[:-1]}: {obj}"
+
 def _chunk(text: str) -> List[str]:
     words, out, buf = text.split(), [], []
     for w in words:
@@ -51,6 +62,18 @@ def _embed_query(q: str) -> np.ndarray:
     emb = _get_embedder()
     return emb.encode(f"query: {q}", normalize_embeddings=True,
                       convert_to_numpy=True).astype("float32")
+
+import json as _json
+
+def add_json_to_store(json_bytes: bytes):
+    """Convert JSON → lines → one doc string, then embed."""
+    try:
+        data = _json.loads(json_bytes)
+    except ValueError as e:
+        print("JSON parse error:", e)
+        return
+    doc_text = "\n".join(_json_to_lines(data))
+    add_to_store(doc_text)
 
 # index init ----------------------------------------------------------------
 
