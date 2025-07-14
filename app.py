@@ -21,8 +21,8 @@ app    = Flask(__name__, template_folder="templates", static_folder="static")
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 # ensure nltk punkt is found (already downloaded in build stage)
-import nltk  # noqa: E402
-nltk.data.path.append("/opt/render/nltk_data")
+#import nltk  # noqa: E402
+#nltk.data.path.append("/opt/render/nltk_data")
 
 # ── utils ------------------------------------------------------------------
 
