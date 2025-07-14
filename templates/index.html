@@ -37,6 +37,7 @@
       <button id="exportBtn" class="btn btn-outline-secondary">Export → JSON</button>
     </div>
   </div>
+      <button id="txtBtn" class="btn btn-outline-secondary mt-2">Download → TXT</button>
 
   <!-- Hidden until JSON produced -->
   <pre id="output" class="border p-3 bg-light mt-3 d-none" style="white-space:pre-wrap;"></pre>
@@ -93,10 +94,34 @@
       outputEl.textContent = pretty;
       outputEl.classList.remove('d-none');  // reveal block
 
-      // Download file
+    // Download file
       const blob = new Blob([pretty], { type: 'application/json' });
       const url  = URL.createObjectURL(blob);
       Object.assign(document.createElement('a'), { href: url, download: 'protocol.json' }).click();
+      URL.revokeObjectURL(url);
+    });
+
+    // Download answer as .txt
+    document.getElementById('txtBtn').addEventListener('click', async () => {
+      const answer = document.getElementById('answer').textContent.trim();
+      if (!answer) { alert('No answer to save!'); return; }
+    
+      const res = await fetch('/save_txt', {
+        method : 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body   : JSON.stringify({ answer })
+      });
+    
+      if (!res.ok) { alert('Server error'); return; }
+    
+      // Blob-download dance
+      const blob = await res.blob();
+      const url  = URL.createObjectURL(blob);
+      Object.assign(document.createElement('a'), {
+        href: url,
+        download: res.headers.get('Content-Disposition')
+                    ?.match(/filename=\"(.+)\"/)?.[1] || 'answer.txt'
+      }).click();
       URL.revokeObjectURL(url);
     });
   </script>
