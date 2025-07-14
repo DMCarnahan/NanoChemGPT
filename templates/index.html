@@ -8,7 +8,7 @@
 </head>
 <body class="container py-4">
   <h1 class="mb-4">NanoChemGPT <small class="text-muted fw-light">(GPT‑4o RAG)</small></h1>
-
+  
   <!--PDF upload-->
   <form id="uploadForm" action="/upload" method="post" enctype="multipart/form-data" class="mb-4 p-3 border rounded bg-light">
     <div class="mb-3">
@@ -46,21 +46,22 @@
 
   <!-- -- Scripts -- -->
   <script>
+
+    /* ---------- element refs ---------- */
+    const sendBtn      = document.getElementById('sendBtn');
+    const answerEl     = document.getElementById('answer');
+    const exportBtn    = document.getElementById('exportBtn');
+    const txtBtn       = document.getElementById('txtBtn');
+    const rationaleEl  = document.getElementById('rationale');
+    const rationaleHd  = document.getElementById('rationaleHeader');
+    const rtxtBtn      = document.getElementById('rtxtBtn');
+    
     /* ---------- helpers ---------- */
     const postForm = (url, payload) => fetch(url, {
       method: 'POST',
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
       body  : new URLSearchParams(payload)
     });
-
-    /* ---------- element refs ---------- */
-    const sendBtn     = document.getElementById('sendBtn');
-    const answerEl    = document.getElementById('answer');
-    const exportBtn   = document.getElementById('exportBtn');
-    const txtBtn      = document.getElementById('txtBtn');
-    const rationaleEl = document.getElementById('rationale');
-    const rationaleHd = document.getElementById('rationaleHeader');
-    const rtxtBtn     = document.getElementById('rtxtBtn');
 
     /* ---------- upload interceptor ---------- */
     document.getElementById('uploadForm').addEventListener('submit', async (ev) => {
