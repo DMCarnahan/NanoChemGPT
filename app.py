@@ -39,16 +39,21 @@ def home():
 
 @app.post("/upload")
 def upload():
-    file = request.files.get("file")
-    if not file or file.filename == "":
+    f = request.files.get("file")
+    if not f or f.filename == "":
         abort(400, "No file.")
-    if file.mimetype == "application/pdf":
-        vs.add_to_store(_extract_text(file.read()))
-    elif file.mimetype == "application/json":
-        vs.add_json_to_store(file.read())
+    
+    if f.mimetype == "application/pdf":
+        vs.add_to_store(_extract_text(f.read()))
+    
+    elif f.mimetype == "application/json":
+        from vector_store import add_json_to_store   # function we wrote earlier
+        add_json_to_store(f.read())
+    
     else:
         abort(400, "Only PDF or JSON accepted.")
-    return {"status": "ok", "filename": file.filename}
+    
+    return jsonify(status="ok", filename=f.filename)
 
 @app.post("/ask")
 def ask():
