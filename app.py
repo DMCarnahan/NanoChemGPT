@@ -140,21 +140,32 @@ def seed():
 # (add near /seed, then disable afterwards)
 import requests, pathlib, json, ijson
 
+import gzip, requests, ijson, json, io
+
 @app.post("/seed_json_url")
 def seed_json_url():
-    if request.headers.get("X-SEED-TOKEN") != os.getenv("SEED_TOKEN"):
+    if request.headers.get("X-SEED-TOKEN") != SEED_TOKEN:
         abort(403)
 
     url = request.json.get("url")
-    if not url: abort(400, "provide JSON url")
+    if not url:
+        abort(400, "provide {'url': ...}")
 
-    with requests.get(url, stream=True, timeout=60) as r:
-        r.raise_for_status()
-        parser = ijson.items(r.raw, '')          # stream whole file
-        for obj in parser:                       # obj is dict
-            vector_store.add_json_bytes(
-                json.dumps(obj).encode()         # tiny chunk
-            )
+    try:
+        with requests.get(url, stream=True, timeout=60) as resp:
+            resp.raise_for_status()
+
+            # auto‑detect gzip
+            stream = resp.raw
+            if resp.headers.get("Content-Encoding") == "gzip" or stream.peek(2)[:2] == b'\\x1f\\x8b':
+                stream = gzip.GzipFile(fileobj=stream)
+
+            for obj in ijson.items(stream, ''):
+                vector_store.add_json_bytes(json.dumps(obj).encode())
+
+    except Exception as err:
+        print("seed failed:", err)
+        abort(500, str(err))
 
     return {"status": "seeded"}
 
