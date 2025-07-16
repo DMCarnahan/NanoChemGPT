@@ -141,7 +141,7 @@ def seed():
 import requests, pathlib, json, ijson
 
 import gzip, requests, ijson, json, io
-
+SEED_TOKEN = mysecret
 @app.post("/seed_json_url")
 def seed_json_url():
     if request.headers.get("X-SEED-TOKEN") != SEED_TOKEN:
