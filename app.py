@@ -1,4 +1,3 @@
-# app.py – streamlined Flask backend with rationale support
 from __future__ import annotations
 
 import io, os
@@ -137,6 +136,27 @@ def seed():
         print("seeded", pdf.name)
 
     return {"status": "seeded", "files": len(pdfs)}
+
+# (add near /seed, then disable afterwards)
+import requests, pathlib, json, ijson
+
+@app.post("/seed_json_url")
+def seed_json_url():
+    if request.headers.get("X-SEED-TOKEN") != os.getenv("SEED_TOKEN"):
+        abort(403)
+
+    url = request.json.get("url")
+    if not url: abort(400, "provide JSON url")
+
+    with requests.get(url, stream=True, timeout=60) as r:
+        r.raise_for_status()
+        parser = ijson.items(r.raw, '')          # stream whole file
+        for obj in parser:                       # obj is dict
+            vector_store.add_json_bytes(
+                json.dumps(obj).encode()         # tiny chunk
+            )
+
+    return {"status": "seeded"}
 
 @app.get("/ping")
 def ping():
