@@ -141,31 +141,39 @@ def seed():
 import requests, pathlib, json, ijson
 
 import gzip, requests, ijson, json, io
-SEED_TOKEN = mysecret
+
+import gzip, json, requests, ijson
+from urllib.parse import urlparse
+from flask import request, abort
+
 @app.post("/seed_json_url")
 def seed_json_url():
-    if request.headers.get("X-SEED-TOKEN") != SEED_TOKEN:
-        abort(403)
+    """Stream a remote JSON (optionally .gz) into the vector store.
 
-    url = request.json.get("url")
+    Body: {"url": "<https://...json[.gz]>"}   ← required
+    """
+    url = request.json.get("url") if request.is_json else None
     if not url:
-        abort(400, "provide {'url': ...}")
+        abort(400, "body must be {'url': '<https://...>'}")
+
+    print(f"[seed] requested by {request.remote_addr} → {url}")
 
     try:
         with requests.get(url, stream=True, timeout=60) as resp:
             resp.raise_for_status()
 
-            # auto‑detect gzip
-            stream = resp.raw
-            if resp.headers.get("Content-Encoding") == "gzip" or stream.peek(2)[:2] == b'\\x1f\\x8b':
-                stream = gzip.GzipFile(fileobj=stream)
+            # unwrap gzip if Content‑Encoding or .gz extension
+            raw = resp.raw
+            if (resp.headers.get("Content-Encoding") == "gzip" or
+                urlparse(url).path.endswith(".gz")):
+                raw = gzip.GzipFile(fileobj=raw)
 
-            for obj in ijson.items(stream, ''):
+            for obj in ijson.items(raw, ''):                # stream
                 vector_store.add_json_bytes(json.dumps(obj).encode())
 
     except Exception as err:
-        print("seed failed:", err)
-        abort(500, str(err))
+        print("[seed] failed:", err)
+        abort(500, f"seeding failed: {err}")
 
     return {"status": "seeded"}
 
