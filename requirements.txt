@@ -9,4 +9,5 @@ tqdm>=4.66
 gunicorn>=21.2
 python-multipart
 sentence-transformers
-ijson requests
+ijson
+requests
