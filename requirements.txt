@@ -9,7 +9,5 @@ tqdm>=4.66
 gunicorn>=21.2
 python-multipart
 sentence-transformers
-ijson==3.2.3 \
-    --hash=sha256:d7cf875bd2630d670a61f727058cf8b79b15f98566ed5b5f5cfa75c08814531e
-requests>=2.32 \
-    --hash=sha256:30ac3869f6db17d170e0e556dd6cc5eee02647abc31ca856634d5a40f82c15b2
+ijson==3.2.3 
+requests>=2.32 
