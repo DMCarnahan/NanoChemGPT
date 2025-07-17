@@ -74,7 +74,11 @@ def ask():
         "1. **Materials**:\n[]\n"
         "2. **Procedure**\n[]\n"
         "3. **Characterization**:\n[]\n\n"
-        "```reason\nExplain, step‑by‑step, why each chemical, ratio, temperature, and other parameter was chosen.\n```\n\n"
+        "```reason"
+            "Think step‑by‑step:\n"
+            "1. Restate constraints.\n"
+            "2. Justify every solvent / ratio / temp.\n"
+            "3. Final‑check for violations (e.g. water in air-free reaction → reject).\n"
         f"Context:\n{context}\n\nUser question: {q}"
     )
 
