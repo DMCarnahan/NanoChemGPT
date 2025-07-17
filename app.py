@@ -23,10 +23,14 @@ import vector_store as vs
 from backend.parser import convert_to_json, ParserError
 
 # ──────────────────────────────────────────────────────────────────────────
-app = Flask(__name__, template_folder="templates", static_folder="static")
-app.config["MAX_CONTENT_LENGTH"] = 100 * 1024 * 1024    # 100 MB
 load_dotenv()
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+app = Flask(__name__,
+            template_folder="templates",
+            static_folder="static")
+
+# limit request body to 100 MB (PDF / JSON uploads)
+app.config["MAX_CONTENT_LENGTH"] = 100 * 1024 * 1024
 
 # ── helpers --------------------------------------------------------------
 
@@ -41,6 +45,15 @@ def home():
     return render_template("index.html")
 
 # ---- file upload (PDF / JSON) ------------------------------------------
+# upload route
+if file.filename.lower().endswith(".pdf"):
+    try:
+        pages = PdfReader(file).pages          # avoids full read into RAM
+        text  = "\n".join(p.extract_text() or "" for p in pages)
+    except Exception as err:
+        abort(400, f"PDF parse error: {err}")
+    vs.add_to_store(text)
+
 @app.post("/upload")
 def upload():
     file = request.files.get("file")
