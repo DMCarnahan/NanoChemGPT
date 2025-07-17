@@ -97,6 +97,33 @@ def _persist():
     faiss.write_index(_index, str(INDEX_FILE))
     META_FILE.write_text(json.dumps(_meta))
 
+# builtin data -----------------------------------------------------------------------
+
+import pathlib, json, csv, gzip
+from PyPDF2 import PdfReader
+
+BUILTIN_DIR = pathlib.Path(__file__).parent / "builtin_data"
+
+def _load_builtin_once():
+    """Embed every file under builtin_data/ on first launch."""
+    if _index.ntotal:       # index already has vectors → skip
+        return
+    for path in BUILTIN_DIR.rglob("*"):
+        if path.suffix == ".json":
+            add_json_bytes(path.read_bytes())
+        elif path.suffix == ".csv":
+            add_csv_bytes(path.read_bytes())
+        elif path.suffix == ".gz" and path.name.endswith(".json.gz"):
+            add_json_bytes(gzip.open(path, "rb").read())
+        elif path.suffix == ".pdf":
+            text = "\n".join(
+                (PdfReader(str(path)).pages[i].extract_text() or "")
+                for i in range(len(PdfReader(str(path)).pages))
+            )
+            add_to_store(text)
+        # add more formats as you like
+    print("[vector_store] builtin data embedded")
+
 # public API -----------------------------------------------------------------
 
 def add_to_store(doc: str):
@@ -127,3 +154,5 @@ def stats():
 # cli -----------------------------------------------------------------------
 if __name__ == "__main__":
     print(stats())
+# builtin load -----------------------------------------------------------------------
+_load_builtin_once()
