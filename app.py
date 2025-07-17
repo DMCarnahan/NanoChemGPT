@@ -114,9 +114,11 @@ def save_txt():
     fname = f"chatau_{datetime.utcnow():%Y%m%d_%H%M%S}.txt"
     return send_file(buf, mimetype="text/plain", as_attachment=True, download_name=fname)
 
-# ── optional one-time seeding route ───────────────────────────────────────
-import pathlib
-SEED_FOLDER = pathlib.Path("seed_pdfs")   # put your reference PDFs here
+@app.post("/clear_uploads")
+def clear_uploads_route():
+    import vector_store as vs
+    vs.clear_uploads()
+    return {"status": "uploads cleared"}
 
 @app.post("/seed")
 def seed():
