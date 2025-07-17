@@ -1,158 +1,202 @@
-"""Embeds PDF chunks with **all‑MiniLM‑L6‑v2** (384‑D) and stores them in
-FAISS. 
+# vector_store.py  ── FAISS + Sentence‑Transformers with upload‑expiry
+"""Persistent vector store that
+* embeds text with **intfloat/e5‑small‑v2** (384‑D, CPU‑friendly)
+* stores vectors in FAISS `IndexFlatIP` + stable IDs
+* **tags** every chunk as either ``builtin`` or ``upload``
+  · builtin vectors are permanent
+  · upload vectors expire automatically after 30 minutes **or** on demand via
+    `clear_uploads()`
+
+Public API used by *app.py*
+---------------------------
+add_to_store(text, tag="upload")          → embed + append vectors
+add_json_bytes(json_bytes, tag="upload") → helper for JSON datasets
+search(query, k=4)                         → retrieve top‑k passages
+clear_uploads()                            → drop all uploaded chunks
+stats() -> {chunks, vectors}
 """
 from __future__ import annotations
 
-import json, pathlib, threading
-from typing import List
+import gzip, json, pathlib, threading, time, csv
+from typing import List, Dict, Any
 
 import faiss, numpy as np
 from sentence_transformers import SentenceTransformer
 import tiktoken
+from PyPDF2 import PdfReader
 
+# ── config ────────────────────────────────────────────────────────────────
 DATA_DIR   = pathlib.Path("data"); DATA_DIR.mkdir(exist_ok=True)
 INDEX_FILE = DATA_DIR / "faiss.index"
-META_FILE  = DATA_DIR / "meta.json"
+META_FILE  = DATA_DIR / "meta.json"   # JSON list[dict]
 
-TOKENIZER  = tiktoken.get_encoding("cl100k_base")
-CHUNK_TOKS = 300
-DIM        = 384  # MiniLM
+TOKENIZER   = tiktoken.get_encoding("cl100k_base")
+CHUNK_TOKS  = 300
+DIM         = 384
+UPLOAD_TTL  = 30 * 60          # 30 minutes in seconds
 
-# lazy model load -----------------------------------------------------------
-_embedder = None  # type: SentenceTransformer | None
+# ── embedding model (lazy) ────────────────────────────────────────────────
+_embedder: SentenceTransformer | None = None
 
 def _get_embedder() -> SentenceTransformer:
     global _embedder
     if _embedder is None:
         print("[vector_store] loading e5-small-v2 …")
-        _embedder = SentenceTransformer("intfloat/e5-small-v2")
+        _embedder = SentenceTransformer("intfloat/e5-small-v2", device="cpu", low_cpu_mem_usage=True)
     return _embedder
 
-# helpers -------------------------------------------------------------------
+# ── helpers ───────────────────────────────────────────────────────────────
 
-def _json_to_lines(obj, prefix=""):
-    """Yield 'key.path: value' lines from any nested mapping / list."""
+def _chunk(text: str) -> List[str]:
+    words, buf, out = text.split(), [], []
+    for w in words:
+        buf.append(w)
+        if len(TOKENIZER.encode(" ".join(buf))) >= CHUNK_TOKS:
+            out.append(" ".join(buf)); buf = []
+    if buf:
+        out.append(" ".join(buf))
+    return out
+
+
+def _embed_passages(txts: list[str]) -> np.ndarray:
+    vecs = _get_embedder().encode(
+        [f"passage: {t}" for t in txts],
+        normalize_embeddings=True,
+        convert_to_numpy=True,
+        batch_size=16,
+    ).astype("float32")
+    return vecs
+
+
+def _embed_query(q: str) -> np.ndarray:
+    return _get_embedder().encode(
+        f"query: {q}", normalize_embeddings=True, convert_to_numpy=True
+    ).astype("float32")
+
+# flatten JSON / CSV -------------------------------------------------------
+
+def _json_to_lines(obj: Any, prefix: str = ""):
     if isinstance(obj, dict):
         for k, v in obj.items():
             yield from _json_to_lines(v, f"{prefix}{k}.")
     elif isinstance(obj, list):
         for i, v in enumerate(obj):
             yield from _json_to_lines(v, f"{prefix}{i}.")
-    else:                                  # leaf → value
+    else:
         yield f"{prefix[:-1]}: {obj}"
 
-def _chunk(text: str) -> List[str]:
-    words, out, buf = text.split(), [], []
-    for w in words:
-        buf.append(w)
-        if len(TOKENIZER.encode(" ".join(buf))) >= CHUNK_TOKS:
-            out.append(" ".join(buf)); buf = []
-    if buf: out.append(" ".join(buf))
-    return out
-
-
-def _embed_passages(txts: list[str]) -> np.ndarray:
-    emb = _get_embedder()
-    vecs = emb.encode([f"passage: {t}" for t in txts], normalize_embeddings=True,
-                      convert_to_numpy=True).astype("float32")
-    return vecs
-
-
-def _embed_query(q: str) -> np.ndarray:
-    emb = _get_embedder()
-    return emb.encode(f"query: {q}", normalize_embeddings=True,
-                      convert_to_numpy=True).astype("float32")
-
-import json as _json
-
-def add_json_to_store(json_bytes: bytes):
-    """Convert JSON → lines → one doc string, then embed."""
-    try:
-        data = _json.loads(json_bytes)
-    except ValueError as e:
-        print("JSON parse error:", e)
-        return
-    doc_text = "\n".join(_json_to_lines(data))
-    add_to_store(doc_text)
-
-# index init ----------------------------------------------------------------
+# ── index init / persistence ──────────────────────────────────────────────
 
 def _new_index() -> faiss.IndexIDMap2:
     return faiss.IndexIDMap2(faiss.IndexFlatIP(DIM))
 
-def _load() -> tuple[faiss.IndexIDMap2, list[str]]:
-    if INDEX_FILE.exists():
-        index = faiss.read_index(str(INDEX_FILE))  # type: ignore[arg-type]
-        meta  = json.loads(META_FILE.read_text())
-    else:
-        index, meta = _new_index(), []
-    return index, meta
+if INDEX_FILE.exists():
+    _index: faiss.IndexIDMap2 = faiss.read_index(str(INDEX_FILE))  # type: ignore[arg-type]
+    _meta: List[Dict[str, Any]] = json.loads(META_FILE.read_text())
+else:
+    _index, _meta = _new_index(), []
 
-_index, _meta = _load()
 _lock = threading.Lock()
 
-# persistence ----------------------------------------------------------------
 
 def _persist():
     faiss.write_index(_index, str(INDEX_FILE))
     META_FILE.write_text(json.dumps(_meta))
 
-# builtin data -----------------------------------------------------------------------
+# ── core public API ───────────────────────────────────────────────────────
 
-import pathlib, json, csv, gzip
-from PyPDF2 import PdfReader
-
-BUILTIN_DIR = pathlib.Path(__file__).parent / "builtin_data"
-
-def _load_builtin_once():
-    """Embed every file under builtin_data/ on first launch."""
-    if _index.ntotal:       # index already has vectors → skip
+def add_to_store(doc: str, *, tag: str = "upload", ts: float | None = None):
+    if not doc:
         return
-    for path in BUILTIN_DIR.rglob("*"):
-        if path.suffix == ".json":
-            add_json_bytes(path.read_bytes())
-        elif path.suffix == ".csv":
-            add_csv_bytes(path.read_bytes())
-        elif path.suffix == ".gz" and path.name.endswith(".json.gz"):
-            add_json_bytes(gzip.open(path, "rb").read())
-        elif path.suffix == ".pdf":
-            text = "\n".join(
-                (PdfReader(str(path)).pages[i].extract_text() or "")
-                for i in range(len(PdfReader(str(path)).pages))
-            )
-            add_to_store(text)
-        # add more formats as you like
-    print("[vector_store] builtin data embedded")
-
-# public API -----------------------------------------------------------------
-
-def add_to_store(doc: str):
-    if not doc: return
+    ts = ts or time.time()
     chunks = _chunk(doc)
     vecs   = _embed_passages(chunks)
     with _lock:
-        ids = np.arange(len(_meta), len(_meta)+len(chunks)).astype("int64")
+        start = len(_meta)
+        ids   = np.arange(start, start + len(chunks)).astype("int64")
         _index.add_with_ids(vecs, ids)
-        _meta.extend(chunks)
+        _meta.extend({"text": c, "tag": tag, "ts": ts} for c in chunks)
         _persist()
         print(f"[vector_store] indexed {len(chunks)} chunks (total {len(_meta)})")
 
 
+def add_json_bytes(b: bytes, *, tag="upload"):
+    try:
+        data = json.loads(b)
+    except ValueError as e:
+        print("JSON parse error:", e); return
+    add_to_store("\n".join(_json_to_lines(data)), tag=tag)
+
+
+def add_csv_bytes(b: bytes, *, delimiter=",", tag="upload"):
+    lines = []
+    for i, row in enumerate(csv.DictReader(b.decode().splitlines(), delimiter=delimiter)):
+        for k, v in row.items():
+            lines.append(f"row[{i}].{k}: {v}")
+    add_to_store("\n".join(lines), tag=tag)
+
+# ── search with auto‑expiry ───────────────────────────────────────────────
+
+def _expire_old_uploads():
+    now = time.time()
+    keep = [rec for rec in _meta if rec["tag"] == "builtin" or now - rec["ts"] < UPLOAD_TTL]
+    if len(keep) == len(_meta):
+        return
+    print("[vector_store] expiring", len(_meta) - len(keep), "upload chunks …")
+    _rebuild_index(keep)
+
+
+def _rebuild_index(records: List[dict]):
+    global _index, _meta
+    _index = _new_index(); _meta = []
+    for rec in records:
+        add_to_store(rec["text"], tag=rec["tag"], ts=rec["ts"], )  # rebuild=True not needed because new index
+    print("[vector_store] index rebuilt")
+
+
 def search(query: str, k: int = 4) -> str:
+    _expire_old_uploads()
     if _index.ntotal == 0 or not query:
         return ""
     qvec = _embed_query(query)
     with _lock:
         scores, ids = _index.search(qvec, min(k, _index.ntotal))
-    hits = [_meta[i] for i in ids[0] if i != -1]
+    hits = [_meta[i]["text"] for i in ids[0] if i != -1]
     return "\n\n".join(hits)
+
+# ── management helpers ─────────────────────────────────────────────────---
+
+def clear_uploads():
+    keep = [rec for rec in _meta if rec["tag"] == "builtin"]
+    _rebuild_index(keep)
+    _persist()
+    print("[vector_store] cleared all uploaded chunks")
 
 
 def stats():
     return {"chunks": len(_meta), "vectors": int(_index.ntotal)}
 
-# cli -----------------------------------------------------------------------
+# ── builtin corpus load (tag=builtin) ─────────────────────────────────────
+BUILTIN_DIR = pathlib.Path(__file__).parent / "builtin_data"
+
+def _load_builtin_once():
+    if any(rec["tag"] == "builtin" for rec in _meta):
+        return
+    for path in BUILTIN_DIR.rglob("*"):
+        if path.suffix == ".json":
+            add_json_bytes(path.read_bytes(), tag="builtin")
+        elif path.suffix in {".csv", ".tsv"}:
+            add_csv_bytes(path.read_bytes(), delimiter="\t" if path.suffix == ".tsv" else ",", tag="builtin")
+        elif path.suffix == ".gz" and path.name.endswith(".json.gz"):
+            add_json_bytes(gzip.open(path, "rb").read(), tag="builtin")
+        elif path.suffix == ".pdf":
+            text = "\n".join(p.extract_text() or "" for p in PdfReader(str(path)).pages)
+            add_to_store(text, tag="builtin")
+    print("[vector_store] builtin_data embedded")
+
+# ── module init -----------------------------------------------------------
+_load_builtin_once()
+
+# ── CLI -------------------------------------------------------------------
 if __name__ == "__main__":
     print(stats())
-# builtin load -----------------------------------------------------------------------
-_load_builtin_once()
