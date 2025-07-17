@@ -24,8 +24,8 @@ _embedder = None  # type: SentenceTransformer | None
 def _get_embedder() -> SentenceTransformer:
     global _embedder
     if _embedder is None:
-        print("[vector_store] loading all-MiniLM-L6-v2 …")
-        _embedder = SentenceTransformer("all-MiniLM-L6-v2")
+        print("[vector_store] loading e5-small-v2 …")
+        _embedder = SentenceTransformer("intfloat/e5-small-v2")
     return _embedder
 
 # helpers -------------------------------------------------------------------
