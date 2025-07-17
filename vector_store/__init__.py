@@ -42,7 +42,8 @@ def _get_embedder() -> SentenceTransformer:
     global _embedder
     if _embedder is None:
         print("[vector_store] loading e5-small-v2 …")
-        _embedder = SentenceTransformer("intfloat/e5-small-v2", device="cpu", low_cpu_mem_usage=True)
+        # remove the two extra kwargs for older ST versions
+        _embedder = SentenceTransformer("intfloat/e5-small-v2")
     return _embedder
 
 # ── helpers ───────────────────────────────────────────────────────────────
