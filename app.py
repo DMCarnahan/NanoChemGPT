@@ -1,8 +1,15 @@
+"""Flask API for NanoChemGPT
+--------------------------------------------------
+* Upload PDF or JSON → vector_store.add_(…) (tag="upload")
+* `/ask` → retrieves context (k=4) + calls GPT‑4o‑mini
+* `/clear_uploads` drops all *uploaded* vectors (builtin corpus kept)
+* Auto‑expiry of upload vectors handled inside vector_store.search()
+"""
 from __future__ import annotations
 
-import io, os
+import io, os, json, gzip
 from datetime import datetime
-from typing import Dict, Any
+from urllib.parse import urlparse
 
 from dotenv import load_dotenv
 from flask import (
@@ -10,50 +17,47 @@ from flask import (
 )
 from openai import OpenAI
 from PyPDF2 import PdfReader
+import requests, ijson
 
 import vector_store as vs
 from backend.parser import convert_to_json, ParserError
 
-# ── init -------------------------------------------------------------------
+# ──────────────────────────────────────────────────────────────────────────
 load_dotenv()
 app    = Flask(__name__, template_folder="templates", static_folder="static")
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
-# ensure nltk punkt is found (already downloaded in build stage)
-#import nltk  # noqa: E402
-#nltk.data.path.append("/opt/render/nltk_data")
-
-# ── utils ------------------------------------------------------------------
+# ── helpers --------------------------------------------------------------
 
 def _extract_text(pdf_bytes: bytes) -> str:
-    """Return full text of all pages concatenated."""
     reader = PdfReader(io.BytesIO(pdf_bytes))
     return "\n".join(page.extract_text() or "" for page in reader.pages)
 
-# ── routes -----------------------------------------------------------------
+# ── routes ---------------------------------------------------------------
 
 @app.get("/")
 def home():
     return render_template("index.html")
 
+# ---- file upload (PDF / JSON) ------------------------------------------
 @app.post("/upload")
 def upload():
-    f = request.files.get("file")
-    if not f or f.filename == "":
-        abort(400, "No file.")
-    
-    if f.mimetype == "application/pdf":
-        vs.add_to_store(_extract_text(f.read()))
-    
-    elif f.mimetype == "application/json":
-        from vector_store import add_json_to_store   # function we wrote earlier
-        add_json_to_store(f.read())
-    
+    file = request.files.get("file")
+    if not file or file.filename == "":
+        abort(400, "No file uploaded.")
+
+    if file.mimetype == "application/pdf":
+        vs.add_to_store(_extract_text(file.read()))
+
+    elif file.mimetype in {"application/json", "application/x-json"}:
+        vs.add_json_bytes(file.read())
+
     else:
         abort(400, "Only PDF or JSON accepted.")
-    
-    return jsonify(status="ok", filename=f.filename)
 
+    return {"status": "ok", "filename": file.filename}
+
+# ---- main Q&A -----------------------------------------------------------
 @app.post("/ask")
 def ask():
     q = request.form.get("question", "").strip()
@@ -64,10 +68,10 @@ def ask():
     prompt  = (
         "You are NanoChemGPT, an AI assistant that proposes nanomaterial syntheses. "
         "Use the context unless general chemistry knowledge is required. "
-        "Provide concrete numerical parameters on the same volume scale as the paper. You should alway think about your response before submitting. \n\n"
-        "Return **two blocks** in order:\n"
+        "Provide concrete numerical parameters on the same volume scale as the paper. "
+        "Return *two blocks* in order:\n"
         "## SynthesisProtocol\n"
-        "1. **Materials**: \n[]\n"
+        "1. **Materials**:\n[]\n"
         "2. **Procedure**\n[]\n"
         "3. **Characterization**:\n[]\n\n"
         "```reason\nExplain, step‑by‑step, why each chemical, ratio, temperature, and other parameter was chosen.\n```\n\n"
@@ -86,21 +90,22 @@ def ask():
     else:
         answer, rationale = raw, ""
 
-    return jsonify(answer=answer.strip(), rationale=rationale)
+    return {"answer": answer.strip(), "rationale": rationale}
 
-
+# ---- JSON → structured ---------------------------------------------------
 @app.post("/parse")
 def parse_route():
-    payload: Dict[str, Any] = request.get_json(silent=True) or {}
+    payload: dict[str, str] = request.get_json(silent=True) or {}
     text = payload.get("text", "").strip()
     if not text:
-        abort(400, "JSON must contain non-empty 'text'.")
+        abort(400, "JSON must contain non‑empty 'text'.")
     try:
         parsed = convert_to_json(text)
     except ParserError as e:
         abort(422, str(e))
     return jsonify(parsed)
 
+# ---- Save answer / rationale to .txt ------------------------------------
 @app.post("/save_txt")
 def save_txt():
     data = request.get_json(silent=True) or {}
@@ -114,83 +119,24 @@ def save_txt():
     fname = f"chatau_{datetime.utcnow():%Y%m%d_%H%M%S}.txt"
     return send_file(buf, mimetype="text/plain", as_attachment=True, download_name=fname)
 
+# ---- Purge all uploaded vectors -----------------------------------------
 @app.post("/clear_uploads")
 def clear_uploads_route():
-    import vector_store as vs
     vs.clear_uploads()
     return {"status": "uploads cleared"}
 
-@app.post("/seed")
-def seed():
-    """Ingest every PDF inside seed_pdfs/ and add it to the vector store.
-       Call once, then remove or protect with SEED_TOKEN."""
-    token = request.headers.get("X-SEED-TOKEN")
-    if token != os.getenv("SEED_TOKEN"):          # simple gate
-        abort(403)
-
-    pdfs = list(SEED_FOLDER.glob("*.pdf"))
-    if not pdfs:
-        return {"status": "no PDFs found", "folder": str(SEED_FOLDER)}
-
-    for pdf in pdfs:
-        with pdf.open("rb") as f:
-            vs.add_to_store(_extract_text(f.read()))
-        print("seeded", pdf.name)
-
-    return {"status": "seeded", "files": len(pdfs)}
-
-# (add near /seed, then disable afterwards)
-import requests, pathlib, json, ijson
-
-import gzip, requests, ijson, json, io
-
-import gzip, json, requests, ijson
-from urllib.parse import urlparse
-from flask import request, abort
-
-@app.post("/seed_json_url")
-def seed_json_url():
-    """Stream a remote JSON (optionally .gz) into the vector store.
-
-    Body: {"url": "<https://...json[.gz]>"}   ← required
-    """
-    url = request.json.get("url") if request.is_json else None
-    if not url:
-        abort(400, "body must be {'url': '<https://...>'}")
-
-    print(f"[seed] requested by {request.remote_addr} → {url}")
-
-    try:
-        with requests.get(url, stream=True, timeout=60) as resp:
-            resp.raise_for_status()
-
-            # unwrap gzip if Content‑Encoding or .gz extension
-            raw = resp.raw
-            if (resp.headers.get("Content-Encoding") == "gzip" or
-                urlparse(url).path.endswith(".gz")):
-                raw = gzip.GzipFile(fileobj=raw)
-
-            for obj in ijson.items(raw, ''):                # stream
-                vector_store.add_json_bytes(json.dumps(obj).encode())
-
-    except Exception as err:
-        print("[seed] failed:", err)
-        abort(500, f"seeding failed: {err}")
-
-    return {"status": "seeded"}
-
+# ---- health --------------------------------------------------------------
 @app.get("/ping")
 def ping():
     return {"status": "alive"}
 
-# ── JSON error handler -----------------------------------------------------
+# ---- error handler -------------------------------------------------------
 @app.errorhandler(400)
 @app.errorhandler(422)
-@app.errorhandler(502)
 @app.errorhandler(500)
 def handle_err(e):
     return jsonify(error=str(e)), getattr(e, "code", 500)
 
-# ── dev entry --------------------------------------------------------------
+# ---- dev entry -----------------------------------------------------------
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=int(os.getenv("PORT", 5000)), debug=True)
