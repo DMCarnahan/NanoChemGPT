@@ -23,8 +23,9 @@ import vector_store as vs
 from backend.parser import convert_to_json, ParserError
 
 # ──────────────────────────────────────────────────────────────────────────
+app = Flask(__name__, template_folder="templates", static_folder="static")
+app.config["MAX_CONTENT_LENGTH"] = 100 * 1024 * 1024    # 100 MB
 load_dotenv()
-app    = Flask(__name__, template_folder="templates", static_folder="static")
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 # ── helpers --------------------------------------------------------------
@@ -140,7 +141,10 @@ def ping():
 @app.errorhandler(500)
 def handle_err(e):
     return jsonify(error=str(e)), getattr(e, "code", 500)
-
+@app.errorhandler(413)
+def too_large(e):
+    return jsonify(error="File bigger than 100 MB — compress or split it."), 413
+    
 # ---- dev entry -----------------------------------------------------------
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=int(os.getenv("PORT", 5000)), debug=True)
