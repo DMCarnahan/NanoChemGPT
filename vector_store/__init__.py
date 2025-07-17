@@ -1,4 +1,3 @@
-# vector_store.py  ── FAISS + Sentence‑Transformers with upload‑expiry
 """Persistent vector store that
 * embeds text with **intfloat/e5‑small‑v2** (384‑D, CPU‑friendly)
 * stores vectors in FAISS `IndexFlatIP` + stable IDs
@@ -6,14 +5,6 @@
   · builtin vectors are permanent
   · upload vectors expire automatically after 30 minutes **or** on demand via
     `clear_uploads()`
-
-Public API used by *app.py*
----------------------------
-add_to_store(text, tag="upload")          → embed + append vectors
-add_json_bytes(json_bytes, tag="upload") → helper for JSON datasets
-search(query, k=4)                         → retrieve top‑k passages
-clear_uploads()                            → drop all uploaded chunks
-stats() -> {chunks, vectors}
 """
 from __future__ import annotations
 
@@ -42,7 +33,7 @@ def _get_embedder() -> SentenceTransformer:
     global _embedder
     if _embedder is None:
         print("[vector_store] loading e5-small-v2 …")
-        # old: SentenceTransformer("intfloat/e5-small-v2", device="cpu", low_cpu_mem_usage=True)
+        # keep kwargs minimal so we work with ST <2.6 as well
         _embedder = SentenceTransformer("intfloat/e5-small-v2")
     return _embedder
 
@@ -151,7 +142,7 @@ def _rebuild_index(records: List[dict]):
     global _index, _meta
     _index = _new_index(); _meta = []
     for rec in records:
-        add_to_store(rec["text"], tag=rec["tag"], ts=rec["ts"], )  # rebuild=True not needed because new index
+        add_to_store(rec["text"], tag=rec["tag"], ts=rec["ts"])  # rebuild path
     print("[vector_store] index rebuilt")
 
 
@@ -179,6 +170,7 @@ def stats():
 
 # ── builtin corpus load (tag=builtin) ─────────────────────────────────────
 BUILTIN_DIR = pathlib.Path(__file__).parent / "builtin_data"
+
 
 def _load_builtin_once():
     if any(rec["tag"] == "builtin" for rec in _meta):
