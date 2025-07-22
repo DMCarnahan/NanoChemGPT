@@ -85,7 +85,7 @@ def ask():
         "Provide concrete numerical parameters on the same volume scale as the paper. "
         "Return *two blocks* in order:\n"
         "## SynthesisProtocol\n"
-        "1. **Hardware**:\n[]\n"
+        "1. **Hardware & Glassware**:\n[]\n"
         "2. **Materials**:\n[]\n"
         "3. **Procedure**\n[]\n\n"
         "```reason"
