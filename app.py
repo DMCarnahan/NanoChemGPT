@@ -11,7 +11,7 @@ from jinja2 import TemplateNotFound
 
 # === project-local imports ========================
 import vector_store as vs                         
-from parser import convert_to_json, ParserError  
+from converter import convert_to_json, ParserError  
 # ==========================================================================
 
 # ---- paths & app ----------------------------------------------------------
@@ -126,7 +126,7 @@ def ask():
 
     prompt = (
         "You are NanoChemGPT, an AI assistant that proposes nanomaterial syntheses. "
-        "Use the context unless general chemistry knowledge is required. "
+        "Use the context and builtin data to provide a reasonable answer to the question. "
         "Provide concrete numerical parameters on the same volume scale as the paper. "
         "Return *two blocks* in order:\n"
         "## SynthesisProtocol\n"
