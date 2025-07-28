@@ -8,7 +8,7 @@
 """
 from __future__ import annotations
 
-import gzip, json, pathlib, threading, time, csv
+import gzip, json, pathlib, threading, time, csv, os
 from typing import List, Dict, Any
 
 import faiss, numpy as np
