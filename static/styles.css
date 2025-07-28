@@ -201,3 +201,6 @@ input[type="file"] {
 /* Small tweak so header sits on one line on wide screens */
 .header { margin-top: 12px; }
 
+#searchResults li { margin: 6px 0; }
+#searchResults a { text-decoration: none; }
+#searchResults a:hover { text-decoration: underline; }

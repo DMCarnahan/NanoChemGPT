@@ -249,3 +249,42 @@ function wireUI() {
 }
 
 document.addEventListener('DOMContentLoaded', wireUI);
+
+function escapeHtml(s) {
+  return (s || '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+async function runSearch() {
+  const q = (qs('#searchInput')?.value || '').trim();
+  if (!q) { showAlert('#searchMsg', 'error', 'Enter a search query.'); return; }
+  showAlert('#searchMsg', 'success', 'Searching…');
+  try {
+    const r = await fetch('/search', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ q, n: 6 })
+    });
+    const raw = await r.text();
+    if (!r.ok) { showAlert('#searchMsg', 'error', `Search failed (${r.status}): ${raw}`); return; }
+    const data = JSON.parse(raw);
+    renderSearchResults(data.results || []);
+    showAlert('#searchMsg', 'success', `Found ${ (data.results||[]).length } results.`);
+  } catch (e) {
+    showAlert('#searchMsg', 'error', `Network/JS error: ${e}`);
+  }
+}
+
+function renderSearchResults(items) {
+  const ol = qs('#searchResults');
+  if (!ol) return;
+  ol.innerHTML = (items || []).map((it, i) => {
+    const title = escapeHtml(it.title || '(no title)');
+    const url = it.url || (it.doi ? `https://doi.org/${it.doi}` : '#');
+    const meta = [it.venue, it.year, it.source].filter(Boolean).join(' • ');
+    return `<li>[${i+1}] <a href="${url}" target="_blank" rel="noopener">${title}</a>` +
+           (meta ? ` <span class="muted">(${escapeHtml(meta)})</span>` : '') +
+           `</li>`;
+  }).join('');
+}
+
+qs('#searchBtn')?.addEventListener('click', (e) => { e.preventDefault(); runSearch(); });

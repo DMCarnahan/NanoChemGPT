@@ -37,6 +37,21 @@
       <div id="result" class="alert mt-3"></div>
     </div>
 
+    <!-- Search -->
+    <div class="card mt-6">
+      <h2 class="card-title">Search literature</h2>
+      <div class="row">
+        <input id="searchInput" class="textarea" placeholder="Search query (e.g., cobalt nanowires oleylamine synthesis)" />
+        <button id="searchBtn" class="btn secondary">Search</button>
+      </div>
+      <div id="searchMsg" class="alert mt-2 hidden"></div>
+      <ol id="searchResults" class="mt-3 small"></ol>
+      <p class="small muted mt-2">
+        Closed-access providers (Bing, Google CSE, Scopus, IEEE Xplore) are stubbed in code and can
+        be enabled later by setting API keys (see <code>search.py</code>).
+      </p>
+    </div>
+
     <!-- Ask -->
     <div class="card mt-6">
       <h2 class="card-title">Ask NanoChemGPT</h2>

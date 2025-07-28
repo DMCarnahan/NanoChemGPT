@@ -12,6 +12,7 @@ from jinja2 import TemplateNotFound
 # === project-local imports ========================
 import vector_store as vs                         
 from converter import convert_to_json, ParserError  
+from search import basic_search  
 # ==========================================================================
 
 # ---- paths & app ----------------------------------------------------------
@@ -74,7 +75,7 @@ def home():
     except TemplateNotFound:
         return "<h1>NanoChemGPT is up</h1><p>templates/index.html is missing.</p>", 200
 
-# ---- routes: upload + status (non‑blocking) -------------------------------
+# ---- routes: upload + status (non‑blocking) --------------------------------
 @app.post("/upload")
 def upload():
     f = request.files.get("file")
@@ -109,25 +110,42 @@ def status(jid):
         abort(404, "unknown job id")
     return jsonify(j)
 
+# --- routes: search --------------------------------------------------------
+@app.post("/search")
+def search_route():
+    payload = request.get_json(silent=True) or {}
+    q = (payload.get("q") or payload.get("query") or "").strip()
+    n = int(payload.get("n") or 6)
+    if not q:
+        abort(400, "Missing 'q' (query).")
+    refs = basic_search(q, n)
+    return jsonify({"results": refs})
+
 # ---- routes: main Q&A -----------------------------------------------------
 @app.post("/ask")
 def ask():
-    q = (request.form.get("question") or request.json.get("question") if request.is_json else "").strip() \
-        if request.method == "POST" else ""
+    data = request.get_json(silent=True) or {}
+    q = (data.get("question") or request.form.get("question") or "").strip()
     if not q:
         abort(400, "No question.")
 
-    # Retrieve context from vector store
+    # Retrieve context from your vector store
     ctx = vs.search(q, k=4)
-    if isinstance(ctx, (list, tuple)):
-        context = "\n\n".join(map(str, ctx))
-    else:
-        context = str(ctx)
+    context = "\n\n".join(map(str, ctx)) if isinstance(ctx, (list, tuple)) else str(ctx)
+
+    # Basic literature search (open sources)
+    refs = basic_search(q, limit=6)
+    refs_text = "\n".join(
+        f"[{i+1}] {r['title']}" +
+        (f" — {r['url']}" if r.get('url') else "") +
+        (f" ({r.get('venue')}, {r.get('year')})" if r.get('venue') or r.get('year') else "")
+        for i, r in enumerate(refs)
+    )
 
     prompt = (
-        "You are NanoChemGPT, an AI assistant that proposes nanomaterial syntheses. "
-        "Use the context and builtin data to provide a reasonable answer to the question. "
-        "Provide concrete numerical parameters on the same volume scale as the paper. "
+        "You are NanoChemGPT, an AI assistant that proposes nanomaterial syntheses.\n"
+        "Use the context unless general chemistry knowledge is required.\n"
+        "Provide concrete numerical parameters on the same volume scale as the paper.\n"
         "Return *two blocks* in order:\n"
         "## SynthesisProtocol\n"
         "1. **Hardware & Glassware**:\n[]\n"
@@ -138,7 +156,10 @@ def ask():
         "1. Restate constraints.\n"
         "2. Justify every solvent / ratio / temp.\n"
         "3. Final‑check for violations (e.g. water in air-free reaction → reject).\n"
-        f"Context:\n{context}\n\nUser question: {q}\n```"
+        "When you make claims tied to literature, cite using the numeric references [1], [2], etc.\n"
+        f"Context:\n{context}\n\n"
+        f"Retrieved sources:\n{refs_text}\n"
+        "```"
     )
 
     resp = client.chat.completions.create(
@@ -153,6 +174,10 @@ def ask():
         rationale = rest.split("```", 1)[0].strip()
     else:
         answer, rationale = raw, ""
+
+    # Always append explicit references into the rationale box
+    if refs:
+        rationale = (rationale + "\n\nReferences:\n" + refs_text).strip()
 
     return {"answer": answer.strip(), "rationale": rationale}
 
