@@ -120,14 +120,14 @@ async function askQuestion() {
 
 // ---- Convert answer to JSON ----
 async function parseAnswer() {
-  // Prefer the live variable, fall back to the DOM
+  // Use the in-memory answer, fall back to the DOM
   let text = (typeof lastAnswer === 'string' && lastAnswer.trim())
     ? lastAnswer
     : (qs('#answerPre')?.textContent || '').trim();
 
   hide(qs('#jsonBlock'));
   if (!text) {
-    showAlert('#askMsg', 'error', 'No answer to parse yet. Click "Ask" first.');
+    showAlert('#askMsg', 'error', 'No answer to parse yet. Click “Ask” first.');
     return;
   }
 
@@ -137,19 +137,31 @@ async function parseAnswer() {
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify({ text })
     });
+
+    const raw = await r.text();              // read as text first (always succeeds)
     if (!r.ok) {
-      const txt = await r.text();
-      showAlert('#askMsg', 'error', `Parse failed (${r.status}): ${txt || 'Unknown error'}`);
+      showAlert('#askMsg', 'error', `Parse failed (${r.status}): ${raw || 'Unknown error'}`);
       return;
     }
-    const obj = await r.json();
+
+    // Be tolerant: server might return JSON with a non-json content-type
+    let obj;
+    try { obj = JSON.parse(raw); }
+    catch {
+      // If it isn't JSON, at least show what we got
+      qs('#jsonPre').textContent = raw;
+      qs('#jsonBlock').classList.remove('hidden');
+      showAlert('#askMsg', 'error', 'Server returned non‑JSON. Showing raw text.');
+      return;
+    }
+
     qs('#jsonPre').textContent = JSON.stringify(obj, null, 2);
     qs('#jsonBlock').classList.remove('hidden');
+    showAlert('#askMsg', 'success', 'Parsed to JSON.');
   } catch (err) {
-    showAlert('#askMsg', 'error', `Network error: ${err}`);
+    showAlert('#askMsg', 'error', `Network/JS error: ${err}`);
   }
 }
-
 
 // ---- Save answer to TXT ----
 async function saveTxt() {

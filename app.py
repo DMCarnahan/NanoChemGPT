@@ -161,6 +161,7 @@ def ask():
 def parse_route():
     payload = request.get_json(silent=True) or {}
     text = (payload.get("text") or "").strip()
+    print(f"[parse] len={len(text)}", flush=True)
     if not text:
         abort(400, "JSON must contain non‑empty 'text'.")
     try:
