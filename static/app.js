@@ -36,6 +36,19 @@ function showAlert(id, kind, text) {
 function hide(el) { el?.classList.add('hidden'); }
 function setProgress(pct) { const bar = qs('#progressInner'); if (bar) bar.style.width = `${Math.max(0, Math.min(100, pct))}%`; }
 function resetProgress() { setProgress(0); }
+function downloadFile(filename, text, mime = 'application/json') {
+  const blob = new Blob([text], { type: mime });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = filename;
+  document.body.appendChild(a); a.click();
+  a.remove(); URL.revokeObjectURL(url);
+}
+function safeName(s) {
+  return (s || 'parsed')
+    .toLowerCase().replace(/[^a-z0-9\-_.]+/g, '-').replace(/-+/g, '-')
+    .slice(0, 80);
+}
 
 // ---- Upload flow ----
 async function uploadFile(file) {
@@ -120,7 +133,6 @@ async function askQuestion() {
 
 // ---- Convert answer to JSON ----
 async function parseAnswer() {
-  // Use the in-memory answer, fall back to the DOM
   let text = (typeof lastAnswer === 'string' && lastAnswer.trim())
     ? lastAnswer
     : (qs('#answerPre')?.textContent || '').trim();
@@ -138,30 +150,35 @@ async function parseAnswer() {
       body: JSON.stringify({ text })
     });
 
-    const raw = await r.text();              // read as text first (always succeeds)
+    const raw = await r.text();
     if (!r.ok) {
       showAlert('#askMsg', 'error', `Parse failed (${r.status}): ${raw || 'Unknown error'}`);
       return;
     }
 
-    // Be tolerant: server might return JSON with a non-json content-type
+    // Tolerant: parse or show raw
     let obj;
     try { obj = JSON.parse(raw); }
     catch {
-      // If it isn't JSON, at least show what we got
       qs('#jsonPre').textContent = raw;
       qs('#jsonBlock').classList.remove('hidden');
       showAlert('#askMsg', 'error', 'Server returned non‑JSON. Showing raw text.');
       return;
     }
 
-    qs('#jsonPre').textContent = JSON.stringify(obj, null, 2);
+    const pretty = JSON.stringify(obj, null, 2);
+    qs('#jsonPre').textContent = pretty;
     qs('#jsonBlock').classList.remove('hidden');
     showAlert('#askMsg', 'success', 'Parsed to JSON.');
+
+    // Auto‑download
+    const base = safeName(lastQuestion || 'answer');
+    downloadFile(`${base || 'answer'}.json`, pretty, 'application/json');
   } catch (err) {
     showAlert('#askMsg', 'error', `Network/JS error: ${err}`);
   }
 }
+
 
 // ---- Save answer to TXT ----
 async function saveTxt() {
