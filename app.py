@@ -26,6 +26,13 @@ DATA_DIR.mkdir(parents=True, exist_ok=True)
 * Auto‑expiry of upload vectors handled inside vector_store.search()
 """
 
+from pathlib import Path
+BASE_DIR = Path(__file__).resolve().parent
+app = Flask(
+    __name__,
+    template_folder=str(BASE_DIR / "templates"),
+    static_folder=str(BASE_DIR / "static"),
+)
 
 # ──────────────────────────────────────────────────────────────────────────
 load_dotenv()
@@ -169,10 +176,15 @@ def clear_uploads_route():
 def health():
     return "ok", 200
 
+from jinja2 import TemplateNotFound
+
 @app.get("/")
 def home():
-    # Temporarily bypass template to rule out template issues
-    return "<h1>NanoChemGPT is up</h1>", 200
+    try:
+        return render_template("index.html")
+    except TemplateNotFound:
+        return "<h1>NanoChemGPT is up</h1><p>templates/index.html is missing.</p>", 200
+
 # ---- error handler -------------------------------------------------------
 @app.errorhandler(400)
 @app.errorhandler(422)
