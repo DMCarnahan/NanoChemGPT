@@ -165,10 +165,14 @@ def clear_uploads_route():
     return {"status": "uploads cleared"}
 
 # ---- health --------------------------------------------------------------
-@app.get("/ping")
-def ping():
-    return {"status": "alive"}
+@app.get("/health")
+def health():
+    return "ok", 200
 
+@app.get("/")
+def home():
+    # Temporarily bypass template to rule out template issues
+    return "<h1>NanoChemGPT is up</h1>", 200
 # ---- error handler -------------------------------------------------------
 @app.errorhandler(400)
 @app.errorhandler(422)
