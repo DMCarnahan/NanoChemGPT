@@ -50,6 +50,41 @@ function safeName(s) {
     .slice(0, 80);
 }
 
+function escapeHtml(s) {
+  return (s || '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+function renderRationaleWithCitations(text, refs) {
+  // Escape everything first
+  let html = escapeHtml(text || '');
+
+  // Link numeric citations [1], [2], ...
+  html = html.replace(/\[(\d+)\]/g, (m, n) => {
+    const idx = parseInt(n, 10) - 1;
+    const r = Array.isArray(refs) ? refs[idx] : null;
+    const url = r && r.url ? r.url : (r && r.doi ? `https://doi.org/${r.doi}` : null);
+    return url ? `<a href="${url}" target="_blank" rel="noopener">[${n}]</a>` : m;
+  });
+
+  // Style special tags [CTX] and [GEN]
+  html = html
+    .replace(/\[CTX\]/g, '<span class="badge badge-ctx">[CTX]</span>')
+    .replace(/\[GEN\]/g, '<span class="badge badge-gen">[GEN]</span>');
+
+  return html;
+}
+
+function renderReferencesList(refs) {
+  if (!Array.isArray(refs)) return '';
+  return refs.map((r, i) => {
+    const title = escapeHtml(r.title || '(no title)');
+    const url = r.url || (r.doi ? `https://doi.org/${r.doi}` : '#');
+    const meta = [r.venue, r.year, r.source].filter(Boolean).join(' • ');
+    const metaHtml = meta ? ` <span class="muted">(${escapeHtml(meta)})</span>` : '';
+    return `<li>[${i+1}] <a href="${url}" target="_blank" rel="noopener">${title}</a>${metaHtml}</li>`;
+  }).join('');
+}
+
 // ---- Upload flow ----
 async function uploadFile(file) {
   resetProgress();
@@ -119,7 +154,20 @@ async function askQuestion() {
     lastQuestion = q;
 
     qs('#answerPre').textContent = lastAnswer || '(empty)';
-    qs('#rationalePre').textContent = data.rationale || '(no rationale returned)';
+
+    // Render rationale with inline [n] → clickable links, plus [CTX]/[GEN] badges
+    const refs = Array.isArray(data.refs) ? data.refs : [];
+    const rationaleBox = qs('#rationalePre');
+    if (rationaleBox) {
+      rationaleBox.innerHTML = renderRationaleWithCitations(data.rationale || '', refs);
+    }
+
+    // Show numbered references list under the rationale
+    const refsList = qs('#refsList');  
+    if (refsList) {
+      refsList.innerHTML = renderReferencesList(refs);
+    }
+
     qs('#parseBtn').disabled = !lastAnswer;
     qs('#saveTxtBtn').disabled = !lastAnswer;
 
@@ -249,10 +297,6 @@ function wireUI() {
 }
 
 document.addEventListener('DOMContentLoaded', wireUI);
-
-function escapeHtml(s) {
-  return (s || '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-}
 
 async function runSearch() {
   const q = (qs('#searchInput')?.value || '').trim();

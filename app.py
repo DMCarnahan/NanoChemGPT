@@ -129,36 +129,42 @@ def ask():
     if not q:
         abort(400, "No question.")
 
-    # Retrieve context from your vector store
+    # 1) RAG context
     ctx = vs.search(q, k=4)
     context = "\n\n".join(map(str, ctx)) if isinstance(ctx, (list, tuple)) else str(ctx)
 
-    # Basic literature search (open sources)
+    # 2) Open literature (no keys needed)
     refs = basic_search(q, limit=6)
-    refs_text = "\n".join(
-        f"[{i+1}] {r['title']}" +
-        (f" — {r['url']}" if r.get('url') else "") +
-        (f" ({r.get('venue')}, {r.get('year')})" if r.get('venue') or r.get('year') else "")
+
+    # Build a numbered list for the model to cite
+    # [1] ... [2] ...  (numbers must be stable/order-preserving)
+    refs_prompt = "\n".join(
+        f"[{i+1}] {r.get('title','')}"
+        + (f" — {r.get('url','')}" if r.get('url') else "")
+        + (f" ({r.get('venue')}, {r.get('year')})" if r.get('venue') or r.get('year') else "")
         for i, r in enumerate(refs)
     )
 
     prompt = (
         "You are NanoChemGPT, an AI assistant that proposes nanomaterial syntheses.\n"
-        "Use the context unless general chemistry knowledge is required.\n"
-        "Provide concrete numerical parameters on the same volume scale as the paper.\n"
+        "Use the provided context unless general chemistry knowledge is required.\n"
+        "Provide concrete numerical parameters on the same volume scale as the paper.\n\n"
         "Return *two blocks* in order:\n"
         "## SynthesisProtocol\n"
         "1. **Hardware & Glassware**:\n[]\n"
         "2. **Materials**:\n[]\n"
         "3. **Procedure**\n[]\n\n"
         "```reason\n"
-        "Think step‑by‑step:\n"
-        "1. Restate constraints.\n"
-        "2. Justify every solvent / ratio / temp.\n"
-        "3. Final‑check for violations (e.g. water in air-free reaction → reject).\n"
-        "When you make claims tied to literature, cite using the numeric references [1], [2], etc.\n"
+        "CITATION RULES (very important):\n"
+        "• In the rationale, add inline numeric citations like [1], [2] at the end of ANY sentence that relies on literature.\n"
+        "• Use ONLY the numbers from the 'Retrieved sources' list below. Do NOT invent new numbers.\n"
+        "• If a sentence is based on the provided vector-store context (not public web), use [CTX].\n"
+        "• If it is general chemistry knowledge with no specific citation, use [GEN].\n"
+        "• Prefer 1–2 citations per sentence (avoid over-citation).\n\n"
+        "Think step-by-step:\n"
+        "1) Restate constraints. 2) Justify every solvent/ratio/temp. 3) Final-check for violations.\n"
         f"Context:\n{context}\n\n"
-        f"Retrieved sources:\n{refs_text}\n"
+        f"Retrieved sources:\n{refs_prompt}\n"
         "```"
     )
 
@@ -175,11 +181,8 @@ def ask():
     else:
         answer, rationale = raw, ""
 
-    # Always append explicit references into the rationale box
-    if refs:
-        rationale = (rationale + "\n\nReferences:\n" + refs_text).strip()
-
-    return {"answer": answer.strip(), "rationale": rationale}
+    # Return refs separately so the client can hyperlink [n] → URL
+    return {"answer": answer.strip(), "rationale": rationale, "refs": refs}
 
 # ---- routes: JSON parse ---------------------------------------------------
 @app.post("/parse")

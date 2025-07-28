@@ -204,3 +204,14 @@ input[type="file"] {
 #searchResults li { margin: 6px 0; }
 #searchResults a { text-decoration: none; }
 #searchResults a:hover { text-decoration: underline; }
+
+.badge {
+  display: inline-block;
+  padding: 0 6px;
+  border-radius: 6px;
+  border: 1px solid #cbd5e1;
+  font-size: 0.75rem;
+  vertical-align: baseline;
+}
+.badge-ctx { background: #eef2ff; border-color: #c7d2fe; color: #3730a3; } /* indigo */
+.badge-gen { background: #f1f5f9; border-color: #cbd5e1; color: #0f172a; }   /* neutral */
