@@ -1,15 +1,3 @@
-import os
-
-DATA_DIR = pathlib.Path(os.getenv("DATA_DIR", "data"))
-DATA_DIR.mkdir(parents=True, exist_ok=True)
-
-"""Flask API for NanoChemGPT
---------------------------------------------------
-* Upload PDF or JSON → vector_store.add_(…) (tag="upload")
-* `/ask` → retrieves context (k=4) + calls GPT‑4o‑mini
-* `/clear_uploads` drops all *uploaded* vectors (builtin corpus kept)
-* Auto‑expiry of upload vectors handled inside vector_store.search()
-"""
 from __future__ import annotations
 
 import io, os, json, gzip
@@ -26,6 +14,18 @@ import requests, ijson
 
 import vector_store as vs
 from backend.parser import convert_to_json, ParserError
+
+DATA_DIR = pathlib.Path(os.getenv("DATA_DIR", "data"))
+DATA_DIR.mkdir(parents=True, exist_ok=True)
+
+"""Flask API for NanoChemGPT
+--------------------------------------------------
+* Upload PDF or JSON → vector_store.add_(…) (tag="upload")
+* `/ask` → retrieves context (k=4) + calls GPT‑4o‑mini
+* `/clear_uploads` drops all *uploaded* vectors (builtin corpus kept)
+* Auto‑expiry of upload vectors handled inside vector_store.search()
+"""
+
 
 # ──────────────────────────────────────────────────────────────────────────
 load_dotenv()
