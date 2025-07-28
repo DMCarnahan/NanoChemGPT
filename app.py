@@ -1,4 +1,7 @@
-"""Flask API for NanoChemGPT
+import os
+
+DATA_DIR = pathlib.Path(os.getenv("DATA_DIR", "data"))
+DATA_DIR.mkdir(parents=True, exist_ok=True)"""Flask API for NanoChemGPT
 --------------------------------------------------
 * Upload PDF or JSON → vector_store.add_(…) (tag="upload")
 * `/ask` → retrieves context (k=4) + calls GPT‑4o‑mini
