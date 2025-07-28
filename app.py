@@ -44,25 +44,41 @@ def _extract_text(pdf_bytes: bytes) -> str:
     return "\n".join(page.extract_text() or "" for page in reader.pages)
 
 # ── routes ---------------------------------------------------------------
-
-@app.get("/")
-def home():
-    return render_template("index.html")
-
-# ---- file upload (PDF / JSON) ------------------------------------------
-# upload route
-if file.filename.lower().endswith(".pdf"):
-    try:
-        pages = PdfReader(file).pages          # avoids full read into RAM
-        text  = "\n".join(p.extract_text() or "" for p in pages)
-    except Exception as err:
-        abort(400, f"PDF parse error: {err}")
-    vs.add_to_store(text)
+# ---- file upload (PDF / JSON) -------------------------------------------
 
 @app.post("/upload")
 def upload():
-    file = request.files.get("file")
-    if not file or file.filename == "":
+    f = request.files.get("file")
+    if not f or f.filename == "":
+        abort(400, "No file uploaded.")
+
+    name = f.filename
+    lower = name.lower()
+
+    try:
+        if lower.endswith(".pdf"):
+            # Stream directly; avoids reading entire PDF into RAM
+            reader = PdfReader(f.stream)
+            text = "\n".join((p.extract_text() or "") for p in reader.pages)
+            vs.add_to_store(text, tag="upload")
+            return jsonify({"ok": True, "kind": "pdf", "filename": name, "chars": len(text)})
+
+        elif lower.endswith(".json"):
+            raw = f.stream.read()
+            data = json.loads(raw.decode("utf-8"))
+            # If your VS expects text, store the serialized JSON string:
+            vs.add_to_store(json.dumps(data, ensure_ascii=False), tag="upload")
+            return jsonify({"ok": True, "kind": "json", "filename": name})
+
+        else:
+            # Treat other files as UTF‑8 text
+            contents = f.stream.read().decode("utf-8", errors="ignore")
+            vs.add_to_store(contents, tag="upload")
+            return jsonify({"ok": True, "kind": "text", "filename": name, "chars": len(contents)})
+
+    except Exception as err:
+        abort(400, f"Upload processing error: {err}")
+
         abort(400, "No file uploaded.")
 
     if file.mimetype == "application/pdf":
