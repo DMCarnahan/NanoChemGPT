@@ -9,9 +9,9 @@ from werkzeug.utils import secure_filename
 from flask import Flask, request, jsonify, abort, render_template, send_file
 from jinja2 import TemplateNotFound
 
-# === project-local imports (adjust path if needed) ========================
-from vector_store import vs                         
-from converter import convert_to_json, ParserError  
+# === project-local imports ========================
+import vector_store as vs                         
+from parser import convert_to_json, ParserError  
 # ==========================================================================
 
 # ---- paths & app ----------------------------------------------------------
