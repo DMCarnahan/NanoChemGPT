@@ -183,8 +183,12 @@ def _load_builtin_once():
         elif path.suffix == ".gz" and path.name.endswith(".json.gz"):
             add_json_bytes(gzip.open(path, "rb").read(), tag="builtin")
         elif path.suffix == ".pdf":
-            text = "\n".join(p.extract_text() or "" for p in PdfReader(str(path)).pages)
-            add_to_store(text, tag="builtin")
+            if os.getenv("EMBED_PDFS", "0") == "1":
+                text = "\n".join(p.extract_text() or "" for p in PdfReader(str(path)).pages)
+                add_to_store(text, tag="builtin")
+            else:
+                print(f"[vector_store] skipping PDF {path.name} (set EMBED_PDFS=1 to enable)")
+
     print("[vector_store] builtin_data embedded")
 
 # ── module init -----------------------------------------------------------
