@@ -120,13 +120,22 @@ async function askQuestion() {
 
 // ---- Convert answer to JSON ----
 async function parseAnswer() {
+  // Prefer the live variable, fall back to the DOM
+  let text = (typeof lastAnswer === 'string' && lastAnswer.trim())
+    ? lastAnswer
+    : (qs('#answerPre')?.textContent || '').trim();
+
   hide(qs('#jsonBlock'));
-  if (!lastAnswer) { showAlert('#askMsg', 'error', 'No answer to parse yet.'); return; }
+  if (!text) {
+    showAlert('#askMsg', 'error', 'No answer to parse yet. Click "Ask" first.');
+    return;
+  }
+
   try {
     const r = await fetch('/parse', {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ text: lastAnswer })
+      body: JSON.stringify({ text })
     });
     if (!r.ok) {
       const txt = await r.text();
@@ -140,6 +149,7 @@ async function parseAnswer() {
     showAlert('#askMsg', 'error', `Network error: ${err}`);
   }
 }
+
 
 // ---- Save answer to TXT ----
 async function saveTxt() {
