@@ -4,8 +4,6 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>NanoChemGPT</title>
-
-  <!-- Load your stylesheet -->
   <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
 </head>
 <body>
@@ -19,7 +17,9 @@
       </div>
     </div>
 
+    <!-- Upload -->
     <div class="card upload">
+      <h2 class="card-title">Upload source (PDF / JSON / TXT)</h2>
       <div class="input-row">
         <input id="fileInput" type="file" accept=".pdf,.json,.txt,.md,.csv">
         <button id="uploadBtn" class="btn">
@@ -29,15 +29,58 @@
       </div>
       <div id="fileHint" class="small muted"></div>
 
-      <div id="progress" class="progress mt-3">
+      <div class="progress mt-3">
         <div id="progressInner"></div>
       </div>
 
       <div id="result" class="alert mt-3"></div>
     </div>
+
+    <!-- Ask -->
+    <div class="card mt-6">
+      <h2 class="card-title">Ask NanoChemGPT</h2>
+      <textarea id="questionInput" class="textarea" rows="5" placeholder="Ask a synthesis question…"></textarea>
+      <div class="row mt-3">
+        <button id="askBtn" class="btn">
+          <span class="spinner hidden"></span>
+          Ask
+        </button>
+        <button id="parseBtn" class="btn secondary" disabled>Convert answer → JSON</button>
+        <button id="saveTxtBtn" class="btn secondary" disabled>Export answer → .txt</button>
+      </div>
+
+      <div id="askMsg" class="alert mt-3 hidden"></div>
+
+      <div class="mt-4">
+        <h3 class="subhead">Answer</h3>
+        <pre id="answerPre" class="pre"></pre>
+      </div>
+
+      <div class="mt-4">
+        <h3 class="subhead">Rationale</h3>
+        <pre id="rationalePre" class="pre muted"></pre>
+      </div>
+
+      <div id="jsonBlock" class="mt-4 hidden">
+        <h3 class="subhead">Parsed JSON</h3>
+        <pre id="jsonPre" class="pre"></pre>
+      </div>
+    </div>
+
+    <!-- Maintenance -->
+    <div class="card mt-6">
+      <h2 class="card-title">Maintenance</h2>
+      <div class="row">
+        <button id="clearBtn" class="btn secondary">Clear uploaded memory</button>
+        <div id="clearMsg" class="alert mt-2 hidden"></div>
+      </div>
+      <p class="small muted mt-3">
+        Tip: Large first request may be slower if a model download/cold cache occurs. Mount a volume at <code>/data</code> and set
+        <code>HF_HOME=/data/hf</code> so downloads persist.
+      </p>
+    </div>
   </div>
 
-  <!-- Load your JavaScript (defer = run after parsing) -->
   <script src="{{ url_for('static', filename='app.js') }}" defer></script>
 </body>
 </html>

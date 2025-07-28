@@ -1,22 +1,20 @@
-function qs(sel) { return document.querySelector(sel); }
-function qsa(sel) { return Array.from(document.querySelectorAll(sel)); }
+const qs  = (s) => document.querySelector(s);
+const qsa = (s) => Array.from(document.querySelectorAll(s));
 
 function setStatus(ok) {
   const el = qs('#healthStatus');
   if (!el) return;
   el.classList.remove('ok', 'err');
   el.classList.add(ok ? 'ok' : 'err');
-  const text = el.querySelector('.status-txt');
-  if (text) text.textContent = ok ? 'healthy' : 'unhealthy';
+  const t = el.querySelector('.status-txt');
+  if (t) t.textContent = ok ? 'healthy' : 'unhealthy';
 }
 
 async function checkHealth() {
   try {
     const r = await fetch('/health', { cache: 'no-store' });
     setStatus(r.ok);
-  } catch {
-    setStatus(false);
-  }
+  } catch { setStatus(false); }
 }
 
 function humanSize(bytes) {
@@ -27,102 +25,188 @@ function humanSize(bytes) {
   return `${n.toFixed(n < 10 && i > 0 ? 1 : 0)} ${units[i]}`;
 }
 
-function resetProgress() {
-  const bar = qs('#progressInner');
-  if (bar) bar.style.width = '0%';
+function showAlert(id, kind, text) {
+  const el = qs(id);
+  if (!el) return;
+  el.classList.remove('hidden');
+  el.className = `alert ${kind}`;
+  el.textContent = text;
 }
 
-function setProgress(pct) {
-  const bar = qs('#progressInner');
-  if (bar) bar.style.width = `${Math.max(0, Math.min(100, pct))}%`;
-}
+function hide(el) { el?.classList.add('hidden'); }
+function setProgress(pct) { const bar = qs('#progressInner'); if (bar) bar.style.width = `${Math.max(0, Math.min(100, pct))}%`; }
+function resetProgress() { setProgress(0); }
 
-function showMessage(kind, text) {
-  const out = qs('#result');
-  if (!out) return;
-  out.className = `alert ${kind}`;
-  out.textContent = text;
-}
-
+// ---- Upload flow ----
 async function uploadFile(file) {
   resetProgress();
-  setProgress(10);
 
-  const fd = new FormData();
-  fd.append('file', file);
+  const fd = new FormData(); fd.append('file', file);
 
-  // Note: Native fetch doesn't give real upload progress without XHR.
-  // We fake a little progress then jump to 100% on completion.
-  const fake = setInterval(() => {
-    const bar = qs('#progressInner');
-    if (!bar) return;
-    const curr = parseFloat(bar.style.width || '0');
-    if (curr < 85) setProgress(curr + 5);
-  }, 150);
+  // Fake progress until server returns a job id
+  let pct = 10;
+  const fake = setInterval(() => { if (pct < 85) { pct += 5; setProgress(pct); } }, 150);
 
   try {
     const resp = await fetch('/upload', { method: 'POST', body: fd });
     clearInterval(fake);
-    setProgress(100);
-
-    const contentType = resp.headers.get('content-type') || '';
     if (!resp.ok) {
       const txt = await resp.text();
-      showMessage('error', `Upload failed (${resp.status}): ${txt || 'Unknown error'}`);
+      showAlert('#result', 'error', `Upload failed (${resp.status}): ${txt || 'Unknown error'}`);
       return;
     }
-
-    if (contentType.includes('application/json')) {
-      const data = await resp.json();
-      const fname = data.filename || file.name;
-      let details = '';
-      if (typeof data.chars === 'number') details = ` • ${data.chars} chars`;
-      if (data.kind) details = ` (${data.kind})` + details;
-      showMessage('success', `Uploaded: ${fname}${details}`);
-    } else {
-      const txt = await resp.text();
-      showMessage('success', `Uploaded: ${file.name}\n${txt.slice(0, 500)}`);
-    }
+    const data = await resp.json();
+    showAlert('#result', 'success', `Uploaded: ${data.filename || file.name}`);
+    if (data.job_id) await pollStatus(data.job_id);
+    else setProgress(100);
   } catch (err) {
     clearInterval(fake);
-    showMessage('error', `Network error: ${err}`);
+    showAlert('#result', 'error', `Network error: ${err}`);
   }
 }
 
+async function pollStatus(jobId) {
+  for (;;) {
+    const r = await fetch(`/status/${jobId}`, { cache: 'no-store' });
+    if (!r.ok) { showAlert('#result', 'error', `Status error: ${r.status}`); break; }
+    const st = await r.json();
+    if (typeof st.progress === 'number') setProgress(st.progress);
+    if (st.status === 'done') { showAlert('#result', 'success', `Processed ${st.filename || ''}`); break; }
+    if (st.status === 'error') { showAlert('#result', 'error', `Processing error: ${st.error || 'unknown'}`); break; }
+    await new Promise(res => setTimeout(res, 1000));
+  }
+}
+
+// ---- Ask flow ----
+let lastAnswer = '';
+let lastQuestion = '';
+
+async function askQuestion() {
+  hide(qs('#askMsg')); hide(qs('#jsonBlock'));
+  const q = (qs('#questionInput').value || '').trim();
+  if (!q) { showAlert('#askMsg', 'error', 'Type a question first.'); return; }
+
+  const btn = qs('#askBtn');
+  btn.disabled = true; btn.querySelector('.spinner')?.classList.remove('hidden');
+  qs('#parseBtn').disabled = true; qs('#saveTxtBtn').disabled = true;
+
+  try {
+    const r = await fetch('/ask', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ question: q })
+    });
+    if (!r.ok) {
+      const txt = await r.text();
+      showAlert('#askMsg', 'error', `Ask failed (${r.status}): ${txt || 'Unknown error'}`);
+      return;
+    }
+    const data = await r.json();
+    lastAnswer = data.answer || '';
+    lastQuestion = q;
+
+    qs('#answerPre').textContent = lastAnswer || '(empty)';
+    qs('#rationalePre').textContent = data.rationale || '(no rationale returned)';
+    qs('#parseBtn').disabled = !lastAnswer;
+    qs('#saveTxtBtn').disabled = !lastAnswer;
+
+    showAlert('#askMsg', 'success', 'Answer ready.');
+  } catch (err) {
+    showAlert('#askMsg', 'error', `Network error: ${err}`);
+  } finally {
+    btn.disabled = false; btn.querySelector('.spinner')?.classList.add('hidden');
+  }
+}
+
+// ---- Convert answer to JSON ----
+async function parseAnswer() {
+  hide(qs('#jsonBlock'));
+  if (!lastAnswer) { showAlert('#askMsg', 'error', 'No answer to parse yet.'); return; }
+  try {
+    const r = await fetch('/parse', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ text: lastAnswer })
+    });
+    if (!r.ok) {
+      const txt = await r.text();
+      showAlert('#askMsg', 'error', `Parse failed (${r.status}): ${txt || 'Unknown error'}`);
+      return;
+    }
+    const obj = await r.json();
+    qs('#jsonPre').textContent = JSON.stringify(obj, null, 2);
+    qs('#jsonBlock').classList.remove('hidden');
+  } catch (err) {
+    showAlert('#askMsg', 'error', `Network error: ${err}`);
+  }
+}
+
+// ---- Save answer to TXT ----
+async function saveTxt() {
+  if (!lastAnswer) { showAlert('#askMsg', 'error', 'No answer to save yet.'); return; }
+  try {
+    const r = await fetch('/save_txt', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ answer: lastAnswer, question: lastQuestion })
+    });
+    if (!r.ok) {
+      const txt = await r.text();
+      showAlert('#askMsg', 'error', `Save failed (${r.status}): ${txt || 'Unknown error'}`);
+      return;
+    }
+    const blob = await r.blob();
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = 'answer.txt';
+    document.body.appendChild(a); a.click();
+    a.remove(); URL.revokeObjectURL(url);
+    showAlert('#askMsg', 'success', 'Saved as TXT.');
+  } catch (err) {
+    showAlert('#askMsg', 'error', `Network error: ${err}`);
+  }
+}
+
+// ---- Clear uploaded memory ----
+async function clearUploads() {
+  try {
+    const r = await fetch('/clear_uploads', { method: 'POST' });
+    if (!r.ok) {
+      const txt = await r.text();
+      showAlert('#clearMsg', 'error', `Clear failed (${r.status}): ${txt || 'Unknown error'}`);
+      return;
+    }
+    showAlert('#clearMsg', 'success', 'Uploads cleared.');
+  } catch (err) {
+    showAlert('#clearMsg', 'error', `Network error: ${err}`);
+  }
+}
+
+// ---- Wire UI ----
 function wireUI() {
-  // Health badge wires itself
   checkHealth();
-  // ping health periodically
   setInterval(checkHealth, 30000);
 
-  const input = qs('#fileInput');
+  const input  = qs('#fileInput');
   const button = qs('#uploadBtn');
+  input?.addEventListener('change', () => {
+    const f = input.files?.[0];
+    const hint = qs('#fileHint');
+    if (hint && f) hint.textContent = `${f.name} • ${humanSize(f.size)}`;
+  });
+  button?.addEventListener('click', async (e) => {
+    e.preventDefault();
+    const f = input?.files?.[0];
+    if (!f) { showAlert('#result', 'error', 'Choose a file first.'); return; }
+    button.disabled = true; button.querySelector('.spinner')?.classList.remove('hidden');
+    await uploadFile(f);
+    button.disabled = false; button.querySelector('.spinner')?.classList.add('hidden');
+  });
 
-  if (input) {
-    input.addEventListener('change', () => {
-      const f = input.files?.[0];
-      const hint = qs('#fileHint');
-      if (hint && f) {
-        hint.textContent = `${f.name} • ${humanSize(f.size)}`;
-      }
-    });
-  }
-
-  if (button && input) {
-    button.addEventListener('click', async (e) => {
-      e.preventDefault();
-      const f = input.files?.[0];
-      if (!f) {
-        showMessage('error', 'Choose a file first (PDF/JSON/TXT).');
-        return;
-      }
-      button.disabled = true;
-      qsa('.btn .spinner').forEach(s => s.classList.remove('hidden'));
-      await uploadFile(f);
-      qsa('.btn .spinner').forEach(s => s.classList.add('hidden'));
-      button.disabled = false;
-    });
-  }
+  qs('#askBtn')?.addEventListener('click', (e) => { e.preventDefault(); askQuestion(); });
+  qs('#parseBtn')?.addEventListener('click', (e) => { e.preventDefault(); parseAnswer(); });
+  qs('#saveTxtBtn')?.addEventListener('click', (e) => { e.preventDefault(); saveTxt(); });
+  qs('#clearBtn')?.addEventListener('click', (e) => { e.preventDefault(); clearUploads(); });
 }
 
 document.addEventListener('DOMContentLoaded', wireUI);
