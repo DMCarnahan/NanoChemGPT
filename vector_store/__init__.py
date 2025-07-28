@@ -55,7 +55,7 @@ def _embed_passages(txts: list[str]) -> np.ndarray:
         [f"passage: {t}" for t in txts],
         normalize_embeddings=True,
         convert_to_numpy=True,
-        batch_size=16,
+        batch_size=8,
     ).astype("float32")
     return vecs
 
@@ -188,7 +188,10 @@ def _load_builtin_once():
     print("[vector_store] builtin_data embedded")
 
 # ── module init -----------------------------------------------------------
-_load_builtin_once()
+if os.getenv("PRELOAD_BUILTIN", "0") == "1":
+    _load_builtin_once()
+else:
+    print("[vector_store] builtin preload disabled (PRELOAD_BUILTIN=0)")
 
 # ── CLI -------------------------------------------------------------------
 if __name__ == "__main__":
