@@ -1,113 +1,130 @@
-from __future__ import annotations
-
-import io, os, json, gzip, pathlib
+import os, io, json, threading, uuid
 from datetime import datetime
-from urllib.parse import urlparse
+from pathlib import Path
 
 from dotenv import load_dotenv
-from flask import (
-    Flask, jsonify, render_template, request, abort, send_file
-)
 from openai import OpenAI
 from PyPDF2 import PdfReader
-import requests, ijson
+from werkzeug.utils import secure_filename
+from flask import Flask, request, jsonify, abort, render_template, send_file
+from jinja2 import TemplateNotFound
 
-import vector_store as vs
-from backend.parser import convert_to_json, ParserError
+# === project-local imports (adjust path if needed) ========================
+from vector_store import vs                         
+from converter import convert_to_json, ParserError  
+# ==========================================================================
 
-DATA_DIR = pathlib.Path(os.getenv("DATA_DIR", "data"))
-DATA_DIR.mkdir(parents=True, exist_ok=True)
+# ---- paths & app ----------------------------------------------------------
+load_dotenv()
 
-"""Flask API for NanoChemGPT
---------------------------------------------------
-* Upload PDF or JSON → vector_store.add_(…) (tag="upload")
-* `/ask` → retrieves context (k=4) + calls GPT‑4o‑mini
-* `/clear_uploads` drops all *uploaded* vectors (builtin corpus kept)
-* Auto‑expiry of upload vectors handled inside vector_store.search()
-"""
-
-from pathlib import Path
 BASE_DIR = Path(__file__).resolve().parent
+DATA_DIR = Path(os.getenv("DATA_DIR", BASE_DIR / "data"))
+UPLOADS_DIR = DATA_DIR / "uploads"
+UPLOADS_DIR.mkdir(parents=True, exist_ok=True)
+
 app = Flask(
     __name__,
     template_folder=str(BASE_DIR / "templates"),
     static_folder=str(BASE_DIR / "static"),
 )
 
-# ──────────────────────────────────────────────────────────────────────────
-load_dotenv()
+# Limit request body size (matches 413 handler below)
+app.config["MAX_CONTENT_LENGTH"] = 100 * 1024 * 1024  # 100 MB
+
+# OpenAI client
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
-app = Flask(__name__,
-            template_folder="templates",
-            static_folder="static")
 
-# limit request body to 100 MB (PDF / JSON uploads)
-app.config["MAX_CONTENT_LENGTH"] = 100 * 1024 * 1024
-
-# ── helpers --------------------------------------------------------------
-
+# ---- small helpers --------------------------------------------------------
 def _extract_text(pdf_bytes: bytes) -> str:
     reader = PdfReader(io.BytesIO(pdf_bytes))
     return "\n".join(page.extract_text() or "" for page in reader.pages)
 
-# ── routes ---------------------------------------------------------------
-# ---- file upload (PDF / JSON) -------------------------------------------
+# In‑memory job registry 
+JOBS = {}  # {job_id: {"status": "...", "progress": int, "error": str, "filename": str}}
 
+def _set_job(jid, **kw):
+    JOBS.setdefault(jid, {}).update(kw)
+
+def _process_pdf_job(jid: str, path: Path, filename: str):
+    """Background thread that extracts text from a PDF and adds it to the vector store."""
+    try:
+        reader = PdfReader(str(path))
+        n = len(reader.pages) or 1
+        texts = []
+        for i, page in enumerate(reader.pages, 1):
+            texts.append(page.extract_text() or "")
+            _set_job(jid, progress=int(100 * i / n))
+        text = "\n".join(texts)
+        if not text.strip():
+            raise ValueError("PDF contains no extractable text.")
+        vs.add_to_store(text, tag=f"upload:{filename}")
+        _set_job(jid, status="done", progress=100)
+    except Exception as e:
+        _set_job(jid, status="error", error=str(e))
+
+# ---- routes: health & home ------------------------------------------------
+@app.get("/health")
+def health():
+    return "ok", 200
+
+@app.get("/")
+def home():
+    try:
+        return render_template("index.html")
+    except TemplateNotFound:
+        return "<h1>NanoChemGPT is up</h1><p>templates/index.html is missing.</p>", 200
+
+# ---- routes: upload + status (non‑blocking) -------------------------------
 @app.post("/upload")
 def upload():
     f = request.files.get("file")
     if not f or f.filename == "":
         abort(400, "No file uploaded.")
 
-    name = f.filename
-    lower = name.lower()
+    fname = secure_filename(f.filename)
+    path = UPLOADS_DIR / fname
+    f.save(path)
 
-    try:
-        if lower.endswith(".pdf"):
-            # Stream directly; avoids reading entire PDF into RAM
-            reader = PdfReader(f.stream)
-            text = "\n".join((p.extract_text() or "") for p in reader.pages)
-            vs.add_to_store(text, tag="upload")
-            return jsonify({"ok": True, "kind": "pdf", "filename": name, "chars": len(text)})
+    jid = uuid.uuid4().hex
+    _set_job(jid, status="processing", progress=0, filename=fname)
 
-        elif lower.endswith(".json"):
-            raw = f.stream.read()
-            data = json.loads(raw.decode("utf-8"))
-            # If your VS expects text, store the serialized JSON string:
-            vs.add_to_store(json.dumps(data, ensure_ascii=False), tag="upload")
-            return jsonify({"ok": True, "kind": "json", "filename": name})
-
-        else:
-            # Treat other files as UTF‑8 text
-            contents = f.stream.read().decode("utf-8", errors="ignore")
-            vs.add_to_store(contents, tag="upload")
-            return jsonify({"ok": True, "kind": "text", "filename": name, "chars": len(contents)})
-
-    except Exception as err:
-        abort(400, f"Upload processing error: {err}")
-
-        abort(400, "No file uploaded.")
-
-    if file.mimetype == "application/pdf":
-        vs.add_to_store(_extract_text(file.read()))
-
-    elif file.mimetype in {"application/json", "application/x-json"}:
-        vs.add_json_bytes(file.read())
-
+    lower = fname.lower()
+    if lower.endswith(".pdf"):
+        threading.Thread(target=_process_pdf_job, args=(jid, path, fname), daemon=True).start()
+    elif lower.endswith(".json"):
+        raw = path.read_text(encoding="utf-8", errors="ignore")
+        vs.add_to_store(raw, tag=f"upload:{fname}")
+        _set_job(jid, status="done", progress=100)
     else:
-        abort(400, "Only PDF or JSON accepted.")
+        txt = path.read_text(encoding="utf-8", errors="ignore")
+        vs.add_to_store(txt, tag=f"upload:{fname}")
+        _set_job(jid, status="done", progress=100)
 
-    return {"status": "ok", "filename": file.filename}
+    return jsonify({"ok": True, "job_id": jid, "filename": fname})
 
-# ---- main Q&A -----------------------------------------------------------
+@app.get("/status/<jid>")
+def status(jid):
+    j = JOBS.get(jid)
+    if not j:
+        abort(404, "unknown job id")
+    return jsonify(j)
+
+# ---- routes: main Q&A -----------------------------------------------------
 @app.post("/ask")
 def ask():
-    q = request.form.get("question", "").strip()
+    q = (request.form.get("question") or request.json.get("question") if request.is_json else "").strip() \
+        if request.method == "POST" else ""
     if not q:
         abort(400, "No question.")
 
-    context = vs.search(q, k=4)
-    prompt  = (
+    # Retrieve context from vector store
+    ctx = vs.search(q, k=4)
+    if isinstance(ctx, (list, tuple)):
+        context = "\n\n".join(map(str, ctx))
+    else:
+        context = str(ctx)
+
+    prompt = (
         "You are NanoChemGPT, an AI assistant that proposes nanomaterial syntheses. "
         "Use the context unless general chemistry knowledge is required. "
         "Provide concrete numerical parameters on the same volume scale as the paper. "
@@ -116,19 +133,20 @@ def ask():
         "1. **Hardware & Glassware**:\n[]\n"
         "2. **Materials**:\n[]\n"
         "3. **Procedure**\n[]\n\n"
-        "```reason"
-            "Think step‑by‑step:\n"
-            "1. Restate constraints.\n"
-            "2. Justify every solvent / ratio / temp.\n"
-            "3. Final‑check for violations (e.g. water in air-free reaction → reject).\n"
-        f"Context:\n{context}\n\nUser question: {q}"
+        "```reason\n"
+        "Think step‑by‑step:\n"
+        "1. Restate constraints.\n"
+        "2. Justify every solvent / ratio / temp.\n"
+        "3. Final‑check for violations (e.g. water in air-free reaction → reject).\n"
+        f"Context:\n{context}\n\nUser question: {q}\n```"
     )
 
-    raw = client.chat.completions.create(
+    resp = client.chat.completions.create(
         model="gpt-4o-mini",
         messages=[{"role": "user", "content": prompt}],
         temperature=0.2,
-    ).choices[0].message.content
+    )
+    raw = resp.choices[0].message.content or ""
 
     if "```reason" in raw:
         answer, rest = raw.split("```reason", 1)
@@ -138,11 +156,11 @@ def ask():
 
     return {"answer": answer.strip(), "rationale": rationale}
 
-# ---- JSON → structured ---------------------------------------------------
+# ---- routes: JSON parse ---------------------------------------------------
 @app.post("/parse")
 def parse_route():
-    payload: dict[str, str] = request.get_json(silent=True) or {}
-    text = payload.get("text", "").strip()
+    payload = request.get_json(silent=True) or {}
+    text = (payload.get("text") or "").strip()
     if not text:
         abort(400, "JSON must contain non‑empty 'text'.")
     try:
@@ -151,12 +169,12 @@ def parse_route():
         abort(422, str(e))
     return jsonify(parsed)
 
-# ---- Save answer / rationale to .txt ------------------------------------
+# ---- routes: save answer/rationale to .txt -------------------------------
 @app.post("/save_txt")
 def save_txt():
     data = request.get_json(silent=True) or {}
-    answer   = data.get("answer", "").strip()
-    question = data.get("question", "").strip()
+    answer   = (data.get("answer") or "").strip()
+    question = (data.get("question") or "").strip()
     if not answer:
         abort(400, "answer is empty")
 
@@ -165,36 +183,26 @@ def save_txt():
     fname = f"chatau_{datetime.utcnow():%Y%m%d_%H%M%S}.txt"
     return send_file(buf, mimetype="text/plain", as_attachment=True, download_name=fname)
 
-# ---- Purge all uploaded vectors -----------------------------------------
+# ---- routes: clear uploaded vectors --------------------------------------
 @app.post("/clear_uploads")
 def clear_uploads_route():
-    vs.clear_uploads()
+    try:
+        vs.clear_uploads()
+    except AttributeError:
+        abort(501, "clear_uploads() not implemented in vector_store.")
     return {"status": "uploads cleared"}
 
-# ---- health --------------------------------------------------------------
-@app.get("/health")
-def health():
-    return "ok", 200
-
-from jinja2 import TemplateNotFound
-
-@app.get("/")
-def home():
-    try:
-        return render_template("index.html")
-    except TemplateNotFound:
-        return "<h1>NanoChemGPT is up</h1><p>templates/index.html is missing.</p>", 200
-
-# ---- error handler -------------------------------------------------------
+# ---- error handlers -------------------------------------------------------
 @app.errorhandler(400)
 @app.errorhandler(422)
 @app.errorhandler(500)
 def handle_err(e):
     return jsonify(error=str(e)), getattr(e, "code", 500)
+
 @app.errorhandler(413)
 def too_large(e):
-    return jsonify(error="File bigger than 100 MB — compress or split it."), 413
-    
-# ---- dev entry -----------------------------------------------------------
+    return jsonify(error="File bigger than 100 MB — compress or split it."), 413
+
+# ---- dev entry ------------------------------------------------------------
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=int(os.getenv("PORT", 5000)), debug=True)
+    app.run(host="0.0.0.0", port=int(os.getenv("PORT", 5000)), debug=bool(os.getenv("DEBUG")))
