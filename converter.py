@@ -1,11 +1,11 @@
 from __future__ import annotations
 
-import json, re, textwrap
+import json, re, math, textwrap
 from dataclasses import dataclass, asdict
 from typing import Dict, List, Optional, Callable, Tuple
 
 __all__ = ["convert_to_json", "ParserError"]
-SCHEMA_VERSION = "1.7"  # v1.7 + global centrifuge fallback
+SCHEMA_VERSION = "1.8"
 
 class ParserError(ValueError):
     pass
@@ -91,7 +91,7 @@ _STIR_SPEED_RXS = [
     re.compile(r"\bset\s*stirr(?:er|ing)\s*(?:speed\s*(?:to|=)?)?\s*(?P<rpm>\d{2,4})\s*rpm\b", re.I),
 ]
 
-# --- time normalization ---
+# --- ultrasonic and time normalization helpers ---
 def _norm_time(val: str, unit: Optional[str]) -> str:
     v = val.strip()
     u = (unit or "").lower()
@@ -106,27 +106,66 @@ _SETUP_DEDUP_RXS = [
     re.compile(r"^turn on stir plate to target speed$", re.I),
 ]
 
+# --- NEW: detect RCF and radius (for RPM conversion) ---
+_RCF_RX = re.compile(r"(?:\brcf\b|\b(\d{3,6})\s*(?:×\s*)?g|\b\d{3,6}\s*xg)\b", re.I)
+# Simpler targeted extractor to pull numeric value near 'rcf' or 'g'
+_RCF_VALUE_RX = re.compile(r"(?P<rcf>\d{3,6})\s*(?:×\s*)?(?:g|xg)\b|\brcf\b\s*(?P<rcf2>\d{3,6})", re.I)
+_RADIUS_RX = re.compile(r"(?:radius|r\s*=?)\s*(?P<rad>\d+(?:\.\d+)?)\s*cm", re.I)
+
+def _rcf_to_rpm(rcf: float, r_cm: float) -> int:
+    # rpm = sqrt( RCF / (1.118e-5 * r_cm) )
+    rpm = math.sqrt(rcf / (1.118e-5 * r_cm))
+    return int(round(rpm))
+
+def _extract_rcf_and_radius(text: str) -> tuple[Optional[float], Optional[float]]:
+    rcf = None
+    rad = None
+    m = _RCF_VALUE_RX.search(text)
+    if m:
+        rcf_str = m.group("rcf") or m.group("rcf2")
+        try:
+            rcf = float(rcf_str)
+        except Exception:
+            rcf = None
+    rm = _RADIUS_RX.search(text)
+    if rm:
+        try:
+            rad = float(rm.group("rad"))
+        except Exception:
+            rad = None
+    return rcf, rad
+
 # Global fallbacks to pull rpm/time from the whole text (for centrifuge)
-_CENT_RPM_GLOBAL = re.compile(
-    r"centrifug\w*[^.]*?\bat\s*(?P<rpm>\d{3,5})\s*rpm", re.I
-)
+_CENT_RPM_GLOBAL = re.compile(r"centrifug\w*[^.]*?\bat\s*(?P<rpm>\d{3,5})\s*rpm", re.I)
 _CENT_TIME_GLOBAL = re.compile(
-    r"centrifug\w*[^.]*?\bfor\s*(?P<val>\d+(?:\.\d+)?)\s*"
-    r"(?P<u>min|mins|minutes|minute|h|hr|hrs|hour|hours|s|sec|secs|seconds)\b",
+    r"centrifug\w*[^.]*?\bfor\s*(?P<val>\d+(?:\.\d+)?)\s*(?P<u>min|mins|minutes|minute|h|hr|hrs|hour|hours|s|sec|secs|seconds)\b",
     re.I
 )
 
-def _extract_centrifuge_params(text: str) -> tuple[Optional[int], Optional[str]]:
-    rpm = None; tstr = None
-    m = _CENT_RPM_GLOBAL.search(text)
-    if m:
-        try: rpm = int(m.group("rpm"))
-        except ValueError: pass
+def _extract_centrifuge_time(text: str) -> Optional[str]:
     m = _CENT_TIME_GLOBAL.search(text)
     if m:
-        tstr = _norm_time(m.group("val"), m.group("u"))
-    return rpm, tstr
+        return _norm_time(m.group("val"), m.group("u"))
+    return None
 
+def _extract_centrifuge_params(text: str) -> tuple[Optional[int], Optional[str]]:
+    """Find rpm OR RCF+radius anywhere, plus a time."""
+    # 1) explicit rpm
+    m = _CENT_RPM_GLOBAL.search(text)
+    if m:
+        try:
+            rpm = int(m.group("rpm"))
+            return rpm, _extract_centrifuge_time(text)
+        except ValueError:
+            pass
+    # 2) RCF (+ optional radius)
+    rcf, rad = _extract_rcf_and_radius(text)
+    if rcf is not None:
+        r_cm = rad if rad is not None else 11.0
+        rpm = _rcf_to_rpm(rcf, r_cm)
+        return rpm, _extract_centrifuge_time(text)
+    # 3) at least return time if found
+    return None, _extract_centrifuge_time(text)
 
 def _protocol_window(text: str) -> str:
     m = re.search(r"^\s*##\s*SynthesisProtocol\b.*", text, flags=re.I | re.M | re.S)
@@ -190,8 +229,38 @@ def _parse_reagent(line: str) -> Reagent:
 Action = List[str]
 RuleFn = Callable[[re.Match], Action]
 
+def _centrifuge_actions_from_match(m: re.Match) -> List[str]:
+    # Prefer explicit rpm in the same line
+    rpm_val: Optional[int] = None
+    if m.groupdict().get("rpm"):
+        try:
+            rpm_val = int(m.group("rpm"))
+        except Exception:
+            rpm_val = None
+
+    # If no rpm, try RCF + radius in the matched text
+    if rpm_val is None:
+        rcf, rad = _extract_rcf_and_radius(m.group(0))
+        if rcf is not None:
+            r_cm = rad if rad is not None else 11.0
+            rpm_val = _rcf_to_rpm(rcf, r_cm)
+
+    # Time (if present in this line)
+    tstr: Optional[str] = None
+    if m.groupdict().get("tval"):
+        tstr = _norm_time(m.group("tval"), m.group("tunit"))
+
+    rpm_txt = f"set speed {rpm_val} rpm" if rpm_val else "set speed as specified"
+    time_txt = f"run for {tstr}" if tstr else "run for specified time"
+    return [
+        "load tubes into centrifuge",
+        rpm_txt,
+        time_txt,
+        "pour off supernatant into waste, keep pellet",
+    ]
+
 ACTION_RULES: List[Tuple[re.Pattern, RuleFn]] = [
-    # Ultrasonic bath (must be before transfer)
+    # Ultrasonic bath (put BEFORE transfer so it wins)
     (re.compile(r"\bultrasonic bath\b.*?\bfor\s*(?P<time>\d+(?:\.\d+)?)\s*(?P<tunit>min|mins|minutes|s|sec|secs|seconds)\b", re.I),
      lambda m: ["place container in ultrasonic bath",
                 f"run sonication for {_norm_time(m.group('time'), m.group('tunit'))}"]),
@@ -210,7 +279,7 @@ ACTION_RULES: List[Tuple[re.Pattern, RuleFn]] = [
     (re.compile(r"\btransfer(?:red)?\s+(.*)\s+to\s+(.*)", re.I),
      lambda m: [f"transfer {m.group(1).strip()} to {m.group(2).strip()}"]),
 
-    # Heat to T for time
+    # Heat to T for time  (captures both T and time)
     (re.compile(r"\bheat(?:ed)?\s+(?:the\s+)?(?:mixture|solution|suspension)\s*to\s*(?P<T>\d+(?:\.\d+)?)\s*°?\s*C(?:[^\.]*?)\bfor\s*(?P<tval>\d+(?:\.\d+)?)\s*(?P<tunit>min|mins|minutes|h|hr|hrs|hour|hours)\b", re.I),
      lambda m: [f"set heating device to {m.group('T')} °C",
                 "monitor temperature until set point reached",
@@ -229,16 +298,14 @@ ACTION_RULES: List[Tuple[re.Pattern, RuleFn]] = [
     (re.compile(r"\bcool(?:ed)?\s+to\s+(?P<T>\d+(?:\.\d+)?)\s*°?\s*C\b", re.I),
      lambda m: [f"cool vessel to {m.group('T')} °C"]),
 
-    # Centrifuge (captures rpm and time incl. minutes/hours/seconds)
+    # Centrifuge — supports explicit rpm or RCF (×g/rcf) and time
     (re.compile(
         r"\bcentrifug(e|ed|ation)\b"
-        r".*?(?:at\s*(?P<rpm>\d{2,5})\s*rpm)?"
-        r"(?:.*?\bfor\s*(?P<tval>\d+(?:\.\d+)?)(?:\s*(?P<tunit>min|mins|minutes|h|hr|hrs|hour|hours|s|sec|secs|seconds))?)?",
+        r".*?(?:(?:at|@)\s*(?P<rpm>\d{2,5})\s*rpm)?"
+        r"(?:.*?(?:rcf\b|\d{3,6}\s*(?:×\s*)?g|\d{3,6}\s*xg).*?)?"
+        r"(?:.*?\bfor\s*(?P<tval>\d+(?:\.\d+)?)(?:\s*(?P<tunit>min|mins|minutes|minute|h|hr|hrs|hour|hours|s|sec|secs|seconds))?)?",
         re.I),
-     lambda m: ["load tubes into centrifuge",
-                (f"set speed {m.group('rpm')} rpm" if m.group('rpm') else "set speed as specified"),
-                (f"run for {_norm_time(m.group('tval'), m.group('tunit'))}" if m.group('tval') else "run for specified time"),
-                "separate supernatant and pellet as specified"]),
+     _centrifuge_actions_from_match),
 
     # Purge with gas
     (re.compile(r"\b(purge|degass?|bubble)\s+(with\s+)?(n2|nitrogen|argon|ar)\b", re.I),
@@ -251,13 +318,13 @@ ACTION_RULES: List[Tuple[re.Pattern, RuleFn]] = [
      lambda m: ["place sample in vacuum chamber",
                 "apply vacuum until solvent removed or mass constant"]),
 
-    # pH adjust
+    # pH adjust (generic)
     (re.compile(r"\badjust\s+pH\s+to\s+(\d+(?:\.\d+)?)", re.I),
      lambda m: [f"measure solution pH",
                 f"add acid/base to reach pH {m.group(1)}",
                 "verify pH is stable"]),
 
-    # Sonication (generic)
+    # Sonication (generic, if not matched by timed rule)
     (re.compile(r"\bsonicat(e|ed|ion)\b", re.I),
      lambda m: ["place container in ultrasonic bath",
                 "run sonication for specified time / power"]),
@@ -276,7 +343,6 @@ def _expand_procedure_line(line: str) -> List[str]:
     return [line]
 
 # ---------- robot-mode helpers ----------
-
 def _strip_reasoning_fragments(s: str) -> str:
     s = _STRIP_CIT_RX.sub("", s)
     s = re.sub(r"^\s*finally,\s*", "", s, flags=re.I)
@@ -287,14 +353,11 @@ def _strip_reasoning_fragments(s: str) -> str:
     s = re.sub(r"\.\s*to vessel\s*$", "", s, flags=re.I)
     return s.strip()
 
-
 def _is_meta_line(s: str) -> bool:
     return bool(_META_RX.search(s))
 
-
 def _normalize_prepare_line(s: str) -> str:
     return re.sub(r"^\s*in a separate (container|vessel),\s*", "", s, flags=re.I).strip()
-
 
 def _normalize_dry_line(s: str) -> Optional[str]:
     m = re.search(r"\bdry\b.*?\bat\s*(\d+(?:\.\d+)?)\s*°?\s*C.*?\bfor\s*([^.;,\n]+)", s, flags=re.I)
@@ -305,12 +368,10 @@ def _normalize_dry_line(s: str) -> Optional[str]:
             .replace("mins", "min").replace("minutes", "min"))
     return f"dry sample in oven at {T} °C for {t}"
 
-
 def _cleanup_add_target(s: str) -> str:
     if s.lower().startswith("add ") and " to vessel" in s.lower() and re.search(r"\bto\s+(?!vessel)\b", s, re.I):
         s = re.sub(r"\s+to vessel\s*$", "", s, flags=re.I)
     return s
-
 
 def _expand_prepare_solution(line: str) -> Optional[List[str]]:
     m = _PREPARE_SOLUTION_RX.search(line)
@@ -332,7 +393,6 @@ def _expand_prepare_solution(line: str) -> Optional[List[str]]:
         "stir until dissolved",
     ]
 
-
 def _expand_pH_adjust(line: str) -> Optional[List[str]]:
     if re.search(r"\bnaoh\b", line, re.I) and (m := _PH_RX.search(line)):
         pH = m.group("val")
@@ -346,12 +406,10 @@ def _expand_pH_adjust(line: str) -> Optional[List[str]]:
         ]
     return None
 
-
 def _detect_vessel_type(s: str) -> Optional[str]:
     for rx, vtype in _VESSEL_PATTERNS:
         if rx.search(s): return vtype
     return None
-
 
 def _ensure_vessel(vessels: List[Dict[str, str]], desc: str) -> str:
     for v in vessels:
@@ -361,7 +419,6 @@ def _ensure_vessel(vessels: List[Dict[str, str]], desc: str) -> str:
     vtype = (desc.split()[-1] if desc.split() else "vessel")
     vessels.append({"id": vid, "type": vtype, "description": desc})
     return vid
-
 
 def _collect_vessels_from_hardware(hardware: List[str]) -> List[Dict[str, str]]:
     vessels: List[Dict[str, str]] = []
@@ -375,7 +432,6 @@ def _collect_vessels_from_hardware(hardware: List[str]) -> List[Dict[str, str]]:
         _ensure_vessel(vessels, "flask")  # default V1
     return vessels
 
-
 def _dedupe_adjacent(seq: List[str]) -> List[str]:
     out: List[str] = []
     last = None
@@ -384,7 +440,6 @@ def _dedupe_adjacent(seq: List[str]) -> List[str]:
             out.append(s)
             last = s
     return out
-
 
 def _global_dedupe_setup(seq: List[str]) -> List[str]:
     seen = [False] * len(_SETUP_DEDUP_RXS)
@@ -402,7 +457,6 @@ def _global_dedupe_setup(seq: List[str]) -> List[str]:
             out.append(s)
     return out
 
-
 def _extract_stir_speed(text: str) -> int:
     for rx in _STIR_SPEED_RXS:
         m = rx.search(text)
@@ -414,7 +468,6 @@ def _extract_stir_speed(text: str) -> int:
             except ValueError:
                 pass
     return 900  # default if not specified
-
 
 def _assign_targets(steps: List[str], vessels: List[Dict[str, str]]) -> List[Dict[str, str]]:
     if not vessels:
@@ -458,6 +511,11 @@ def convert_to_json(raw: str, robot: bool = False) -> Dict[str, object]:
     # Expand to low-level actions first
     expanded: List[str] = []
     for line in procedure_lines:
+        # add specific expanders before generic rules
+        if (prep := _expand_prepare_solution(line)):
+            expanded.extend(prep); continue
+        if (ph := _expand_pH_adjust(line)):
+            expanded.extend(ph); continue
         expanded.extend(_expand_procedure_line(line))
 
     vessels = _collect_vessels_from_hardware(hardware_lines)
@@ -470,13 +528,9 @@ def convert_to_json(raw: str, robot: bool = False) -> Dict[str, object]:
                 continue
             s = _normalize_prepare_line(s)
 
-            # Specific normalizers / expanders
+            # Specific normalizers
             if (dry := _normalize_dry_line(s)):
                 tmp.append(dry); continue
-            if (ph := _expand_pH_adjust(s)):
-                tmp.extend(ph); continue
-            if (prep := _expand_prepare_solution(s)):
-                tmp.extend(prep); continue
 
             s2 = _cleanup_add_target(_strip_reasoning_fragments(s))
             if s2:
