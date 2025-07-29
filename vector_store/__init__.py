@@ -1,5 +1,5 @@
 """Persistent vector store that
-* embeds text with **intfloat/e5‑small‑v2** (384‑D, CPU‑friendly)
+* embeds text with **intfloat/e5‑large‑v2** 
 * stores vectors in FAISS `IndexFlatIP` + stable IDs
 * **tags** every chunk as either ``builtin`` or ``upload``
   · builtin vectors are permanent
@@ -26,15 +26,14 @@ CHUNK_TOKS  = 300
 DIM         = 384
 UPLOAD_TTL  = 30 * 60          # 30 minutes in seconds
 
-# ── embedding model (lazy) ────────────────────────────────────────────────
+# ── embedding model ────────────────────────────────────────────────
 _embedder: SentenceTransformer | None = None
 
 def _get_embedder() -> SentenceTransformer:
     global _embedder
     if _embedder is None:
-        print("[vector_store] loading e5-small-v2 …")
-        # keep kwargs minimal so we work with ST <2.6 as well
-        _embedder = SentenceTransformer("intfloat/e5-small-v2")
+        print("[vector_store] loading e5-large-v2 …")
+        _embedder = SentenceTransformer("intfloat/e5-large-v2")
     return _embedder
 
 # ── helpers ───────────────────────────────────────────────────────────────

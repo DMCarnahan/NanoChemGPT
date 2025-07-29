@@ -73,6 +73,19 @@ function renderRationaleWithCitations(text, refs) {
 
   return html;
 }
+function showRefs(refs) {
+  const list = qs('#refsList');
+  if (!list) return;
+  const section = list.closest('.mt-4') || list.parentElement;
+
+  if (Array.isArray(refs) && refs.length > 0) {
+    list.innerHTML = renderReferencesList(refs);
+    section?.classList.remove('hidden');
+  } else {
+    list.innerHTML = '';
+    section?.classList.add('hidden'); // hide the whole References section if empty
+  }
+}
 
 function renderReferencesList(refs) {
   if (!Array.isArray(refs)) return '';
@@ -162,7 +175,9 @@ async function askQuestion() {
     lastAnswer = data.answer || '';
     lastQuestion = q;
 
-    qs('#answerPre').textContent = lastAnswer || '(empty)';
+    qs('#answerPre').textContent = data.answer || '(empty)';
+    qs('#rationalePre').innerHTML = renderRationaleWithCitations(data.rationale || '', data.references || []);
+    showRefs(data.references || []);
 
     // Render rationale with inline [n] → clickable links, plus [CTX]/[GEN] badges
     const refs = Array.isArray(data.refs) ? data.refs : [];
@@ -220,9 +235,6 @@ async function parseAnswer() {
     catch { qs('#jsonPre').textContent = raw; qs('#jsonBlock').classList.remove('hidden'); return; }
 
     const pretty = JSON.stringify(obj, null, 2);
-    qs('#jsonPre').textContent = pretty;
-    qs('#jsonBlock').classList.remove('hidden');
-    showAlert('#askMsg', 'success', robot ? 'Parsed to JSON (robot mode).' : 'Parsed to JSON.');
     const vsWrap = qs('#vesselSummary');
     
     const vsList = qs('#vesselList');
