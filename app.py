@@ -8,6 +8,7 @@ from PyPDF2 import PdfReader
 from werkzeug.utils import secure_filename
 from flask import Flask, request, jsonify, abort, render_template, send_file
 from jinja2 import TemplateNotFound
+import traceback
 
 # === project-local imports ========================
 import vector_store as vs                         
