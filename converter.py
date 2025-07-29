@@ -1,4 +1,3 @@
-# converter.py
 from __future__ import annotations
 
 import json, re, textwrap
@@ -6,7 +5,7 @@ from dataclasses import dataclass, asdict
 from typing import Dict, List, Optional, Callable, Tuple
 
 __all__ = ["convert_to_json", "ParserError"]
-SCHEMA_VERSION = "1.5"
+SCHEMA_VERSION = "1.6"
 
 class ParserError(ValueError):
     pass
@@ -42,15 +41,13 @@ _REASONING_MARKERS = re.compile(
     r"\b(because|since|so that|therefore|thus|hence|rationale|justif(?:y|ication)|note:|ensuring)\b",
     re.I,
 )
-# Drop whole lines that are meta commentary rather than actions
 _META_RX = re.compile(
     r"^\s*(this (protocol|procedure)|these steps|the following (procedure|protocol)|"
-    r"which can be|intended to|overview|background|this will serve|this approach)\b",
+    r"which can be|intended to|overview|background|this will serve|this approach|"
+    r"this step is crucial|ensure stability)\b",
     re.I,
 )
-# Strip citation-like tail tokens
 _STRIP_CIT_RX = re.compile(r"\s*\[(?:CTX|GEN|\d+)\]\s*$", re.I)
-# Strip trailing rationale clauses (“to ensure … / to facilitate … / ensuring …”)
 _TRAIL_REASON_RX = re.compile(
     r"\s*(?:[,;.\-–—]\s*)?(?:to (?:ensure|facilitate|promote|allow)\b.*|ensuring\b.*)$",
     re.I,
@@ -68,7 +65,6 @@ _VESSEL_PATTERNS: List[Tuple[re.Pattern, str]] = [
     (re.compile(r"\breaction vessel|reactor|autoclave|teflon-lined", re.I), "reactor"),
 ]
 _SIZE_RX = re.compile(r"(\d+(?:\.\d+)?)\s*(mL|L)\b", re.I)
-# Detect “in a/into a <size?> <vessel>”
 _SEPARATE_VESSEL_RX = re.compile(
     r"\b(?:in(?:to)?\s+(?:a|an)\s+)"
     r"(?:(?P<vol>\d+(?:\.\d+)?)\s*(?P<vu>mL|L)\s+)?"
@@ -76,7 +72,7 @@ _SEPARATE_VESSEL_RX = re.compile(
     re.I,
 )
 
-# Detect “prepare X g Y in Z mL SOLVENT”
+# --- “prepare X g Y in Z mL solvent” → atomic steps ---
 _PREPARE_SOLUTION_RX = re.compile(
     r"\b(prepare|make|formulate)\s+"
     r"(?P<amt>\d+(?:\.\d+)?)\s*(?P<aunit>mg|g|kg)\s+"
@@ -86,13 +82,20 @@ _PREPARE_SOLUTION_RX = re.compile(
     re.I,
 )
 
-# Setup lines we’ll dedupe globally (keep first occurrence; still keep repeated WASH steps)
+# --- pH control expansion ---
+_PH_RX = re.compile(r"pH\s*(?:of\s*)?(?:around\s*)?(?P<val>\d+(?:\.\d+)?)", re.I)
+
+# --- stir speed extraction (prefer procedure context; else default 900 rpm) ---
+_STIR_SPEED_RXS = [
+    re.compile(r"\bstir(?:ring)?\s*(?:at|speed\s*(?:to|=)?)\s*(?P<rpm>\d{2,4})\s*rpm\b", re.I),
+    re.compile(r"\bset\s*stirr(?:er|ing)\s*(?:speed\s*(?:to|=)?)?\s*(?P<rpm>\d{2,4})\s*rpm\b", re.I),
+]
+
+# Setup lines to dedupe globally (keep first occurrence)
 _SETUP_DEDUP_RXS = [
     re.compile(r"^insert stir bar into vessel$", re.I),
     re.compile(r"^place vessel on magnetic stir plate$", re.I),
     re.compile(r"^turn on stir plate to target speed$", re.I),
-    re.compile(r"^connect inert gas line to vessel$", re.I),
-    re.compile(r"^open gas flow to purge headspace$", re.I),
 ]
 
 def _protocol_window(text: str) -> str:
@@ -168,7 +171,7 @@ ACTION_RULES: List[Tuple[re.Pattern, RuleFn]] = [
     (re.compile(r"\bheat(?:ed)?\s+to\s+(\d+(?:\.\d+)?)\s*°?\s*C\b", re.I),
      lambda m: [f"set heating device to {m.group(1)} °C",
                 "monitor temperature until set point reached"]),
-    (re.compile(r"\bmaintain(?:ed)?\s+at\s+(\d+(?:\.\d+)?)\s*°?\s*C\s+for\s+([\dhmsec\s]+)", re.I),
+    (re.compile(r"\bmaintain(?:ed)?\s+at\s+(\d+(?:\.\.\d+)?)\s*°?\s*C\s+for\s+([\dhmsec\s]+)", re.I),
      lambda m: [f"hold temperature at {m.group(1)} °C for {m.group(2).strip()}"]),
     (re.compile(r"\bcool(?:ed)?\s+to\s+(\d+(?:\.\d+)?)\s*°?\s*C\b", re.I),
      lambda m: [f"cool vessel to {m.group(1)} °C"]),
@@ -208,19 +211,67 @@ def _expand_procedure_line(line: str) -> Action:
 # ---------- robot-mode helpers ----------
 def _strip_reasoning_fragments(s: str) -> str:
     s = _STRIP_CIT_RX.sub("", s)
+    s = re.sub(r"^\s*finally,\s*", "", s, flags=re.I)
     s = re.sub(r"\((?:[^)]{0,80})\)", lambda m: ("" if _REASONING_MARKERS.search(m.group(0)) else m.group(0)), s)
     s = _TRAIL_REASON_RX.sub("", s)
     s = re.sub(r"[:–—-]\s*(?=(because|since|so that|therefore|thus|hence)\b).*", "", s, flags=re.I)
     s = re.sub(r"\b(because|since|so that|therefore|thus|hence|rationale|justif(?:y|ication)|note:|ensuring).*$", "", s, flags=re.I)
+    s = re.sub(r"\.\s*to vessel\s*$", "", s, flags=re.I)   # kill trailing ". to vessel"
     return s.strip()
 
 def _is_meta_line(s: str) -> bool:
     return bool(_META_RX.search(s))
 
 def _normalize_prepare_line(s: str) -> str:
-    s2 = re.sub(r"^\s*in a separate (container|vessel),\s*", "", s, flags=re.I)
-    s2 = re.sub(r"\bprepare\s+a\b", "prepare", s2, flags=re.I)
-    return s2.strip()
+    return re.sub(r"^\s*in a separate (container|vessel),\s*", "", s, flags=re.I).strip()
+
+def _normalize_dry_line(s: str) -> Optional[str]:
+    m = re.search(r"\bdry\b.*?\bat\s*(\d+(?:\.\d+)?)\s*°?\s*C.*?\bfor\s*([^.;,\n]+)", s, flags=re.I)
+    if not m:
+        return None
+    T = m.group(1); t = re.sub(r"\s+", " ", m.group(2)).strip()
+    t = t.replace("hours", "h").replace("hour", "h").replace("mins", "min").replace("minutes", "min")
+    return f"dry sample in oven at {T} °C for {t}"
+
+def _cleanup_add_target(s: str) -> str:
+    # If it's an "add X ... to Y" line already, drop trailing "to vessel"
+    if s.lower().startswith("add ") and " to vessel" in s.lower() and re.search(r"\bto\s+(?!vessel)\b", s, re.I):
+        s = re.sub(r"\s+to vessel\s*$", "", s, flags=re.I)
+    return s
+
+def _expand_prepare_solution(line: str) -> Optional[List[str]]:
+    m = _PREPARE_SOLUTION_RX.search(line)
+    if not m:
+        return None
+    amt, aunit = m.group("amt"), m.group("aunit")
+    chem = re.sub(r"\s+", " ", (m.group("chem") or "").strip())
+    vol, vunit = m.group("vol"), m.group("vunit")
+    solv = re.sub(r"\s+", " ", (m.group("solv") or "").strip())
+    return [
+        "place clean vessel on balance",
+        "tare balance",
+        f"weigh {amt} {aunit} {chem}",
+        f"add {vol} {vunit} {solv} to vessel",
+        f"add {amt} {aunit} {chem} to vessel",
+        "insert stir bar into vessel",
+        "place vessel on magnetic stir plate",
+        "turn on stir plate to target speed",
+        "stir until dissolved",
+    ]
+
+def _expand_pH_adjust(line: str) -> Optional[List[str]]:
+    # If a line mentions NaOH and a pH target → split into atomic actions
+    if re.search(r"\bnaoh\b", line, re.I) and (m := _PH_RX.search(line)):
+        pH = m.group("val")
+        core = re.sub(r"\s*while\s+maintain.*$", "", line, flags=re.I)
+        core = re.sub(r"\s*,?\s*which\s+promotes.*$", "", core, flags=re.I)
+        core = re.sub(r"\s*\[(?:CTX|GEN|\d+)\]\s*$", "", core)
+        return [
+            _cleanup_add_target(_strip_reasoning_fragments(core)).rstrip("."),
+            f"monitor pH (target {pH} ± 0.2)",
+            f"adjust with NaOH to reach pH {pH}",
+        ]
+    return None
 
 def _detect_vessel_type(s: str) -> Optional[str]:
     for rx, vtype in _VESSEL_PATTERNS:
@@ -258,7 +309,6 @@ def _dedupe_adjacent(seq: List[str]) -> List[str]:
     return out
 
 def _global_dedupe_setup(seq: List[str]) -> List[str]:
-    """Remove repeat setup lines appearing multiple times non-adjacently."""
     seen = [False] * len(_SETUP_DEDUP_RXS)
     out: List[str] = []
     for s in seq:
@@ -274,35 +324,24 @@ def _global_dedupe_setup(seq: List[str]) -> List[str]:
             out.append(s)
     return out
 
-def _expand_prepare_solution(line: str) -> Optional[List[str]]:
-    m = _PREPARE_SOLUTION_RX.search(line)
-    if not m:
-        return None
-    amt, aunit = m.group("amt"), m.group("aunit")
-    chem = re.sub(r"\s+", " ", (m.group("chem") or "").strip())
-    vol, vunit = m.group("vol"), m.group("vunit")
-    solv = re.sub(r"\s+", " ", (m.group("solv") or "").strip())
-    # Atomic steps for a robot
-    return [
-        "place clean vessel on balance",
-        "tare balance",
-        f"weigh {amt} {aunit} {chem}",
-        f"add {vol} {vunit} {solv} to vessel",
-        f"add {amt} {aunit} {chem} to vessel",
-        "insert stir bar into vessel",
-        "place vessel on magnetic stir plate",
-        "turn on stir plate to target speed",
-        "stir until dissolved",
-    ]
+def _extract_stir_speed(text: str) -> int:
+    for rx in _STIR_SPEED_RXS:
+        m = rx.search(text)
+        if m:
+            try:
+                rpm = int(m.group("rpm"))
+                if 20 <= rpm <= 5000:
+                    return rpm
+            except ValueError:
+                pass
+    return 900  # default if not specified
 
 def _assign_targets(steps: List[str], vessels: List[Dict[str, str]]) -> List[Dict[str, str]]:
-    """Stateful assignment: maintain current vessel; open new on 'in a <vessel>'."""
     if not vessels:
         vessels = [{"id": "V1", "type": "flask", "description": "flask"}]
-    current = vessels[0]["id"]  # default V1
+    current = vessels[0]["id"]
     out: List[Dict[str, str]] = []
     for s in steps:
-        # Create new vessel if step introduces one (e.g., "in a 50 mL centrifuge tube")
         m = _SEPARATE_VESSEL_RX.search(s)
         if m:
             vol = (m.group("vol") or "").strip()
@@ -311,12 +350,10 @@ def _assign_targets(steps: List[str], vessels: List[Dict[str, str]]) -> List[Dic
             desc = (f"{vol} {vu} " if vol and vu else "") + typ
             desc = re.sub(r"\s+", " ", desc).strip()
             current = _ensure_vessel(vessels, desc)
-
         if re.search(r"\bcentrifug", s, re.I):
             tube = next((v for v in vessels if "tube" in v["description"].lower()), None)
             if tube:
                 current = tube["id"]
-
         out.append({"action": s, "target": current})
     return out
 
@@ -335,14 +372,13 @@ def convert_to_json(raw: str, robot: bool = False) -> Dict[str, object]:
 
     reagents = [_parse_reagent(l).asdict() for l in reagent_lines]
 
-    # Expand to low-level actions first (low-level verb rules)
+    # Expand to low-level actions first (verb rules)
     expanded: List[str] = []
     for line in procedure_lines:
         expanded.extend(_expand_procedure_line(line))
 
     vessels = _collect_vessels_from_hardware(hardware_lines)
 
-    # --- robot mode cleanup + vessel labeling / targeting ---
     final_actions = expanded
     if robot:
         tmp: List[str] = []
@@ -350,19 +386,29 @@ def convert_to_json(raw: str, robot: bool = False) -> Dict[str, object]:
             if _is_meta_line(s):
                 continue
             s = _normalize_prepare_line(s)
-            # Split “prepare X g Y in Z mL solvent” into atomic steps (if present)
-            atomic = _expand_prepare_solution(s)
-            if atomic:
-                tmp.extend(atomic)
-                continue
-            # Otherwise clean reasoning
-            s2 = _strip_reasoning_fragments(s)
-            if s2:
-                tmp.append(s2)
 
-        # Remove adjacent duplicates, then global setup duplicates
+            # Special cases first
+            if (dry := _normalize_dry_line(s)):
+                tmp.append(dry); continue
+            if (ph := _expand_pH_adjust(s)):
+                tmp.extend(ph); continue
+
+            # Generic cleaning
+            s2 = _cleanup_add_target(_strip_reasoning_fragments(s))
+            if s2:
+                tmp.append(s2.rstrip("."))
+
         tmp = _dedupe_adjacent(tmp)
-        final_actions = _global_dedupe_setup(tmp)
+        tmp = _global_dedupe_setup(tmp)
+        final_actions = tmp
+
+        # Replace "target speed" with discovered or default rpm
+        chosen_rpm = _extract_stir_speed(raw) or _extract_stir_speed(" ".join(procedure_lines))
+        final_actions = [
+            (re.sub(r"\bturn on stir plate to target speed\b",
+                    f"set stirrer to {chosen_rpm} rpm", a, flags=re.I))
+            for a in final_actions
+        ]
 
     structured = _assign_targets(final_actions if robot else expanded, vessels)
     vessel_map = {v["id"]: v["description"] for v in vessels}
@@ -380,7 +426,7 @@ def convert_to_json(raw: str, robot: bool = False) -> Dict[str, object]:
         out["vessels"] = vessels
         out["vessel_map"] = vessel_map
         out["procedure_structured"] = structured
-        out["robot"] = {"cleaned": True, "vessel_labels": True, "atomic_prepare": True}
+        out["robot"] = {"cleaned": True, "vessel_labels": True, "atomic_prepare": True, "rpm_default": 900}
 
     if not (out["reagents"] or out["procedure"] or out.get("hardware")):
         raise ParserError("Could not recognize any sections or steps.")
