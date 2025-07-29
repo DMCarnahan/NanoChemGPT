@@ -189,11 +189,11 @@ def ask():
 def parse_route():
     payload = request.get_json(silent=True) or {}
     text = (payload.get("text") or "").strip()
-    print(f"[parse] len={len(text)}", flush=True)
     if not text:
         abort(400, "JSON must contain non‑empty 'text'.")
+    robot = bool(payload.get("robot"))  # <- read flag from client
     try:
-        parsed = convert_to_json(text)
+        parsed = convert_to_json(text, robot=robot)
     except ParserError as e:
         abort(422, str(e))
     return jsonify(parsed)

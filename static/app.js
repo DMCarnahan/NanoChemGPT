@@ -186,42 +186,32 @@ async function parseAnswer() {
     : (qs('#answerPre')?.textContent || '').trim();
 
   hide(qs('#jsonBlock'));
-  if (!text) {
-    showAlert('#askMsg', 'error', 'No answer to parse yet. Click “Ask” first.');
-    return;
-  }
+  if (!text) { showAlert('#askMsg', 'error', 'No answer to parse yet. Click “Ask” first.'); return; }
+
+  const robot = !!qs('#robotMode')?.checked;   // <-- read checkbox
 
   try {
     const r = await fetch('/parse', {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ text })
+      body: JSON.stringify({ text, robot })     // <-- send to backend
     });
 
     const raw = await r.text();
-    if (!r.ok) {
-      showAlert('#askMsg', 'error', `Parse failed (${r.status}): ${raw || 'Unknown error'}`);
-      return;
-    }
+    if (!r.ok) { showAlert('#askMsg', 'error', `Parse failed (${r.status}): ${raw || 'Unknown error'}`); return; }
 
-    // Tolerant: parse or show raw
     let obj;
     try { obj = JSON.parse(raw); }
-    catch {
-      qs('#jsonPre').textContent = raw;
-      qs('#jsonBlock').classList.remove('hidden');
-      showAlert('#askMsg', 'error', 'Server returned non‑JSON. Showing raw text.');
-      return;
-    }
+    catch { qs('#jsonPre').textContent = raw; qs('#jsonBlock').classList.remove('hidden'); return; }
 
     const pretty = JSON.stringify(obj, null, 2);
     qs('#jsonPre').textContent = pretty;
     qs('#jsonBlock').classList.remove('hidden');
-    showAlert('#askMsg', 'success', 'Parsed to JSON.');
+    showAlert('#askMsg', 'success', robot ? 'Parsed to JSON (robot mode).' : 'Parsed to JSON.');
 
-    // Auto‑download
+    // download with suffix if robot mode
     const base = safeName(lastQuestion || 'answer');
-    downloadFile(`${base || 'answer'}.json`, pretty, 'application/json');
+    downloadFile(`${base}${robot ? '-robot' : ''}.json`, pretty, 'application/json');
   } catch (err) {
     showAlert('#askMsg', 'error', `Network/JS error: ${err}`);
   }
