@@ -85,6 +85,15 @@ function renderReferencesList(refs) {
   }).join('');
 }
 
+function renderVesselList(vessels) {
+  if (!Array.isArray(vessels) || !vessels.length) return '';
+  return vessels.map(v => {
+    const id = (v.id || '').toString();
+    const desc = (v.description || v.type || '').toString();
+    return `<li><strong>${id}</strong> — ${escapeHtml(desc)}</li>`;
+  }).join('');
+}
+
 // ---- Upload flow ----
 async function uploadFile(file) {
   resetProgress();
@@ -208,6 +217,18 @@ async function parseAnswer() {
     qs('#jsonPre').textContent = pretty;
     qs('#jsonBlock').classList.remove('hidden');
     showAlert('#askMsg', 'success', robot ? 'Parsed to JSON (robot mode).' : 'Parsed to JSON.');
+    const vsWrap = qs('#vesselSummary');
+    
+    const vsList = qs('#vesselList');
+    if (vsWrap && vsList) {
+      if (Array.isArray(obj.vessels) && obj.vessels.length) {
+        vsList.innerHTML = renderVesselList(obj.vessels);
+        vsWrap.classList.remove('hidden');
+      } else {
+        vsList.innerHTML = '';
+        vsWrap.classList.add('hidden');
+      }
+    }
 
     // download with suffix if robot mode
     const base = safeName(lastQuestion || 'answer');

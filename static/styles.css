@@ -215,3 +215,6 @@ input[type="file"] {
 }
 .badge-ctx { background: #eef2ff; border-color: #c7d2fe; color: #3730a3; } /* indigo */
 .badge-gen { background: #f1f5f9; border-color: #cbd5e1; color: #0f172a; }   /* neutral */
+
+#vesselSummary ul { margin: 6px 0; padding-left: 1.1rem; }
+#vesselSummary li { margin: 4px 0; }

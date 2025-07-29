@@ -6,7 +6,7 @@ from dataclasses import dataclass, asdict
 from typing import Dict, List, Optional, Callable, Tuple
 
 __all__ = ["convert_to_json", "ParserError"]
-SCHEMA_VERSION = "1.3"
+SCHEMA_VERSION = "1.5"
 
 class ParserError(ValueError):
     pass
@@ -35,11 +35,24 @@ _LIST_BULLET = re.compile(r"^\s*(?:[-*•–—]\s+|\d+[\.\)]\s+)")
 # quantities / units
 _AMOUNT_RX = re.compile(r"(?P<qty>\d+(?:\.\d+)?)\s*(?P<unit>mg|g|kg|µl|μl|ul|mL|ml|L|l)\b", re.I)
 _CONC_RX   = re.compile(r"(?P<val>\d+(?:\.\d+)?)\s*(?P<unit>mM|M|%(?:\s*w\/v|\s*v\/v)?)\b", re.I)
-_VOL_RX    = re.compile(r"(?P<val>\d+(?:\.\d+)?)\s*mL\b", re.I)
+_VOL_RX    = re.compile(r"(?P<val>\d+(?:\.\d+)?)\s*(?P<vunit>mL|L)\b", re.I)
 
-# --- robot-mode reasoning cleanup ---
+# --- robot-mode cleanup + meta detection ---
 _REASONING_MARKERS = re.compile(
-    r"\b(because|since|so that|therefore|thus|hence|rationale|justif(?:y|ication)|note:)\b",
+    r"\b(because|since|so that|therefore|thus|hence|rationale|justif(?:y|ication)|note:|ensuring)\b",
+    re.I,
+)
+# Drop whole lines that are meta commentary rather than actions
+_META_RX = re.compile(
+    r"^\s*(this (protocol|procedure)|these steps|the following (procedure|protocol)|"
+    r"which can be|intended to|overview|background|this will serve|this approach)\b",
+    re.I,
+)
+# Strip citation-like tail tokens
+_STRIP_CIT_RX = re.compile(r"\s*\[(?:CTX|GEN|\d+)\]\s*$", re.I)
+# Strip trailing rationale clauses (“to ensure … / to facilitate … / ensuring …”)
+_TRAIL_REASON_RX = re.compile(
+    r"\s*(?:[,;.\-–—]\s*)?(?:to (?:ensure|facilitate|promote|allow)\b.*|ensuring\b.*)$",
     re.I,
 )
 
@@ -55,6 +68,32 @@ _VESSEL_PATTERNS: List[Tuple[re.Pattern, str]] = [
     (re.compile(r"\breaction vessel|reactor|autoclave|teflon-lined", re.I), "reactor"),
 ]
 _SIZE_RX = re.compile(r"(\d+(?:\.\d+)?)\s*(mL|L)\b", re.I)
+# Detect “in a/into a <size?> <vessel>”
+_SEPARATE_VESSEL_RX = re.compile(
+    r"\b(?:in(?:to)?\s+(?:a|an)\s+)"
+    r"(?:(?P<vol>\d+(?:\.\d+)?)\s*(?P<vu>mL|L)\s+)?"
+    r"(?P<typ>schlenk flask|round[- ]?bottom flask|flask|beaker|vial|centrifuge tube|tube)\b",
+    re.I,
+)
+
+# Detect “prepare X g Y in Z mL SOLVENT”
+_PREPARE_SOLUTION_RX = re.compile(
+    r"\b(prepare|make|formulate)\s+"
+    r"(?P<amt>\d+(?:\.\d+)?)\s*(?P<aunit>mg|g|kg)\s+"
+    r"(?P<chem>[^,;.\n]+?)\s+in\s+"
+    r"(?P<vol>\d+(?:\.\d+)?)\s*(?P<vunit>mL|L)\s+"
+    r"(?P<solv>[^.;\n]+)",
+    re.I,
+)
+
+# Setup lines we’ll dedupe globally (keep first occurrence; still keep repeated WASH steps)
+_SETUP_DEDUP_RXS = [
+    re.compile(r"^insert stir bar into vessel$", re.I),
+    re.compile(r"^place vessel on magnetic stir plate$", re.I),
+    re.compile(r"^turn on stir plate to target speed$", re.I),
+    re.compile(r"^connect inert gas line to vessel$", re.I),
+    re.compile(r"^open gas flow to purge headspace$", re.I),
+]
 
 def _protocol_window(text: str) -> str:
     m = re.search(r"^\s*##\s*SynthesisProtocol\b.*", text, flags=re.I | re.M | re.S)
@@ -168,49 +207,117 @@ def _expand_procedure_line(line: str) -> Action:
 
 # ---------- robot-mode helpers ----------
 def _strip_reasoning_fragments(s: str) -> str:
+    s = _STRIP_CIT_RX.sub("", s)
     s = re.sub(r"\((?:[^)]{0,80})\)", lambda m: ("" if _REASONING_MARKERS.search(m.group(0)) else m.group(0)), s)
+    s = _TRAIL_REASON_RX.sub("", s)
     s = re.sub(r"[:–—-]\s*(?=(because|since|so that|therefore|thus|hence)\b).*", "", s, flags=re.I)
-    s = re.sub(r"\b(because|since|so that|therefore|thus|hence|rationale|justif(?:y|ication)|note:).*$", "", s, flags=re.I)
+    s = re.sub(r"\b(because|since|so that|therefore|thus|hence|rationale|justif(?:y|ication)|note:|ensuring).*$", "", s, flags=re.I)
     return s.strip()
+
+def _is_meta_line(s: str) -> bool:
+    return bool(_META_RX.search(s))
+
+def _normalize_prepare_line(s: str) -> str:
+    s2 = re.sub(r"^\s*in a separate (container|vessel),\s*", "", s, flags=re.I)
+    s2 = re.sub(r"\bprepare\s+a\b", "prepare", s2, flags=re.I)
+    return s2.strip()
 
 def _detect_vessel_type(s: str) -> Optional[str]:
     for rx, vtype in _VESSEL_PATTERNS:
         if rx.search(s): return vtype
     return None
 
-def _collect_vessels(hardware: List[str], steps: List[str]) -> List[Dict[str, str]]:
-    found: List[str] = []
+def _ensure_vessel(vessels: List[Dict[str, str]], desc: str) -> str:
+    for v in vessels:
+        if v["description"].lower() == desc.lower():
+            return v["id"]
+    vid = f"V{len(vessels)+1}"
+    vtype = (desc.split()[-1] if desc.split() else "vessel")
+    vessels.append({"id": vid, "type": vtype, "description": desc})
+    return vid
+
+def _collect_vessels_from_hardware(hardware: List[str]) -> List[Dict[str, str]]:
+    vessels: List[Dict[str, str]] = []
     for h in hardware:
         vtype = _detect_vessel_type(h or "")
         if vtype:
             size = _SIZE_RX.search(h or "")
             desc = (f"{size.group(0)} " if size else "") + vtype.replace("_", " ")
-            found.append(desc.strip())
-    for st in steps:
-        vtype = _detect_vessel_type(st or "")
-        if vtype: found.append(vtype.replace("_", " "))
-    uniq, seen = [], set()
-    for d in found or ["flask"]:
-        k = d.lower()
-        if k not in seen:
-            uniq.append(d); seen.add(k)
-    return [{"id": f"V{i}", "type": d.split()[-1], "description": d} for i, d in enumerate(uniq, 1)]
+            _ensure_vessel(vessels, desc.strip())
+    if not vessels:
+        _ensure_vessel(vessels, "flask")  # default V1
+    return vessels
+
+def _dedupe_adjacent(seq: List[str]) -> List[str]:
+    out: List[str] = []
+    last = None
+    for s in seq:
+        if s != last:
+            out.append(s)
+            last = s
+    return out
+
+def _global_dedupe_setup(seq: List[str]) -> List[str]:
+    """Remove repeat setup lines appearing multiple times non-adjacently."""
+    seen = [False] * len(_SETUP_DEDUP_RXS)
+    out: List[str] = []
+    for s in seq:
+        lowered = s.strip().lower()
+        matched_setup = False
+        for i, rx in enumerate(_SETUP_DEDUP_RXS):
+            if rx.match(lowered):
+                matched_setup = True
+                if not seen[i]:
+                    out.append(s); seen[i] = True
+                break
+        if not matched_setup:
+            out.append(s)
+    return out
+
+def _expand_prepare_solution(line: str) -> Optional[List[str]]:
+    m = _PREPARE_SOLUTION_RX.search(line)
+    if not m:
+        return None
+    amt, aunit = m.group("amt"), m.group("aunit")
+    chem = re.sub(r"\s+", " ", (m.group("chem") or "").strip())
+    vol, vunit = m.group("vol"), m.group("vunit")
+    solv = re.sub(r"\s+", " ", (m.group("solv") or "").strip())
+    # Atomic steps for a robot
+    return [
+        "place clean vessel on balance",
+        "tare balance",
+        f"weigh {amt} {aunit} {chem}",
+        f"add {vol} {vunit} {solv} to vessel",
+        f"add {amt} {aunit} {chem} to vessel",
+        "insert stir bar into vessel",
+        "place vessel on magnetic stir plate",
+        "turn on stir plate to target speed",
+        "stir until dissolved",
+    ]
 
 def _assign_targets(steps: List[str], vessels: List[Dict[str, str]]) -> List[Dict[str, str]]:
+    """Stateful assignment: maintain current vessel; open new on 'in a <vessel>'."""
     if not vessels:
         vessels = [{"id": "V1", "type": "flask", "description": "flask"}]
-    default = vessels[0]["id"]
+    current = vessels[0]["id"]  # default V1
     out: List[Dict[str, str]] = []
     for s in steps:
-        tgt = default
-        for v in vessels:
-            if any(tok in s.lower() for tok in v["description"].lower().split()):
-                tgt = v["id"]; break
+        # Create new vessel if step introduces one (e.g., "in a 50 mL centrifuge tube")
+        m = _SEPARATE_VESSEL_RX.search(s)
+        if m:
+            vol = (m.group("vol") or "").strip()
+            vu  = (m.group("vu")  or "").strip()
+            typ = (m.group("typ") or "").strip().lower()
+            desc = (f"{vol} {vu} " if vol and vu else "") + typ
+            desc = re.sub(r"\s+", " ", desc).strip()
+            current = _ensure_vessel(vessels, desc)
+
         if re.search(r"\bcentrifug", s, re.I):
-            for v in vessels:
-                if "tube" in v["description"].lower():
-                    tgt = v["id"]; break
-        out.append({"action": s, "target": tgt})
+            tube = next((v for v in vessels if "tube" in v["description"].lower()), None)
+            if tube:
+                current = tube["id"]
+
+        out.append({"action": s, "target": current})
     return out
 
 # ---------- main ----------
@@ -228,38 +335,56 @@ def convert_to_json(raw: str, robot: bool = False) -> Dict[str, object]:
 
     reagents = [_parse_reagent(l).asdict() for l in reagent_lines]
 
+    # Expand to low-level actions first (low-level verb rules)
     expanded: List[str] = []
     for line in procedure_lines:
         expanded.extend(_expand_procedure_line(line))
 
-    vessels: List[Dict[str, str]] = []
-    structured: List[Dict[str, str]] = []
-    cleaned_actions = expanded
+    vessels = _collect_vessels_from_hardware(hardware_lines)
 
+    # --- robot mode cleanup + vessel labeling / targeting ---
+    final_actions = expanded
     if robot:
-        cleaned_actions = []
+        tmp: List[str] = []
         for s in expanded:
+            if _is_meta_line(s):
+                continue
+            s = _normalize_prepare_line(s)
+            # Split “prepare X g Y in Z mL solvent” into atomic steps (if present)
+            atomic = _expand_prepare_solution(s)
+            if atomic:
+                tmp.extend(atomic)
+                continue
+            # Otherwise clean reasoning
             s2 = _strip_reasoning_fragments(s)
-            if s2: cleaned_actions.append(s2)
-        vessels = _collect_vessels(hardware_lines, cleaned_actions)
-        structured = _assign_targets(cleaned_actions, vessels)
+            if s2:
+                tmp.append(s2)
+
+        # Remove adjacent duplicates, then global setup duplicates
+        tmp = _dedupe_adjacent(tmp)
+        final_actions = _global_dedupe_setup(tmp)
+
+    structured = _assign_targets(final_actions if robot else expanded, vessels)
+    vessel_map = {v["id"]: v["description"] for v in vessels}
 
     out: Dict[str, object] = {
         "schema_version": SCHEMA_VERSION,
         "title"         : raw.split("\n", 1)[0].lstrip("# ")[:120],
         "hardware"      : hardware_lines,
         "reagents"      : reagents,
-        "procedure"     : (cleaned_actions if robot else expanded),
+        "procedure"     : final_actions if robot else expanded,
         "characterization": [],
         "storage"       : "",
     }
     if robot:
         out["vessels"] = vessels
+        out["vessel_map"] = vessel_map
         out["procedure_structured"] = structured
-        out["robot"] = {"cleaned": True, "vessel_labels": True}
+        out["robot"] = {"cleaned": True, "vessel_labels": True, "atomic_prepare": True}
 
     if not (out["reagents"] or out["procedure"] or out.get("hardware")):
         raise ParserError("Could not recognize any sections or steps.")
+
     return out
 
 if __name__ == "__main__":
