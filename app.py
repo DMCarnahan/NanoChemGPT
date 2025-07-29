@@ -179,7 +179,7 @@ def ask():
         "- No explanatory prose inside steps.\n"
         "- Put explanatory sentences only in the ```reason block, with citations.\n"
         f"Context:\n{context}\n\n"
-        f"Retrieved sources:\n{refs_prompt}\n"
+        f"Retrieved sources:\n{bib}\n"
         "```"
     )
 
