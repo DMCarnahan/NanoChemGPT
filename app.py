@@ -122,28 +122,22 @@ def search_route():
     return jsonify({"results": refs})
 
 # ---- routes: main Q&A -----------------------------------------------------
+from search import basic_search
+
 @app.post("/ask")
 def ask():
-    data = request.get_json(silent=True) or {}
-    q = (data.get("question") or request.form.get("question") or "").strip()
+    q = request.json.get("question", "").strip()
     if not q:
         abort(400, "No question.")
 
-    # 1) RAG context
-    ctx = vs.search(q, k=4)
-    context = "\n\n".join(map(str, ctx)) if isinstance(ctx, (list, tuple)) else str(ctx)
+    # fetch context 
+    context = vs.search(q, k=4)
 
-    # 2) Open literature (no keys needed)
-    refs = basic_search(q, limit=6)
-
-    # Build a numbered list for the model to cite
-    # [1] ... [2] ...  (numbers must be stable/order-preserving)
-    refs_prompt = "\n".join(
-        f"[{i+1}] {r.get('title','')}"
-        + (f" — {r.get('url','')}" if r.get('url') else "")
-        + (f" ({r.get('venue')}, {r.get('year')})" if r.get('venue') or r.get('year') else "")
-        for i, r in enumerate(refs)
-    )
+    # also fetch refs for citations
+    refs = basic_search(q, n=6)
+    # render a numbered bibliography block for the prompt
+    bib = "\n".join(f"[{i+1}] {r['title']} ({r.get('year','')}) — {r.get('url') or ('https://doi.org/'+r['doi'] if r.get('doi') else '')}"
+                    for i, r in enumerate(refs))
 
     prompt = (
         "You are NanoChemGPT, an AI assistant that proposes nanomaterial syntheses.\n"
@@ -162,18 +156,21 @@ def ask():
         "• If it is general chemistry knowledge with no specific citation, use [GEN].\n"
         "• Prefer 1–2 citations per sentence (avoid over-citation).\n\n"
         "Think step-by-step:\n"
-        "1) Restate constraints. 2) Justify every solvent/ratio/temp. 3) Final-check for violations.\n"
+        "1) Restate constraints. 2) Justify every solvent/ratio/temp. 3) Final-check for violations.\n" \
+        "Style constraints for Procedure:\n"
+        "- Use imperative, atomic steps.\n"
+        "- No explanatory prose inside steps.\n"
+        "- Put explanatory sentences only in the ```reason block, with citations.\n"
         f"Context:\n{context}\n\n"
         f"Retrieved sources:\n{refs_prompt}\n"
         "```"
     )
 
-    resp = client.chat.completions.create(
+    raw = client.chat.completions.create(
         model="gpt-4o-mini",
         messages=[{"role": "user", "content": prompt}],
         temperature=0.2,
-    )
-    raw = resp.choices[0].message.content or ""
+    ).choices[0].message.content
 
     if "```reason" in raw:
         answer, rest = raw.split("```reason", 1)
@@ -181,8 +178,7 @@ def ask():
     else:
         answer, rationale = raw, ""
 
-    # Return refs separately so the client can hyperlink [n] → URL
-    return {"answer": answer.strip(), "rationale": rationale, "refs": refs}
+    return {"answer": answer.strip(), "rationale": rationale, "references": refs}
 
 # ---- routes: JSON parse ---------------------------------------------------
 @app.post("/parse")
@@ -197,6 +193,7 @@ def parse_route():
     except ParserError as e:
         abort(422, str(e))
     return jsonify(parsed)
+
 
 # ---- routes: save answer/rationale to .txt -------------------------------
 @app.post("/save_txt")

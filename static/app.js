@@ -171,6 +171,12 @@ async function askQuestion() {
       rationaleBox.innerHTML = renderRationaleWithCitations(data.rationale || '', refs);
     }
 
+    // render rationale with inline links and badges
+    qs('#rationalePre').innerHTML = renderRationaleWithCitations(data.rationale || '', data.references || []);
+
+    // also populate the references list on the page
+    qs('#refsList').innerHTML = renderReferencesList(data.references || []);
+
     // Show numbered references list under the rationale
     const refsList = qs('#refsList');  
     if (refsList) {
