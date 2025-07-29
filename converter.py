@@ -5,7 +5,7 @@ from dataclasses import dataclass, asdict
 from typing import Dict, List, Optional, Callable, Tuple
 
 __all__ = ["convert_to_json", "ParserError"]
-SCHEMA_VERSION = "1.6"
+SCHEMA_VERSION = "1.7"  # v1.7 + global centrifuge fallback
 
 class ParserError(ValueError):
     pass
@@ -91,12 +91,42 @@ _STIR_SPEED_RXS = [
     re.compile(r"\bset\s*stirr(?:er|ing)\s*(?:speed\s*(?:to|=)?)?\s*(?P<rpm>\d{2,4})\s*rpm\b", re.I),
 ]
 
-# Setup lines to dedupe globally (keep first occurrence)
+# --- time normalization ---
+def _norm_time(val: str, unit: Optional[str]) -> str:
+    v = val.strip()
+    u = (unit or "").lower()
+    if u in ("h","hr","hrs","hour","hours"): return f"{v} h"
+    if u in ("s","sec","secs","second","seconds"): return f"{v} s"
+    return f"{v} min"  # default minutes
+
+# Setup lines to dedupe globally
 _SETUP_DEDUP_RXS = [
     re.compile(r"^insert stir bar into vessel$", re.I),
     re.compile(r"^place vessel on magnetic stir plate$", re.I),
     re.compile(r"^turn on stir plate to target speed$", re.I),
 ]
+
+# Global fallbacks to pull rpm/time from the whole text (for centrifuge)
+_CENT_RPM_GLOBAL = re.compile(
+    r"centrifug\w*[^.]*?\bat\s*(?P<rpm>\d{3,5})\s*rpm", re.I
+)
+_CENT_TIME_GLOBAL = re.compile(
+    r"centrifug\w*[^.]*?\bfor\s*(?P<val>\d+(?:\.\d+)?)\s*"
+    r"(?P<u>min|mins|minutes|minute|h|hr|hrs|hour|hours|s|sec|secs|seconds)\b",
+    re.I
+)
+
+def _extract_centrifuge_params(text: str) -> tuple[Optional[int], Optional[str]]:
+    rpm = None; tstr = None
+    m = _CENT_RPM_GLOBAL.search(text)
+    if m:
+        try: rpm = int(m.group("rpm"))
+        except ValueError: pass
+    m = _CENT_TIME_GLOBAL.search(text)
+    if m:
+        tstr = _norm_time(m.group("val"), m.group("u"))
+    return rpm, tstr
+
 
 def _protocol_window(text: str) -> str:
     m = re.search(r"^\s*##\s*SynthesisProtocol\b.*", text, flags=re.I | re.M | re.S)
@@ -159,56 +189,94 @@ def _parse_reagent(line: str) -> Reagent:
 # ---------- expansion rules ----------
 Action = List[str]
 RuleFn = Callable[[re.Match], Action]
+
 ACTION_RULES: List[Tuple[re.Pattern, RuleFn]] = [
+    # Ultrasonic bath (must be before transfer)
+    (re.compile(r"\bultrasonic bath\b.*?\bfor\s*(?P<time>\d+(?:\.\d+)?)\s*(?P<tunit>min|mins|minutes|s|sec|secs|seconds)\b", re.I),
+     lambda m: ["place container in ultrasonic bath",
+                f"run sonication for {_norm_time(m.group('time'), m.group('tunit'))}"]),
+
+    # Stir
     (re.compile(r"\bstir(?:red|ring)?\b", re.I),
      lambda m: ["insert stir bar into vessel",
                 "place vessel on magnetic stir plate",
                 "turn on stir plate to target speed"]),
+
+    # Add X
     (re.compile(r"\badd(?:ed)?\s+(.*)", re.I),
      lambda m: [f"add {m.group(1).strip()} to vessel"]),
+
+    # Transfer … to …
     (re.compile(r"\btransfer(?:red)?\s+(.*)\s+to\s+(.*)", re.I),
      lambda m: [f"transfer {m.group(1).strip()} to {m.group(2).strip()}"]),
-    (re.compile(r"\bheat(?:ed)?\s+to\s+(\d+(?:\.\d+)?)\s*°?\s*C\b", re.I),
-     lambda m: [f"set heating device to {m.group(1)} °C",
+
+    # Heat to T for time
+    (re.compile(r"\bheat(?:ed)?\s+(?:the\s+)?(?:mixture|solution|suspension)\s*to\s*(?P<T>\d+(?:\.\d+)?)\s*°?\s*C(?:[^\.]*?)\bfor\s*(?P<tval>\d+(?:\.\d+)?)\s*(?P<tunit>min|mins|minutes|h|hr|hrs|hour|hours)\b", re.I),
+     lambda m: [f"set heating device to {m.group('T')} °C",
+                "monitor temperature until set point reached",
+                f"hold temperature at {m.group('T')} °C for {_norm_time(m.group('tval'), m.group('tunit'))}"]),
+
+    # Heat to T (no time)
+    (re.compile(r"\bheat(?:ed)?\s+to\s+(?P<T>\d+(?:\.\d+)?)\s*°?\s*C\b", re.I),
+     lambda m: [f"set heating device to {m.group('T')} °C",
                 "monitor temperature until set point reached"]),
-    (re.compile(r"\bmaintain(?:ed)?\s+at\s+(\d+(?:\.\.\d+)?)\s*°?\s*C\s+for\s+([\dhmsec\s]+)", re.I),
-     lambda m: [f"hold temperature at {m.group(1)} °C for {m.group(2).strip()}"]),
-    (re.compile(r"\bcool(?:ed)?\s+to\s+(\d+(?:\.\d+)?)\s*°?\s*C\b", re.I),
-     lambda m: [f"cool vessel to {m.group(1)} °C"]),
-    (re.compile(r"\bfilte?r(?:ed|ation)?\b", re.I),
-     lambda m: ["assemble filtration apparatus",
-                "pass mixture through filter",
-                "collect specified fraction (filtrate/solid)"]),
-    (re.compile(r"\bcentrifug(e|ed|ation)\b.*?(?P<rpm>\d+.*?rpm)?(?P<time>\d+.*?min)?", re.I),
+
+    # Maintain at T for time
+    (re.compile(r"\bmaintain(?:ed)?\s+at\s+(?P<T>\d+(?:\.\d+)?)\s*°?\s*C\s+for\s+(?P<tval>\d+(?:\.\d+)?)\s*(?P<tunit>min|mins|minutes|h|hr|hrs|hour|hours)\b", re.I),
+     lambda m: [f"hold temperature at {m.group('T')} °C for {_norm_time(m.group('tval'), m.group('tunit'))}"]),
+
+    # Cool to T °C
+    (re.compile(r"\bcool(?:ed)?\s+to\s+(?P<T>\d+(?:\.\d+)?)\s*°?\s*C\b", re.I),
+     lambda m: [f"cool vessel to {m.group('T')} °C"]),
+
+    # Centrifuge (captures rpm and time incl. minutes/hours/seconds)
+    (re.compile(
+        r"\bcentrifug(e|ed|ation)\b"
+        r".*?(?:at\s*(?P<rpm>\d{2,5})\s*rpm)?"
+        r"(?:.*?\bfor\s*(?P<tval>\d+(?:\.\d+)?)(?:\s*(?P<tunit>min|mins|minutes|h|hr|hrs|hour|hours|s|sec|secs|seconds))?)?",
+        re.I),
      lambda m: ["load tubes into centrifuge",
-                (f"set speed {m.group('rpm').strip()}" if m.group('rpm') else "set speed as specified"),
-                (f"run for {m.group('time').strip()}" if m.group('time') else "run for specified time"),
+                (f"set speed {m.group('rpm')} rpm" if m.group('rpm') else "set speed as specified"),
+                (f"run for {_norm_time(m.group('tval'), m.group('tunit'))}" if m.group('tval') else "run for specified time"),
                 "separate supernatant and pellet as specified"]),
+
+    # Purge with gas
     (re.compile(r"\b(purge|degass?|bubble)\s+(with\s+)?(n2|nitrogen|argon|ar)\b", re.I),
      lambda m: ["connect inert gas line to vessel",
                 "open gas flow to purge headspace",
                 "maintain flow for specified duration"]),
+
+    # Vacuum dry
     (re.compile(r"\b(dry|evaporate)\b.*\b(vacuum|vac)\b", re.I),
      lambda m: ["place sample in vacuum chamber",
                 "apply vacuum until solvent removed or mass constant"]),
+
+    # pH adjust
     (re.compile(r"\badjust\s+pH\s+to\s+(\d+(?:\.\d+)?)", re.I),
      lambda m: [f"measure solution pH",
                 f"add acid/base to reach pH {m.group(1)}",
                 "verify pH is stable"]),
+
+    # Sonication (generic)
     (re.compile(r"\bsonicat(e|ed|ion)\b", re.I),
      lambda m: ["place container in ultrasonic bath",
                 "run sonication for specified time / power"]),
+
+    # Wash
     (re.compile(r"\bwash(?:ed)?\s+with\s+(.*)", re.I),
      lambda m: [f"wash solid with {m.group(1).strip()}",
                 "discard washings or combine as specified"]),
 ]
-def _expand_procedure_line(line: str) -> Action:
+
+def _expand_procedure_line(line: str) -> List[str]:
     for rx, fn in ACTION_RULES:
         m = rx.search(line)
-        if m: return fn(m)
+        if m:
+            return fn(m)
     return [line]
 
 # ---------- robot-mode helpers ----------
+
 def _strip_reasoning_fragments(s: str) -> str:
     s = _STRIP_CIT_RX.sub("", s)
     s = re.sub(r"^\s*finally,\s*", "", s, flags=re.I)
@@ -216,28 +284,33 @@ def _strip_reasoning_fragments(s: str) -> str:
     s = _TRAIL_REASON_RX.sub("", s)
     s = re.sub(r"[:–—-]\s*(?=(because|since|so that|therefore|thus|hence)\b).*", "", s, flags=re.I)
     s = re.sub(r"\b(because|since|so that|therefore|thus|hence|rationale|justif(?:y|ication)|note:|ensuring).*$", "", s, flags=re.I)
-    s = re.sub(r"\.\s*to vessel\s*$", "", s, flags=re.I)   # kill trailing ". to vessel"
+    s = re.sub(r"\.\s*to vessel\s*$", "", s, flags=re.I)
     return s.strip()
+
 
 def _is_meta_line(s: str) -> bool:
     return bool(_META_RX.search(s))
 
+
 def _normalize_prepare_line(s: str) -> str:
     return re.sub(r"^\s*in a separate (container|vessel),\s*", "", s, flags=re.I).strip()
+
 
 def _normalize_dry_line(s: str) -> Optional[str]:
     m = re.search(r"\bdry\b.*?\bat\s*(\d+(?:\.\d+)?)\s*°?\s*C.*?\bfor\s*([^.;,\n]+)", s, flags=re.I)
     if not m:
         return None
     T = m.group(1); t = re.sub(r"\s+", " ", m.group(2)).strip()
-    t = t.replace("hours", "h").replace("hour", "h").replace("mins", "min").replace("minutes", "min")
+    t = (t.replace("hours", "h").replace("hour", "h")
+            .replace("mins", "min").replace("minutes", "min"))
     return f"dry sample in oven at {T} °C for {t}"
 
+
 def _cleanup_add_target(s: str) -> str:
-    # If it's an "add X ... to Y" line already, drop trailing "to vessel"
     if s.lower().startswith("add ") and " to vessel" in s.lower() and re.search(r"\bto\s+(?!vessel)\b", s, re.I):
         s = re.sub(r"\s+to vessel\s*$", "", s, flags=re.I)
     return s
+
 
 def _expand_prepare_solution(line: str) -> Optional[List[str]]:
     m = _PREPARE_SOLUTION_RX.search(line)
@@ -259,8 +332,8 @@ def _expand_prepare_solution(line: str) -> Optional[List[str]]:
         "stir until dissolved",
     ]
 
+
 def _expand_pH_adjust(line: str) -> Optional[List[str]]:
-    # If a line mentions NaOH and a pH target → split into atomic actions
     if re.search(r"\bnaoh\b", line, re.I) and (m := _PH_RX.search(line)):
         pH = m.group("val")
         core = re.sub(r"\s*while\s+maintain.*$", "", line, flags=re.I)
@@ -273,10 +346,12 @@ def _expand_pH_adjust(line: str) -> Optional[List[str]]:
         ]
     return None
 
+
 def _detect_vessel_type(s: str) -> Optional[str]:
     for rx, vtype in _VESSEL_PATTERNS:
         if rx.search(s): return vtype
     return None
+
 
 def _ensure_vessel(vessels: List[Dict[str, str]], desc: str) -> str:
     for v in vessels:
@@ -286,6 +361,7 @@ def _ensure_vessel(vessels: List[Dict[str, str]], desc: str) -> str:
     vtype = (desc.split()[-1] if desc.split() else "vessel")
     vessels.append({"id": vid, "type": vtype, "description": desc})
     return vid
+
 
 def _collect_vessels_from_hardware(hardware: List[str]) -> List[Dict[str, str]]:
     vessels: List[Dict[str, str]] = []
@@ -299,6 +375,7 @@ def _collect_vessels_from_hardware(hardware: List[str]) -> List[Dict[str, str]]:
         _ensure_vessel(vessels, "flask")  # default V1
     return vessels
 
+
 def _dedupe_adjacent(seq: List[str]) -> List[str]:
     out: List[str] = []
     last = None
@@ -307,6 +384,7 @@ def _dedupe_adjacent(seq: List[str]) -> List[str]:
             out.append(s)
             last = s
     return out
+
 
 def _global_dedupe_setup(seq: List[str]) -> List[str]:
     seen = [False] * len(_SETUP_DEDUP_RXS)
@@ -324,6 +402,7 @@ def _global_dedupe_setup(seq: List[str]) -> List[str]:
             out.append(s)
     return out
 
+
 def _extract_stir_speed(text: str) -> int:
     for rx in _STIR_SPEED_RXS:
         m = rx.search(text)
@@ -335,6 +414,7 @@ def _extract_stir_speed(text: str) -> int:
             except ValueError:
                 pass
     return 900  # default if not specified
+
 
 def _assign_targets(steps: List[str], vessels: List[Dict[str, str]]) -> List[Dict[str, str]]:
     if not vessels:
@@ -351,9 +431,12 @@ def _assign_targets(steps: List[str], vessels: List[Dict[str, str]]) -> List[Dic
             desc = re.sub(r"\s+", " ", desc).strip()
             current = _ensure_vessel(vessels, desc)
         if re.search(r"\bcentrifug", s, re.I):
+            # Ensure a tube exists; then use it
             tube = next((v for v in vessels if "tube" in v["description"].lower()), None)
-            if tube:
-                current = tube["id"]
+            if not tube:
+                vid = _ensure_vessel(vessels, "tube")
+                tube = next(v for v in vessels if v["id"] == vid)
+            current = tube["id"]
         out.append({"action": s, "target": current})
     return out
 
@@ -372,7 +455,7 @@ def convert_to_json(raw: str, robot: bool = False) -> Dict[str, object]:
 
     reagents = [_parse_reagent(l).asdict() for l in reagent_lines]
 
-    # Expand to low-level actions first (verb rules)
+    # Expand to low-level actions first
     expanded: List[str] = []
     for line in procedure_lines:
         expanded.extend(_expand_procedure_line(line))
@@ -387,13 +470,14 @@ def convert_to_json(raw: str, robot: bool = False) -> Dict[str, object]:
                 continue
             s = _normalize_prepare_line(s)
 
-            # Special cases first
+            # Specific normalizers / expanders
             if (dry := _normalize_dry_line(s)):
                 tmp.append(dry); continue
             if (ph := _expand_pH_adjust(s)):
                 tmp.extend(ph); continue
+            if (prep := _expand_prepare_solution(s)):
+                tmp.extend(prep); continue
 
-            # Generic cleaning
             s2 = _cleanup_add_target(_strip_reasoning_fragments(s))
             if s2:
                 tmp.append(s2.rstrip("."))
@@ -409,6 +493,19 @@ def convert_to_json(raw: str, robot: bool = False) -> Dict[str, object]:
                     f"set stirrer to {chosen_rpm} rpm", a, flags=re.I))
             for a in final_actions
         ]
+
+        # Fill centrifuge placeholders from global values, if present
+        rpm, ctime = _extract_centrifuge_params(raw)
+        if rpm or ctime:
+            new = []
+            for a in final_actions:
+                a2 = a
+                if rpm:
+                    a2 = re.sub(r"\bset speed as specified\b", f"set speed {rpm} rpm", a2, flags=re.I)
+                if ctime:
+                    a2 = re.sub(r"\brun for specified time\b", f"run for {ctime}", a2, flags=re.I)
+                new.append(a2)
+            final_actions = new
 
     structured = _assign_targets(final_actions if robot else expanded, vessels)
     vessel_map = {v["id"]: v["description"] for v in vessels}
@@ -430,7 +527,6 @@ def convert_to_json(raw: str, robot: bool = False) -> Dict[str, object]:
 
     if not (out["reagents"] or out["procedure"] or out.get("hardware")):
         raise ParserError("Could not recognize any sections or steps.")
-
     return out
 
 if __name__ == "__main__":
