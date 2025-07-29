@@ -1,5 +1,4 @@
 from __future__ import annotations
-
 import os, re, json, time, hashlib, pathlib
 from typing import List, Dict, Any, Tuple, Optional
 import requests
@@ -7,118 +6,79 @@ import requests
 CROSSREF_URL = "https://api.crossref.org/works"
 ARXIV_URL    = "http://export.arxiv.org/api/query"
 
-# --------------------------- Config via env ---------------------------
-# Override in Railway → Variables.
-CACHE_DIR        = os.getenv("SEARCH_CACHE_DIR", "/data/cache/search")
-CACHE_TTL_SEC    = int(os.getenv("SEARCH_CACHE_TTL", "86400"))  # 24h
-SEARCH_EXPAND    = os.getenv("SEARCH_EXPAND", "1") == "1"
-STRICT_TITLE_MAT = os.getenv("STRICT_TITLE_MATERIAL", "1") == "1"  # require a material token in the TITLE if materials were given
-STRICT_SIZE      = os.getenv("STRICT_SIZE", "0") == "1"            # require size mention in item when query had a size
-SIZE_TOL_FRAC    = float(os.getenv("SIZE_TOL_FRAC", "0.2"))        # ±20% default
-RERANK           = os.getenv("RERANK", "0") == "1"                 # optional cross-encoder rerank
-RERANK_MODEL     = os.getenv("RERANK_MODEL", "cross-encoder/ms-marco-MiniLM-L-6-v2")
+CACHE_DIR     = os.getenv("SEARCH_CACHE_DIR", "/tmp/search_cache")
+CACHE_TTL_SEC = int(os.getenv("SEARCH_CACHE_TTL", "86400"))
+SEARCH_EXPAND = os.getenv("SEARCH_EXPAND", "1") == "1"
+STRICT_TITLE_MATERIAL = os.getenv("STRICT_TITLE_MATERIAL", "1") == "1"
+STRICT_SIZE   = os.getenv("STRICT_SIZE", "0") == "1"
+SIZE_TOL_FRAC = float(os.getenv("SIZE_TOL_FRAC", "0.2"))
 
-# Journal whitelist boosts: "journal|venue substring": weight
-# Add/override via env JSON in JOURNAL_WHITELIST
-_DEFAULT_JOURNAL_WHITELIST = {
-    "ACS Nano": 2.0,
-    "Chem. Mater": 1.5,
-    "Chemistry of Materials": 1.5,
-    "J. Phys. Chem. C": 1.5,
-    "Nanoscale": 1.2,
-    "Langmuir": 1.2,
-    "Small": 1.2,
-    "CrystEngComm": 1.0,
-    "Nano Letters": 2.0,
-    "Advanced Materials": 2.0,
-    "Materials Chemistry": 1.0,
+DEFAULT_JOURNAL_BOOSTS = {
+    "ACS Nano": 2.0, "Nano Letters": 2.0, "Advanced Materials": 2.0,
+    "Chem. Mater": 1.5, "Chemistry of Materials": 1.5, "J. Phys. Chem. C": 1.5,
+    "Nanoscale": 1.2, "Langmuir": 1.2, "Small": 1.2, "CrystEngComm": 1.0,
 }
 try:
-    JOURNAL_WHITELIST: Dict[str, float] = json.loads(os.getenv("JOURNAL_WHITELIST", "")) or _DEFAULT_JOURNAL_WHITELIST
+    JOURNAL_BOOSTS = json.loads(os.getenv("JOURNAL_WHITELIST", "")) or DEFAULT_JOURNAL_BOOSTS
 except Exception:
-    JOURNAL_WHITELIST = _DEFAULT_JOURNAL_WHITELIST
+    JOURNAL_BOOSTS = DEFAULT_JOURNAL_BOOSTS
 
-# --------------------- Controlled vocabularies -----------------------
 MATERIAL_SYNONYMS = {
-    # Oxides (examples)
     "iron oxide": ["iron oxide", "magnetite", "fe3o4", "maghemite", "fe2o3"],
     "zinc oxide": ["zno", "zinc oxide"],
     "titanium dioxide": ["tio2", "titanium dioxide", "anatase", "rutile"],
     "silica": ["silica", "sio2", "stöber", "stober"],
     "nickel oxide": ["nio", "nickel oxide"],
     "cobalt oxide": ["coo", "co3o4", "cobalt oxide"],
-    "copper(i) oxide": ["cu2o", "cuprous oxide"],
-    "copper(ii) oxide": ["cuo", "cupric oxide"],
-    # Metals / chalcogenides / perovskites (examples)
     "gold": ["gold", "au"],
     "silver": ["silver", "ag"],
     "cadmium selenide": ["cdse", "cadmium selenide"],
     "lead sulfide": ["pbs", "lead sulfide"],
     "perovskite": ["perovskite", "mapbi3", "fapbi3", "cspbbr3", "cspbi3"],
-    "graphene": ["graphene", "graphite oxide", "go", "rgo", "reduced graphene oxide"],
+    "graphene": ["graphene", "graphite oxide", "go", "rgo"],
 }
 SHAPE_SYNONYMS = {
     "sphere": ["nanosphere", "nanospheres", "spherical"],
-    "rod": ["nanorod", "nanorods", "rod-like", "nanorod-like"],
+    "rod": ["nanorod", "nanorods", "rod-like"],
     "wire": ["nanowire", "nanowires"],
     "cube": ["nanocube", "nanocubes", "cubic"],
-    "sheet": ["nanosheet", "nanosheets", "2d nanosheet", "2d sheet"],
+    "sheet": ["nanosheet", "nanosheets", "2d sheet"],
     "tube": ["nanotube", "nanotubes"],
-    "flower": ["nanoflower", "nanoflowers"],
-    "star": ["nanostar", "nanostars"],
 }
-METHOD_TERMS = [
-    "co-precipitation", "coprecipitation", "solvothermal", "hydrothermal",
-    "hot injection", "thermal decomposition", "polyol", "microemulsion",
-    "reverse micelle", "seeded growth", "stober", "stöber", "sol-gel",
-]
-LIGAND_TERMS = [
-    "oleylamine", "oleic acid", "pvp", "ctab", "sds", "toab", "topo",
-    "trioctylphosphine", "citric acid", "pei", "dopamine",
-]
-SIZE_RX = re.compile(r"\\b(\\d{1,3})\\s*nm\\b", re.I)
+METHOD_TERMS = ["co-precipitation","coprecipitation","solvothermal","hydrothermal","hot injection","polyol","thermal decomposition","microemulsion","reverse micelle","seeded growth","stober","stöber","sol-gel"]
+LIGAND_TERMS = ["oleylamine","oleic acid","pvp","ctab","sds","toab","topo","trioctylphosphine","citric acid","pei","dopamine"]
+SIZE_RX = re.compile(r"\b(\d{1,3})\s*nm\b", re.I)
 
-# ----------------------------- Caching --------------------------------
 def _cache_key(url: str, params: Dict[str, Any]) -> str:
     s = url + "?" + "&".join(f"{k}={params[k]}" for k in sorted(params))
-    return hashlib.sha1(s.encode("utf-8")).hexdigest()
+    import hashlib; return hashlib.sha1(s.encode("utf-8")).hexdigest()
 
 def _cache_path(key: str) -> pathlib.Path:
-    root = pathlib.Path(CACHE_DIR)
-    root.mkdir(parents=True, exist_ok=True)
+    root = pathlib.Path(CACHE_DIR); root.mkdir(parents=True, exist_ok=True)
     return root / f"{key}.json"
 
 def _cache_get(url: str, params: Dict[str, Any]) -> Optional[Dict[str, Any]]:
-    key = _cache_key(url, params)
-    p = _cache_path(key)
+    key = _cache_key(url, params); p = _cache_path(key)
     if p.exists():
         try:
-            if time.time() - p.stat().st_mtime <= CACHE_TTL_SEC:
-                with p.open("r", encoding="utf-8") as f:
-                    return json.load(f)
+            if CACHE_TTL_SEC > 0 and time.time() - p.stat().st_mtime <= CACHE_TTL_SEC:
+                return json.loads(p.read_text("utf-8"))
         except Exception:
             return None
     return None
 
 def _cache_set(url: str, params: Dict[str, Any], data: Dict[str, Any]) -> None:
-    key = _cache_key(url, params)
-    p = _cache_path(key)
-    try:
-        with p.open("w", encoding="utf-8") as f:
-            json.dump(data, f)
-    except Exception:
-        pass
+    key = _cache_key(url, params); p = _cache_path(key)
+    try: p.write_text(json.dumps(data), encoding="utf-8")
+    except Exception: pass
 
-# --------------------------- Query parsing ----------------------------
 def parse_query_features(q: str) -> dict:
     q_low = q.lower()
     mats, shapes, methods, ligands = [], [], [], []
     for canon, syns in MATERIAL_SYNONYMS.items():
-        if any(s in q_low for s in syns + [canon]):
-            mats.append(canon)
+        if any(s in q_low for s in syns + [canon]): mats.append(canon)
     for canon, syns in SHAPE_SYNONYMS.items():
-        if any(s in q_low for s in syns + [canon]):
-            shapes.append(canon)
+        if any(s in q_low for s in syns + [canon]): shapes.append(canon)
     for t in METHOD_TERMS:
         if t in q_low: methods.append(t)
     for t in LIGAND_TERMS:
@@ -132,9 +92,8 @@ def parse_query_features(q: str) -> dict:
 
 def _or_group(tokens: List[str]) -> str:
     toks = [t for t in sorted(set(tokens)) if t]
-    if not toks: return ""
     toks = [f'"{t}"' if " " in t and not t.startswith('"') else t for t in toks]
-    return "(" + " OR ".join(toks) + ")"
+    return "(" + " OR ".join(toks) + ")" if toks else ""
 
 def build_expanded_query(original_q: str, feats: dict) -> str:
     parts = [original_q.strip()]
@@ -148,42 +107,26 @@ def build_expanded_query(original_q: str, feats: dict) -> str:
         for s in feats["shapes"]:
             shape_tokens += SHAPE_SYNONYMS.get(s, [s])
         parts.append(_or_group(shape_tokens))
-    if feats["methods"]:
-        parts.append(_or_group(feats["methods"]))
-    if feats["ligands"]:
-        parts.append(_or_group(feats["ligands"]))
-    qx = " ".join(p for p in parts if p).strip()
-    return qx or original_q
+    if feats["methods"]: parts.append(_or_group(feats["methods"]))
+    if feats["ligands"]: parts.append(_or_group(feats["ligands"]))
+    return " ".join(p for p in parts if p).strip() or original_q
 
-# ------------------------------- Sources ------------------------------
 def _norm_crossref_item(x: Dict[str, Any]) -> Dict[str, Any]:
     doi = (x.get("DOI") or "").lower()
     title = " ".join(x.get("title") or [])[:500]
     yr = None
-    try:
-        yr = int((x.get("issued", {}).get("date-parts") or [[None]])[0][0])
-    except Exception:
-        pass
+    try: yr = int((x.get("issued", {}).get("date-parts") or [[None]])[0][0])
+    except Exception: pass
     url = x.get("URL") or (f"https://doi.org/{doi}" if doi else None)
     venue = ""
-    if x.get("container-title"):
-        venue = x.get("container-title", [""])[0] or ""
+    if x.get("container-title"): venue = x.get("container-title", [""])[0] or ""
     publisher = x.get("publisher") or ""
     venue_str = " • ".join(v for v in [venue, publisher] if v)
-    return {
-        "title": title,
-        "year": yr,
-        "venue": venue_str,
-        "source": "Crossref",
-        "doi": doi or None,
-        "url": url,
-        "abstract": "",
-    }
+    return {"title": title, "year": yr, "venue": venue_str, "source": "Crossref", "doi": doi or None, "url": url, "abstract": ""}
 
 def _request_with_cache(url: str, params: Dict[str, Any]) -> Dict[str, Any]:
     cached = _cache_get(url, params)
-    if cached is not None:
-        return cached
+    if cached is not None: return cached
     r = requests.get(url, params=params, timeout=25)
     r.raise_for_status()
     data = r.json() if "crossref" in url else {"text": r.text}
@@ -191,13 +134,7 @@ def _request_with_cache(url: str, params: Dict[str, Any]) -> Dict[str, Any]:
     return data
 
 def _search_crossref(q: str, rows: int = 25) -> List[Dict[str, Any]]:
-    params = {
-        "query": q,
-        "filter": "type:journal-article,from-pub-date:2005-01-01",
-        "rows": rows,
-        "select": "title,DOI,issued,container-title,publisher,URL",
-        "sort": "relevance"
-    }
+    params = {"query": q, "filter": "type:journal-article,from-pub-date:2005-01-01", "rows": rows, "select": "title,DOI,issued,container-title,publisher,URL", "sort": "relevance"}
     data = _request_with_cache(CROSSREF_URL, params)
     items = (data.get("message", {}).get("items") or [])
     return [_norm_crossref_item(x) for x in items]
@@ -212,27 +149,22 @@ def _search_arxiv(q: str, rows: int = 16) -> List[Dict[str, Any]]:
         def _g(tag):
             s = f"<{tag}>"; e = f"</{tag}>"
             return entry.split(s,1)[1].split(e,1)[0] if s in entry and e in entry else ""
-        title = re.sub(r"\\s+", " ", _g("title")).strip()
+        title = re.sub(r"\s+", " ", _g("title")).strip()
         link  = ""
         for p in entry.split("<link"):
             if 'rel="alternate"' in p and 'href="' in p:
                 link = p.split('href="',1)[1].split('"',1)[0]
-        summary = re.sub(r"\\s+", " ", _g("summary")).strip()
-        yearm  = re.search(r"<published>(\\d{4})-", entry)
+        summary = re.sub(r"\s+", " ", _g("summary")).strip()
+        yearm  = re.search(r"<published>(\d{4})-", entry)
         yr     = int(yearm.group(1)) if yearm else None
-        out.append({
-            "title": title, "year": yr, "venue": "arXiv", "source": "arXiv",
-            "doi": None, "url": link or None, "abstract": summary
-        })
+        out.append({"title": title, "year": yr, "venue": "arXiv", "source": "arXiv", "doi": None, "url": link or None, "abstract": summary})
     return out
 
-# ------------------------------- Scoring --------------------------------
 def _journal_boost(venue: str) -> float:
     v = venue or ""
     boost = 0.0
-    for name, w in JOURNAL_WHITELIST.items():
-        if name.lower() in v.lower():
-            boost += float(w)
+    for name, w in JOURNAL_BOOSTS.items():
+        if name.lower() in v.lower(): boost += float(w)
     return boost
 
 def _score_item(q: str, feats: dict, it: Dict[str, Any]) -> float:
@@ -240,44 +172,25 @@ def _score_item(q: str, feats: dict, it: Dict[str, Any]) -> float:
     abstr = (it.get("abstract") or "").lower()
     venue = (it.get("venue") or "")
     text  = f"{title}. {abstr}"
-
     score = 0.0
 
-    # 0) Hard gate: if materials were specified, require at least one material token IN THE TITLE
-    if feats["materials"] and STRICT_TITLE_MAT:
-        title_ok = False
-        for m in feats["materials"]:
-            for tok in MATERIAL_SYNONYMS.get(m, [m]):
-                if tok in title:
-                    title_ok = True; break
-            if title_ok: break
-        if not title_ok:
-            return -1e9  # drop
+    if feats["materials"] and STRICT_TITLE_MATERIAL:
+        if not any(tok in title for m in feats["materials"] for tok in MATERIAL_SYNONYMS.get(m, [m])):
+            return -1e9
 
-    # 1) Materials (title > abstract)
-    if feats["materials"]:
-        m_boost = 0
-        for m in feats["materials"]:
-            for tok in MATERIAL_SYNONYMS.get(m, [m]):
-                if tok in title: m_boost += 3
-                elif tok in abstr: m_boost += 1.5
-        score += m_boost
+    for m in feats["materials"]:
+        for tok in MATERIAL_SYNONYMS.get(m, [m]):
+            if tok in title: score += 3
+            elif tok in abstr: score += 1.5
 
-    # 2) Shapes
-    if feats["shapes"]:
-        s_boost = 0
-        for s in feats["shapes"]:
-            for tok in SHAPE_SYNONYMS.get(s, [s]):
-                if tok in title: s_boost += 2.5
-                elif tok in abstr: s_boost += 1.0
-        score += s_boost
+    for s in feats["shapes"]:
+        for tok in SHAPE_SYNONYMS.get(s, [s]):
+            if tok in title: score += 2.5
+            elif tok in abstr: score += 1.0
 
-    # 3) Size proximity; strict size gate if enabled
+    found = [int(m.group(1)) for m in SIZE_RX.finditer(text)]
     if feats["sizes_nm"]:
-        found = [int(m.group(1)) for m in SIZE_RX.finditer(text)]
-        # hard gate: any size mention near any target
-        if STRICT_SIZE and not found:
-            return -1e9  # drop if query had size but item has none
+        if STRICT_SIZE and not found: return -1e9
         for target in feats["sizes_nm"]:
             best = 0.0
             for nm in found:
@@ -286,65 +199,40 @@ def _score_item(q: str, feats: dict, it: Dict[str, Any]) -> float:
                     best = max(best, 2.0 + (1.0 if nm == target else 0.0))
             score += best
 
-    # 4) Methods / ligands
     for t in feats["methods"]:
         if t in title: score += 1.5
         elif t in abstr: score += 0.8
     for t in feats["ligands"]:
         if t in text: score += 0.5
 
-    # 5) Journal/venue boost
     score += _journal_boost(venue)
 
-    # 6) Recency (soft)
     year = it.get("year")
     if isinstance(year, int):
         score += min(3.0, max(0.0, 0.1 * (year - 2010)))
 
     return score
 
-# ------------------------------- Public API -------------------------------
 def basic_search(q: str, n: int = 6) -> List[Dict[str, Any]]:
     feats = parse_query_features(q)
     qx = build_expanded_query(q, feats) if SEARCH_EXPAND else q
 
     items: List[Dict[str, Any]] = []
-    # Crossref
-    try:
-        items.extend(_search_crossref(qx, rows=max(24, n*4)))
-    except Exception:
-        pass
-    # arXiv
-    try:
-        items.extend(_search_arxiv(qx, rows=16))
-    except Exception:
-        pass
+    try: items.extend(_search_crossref(qx, rows=max(24, n*4)))
+    except Exception: pass
+    try: items.extend(_search_arxiv(qx, rows=16))
+    except Exception: pass
 
-    # Score & sort
-    scored: List[Tuple[float, Dict[str, Any]]] = []
+    scored = []
     for it in items:
         s = _score_item(q, feats, it)
-        if s <= -1e8:
-            continue
+        if s <= -1e8: continue
         scored.append((s, it))
     scored.sort(key=lambda t: (t[0], t[1].get("year") or 0), reverse=True)
-    results = [it for _, it in scored[: n * 2]]  # buffer for rerank
-
-    # OPTIONAL semantic rerank
-    if RERANK:
-        try:
-            from sentence_transformers import CrossEncoder
-            model = CrossEncoder(RERANK_MODEL)
-            pairs = [(q, f"{r['title']} {r.get('abstract','')}") for r in results]
-            scores = model.predict(pairs)
-            results = [r for _, r in sorted(zip(scores, results), key=lambda x: x[0], reverse=True)]
-        except Exception:
-            pass
-
+    results = [it for _, it in scored[: n * 2]]
     return results[:n]
 
 if __name__ == "__main__":
-    # quick manual test
     import sys
     query = " ".join(sys.argv[1:]) or "50 nm iron oxide nanospheres coprecipitation"
     print(json.dumps(basic_search(query, n=6), indent=2))

@@ -1,4 +1,4 @@
-import os, io, json, threading, uuid
+import os, io, json, threading, traceback
 from datetime import datetime
 from pathlib import Path
 
@@ -8,47 +8,32 @@ from PyPDF2 import PdfReader
 from werkzeug.utils import secure_filename
 from flask import Flask, request, jsonify, abort, render_template, send_file
 from jinja2 import TemplateNotFound
-import traceback
 
-# === project-local imports ========================
-import vector_store as vs                         
-from converter import convert_to_json, ParserError  
-from search import basic_search  
-# ==========================================================================
+# Local imports
+import vector_store as vs
+from converter import convert_to_json, ParserError
+from search import basic_search
 
-# ---- paths & app ----------------------------------------------------------
-load_dotenv()
-
+# App + folders
 BASE_DIR = Path(__file__).resolve().parent
 DATA_DIR = Path(os.getenv("DATA_DIR", BASE_DIR / "data"))
 UPLOADS_DIR = DATA_DIR / "uploads"
 UPLOADS_DIR.mkdir(parents=True, exist_ok=True)
 
-app = Flask(
-    __name__,
-    template_folder=str(BASE_DIR / "templates"),
-    static_folder=str(BASE_DIR / "static"),
-)
-
-# Limit request body size (matches 413 handler below)
+app = Flask(__name__,
+            template_folder=str(BASE_DIR / "templates"),
+            static_folder=str(BASE_DIR / "static"))
 app.config["MAX_CONTENT_LENGTH"] = 100 * 1024 * 1024  # 100 MB
 
-# OpenAI client
+# OpenAI
+load_dotenv()
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
-# ---- small helpers --------------------------------------------------------
-def _extract_text(pdf_bytes: bytes) -> str:
-    reader = PdfReader(io.BytesIO(pdf_bytes))
-    return "\n".join(page.extract_text() or "" for page in reader.pages)
-
-# In‑memory job registry 
+# Job registry
 JOBS = {}  # {job_id: {"status": "...", "progress": int, "error": str, "filename": str}}
-
-def _set_job(jid, **kw):
-    JOBS.setdefault(jid, {}).update(kw)
+def _set_job(jid, **kw): JOBS.setdefault(jid, {}).update(kw)
 
 def _process_pdf_job(jid: str, path: Path, filename: str):
-    """Background thread that extracts text from a PDF and adds it to the vector store."""
     try:
         reader = PdfReader(str(path))
         n = len(reader.pages) or 1
@@ -64,7 +49,6 @@ def _process_pdf_job(jid: str, path: Path, filename: str):
     except Exception as e:
         _set_job(jid, status="error", error=str(e))
 
-# ---- routes: health & home ------------------------------------------------
 @app.get("/health")
 def health():
     return "ok", 200
@@ -76,31 +60,32 @@ def home():
     except TemplateNotFound:
         return "<h1>NanoChemGPT is up</h1><p>templates/index.html is missing.</p>", 200
 
-# ---- routes: upload + status (non‑blocking) --------------------------------
 @app.post("/upload")
 def upload():
     f = request.files.get("file")
     if not f or f.filename == "":
         abort(400, "No file uploaded.")
-
     fname = secure_filename(f.filename)
     path = UPLOADS_DIR / fname
     f.save(path)
 
-    jid = uuid.uuid4().hex
+    jid = os.urandom(8).hex()
     _set_job(jid, status="processing", progress=0, filename=fname)
 
-    lower = fname.lower()
-    if lower.endswith(".pdf"):
-        threading.Thread(target=_process_pdf_job, args=(jid, path, fname), daemon=True).start()
-    elif lower.endswith(".json"):
-        raw = path.read_text(encoding="utf-8", errors="ignore")
-        vs.add_to_store(raw, tag=f"upload:{fname}")
-        _set_job(jid, status="done", progress=100)
-    else:
-        txt = path.read_text(encoding="utf-8", errors="ignore")
-        vs.add_to_store(txt, tag=f"upload:{fname}")
-        _set_job(jid, status="done", progress=100)
+    try:
+        lower = fname.lower()
+        if lower.endswith(".pdf"):
+            threading.Thread(target=_process_pdf_job, args=(jid, path, fname), daemon=True).start()
+        elif lower.endswith(".json"):
+            raw = path.read_text(encoding="utf-8", errors="ignore")
+            vs.add_to_store(raw, tag=f"upload:{fname}")
+            _set_job(jid, status="done", progress=100)
+        else:
+            txt = path.read_text(encoding="utf-8", errors="ignore")
+            vs.add_to_store(txt, tag=f"upload:{fname}")
+            _set_job(jid, status="done", progress=100)
+    except Exception as e:
+        _set_job(jid, status="error", error=str(e))
 
     return jsonify({"ok": True, "job_id": jid, "filename": fname})
 
@@ -111,7 +96,6 @@ def status(jid):
         abort(404, "unknown job id")
     return jsonify(j)
 
-# --- routes: search --------------------------------------------------------
 @app.post("/search")
 def search_route():
     payload = request.get_json(silent=True) or {}
@@ -122,9 +106,6 @@ def search_route():
     refs = basic_search(q, n)
     return jsonify({"results": refs})
 
-# ---- routes: main Q&A -----------------------------------------------------
-from search import basic_search
-
 @app.post("/ask")
 def ask():
     try:
@@ -133,29 +114,26 @@ def ask():
         if not q:
             abort(400, "No question.")
 
-        # 1) Vector context
         try:
             context = vs.search(q, k=4)
         except Exception as e:
-            print("[/ask] vs.search error:", e)
-            context = ""
+            print("[/ask] vs.search error:", e); context = ""
 
-        # 2) References (never break /ask if search has trouble)
         refs = []
         try:
             refs = basic_search(q, n=6) or []
-            print(f"[/ask] search refs: {len(refs)}")
         except Exception as e:
-            print("[/ask] basic_search error:", e)
-            traceback.print_exc()
-            refs = []
+            print("[/ask] basic_search error:", e); refs = []
 
-        # 3) Build prompt (with numbered refs)
-        bib = "\n".join(
-            f"[{i+1}] {r.get('title','(no title)')} "
-            f"({r.get('year','')}) — {r.get('url') or ('https://doi.org/'+r['doi'] if r.get('doi') else '')}"
+        def _ref_url(r):
+            if r.get("url"): return r["url"]
+            if r.get("doi"): return f"https://doi.org/{r['doi']}"
+            return ""
+        refs_prompt = "\n".join(
+            f"[{i+1}] {(r.get('title') or '(no title)')} ({r.get('year') or ''}) — {_ref_url(r)}"
             for i, r in enumerate(refs)
         )
+
         prompt = (
         "You are NanoChemGPT, an AI assistant that proposes nanomaterial syntheses.\n"
         "Use the provided context unless general chemistry knowledge is required.\n"
@@ -178,24 +156,15 @@ def ask():
         "- Use imperative, atomic steps.\n"
         "- No explanatory prose inside steps.\n"
         "- Put explanatory sentences only in the ```reason block, with citations.\n"
-        f"Context:\n{context}\n\n"
-        f"Retrieved sources:\n{bib}\n"
-        "```"
-    )
+            f"\n\nCONTEXT:\n{context}\n\nREFERENCES:\n{refs_prompt}\n\nUser question: {q}"
+        )
 
-        # 4) Call the model
-        try:
-            raw = client.chat.completions.create(
-                model="gpt-4o-mini",
-                messages=[{"role": "user", "content": prompt}],
-                temperature=0.2,
-            ).choices[0].message.content
-        except Exception as e:
-            print("[/ask] OpenAI error:", e)
-            traceback.print_exc()
-            abort(502, f"Model call failed: {e}")
+        raw = client.chat.completions.create(
+            model="gpt-4o-mini",
+            messages=[{"role": "user", "content": prompt}],
+            temperature=0.2,
+        ).choices[0].message.content
 
-        # 5) Split answer/rationale
         if "```reason" in raw:
             answer, rest = raw.split("```reason", 1)
             rationale = rest.split("```", 1)[0].strip()
@@ -203,29 +172,24 @@ def ask():
             answer, rationale = raw, ""
 
         return jsonify({"answer": answer.strip(), "rationale": rationale, "references": refs})
-
     except Exception as e:
-        # Never return a generic 500; include a short helpful message
         print("[/ask] Unhandled error:", e)
         traceback.print_exc()
         return jsonify({"error": f"/ask failed: {e}"}), 500
 
-# ---- routes: JSON parse ---------------------------------------------------
 @app.post("/parse")
 def parse_route():
     payload = request.get_json(silent=True) or {}
     text = (payload.get("text") or "").strip()
     if not text:
         abort(400, "JSON must contain non‑empty 'text'.")
-    robot = bool(payload.get("robot"))  # <- read flag from client
+    robot = bool(payload.get("robot"))
     try:
         parsed = convert_to_json(text, robot=robot)
     except ParserError as e:
         abort(422, str(e))
     return jsonify(parsed)
 
-
-# ---- routes: save answer/rationale to .txt -------------------------------
 @app.post("/save_txt")
 def save_txt():
     data = request.get_json(silent=True) or {}
@@ -233,22 +197,19 @@ def save_txt():
     question = (data.get("question") or "").strip()
     if not answer:
         abort(400, "answer is empty")
-
     buf = io.BytesIO(f"Q: {question}\n\nA:\n{answer}\n".encode())
     buf.seek(0)
     fname = f"chatau_{datetime.utcnow():%Y%m%d_%H%M%S}.txt"
     return send_file(buf, mimetype="text/plain", as_attachment=True, download_name=fname)
 
-# ---- routes: clear uploaded vectors --------------------------------------
 @app.post("/clear_uploads")
 def clear_uploads_route():
     try:
         vs.clear_uploads()
-    except AttributeError:
-        abort(501, "clear_uploads() not implemented in vector_store.")
+    except Exception as e:
+        print("clear_uploads error:", e)
     return {"status": "uploads cleared"}
 
-# ---- error handlers -------------------------------------------------------
 @app.errorhandler(400)
 @app.errorhandler(422)
 @app.errorhandler(500)
@@ -259,6 +220,5 @@ def handle_err(e):
 def too_large(e):
     return jsonify(error="File bigger than 100 MB — compress or split it."), 413
 
-# ---- dev entry ------------------------------------------------------------
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=int(os.getenv("PORT", 5000)), debug=bool(os.getenv("DEBUG")))
