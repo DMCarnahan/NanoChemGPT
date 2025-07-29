@@ -126,20 +126,36 @@ from search import basic_search
 
 @app.post("/ask")
 def ask():
-    q = request.json.get("question", "").strip()
-    if not q:
-        abort(400, "No question.")
+    try:
+        payload = request.get_json(silent=True) or {}
+        q = (payload.get("question") or "").strip()
+        if not q:
+            abort(400, "No question.")
 
-    # fetch context 
-    context = vs.search(q, k=4)
+        # 1) Vector context
+        try:
+            context = vs.search(q, k=4)
+        except Exception as e:
+            print("[/ask] vs.search error:", e)
+            context = ""
 
-    # also fetch refs for citations
-    refs = basic_search(q, n=6)
-    # render a numbered bibliography block for the prompt
-    bib = "\n".join(f"[{i+1}] {r['title']} ({r.get('year','')}) — {r.get('url') or ('https://doi.org/'+r['doi'] if r.get('doi') else '')}"
-                    for i, r in enumerate(refs))
+        # 2) References (never break /ask if search has trouble)
+        refs = []
+        try:
+            refs = basic_search(q, n=6) or []
+            print(f"[/ask] search refs: {len(refs)}")
+        except Exception as e:
+            print("[/ask] basic_search error:", e)
+            traceback.print_exc()
+            refs = []
 
-    prompt = (
+        # 3) Build prompt (with numbered refs)
+        bib = "\n".join(
+            f"[{i+1}] {r.get('title','(no title)')} "
+            f"({r.get('year','')}) — {r.get('url') or ('https://doi.org/'+r['doi'] if r.get('doi') else '')}"
+            for i, r in enumerate(refs)
+        )
+        prompt = (
         "You are NanoChemGPT, an AI assistant that proposes nanomaterial syntheses.\n"
         "Use the provided context unless general chemistry knowledge is required.\n"
         "Provide concrete numerical parameters on the same volume scale as the paper.\n\n"
@@ -166,19 +182,32 @@ def ask():
         "```"
     )
 
-    raw = client.chat.completions.create(
-        model="gpt-4o-mini",
-        messages=[{"role": "user", "content": prompt}],
-        temperature=0.2,
-    ).choices[0].message.content
+        # 4) Call the model
+        try:
+            raw = client.chat.completions.create(
+                model="gpt-4o-mini",
+                messages=[{"role": "user", "content": prompt}],
+                temperature=0.2,
+            ).choices[0].message.content
+        except Exception as e:
+            print("[/ask] OpenAI error:", e)
+            traceback.print_exc()
+            abort(502, f"Model call failed: {e}")
 
-    if "```reason" in raw:
-        answer, rest = raw.split("```reason", 1)
-        rationale = rest.split("```", 1)[0].strip()
-    else:
-        answer, rationale = raw, ""
+        # 5) Split answer/rationale
+        if "```reason" in raw:
+            answer, rest = raw.split("```reason", 1)
+            rationale = rest.split("```", 1)[0].strip()
+        else:
+            answer, rationale = raw, ""
 
-    return {"answer": answer.strip(), "rationale": rationale, "references": refs}
+        return jsonify({"answer": answer.strip(), "rationale": rationale, "references": refs})
+
+    except Exception as e:
+        # Never return a generic 500; include a short helpful message
+        print("[/ask] Unhandled error:", e)
+        traceback.print_exc()
+        return jsonify({"error": f"/ask failed: {e}"}), 500
 
 # ---- routes: JSON parse ---------------------------------------------------
 @app.post("/parse")
