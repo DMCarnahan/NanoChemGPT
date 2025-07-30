@@ -108,7 +108,7 @@ function updateSourcesUsed(data) {
   if (s2) s2.textContent = (v2 ? v2 : '(empty)').slice(0, 4000);
   if (s3) s3.textContent = (v3 ? v3 : '(empty)').slice(0, 4000);
 
-  if (panel && (v1 || v2 || v3)) panel.open = true; // auto-open when there is content
+  if (panel && (v1 || v2 || v3)) panel.open = true;
 }
 
 // ------- Upload flow -------

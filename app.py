@@ -148,8 +148,6 @@ def fetch_db_context(q: str, limit: int = DB_CTX_LIMIT) -> str:
 def fetch_parsed_context(q: str, limit: int = 2) -> str:
     try:
         db = get_db()
-
-        # Prefer $text when a text index exists
         try:
             cur = db.parsed.find({"$text": {"$search": q}})
         except Exception as e:
@@ -160,7 +158,6 @@ def fetch_parsed_context(q: str, limit: int = 2) -> str:
                     {"raw_text": {"$regex": q, "$options": "i"}},
                 ]
             })
-
         items = list(cur.sort("created_at", -1).limit(limit))
     except Exception as e:
         print("[parsed_ctx] query failed:", e)
@@ -411,8 +408,7 @@ def parse_route():
     if not text:
         abort(400, "JSON must contain non‑empty 'text'.")
     robot = bool(payload.get("robot"))
-    question = (payload.get("question") or "").strip()
-    db.parsed.insert_one({"question": question, "raw_text": text, "parsed": parsed, "robot": robot, "created_at": datetime.utcnow()})
+    question = (payload.get("question") or "").strip()  # <— NEW
 
     try:
         parsed = convert_to_json(text, robot=robot)
@@ -425,7 +421,7 @@ def parse_route():
         db.parsed.insert_one({
             "created_at": datetime.utcnow(),
             "robot": robot,
-            "question": question,   # <-- store question
+            "question": question,      # <— store question
             "raw_text": text,
             "parsed": parsed
         })
