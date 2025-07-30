@@ -95,9 +95,10 @@ function showRefs(refs) {
 
 // ------- Sources-used viewer -------
 function updateSourcesUsed(data) {
-  const s1 = qs('#srcCtxVs');
-  const s2 = qs('#srcCtxParsed');
-  const s3 = qs('#srcCtxDb');
+  const s1 = document.getElementById('srcCtxVs');
+  const s2 = document.getElementById('srcCtxParsed');
+  const s3 = document.getElementById('srcCtxDb');
+  const panel = document.getElementById('sourcesPanel');
 
   const v1 = (data.ctx_vs || data.ctxVS || data.ctx_uploads || '').trim();
   const v2 = (data.ctx_parsed || '').trim();
@@ -106,6 +107,8 @@ function updateSourcesUsed(data) {
   if (s1) s1.textContent = (v1 ? v1 : '(empty)').slice(0, 4000);
   if (s2) s2.textContent = (v2 ? v2 : '(empty)').slice(0, 4000);
   if (s3) s3.textContent = (v3 ? v3 : '(empty)').slice(0, 4000);
+
+  if (panel && (v1 || v2 || v3)) panel.open = true; // auto-open when there is content
 }
 
 // ------- Upload flow -------
@@ -211,6 +214,21 @@ async function askQuestion() {
     btn.disabled = false;
     btn.querySelector('.spinner')?.classList.add('hidden');
   }
+    
+    if ((!data.ctx_vs && !data.ctx_parsed && !data.ctx_db) && data.qa_id) {
+      try {
+        const r2 = await fetch(`/api/history/${data.qa_id}`, { cache: 'no-store' });
+        if (r2.ok) {
+          const doc = await r2.json();
+          updateSourcesUsed({
+            ctx_vs: doc.ctx_vs || '',
+            ctx_parsed: doc.ctx_parsed || '',
+            ctx_db: doc.ctx_db || ''
+          });
+        }
+      } catch {}
+    }
+
 }
 
 // ------- Download helpers -------
@@ -266,8 +284,9 @@ async function parseAnswer() {
     const r = await fetch('/parse', {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ text, robot })
+      body: JSON.stringify({ text, robot, question: lastQuestion || '' })  
     });
+
 
     const raw = await r.text();
 

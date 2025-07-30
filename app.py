@@ -154,11 +154,17 @@ def fetch_db_context(q: str, limit: int = DB_CTX_LIMIT) -> str:
     return "\n\n---\n\n".join(blobs)
 
 def fetch_parsed_context(q: str, limit: int = 2) -> str:
-    """Return succinct summaries built from parsed protocols in db.parsed."""
     try:
         db = get_db()
-        cur = db.parsed.find({"raw_text": {"$regex": q, "$options": "i"}}).sort("created_at", -1).limit(limit)
-        items = list(cur)
+        # Prefer text index; fallback to regex
+        try:
+            cur = db.parsed.find({"$text": {"$search": q}})
+        except Exception:
+            cur = db.parsed.find({"$or": [
+                {"question": {"$regex": q, "$options": "i"}},
+                {"raw_text": {"$regex": q, "$options": "i"}},
+            ]})
+        items = list(cur.sort("created_at", -1).limit(limit))
     except Exception as e:
         print("[parsed_ctx] query failed:", e)
         return ""
@@ -175,7 +181,7 @@ def fetch_parsed_context(q: str, limit: int = 2) -> str:
         if proc: parts.append(f"Procedure: {proc}")
         if parts:
             pieces.append(" • ".join(parts))
-    return "\n\n".join(pieces)
+    return "\n".join(pieces)
 
 # ---------------- Upload ----------------
 @app.post("/upload")
@@ -408,21 +414,26 @@ def parse_route():
     if not text:
         abort(400, "JSON must contain non‑empty 'text'.")
     robot = bool(payload.get("robot"))
+    question = (payload.get("question") or "").strip()  # <-- NEW
+
     try:
         parsed = convert_to_json(text, robot=robot)
     except ParserError as e:
         abort(422, str(e))
+
     # Save to Mongo
     try:
         db = get_db()
         db.parsed.insert_one({
             "created_at": datetime.utcnow(),
             "robot": robot,
+            "question": question,   # <-- store question
             "raw_text": text,
             "parsed": parsed
         })
     except Exception as e:
         print("[/parse] DB insert warn:", e)
+
     return jsonify(parsed)
 
 # ---------------- Save TXT ----------------
