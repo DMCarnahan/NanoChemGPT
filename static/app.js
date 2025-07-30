@@ -1,4 +1,6 @@
 const qs  = (s) => document.querySelector(s);
+const qsa = (s) => Array.from(document.querySelectorAll(s));
+
 function setStatus(ok){const el=qs('#healthStatus');if(!el)return;el.classList.remove('ok','err');el.classList.add(ok?'ok':'err');const t=el.querySelector('.status-txt');if(t)t.textContent=ok?'healthy':'unhealthy';}
 async function checkHealth(){try{const r=await fetch('/health',{cache:'no-store'});setStatus(r.ok);}catch{setStatus(false);}}
 function showAlert(id,kind,text){const el=qs(id);if(!el)return;el.classList.remove('hidden');el.className=`alert ${kind}`;el.textContent=text;}
@@ -10,6 +12,7 @@ function renderRationaleWithCitations(text,refs){let html=escapeHtml(text||'');h
 function renderReferencesList(refs){if(!Array.isArray(refs))return'';return refs.map((r,i)=>{const title=escapeHtml(r.title||'(no title)');const url=r.url||(r.doi?`https://doi.org/${r.doi}`:'#');const meta=[r.venue,r.year,r.source].filter(Boolean).join(' • ');const mh=meta?` <span class="muted">(${escapeHtml(meta)})</span>`:'';return `<li>[${i+1}] <a href="${url}" target="_blank" rel="noopener">${title}</a>${mh}</li>`;}).join('');}
 function showRefs(refs){const list=qs('#refsList');const sec=qs('#refsSection');if(!list||!sec)return; if(Array.isArray(refs)&&refs.length){list.innerHTML=renderReferencesList(refs);sec.classList.remove('hidden');}else{list.innerHTML='';sec.classList.add('hidden');}}
 
+// Upload flow
 async function uploadFile(file){const fd=new FormData();fd.append('file',file);let pct=10;const fake=setInterval(()=>{if(pct<85){pct+=5;setProgress(pct);}},150);try{const resp=await fetch('/upload',{method:'POST',body:fd});clearInterval(fake);if(!resp.ok){const txt=await resp.text();showAlert('#result','error',`Upload failed (${resp.status}): ${txt||'Unknown error'}`);return;}const data=await resp.json();showAlert('#result','success',`Uploaded: ${data.filename||file.name}`);if(data.job_id){for(;;){const r=await fetch(`/status/${data.job_id}`,{cache:'no-store'});if(!r.ok){showAlert('#result','error',`Status error: ${r.status}`);break;}const st=await r.json();if(typeof st.progress==='number') setProgress(st.progress);if(st.status==='done'){showAlert('#result','success',`Processed ${st.filename||''}`);break;}if(st.status==='error'){showAlert('#result','error',`Processing error: ${st.error||'unknown'}`);break;}await new Promise(res=>setTimeout(res,1000));}}else{setProgress(100);} }catch(err){clearInterval(fake);showAlert('#result','error',`Network error: ${err}`);}}
 
 let lastAnswer='';let lastQuestion='';
@@ -26,5 +29,115 @@ async function saveTxt(){if(!lastAnswer){showAlert('#askMsg','error','No answer 
 
 async function runSearch(){const q=(qs('#searchInput')?.value||'').trim();if(!q){showAlert('#searchMsg','error','Enter a search query.');return;}showAlert('#searchMsg','success','Searching…');try{const r=await fetch('/search',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({q,n:6})});const raw=await r.text();if(!r.ok){showAlert('#searchMsg','error',`Search failed (${r.status}): ${raw}`);return;}const data=JSON.parse(raw);const ol=qs('#searchResults');ol.innerHTML=(data.results||[]).map((it,i)=>{const title=escapeHtml(it.title||'(no title)');const url=it.url||(it.doi?`https://doi.org/${it.doi}`:'#');const meta=[it.venue,it.year,it.source].filter(Boolean).join(' • ');return `<li>[${i+1}] <a href="${url}" target="_blank" rel="noopener">${title}</a>`+(meta?` <span class="muted">(${escapeHtml(meta)})</span>`:'')+`</li>`;}).join('');showAlert('#searchMsg','success',`Found ${(data.results||[]).length} results.`);}catch(e){showAlert('#searchMsg','error',`Network/JS error: ${e}`);}}
 
-function wireUI(){checkHealth();setInterval(checkHealth,30000);const input=qs('#fileInput');const button=qs('#uploadBtn');input?.addEventListener('change',()=>{const f=input.files?.[0];const hint=qs('#fileHint');if(hint&&f)hint.textContent=`${f.name} • ${(f.size/1024/1024).toFixed(2)} MB`;});button?.addEventListener('click',async(e)=>{e.preventDefault();const f=input?.files?.[0];if(!f){showAlert('#result','error','Choose a file first.');return;}button.disabled=true;button.querySelector('.spinner')?.classList.remove('hidden');await uploadFile(f);button.disabled=false;button.querySelector('.spinner')?.classList.add('hidden');});qs('#askBtn')?.addEventListener('click',(e)=>{e.preventDefault();askQuestion();});qs('#parseBtn')?.addEventListener('click',(e)=>{e.preventDefault();parseAnswer();});qs('#saveTxtBtn')?.addEventListener('click',(e)=>{e.preventDefault();saveTxt();});qs('#searchBtn')?.addEventListener('click',(e)=>{e.preventDefault();runSearch();});}
-document.addEventListener('DOMContentLoaded',wireUI);
+// ---------- History (Q&A) ----------
+let histSkip = 0;
+const histLimit = 10;
+
+function renderHistItems(items, append=false){
+  const ol = qs('#histList'); if(!ol) return;
+  const html = (items||[]).map(d=>{
+    const dt = d.created_at ? new Date(d.created_at).toISOString().slice(0,19).replace('T',' ') : '';
+    const qx = (d.question || '').slice(0,120).replace(/\s+/g,' ');
+    return `<li><a href="#" data-hist-id="${d._id}">[${dt}] ${escapeHtml(qx)}</a></li>`;
+  }).join('');
+  if (append) ol.insertAdjacentHTML('beforeend', html);
+  else ol.innerHTML = html;
+}
+
+async function loadHistory(reset=false){
+  const msg = qs('#histMsg');
+  if (reset){ histSkip = 0; qs('#histList').innerHTML = ''; }
+  const query = (qs('#histQuery')?.value || '').trim();
+  const url = `/api/history?skip=${histSkip}&limit=${histLimit}` + (query ? `&q=${encodeURIComponent(query)}` : '');
+  try{
+    const r = await fetch(url, {cache:'no-store'});
+    if(!r.ok){ showAlert('#histMsg','error',`History error (${r.status})`); return; }
+    const data = await r.json();
+    renderHistItems(data.items, append=(histSkip>0));
+    if (data.items && data.items.length) histSkip += data.items.length;
+    showAlert('#histMsg','success',`Loaded ${data.items?.length||0} items.`);
+  }catch(e){
+    showAlert('#histMsg','error',`History load failed: ${e}`);
+  }
+}
+
+async function loadHistoryItem(id){
+  try{
+    const r = await fetch(`/api/history/${id}`, {cache:'no-store'});
+    if(!r.ok){ showAlert('#histMsg','error',`Open failed (${r.status})`); return; }
+    const d = await r.json();
+    // Fill UI
+    lastQuestion = d.question || '';
+    lastAnswer   = d.answer || '';
+    qs('#questionInput').value = d.question || '';
+    qs('#answerPre').textContent = lastAnswer || '(empty)';
+    qs('#rationalePre').innerHTML = renderRationaleWithCitations(d.rationale || '', d.references || []);
+    showRefs(d.references || []);
+    qs('#parseBtn').disabled = !lastAnswer;
+    qs('#saveTxtBtn').disabled = !lastAnswer;
+    showAlert('#askMsg','success','Loaded from history.');
+    window.scrollTo({top:0, behavior:'smooth'});
+  }catch(e){
+    showAlert('#histMsg','error',`Open failed: ${e}`);
+  }
+}
+
+// ---------- Upload Browser ----------
+async function loadUploads(){
+  const msg = qs('#uplMsg');
+  try{
+    const r = await fetch('/api/uploads', {cache:'no-store'});
+    if(!r.ok){ showAlert('#uplMsg','error',`Uploads error (${r.status})`); return; }
+    const data = await r.json();
+    const ol = qs('#uplList');
+    ol.innerHTML = (data.items||[]).map((u,i)=>{
+      const ts  = u.indexed_at || u.ts || '';
+      const dt  = ts ? new Date(ts).toISOString().slice(0,19).replace('T',' ') : '';
+      const info = [u.status, u.kind, (u.n_pages?`${u.n_pages} pp`:'')].filter(Boolean).join(' • ');
+      return `<li>${escapeHtml(u.filename||'(unknown)')} <span class="muted">— ${escapeHtml(info)} ${dt?` • ${dt}`:''}</span></li>`;
+    }).join('');
+    showAlert('#uplMsg','success',`Loaded ${data.items?.length||0} uploads.`);
+  }catch(e){
+    showAlert('#uplMsg','error',`Uploads load failed: ${e}`);
+  }
+}
+
+// Wire UI
+function wireUI(){
+  checkHealth(); setInterval(checkHealth,30000);
+
+  const input=qs('#fileInput'); const button=qs('#uploadBtn');
+  input?.addEventListener('change',()=>{
+    const f=input.files?.[0]; const hint=qs('#fileHint');
+    if(hint&&f) hint.textContent = `${f.name} • ${(f.size/1024/1024).toFixed(2)} MB`;
+  });
+  button?.addEventListener('click', async (e)=>{
+    e.preventDefault(); const f=input?.files?.[0];
+    if(!f){ showAlert('#result','error','Choose a file first.'); return; }
+    button.disabled=true; button.querySelector('.spinner')?.classList.remove('hidden');
+    await uploadFile(f);
+    button.disabled=false; button.querySelector('.spinner')?.classList.add('hidden');
+    loadUploads(); // refresh uploads list
+  });
+
+  qs('#askBtn')?.addEventListener('click',(e)=>{ e.preventDefault(); askQuestion(); });
+  qs('#parseBtn')?.addEventListener('click',(e)=>{ e.preventDefault(); parseAnswer(); });
+  qs('#saveTxtBtn')?.addEventListener('click',(e)=>{ e.preventDefault(); saveTxt(); });
+  qs('#searchBtn')?.addEventListener('click',(e)=>{ e.preventDefault(); runSearch(); });
+
+  // History bindings
+  qs('#histRefreshBtn')?.addEventListener('click',(e)=>{ e.preventDefault(); loadHistory(true); });
+  qs('#histMoreBtn')?.addEventListener('click',(e)=>{ e.preventDefault(); loadHistory(false); });
+  qs('#histList')?.addEventListener('click',(e)=>{
+    const a = e.target.closest('a[data-hist-id]'); if(!a) return;
+    e.preventDefault(); loadHistoryItem(a.getAttribute('data-hist-id'));
+  });
+  // Uploads bindings
+  qs('#uplRefreshBtn')?.addEventListener('click',(e)=>{ e.preventDefault(); loadUploads(); });
+
+  // First loads
+  loadHistory(true);
+  loadUploads();
+}
+
+document.addEventListener('DOMContentLoaded', wireUI);

@@ -8,11 +8,13 @@ from PyPDF2 import PdfReader
 from werkzeug.utils import secure_filename
 from flask import Flask, request, jsonify, abort, render_template, send_file
 from jinja2 import TemplateNotFound
+from bson import ObjectId
 
-# Local imports
+# Local imports 
 import vector_store as vs
 from converter import convert_to_json, ParserError
 from search import basic_search
+from mongo_client import get_db, ping as mongo_ping
 
 # App + folders
 BASE_DIR = Path(__file__).resolve().parent
@@ -34,7 +36,13 @@ JOBS = {}  # {job_id: {"status": "...", "progress": int, "error": str, "filename
 def _set_job(jid, **kw): JOBS.setdefault(jid, {}).update(kw)
 
 def _process_pdf_job(jid: str, path: Path, filename: str):
+    db = None
     try:
+        try:
+            db = get_db()
+        except Exception as e:
+            print("[/upload] get_db failed (continuing without DB):", e)
+
         reader = PdfReader(str(path))
         n = len(reader.pages) or 1
         texts = []
@@ -45,13 +53,34 @@ def _process_pdf_job(jid: str, path: Path, filename: str):
         if not text.strip():
             raise ValueError("PDF contains no extractable text.")
         vs.add_to_store(text, tag=f"upload:{filename}")
+        if db is not None:
+            db.uploads.update_one({"filename": filename},
+                                  {"$set": {"status": "indexed", "indexed_at": datetime.utcnow(),
+                                            "n_pages": n}},
+                                  upsert=True)
         _set_job(jid, status="done", progress=100)
     except Exception as e:
+        if db is not None:
+            try:
+                db.uploads.update_one({"filename": filename},
+                                      {"$set": {"status": "error", "error": str(e),
+                                                "failed_at": datetime.utcnow()}},
+                                      upsert=True)
+            except Exception as ee:
+                print("[/upload] failed to record error in DB:", ee)
         _set_job(jid, status="error", error=str(e))
 
 @app.get("/health")
 def health():
     return "ok", 200
+
+@app.get("/db_health")
+def db_health():
+    try:
+        mongo_ping()
+        return {"mongo": "ok"}, 200
+    except Exception as e:
+        return {"mongo": "error", "detail": str(e)}, 500
 
 @app.get("/")
 def home():
@@ -60,6 +89,7 @@ def home():
     except TemplateNotFound:
         return "<h1>NanoChemGPT is up</h1><p>templates/index.html is missing.</p>", 200
 
+# ---------------- Upload ----------------
 @app.post("/upload")
 def upload():
     f = request.files.get("file")
@@ -68,6 +98,15 @@ def upload():
     fname = secure_filename(f.filename)
     path = UPLOADS_DIR / fname
     f.save(path)
+
+    # record receipt
+    try:
+        db = get_db()
+        db.uploads.update_one({"filename": fname},
+                              {"$set": {"filename": fname, "ts": datetime.utcnow(), "status": "received"}},
+                              upsert=True)
+    except Exception as e:
+        print("[/upload] DB receipt warn:", e)
 
     jid = os.urandom(8).hex()
     _set_job(jid, status="processing", progress=0, filename=fname)
@@ -79,10 +118,24 @@ def upload():
         elif lower.endswith(".json"):
             raw = path.read_text(encoding="utf-8", errors="ignore")
             vs.add_to_store(raw, tag=f"upload:{fname}")
+            try:
+                get_db().uploads.update_one({"filename": fname},
+                                            {"$set": {"status": "indexed", "indexed_at": datetime.utcnow(),
+                                                      "kind": "json"}},
+                                            upsert=True)
+            except Exception as e:
+                print("[/upload] DB update warn:", e)
             _set_job(jid, status="done", progress=100)
         else:
             txt = path.read_text(encoding="utf-8", errors="ignore")
             vs.add_to_store(txt, tag=f"upload:{fname}")
+            try:
+                get_db().uploads.update_one({"filename": fname},
+                                            {"$set": {"status": "indexed", "indexed_at": datetime.utcnow(),
+                                                      "kind": "text"}},
+                                            upsert=True)
+            except Exception as e:
+                print("[/upload] DB update warn:", e)
             _set_job(jid, status="done", progress=100)
     except Exception as e:
         _set_job(jid, status="error", error=str(e))
@@ -96,6 +149,7 @@ def status(jid):
         abort(404, "unknown job id")
     return jsonify(j)
 
+# ---------------- Search ----------------
 @app.post("/search")
 def search_route():
     payload = request.get_json(silent=True) or {}
@@ -106,6 +160,7 @@ def search_route():
     refs = basic_search(q, n)
     return jsonify({"results": refs})
 
+# ---------------- Ask ----------------
 @app.post("/ask")
 def ask():
     try:
@@ -135,27 +190,16 @@ def ask():
         )
 
         prompt = (
-        "You are NanoChemGPT, an AI assistant that proposes nanomaterial syntheses.\n"
-        "Use the provided context unless general chemistry knowledge is required.\n"
-        "Provide concrete numerical parameters on the same volume scale as the paper.\n\n"
-        "Return *two blocks* in order:\n"
-        "## SynthesisProtocol\n"
-        "1. **Hardware & Glassware**:\n[]\n"
-        "2. **Materials**:\n[]\n"
-        "3. **Procedure**\n[]\n\n"
-        "```reason\n"
-        "CITATION RULES (very important):\n"
-        "• In the rationale, add inline numeric citations like [1], [2] at the end of ANY sentence that relies on literature.\n"
-        "• Use ONLY the numbers from the 'Retrieved sources' list below. Do NOT invent new numbers.\n"
-        "• If a sentence is based on the provided vector-store context (not public web), use [CTX].\n"
-        "• If it is general chemistry knowledge with no specific citation, use [GEN].\n"
-        "• Prefer 1–2 citations per sentence (avoid over-citation).\n\n"
-        "Think step-by-step:\n"
-        "1) Restate constraints. 2) Justify every solvent/ratio/temp. 3) Final-check for violations.\n" \
-        "Style constraints for Procedure:\n"
-        "- Use imperative, atomic steps.\n"
-        "- No explanatory prose inside steps.\n"
-        "- Put explanatory sentences only in the ```reason block, with citations.\n"
+            "You are NanoChemGPT. Use the CONTEXT and the numbered REFERENCES to propose a synthesis.\n"
+            "Return two blocks:\n"
+            "## SynthesisProtocol\n"
+            "1. **Hardware & Glassware**:\n[]\n"
+            "2. **Materials**:\n[]\n"
+            "3. **Procedure**\n[]\n\n"
+            "```reason\n"
+            "Explain key choices with brief sentences. Cite using [1], [2], ... for REFERENCES. "
+            "Use [CTX] when justification is from uploaded context.\n"
+            "```"
             f"\n\nCONTEXT:\n{context}\n\nREFERENCES:\n{refs_prompt}\n\nUser question: {q}"
         )
 
@@ -171,12 +215,28 @@ def ask():
         else:
             answer, rationale = raw, ""
 
-        return jsonify({"answer": answer.strip(), "rationale": rationale, "references": refs})
+        # Save to Mongo
+        try:
+            db = get_db()
+            ins = db.qa.insert_one({
+                "created_at": datetime.utcnow(),
+                "question": q,
+                "answer": (answer or "").strip(),
+                "rationale": rationale,
+                "references": refs
+            })
+            qa_id = str(ins.inserted_id)
+        except Exception as e:
+            print("[/ask] DB insert warn:", e)
+            qa_id = None
+
+        return jsonify({"answer": (answer or '').strip(), "rationale": rationale, "references": refs, "qa_id": qa_id})
     except Exception as e:
         print("[/ask] Unhandled error:", e)
         traceback.print_exc()
         return jsonify({"error": f"/ask failed: {e}"}), 500
 
+# ---------------- Parse ----------------
 @app.post("/parse")
 def parse_route():
     payload = request.get_json(silent=True) or {}
@@ -188,8 +248,20 @@ def parse_route():
         parsed = convert_to_json(text, robot=robot)
     except ParserError as e:
         abort(422, str(e))
+    # Save to Mongo
+    try:
+        db = get_db()
+        db.parsed.insert_one({
+            "created_at": datetime.utcnow(),
+            "robot": robot,
+            "raw_text": text,
+            "parsed": parsed
+        })
+    except Exception as e:
+        print("[/parse] DB insert warn:", e)
     return jsonify(parsed)
 
+# ---------------- Save TXT ----------------
 @app.post("/save_txt")
 def save_txt():
     data = request.get_json(silent=True) or {}
@@ -202,6 +274,7 @@ def save_txt():
     fname = f"chatau_{datetime.utcnow():%Y%m%d_%H%M%S}.txt"
     return send_file(buf, mimetype="text/plain", as_attachment=True, download_name=fname)
 
+# ---------------- Upload maintenance ----------------
 @app.post("/clear_uploads")
 def clear_uploads_route():
     try:
@@ -210,6 +283,64 @@ def clear_uploads_route():
         print("clear_uploads error:", e)
     return {"status": "uploads cleared"}
 
+# ---------------- History & Upload Browser APIs ----------------
+def _safe_id(x):
+    try:
+        return ObjectId(x)
+    except Exception:
+        return None
+
+def _doc(obj):
+    if not isinstance(obj, dict): return obj
+    out = dict(obj)
+    if "_id" in out:
+        out["_id"] = str(out["_id"])
+    for k, v in list(out.items()):
+        if hasattr(v, "isoformat"):
+            out[k] = v.isoformat()
+    return out
+
+@app.get("/api/history")
+def api_history():
+    db = get_db()
+    try:
+        skip = int(request.args.get("skip", 0))
+        limit = min(100, int(request.args.get("limit", 10)))
+    except Exception:
+        skip, limit = 0, 10
+    q = (request.args.get("q") or "").strip()
+    cur = None
+    if q:
+        try:
+            cur = db.qa.find({"$text": {"$search": q}})
+        except Exception:
+            cur = db.qa.find({"question": {"$regex": q, "$options": "i"}})
+    else:
+        cur = db.qa.find({})
+    items = [ _doc(d) for d in cur.sort("created_at", -1).skip(skip).limit(limit) ]
+    return jsonify({"items": items, "skip": skip, "limit": limit})
+
+@app.get("/api/history/<id>")
+def api_history_one(id):
+    db = get_db()
+    oid = _safe_id(id)
+    if not oid: abort(404, "invalid id")
+    doc = db.qa.find_one({"_id": oid})
+    if not doc: abort(404, "not found")
+    return jsonify(_doc(doc))
+
+@app.get("/api/uploads")
+def api_uploads():
+    db = get_db()
+    try:
+        limit = min(200, int(request.args.get("limit", 50)))
+    except Exception:
+        limit = 50
+    cur = db.uploads.find({}).sort([("indexed_at", -1), ("ts", -1)]).limit(limit)
+    items = [ _doc(d) for d in cur ]
+    return jsonify({"items": items, "limit": limit})
+
+# ---------------- Errors ----------------
 @app.errorhandler(400)
 @app.errorhandler(422)
 @app.errorhandler(500)

@@ -14,3 +14,4 @@ python-multipart
 sentence-transformers
 ijson==3.2.3 
 requests>=2.32 
+pymongo[srv]>=4.6
