@@ -92,13 +92,6 @@ def preload_builtin():
             print(f"[preload] skip {f}: {e}")
     print(f"[preload] indexed {count} builtin docs from {p}")
 
-# call once after app init
-try:
-    if os.getenv("PRELOAD_BUILTIN", "1") == "1":
-        preload_builtin()
-except Exception as e:
-    print("[preload] failed:", e)
-
 # call once at startup
 try:
     if os.getenv("PRELOAD_BUILTIN", "1") == "1":
@@ -124,8 +117,9 @@ def home():
     try:
         return render_template("index.html")
     except TemplateNotFound:
+        # Fallback: simple HTML if template missing
         return "<h1>NanoChemGPT is up</h1><p>templates/index.html is missing.</p>", 200
-    
+
 # --- DB context options ---
 USE_DB_CONTEXT   = os.getenv("USE_DB_CONTEXT", "1") == "1"
 DB_CTX_LIMIT     = int(os.getenv("DB_CTX_LIMIT", "3"))
@@ -260,6 +254,40 @@ def search_route():
     return jsonify({"results": refs})
 
 # ---------------- Ask ----------------
+
+# --------- Helpers: citation & tag extraction ---------
+_CIT_BRACKET_RX = re.compile(r"[\[](?P<num>\d{1,4})\]")
+_CIT_FULLWIDTH_RX = re.compile(r"【(?P<num>\d{1,4})】")
+_CIT_FOOTNOTE_RX = re.compile(r"\[\^(?P<num>\d{1,4})\]")
+
+_TAGS = ("CTX", "PARSED", "DB", "GEN")
+
+def _extract_used_markers(*texts: str) -> dict:
+    """Extract used reference numbers and tag counts from the given texts.
+    Handles ASCII [12], full-width 【12】, and footnote [^12] citations.
+    Returns: { 'refs': [int,...], 'tags': {tag:count}, 'has_ctx': bool }
+    """
+    seen = set()
+    tag_counts = {t: 0 for t in _TAGS}
+    for t in texts:
+        if not t: 
+            continue
+        # Normalize NBSP and stray unicode
+        tt = t.replace('\u00A0', ' ')
+        for rx in (_CIT_BRACKET_RX, _CIT_FULLWIDTH_RX, _CIT_FOOTNOTE_RX):
+            for m in rx.finditer(tt):
+                try:
+                    seen.add(int(m.group('num')))
+                except Exception:
+                    pass
+        # Count tags (exact tokens inside square brackets)
+        for tag in _TAGS:
+            tag_rx = re.compile(rf"\[{tag}\]")
+            tag_counts[tag] += len(tag_rx.findall(tt))
+    refs = sorted(seen)
+    has_ctx = any(tag_counts[t] > 0 for t in ("CTX","PARSED","DB"))
+    return { "refs": refs, "tags": tag_counts, "has_ctx": has_ctx }
+
 @app.post("/ask")
 def ask():
     from datetime import datetime
@@ -272,8 +300,7 @@ def ask():
         text = raw.strip()
 
         # 1) Fenced code block with language: reason / rationale / reasoning
-        fence = re.compile(r"```(?:reason|rationale|reasoning)\s*(.*?)```",
-                           re.I | re.S)
+        fence = re.compile(r"```(?:reason|rationale|reasoning)\s*(.*?)```", re.I | re.S)
         m = fence.search(text)
         if m:
             rationale = m.group(1).strip()
@@ -281,7 +308,6 @@ def ask():
             return answer, rationale
 
         # 2) Any fenced block after a 'rationale' keyword in the line above
-        #    e.g., "... rationale:\n``` ... ```"
         fence_any = re.compile(r"rationale\s*:?\s*```(.*?)```", re.I | re.S)
         m = fence_any.search(text)
         if m:
@@ -289,9 +315,8 @@ def ask():
             answer = (text[:m.start()] + text[m.end():]).strip()
             return answer, rationale
 
-        # 3) Markdown heading "Rationale" / "Reasoning"
-        head = re.compile(r"(?:^|\n)#{1,3}\s*(rationale|reasoning)\b[^\n]*\n(.*)$",
-                          re.I | re.S)
+        # 3) Markdown heading "Rationale" / "Reasoning" (multi-line)
+        head = re.compile(r"(?:^|\n)#{1,3}\s*(rationale|reasoning)\b[^\n]*\n((?:.*\n?)*)$", re.I | re.S)
         m = head.search(text)
         if m:
             rationale = m.group(2).strip()
@@ -372,7 +397,7 @@ def ask():
         raw = client.chat.completions.create(
             model="gpt-4o-mini",
             messages=[{"role": "user", "content": prompt}],
-            temperature=0.2,
+            temperature=0.2
         ).choices[0].message.content
 
         answer, rationale = split_reasoning(raw)
@@ -403,6 +428,13 @@ def ask():
                 print("[/ask] rationale fallback failed:", e)
                 rationale = rationale or ""  # keep empty if it fails
 
+        # Extract usage summary from answer + rationale
+        try:
+            used_summary = _extract_used_markers(answer or "", rationale or "")
+        except Exception as _e:
+            print("[/ask] used extraction failed:", _e)
+            used_summary = {"refs": [], "tags": {}, "has_ctx": False}
+
         # --- Save to Mongo (includes exact context parts for auditing) ---
         qa_id = None
         try:
@@ -413,6 +445,8 @@ def ask():
                 "answer": (answer or "").strip(),
                 "rationale": rationale,
                 "references": refs,
+                "refs_used": used_summary.get("refs", []),
+                "used_tags": used_summary.get("tags", {}),
                 "ctx_vs": vs_ctx,
                 "ctx_db": db_ctx,
                 "ctx_parsed": ctx_parsed,
@@ -426,6 +460,8 @@ def ask():
             "answer": (answer or "").strip(),
             "rationale": rationale,
             "references": refs,
+            "refs_used": used_summary.get("refs", []),
+            "used": used_summary,
             "qa_id": qa_id,
             "ctx_vs": (vs_ctx or "")[:8000],
             "ctx_parsed": (ctx_parsed or "")[:8000],
@@ -437,6 +473,7 @@ def ask():
         traceback.print_exc()
         return jsonify({"error": f"/ask failed: {e}"}), 500
 
+# ---------------- Parse & Save ----------------
 # ---------------- Parse ----------------
 @app.post("/parse")
 def parse_route():
@@ -558,4 +595,8 @@ def too_large(e):
     return jsonify(error="File bigger than 100 MB — compress or split it."), 413
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=int(os.getenv("PORT", 5000)), debug=bool(os.getenv("DEBUG")))
+    app.run(
+        host="0.0.0.0",
+        port=int(os.getenv("PORT", 5000)),
+        debug=os.getenv("DEBUG", "0") == "1"
+    )

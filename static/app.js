@@ -46,12 +46,17 @@ function escapeHtml(s) {
   ));
 }
 
+
 function renderRationaleWithCitations(text, refs) {
   // Escape everything first
   let html = escapeHtml(text || '');
 
+  // Normalize full-width brackets to ASCII and footnotes [^n] -> [n]
+  html = html.replaceAll('【', '[').replaceAll('】', ']');
+  html = html.replace(/\[\^(\d{1,4})\]/g, '[$1]');
+
   // Link numeric citations [1], [2], ...
-  html = html.replace(/\[(\d+)\]/g, (m, n) => {
+  html = html.replace(/\[(\d{1,4})\]/g, (m, n) => {
     const idx = parseInt(n, 10) - 1;
     const r = Array.isArray(refs) ? refs[idx] : null;
     const url = r && r.url ? r.url : (r && r.doi ? `https://doi.org/${r.doi}` : null);
@@ -94,12 +99,14 @@ function showRefs(refs) {
 }
 
 // ------- Sources-used viewer -------
+
 function updateSourcesUsed(data) {
   console.log('updateSourcesUsed got:', data); // <-- see ctx_* in console
 
   const s1 = document.getElementById('srcCtxVs');
   const s2 = document.getElementById('srcCtxParsed');
   const s3 = document.getElementById('srcCtxDb');
+  const usedEl = document.getElementById('srcUsedSummary');
   const panel = document.getElementById('sourcesPanel');
 
   const v1 = (data.ctx_vs || data.ctxVS || data.ctx_uploads || '').trim();
@@ -109,6 +116,22 @@ function updateSourcesUsed(data) {
   if (s1) s1.textContent = (v1 ? v1 : '(empty)').slice(0, 4000);
   if (s2) s2.textContent = (v2 ? v2 : '(empty)').slice(0, 4000);
   if (s3) s3.textContent = (v3 ? v3 : '(empty)').slice(0, 4000);
+
+  // Show usage summary if provided by server
+  if (usedEl) {
+    try {
+      const used = data.used || {};
+      const refs = used.refs || data.refs_used || [];
+      const tags = used.tags || {};
+      const bits = [];
+      if (Array.isArray(refs) && refs.length) bits.push(`refs [${refs.join(', ')}]`);
+      const tparts = Object.entries(tags).filter(([k,v]) => v > 0).map(([k,v]) => `${k}×${v}`);
+      if (tparts.length) bits.push(tparts.join(' • '));
+      usedEl.textContent = bits.length ? bits.join(' | ') : '(none detected)';
+    } catch (e) {
+      usedEl.textContent = '(none detected)';
+    }
+  }
 
   if (panel && (v1 || v2 || v3)) panel.open = true;
 }
@@ -176,6 +199,7 @@ async function askQuestion() {
   qs('#parseBtn').disabled   = true;
   qs('#saveTxtBtn').disabled = true;
 
+  let data;
   try {
     const r = await fetch('/ask', {
       method: 'POST',
@@ -189,7 +213,7 @@ async function askQuestion() {
       return;
     }
 
-    const data = await r.json();
+    data = await r.json();
 
     lastAnswer   = data.answer || '';
     lastQuestion = q;
@@ -203,7 +227,6 @@ async function askQuestion() {
     showRefs(data.references || []);
 
     // Fill Sources-used viewer if server returned ctx fields
-    console.log('/ask parsed response:', data);
     updateSourcesUsed(data);
 
     // Buttons
@@ -211,13 +234,8 @@ async function askQuestion() {
     qs('#saveTxtBtn').disabled = !lastAnswer;
 
     showAlert('#askMsg', 'success', 'Answer ready.');
-  } catch (err) {
-    showAlert('#askMsg', 'error', `Network error: ${err}`);
-  } finally {
-    btn.disabled = false;
-    btn.querySelector('.spinner')?.classList.add('hidden');
-  }
-    
+
+    // Fallback: fetch context from history if missing
     if ((!data.ctx_vs && !data.ctx_parsed && !data.ctx_db) && data.qa_id) {
       try {
         const r2 = await fetch(`/api/history/${data.qa_id}`, { cache: 'no-store' });
@@ -232,6 +250,12 @@ async function askQuestion() {
       } catch {}
     }
 
+  } catch (err) {
+    showAlert('#askMsg', 'error', `Network error: ${err}`);
+  } finally {
+    btn.disabled = false;
+    btn.querySelector('.spinner')?.classList.add('hidden');
+  }
 }
 
 // ------- Download helpers -------

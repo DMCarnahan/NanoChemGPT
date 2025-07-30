@@ -4,8 +4,8 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>NanoChemGPT</title>
-  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css', v=24) }}">
-  <script src="{{ url_for('static', filename='app.js', v=24) }}" defer></script>
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css', v=25) }}">
+  <script src="{{ url_for('static', filename='app.js', v=25) }}" defer></script>
 </head>
 <body>
   <div class="container">
@@ -18,25 +18,25 @@
     <div class="card">
       <h2 class="card-title">Upload source (PDF / JSON / TXT)</h2>
       <div class="input-row">
+        <label for="fileInput" class="visually-hidden">Choose file</label>
         <input id="fileInput" type="file" accept=".pdf,.json,.txt,.md,.csv">
-        <button id="uploadBtn" class="btn"><span class="spinner hidden"></span>Upload</button>
+        <button id="uploadBtn" class="btn" type="button"><span class="spinner hidden"></span>Upload</button>
       </div>
       <div id="fileHint" class="small muted"></div>
       <div class="progress mt-3"><div id="progressInner"></div></div>
-      <div id="result" class="alert mt-3 hidden"></div>
+      <div id="result" class="alert mt-3 hidden" aria-live="polite"></div>
     </div>
 
     <!-- Search -->
     <div class="card mt-6">
       <h2 class="card-title">Search literature</h2>
       <div class="row">
-        <input id="searchInput" class="textarea" placeholder="Search query (e.g., cobalt nanowires oleylamine synthesis)">
-        <button id="searchBtn" class="btn secondary">Search</button>
+        <input id="searchInput" class="textarea" placeholder="Search...">
+        <button id="searchBtn" class="btn secondary" type="button">Search</button>
       </div>
-      <div id="searchMsg" class="alert mt-2 hidden"></div>
+      <div id="searchMsg" class="alert mt-2 hidden" aria-live="polite"></div>
       <ol id="searchResults" class="mt-3 small"></ol>
       <p class="small muted mt-2">
-        Closed-access providers (Bing, Google CSE, Scopus, IEEE Xplore) are stubbed in code and can
         be enabled later by setting API keys (see <code>search.py</code>).
       </p>
     </div>
@@ -57,7 +57,7 @@
         <button id="saveTxtBtn" class="btn secondary" disabled>Export answer → .txt</button>
       </div>
 
-      <div id="askMsg" class="alert mt-3 hidden"></div>
+      <div id="askMsg" class="alert mt-3 hidden" aria-live="polite"></div>
 
       <div class="mt-4">
         <h3 class="subhead">Answer</h3>
@@ -84,6 +84,8 @@
         <summary class="subhead">Sources used (debug)</summary>
         <div class="small muted mt-2">
           <p>This shows the context chunks that were sent to the model for the last answer.</p>
+          <div class="small mt-2"><strong>Usage summary</strong>: <span id="srcUsedSummary" class="muted">(pending)</span></div>
+
         </div>
         <div class="mt-2">
           <h4 class="subhead">Uploaded context [CTX]</h4>
@@ -105,10 +107,10 @@
       <h2 class="card-title">History (Q&A)</h2>
       <div class="row">
         <input id="histQuery" class="textarea" placeholder="Filter (optional): keywords in question">
-        <button id="histRefreshBtn" class="btn secondary">Refresh</button>
-        <button id="histMoreBtn" class="btn secondary">Load more</button>
+        <button id="histRefreshBtn" class="btn secondary" type="button">Refresh</button>
+        <button id="histMoreBtn" class="btn secondary" type="button">Load more</button>
       </div>
-      <div id="histMsg" class="alert mt-2 hidden"></div>
+      <div id="histMsg" class="alert mt-2 hidden" aria-live="polite"></div>
       <ol id="histList" class="mt-3 small"></ol>
       <p class="small muted mt-2">Tip: Click a history item to load its answer/rationale back into the page.</p>
     </div>
@@ -117,9 +119,9 @@
     <div class="card mt-6">
       <h2 class="card-title">Uploads</h2>
       <div class="row">
-        <button id="uplRefreshBtn" class="btn secondary">Refresh</button>
+        <button id="uplRefreshBtn" class="btn secondary" type="button">Refresh</button>
       </div>
-      <div id="uplMsg" class="alert mt-2 hidden"></div>
+      <div id="uplMsg" class="alert mt-2 hidden" aria-live="polite"></div>
       <ol id="uplList" class="mt-3 small"></ol>
     </div>
 
@@ -127,8 +129,8 @@
     <div class="card mt-6">
       <h2 class="card-title">Maintenance</h2>
       <div class="row">
-        <button id="clearBtn" class="btn secondary" onclick="fetch('/clear_uploads',{method:'POST'}).then(()=>{document.getElementById('uplMsg').classList.remove('hidden');document.getElementById('uplMsg').textContent='Uploads cleared (vector memory)';loadUploads();});">Clear uploaded memory</button>
-        <div id="clearMsg" class="alert mt-2 hidden"></div>
+        <button id="clearBtn" class="btn secondary" type="button" onclick="fetch('/clear_uploads',{method:'POST'}).then(()=>{document.getElementById('uplMsg').classList.remove('hidden');document.getElementById('uplMsg').textContent='Uploads cleared (vector memory)';loadUploads();});">Clear uploaded memory</button>
+        <div id="clearMsg" class="alert mt-2 hidden" aria-live="polite"></div>
       </div>
       <p class="small muted mt-3">
         Tip: Mount a volume at <code>/data</code> and set <code>HF_HOME=/data/hf</code> so model downloads persist.
