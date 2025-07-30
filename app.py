@@ -216,45 +216,63 @@ def search_route():
 # ---------------- Ask ----------------
 @app.post("/ask")
 def ask():
+    from datetime import datetime
+    import re, traceback
+
+    def split_reasoning(raw: str) -> tuple[str, str]:
+        """Extract rationale robustly from fences or headings."""
+        if not raw:
+            return "", ""
+        text = raw.strip()
+
+        # 1) Fenced code block with language: reason / rationale / reasoning
+        fence = re.compile(r"```(?:reason|rationale|reasoning)\s*(.*?)```",
+                           re.I | re.S)
+        m = fence.search(text)
+        if m:
+            rationale = m.group(1).strip()
+            answer = (text[:m.start()] + text[m.end():]).strip()
+            return answer, rationale
+
+        # 2) Any fenced block after a 'rationale' keyword in the line above
+        #    e.g., "... rationale:\n``` ... ```"
+        fence_any = re.compile(r"rationale\s*:?\s*```(.*?)```", re.I | re.S)
+        m = fence_any.search(text)
+        if m:
+            rationale = m.group(1).strip()
+            answer = (text[:m.start()] + text[m.end():]).strip()
+            return answer, rationale
+
+        # 3) Markdown heading "Rationale" / "Reasoning"
+        head = re.compile(r"(?:^|\n)#{1,3}\s*(rationale|reasoning)\b[^\n]*\n(.*)$",
+                          re.I | re.S)
+        m = head.search(text)
+        if m:
+            rationale = m.group(2).strip()
+            answer = text[:m.start()].strip()
+            return answer, rationale
+
+        # 4) Fallback: no rationale
+        return text, ""
+
     try:
         payload = request.get_json(silent=True) or {}
         q = (payload.get("question") or "").strip()
         if not q:
             abort(400, "No question.")
 
+        # --- Build context from vector store first ---
+        vs_ctx = ""
         try:
-            context = vs.search(q, k=4)
+            vs_ctx = vs.search(q, k=4) or ""
         except Exception as e:
-            print("[/ask] vs.search error:", e); context = ""
+            print("[/ask] vs.search error:", e)
 
-        # Enrich context with Mongo history & parsed protocols
-        if USE_DB_CONTEXT:
-            db_ctx     = fetch_db_context(q)
-            ctx_parsed = fetch_parsed_context(q)
-            # Put vector-store hits first, then parsed summaries, then raw Q&A
-            context = "\n\n---\n\n".join([c for c in [context, ctx_parsed, db_ctx] if c]).strip()
-
-        refs = []
-        try:
-            refs = basic_search(q, n=6) or []
-        except Exception as e:
-            print("[/ask] basic_search error:", e); refs = []
-
-        def _ref_url(r):
-            if r.get("url"): return r["url"]
-            if r.get("doi"): return f"https://doi.org/{r['doi']}"
-            return ""
-        refs_prompt = "\n".join(
-            f"[{i+1}] {(r.get('title') or '(no title)')} ({r.get('year') or ''}) — {_ref_url(r)}"
-            for i, r in enumerate(refs)
-        )
-
-        # Build the final CONTEXT block with visible sentinels 
-        # and store each part separately to persist them in Mongo
-        vs_ctx = context  # from vector_store.search(q, k=4) 
+        # --- Optional Mongo context (history + parsed) ---
         db_ctx = fetch_db_context(q) if USE_DB_CONTEXT else ""
         ctx_parsed = fetch_parsed_context(q) if USE_DB_CONTEXT else ""
 
+        # Order: VS first, PARSED second, DB last (most general).
         context_parts = []
         if vs_ctx:     context_parts.append("<<<CTX_UPLOADS>>>\n" + vs_ctx)
         if ctx_parsed: context_parts.append("<<<CTX_PARSED>>>\n"  + ctx_parsed)
@@ -262,6 +280,25 @@ def ask():
 
         context_joined = "\n\n---\n\n".join(context_parts).strip()
 
+        # --- Web refs for citations ---
+        refs = []
+        try:
+            refs = basic_search(q, n=6) or []
+        except Exception as e:
+            print("[/ask] basic_search error:", e)
+            refs = []
+
+        def _ref_url(r):
+            if r.get("url"): return r["url"]
+            if r.get("doi"): return f"https://doi.org/{r['doi']}"
+            return ""
+
+        refs_prompt = "\n".join(
+            f"[{i+1}] {(r.get('title') or '(no title)')} ({r.get('year') or ''}) — {_ref_url(r)}"
+            for i, r in enumerate(refs)
+        )
+
+        # --- Prompt ---
         prompt = (
             "You are NanoChemGPT. Use the CONTEXT and the numbered REFERENCES to propose a synthesis.\n"
             "Return two blocks exactly in this order:\n"
@@ -273,10 +310,12 @@ def ask():
             "For each key justification, add an inline tag:\n"
             "  [CTX] for uploaded/context hits, [DB] for similar past Q&A from Mongo,\n"
             "  [PARSED] for summaries from prior parsed protocols,\n"
-            "  [n] (e.g., [1]) for numbered web REFERENCES, and [GEN] if inferred/general.\n"
+            "  [n] for numbered web REFERENCES, and [GEN] if inferred/general.\n"
             "Keep rationales terse.\n"
             "```\n\n"
-            f"CONTEXT:\n{context_joined}\n\nREFERENCES:\n{refs_prompt}\n\nUser question: {q}"
+            f"CONTEXT:\n{context_joined}\n\n"
+            f"REFERENCES:\n{refs_prompt}\n\n"
+            f"User question: {q}"
         )
 
         raw = client.chat.completions.create(
@@ -285,13 +324,10 @@ def ask():
             temperature=0.2,
         ).choices[0].message.content
 
-        if "```reason" in raw:
-            answer, rest = raw.split("```reason", 1)
-            rationale = rest.split("```", 1)[0].strip()
-        else:
-            answer, rationale = raw, ""
+        answer, rationale = split_reasoning(raw)
 
-        # Save to Mongo
+        # --- Save to Mongo (includes exact context parts for auditing) ---
+        qa_id = None
         try:
             db = get_db()
             ins = db.qa.insert_one({
@@ -299,15 +335,18 @@ def ask():
                 "question": q,
                 "answer": (answer or "").strip(),
                 "rationale": rationale,
-                "references": refs
+                "references": refs,
+                "ctx_vs": vs_ctx,
+                "ctx_db": db_ctx,
+                "ctx_parsed": ctx_parsed,
             })
             qa_id = str(ins.inserted_id)
         except Exception as e:
             print("[/ask] DB insert warn:", e)
-            qa_id = None
 
+        # --- Return everything the UI needs (including ctx fields) ---
         return jsonify({
-            "answer": (answer or '').strip(),
+            "answer": (answer or "").strip(),
             "rationale": rationale,
             "references": refs,
             "qa_id": qa_id,
