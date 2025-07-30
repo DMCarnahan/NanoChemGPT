@@ -95,6 +95,8 @@ function showRefs(refs) {
 
 // ------- Sources-used viewer -------
 function updateSourcesUsed(data) {
+  console.log('updateSourcesUsed got:', data); // <-- see ctx_* in console
+
   const s1 = document.getElementById('srcCtxVs');
   const s2 = document.getElementById('srcCtxParsed');
   const s3 = document.getElementById('srcCtxDb');
@@ -201,6 +203,7 @@ async function askQuestion() {
     showRefs(data.references || []);
 
     // Fill Sources-used viewer if server returned ctx fields
+    console.log('/ask parsed response:', data);
     updateSourcesUsed(data);
 
     // Buttons

@@ -69,7 +69,8 @@ def _process_pdf_job(jid: str, path: Path, filename: str):
             except Exception as ee:
                 print("[/upload] failed to record error in DB:", ee)
         _set_job(jid, status="error", error=str(e))
-
+        
+# ---------------- Vector Store init ----------------
 def preload_builtin():
     root = os.getenv("BUILTIN_DIR") or str((Path(__file__).parent / "builtin"))
     p = Path(root)
@@ -78,15 +79,25 @@ def preload_builtin():
         return
     count = 0
     for f in p.rglob("*"):
-        if f.is_file() and f.suffix.lower() in {".txt", ".md", ".json"}:
-            try:
-                txt = f.read_text(encoding="utf-8", errors="ignore")
-                if txt.strip():
-                    vs.add_to_store(txt, tag=f"builtin:{f.name}")
-                    count += 1
-            except Exception as e:
-                print(f"[preload] skip {f}: {e}")
+        if not f.is_file(): 
+            continue
+        if f.suffix.lower() not in {".txt", ".md", ".json"}:
+            continue
+        try:
+            txt = f.read_text(encoding="utf-8", errors="ignore")
+            if txt.strip():
+                vs.add_to_store(txt, tag=f"builtin:{f.name}")
+                count += 1
+        except Exception as e:
+            print(f"[preload] skip {f}: {e}")
     print(f"[preload] indexed {count} builtin docs from {p}")
+
+# call once after app init
+try:
+    if os.getenv("PRELOAD_BUILTIN", "1") == "1":
+        preload_builtin()
+except Exception as e:
+    print("[preload] failed:", e)
 
 # call once at startup
 try:
