@@ -70,6 +70,41 @@ def _process_pdf_job(jid: str, path: Path, filename: str):
                 print("[/upload] failed to record error in DB:", ee)
         _set_job(jid, status="error", error=str(e))
 
+from pathlib import Path
+
+def preload_builtin():
+    """
+    Pre-index text from BUILTIN_DIR (or ./builtin) into the vector store at startup.
+    Reads .txt/.md/.json. PDFs are skipped here to avoid heavy parsing at boot.
+    """
+    root = os.getenv("BUILTIN_DIR") or str((Path(__file__).parent / "builtin"))
+    p = Path(root)
+    if not p.exists():
+        print(f"[preload] no builtin dir: {p}")
+        return
+
+    count = 0
+    for file in p.rglob("*"):
+        if not file.is_file(): 
+            continue
+        if file.suffix.lower() not in {".txt", ".md", ".json"}:
+            continue
+        try:
+            txt = file.read_text(encoding="utf-8", errors="ignore")
+            if txt.strip():
+                vs.add_to_store(txt, tag=f"builtin:{file.name}")
+                count += 1
+        except Exception as e:
+            print(f"[preload] skip {file}: {e}")
+
+    print(f"[preload] indexed {count} builtin docs from {p}")
+
+    try:
+        if os.getenv("PRELOAD_BUILTIN", "1") == "1":
+            preload_builtin()
+    except Exception as e:
+        print("[preload] failed:", e)
+
 @app.get("/health")
 def health():
     return "ok", 200
@@ -279,6 +314,11 @@ def ask():
         if db_ctx:     context_parts.append("<<<CTX_DB_QA>>>\n"   + db_ctx)
 
         context_joined = "\n\n---\n\n".join(context_parts).strip()
+
+        print("[ask] ctx parts:", 
+            f"VS={bool(vs_ctx)} len={len(vs_ctx) if vs_ctx else 0}",
+            f"PARSED={bool(ctx_parsed)} len={len(ctx_parsed) if ctx_parsed else 0}",
+            f"DB={bool(db_ctx)} len={len(db_ctx) if db_ctx else 0}")
 
         # --- Web refs for citations ---
         refs = []

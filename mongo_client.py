@@ -31,6 +31,7 @@ def get_db():
         _db.qa.create_index([("created_at", 1)])
         _db.qa.create_index([("question", "text"), ("answer", "text")], default_language="english")
         _db.parsed.create_index([("created_at", 1)])
+        
     except Exception as e:
         print("[mongo] index creation warning:", e)
     return _db

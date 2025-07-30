@@ -95,17 +95,17 @@ function showRefs(refs) {
 
 // ------- Sources-used viewer -------
 function updateSourcesUsed(data) {
-  // We expect the backend to include ctx fields in /ask response:
-  //   ctx_vs, ctx_parsed, ctx_db  (each is a string, possibly empty)
   const s1 = qs('#srcCtxVs');
   const s2 = qs('#srcCtxParsed');
   const s3 = qs('#srcCtxDb');
 
-  if (s1) s1.textContent = (data.ctx_vs || data.ctxVS || data.ctx_uploads || '').slice(0, 4000);
-  if (s2) s2.textContent = (data.ctx_parsed || '').slice(0, 4000);
-  if (s3) s3.textContent = (data.ctx_db || '').slice(0, 4000);
+  const v1 = (data.ctx_vs || data.ctxVS || data.ctx_uploads || '').trim();
+  const v2 = (data.ctx_parsed || '').trim();
+  const v3 = (data.ctx_db || '').trim();
 
-  // Do nothing else — the <details> panel stays collapsed until you open it.
+  if (s1) s1.textContent = (v1 ? v1 : '(empty)').slice(0, 4000);
+  if (s2) s2.textContent = (v2 ? v2 : '(empty)').slice(0, 4000);
+  if (s3) s3.textContent = (v3 ? v3 : '(empty)').slice(0, 4000);
 }
 
 // ------- Upload flow -------
