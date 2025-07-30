@@ -284,7 +284,7 @@ async function parseAnswer() {
     const r = await fetch('/parse', {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ text, robot, question: lastQuestion || '' })  
+      body: JSON.stringify({ text, robot, question: lastQuestion || '' })
     });
 
 

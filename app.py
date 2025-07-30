@@ -70,41 +70,32 @@ def _process_pdf_job(jid: str, path: Path, filename: str):
                 print("[/upload] failed to record error in DB:", ee)
         _set_job(jid, status="error", error=str(e))
 
-from pathlib import Path
-
 def preload_builtin():
-    """
-    Pre-index text from BUILTIN_DIR (or ./builtin) into the vector store at startup.
-    Reads .txt/.md/.json. PDFs are skipped here to avoid heavy parsing at boot.
-    """
     root = os.getenv("BUILTIN_DIR") or str((Path(__file__).parent / "builtin"))
     p = Path(root)
     if not p.exists():
         print(f"[preload] no builtin dir: {p}")
         return
-
     count = 0
-    for file in p.rglob("*"):
-        if not file.is_file(): 
-            continue
-        if file.suffix.lower() not in {".txt", ".md", ".json"}:
-            continue
-        try:
-            txt = file.read_text(encoding="utf-8", errors="ignore")
-            if txt.strip():
-                vs.add_to_store(txt, tag=f"builtin:{file.name}")
-                count += 1
-        except Exception as e:
-            print(f"[preload] skip {file}: {e}")
-
+    for f in p.rglob("*"):
+        if f.is_file() and f.suffix.lower() in {".txt", ".md", ".json"}:
+            try:
+                txt = f.read_text(encoding="utf-8", errors="ignore")
+                if txt.strip():
+                    vs.add_to_store(txt, tag=f"builtin:{f.name}")
+                    count += 1
+            except Exception as e:
+                print(f"[preload] skip {f}: {e}")
     print(f"[preload] indexed {count} builtin docs from {p}")
 
-    try:
-        if os.getenv("PRELOAD_BUILTIN", "1") == "1":
-            preload_builtin()
-    except Exception as e:
-        print("[preload] failed:", e)
+# call once at startup
+try:
+    if os.getenv("PRELOAD_BUILTIN", "1") == "1":
+        preload_builtin()
+except Exception as e:
+    print("[preload] failed:", e)
 
+# --- Health checks ---
 @app.get("/health")
 def health():
     return "ok", 200
@@ -123,6 +114,7 @@ def home():
         return render_template("index.html")
     except TemplateNotFound:
         return "<h1>NanoChemGPT is up</h1><p>templates/index.html is missing.</p>", 200
+    
 # --- DB context options ---
 USE_DB_CONTEXT   = os.getenv("USE_DB_CONTEXT", "1") == "1"
 DB_CTX_LIMIT     = int(os.getenv("DB_CTX_LIMIT", "3"))
@@ -156,14 +148,19 @@ def fetch_db_context(q: str, limit: int = DB_CTX_LIMIT) -> str:
 def fetch_parsed_context(q: str, limit: int = 2) -> str:
     try:
         db = get_db()
-        # Prefer text index; fallback to regex
+
+        # Prefer $text when a text index exists
         try:
             cur = db.parsed.find({"$text": {"$search": q}})
-        except Exception:
-            cur = db.parsed.find({"$or": [
-                {"question": {"$regex": q, "$options": "i"}},
-                {"raw_text": {"$regex": q, "$options": "i"}},
-            ]})
+        except Exception as e:
+            print("[parsed_ctx] $text unavailable, falling back to regex:", e)
+            cur = db.parsed.find({
+                "$or": [
+                    {"question": {"$regex": q, "$options": "i"}},
+                    {"raw_text": {"$regex": q, "$options": "i"}},
+                ]
+            })
+
         items = list(cur.sort("created_at", -1).limit(limit))
     except Exception as e:
         print("[parsed_ctx] query failed:", e)
@@ -414,7 +411,8 @@ def parse_route():
     if not text:
         abort(400, "JSON must contain non‑empty 'text'.")
     robot = bool(payload.get("robot"))
-    question = (payload.get("question") or "").strip()  # <-- NEW
+    question = (payload.get("question") or "").strip()
+    db.parsed.insert_one({"question": question, "raw_text": text, "parsed": parsed, "robot": robot, "created_at": datetime.utcnow()})
 
     try:
         parsed = convert_to_json(text, robot=robot)
