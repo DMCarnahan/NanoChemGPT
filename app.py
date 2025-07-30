@@ -366,6 +366,32 @@ def ask():
 
         answer, rationale = split_reasoning(raw)
 
+        # Fallback: if the model omitted rationale, ask for it explicitly
+        if not (rationale or "").strip():
+            try:
+                rationale_only = (
+                    "You previously produced the SynthesisProtocol below.\n"
+                    "Write a short rationale (5–8 bullets max). For each key justification add inline tags:\n"
+                    "[CTX] uploaded/context hits, [DB] Mongo Q&A, [PARSED] parsed protocols, [n] for numbered web REFERENCES, [GEN] for general.\n"
+                    "Base your reasoning strictly on the ANSWER, CONTEXT, and REFERENCES.\n"
+                    "Return just the rationale text, no code fences, no extra headings."
+                )
+                rraw = client.chat.completions.create(
+                    model="gpt-4o-mini",
+                    messages=[
+                        {"role": "user", "content": rationale_only},
+                        {"role": "user", "content": f"CONTEXT:\n{context_joined}"},
+                        {"role": "user", "content": f"REFERENCES:\n{refs_prompt}"},
+                        {"role": "user", "content": f"ANSWER:\n{(answer or '').strip()}"},
+                        {"role": "user", "content": f"QUESTION:\n{q}"},
+                    ],
+                    temperature=0.2,
+                ).choices[0].message.content
+                rationale = (rraw or "").strip()
+            except Exception as e:
+                print("[/ask] rationale fallback failed:", e)
+                rationale = rationale or ""  # keep empty if it fails
+
         # --- Save to Mongo (includes exact context parts for auditing) ---
         qa_id = None
         try:
