@@ -78,6 +78,26 @@
         <h3 class="subhead">Parsed JSON</h3>
         <pre id="jsonPre" class="pre"></pre>
       </div>
+      
+    <div class="mt-4">
+      <details id="sourcesPanel">
+        <summary class="subhead">Sources used (debug)</summary>
+        <div class="small muted mt-2">
+          <p>This shows the context chunks that were sent to the model for the last answer.</p>
+        </div>
+        <div class="mt-2">
+          <h4 class="subhead">Uploaded context [CTX]</h4>
+          <pre id="srcCtxVs" class="pre small"></pre>
+        </div>
+        <div class="mt-2">
+          <h4 class="subhead">Parsed protocols [PARSED]</h4>
+          <pre id="srcCtxParsed" class="pre small"></pre>
+        </div>
+        <div class="mt-2">
+          <h4 class="subhead">Mongo Q&A matches [DB]</h4>
+          <pre id="srcCtxDb" class="pre small"></pre>
+        </div>
+      </details>
     </div>
 
     <!-- History (Q&A) -->

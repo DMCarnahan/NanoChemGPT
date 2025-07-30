@@ -97,3 +97,16 @@ h1{font-size:26px;margin:0}
 .badge-gen{background:#f3f4f6;color:#4b5563}
 
 @keyframes spin{to{transform:rotate(360deg)}}
+
+/* Badges for [DB] and [PARSED] */
+.badge-db {
+  background: #fff4e5;
+  color: #8a5a00;
+  border-color: #f3d19e;
+}
+
+.badge-parsed {
+  background: #eef7ff;
+  color: #0b73e8;
+  border-color: #cfe5ff;
+}

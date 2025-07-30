@@ -249,18 +249,34 @@ def ask():
             for i, r in enumerate(refs)
         )
 
+        # Build the final CONTEXT block with visible sentinels 
+        # and store each part separately to persist them in Mongo
+        vs_ctx = context  # from vector_store.search(q, k=4) 
+        db_ctx = fetch_db_context(q) if USE_DB_CONTEXT else ""
+        ctx_parsed = fetch_parsed_context(q) if USE_DB_CONTEXT else ""
+
+        context_parts = []
+        if vs_ctx:     context_parts.append("<<<CTX_UPLOADS>>>\n" + vs_ctx)
+        if ctx_parsed: context_parts.append("<<<CTX_PARSED>>>\n"  + ctx_parsed)
+        if db_ctx:     context_parts.append("<<<CTX_DB_QA>>>\n"   + db_ctx)
+
+        context_joined = "\n\n---\n\n".join(context_parts).strip()
+
         prompt = (
             "You are NanoChemGPT. Use the CONTEXT and the numbered REFERENCES to propose a synthesis.\n"
-            "Return two blocks:\n"
+            "Return two blocks exactly in this order:\n"
             "## SynthesisProtocol\n"
             "1. **Hardware & Glassware**:\n[]\n"
             "2. **Materials**:\n[]\n"
             "3. **Procedure**\n[]\n\n"
             "```reason\n"
-            "Explain key choices with brief sentences. Cite using [1], [2], ... for REFERENCES. "
-            "Use [CTX] when justification is from uploaded context.\n"
-            "```"
-            f"\n\nCONTEXT:\n{context}\n\nREFERENCES:\n{refs_prompt}\n\nUser question: {q}"
+            "For each key justification, add an inline tag:\n"
+            "  [CTX] for uploaded/context hits, [DB] for similar past Q&A from Mongo,\n"
+            "  [PARSED] for summaries from prior parsed protocols,\n"
+            "  [n] (e.g., [1]) for numbered web REFERENCES, and [GEN] if inferred/general.\n"
+            "Keep rationales terse.\n"
+            "```\n\n"
+            f"CONTEXT:\n{context_joined}\n\nREFERENCES:\n{refs_prompt}\n\nUser question: {q}"
         )
 
         raw = client.chat.completions.create(
@@ -290,7 +306,16 @@ def ask():
             print("[/ask] DB insert warn:", e)
             qa_id = None
 
-        return jsonify({"answer": (answer or '').strip(), "rationale": rationale, "references": refs, "qa_id": qa_id})
+        return jsonify({
+            "answer": (answer or '').strip(),
+            "rationale": rationale,
+            "references": refs,
+            "qa_id": qa_id,
+            "ctx_vs": (vs_ctx or "")[:8000],
+            "ctx_parsed": (ctx_parsed or "")[:8000],
+            "ctx_db": (db_ctx or "")[:8000],
+        })
+
     except Exception as e:
         print("[/ask] Unhandled error:", e)
         traceback.print_exc()
