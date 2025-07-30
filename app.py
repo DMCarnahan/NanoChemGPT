@@ -88,6 +88,59 @@ def home():
         return render_template("index.html")
     except TemplateNotFound:
         return "<h1>NanoChemGPT is up</h1><p>templates/index.html is missing.</p>", 200
+# --- DB context options ---
+USE_DB_CONTEXT   = os.getenv("USE_DB_CONTEXT", "1") == "1"
+DB_CTX_LIMIT     = int(os.getenv("DB_CTX_LIMIT", "3"))
+DB_CTX_MAX_CHARS = int(os.getenv("DB_CTX_MAX_CHARS", "1200"))
+
+def fetch_db_context(q: str, limit: int = DB_CTX_LIMIT) -> str:
+    """Return recent similar Q&A from Mongo (db.qa) as a compact text block."""
+    try:
+        db = get_db()
+        try:
+            cur = db.qa.find({"$text": {"$search": q}})
+        except Exception:
+            cur = db.qa.find({"question": {"$regex": q, "$options": "i"}})
+        items = list(cur.sort("created_at", -1).limit(limit))
+    except Exception as e:
+        print("[db_ctx] query failed:", e)
+        return ""
+
+    blobs = []
+    for d in items:
+        qq = (d.get("question") or "").strip()
+        aa = (d.get("answer") or "").strip()
+        if not aa:
+            continue
+        piece = f"Q: {qq}\nA: {aa}"
+        if len(piece) > DB_CTX_MAX_CHARS:
+            piece = piece[:DB_CTX_MAX_CHARS] + " …"
+        blobs.append(piece)
+    return "\n\n---\n\n".join(blobs)
+
+def fetch_parsed_context(q: str, limit: int = 2) -> str:
+    """Return succinct summaries built from parsed protocols in db.parsed."""
+    try:
+        db = get_db()
+        cur = db.parsed.find({"raw_text": {"$regex": q, "$options": "i"}}).sort("created_at", -1).limit(limit)
+        items = list(cur)
+    except Exception as e:
+        print("[parsed_ctx] query failed:", e)
+        return ""
+
+    pieces = []
+    for d in items:
+        p = d.get("parsed") or {}
+        hdr  = "; ".join(p.get("hardware", [])[:5])
+        reag = "; ".join((r.get("description") for r in p.get("reagents", [])[:6] if isinstance(r, dict)))
+        proc = "; ".join(p.get("procedure", [])[:6])
+        parts = []
+        if hdr:  parts.append(f"Hardware: {hdr}")
+        if reag: parts.append(f"Materials: {reag}")
+        if proc: parts.append(f"Procedure: {proc}")
+        if parts:
+            pieces.append(" • ".join(parts))
+    return "\n\n".join(pieces)
 
 # ---------------- Upload ----------------
 @app.post("/upload")
@@ -173,6 +226,13 @@ def ask():
             context = vs.search(q, k=4)
         except Exception as e:
             print("[/ask] vs.search error:", e); context = ""
+
+        # Enrich context with Mongo history & parsed protocols
+        if USE_DB_CONTEXT:
+            db_ctx     = fetch_db_context(q)
+            ctx_parsed = fetch_parsed_context(q)
+            # Put vector-store hits first, then parsed summaries, then raw Q&A
+            context = "\n\n---\n\n".join([c for c in [context, ctx_parsed, db_ctx] if c]).strip()
 
         refs = []
         try:
