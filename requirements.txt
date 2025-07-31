@@ -5,7 +5,7 @@ Flask>=3.0
 python-dotenv>=1.0
 openai>=1.18
 tiktoken>=0.6
-numpy>=1.26
+numpy==1.24.4
 PyPDF2>=3.0
 tqdm>=4.66
 gunicorn>=21.2
