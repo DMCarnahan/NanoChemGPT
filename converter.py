@@ -101,14 +101,13 @@ def extract_atomic_steps_with_p2a(procedure_text: str) -> list:
         atomic_steps.append(mapped)
     return atomic_steps
 
+def get_chemcrow_agent():
+    # Initialize ChemCrow agent inside the function to avoid global state issues
+    # Do NOT cache as a function attribute to avoid deepcopy/pickle errors in multiprocessing
+    return ChemCrow(tools=[ExperimentalTools()])
+
 def extract_atomic_steps_with_chemcrow(procedure_text: str) -> list:
-    """
-    Use ChemCrow to extract atomic steps from a procedure paragraph.
-    Returns a list of dicts, each representing an atomic action.
-    """
-    # Initialize ChemCrow agent (do this once in production for efficiency)
-    agent = ChemCrow(tools=[ExperimentalTools()])
-    # Prompt ChemCrow to convert the procedure to atomic steps
+    agent = get_chemcrow_agent()
     prompt = (
         "Convert the following chemical procedure into a list of atomic, robot-executable steps. "
         "Each step should be a JSON object with fields like 'action', 'reagents', 'amount', 'vessel', 'temperature', 'duration', etc. "
@@ -137,7 +136,6 @@ def convert_to_json(raw: str, robot: bool = False) -> Dict[str, object]:
     raw = textwrap.dedent(raw).strip()
 
     # --- Section extraction logic (simplified for brevity) ---
-    # This is a placeholder; use your actual section extraction logic
     sections = {}
     current = None
     for line in raw.splitlines():
@@ -150,7 +148,7 @@ def convert_to_json(raw: str, robot: bool = False) -> Dict[str, object]:
             if _LIST_BULLET.match(line) or line.strip():
                 sections[current].append(line.strip())
 
-    # --- Use Paragraph2Actions for atomic steps if robot mode and procedure present ---
+    # --- Use ChemCrow for atomic steps if robot mode and procedure present ---
     if robot and "procedure" in sections:
         procedure_text = "\n".join(sections["procedure"])
         try:
