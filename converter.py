@@ -293,6 +293,21 @@ def _extract_stir_speed(text: str) -> int:
                 pass
     return 900
 
+def _atomic_split(line: str) -> List[str]:
+    """
+    Split a procedure line into atomic actions for robot execution.
+    This is a naive implementation: for production, use NLP or a more advanced parser.
+    """
+    # Split on 'and', 'then', ';', or numbered substeps
+    # Only split if these connectors are not inside parentheses
+    # e.g. "add A and stir" -> ["add A", "stir"]
+    # e.g. "centrifuge at 8000 rpm for 10 min; decant supernatant" -> ["centrifuge at 8000 rpm for 10 min", "decant supernatant"]
+    # e.g. "add B, then heat to 80 C" -> ["add B", "heat to 80 C"]
+    # This is intentionally simple and can be improved
+    parts = re.split(r"\s*(?:;|(?:,?\s+then\s+)|(?:\s+and\s+))\s*", line, flags=re.I)
+    # Remove empty and whitespace-only parts
+    return [p.strip() for p in parts if p.strip()]
+
 def convert_to_json(raw: str, robot: bool = False) -> Dict[str, object]:
     if not raw or not raw.strip():
         raise ParserError("Input text is empty.")
@@ -357,12 +372,18 @@ def convert_to_json(raw: str, robot: bool = False) -> Dict[str, object]:
         m = re.search(r"\badjust\s+pH\s+to\s+(\d+(?:\.\d+)?)", line, re.I)
         if m:
             steps = ["measure solution pH", f"adjust with acid/base to reach pH {m.group(1)}", "verify pH is stable"]
-            expanded.extend(steps); continue
-        for rx, fn in ACTION_RULES:
-            mm = rx.search(line)
-            if mm: expanded.extend(fn(mm)); break
-        else:
-            expanded.append(line)
+            expanded.extend(steps)
+            continue
+        # --- PATCH: atomic split before action rules ---
+        atomic_steps = _atomic_split(line)
+        for atomic in atomic_steps:
+            for rx, fn in ACTION_RULES:
+                mm = rx.search(atomic)
+                if mm:
+                    expanded.extend(fn(mm))
+                    break
+            else:
+                expanded.append(atomic)
 
     # Vessels
     vessels: List[Dict[str, str]] = _collect_vessels_from_hardware(hardware_lines)
