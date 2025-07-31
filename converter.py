@@ -3,6 +3,9 @@ import json, re, math, textwrap
 from dataclasses import dataclass, asdict
 from typing import Dict, List, Optional, Callable, Tuple
 
+from chemcrow.tools.experimental import ExperimentalTools
+from chemcrow.agent import ChemCrow
+
 __all__ = ["convert_to_json", "ParserError"]
 SCHEMA_VERSION = "1.8.2"
 
@@ -98,6 +101,36 @@ def extract_atomic_steps_with_p2a(procedure_text: str) -> list:
         atomic_steps.append(mapped)
     return atomic_steps
 
+def extract_atomic_steps_with_chemcrow(procedure_text: str) -> list:
+    """
+    Use ChemCrow to extract atomic steps from a procedure paragraph.
+    Returns a list of dicts, each representing an atomic action.
+    """
+    # Initialize ChemCrow agent (do this once in production for efficiency)
+    agent = ChemCrow(tools=[ExperimentalTools()])
+    # Prompt ChemCrow to convert the procedure to atomic steps
+    prompt = (
+        "Convert the following chemical procedure into a list of atomic, robot-executable steps. "
+        "Each step should be a JSON object with fields like 'action', 'reagents', 'amount', 'vessel', 'temperature', 'duration', etc. "
+        "Return a JSON array of steps. Procedure:\n"
+        f"{procedure_text}"
+    )
+    response = agent(prompt)
+    # Try to extract the JSON from the response
+    import json
+    try:
+        # ChemCrow may return text with a code block or extra text, so extract JSON robustly
+        import re
+        match = re.search(r"\[.*\]", response, re.DOTALL)
+        if match:
+            steps = json.loads(match.group(0))
+        else:
+            steps = json.loads(response)
+        return steps
+    except Exception as e:
+        # Fallback: return the raw response as a single step
+        return [{"action": "raw_chemcrow_response", "details": response}]
+
 def convert_to_json(raw: str, robot: bool = False) -> Dict[str, object]:
     if not raw or not raw.strip():
         raise ParserError("Input text is empty.")
@@ -121,12 +154,11 @@ def convert_to_json(raw: str, robot: bool = False) -> Dict[str, object]:
     if robot and "procedure" in sections:
         procedure_text = "\n".join(sections["procedure"])
         try:
-            procedure_structured = extract_atomic_steps_with_p2a(procedure_text)
+            procedure_structured = extract_atomic_steps_with_chemcrow(procedure_text)
         except Exception as e:
-            # Fallback: just split lines if P2A fails
-            procedure_structured = [{"action": l} for l in sections["procedure"]]
+            procedure_structured = [{"action": "error", "details": str(e)}]
     else:
-        # Fallback: just split lines
+        # fallback logic
         procedure_structured = [{"action": l} for l in sections.get("procedure", [])]
 
     # --- Compose output ---
