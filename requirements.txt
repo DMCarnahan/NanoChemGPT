@@ -1,36 +1,29 @@
-##############################################################################
-# requirements.txt  –  Python 3.11, paragraph2actions 1.5.0, all-wheel stack
-##############################################################################
-
 # PyTorch (CPU wheels, latest 2.x still supports everything you need)
 --extra-index-url https://download.pytorch.org/whl/cpu
-torch==2.2.2+cpu
-
-# paragraph2actions 1.5.x (requires Py≥3.9, spaCy≥3.7, pydantic≥2)
-paragraph2actions==1.5.0
+torch==2.2.1+cpu
 
 # ↓ Hard pins for transitive deps to keep the resolver instant
 spacy==3.7.4
-spacy-legacy==3.0.12          # required by spaCy 3.7.x
+spacy-legacy==3.0.12          
 thinc==8.2.4
-cython-blis==0.7.11
+blis==0.7.11
 
 sentence-transformers==2.6.1
 transformers==4.40.2
-tokenizers==0.15.2
+tokenizers>=0.19
 huggingface-hub==0.22.2
 
-PyYAML==6.0.1                 # wheels for py311
+PyYAML==6.0.1                 
 pydantic==2.6.4
 pydantic-core==2.16.3
 typing-extensions==4.11.0
 
 # Flask & friends (Py3.11-compatible)
 Flask==3.1.1
-Werkzeug==3.0.3
+Werkzeug==3.1
 Jinja2==3.1.4
 MarkupSafe==2.1.5
-itsdangerous==2.1.2
+itsdangerous==2.2
 gunicorn==21.2.0
 
 # OpenAI + peer deps
@@ -40,14 +33,13 @@ tiktoken==0.6.0
 
 # Utilities
 faiss-cpu==1.8.0.post1
-numpy==1.26.4                 # latest wheel for py311
+numpy==1.26.4                 
 PyPDF2==3.0.1
 pymongo==4.6.3
 requests==2.32.3
-tqdm==4.66.4
+tqdm==4.42.1
 python-dotenv==1.0.1
 python-multipart==0.0.6
 ijson==3.2.3
 packaging==24.0
-importlib-metadata==7.0.0      # still needed for some libs until py312
-##############################################################################
+importlib-metadata==7.0.0     
