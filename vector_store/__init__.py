@@ -1,6 +1,6 @@
 from __future__ import annotations
 import os, time, threading, gzip, json
-from pathlib import Path
+import pathlib
 from typing import List, Dict, Any
 import numpy as np
 import faiss
