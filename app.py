@@ -33,7 +33,7 @@ _no_proxy_client = httpx.Client(
     timeout=3.0,          
 )
 load_dotenv()
-client = OpenAI(api_key=os.getenv("OPENAI_API_KEY", http_client=_no_proxy_client))
+client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"), http_client=_no_proxy_client)
 
 # Job registry
 JOBS = {}  # {job_id: {"status": "...", "progress": int, "error": str, "filename": str}}
