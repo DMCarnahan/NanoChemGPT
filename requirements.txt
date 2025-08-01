@@ -1,6 +1,5 @@
-text --extra-index-url https://download.pytorch.org/whl/cpu -f https://download.pytorch.org/whl/torch_stable.html 
 torch==1.5.1+cpu
-Flask>=2.2
+Flask>=2.3
 gunicorn>=20.1
 python-dotenv>=1.0
 pymongo>=4.6
@@ -11,8 +10,8 @@ tqdm>=4.66
 nltk>=3.8
 tiktoken>=0.6
 faiss-cpu==1.8.0.post1
-sentence-transformers==2.2.2
+sentence-transformers==0.4.1
 openai>=1.18
-paragraph2actions>=0.1.0
+paragraph2actions>=0.0.8
 pydantic<2
 numpy==1.24.4
