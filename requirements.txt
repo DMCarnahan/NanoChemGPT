@@ -1,8 +1,5 @@
---extra-index-url https://download.pytorch.org/whl/cpu
--f https://download.pytorch.org/whl/torch_stable.html
-
 # ---------------- Core numeric / ML stack ----------------
-torch==1.8.1+cpu
+torch==2.1.2+cpu
 faiss-cpu==1.8.0.post1
 numpy==1.24.4                       # last cp38 wheel
 
