@@ -1,4 +1,4 @@
-torch==1.5.1+cpu
+torch==1.8.1+cpu
 Flask>=2.3
 gunicorn>=20.1
 python-dotenv>=1.0
