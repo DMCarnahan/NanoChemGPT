@@ -4,7 +4,7 @@ faiss-cpu==1.8.0.post1
 numpy==1.24.4                       # last cp38 wheel
 
 # ---------------- NLP + paragraph2actions stack ----------
-https://github.com/AI-redactions/paragraph2actions/releases/download/v0.0.8/paragraph2actions-0.0.8-py3-none-any.whl
+./wheels/paragraph2actions-1.5.0-py3-none-any.whl
 # p2a 0.0.8 works with spaCy 3.5 / Torch 1.8 + Transformers 4.0
 spacy==3.5.4
 sentence-transformers==0.4.1
