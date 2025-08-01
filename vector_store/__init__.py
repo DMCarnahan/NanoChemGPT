@@ -6,7 +6,8 @@ import numpy as np
 import faiss
 from sentence_transformers import SentenceTransformer
 
-DATA_DIR   = Path(os.getenv("DATA_DIR", Path(__file__).resolve().parent.parent / "data"))
+DATA_DIR = pathlib.Path(os.getenv("VECTORSTORE_DIR", "/tmp/index"))
+DATA_DIR.mkdir(parents=True, exist_ok=True)
 INDEX_DIR  = DATA_DIR / "index"; INDEX_DIR.mkdir(parents=True, exist_ok=True)
 TTL_SEC    = int(os.getenv("UPLOAD_TTL_SEC", "1800"))  # 30 min
 MODEL_NAME = os.getenv("EMBED_MODEL", "intfloat/e5-large-v2")
