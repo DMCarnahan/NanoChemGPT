@@ -1,12 +1,7 @@
 import os, io, json, threading, traceback, re
 from datetime import datetime
 from pathlib import Path
-
-for _v in ("HTTP_PROXY", "HTTPS_PROXY", "ALL_PROXY",
-           "http_proxy", "https_proxy", "all_proxy",
-           "OPENAI_PROXY"):
-    os.environ.pop(_v, None)
-
+import httpx
 from dotenv import load_dotenv
 from openai import OpenAI
 from PyPDF2 import PdfReader
@@ -33,6 +28,10 @@ app = Flask(__name__,
 app.config["MAX_CONTENT_LENGTH"] = 100 * 1024 * 1024  # 100 MB
 
 # OpenAI
+_no_proxy_client = httpx.Client(
+    proxies=None,          # disable env-proxy auto-detection
+    timeout=3.0,          
+)
 load_dotenv()
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
