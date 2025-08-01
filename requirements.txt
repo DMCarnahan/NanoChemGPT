@@ -1,4 +1,4 @@
-torch==1.8.1+cpu
+torch==2.1.2+cpu
 Flask>=2.3
 gunicorn>=20.1
 python-dotenv>=1.0
@@ -10,8 +10,9 @@ tqdm>=4.66
 nltk>=3.8
 tiktoken>=0.6
 faiss-cpu==1.8.0.post1
-sentence-transformers==0.4.1
+transformers>=4.40,<5
+sentence-transformers>=2.6,<3
 openai>=1.18
-paragraph2actions==0.0.8
+paragraph2actions
 pydantic<2
 numpy==1.24.4
