@@ -3,7 +3,6 @@
 torch==2.2.1+cpu
 
 # ↓ Hard pins for transitive deps to keep the resolver instant
-paragraph2actions
 spacy==3.7.4
 spacy-legacy==3.0.12          
 thinc==8.2.4

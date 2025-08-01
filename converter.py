@@ -5,6 +5,9 @@ from typing import Dict, List
 __all__ = ["convert_to_json", "ParserError"]
 SCHEMA_VERSION = "1.8.2"
 
+import sys, types
+sys.modules["rxn_opennmt_py"] = types.ModuleType("rxn_opennmt_py")
+
 class ParserError(ValueError):
     pass
 
