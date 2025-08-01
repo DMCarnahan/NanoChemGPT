@@ -12,11 +12,10 @@ class ParserError(ValueError):
     pass
 
 # --- Paragraph2Actions integration ---
-try:
-    from paragraph2actions import Paragraph2Actions
-    _P2A_MODEL = Paragraph2Actions.from_pretrained()
-except ImportError:
-    _P2A_MODEL = None
+from p2a_translator import translate_paragraphs
+
+paras = [p.strip() for p in text.split("\n\n") if p.strip()]
+actions = translate_paragraphs(paras)
 
 _HEADING_LINE = re.compile(
     r"""^\s*
