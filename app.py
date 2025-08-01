@@ -29,7 +29,7 @@ app.config["MAX_CONTENT_LENGTH"] = 100 * 1024 * 1024  # 100 MB
 
 # OpenAI
 _no_proxy_client = httpx.Client(
-    proxies=None,          # disable env-proxy auto-detection
+    trust_env=False,          
     timeout=3.0,          
 )
 load_dotenv()
