@@ -16,6 +16,11 @@ from converter import convert_to_json, ParserError
 from search import basic_search
 from mongo_client import get_db, ping as mongo_ping
 
+for _v in ("HTTP_PROXY", "HTTPS_PROXY", "ALL_PROXY",
+           "http_proxy", "https_proxy", "all_proxy",
+           "OPENAI_PROXY"):
+    os.environ.pop(_v, None)
+    
 # App + folders
 BASE_DIR = Path(__file__).resolve().parent
 DATA_DIR = Path(os.getenv("DATA_DIR", BASE_DIR / "data"))
