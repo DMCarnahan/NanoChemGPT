@@ -3,6 +3,7 @@ import json, re, textwrap, types, sys, os, httpx
 from pathlib import Path
 from typing import Dict, List, Any
 from openai import OpenAI
+from chem_post import postprocess_steps
 
 # ---------------------------------------------------------------------------
 # 1.  Regex helpers
@@ -108,7 +109,7 @@ def gpt_steps(paragraphs: list[str], model: str = "gpt-4o-mini") -> list[dict]:
                 "reagents": ["KOH"],
             }),
         }],
-    })
+    }) # type: ignore
 
     # one user message per numbered line
     for p in paragraphs:
@@ -172,12 +173,11 @@ def convert_to_json(raw: str, *, robot: bool = False) -> Dict[str, Any]:
 
     # ---- 5.2  Atomic steps --------------------------------------
     procedure_structured: list[dict[str, Any]] = []
-    if robot and "procedure" in sections:
-        paragraphs = [ln for ln in sections["procedure"] if ln.strip()]
+    if robot:
         try:
-            procedure_structured = gpt_steps(paragraphs)
+            procedure_structured = postprocess_steps(procedure_structured)
         except Exception as exc:
-            procedure_structured = [{"action": "error", "details": str(exc)}]
+            procedure_structured = [{"action":"error","details":f"post-proc: {exc}"}]
 
     # ---- 5.3  Compose output ----------------------------------------------
     return {
