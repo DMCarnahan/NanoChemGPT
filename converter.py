@@ -118,20 +118,19 @@ def gpt_steps(paragraphs: list[str], model: str = "gpt-4o-mini") -> list[dict]:
             msgs.append({"role": "user", "content": clean})
 
     resp = _client.chat.completions.create(
-        model=model,
+        model="gpt-4o-mini",
         temperature=0,
-        tools=[{"type": "function", "function": _fn_schema}],
-        tool_choice="auto",
+        tools=[{"type":"function","function":_fn_schema}],
+        # force the model to always call the function:
+        tool_choice={"type":"function","function":{"name":"add_step"}},
         messages=msgs,
     )
 
-    steps: list[dict] = []
-    for ch in resp.choices:
-        if ch.finish_reason == "tool_calls":
-            for tc in ch.message.tool_calls:
+    steps = []
+    for choice in resp.choices:
+        if choice.finish_reason == "tool_calls":
+            for tc in choice.message.tool_calls:
                 steps.append(json.loads(tc.function.arguments))
-    return steps
-
 
 # ---------------------------------------------------------------------------
 # 5.  Public API: raw text ➜ NanoChem JSON
