@@ -1,7 +1,7 @@
 # AI
 --extra-index-url https://download.pytorch.org/whl/cpu
 torch==2.2.2+cpu
-git+https://github.com/tencent-ailab/chemactor@v0.3.0#egg=chemactor
+https://github.com/tencent-ailab/chemactor/archive/refs/tags/v0.3.0.tar.gz#egg=chemactor==0.3.0
 
 # ↓ Hard pins for transitive deps to keep the resolver instant
 spacy==3.7.4
