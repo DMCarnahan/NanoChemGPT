@@ -116,7 +116,7 @@ def gpt_steps(paragraphs: list[str], model: str = "gpt-4o-mini") -> list[dict]:
         clean = re.sub(r"^\s*\d+[.)]\s*", "", p).strip()
         if clean:
             msgs.append({"role": "user", "content": clean})
-print("[gpt_steps] paragraphs:", paragraphs)
+    print("[gpt_steps] paragraphs:", paragraphs)
     resp = _client.chat.completions.create(
         model="gpt-4o-mini",
         temperature=0,
