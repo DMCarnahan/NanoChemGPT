@@ -86,6 +86,7 @@ def gpt_steps(paragraphs: list[str], model: str = "gpt-4o-mini") -> list[dict]:
     Return a list of atomic-step dictionaries extracted via
     GPT-4o function-calling, one tool call per input line.
     """
+    print("[gpt_steps] paragraphs:", paragraphs)
     msgs = [{
         "role": "system",
         "content": (
@@ -116,7 +117,7 @@ def gpt_steps(paragraphs: list[str], model: str = "gpt-4o-mini") -> list[dict]:
         clean = re.sub(r"^\s*\d+[.)]\s*", "", p).strip()
         if clean:
             msgs.append({"role": "user", "content": clean})
-    print("[gpt_steps] paragraphs:", paragraphs)
+    
     resp = _client.chat.completions.create(
         model="gpt-4o-mini",
         temperature=0,
@@ -125,7 +126,7 @@ def gpt_steps(paragraphs: list[str], model: str = "gpt-4o-mini") -> list[dict]:
         tool_choice={"type":"function","function":{"name":"add_step"}},
         messages=msgs,
     )
-
+    print("[gpt_steps] raw:", resp.choices[0].message.dict())
     steps = []
     for choice in resp.choices:
         if choice.finish_reason == "tool_calls":
