@@ -7,31 +7,14 @@ __all__ = ["convert_to_json", "ParserError"]
 SCHEMA_VERSION = "1.8.2"
 
 # ---------------------------------------------------------------------------
-# 0.  Guarantee the module imports even if on-device translator is absent
+# 1.  Load the on-device translator. 
 # ---------------------------------------------------------------------------
-# Some P2A builds expect rxn_opennmt_py at import-time; stub it if missing.
-sys.modules.setdefault("rxn_opennmt_py", types.ModuleType("rxn_opennmt_py"))
+from chemactor import ActionExtractor
+_ACTOR = ActionExtractor("en_core_actions")   # loads weights from cache
+                         # will fall back to cloud
 
 # ---------------------------------------------------------------------------
-# 1.  Try to load the on-device translator. If unavailable, _P2A_MODEL=None.
-# ---------------------------------------------------------------------------
-try:
-    from paragraph2actions.predictor import Paragraph2Actions
-
-    _P2A_MODEL = Paragraph2Actions()          # heavy; loads once at import
-except Exception:
-    _P2A_MODEL = None                         # will fall back to cloud
-
-# ---------------------------------------------------------------------------
-# 2.  Cloud fallback (tiny helper). Only used when _P2A_MODEL is None
-# ---------------------------------------------------------------------------
-try:
-    from p2a_translator import translate_paragraphs  # your HTTP helper
-except ImportError:
-    translate_paragraphs = None
-
-# ---------------------------------------------------------------------------
-# 3.  Regex helpers
+# 2.  Regex helpers
 # ---------------------------------------------------------------------------
 _HEADING_LINE = re.compile(
     r"""^\s*
@@ -46,13 +29,13 @@ _HEADING_LINE = re.compile(
 _LIST_BULLET = re.compile(r"^\s*(?:[-*•–—]\s+|\d+[\.\)]\s+)")
 
 # ---------------------------------------------------------------------------
-# 4.  Exceptions
+# 3.  Exceptions
 # ---------------------------------------------------------------------------
 class ParserError(ValueError):
     """Raised when input text cannot be parsed or a dependency is missing."""
 
 # ---------------------------------------------------------------------------
-# 5.  Utility: map P2A action dict ➜ NanoChem step
+# 4.  Utility: map chemactor action dict ➜ NanoChem step
 # ---------------------------------------------------------------------------
 def _map_p2a_action_to_schema(act: dict[str, Any]) -> dict[str, Any]:
     op = (act.get("operation") or act.get("action") or "action").lower()
@@ -79,25 +62,31 @@ def _map_p2a_action_to_schema(act: dict[str, Any]) -> dict[str, Any]:
     return {k: v for k, v in step.items() if v not in ("", None, [], {})}
 
 # ---------------------------------------------------------------------------
-# 6.  Core helper: paragraph text ➜ list of atomic steps
+# 5.  Core helper: paragraph text ➜ list of atomic steps
 # ---------------------------------------------------------------------------
-def _paragraphs_to_steps(paragraphs: list[str]) -> list[dict[str, Any]]:
-    """Return structured steps using on-device model or hosted fallback."""
-    if _P2A_MODEL:
-        actions = _P2A_MODEL.predict("\n\n".join(paragraphs))
-        return [_map_p2a_action_to_schema(a) for a in actions]
-
-    if translate_paragraphs:
-        actions = translate_paragraphs(paragraphs)
-        return [_map_p2a_action_to_schema(a) for a in actions]
-
-    raise ParserError(
-        "Paragraph2Actions translator unavailable. "
-        "Install rxn-opennmt-py or configure the cloud helper."
-    )
+def _paragraphs_to_steps(paragraphs: list[str]) -> list[dict]:
+    """Return NanoChem step dicts for each paragraph."""
+    steps = []
+    for para in paragraphs:
+        for act in _ACTOR(para):
+            step = {
+                "action": act.operation.lower(),
+                "details": act.text,
+            }
+            # map ChemActor fields → schema
+            if act.reagents:
+                step["reagents"] = act.reagents
+            if act.solvents:
+                step["solvents"] = act.solvents
+            if act.temperature:
+                step["temperature"] = act.temperature
+            if act.duration:
+                step["duration"] = act.duration
+            steps.append(step)
+    return steps
 
 # ---------------------------------------------------------------------------
-# 7.  Public API: raw text ➜ NanoChem JSON
+# 6.  Public API: raw text ➜ NanoChem JSON
 # ---------------------------------------------------------------------------
 def convert_to_json(raw: str, *, robot: bool = False) -> Dict[str, Any]:
     """
@@ -121,7 +110,7 @@ def convert_to_json(raw: str, *, robot: bool = False) -> Dict[str, Any]:
 
     raw = textwrap.dedent(raw).strip()
 
-    # ---- 7.1  Split into named sections -----------------------------------
+    # ---- 6.1  Split into named sections -----------------------------------
     sections: dict[str, list[str]] = {}
     current = None
     for line in raw.splitlines():
@@ -134,7 +123,7 @@ def convert_to_json(raw: str, *, robot: bool = False) -> Dict[str, Any]:
             if _LIST_BULLET.match(line) or line.strip():
                 sections[current].append(line.strip())
 
-    # ---- 7.2  Atomic steps (optional) --------------------------------------
+    # ---- 6.2  Atomic steps --------------------------------------
     procedure_structured: list[dict[str, Any]] = []
     if robot and "procedure" in sections:
         paragraphs = textwrap.dedent("\n".join(sections["procedure"])).split("\n\n")
@@ -150,7 +139,7 @@ def convert_to_json(raw: str, *, robot: bool = False) -> Dict[str, Any]:
         # simple fallback: each line as a step
         procedure_structured = [{"action": ln} for ln in sections.get("procedure", [])]
 
-    # ---- 7.3  Compose output ----------------------------------------------
+    # ---- 6.3  Compose output ----------------------------------------------
     return {
         "schema_version": SCHEMA_VERSION,
         "title": sections.get("title", ["SynthesisProtocol"])[0]
