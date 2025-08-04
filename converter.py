@@ -1,17 +1,30 @@
 from __future__ import annotations
-import json, re, textwrap, types, sys
+import json, re, textwrap, types, sys, os, httpx
 from pathlib import Path
 from typing import Dict, List, Any
-
-__all__ = ["convert_to_json", "ParserError"]
-SCHEMA_VERSION = "1.8.2"
-
+from openai import OpenAI
 # ---------------------------------------------------------------------------
-# 1.  Load the on-device translator. 
+# 1.  OpenAI Call 
 # ---------------------------------------------------------------------------
-from chemactor import ActionExtractor
-_ACTOR = ActionExtractor("en_core_actions")   # loads weights from cache
-                         # will fall back to cloud
+
+_ACTION_FN = {
+    "name": "add_step",
+    "description": "Add an atomic operation in a chemical synthesis procedure.",
+    "parameters": {
+        "type": "object",
+        "properties": {
+            "action":   {"type": "string", "description": "verb / operation"},
+            "details":  {"type": "string", "description": "full sentence"},
+            "reagents": {"type": "array",  "items":{"type":"string"}},
+            "solvents": {"type": "array",  "items":{"type":"string"}},
+            "temperature":{"type":"string"},
+            "duration": {"type":"string"},
+            "rpm":      {"type":"string"},
+            "atmosphere":{"type":"string"},
+        },
+        "required": ["action", "details"],
+    },
+}
 
 # ---------------------------------------------------------------------------
 # 2.  Regex helpers
@@ -35,7 +48,7 @@ class ParserError(ValueError):
     """Raised when input text cannot be parsed or a dependency is missing."""
 
 # ---------------------------------------------------------------------------
-# 4.  Utility: map chemactor action dict ➜ NanoChem step
+# 4.  Utility: map action dict ➜ NanoChem step
 # ---------------------------------------------------------------------------
 def _map_p2a_action_to_schema(act: dict[str, Any]) -> dict[str, Any]:
     op = (act.get("operation") or act.get("action") or "action").lower()
@@ -64,25 +77,26 @@ def _map_p2a_action_to_schema(act: dict[str, Any]) -> dict[str, Any]:
 # ---------------------------------------------------------------------------
 # 5.  Core helper: paragraph text ➜ list of atomic steps
 # ---------------------------------------------------------------------------
-def _paragraphs_to_steps(paragraphs: list[str]) -> list[dict]:
-    """Return NanoChem step dicts for each paragraph."""
+_no_proxy_client = httpx.Client(trust_env=False, timeout=30.0)
+oa_client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"),
+                   http_client=_no_proxy_client)
+
+def gpt_steps(paragraph: str, model:str="gpt-4o-mini") -> list[dict]:
+    resp = oa_client.chat.completions.create(
+        model=model,
+        temperature=0,
+        tools=[{"type":"function", "function":_ACTION_FN}],
+        tool_choice={"type":"function", "function":{"name":"add_step"}},
+        messages=[
+            {"role":"system","content":"You extract structured synthesis steps."},
+            {"role":"user","content":paragraph}
+        ],
+    )
     steps = []
-    for para in paragraphs:
-        for act in _ACTOR(para):
-            step = {
-                "action": act.operation.lower(),
-                "details": act.text,
-            }
-            # map ChemActor fields → schema
-            if act.reagents:
-                step["reagents"] = act.reagents
-            if act.solvents:
-                step["solvents"] = act.solvents
-            if act.temperature:
-                step["temperature"] = act.temperature
-            if act.duration:
-                step["duration"] = act.duration
-            steps.append(step)
+    for choice in resp.choices:
+        if choice.finish_reason == "tool_calls":
+            payload = json.loads(choice.message.tool_calls[0].function.arguments)
+            steps.append(payload)
     return steps
 
 # ---------------------------------------------------------------------------
@@ -128,20 +142,15 @@ def convert_to_json(raw: str, *, robot: bool = False) -> Dict[str, Any]:
     if robot and "procedure" in sections:
         paragraphs = textwrap.dedent("\n".join(sections["procedure"])).split("\n\n")
         paragraphs = [p.strip() for p in paragraphs if p.strip()]
-
         try:
-            procedure_structured = _paragraphs_to_steps(paragraphs)
+            procedure_structured = []
+            for para in paragraphs:
+                procedure_structured.extend(gpt_steps(para))
         except Exception as exc:
-            procedure_structured = [
-                {"action": "error", "details": str(exc)}
-            ]
-    else:
-        # simple fallback: each line as a step
-        procedure_structured = [{"action": ln} for ln in sections.get("procedure", [])]
+            procedure_structured = [{"action":"error","details":str(exc)}]
 
     # ---- 6.3  Compose output ----------------------------------------------
     return {
-        "schema_version": SCHEMA_VERSION,
         "title": sections.get("title", ["SynthesisProtocol"])[0]
         if "title" in sections
         else "SynthesisProtocol",
