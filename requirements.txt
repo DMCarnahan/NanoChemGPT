@@ -1,7 +1,7 @@
 # AI
 --extra-index-url https://download.pytorch.org/whl/cpu
 torch==2.2.2+cpu
-text https://github.com/Zhanghahah/ChemActor/archive/refs/heads/main.zip
+https://github.com/Zhanghahah/ChemActor/archive/refs/heads/main.zip
 
 # ↓ Hard pins for transitive deps to keep the resolver instant
 spacy==3.7.4
