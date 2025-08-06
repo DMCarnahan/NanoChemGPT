@@ -36,6 +36,8 @@
     "UPLOADS_DIR": "/mnt/data/uploads",
     "USE_DB_CONTEXT": "1",
     "VECTORSTORE_DIR": "/mnt/data/index",
+    "VS_MMR": "1",
+    "VS_LLM_RERANLK": "1",
     "TOKENIZERS_PARALLELISM": "false"
   }
 }

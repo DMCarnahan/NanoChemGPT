@@ -1,6 +1,6 @@
 from __future__ import annotations
-import os, time, threading, gzip, json, pathlib
-from typing import List, Dict, Any, Optional
+import os, re, time, threading, gzip, json, pathlib
+from typing import List, Dict, Any, Optional, Tuple
 import numpy as np
 import faiss
 
@@ -14,12 +14,20 @@ DATA_DIR = pathlib.Path(os.getenv("VECTORSTORE_DIR", "/tmp/index")).resolve()
 DATA_DIR.mkdir(parents=True, exist_ok=True)
 INDEX_DIR = DATA_DIR / "index"; INDEX_DIR.mkdir(parents=True, exist_ok=True)
 
-TTL_SEC        = int(os.getenv("UPLOAD_TTL_SEC", "1800"))   # 30 min
-EMBED_BACKEND  = os.getenv("EMBED_BACKEND", "st").lower()   # "st" | "openai"
+TTL_SEC        = int(os.getenv("UPLOAD_TTL_SEC", "1800"))    # 30 min
+EMBED_BACKEND  = os.getenv("EMBED_BACKEND", "st").lower()    # "st" | "openai"
 EMBED_MODEL    = os.getenv("EMBED_MODEL", "sentence-transformers/all-MiniLM-L6-v2")
 OPENAI_EMB     = os.getenv("EMBED_OPENAI_MODEL", "text-embedding-3-small")
 EMB_BATCH      = int(os.getenv("EMBED_BATCH", "64"))
-DEFER_EMBED    = os.getenv("DEFER_EMBED", "1") == "1"       # defer during preload by default
+DEFER_EMBED    = os.getenv("DEFER_EMBED", "1") == "1"        # defer during preload by default
+
+# Rerank & MMR knobs
+DO_MMR         = os.getenv("VS_MMR", "1") == "1"
+MMR_LAMBDA     = float(os.getenv("VS_MMR_LAMBDA", "0.5"))    # 0..1 (0=diverse,1=relevant)
+DO_LLM_RERANK  = os.getenv("VS_LLM_RERANK", "0") == "1"      # default off
+LLM_RERANK_TOP = int(os.getenv("VS_LLM_RERANK_TOP", "16"))
+LLM_RERANK_KEEP= int(os.getenv("VS_LLM_RERANK_KEEP", "8"))
+LLM_RERANK_MODEL = os.getenv("VS_LLM_RERANK_MODEL", "gpt-4o-mini")
 
 # ---------------- State ----------------
 _index: Optional[faiss.Index] = None
@@ -152,6 +160,98 @@ def _ensure_index():
         if _index is None or _dirty_index or (_index.ntotal != len(_meta)):
             _rebuild_index_locked()
 
+# ---------------- Helpers: Router & Shortlist ----------------
+METHOD_TAGS = {
+    "sol gel": "builtin:sol-gel", "sol-gel": "builtin:sol-gel",
+    "solid state": "builtin:solid-state", "solid-state": "builtin:solid-state",
+    "hydrothermal": "builtin:hydrothermal",
+    "cvd": "builtin:cvd", "ald": "builtin:ald",
+    "coprecipitation": "builtin:coprecipitation", "co-precipitation": "builtin:coprecipitation",
+    "electrodeposition": "builtin:electrodeposition",
+    "solvothermal": "builtin:solvothermal",
+}
+CHEM_REGEX = re.compile(
+    r"\b([A-Z][a-z]?\d*(?:[A-Z][a-z]?\d*)*|Co(?:\d|O|\dO\d)?|Ni(?:\d|O|\dO\d)?|TiO2|PdCl2|Pd|Pt|Fe2O3|CuO|Al2O3|MOF|perovskite)\b"
+)
+
+def _route_query(q: str) -> Tuple[List[str], List[str]]:
+    ql = q.lower()
+    tags: List[str] = []
+    for key, tag in METHOD_TAGS.items():
+        if key in ql:
+            tags.append(tag)
+    mats = [m for m in CHEM_REGEX.findall(q) if m]
+    common = re.findall(r"\b(cobalt|palladium|nickel|alumina|perovskite|mof|graphene)\b", ql)
+    must_keywords = sorted(set([*mats, *common]), key=str.lower)
+
+    if not tags:
+        # broad fallback: prefer builtin corpora first, then uploads
+        tags = ["builtin:", "upload:", "mongo:"]
+    return tags, must_keywords
+
+def _shortlist_indices(metas: List[Dict[str, Any]],
+                       must_tags: List[str],
+                       must_keywords: List[str],
+                       cap: int = 200) -> List[int]:
+    idxs = list(range(len(metas)))
+    if must_tags:
+        idxs = [i for i in idxs if any(str(metas[i].get("tag","")).startswith(t) for t in must_tags)]
+    if must_keywords:
+        kws = [kw.lower() for kw in must_keywords]
+        filt = [i for i in idxs if all(kw in metas[i]["text"].lower() for kw in kws)]
+        if filt:
+            idxs = filt
+    # cap but keep non-empty
+    return idxs[:cap] if idxs else []
+
+def _mmr_select(query_vec: np.ndarray, doc_vecs: np.ndarray, k: int,
+                lam: float = 0.5) -> List[int]:
+    """Classic MMR on cosine/IP space. query_vec: (1,d), doc_vecs: (n,d)."""
+    if doc_vecs.shape[0] <= k:
+        return list(range(doc_vecs.shape[0]))
+    sims = (doc_vecs @ query_vec.T).ravel()  # (n,)
+    selected = []
+    candidates = set(range(doc_vecs.shape[0]))
+    while len(selected) < k and candidates:
+        if not selected:
+            i = int(np.argmax(sims))
+            selected.append(i); candidates.remove(i); continue
+        # diversity term: max similarity to any already selected doc
+        div = np.max(doc_vecs[list(selected)] @ doc_vecs.T, axis=0)
+        scores = lam * sims + (1 - lam) * (-div)
+        scores[list(selected)] = -1e9
+        i = int(np.argmax(scores))
+        selected.append(i); candidates.remove(i)
+    return selected
+
+# LLM reranker
+def _llm_rerank(query: str, items: List[Tuple[int,str,str]]) -> List[Tuple[int,str,str]]:
+    """items: list of (meta_idx, tag, text). Returns reordered list."""
+    if not DO_LLM_RERANK or not items:
+        return items
+    try:
+        from openai import OpenAI
+        client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+        sample = items[:LLM_RERANK_TOP]
+        prompt = "Score each context 0-10 for answering the query. Return JSON list of {i,score}.\n"
+        prompt += f"Query: {query}\n\n"
+        for i,(mid, tag, txt) in enumerate(sample):
+            prompt += f"[{i}] ({tag}) {txt[:800]}\n\n"
+        resp = client.chat.completions.create(
+            model=LLM_RERANK_MODEL,
+            temperature=0,
+            messages=[{"role":"user","content":prompt}]
+        )
+        text = resp.choices[0].message.content or "[]"
+        import json as _json
+        scores = {int(d["i"]): float(d["score"]) for d in _json.loads(text) if "i" in d and "score" in d}
+        ordered = sorted(range(len(sample)), key=lambda i: scores.get(i, 0.0), reverse=True)
+        reord = [sample[i] for i in ordered][:LLM_RERANK_KEEP]
+        return reord + items[len(sample):]
+    except Exception as e:
+        print("[vector_store] llm_rerank failed:", e)
+        return items
+
 # ---------------- Public API ----------------
 def add_to_store(text: str, tag: str = "upload", defer_embed: Optional[bool] = None):
     """
@@ -192,19 +292,61 @@ def clear_uploads():
         _persist()
         print(f"[vector_store] cleared uploads; kept {len(_meta)} chunks")
 
-def search(query: str, k: int = 8) -> str:
+def search(query: str, k: int = 8, *,
+           must_tags: list[str] | None = None,
+           must_keywords: list[str] | None = None) -> str:
+    """
+    Hybrid search with:
+      - router-derived must_tags/must_keywords if not provided
+      - lexical shortlist
+      - dense re-rank (OpenAI/ST)
+      - MMR and LLM rerank
+    Returns a prompt-ready string with explicit [SRC tag] prefixes.
+    """
     _ensure_index()
     with _lock:
         if not _meta or _index is None or _index.ntotal == 0:
             return ""
-        q = _encode([query])
-        D, I = _index.search(q, min(k, _index.ntotal))
-        lines = []
-        for idx in I[0]:
-            if 0 <= idx < len(_meta):
-                m = _meta[idx]
-                lines.append(f"[SRC {m.get('tag','ctx')}] {m['text']}")
-        return "\n---\n".join(lines)
+
+        # 1) Route if caller didn't provide filters
+        if not must_tags and not must_keywords:
+            rt_tags, rt_kws = _route_query(query)
+            must_tags = rt_tags
+            must_keywords = rt_kws
+            print(f"[vector_store] router: tags={must_tags} kws={must_keywords}")
+
+        # 2) Shortlist by tags/keywords
+        cand_idxs = _shortlist_indices(_meta, must_tags or [], must_keywords or [], cap=200)
+        if not cand_idxs:
+            cand_idxs = list(range(len(_meta)))  # fallback
+
+        # 3) Dense over shortlist (local temp index)
+        texts = [_meta[i]["text"] for i in cand_idxs]
+        qv = _encode([query])                     # (1,d)
+        dv = _encode(texts)                       # (n,d)
+
+        d = dv.shape[1]
+        tmp = faiss.IndexFlatIP(d)
+        tmp.add(dv)
+        D, I = tmp.search(qv, min(max(k*2, k), len(texts)))  # a little wider
+
+        # 4) Collect candidates
+        cand = [(cand_idxs[j], _meta[cand_idxs[j]].get("tag","ctx"), texts[j]) for j in I[0]]
+
+        # 5) MMR 
+        if DO_MMR and len(cand) > k:
+            select = _mmr_select(qv.astype("float32"), dv[I[0]], k=min(len(cand), max(k, 8)), lam=MMR_LAMBDA)
+            cand = [cand[i] for i in select]
+
+        # 6) LLM rerank 
+        cand = _llm_rerank(query, cand)
+
+        # 7) Final slice
+        cand = cand[:k]
+
+        # 8) Emit with explicit source tags
+        out = [f"[SRC {tag}] {txt}" for (_mi, tag, txt) in cand]
+        return "\n---\n".join(out)
 
 # ---------------- Expirer (uploads TTL) ----------------
 def _expire_uploads():
