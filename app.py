@@ -103,6 +103,14 @@ try:
 except Exception as e:
     print("[preload] failed:", e)
 
+# debug
+@app.before_request
+def _log_path():
+    try:
+        print(f"[req] {request.method} {request.path}")
+    except Exception:
+        pass
+
 # --- Health checks ---
 @app.get("/health")
 def health():
@@ -586,6 +594,9 @@ def api_uploads():
     cur = db.uploads.find({}).sort([("indexed_at", -1), ("ts", -1)]).limit(limit)
     items = [ _doc(d) for d in cur ]
     return jsonify({"items": items, "limit": limit})
+
+print("[routes] url_map:")
+print(app.url_map)
 
 # ---------------- Errors ----------------
 @app.errorhandler(400)
