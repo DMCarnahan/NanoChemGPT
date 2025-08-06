@@ -15,6 +15,8 @@ from werkzeug.utils import secure_filename
 from flask import Flask, request, jsonify, abort, render_template, send_file
 from jinja2 import TemplateNotFound
 from bson import ObjectId
+import secrets
+import lzma
 
 # Local imports
 import vector_store as vs
