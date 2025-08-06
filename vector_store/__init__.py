@@ -9,6 +9,7 @@ from typing import List, Dict, Any
 import numpy as np
 import faiss
 from sentence_transformers import SentenceTransformer
+from pymongo import MongoClient
 
 DATA_DIR = pathlib.Path(os.getenv("VECTORSTORE_DIR", "/tmp/index"))
 DATA_DIR.mkdir(parents=True, exist_ok=True)
@@ -141,3 +142,22 @@ def search(query: str, k: int = 4) -> str:
             if 0 <= idx < len(_meta):
                 lines.append(_meta[idx]["text"])
         return "\n---\n".join(lines)
+    
+    from pymongo import MongoClient
+import os
+
+def preload_builtin_from_mongo():
+    uri = os.getenv("MONGO_URL")
+    if not uri: 
+        print("[preload] no MONGO_URL; skip"); return
+    client = MongoClient(uri, serverSelectionTimeoutMS=5000)
+    db = client.get_default_database()
+    col = db[os.getenv("BUILTIN_COLLECTION", "builtin_docs")]
+
+    count = 0
+    for d in col.find({}, {"text":1, "_id":0}):
+        txt = (d.get("text") or "").strip()
+        if txt:
+            add_to_store(txt, tag="builtin:mongo")
+            count += 1
+    print(f"[preload] indexed {count} builtin docs from Mongo")

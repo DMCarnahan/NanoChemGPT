@@ -27,6 +27,9 @@ BASE_DIR = Path(__file__).resolve().parent
 DATA_DIR = Path(os.getenv("DATA_DIR", BASE_DIR / "data"))
 UPLOADS_DIR = DATA_DIR / "uploads"
 UPLOADS_DIR.mkdir(parents=True, exist_ok=True)
+UPLOAD_SECRET = os.getenv("ADMIN_UPLOAD_SECRET", secrets.token_hex(16))
+DEST = pathlib.Path(os.getenv("BUILTIN_DIR", "/data/builtin")).resolve()
+DEST.mkdir(parents=True, exist_ok=True)
 
 app = Flask(
     __name__,
@@ -209,6 +212,37 @@ def fetch_parsed_context(q: str, limit: int = 2) -> str:
         if parts:
             pieces.append(" • ".join(parts))
     return "\n".join(pieces)
+
+# ---------------- Initialize Datasets ----------------
+@app.post("/admin/upload_builtin")
+def admin_upload_builtin():
+    auth = request.headers.get("Authorization", "")
+    if not auth.startswith("Bearer ") or auth.split(" ",1)[1].strip() != UPLOAD_SECRET:
+        return jsonify({"error":"unauthorized"}), 401
+
+    f = request.files.get("file")
+    if not f or f.filename == "":
+        return jsonify({"error":"no file"}), 400
+
+    fname = secure_filename(f.filename)
+    raw_path = DEST / fname
+    raw_path.parent.mkdir(parents=True, exist_ok=True)
+
+    # Save original
+    f.save(raw_path)
+
+    # If it’s .json.xz: decompress to .json right next to it
+    out_path = raw_path
+    if fname.lower().endswith(".json.xz"):
+        out_path = DEST / fname[:-3]  # strip .xz → .json
+        with lzma.open(raw_path, "rb") as xzf, open(out_path, "wb") as out:
+            out.write(xzf.read())
+
+    return jsonify({
+        "ok": True,
+        "saved": str(raw_path),
+        "decompressed": str(out_path) if out_path != raw_path else None
+    })
 
 # ---------------- Upload ----------------
 @app.post("/upload")

@@ -33,6 +33,19 @@
       <div id="result" class="alert mt-3 hidden" aria-live="polite"></div>
     </div>
 
+    <!-- Builtin uploader (goes to /admin/upload_builtin) -->
+    <div class="card mt-6">
+      <h2 class="card-title">Upload builtin data (.json / .json.xz)</h2>
+
+      <div id="builtinDrop" class="dropzone" tabindex="0" role="button" aria-label="Drop files or click to choose">
+        <strong>Drag & drop</strong> files here (or click to choose)
+      </div>
+
+      <input id="builtinFile" type="file" class="visually-hidden" accept=".json,.json.xz" multiple>
+      <div class="small muted mt-2">Files land in <code>BUILTIN_DIR</code> and <code>.json.xz</code> is decompressed server-side.</div>
+      <div id="builtinMsg" class="alert mt-2 hidden" aria-live="polite"></div>
+    </div>
+
     <!-- Ask -->
     <div class="card mt-6">
       <h2 class="card-title">Ask NanoChemGPT</h2>
