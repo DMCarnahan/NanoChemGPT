@@ -665,8 +665,16 @@ def admin_reindex_builtin():
     except Exception as e:
         return {"error": str(e)}, 500
 
-print("[routes] url_map:")
-print(app.url_map)
+from flask import make_response, render_template
+
+def _admin_csp(resp):
+    resp.headers["Content-Security-Policy"] = "default-src 'self'; connect-src 'self'; style-src 'self' 'unsafe-inline'"
+    return resp
+
+@app.get("/admin")
+def admin_page():
+    resp = make_response(render_template("admin.html"))
+    return _admin_csp(resp)
 
 @app.errorhandler(400)
 @app.errorhandler(422)

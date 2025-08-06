@@ -1,3 +1,6 @@
+// Configuration for deploying a web application using Railway
+// This configuration uses Nixpacks for building the application and sets up various environment variables.
+
 {
   "$schema": "https://railway.com/railway.schema.json",
   "build": {
@@ -22,7 +25,7 @@
     "NIXPACKS_PYTHON_VERSION": "3.11",
     "NIXPACKS_POST_INSTALL_CMD": "python -m spacy download en_core_web_sm",
     "OPENAI_API_KEY": "${{shared.OPENAI_API_KEY}}",
-    "PERSIST_INDEX": "0",
+    "PERSIST_INDEX": "1",
     "PIP_DISABLE_PIP_VERSION_CHECK": "1",
     "PIP_EXTRA_INDEX_URL": "https://download.pytorch.org/whl/cpu",
     "PIP_FIND_LINKS": "https://download.pytorch.org/whl/torch_stable.html",
