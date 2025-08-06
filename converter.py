@@ -139,7 +139,7 @@ def convert_to_json(raw: str, *, robot: bool = False) -> Dict[str, Any]:
     raw = textwrap.dedent(raw).strip()
 
     # ---- Split into named sections ----
-    sections: dict[str, list[str]] = {}
+    sections: Dict[str, List[str]] = {}
     current = None
     for line in raw.splitlines():
         m = _HEADING_LINE.match(line)
@@ -147,33 +147,45 @@ def convert_to_json(raw: str, *, robot: bool = False) -> Dict[str, Any]:
             current = m.group("name").lower()
             sections[current] = []
             continue
-        if current and ( _LIST_BULLET.match(line) or line.strip() ):
+        if current and (_LIST_BULLET.match(line) or line.strip()):
             sections[current].append(line.strip())
 
     # ---- Atomic steps ----
-    procedure_structured: list[dict[str, Any]] = []
-    if robot and sections.get("procedure"):
-        paragraphs = [ln for ln in sections["procedure"] if ln.strip()]
-        print("[convert] calling gpt_steps on", len(paragraphs), "lines")
-        try:
-            steps = gpt_steps(paragraphs)                 # ← call the model
-            procedure_structured = postprocess_steps(steps)  # ← enrich
-        except Exception as exc:
-            procedure_structured = [{"action": "error", "details": f"extract: {exc}"}]
+    procedure_structured: List[Dict[str, Any]] = []
+    if sections.get("procedure"):
+        if robot:
+            paragraphs = [ln for ln in sections["procedure"] if ln.strip()]
+            print("[convert] calling gpt_steps on", len(paragraphs), "lines")
+            try:
+                steps = gpt_steps(paragraphs, model="gpt-4o-mini")
+                procedure_structured = postprocess_steps(steps)  # one pass
+            except Exception as exc:
+                procedure_structured = [{"action": "error", "details": f"extract: {exc}"}]
+        else:
+            # minimal fallback: one step per line
+            procedure_structured = [{"action": "step", "details": ln}
+                                    for ln in sections["procedure"]]
+
+    # ---- Materials enrichment (best-effort) ----
+    materials_lines = sections.get("materials", [])
+    try:
+        materials_struct = enrich_materials(materials_lines)
+    except Exception as exc:
+        materials_struct = [{"name": ln, "notes": f"enrich failed: {exc}"} for ln in materials_lines]
+
+    # ---- Title ----
+    title = sections.get("title", ["SynthesisProtocol"])
+    title = title[0] if title else "SynthesisProtocol"
 
     # ---- Compose output ----
-
-    materials_lines = sections.get("materials", [])
-    materials_struct = enrich_materials(materials_lines)
-
     return {
-        "title": ...,
+        "title": title,
         "hardware": sections.get("hardware", []),
         "materials": materials_lines,
-        "materials_enriched": materials_struct,   # <— new field
+        "materials_enriched": materials_struct,
         "procedure": sections.get("procedure", []),
         "procedure_structured": procedure_structured,
-}
+    }
 
 # Stand-alone CLI use ---------------------------------------------------------
 if __name__ == "__main__":

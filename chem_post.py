@@ -1,53 +1,77 @@
-import re
-import time
+# chem_post.py  (safe on Python 3.11)
+from __future__ import annotations
+import os, re, time
 from typing import List, Dict, Optional
 
-from rdkit import Chem
-from rdkit.Chem.inchi import MolToInchiKey
-import pubchempy as pcp
+try:
+    import pubchempy as pcp
+except Exception:
+    pcp = None
 
 # ----------------------------------------------------------------------
-# 1. canonicalise && valence check
+# 1. canonicalise && CAS
 # ----------------------------------------------------------------------
-def _canonical_name(name: str) -> str:
-    """
-    Canonicalize a reagent/solvent name.
-    - If it parses as SMILES, return its InChIKey.
-    - Else return the PubChem standard name if available.
-    - Fallback: original string.
-    """
-    if any(c in name for c in "[]=#0123456789"):
-        mol = Chem.MolFromSmiles(name, sanitize=False)
-        if mol is not None:
-            try:
-                Chem.SanitizeMol(mol)
-                return MolToInchiKey(mol)
-            except Exception:
-                return name
+def _smiles_to_inchikey(smiles: str) -> Optional[str]:
+    if not Chem or not MolToInchiKey:
+        return None
     try:
-        cids = pcp.get_cids(name, 'name')
-        if cids:
-            comp = pcp.Compound.from_cid(cids[0])
-            return comp.iupac_name.title() if comp.iupac_name else comp.synonyms[0]
+        mol = Chem.MolFromSmiles(smiles, sanitize=False)
+        if mol is None:
+            return None
+        Chem.SanitizeMol(mol)  # will raise on bad valence
+        return MolToInchiKey(mol)
     except Exception:
-        pass
-    return name
+        return None
 
-
-def _cas_number(name: str) -> Optional[str]:
-    """Fetch the first CAS RN from PubChem (fast local cache)."""
+def _pubchem_standard_name(name: str) -> Optional[str]:
+    """Return IUPAC or first synonym from PubChem."""
+    if not pcp:
+        return None
     try:
-        cids = pcp.get_cids(name, 'name')
+        cids = pcp.get_cids(name, "name")
+        if not cids:
+            # try synonym search as fallback
+            cids = pcp.get_cids(name, "synonym")
         if not cids:
             return None
         comp = pcp.Compound.from_cid(cids[0])
-        for s in comp.synonyms:
-            if re.match(r"^\d{2,7}-\d{2}-\d$", s):
+        if getattr(comp, "iupac_name", None):
+            return comp.iupac_name
+        syns = getattr(comp, "synonyms", None) or []
+        return syns[0] if syns else None
+    except Exception:
+        return None
+
+def _cas_number(name_or_iupac: str) -> Optional[str]:
+    """Fetch first CAS RN from PubChem synonyms."""
+    if not pcp:
+        return None
+    try:
+        cids = pcp.get_cids(name_or_iupac, "name")
+        if not cids:
+            return None
+        comp = pcp.Compound.from_cid(cids[0])
+        for s in getattr(comp, "synonyms", []) or []:
+            if re.fullmatch(r"\d{2,7}-\d{2}-\d", s):
                 return s
     except Exception:
         return None
     return None
 
+def _canonical_name(name: str) -> str:
+    """
+    Canonicalize a reagent/solvent name.
+    - If it looks like SMILES and RDKit is present, return InChIKey.
+    - Else use PubChem IUPAC/first synonym if available.
+    - Fallback: original string.
+    """
+    looks_like_smiles = any(c in name for c in "[]+=#0123456789") and " " not in name
+    if looks_like_smiles:
+        ik = _smiles_to_inchikey(name)
+        if ik:
+            return ik
+    std = _pubchem_standard_name(name)
+    return std or name
 
 # ----------------------------------------------------------------------
 # 2. split “add…, stir…” lines → two atomic steps
@@ -55,8 +79,7 @@ def _cas_number(name: str) -> Optional[str]:
 _SPLIT_RX = re.compile(r"\b(?:then|and then|and|;)\s+", re.I)
 
 def _split_compound_step(step: Dict) -> List[Dict]:
-    """If the details text contains multiple verbs, split into sub-steps."""
-    text = step["details"]
+    text = step.get("details", "") or ""
     parts = _SPLIT_RX.split(text)
     if len(parts) == 1:
         return [step]
@@ -67,40 +90,47 @@ def _split_compound_step(step: Dict) -> List[Dict]:
         if not part:
             continue
         lower = part.lower()
+        act = dict(step)  # shallow copy
         if lower.startswith(("stir", "mix", "agitate")):
-            act = step.copy(); act["action"] = "stir"; act["details"] = part
+            act["action"] = "stir"
         elif lower.startswith(("heat", "reflux")):
-            act = step.copy(); act["action"] = "heat"; act["details"] = part
+            act["action"] = "heat"
+        elif lower.startswith(("cool", "ice-bath", "ice bath", "quench")):
+            act["action"] = "cool"
         else:
-            act = step.copy(); act["action"] = "add";  act["details"] = part
+            act["action"] = act.get("action") or "add"
+        act["details"] = part
         out.append(act)
     return out
-
 
 # ----------------------------------------------------------------------
 # 3. main public helper
 # ----------------------------------------------------------------------
 def postprocess_steps(steps: List[Dict]) -> List[Dict]:
-    """Enrich and clean the list returned by gpt_steps()."""
+    """
+    Enrich and clean the list returned by gpt_steps().
+    - Split multi-verb sentences.
+    - Canonicalize reagent/solvent names.
+    - Add CAS when available.
+    """
     final: List[Dict] = []
 
-    for step in steps:
-        # --- 3.1 split compound sentences
+    for step in steps or []:
         for s in _split_compound_step(step):
-            # --- 3.2 canonicalise reagents & solvents
+            # canonicalise reagents & solvents
             for field in ("reagents", "solvents"):
-                if field in s:
-                    canon = []
-                    for r in s[field]:
-                        r_can = _canonical_name(r)
-                        cas   = _cas_number(r_can) or _cas_number(r)
-                        if cas:
-                            r_can = f"{r_can} (CAS {cas})"
-                        canon.append(r_can)
+                vals = s.get(field) or []
+                canon = []
+                for r in vals:
+                    r_can = _canonical_name(r)
+                    cas = _cas_number(r_can) or _cas_number(r)
+                    if cas:
+                        r_can = f"{r_can} (CAS {cas})"
+                    canon.append(r_can)
+                if canon:
                     s[field] = canon
-
             final.append(s)
-
-            # polite delay for PubChem (≤ 5 req/s)
+            # polite PubChem pacing (<= ~5 req/s)
             time.sleep(0.05)
+
     return final
