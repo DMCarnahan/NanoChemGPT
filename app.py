@@ -489,33 +489,27 @@ def ask():
 # ---------------- Parse ----------------
 @app.post("/parse")
 def parse_route():
-    print("[/parse] robot =", robot, "len(text) =", len(text))
-    payload = request.get_json(silent=True) or {}
-    text = (payload.get("text") or "").strip()
-    if not text:
-        abort(400, "JSON must contain non‑empty 'text'.")
-    robot = bool(payload.get("robot"))
-    question = (payload.get("question") or "").strip()  # <— NEW
-
     try:
-        parsed = convert_to_json(text, robot=robot)
-    except ParserError as e:
-        abort(422, str(e))
+        payload = request.get_json(silent=True) or {}
+        text = (payload.get("text") or "").strip()
+        robot = bool(payload.get("robot"))
+        question = (payload.get("question") or "").strip()
+        print(f"[/parse] robot={robot} len(text)={len(text)}")
 
-    # Save to Mongo
-    try:
-        db = get_db()
-        db.parsed.insert_one({
-            "created_at": datetime.utcnow(),
-            "robot": robot,
-            "question": question,      # <— store question
-            "raw_text": text,
-            "parsed": parsed
-        })
+        if not text:
+            return jsonify({"error": "JSON must contain non-empty 'text'"}), 400
+
+        out = convert_to_json(text, robot=robot)
+        # optional: record in DB here…
+        return jsonify(out)
+
+    except ParserError as pe:
+        print("[/parse] ParserError:", pe)
+        return jsonify({"error": str(pe)}), 422
     except Exception as e:
-        print("[/parse] DB insert warn:", e)
-
-    return jsonify(parsed)
+        import traceback
+        traceback.print_exc()            # ← full stack in logs
+        return jsonify({"error": f"parse failed: {e}"}), 500
 
 # ---------------- Save TXT ----------------
 @app.post("/save_txt")

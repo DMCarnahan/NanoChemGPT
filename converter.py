@@ -56,6 +56,11 @@ def _map_p2a_action_to_schema(act: dict[str, Any]) -> dict[str, Any]:
 # ---------------------------------------------------------------------------
 # 4.  Core helper: paragraph text ➜ list of atomic steps
 # ---------------------------------------------------------------------------
+_client = OpenAI(
+    api_key=os.getenv("OPENAI_API_KEY"),
+    http_client=httpx.Client(trust_env=False, timeout=30.0),
+)
+
 _fn_schema = {
     "name": "add_step",
     "description": "Add ONE atomic operation in a chemical synthesis step.",
@@ -75,13 +80,7 @@ _fn_schema = {
     },
 }
 
-_client = OpenAI(
-    api_key=os.getenv("OPENAI_API_KEY"),
-    http_client=httpx.Client(trust_env=False, timeout=30.0),
-)
-
-
-def gpt_steps(paragraphs: list[str], model: str = "gpt-4o-mini") -> list[dict]:
+def gpt_steps(paragraphs: List[str], model: str = "gpt-4o-mini") -> List[Dict]:
     """
     Return a list of atomic-step dictionaries extracted via
     GPT-4o function-calling, one tool call per input line.
