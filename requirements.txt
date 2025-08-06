@@ -30,6 +30,7 @@ gunicorn==21.2.0
 openai==1.30.1
 jiter==0.4.1
 tiktoken==0.6.0
+httpx==0.27.2
 
 # Utilities
 faiss-cpu==1.8.0.post1
