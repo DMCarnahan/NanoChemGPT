@@ -127,6 +127,8 @@ def preload_builtin():
         except Exception as e:
             print(f"[preload] skip {f}: {e}")
     print(f"[preload] indexed {count} builtin docs from {p}")
+    src = f"[SRC builtin:{f.name}]\n"
+    vs.add_to_store(src + txt, tag=f"builtin:{f.name}")
 
 try:
     if os.getenv("PRELOAD_BUILTIN", "1") == "1":
@@ -415,7 +417,7 @@ def ask():
         if ctx_parsed: context_parts.append("<<<CTX_PARSED>>>\n" + ctx_parsed)
         if db_ctx: context_parts.append("<<<CTX_DB_QA>>>\n" + db_ctx)
         context_joined = "\n\n---\n\n".join(context_parts).strip()
-
+        print("[ask][debug] VS tags preview:", (vs_ctx or "").replace("\n"," ")[:220])
         print("[ask] ctx parts:",
               f"VS={bool(vs_ctx)} len={len(vs_ctx) if vs_ctx else 0}",
               f"PARSED={bool(ctx_parsed)} len={len(ctx_parsed) if ctx_parsed else 0}",
@@ -447,7 +449,7 @@ def ask():
             "3. **Procedure**\n[]\n\n"
             "```reason\n"
             "For each key justification, add an inline tag:\n"
-            "  [CTX] for uploaded/context hits, [DB] for similar past Q&A from Mongo,\n"
+            "  If you use any content from CONTEXT, include “[CTX]” next to that line in the answer. Prefer information from CONTEXT over general knowledge when relevant.,\n"
             "  [PARSED] for summaries from prior parsed protocols,\n"
             "  [n] for numbered web REFERENCES, and [GEN] if inferred/general.\n"
             "Keep rationales terse.\n"
@@ -495,6 +497,23 @@ def ask():
         except Exception as _e:
             print("[/ask] used extraction failed:", _e)
             used_summary = {"refs": [], "tags": {}, "has_ctx": False}
+            
+        if not used_summary.get("has_ctx"):
+            try:
+                revise = client.chat.completions.create(
+                    model="gpt-4o-mini",
+                    temperature=0,
+                    messages=[
+                    {"role":"system","content":"Revise the answer to explicitly cite CONTEXT with [CTX] markers where used."},
+                    {"role":"user","content": f"CONTEXT:\n{context_joined}"},
+                    {"role":"user","content": f"ORIGINAL ANSWER:\n{answer}"}
+                    ]
+                ).choices[0].message.content
+                if revise and len(revise) > len(answer)*0.7:
+                    answer = revise
+                    used_summary = _extract_used_markers(answer, rationale or "")
+            except Exception as e:
+                print("[ask] revise step skipped:", e)
 
         qa_id = None
         try:
