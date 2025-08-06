@@ -44,9 +44,13 @@ def _encode_openai(texts: List[str]) -> np.ndarray:
     return arr
 
 def _encode(texts: List[str]) -> np.ndarray:
-    if EMBED_BACKEND.lower() == "openai":
-        return _encode_openai(texts)
-    return _encode_st(texts)
+    try:
+        if EMBED_BACKEND.lower() == "openai":
+            return _encode_openai(texts)
+        return _encode_st(texts)
+    except Exception as e:
+        print("[vector_store] embed failed:", e, "— set EMBED_BACKEND=openai to avoid local torch.")
+        raise
 
 # ---------------- Index IO ----------------
 def _get_index(d: int) -> faiss.Index:
