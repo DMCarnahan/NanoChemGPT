@@ -614,67 +614,7 @@ def api_uploads():
     items = [_doc(d) for d in cur]
     return jsonify({"items": items, "limit": limit})
 
-# ---- Admin: index stats / search / reindex ----
-@app.get("/admin/index_stats")
-def admin_index_stats():
-    import os, pathlib, shutil
-    from vector_store import stats  # implement below if you don't have it
-    vecdir = pathlib.Path(os.getenv("VECTORSTORE_DIR", "/tmp/index")).resolve()
-    size = 0
-    if vecdir.exists():
-        for p in vecdir.rglob("*"):
-            if p.is_file():
-                size += p.stat().st_size
-    s = stats() if callable(getattr(vs, "stats", None)) else {}
-    return {
-        "VECTORSTORE_DIR": str(vecdir),
-        "exists": vecdir.exists(),
-        "files": len(list(vecdir.rglob("*"))) if vecdir.exists() else 0,
-        "bytes": size,
-        "stats": s,
-    }
-
-@app.get("/admin/vs_search")
-def admin_vs_search():
-    q = request.args.get("q","").strip()
-    if not q: return {"error":"pass ?q="}, 400
-    try:
-        hits = vs.search(q, k=int(request.args.get("k", 5)))
-    except Exception as e:
-        return {"error": f"vs.search failed: {e}"}, 500
-    return {"q": q, "hits": hits}
-
-@app.post("/admin/reindex_builtin")
-def admin_reindex_builtin():
-    try:
-        from vector_store import add_to_store
-        import pathlib, os, json
-        root = pathlib.Path(os.getenv("BUILTIN_DIR", "/mnt/data/builtin"))
-        count = 0
-        for f in root.rglob("*"):
-            if not f.is_file(): continue
-            if f.suffix.lower() in {".txt",".md",".json"}:
-                try:
-                    txt = f.read_text(encoding="utf-8", errors="ignore")
-                    if txt.strip():
-                        vs.add_to_store(txt, tag=f"builtin:{f.name}")
-                        count += 1
-                except Exception as e:
-                    print("[reindex] skip", f, e)
-        return {"ok": True, "indexed": count}
-    except Exception as e:
-        return {"error": str(e)}, 500
-
-from flask import make_response, render_template
-
-def _admin_csp(resp):
-    resp.headers["Content-Security-Policy"] = "default-src 'self'; connect-src 'self'; style-src 'self' 'unsafe-inline'"
-    return resp
-
 # --- Admin auth decorator ---
-import os, functools
-from flask import request, jsonify, make_response, render_template
-
 ADMIN_TOKEN = os.getenv("ADMIN_UPLOAD_SECRET", "")
 
 def require_admin(fn):
