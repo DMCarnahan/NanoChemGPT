@@ -23,29 +23,37 @@ _dirty_index = False
 _lock = threading.Lock()
 
 # ---------------- Model loading (lazy) ----------------
+_ST_MODEL = None
+
 def _load_st_model():
-    global _model
-    if _model is None:
-        # Import only when needed, avoids pulling torch/transformers at import time.
+    global _ST_MODEL
+    if _ST_MODEL is None:
+        # Lazy import to avoid torch import unless needed
         from sentence_transformers import SentenceTransformer
-        _model = SentenceTransformer(MODEL_NAME)
-    return _model
+        _ST_MODEL = SentenceTransformer(os.getenv("EMBED_MODEL", "sentence-transformers/all-MiniLM-L6-v2"))
+    return _ST_MODEL
 
 def _encode_st(texts: List[str]) -> np.ndarray:
-    m = _load_st_model()
-    emb = m.encode(texts, normalize_embeddings=True, show_progress_bar=False, batch_size=EMB_BATCH)
+    model = _load_st_model()
+    emb = model.encode(texts, normalize_embeddings=True, show_progress_bar=False)
     return np.asarray(emb, dtype="float32")
 
 def _encode_openai(texts: List[str]) -> np.ndarray:
     from openai import OpenAI
-    client = OpenAI()
-    out = client.embeddings.create(model=os.getenv("EMBED_OPENAI_MODEL", "text-embedding-3-small"), input=texts)
-    arr = np.array([e.embedding for e in out.data], dtype="float32")
-    return arr
+    client = OpenAI(api_key=OPENAI_API_KEY)
+    out: List[List[float]] = []
+    B = 64
+    for i in range(0, len(texts), B):
+        chunk = texts[i:i+B]
+        resp = client.embeddings.create(model=EMBED_OPENAI_MODEL, input=chunk)
+        out.extend([e.embedding for e in resp.data])
+    arr = np.array(out, dtype="float32")
+    norms = np.linalg.norm(arr, axis=1, keepdims=True) + 1e-12
+    return (arr / norms).astype("float32")
 
 def _encode(texts: List[str]) -> np.ndarray:
     try:
-        if EMBED_BACKEND.lower() == "openai":
+        if EMBED_BACKEND == "openai":
             return _encode_openai(texts)
         return _encode_st(texts)
     except Exception as e:
