@@ -42,5 +42,6 @@ python-dotenv==1.0.1
 python-multipart==0.0.6
 ijson==3.2.3
 packaging==24.0
-pubchempy==1.0.4   
-rdkit-pypi==2023.3.1b1
+pubchempy==1.0.4
+rapidfuzz==3.9.6      
+backoff==2.2.1 

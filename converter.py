@@ -4,6 +4,7 @@ from pathlib import Path
 from typing import Dict, List, Any
 from openai import OpenAI
 from chem_post import postprocess_steps
+from chem_tools import enrich_materials
 
 # ---------------------------------------------------------------------------
 # 1.  Regex helpers
@@ -161,13 +162,18 @@ def convert_to_json(raw: str, *, robot: bool = False) -> Dict[str, Any]:
             procedure_structured = [{"action": "error", "details": f"extract: {exc}"}]
 
     # ---- Compose output ----
-    return {
-        "title": sections.get("title", ["SynthesisProtocol"])[0] if "title" in sections else "SynthesisProtocol",
-        "hardware": sections.get("hardware", []),
-        "materials": sections.get("materials", []),
-        "procedure": sections.get("procedure", []),
-        "procedure_structured": procedure_structured,
-    }
+
+materials_lines = sections.get("materials", [])
+materials_struct = enrich_materials(materials_lines)
+
+return {
+    "title": ...,
+    "hardware": sections.get("hardware", []),
+    "materials": materials_lines,
+    "materials_enriched": materials_struct,   # <— new field
+    "procedure": sections.get("procedure", []),
+    "procedure_structured": procedure_structured,
+}
 
 # Stand-alone CLI use ---------------------------------------------------------
 if __name__ == "__main__":
