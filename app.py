@@ -5,7 +5,7 @@ import threading
 import traceback
 import re
 from datetime import datetime
-from pathlib import Path
+import pathlib
 
 import httpx
 from dotenv import load_dotenv
