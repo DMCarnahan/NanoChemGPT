@@ -1,6 +1,3 @@
-// Configuration for deploying a web application using Railway
-// This configuration uses Nixpacks for building the application and sets up various environment variables.
-
 {
   "$schema": "https://railway.com/railway.schema.json",
   "build": {
