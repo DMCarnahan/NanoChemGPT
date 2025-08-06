@@ -1,5 +1,6 @@
-import re, time
-from typing import List, Dict
+import re
+import time
+from typing import List, Dict, Optional
 
 from rdkit import Chem
 from rdkit.Chem.inchi import MolToInchiKey
@@ -10,12 +11,11 @@ import pubchempy as pcp
 # ----------------------------------------------------------------------
 def _canonical_name(name: str) -> str:
     """
-    Try to canonicalise a reagent/solvent name.
-    • If it parses as SMILES, return its InChIKey.
-    • Else return the PubChem standard name if available.
-    • Fallback: original string.
+    Canonicalize a reagent/solvent name.
+    - If it parses as SMILES, return its InChIKey.
+    - Else return the PubChem standard name if available.
+    - Fallback: original string.
     """
-    # quick SMILES heuristic: contains [,=,# or digits
     if any(c in name for c in "[]=#0123456789"):
         mol = Chem.MolFromSmiles(name, sanitize=False)
         if mol is not None:
@@ -23,10 +23,7 @@ def _canonical_name(name: str) -> str:
                 Chem.SanitizeMol(mol)
                 return MolToInchiKey(mol)
             except Exception:
-                # invalid valence etc.
                 return name
-
-    # name → CID → canonical name
     try:
         cids = pcp.get_cids(name, 'name')
         if cids:
@@ -37,7 +34,7 @@ def _canonical_name(name: str) -> str:
     return name
 
 
-def _cas_number(name: str) -> str | None:
+def _cas_number(name: str) -> Optional[str]:
     """Fetch the first CAS RN from PubChem (fast local cache)."""
     try:
         cids = pcp.get_cids(name, 'name')
@@ -60,7 +57,7 @@ _SPLIT_RX = re.compile(r"\b(?:then|and then|and|;)\s+", re.I)
 def _split_compound_step(step: Dict) -> List[Dict]:
     """If the details text contains multiple verbs, split into sub-steps."""
     text = step["details"]
-    parts = _split_rx.split(text)
+    parts = _SPLIT_RX.split(text)
     if len(parts) == 1:
         return [step]
 
@@ -69,10 +66,10 @@ def _split_compound_step(step: Dict) -> List[Dict]:
         part = part.strip().rstrip(".")
         if not part:
             continue
-        # crude verb → action mapping
-        if part.lower().startswith(("stir", "mix", "agitate")):
+        lower = part.lower()
+        if lower.startswith(("stir", "mix", "agitate")):
             act = step.copy(); act["action"] = "stir"; act["details"] = part
-        elif part.lower().startswith(("heat", "reflux")):
+        elif lower.startswith(("heat", "reflux")):
             act = step.copy(); act["action"] = "heat"; act["details"] = part
         else:
             act = step.copy(); act["action"] = "add";  act["details"] = part

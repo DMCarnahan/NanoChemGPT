@@ -21,18 +21,6 @@ async function checkHealth() {
   }
 }
 
-async function doParse() {
-  const txt = document.querySelector('#protocol').value.trim();
-  const res = await fetch('/parse', {
-    method: 'POST',
-    headers: {'Content-Type':'application/json'},
-    body: JSON.stringify({ text: txt, robot: true, question: '' })
-  });
-  const data = await res.json();
-  console.log('parse ->', data);
-  // render data.procedure_structured to the UI here
-}
-
 // ------- UI helpers -------
 function showAlert(id, kind, text) {
   const el = qs(id);
@@ -57,7 +45,6 @@ function escapeHtml(s) {
     { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]
   ));
 }
-
 
 function renderRationaleWithCitations(text, refs) {
   // Escape everything first

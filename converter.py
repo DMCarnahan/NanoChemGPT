@@ -56,81 +56,78 @@ def _map_p2a_action_to_schema(act: dict[str, Any]) -> dict[str, Any]:
 # ---------------------------------------------------------------------------
 # 4.  Core helper: paragraph text ➜ list of atomic steps
 # ---------------------------------------------------------------------------
-_client = OpenAI(
-    api_key=os.getenv("OPENAI_API_KEY"),
-    http_client=httpx.Client(trust_env=False, timeout=30.0),
-)
-
 _fn_schema = {
     "name": "add_step",
     "description": "Add ONE atomic operation in a chemical synthesis step.",
     "parameters": {
         "type": "object",
         "properties": {
-            "action":      {"type": "string"},
-            "details":     {"type": "string"},
-            "reagents":    {"type": "array", "items": {"type": "string"}},
-            "solvents":    {"type": "array", "items": {"type": "string"}},
+            "action": {"type": "string"},
+            "details": {"type": "string"},
+            "reagents": {"type": "array","items":{"type":"string"}},
+            "solvents": {"type": "array","items":{"type":"string"}},
             "temperature": {"type": "string"},
-            "duration":    {"type": "string"},
-            "rpm":         {"type": "string"},
-            "atmosphere":  {"type": "string"},
+            "duration": {"type": "string"},
+            "rpm": {"type": "string"},
+            "atmosphere": {"type": "string"},
         },
-        "required": ["action", "details"],
+        "required": ["action","details"]
     },
 }
 
-def gpt_steps(paragraphs: List[str], model: str = "gpt-4o-mini") -> List[Dict]:
-    """
-    Return a list of atomic-step dictionaries extracted via
-    GPT-4o function-calling, one tool call per input line.
-    """
-    print("[gpt_steps] paragraphs:", paragraphs)
+_client = OpenAI(
+api_key=os.getenv("OPENAI_API_KEY"),
+http_client=httpx.Client(trust_env=False, timeout=30.0),
+)
+
+def gpt_steps(paragraphs, model="gpt-4o-mini"):
     msgs = [{
         "role": "system",
         "content": (
-            "You are a chemistry assistant. "
-            "For every input line you receive, call the function "
-            "`add_step` exactly once, filling its JSON arguments. "
+            "You are a chemistry assistant. For every input line you receive, "
+            "call the function `add_step` exactly once, filling its JSON arguments. "
             "If a line has multiple operations, split them into separate steps, "
             "calling `add_step` multiple times."
         ),
     }]
 
-    # single “priming” example so the model sees the schema once
     msgs.append({
         "role": "assistant",
         "content": None,
         "tool_calls": [{
-            "name": "add_step",
-            "arguments": json.dumps({
-                "action": "add",
-                "details": "Add 2 g KOH.",
-                "reagents": ["KOH"],
-            }),
-        }],
+            "id": "call_priming",
+            "type": "function",
+            "function": {
+                "name": "add_step",
+                "arguments": json.dumps({
+                    "action": "add",
+                    "details": "Add 2 g KOH.",
+                    "reagents": ["KOH"]
+                })
+            }
+        }]
     }) # type: ignore
 
-    # one user message per numbered line
+    # One user message per step line
     for p in paragraphs:
         clean = re.sub(r"^\s*\d+[.)]\s*", "", p).strip()
         if clean:
             msgs.append({"role": "user", "content": clean})
-    
+
     resp = _client.chat.completions.create(
-        model="gpt-4o-mini",
+        model=model,
         temperature=0,
         tools=[{"type":"function","function":_fn_schema}],
-        # force the model to always call the function:
-        tool_choice={"type":"function","function":{"name":"add_step"}},
+        tool_choice={"type":"function","function":{"name":"add_step"}},  # force it
         messages=msgs,
     )
-    print("[gpt_steps] raw:", resp.choices[0].message.dict())
+
     steps = []
-    for choice in resp.choices:
-        if choice.finish_reason == "tool_calls":
-            for tc in choice.message.tool_calls:
+    for ch in resp.choices:
+        if getattr(ch, "finish_reason", None) == "tool_calls" and ch.message.tool_calls:
+            for tc in ch.message.tool_calls:
                 steps.append(json.loads(tc.function.arguments))
+    return steps
 
 # ---------------------------------------------------------------------------
 # 5.  Public API: raw text ➜ NanoChem JSON

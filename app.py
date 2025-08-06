@@ -1,6 +1,12 @@
-import os, io, json, threading, traceback, re
+import os
+import io
+import json
+import threading
+import traceback
+import re
 from datetime import datetime
 from pathlib import Path
+
 import httpx
 from dotenv import load_dotenv
 from openai import OpenAI
@@ -10,7 +16,7 @@ from flask import Flask, request, jsonify, abort, render_template, send_file
 from jinja2 import TemplateNotFound
 from bson import ObjectId
 
-# Local imports 
+# Local imports
 import vector_store as vs
 from converter import convert_to_json, ParserError
 from search import basic_search
@@ -22,22 +28,22 @@ DATA_DIR = Path(os.getenv("DATA_DIR", BASE_DIR / "data"))
 UPLOADS_DIR = DATA_DIR / "uploads"
 UPLOADS_DIR.mkdir(parents=True, exist_ok=True)
 
-app = Flask(__name__,
-            template_folder=str(BASE_DIR / "templates"),
-            static_folder=str(BASE_DIR / "static"))
+app = Flask(
+    __name__,
+    template_folder=str(BASE_DIR / "templates"),
+    static_folder=str(BASE_DIR / "static"),
+)
 app.config["MAX_CONTENT_LENGTH"] = 100 * 1024 * 1024  # 100 MB
 
 # OpenAI
-_no_proxy_client = httpx.Client(
-    trust_env=False,          
-    timeout=120.0,          
-)
+_no_proxy_client = httpx.Client(trust_env=False, timeout=120.0)
 load_dotenv()
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"), http_client=_no_proxy_client)
 
 # Job registry
 JOBS = {}  # {job_id: {"status": "...", "progress": int, "error": str, "filename": str}}
-def _set_job(jid, **kw): JOBS.setdefault(jid, {}).update(kw)
+def _set_job(jid, **kw):
+    JOBS.setdefault(jid, {}).update(kw)
 
 def _process_pdf_job(jid: str, path: Path, filename: str):
     db = None
@@ -58,22 +64,36 @@ def _process_pdf_job(jid: str, path: Path, filename: str):
             raise ValueError("PDF contains no extractable text.")
         vs.add_to_store(text, tag=f"upload:{filename}")
         if db is not None:
-            db.uploads.update_one({"filename": filename},
-                                  {"$set": {"status": "indexed", "indexed_at": datetime.utcnow(),
-                                            "n_pages": n}},
-                                  upsert=True)
+            db.uploads.update_one(
+                {"filename": filename},
+                {
+                    "$set": {
+                        "status": "indexed",
+                        "indexed_at": datetime.utcnow(),
+                        "n_pages": n,
+                    }
+                },
+                upsert=True,
+            )
         _set_job(jid, status="done", progress=100)
     except Exception as e:
         if db is not None:
             try:
-                db.uploads.update_one({"filename": filename},
-                                      {"$set": {"status": "error", "error": str(e),
-                                                "failed_at": datetime.utcnow()}},
-                                      upsert=True)
+                db.uploads.update_one(
+                    {"filename": filename},
+                    {
+                        "$set": {
+                            "status": "error",
+                            "error": str(e),
+                            "failed_at": datetime.utcnow(),
+                        }
+                    },
+                    upsert=True,
+                )
             except Exception as ee:
                 print("[/upload] failed to record error in DB:", ee)
         _set_job(jid, status="error", error=str(e))
-        
+
 # ---------------- Vector Store init ----------------
 def preload_builtin():
     root = os.getenv("BUILTIN_DIR") or str((Path(__file__).parent / "builtin"))
@@ -83,7 +103,7 @@ def preload_builtin():
         return
     count = 0
     for f in p.rglob("*"):
-        if not f.is_file(): 
+        if not f.is_file():
             continue
         if f.suffix.lower() not in {".txt", ".md", ".json"}:
             continue
@@ -96,14 +116,12 @@ def preload_builtin():
             print(f"[preload] skip {f}: {e}")
     print(f"[preload] indexed {count} builtin docs from {p}")
 
-# call once at startup
 try:
     if os.getenv("PRELOAD_BUILTIN", "1") == "1":
         preload_builtin()
 except Exception as e:
     print("[preload] failed:", e)
 
-# debug
 @app.before_request
 def _log_path():
     try:
@@ -111,7 +129,6 @@ def _log_path():
     except Exception:
         pass
 
-# --- Health checks ---
 @app.get("/health")
 def health():
     return "ok", 200
@@ -129,12 +146,11 @@ def home():
     try:
         return render_template("index.html")
     except TemplateNotFound:
-        # Fallback: simple HTML if template missing
         return "<h1>NanoChemGPT is up</h1><p>templates/index.html is missing.</p>", 200
 
 # --- DB context options ---
-USE_DB_CONTEXT   = os.getenv("USE_DB_CONTEXT", "1") == "1"
-DB_CTX_LIMIT     = int(os.getenv("DB_CTX_LIMIT", "3"))
+USE_DB_CONTEXT = os.getenv("USE_DB_CONTEXT", "1") == "1"
+DB_CTX_LIMIT = int(os.getenv("DB_CTX_LIMIT", "3"))
 DB_CTX_MAX_CHARS = int(os.getenv("DB_CTX_MAX_CHARS", "1200"))
 
 def fetch_db_context(q: str, limit: int = DB_CTX_LIMIT) -> str:
@@ -183,11 +199,11 @@ def fetch_parsed_context(q: str, limit: int = 2) -> str:
     pieces = []
     for d in items:
         p = d.get("parsed") or {}
-        hdr  = "; ".join(p.get("hardware", [])[:5])
+        hdr = "; ".join(p.get("hardware", [])[:5])
         reag = "; ".join((r.get("description") for r in p.get("reagents", [])[:6] if isinstance(r, dict)))
         proc = "; ".join(p.get("procedure", [])[:6])
         parts = []
-        if hdr:  parts.append(f"Hardware: {hdr}")
+        if hdr: parts.append(f"Hardware: {hdr}")
         if reag: parts.append(f"Materials: {reag}")
         if proc: parts.append(f"Procedure: {proc}")
         if parts:
@@ -204,12 +220,13 @@ def upload():
     path = UPLOADS_DIR / fname
     f.save(path)
 
-    # record receipt
     try:
         db = get_db()
-        db.uploads.update_one({"filename": fname},
-                              {"$set": {"filename": fname, "ts": datetime.utcnow(), "status": "received"}},
-                              upsert=True)
+        db.uploads.update_one(
+            {"filename": fname},
+            {"$set": {"filename": fname, "ts": datetime.utcnow(), "status": "received"}},
+            upsert=True,
+        )
     except Exception as e:
         print("[/upload] DB receipt warn:", e)
 
@@ -224,10 +241,11 @@ def upload():
             raw = path.read_text(encoding="utf-8", errors="ignore")
             vs.add_to_store(raw, tag=f"upload:{fname}")
             try:
-                get_db().uploads.update_one({"filename": fname},
-                                            {"$set": {"status": "indexed", "indexed_at": datetime.utcnow(),
-                                                      "kind": "json"}},
-                                            upsert=True)
+                get_db().uploads.update_one(
+                    {"filename": fname},
+                    {"$set": {"status": "indexed", "indexed_at": datetime.utcnow(), "kind": "json"}},
+                    upsert=True,
+                )
             except Exception as e:
                 print("[/upload] DB update warn:", e)
             _set_job(jid, status="done", progress=100)
@@ -235,10 +253,11 @@ def upload():
             txt = path.read_text(encoding="utf-8", errors="ignore")
             vs.add_to_store(txt, tag=f"upload:{fname}")
             try:
-                get_db().uploads.update_one({"filename": fname},
-                                            {"$set": {"status": "indexed", "indexed_at": datetime.utcnow(),
-                                                      "kind": "text"}},
-                                            upsert=True)
+                get_db().uploads.update_one(
+                    {"filename": fname},
+                    {"$set": {"status": "indexed", "indexed_at": datetime.utcnow(), "kind": "text"}},
+                    upsert=True,
+                )
             except Exception as e:
                 print("[/upload] DB update warn:", e)
             _set_job(jid, status="done", progress=100)
@@ -267,24 +286,18 @@ def search_route():
 
 # ---------------- Ask ----------------
 
-# --------- Helpers: citation & tag extraction ---------
 _CIT_BRACKET_RX = re.compile(r"[\[](?P<num>\d{1,4})\]")
 _CIT_FULLWIDTH_RX = re.compile(r"【(?P<num>\d{1,4})】")
 _CIT_FOOTNOTE_RX = re.compile(r"\[\^(?P<num>\d{1,4})\]")
-
 _TAGS = ("CTX", "PARSED", "DB", "GEN")
 
 def _extract_used_markers(*texts: str) -> dict:
-    """Extract used reference numbers and tag counts from the given texts.
-    Handles ASCII [12], full-width 【12】, and footnote [^12] citations.
-    Returns: { 'refs': [int,...], 'tags': {tag:count}, 'has_ctx': bool }
-    """
+    """Extract used reference numbers and tag counts from the given texts."""
     seen = set()
     tag_counts = {t: 0 for t in _TAGS}
     for t in texts:
-        if not t: 
+        if not t:
             continue
-        # Normalize NBSP and stray unicode
         tt = t.replace('\u00A0', ' ')
         for rx in (_CIT_BRACKET_RX, _CIT_FULLWIDTH_RX, _CIT_FOOTNOTE_RX):
             for m in rx.finditer(tt):
@@ -292,50 +305,38 @@ def _extract_used_markers(*texts: str) -> dict:
                     seen.add(int(m.group('num')))
                 except Exception:
                     pass
-        # Count tags (exact tokens inside square brackets)
         for tag in _TAGS:
             tag_rx = re.compile(rf"\[{tag}\]")
             tag_counts[tag] += len(tag_rx.findall(tt))
     refs = sorted(seen)
-    has_ctx = any(tag_counts[t] > 0 for t in ("CTX","PARSED","DB"))
-    return { "refs": refs, "tags": tag_counts, "has_ctx": has_ctx }
+    has_ctx = any(tag_counts[t] > 0 for t in ("CTX", "PARSED", "DB"))
+    return {"refs": refs, "tags": tag_counts, "has_ctx": has_ctx}
 
 @app.post("/ask")
 def ask():
-    from datetime import datetime
-    import re, traceback
-
     def split_reasoning(raw: str) -> tuple[str, str]:
         """Extract rationale robustly from fences or headings."""
         if not raw:
             return "", ""
         text = raw.strip()
-
-        # 1) Fenced code block with language: reason / rationale / reasoning
         fence = re.compile(r"```(?:reason|rationale|reasoning)\s*(.*?)```", re.I | re.S)
         m = fence.search(text)
         if m:
             rationale = m.group(1).strip()
             answer = (text[:m.start()] + text[m.end():]).strip()
             return answer, rationale
-
-        # 2) Any fenced block after a 'rationale' keyword in the line above
         fence_any = re.compile(r"rationale\s*:?\s*```(.*?)```", re.I | re.S)
         m = fence_any.search(text)
         if m:
             rationale = m.group(1).strip()
             answer = (text[:m.start()] + text[m.end():]).strip()
             return answer, rationale
-
-        # 3) Markdown heading "Rationale" / "Reasoning" (multi-line)
         head = re.compile(r"(?:^|\n)#{1,3}\s*(rationale|reasoning)\b[^\n]*\n((?:.*\n?)*)$", re.I | re.S)
         m = head.search(text)
         if m:
             rationale = m.group(2).strip()
             answer = text[:m.start()].strip()
             return answer, rationale
-
-        # 4) Fallback: no rationale
         return text, ""
 
     try:
@@ -344,31 +345,26 @@ def ask():
         if not q:
             abort(400, "No question.")
 
-        # --- Build context from vector store first ---
         vs_ctx = ""
         try:
             vs_ctx = vs.search(q, k=4) or ""
         except Exception as e:
             print("[/ask] vs.search error:", e)
 
-        # --- Optional Mongo context (history + parsed) ---
         db_ctx = fetch_db_context(q) if USE_DB_CONTEXT else ""
         ctx_parsed = fetch_parsed_context(q) if USE_DB_CONTEXT else ""
 
-        # Order: VS first, PARSED second, DB last (most general).
         context_parts = []
-        if vs_ctx:     context_parts.append("<<<CTX_UPLOADS>>>\n" + vs_ctx)
-        if ctx_parsed: context_parts.append("<<<CTX_PARSED>>>\n"  + ctx_parsed)
-        if db_ctx:     context_parts.append("<<<CTX_DB_QA>>>\n"   + db_ctx)
-
+        if vs_ctx: context_parts.append("<<<CTX_UPLOADS>>>\n" + vs_ctx)
+        if ctx_parsed: context_parts.append("<<<CTX_PARSED>>>\n" + ctx_parsed)
+        if db_ctx: context_parts.append("<<<CTX_DB_QA>>>\n" + db_ctx)
         context_joined = "\n\n---\n\n".join(context_parts).strip()
 
-        print("[ask] ctx parts:", 
-            f"VS={bool(vs_ctx)} len={len(vs_ctx) if vs_ctx else 0}",
-            f"PARSED={bool(ctx_parsed)} len={len(ctx_parsed) if ctx_parsed else 0}",
-            f"DB={bool(db_ctx)} len={len(db_ctx) if db_ctx else 0}")
+        print("[ask] ctx parts:",
+              f"VS={bool(vs_ctx)} len={len(vs_ctx) if vs_ctx else 0}",
+              f"PARSED={bool(ctx_parsed)} len={len(ctx_parsed) if ctx_parsed else 0}",
+              f"DB={bool(db_ctx)} len={len(db_ctx) if db_ctx else 0}")
 
-        # --- Web refs for citations ---
         refs = []
         try:
             refs = basic_search(q, n=6) or []
@@ -386,7 +382,6 @@ def ask():
             for i, r in enumerate(refs)
         )
 
-        # --- Prompt ---
         prompt = (
             "You are NanoChemGPT. Use the CONTEXT and the numbered REFERENCES to propose a synthesis.\n"
             "Return two blocks exactly in this order:\n"
@@ -414,7 +409,6 @@ def ask():
 
         answer, rationale = split_reasoning(raw)
 
-        # Fallback: if the model omitted rationale, ask for it explicitly
         if not (rationale or "").strip():
             try:
                 rationale_only = (
@@ -438,16 +432,14 @@ def ask():
                 rationale = (rraw or "").strip()
             except Exception as e:
                 print("[/ask] rationale fallback failed:", e)
-                rationale = rationale or ""  # keep empty if it fails
+                rationale = rationale or ""
 
-        # Extract usage summary from answer + rationale
         try:
             used_summary = _extract_used_markers(answer or "", rationale or "")
         except Exception as _e:
             print("[/ask] used extraction failed:", _e)
             used_summary = {"refs": [], "tags": {}, "has_ctx": False}
 
-        # --- Save to Mongo (includes exact context parts for auditing) ---
         qa_id = None
         try:
             db = get_db()
@@ -467,7 +459,6 @@ def ask():
         except Exception as e:
             print("[/ask] DB insert warn:", e)
 
-        # --- Return everything the UI needs (including ctx fields) ---
         return jsonify({
             "answer": (answer or "").strip(),
             "rationale": rationale,
@@ -486,7 +477,6 @@ def ask():
         return jsonify({"error": f"/ask failed: {e}"}), 500
 
 # ---------------- Parse & Save ----------------
-# ---------------- Parse ----------------
 @app.post("/parse")
 def parse_route():
     try:
@@ -500,22 +490,19 @@ def parse_route():
             return jsonify({"error": "JSON must contain non-empty 'text'"}), 400
 
         out = convert_to_json(text, robot=robot)
-        # optional: record in DB here…
         return jsonify(out)
 
     except ParserError as pe:
         print("[/parse] ParserError:", pe)
         return jsonify({"error": str(pe)}), 422
     except Exception as e:
-        import traceback
-        traceback.print_exc()            # ← full stack in logs
+        traceback.print_exc()
         return jsonify({"error": f"parse failed: {e}"}), 500
 
-# ---------------- Save TXT ----------------
 @app.post("/save_txt")
 def save_txt():
     data = request.get_json(silent=True) or {}
-    answer   = (data.get("answer") or "").strip()
+    answer = (data.get("answer") or "").strip()
     question = (data.get("question") or "").strip()
     if not answer:
         abort(400, "answer is empty")
@@ -524,7 +511,6 @@ def save_txt():
     fname = f"chatau_{datetime.utcnow():%Y%m%d_%H%M%S}.txt"
     return send_file(buf, mimetype="text/plain", as_attachment=True, download_name=fname)
 
-# ---------------- Upload maintenance ----------------
 @app.post("/clear_uploads")
 def clear_uploads_route():
     try:
@@ -533,7 +519,6 @@ def clear_uploads_route():
         print("clear_uploads error:", e)
     return {"status": "uploads cleared"}
 
-# ---------------- History & Upload Browser APIs ----------------
 def _safe_id(x):
     try:
         return ObjectId(x)
@@ -541,7 +526,8 @@ def _safe_id(x):
         return None
 
 def _doc(obj):
-    if not isinstance(obj, dict): return obj
+    if not isinstance(obj, dict):
+        return obj
     out = dict(obj)
     if "_id" in out:
         out["_id"] = str(out["_id"])
@@ -567,16 +553,18 @@ def api_history():
             cur = db.qa.find({"question": {"$regex": q, "$options": "i"}})
     else:
         cur = db.qa.find({})
-    items = [ _doc(d) for d in cur.sort("created_at", -1).skip(skip).limit(limit) ]
+    items = [_doc(d) for d in cur.sort("created_at", -1).skip(skip).limit(limit)]
     return jsonify({"items": items, "skip": skip, "limit": limit})
 
 @app.get("/api/history/<id>")
 def api_history_one(id):
     db = get_db()
     oid = _safe_id(id)
-    if not oid: abort(404, "invalid id")
+    if not oid:
+        abort(404, "invalid id")
     doc = db.qa.find_one({"_id": oid})
-    if not doc: abort(404, "not found")
+    if not doc:
+        abort(404, "not found")
     return jsonify(_doc(doc))
 
 @app.get("/api/uploads")
@@ -587,13 +575,12 @@ def api_uploads():
     except Exception:
         limit = 50
     cur = db.uploads.find({}).sort([("indexed_at", -1), ("ts", -1)]).limit(limit)
-    items = [ _doc(d) for d in cur ]
+    items = [_doc(d) for d in cur]
     return jsonify({"items": items, "limit": limit})
 
 print("[routes] url_map:")
 print(app.url_map)
 
-# ---------------- Errors ----------------
 @app.errorhandler(400)
 @app.errorhandler(422)
 @app.errorhandler(500)
