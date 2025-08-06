@@ -671,10 +671,127 @@ def _admin_csp(resp):
     resp.headers["Content-Security-Policy"] = "default-src 'self'; connect-src 'self'; style-src 'self' 'unsafe-inline'"
     return resp
 
+# --- Admin auth decorator ---
+import os, functools
+from flask import request, jsonify, make_response, render_template
+
+ADMIN_TOKEN = os.getenv("ADMIN_UPLOAD_SECRET", "")
+
+def require_admin(fn):
+    @functools.wraps(fn)
+    def w(*a, **kw):
+        auth = request.headers.get("Authorization","")
+        ok = ADMIN_TOKEN and auth.startswith("Bearer ") and auth.split(" ",1)[1].strip() == ADMIN_TOKEN
+        if not ok:
+            return jsonify({"error":"unauthorized"}), 401
+        return fn(*a, **kw)
+    return w
+
+def _admin_csp(resp):
+    resp.headers["Content-Security-Policy"] = "default-src 'self'; connect-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:"
+    return resp
+
+# --- Minimal admin HTML ---
 @app.get("/admin")
 def admin_page():
-    resp = make_response(render_template("admin.html"))
-    return _admin_csp(resp)
+    html = """
+<!doctype html><meta charset="utf-8">
+<h2>Admin</h2>
+<input id="tok" placeholder="Bearer token" style="width:420px"><br><br>
+<button onclick="post('/admin/reindex_builtin')">reindex builtin</button>
+<button onclick="get('/admin/index_stats')">index_stats</button>
+<input id="q" placeholder="query" style="width:260px">
+<button onclick="get('/admin/vs_search?q='+encodeURIComponent(document.getElementById('q').value))">vs_search</button>
+<pre id="out" style="white-space:pre-wrap;border:1px solid #ccc;padding:8px;margin-top:12px"></pre>
+<script>
+async function get(p){ await req('GET', p); }
+async function post(p){ await req('POST', p); }
+async function req(m,p){
+  const r = await fetch(p,{method:m,headers:{Authorization:'Bearer '+document.getElementById('tok').value}});
+  document.getElementById('out').textContent = await r.text();
+}
+</script>"""
+    return _admin_csp(make_response(html))
+
+# --- JSON admin endpoints ---
+@app.get("/admin/volinfo")
+@require_admin
+def volinfo():
+    import pathlib, os, json
+    root = pathlib.Path(os.getenv("BUILTIN_DIR","/mnt/data/builtin"))
+    files = []
+    if root.exists():
+        for p in root.rglob("*"):
+            if p.is_file():
+                try: files.append(str(p.relative_to(root)))
+                except Exception: files.append(str(p))
+    return {"BUILTIN_DIR": str(root), "contains": files[:200], "count": len(files)}
+
+@app.post("/admin/reindex_builtin")
+@require_admin
+def admin_reindex_builtin():
+    import pathlib, os, json
+    from vector_store import add_to_store
+    root = pathlib.Path(os.getenv("BUILTIN_DIR","/mnt/data/builtin"))
+    count = 0
+
+    def json_to_text(s: str, max_chars=200_000):
+        try: obj = json.loads(s)
+        except Exception: return s
+        out=[]
+        def walk(k,v,p=""):
+            key=".".join([x for x in [p,str(k)] if x])
+            if isinstance(v,str): 
+                if len(v)>2: out.append(f"{key}: {v}")
+            elif isinstance(v,(int,float,bool)): out.append(f"{key}: {v}")
+            elif isinstance(v,dict):
+                for kk,vv in v.items(): walk(kk,vv,key)
+            elif isinstance(v,list):
+                for i,vv in enumerate(v[:50]): walk(i,vv,key)
+        if isinstance(obj,dict):
+            for k,v in obj.items(): walk(k,v)
+        elif isinstance(obj,list):
+            for i,v in enumerate(obj[:200]): walk(i,v)
+        return "\n".join(out)[:max_chars]
+
+    for f in root.rglob("*"):
+        if not f.is_file(): continue
+        if f.suffix.lower() in {".txt",".md",".json"}:
+            try:
+                txt = f.read_text(encoding="utf-8", errors="ignore")
+                if f.suffix.lower()==".json":
+                    txt = json_to_text(txt)
+                if txt.strip():
+                    add_to_store(txt, tag=f"builtin:{f.name}")
+                    count += 1
+            except Exception as e:
+                print("[reindex] skip", f, e)
+    return {"ok": True, "indexed": count}
+
+@app.get("/admin/index_stats")
+@require_admin
+def admin_index_stats():
+    import pathlib, os
+    vecdir = pathlib.Path(os.getenv("VECTORSTORE_DIR","/mnt/data/index"))
+    size = 0; files=0
+    if vecdir.exists():
+        for p in vecdir.rglob("*"):
+            files+=1
+            if p.is_file(): size += p.stat().st_size
+    stats = getattr(vs, "stats", lambda: {})()
+    return {"VECTORSTORE_DIR": str(vecdir), "exists": vecdir.exists(), "files": files, "bytes": size, "stats": stats}
+
+@app.get("/admin/vs_search")
+@require_admin
+def admin_vs_search():
+    q = (request.args.get("q") or "").strip()
+    if not q: return {"error":"pass ?q="}, 400
+    k = int(request.args.get("k") or 5)
+    try:
+        hits = vs.search(q, k=k)
+    except Exception as e:
+        return {"error": f"vs.search failed: {e}"}, 500
+    return {"q": q, "hits": hits}
 
 @app.errorhandler(400)
 @app.errorhandler(422)
