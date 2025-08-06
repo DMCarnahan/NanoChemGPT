@@ -163,16 +163,16 @@ def convert_to_json(raw: str, *, robot: bool = False) -> Dict[str, Any]:
 
     # ---- Compose output ----
 
-materials_lines = sections.get("materials", [])
-materials_struct = enrich_materials(materials_lines)
+    materials_lines = sections.get("materials", [])
+    materials_struct = enrich_materials(materials_lines)
 
-return {
-    "title": ...,
-    "hardware": sections.get("hardware", []),
-    "materials": materials_lines,
-    "materials_enriched": materials_struct,   # <— new field
-    "procedure": sections.get("procedure", []),
-    "procedure_structured": procedure_structured,
+    return {
+        "title": ...,
+        "hardware": sections.get("hardware", []),
+        "materials": materials_lines,
+        "materials_enriched": materials_struct,   # <— new field
+        "procedure": sections.get("procedure", []),
+        "procedure_structured": procedure_structured,
 }
 
 # Stand-alone CLI use ---------------------------------------------------------
