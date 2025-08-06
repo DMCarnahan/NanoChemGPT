@@ -4,63 +4,85 @@ from typing import List, Dict, Any, Optional
 import numpy as np
 import faiss
 
+# ---------------- Boot log ----------------
+print("[vector_store] EMBED_BACKEND =", os.getenv("EMBED_BACKEND", "st"),
+      "| EMBED_MODEL =", os.getenv("EMBED_MODEL", ""),
+      "| EMBED_OPENAI_MODEL =", os.getenv("EMBED_OPENAI_MODEL", ""))
+
 # ---------------- Config ----------------
 DATA_DIR = pathlib.Path(os.getenv("VECTORSTORE_DIR", "/tmp/index")).resolve()
 DATA_DIR.mkdir(parents=True, exist_ok=True)
 INDEX_DIR = DATA_DIR / "index"; INDEX_DIR.mkdir(parents=True, exist_ok=True)
 
 TTL_SEC        = int(os.getenv("UPLOAD_TTL_SEC", "1800"))   # 30 min
-MODEL_NAME     = os.getenv("EMBED_MODEL", "sentence-transformers/all-MiniLM-L6-v2")
-EMBED_BACKEND  = os.getenv("EMBED_BACKEND", "st")           # "st" | "openai"
+EMBED_BACKEND  = os.getenv("EMBED_BACKEND", "st").lower()   # "st" | "openai"
+EMBED_MODEL    = os.getenv("EMBED_MODEL", "sentence-transformers/all-MiniLM-L6-v2")
+OPENAI_EMB     = os.getenv("EMBED_OPENAI_MODEL", "text-embedding-3-small")
 EMB_BATCH      = int(os.getenv("EMBED_BATCH", "64"))
 DEFER_EMBED    = os.getenv("DEFER_EMBED", "1") == "1"       # defer during preload by default
 
 # ---------------- State ----------------
-_model = None                  # sentence-transformers model OR None
 _index: Optional[faiss.Index] = None
 _meta: List[Dict[str, Any]] = []      # [{id, tag, ts, text}]
-_dirty_index = False          
+_dirty_index = False                  # when True we rebuild on next search
 _lock = threading.Lock()
 
-# ---------------- Model loading (lazy) ----------------
+# ---------------- Lazy sentence-transformers ----------------
 _ST_MODEL = None
-
 def _load_st_model():
     global _ST_MODEL
     if _ST_MODEL is None:
-        # Lazy import to avoid torch import unless needed
+        # Import here to avoid importing torch at module import time
         from sentence_transformers import SentenceTransformer
-        _ST_MODEL = SentenceTransformer(os.getenv("EMBED_MODEL", "sentence-transformers/all-MiniLM-L6-v2"))
+        _ST_MODEL = SentenceTransformer(EMBED_MODEL)
+        print("[vector_store] loaded sentence-transformers:", EMBED_MODEL)
     return _ST_MODEL
 
 def _encode_st(texts: List[str]) -> np.ndarray:
     model = _load_st_model()
-    emb = model.encode(texts, normalize_embeddings=True, show_progress_bar=False)
+    emb = model.encode(
+        texts,
+        normalize_embeddings=True,      # unit vectors for cosine/IP
+        show_progress_bar=False,
+        batch_size=EMB_BATCH,
+    )
     return np.asarray(emb, dtype="float32")
 
+# ---------------- OpenAI embeddings ----------------
 def _encode_openai(texts: List[str]) -> np.ndarray:
+    api_key = os.getenv("OPENAI_API_KEY")
+    if not api_key:
+        raise RuntimeError("OPENAI_API_KEY is not set")
     from openai import OpenAI
-    client = OpenAI(api_key=OPENAI_API_KEY)
+    client = OpenAI(api_key=api_key)
     out: List[List[float]] = []
-    B = 64
-    for i in range(0, len(texts), B):
-        chunk = texts[i:i+B]
-        resp = client.embeddings.create(model=EMBED_OPENAI_MODEL, input=chunk)
-        out.extend([e.embedding for e in resp.data])
-    arr = np.array(out, dtype="float32")
+    for i in range(0, len(texts), EMB_BATCH):
+        chunk = texts[i:i+EMB_BATCH]
+        resp = client.embeddings.create(model=OPENAI_EMB, input=chunk)
+        out.extend(e.embedding for e in resp.data)
+    arr = np.asarray(out, dtype="float32")
+    # L2-normalize → cosine via inner product
     norms = np.linalg.norm(arr, axis=1, keepdims=True) + 1e-12
     return (arr / norms).astype("float32")
 
 def _encode(texts: List[str]) -> np.ndarray:
+    backend = os.getenv("EMBED_BACKEND", EMBED_BACKEND).lower()
     try:
-        if EMBED_BACKEND == "openai":
+        if backend == "openai":
+            print("[vector_store] using OpenAI embeddings:", OPENAI_EMB)
             return _encode_openai(texts)
+        print("[vector_store] using sentence-transformers embeddings:", EMBED_MODEL)
         return _encode_st(texts)
     except Exception as e:
-        print("[vector_store] embed failed:", e, "— set EMBED_BACKEND=openai to avoid local torch.")
+        print("[vector_store] embed failed:", repr(e),
+              "— set EMBED_BACKEND=openai to avoid local torch.")
         raise
 
 # ---------------- Index IO ----------------
+def _reset_index(d: int):
+    global _index
+    _index = faiss.IndexFlatIP(d)
+
 def _get_index(d: int) -> faiss.Index:
     global _index
     if _index is None:
@@ -69,15 +91,12 @@ def _get_index(d: int) -> faiss.Index:
             try:
                 _index = faiss.read_index(str(ipath))
                 _load_meta()
+                print("[vector_store] loaded FAISS index with ntotal=", _index.ntotal)
                 return _index
             except Exception as e:
                 print("[vector_store] read_index failed, rebuilding:", e)
-        _index = faiss.IndexFlatIP(d)
+        _reset_index(d)
     return _index
-
-def _reset_index(d: int):
-    global _index
-    _index = faiss.IndexFlatIP(d)
 
 def _persist():
     try:
@@ -100,13 +119,12 @@ def _load_meta():
 
 # ---------------- Chunking ----------------
 def _chunk(text: str) -> List[str]:
-    # Split into paragraph-ish chunks, hard cap
-    parts = [para.strip()[:4000] for para in text.split("\n\n") if para.strip()]
+    parts = [p.strip()[:4000] for p in text.split("\n\n") if p.strip()]
     return parts or [text[:4000]]
 
-# ---------------- Embedding build (lazy/full rebuild) ----------------
+# ---------------- Rebuild ----------------
 def _rebuild_index_locked():
-    """(Re)embed all meta texts and rebuild FAISS. Caller must hold _lock."""
+    """(Re)embed all texts and rebuild FAISS. Caller must hold _lock."""
     global _dirty_index
     texts = [m["text"] for m in _meta]
     if not texts:
@@ -114,7 +132,6 @@ def _rebuild_index_locked():
         _persist()
         _dirty_index = False
         return
-
     embs = _encode(texts)
     d = embs.shape[1]
     _reset_index(d)
@@ -126,20 +143,21 @@ def _rebuild_index_locked():
 def _ensure_index():
     with _lock:
         if _index is None:
-            # try load existing; if not, build
             ipath = INDEX_DIR / "index.faiss"
             if ipath.exists():
                 try:
                     _get_index(1536)  # dim ignored when reading
                 except Exception:
                     pass
-        # if index exists but out of sync or marked dirty 
         if _index is None or _dirty_index or (_index.ntotal != len(_meta)):
             _rebuild_index_locked()
 
 # ---------------- Public API ----------------
 def add_to_store(text: str, tag: str = "upload", defer_embed: Optional[bool] = None):
-    """Add text to store. If defer_embed=True, we won't embed immediately."""
+    """
+    Add text to the store. If defer_embed=True, we only append to meta
+    and mark the index dirty; search() will rebuild on demand.
+    """
     if defer_embed is None:
         defer_embed = DEFER_EMBED
 
@@ -151,14 +169,11 @@ def add_to_store(text: str, tag: str = "upload", defer_embed: Optional[bool] = N
             _meta.append({"id": cur + i, "tag": tag, "ts": ts, "text": c})
 
         if defer_embed:
-            # mark dirty; search() will rebuild lazily
             global _dirty_index
             _dirty_index = True
             _persist()
         else:
-            # embed & add incrementally without full rebuild
             if _index is None or _index.ntotal != cur:
-                # safest path: full rebuild to keep ids aligned
                 _rebuild_index_locked()
             else:
                 embs = _encode(chunks)
@@ -168,7 +183,7 @@ def add_to_store(text: str, tag: str = "upload", defer_embed: Optional[bool] = N
         print(f"[vector_store] indexed {len(chunks)} chunks (total {len(_meta)}) tag={tag}")
 
 def clear_uploads():
-    """Remove transient upload:* chunks; mark index dirty so it rebuilds lazily."""
+    """Remove transient upload:* chunks and mark index dirty."""
     with _lock:
         keep = [m for m in _meta if not str(m.get("tag","")).startswith("upload:")]
         _meta[:] = keep
@@ -188,11 +203,8 @@ def search(query: str, k: int = 8) -> str:
         for idx in I[0]:
             if 0 <= idx < len(_meta):
                 m = _meta[idx]
-                tag = m.get("tag", "ctx")
-                # make source explicit
-                lines.append(f"[SRC {tag}] {m['text']}")
+                lines.append(f"[SRC {m.get('tag','ctx')}] {m['text']}")
         return "\n---\n".join(lines)
-
 
 # ---------------- Expirer (uploads TTL) ----------------
 def _expire_uploads():
@@ -214,4 +226,5 @@ def _expire_uploads():
                 _dirty_index = True
                 _persist()
                 print("[vector_store] expired old uploads; marked index dirty")
+
 threading.Thread(target=_expire_uploads, daemon=True).start()
