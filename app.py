@@ -405,9 +405,11 @@ def ask():
 
         vs_ctx = ""
         try:
-            vs_ctx = vs.search(q, k=4) or ""
+            vs_ctx = vs.search(q, k=8) or ""   # was k=4
         except Exception as e:
             print("[/ask] vs.search error:", e)
+            vs_ctx = ""
+
 
         db_ctx = fetch_db_context(q) if USE_DB_CONTEXT else ""
         ctx_parsed = fetch_parsed_context(q) if USE_DB_CONTEXT else ""
@@ -442,16 +444,18 @@ def ask():
 
         prompt = (
             "You are NanoChemGPT. Use the CONTEXT and the numbered REFERENCES to propose a synthesis.\n"
+            "Rules:\n"
+            " - Prefer CONTEXT over general knowledge when relevant.\n"
+            " - If you use any content from CONTEXT, append [CTX] on that line.\n"
+            " - If CONTEXT is insufficient, say so explicitly before generalizing.\n"
             "Return two blocks exactly in this order:\n"
             "## SynthesisProtocol\n"
             "1. **Hardware & Glassware**:\n[]\n"
             "2. **Materials**:\n[]\n"
             "3. **Procedure**\n[]\n\n"
             "```reason\n"
-            "For each key justification, add an inline tag:\n"
-            "  If you use any content from CONTEXT, include “[CTX]” next to that line in the answer. Prefer information from CONTEXT over general knowledge when relevant.,\n"
-            "  [PARSED] for summaries from prior parsed protocols,\n"
-            "  [n] for numbered web REFERENCES, and [GEN] if inferred/general.\n"
+            "For each key justification, add inline tags: [CTX] for uploaded/context hits, "
+            "[DB] for Mongo Q&A, [PARSED] for parsed protocols, [n] for numbered web REFERENCES, [GEN] if inferred.\n"
             "Keep rationales terse.\n"
             "```\n\n"
             f"CONTEXT:\n{context_joined}\n\n"
@@ -504,12 +508,12 @@ def ask():
                     model="gpt-4o-mini",
                     temperature=0,
                     messages=[
-                    {"role":"system","content":"Revise the answer to explicitly cite CONTEXT with [CTX] markers where used."},
+                    {"role":"system","content":"Revise the answer to explicitly use CONTEXT where relevant. Insert [CTX] markers on lines that derive from CONTEXT, and prefer CONTEXT over general knowledge. Do not change structure."},
                     {"role":"user","content": f"CONTEXT:\n{context_joined}"},
                     {"role":"user","content": f"ORIGINAL ANSWER:\n{answer}"}
                     ]
                 ).choices[0].message.content
-                if revise and len(revise) > len(answer)*0.7:
+                if revise and len(revise) >= 0.7 * len(answer):
                     answer = revise
                     used_summary = _extract_used_markers(answer, rationale or "")
             except Exception as e:

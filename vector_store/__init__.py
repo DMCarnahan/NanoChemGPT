@@ -165,7 +165,7 @@ def clear_uploads():
         _persist()
         print(f"[vector_store] cleared uploads; kept {len(_meta)} chunks")
 
-def search(query: str, k: int = 4) -> str:
+def search(query: str, k: int = 8) -> str:
     _ensure_index()
     with _lock:
         if not _meta or _index is None or _index.ntotal == 0:
@@ -175,8 +175,12 @@ def search(query: str, k: int = 4) -> str:
         lines = []
         for idx in I[0]:
             if 0 <= idx < len(_meta):
-                lines.append(_meta[idx]["text"])
+                m = _meta[idx]
+                tag = m.get("tag", "ctx")
+                # make source explicit
+                lines.append(f"[SRC {tag}] {m['text']}")
         return "\n---\n".join(lines)
+
 
 # ---------------- Expirer (uploads TTL) ----------------
 def _expire_uploads():
