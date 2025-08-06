@@ -222,6 +222,22 @@ def fetch_parsed_context(q: str, limit: int = 2) -> str:
             pieces.append(" • ".join(parts))
     return "\n".join(pieces)
 
+# --- Admin auth decorator ---
+def require_admin(fn):
+    @functools.wraps(fn)
+    def w(*a, **kw):
+        auth = request.headers.get("Authorization", "")
+        token = auth.split(" ", 1)[1].strip() if auth.startswith("Bearer ") else ""
+        ok = bool(ADMIN_TOKEN) and token == ADMIN_TOKEN
+        if not ok:
+            print(f"[admin] unauthorized: got='{token[:6]}…' expected_set={bool(ADMIN_TOKEN)} path={request.path}")
+            return jsonify({"error":"unauthorized"}), 401
+        return fn(*a, **kw)
+    return w
+
+def _admin_csp(resp):
+    resp.headers["Content-Security-Policy"] = "default-src 'self'; connect-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:"
+    return resp
 # ---------------- Initialize Datasets ----------------
 @app.post("/admin/upload_builtin")
 @require_admin
@@ -617,25 +633,6 @@ def api_uploads():
     cur = db.uploads.find({}).sort([("indexed_at", -1), ("ts", -1)]).limit(limit)
     items = [_doc(d) for d in cur]
     return jsonify({"items": items, "limit": limit})
-
-# --- Admin auth decorator ---
-ADMIN_TOKEN = os.getenv("ADMIN_UPLOAD_SECRET", "")
-
-def require_admin(fn):
-    @functools.wraps(fn)
-    def w(*a, **kw):
-        auth = request.headers.get("Authorization", "")
-        token = auth.split(" ", 1)[1].strip() if auth.startswith("Bearer ") else ""
-        ok = bool(ADMIN_TOKEN) and token == ADMIN_TOKEN
-        if not ok:
-            print(f"[admin] unauthorized: got='{token[:6]}…' expected_set={bool(ADMIN_TOKEN)} path={request.path}")
-            return jsonify({"error":"unauthorized"}), 401
-        return fn(*a, **kw)
-    return w
-
-def _admin_csp(resp):
-    resp.headers["Content-Security-Policy"] = "default-src 'self'; connect-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:"
-    return resp
 
 # --- Minimal admin HTML ---
 
