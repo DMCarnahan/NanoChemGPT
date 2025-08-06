@@ -1,55 +1,76 @@
 from __future__ import annotations
-import os
-import time
-import threading
-import gzip
-import json
-import pathlib
-from typing import List, Dict, Any
+import os, time, threading, gzip, json, pathlib
+from typing import List, Dict, Any, Optional
 import numpy as np
 import faiss
-from sentence_transformers import SentenceTransformer
-from pymongo import MongoClient
 
-DATA_DIR = pathlib.Path(os.getenv("VECTORSTORE_DIR", "/tmp/index"))
+# ---------------- Config ----------------
+DATA_DIR = pathlib.Path(os.getenv("VECTORSTORE_DIR", "/tmp/index")).resolve()
 DATA_DIR.mkdir(parents=True, exist_ok=True)
-INDEX_DIR = DATA_DIR / "index"
-INDEX_DIR.mkdir(parents=True, exist_ok=True)
-TTL_SEC = int(os.getenv("UPLOAD_TTL_SEC", "1800"))  # 30 min
-MODEL_NAME = os.getenv("EMBED_MODEL", "intfloat/e5-large-v2")
+INDEX_DIR = DATA_DIR / "index"; INDEX_DIR.mkdir(parents=True, exist_ok=True)
 
-_model = None
-_index = None
-_meta: List[Dict[str, Any]] = []
+TTL_SEC        = int(os.getenv("UPLOAD_TTL_SEC", "1800"))   # 30 min
+MODEL_NAME     = os.getenv("EMBED_MODEL", "sentence-transformers/all-MiniLM-L6-v2")
+EMBED_BACKEND  = os.getenv("EMBED_BACKEND", "st")           # "st" | "openai"
+EMB_BATCH      = int(os.getenv("EMBED_BATCH", "64"))
+DEFER_EMBED    = os.getenv("DEFER_EMBED", "1") == "1"       # defer during preload by default
+
+# ---------------- State ----------------
+_model = None                  # sentence-transformers model OR None
+_index: Optional[faiss.Index] = None
+_meta: List[Dict[str, Any]] = []      # [{id, tag, ts, text}]
+_dirty_index = False          
 _lock = threading.Lock()
 
-def _load_model():
+# ---------------- Model loading (lazy) ----------------
+def _load_st_model():
     global _model
     if _model is None:
+        # Import only when needed, avoids pulling torch/transformers at import time.
+        from sentence_transformers import SentenceTransformer
         _model = SentenceTransformer(MODEL_NAME)
     return _model
 
-def _encode(texts: List[str]) -> np.ndarray:
-    model = _load_model()
-    emb = model.encode(texts, normalize_embeddings=True, show_progress_bar=False)
-    return np.asarray(emb, dtype='float32')
+def _encode_st(texts: List[str]) -> np.ndarray:
+    m = _load_st_model()
+    emb = m.encode(texts, normalize_embeddings=True, show_progress_bar=False, batch_size=EMB_BATCH)
+    return np.asarray(emb, dtype="float32")
 
-def _get_index(d: int):
+def _encode_openai(texts: List[str]) -> np.ndarray:
+    from openai import OpenAI
+    client = OpenAI()
+    out = client.embeddings.create(model=os.getenv("EMBED_OPENAI_MODEL", "text-embedding-3-small"), input=texts)
+    arr = np.array([e.embedding for e in out.data], dtype="float32")
+    return arr
+
+def _encode(texts: List[str]) -> np.ndarray:
+    if EMBED_BACKEND.lower() == "openai":
+        return _encode_openai(texts)
+    return _encode_st(texts)
+
+# ---------------- Index IO ----------------
+def _get_index(d: int) -> faiss.Index:
     global _index
     if _index is None:
-        _index = faiss.IndexFlatIP(d)
         ipath = INDEX_DIR / "index.faiss"
         if ipath.exists():
             try:
                 _index = faiss.read_index(str(ipath))
                 _load_meta()
-            except Exception:
-                pass
+                return _index
+            except Exception as e:
+                print("[vector_store] read_index failed, rebuilding:", e)
+        _index = faiss.IndexFlatIP(d)
     return _index
+
+def _reset_index(d: int):
+    global _index
+    _index = faiss.IndexFlatIP(d)
 
 def _persist():
     try:
-        faiss.write_index(_index, str(INDEX_DIR / "index.faiss"))
+        if _index is not None:
+            faiss.write_index(_index, str(INDEX_DIR / "index.faiss"))
         with gzip.open(INDEX_DIR / "meta.json.gz", "wt", encoding="utf-8") as f:
             json.dump(_meta, f)
     except Exception as e:
@@ -65,73 +86,87 @@ def _load_meta():
         except Exception:
             _meta = []
 
+# ---------------- Chunking ----------------
 def _chunk(text: str) -> List[str]:
-    """Split text into ~paragraph chunks, max 4000 chars each."""
+    # Split into paragraph-ish chunks, hard cap
     parts = [para.strip()[:4000] for para in text.split("\n\n") if para.strip()]
     return parts or [text[:4000]]
 
-def add_to_store(text: str, tag: str = "upload"):
+# ---------------- Embedding build (lazy/full rebuild) ----------------
+def _rebuild_index_locked():
+    """(Re)embed all meta texts and rebuild FAISS. Caller must hold _lock."""
+    global _dirty_index
+    texts = [m["text"] for m in _meta]
+    if not texts:
+        _reset_index(1536)
+        _persist()
+        _dirty_index = False
+        return
+
+    embs = _encode(texts)
+    d = embs.shape[1]
+    _reset_index(d)
+    _index.add(embs)
+    _persist()
+    _dirty_index = False
+    print(f"[vector_store] rebuilt index with {len(_meta)} chunks; dim={d}")
+
+def _ensure_index():
     with _lock:
-        chunks = _chunk(text)
-        embs = _encode(chunks)
-        index = _get_index(embs.shape[1])
+        if _index is None:
+            # try load existing; if not, build
+            ipath = INDEX_DIR / "index.faiss"
+            if ipath.exists():
+                try:
+                    _get_index(1536)  # dim ignored when reading
+                except Exception:
+                    pass
+        # if index exists but out of sync or marked dirty 
+        if _index is None or _dirty_index or (_index.ntotal != len(_meta)):
+            _rebuild_index_locked()
+
+# ---------------- Public API ----------------
+def add_to_store(text: str, tag: str = "upload", defer_embed: Optional[bool] = None):
+    """Add text to store. If defer_embed=True, we won't embed immediately."""
+    if defer_embed is None:
+        defer_embed = DEFER_EMBED
+
+    chunks = _chunk(text)
+    with _lock:
         cur = len(_meta)
-        index.add(embs)
         ts = int(time.time())
         for i, c in enumerate(chunks):
             _meta.append({"id": cur + i, "tag": tag, "ts": ts, "text": c})
-        _persist()
-        print(f"[vector_store] indexed {len(chunks)} chunks (total {len(_meta)})")
 
-def clear_uploads():
-    with _lock:
-        keep = [m for m in _meta if not str(m.get("tag", "")).startswith("upload:")]
-        texts = [m["text"] for m in keep]
-        if not texts:
-            d = _get_index(1).d if _index else 1536
-            _reset_index(d)
-            _meta[:] = []
+        if defer_embed:
+            # mark dirty; search() will rebuild lazily
+            global _dirty_index
+            _dirty_index = True
             _persist()
-            return
-        embs = _encode(texts)
-        d = embs.shape[1]
-        _reset_index(d)
-        _index.add(embs)
-        _meta[:] = keep
-        _persist()
-
-def _reset_index(d: int):
-    global _index
-    _index = faiss.IndexFlatIP(d)
-
-def _expire_uploads():
-    while True:
-        time.sleep(60)
-        now = int(time.time())
-        changed = False
-        with _lock:
-            keep = []
-            for m in _meta:
-                tag = str(m.get("tag", ""))
-                if tag.startswith("upload:") and now - int(m.get("ts", now)) > TTL_SEC:
-                    changed = True
-                    continue
-                keep.append(m)
-            if changed:
-                texts = [m["text"] for m in keep]
-                if texts:
-                    embs = _encode(texts)
-                    d = embs.shape[1]
-                    _reset_index(d)
-                    _index.add(embs)
-                else:
-                    _reset_index(1536)
-                _meta[:] = keep
+        else:
+            # embed & add incrementally without full rebuild
+            if _index is None or _index.ntotal != cur:
+                # safest path: full rebuild to keep ids aligned
+                _rebuild_index_locked()
+            else:
+                embs = _encode(chunks)
+                _get_index(embs.shape[1]).add(embs)
                 _persist()
 
-threading.Thread(target=_expire_uploads, daemon=True).start()
+        print(f"[vector_store] indexed {len(chunks)} chunks (total {len(_meta)}) tag={tag}")
+
+def clear_uploads():
+    """Remove transient upload:* chunks; mark index dirty so it rebuilds lazily."""
+    with _lock:
+        keep = [m for m in _meta if not str(m.get("tag","")).startswith("upload:")]
+        _meta[:] = keep
+        global _dirty_index
+        _dirty_index = True
+        _persist()
+        print(f"[vector_store] cleared uploads; kept {len(_meta)} chunks")
 
 def search(query: str, k: int = 4) -> str:
+    _ensure_index()
     with _lock:
         if not _meta or _index is None or _index.ntotal == 0:
             return ""
@@ -142,22 +177,25 @@ def search(query: str, k: int = 4) -> str:
             if 0 <= idx < len(_meta):
                 lines.append(_meta[idx]["text"])
         return "\n---\n".join(lines)
-    
-    from pymongo import MongoClient
-import os
 
-def preload_builtin_from_mongo():
-    uri = os.getenv("MONGO_URL")
-    if not uri: 
-        print("[preload] no MONGO_URL; skip"); return
-    client = MongoClient(uri, serverSelectionTimeoutMS=5000)
-    db = client.get_default_database()
-    col = db[os.getenv("BUILTIN_COLLECTION", "builtin_docs")]
-
-    count = 0
-    for d in col.find({}, {"text":1, "_id":0}):
-        txt = (d.get("text") or "").strip()
-        if txt:
-            add_to_store(txt, tag="builtin:mongo")
-            count += 1
-    print(f"[preload] indexed {count} builtin docs from Mongo")
+# ---------------- Expirer (uploads TTL) ----------------
+def _expire_uploads():
+    while True:
+        time.sleep(60)
+        now = int(time.time())
+        changed = False
+        with _lock:
+            keep = []
+            for m in _meta:
+                tag = str(m.get("tag",""))
+                if tag.startswith("upload:") and now - int(m.get("ts", now)) > TTL_SEC:
+                    changed = True
+                    continue
+                keep.append(m)
+            if changed:
+                _meta[:] = keep
+                global _dirty_index
+                _dirty_index = True
+                _persist()
+                print("[vector_store] expired old uploads; marked index dirty")
+threading.Thread(target=_expire_uploads, daemon=True).start()
