@@ -12,7 +12,7 @@ from dotenv import load_dotenv
 from openai import OpenAI
 from PyPDF2 import PdfReader
 from werkzeug.utils import secure_filename
-from flask import Flask, request, jsonify, abort, render_template, send_file
+from flask import Flask, request, jsonify, abort, render_template, send_file, make_response
 from jinja2 import TemplateNotFound
 from bson import ObjectId
 import secrets
@@ -633,14 +633,15 @@ def _admin_csp(resp):
     return resp
 
 # --- Minimal admin HTML ---
+
 @app.get("/admin")
 def admin_page():
-    html = """
-<!doctype html><meta charset="utf-8">
+    html = """<!doctype html><meta charset="utf-8">
 <h2>Admin</h2>
 <input id="tok" placeholder="Bearer token" style="width:420px"><br><br>
 <button onclick="post('/admin/reindex_builtin')">reindex builtin</button>
 <button onclick="get('/admin/index_stats')">index_stats</button>
+<button onclick="get('/admin/volinfo')">volinfo</button>
 <input id="q" placeholder="query" style="width:260px">
 <button onclick="get('/admin/vs_search?q='+encodeURIComponent(document.getElementById('q').value))">vs_search</button>
 <pre id="out" style="white-space:pre-wrap;border:1px solid #ccc;padding:8px;margin-top:12px"></pre>
@@ -652,7 +653,10 @@ async function req(m,p){
   document.getElementById('out').textContent = await r.text();
 }
 </script>"""
-    return _admin_csp(make_response(html))
+    resp = make_response(html)
+    # Allow in-page fetches back to your app
+    resp.headers["Content-Security-Policy"] = "default-src 'self'; connect-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:"
+    return resp
 
 # --- JSON admin endpoints ---
 @app.get("/admin/volinfo")
