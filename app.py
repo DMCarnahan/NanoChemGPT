@@ -5,7 +5,7 @@ import threading
 import traceback
 import re
 from datetime import datetime
-import pathlib
+from pathlib import Path
 
 import httpx
 from dotenv import load_dotenv
@@ -30,7 +30,7 @@ DATA_DIR = Path(os.getenv("DATA_DIR", BASE_DIR / "data"))
 UPLOADS_DIR = DATA_DIR / "uploads"
 UPLOADS_DIR.mkdir(parents=True, exist_ok=True)
 UPLOAD_SECRET = os.getenv("ADMIN_UPLOAD_SECRET", secrets.token_hex(16))
-DEST = pathlib.Path(os.getenv("BUILTIN_DIR", "/data/builtin")).resolve()
+DEST = Path(os.getenv("BUILTIN_DIR", "/data/builtin")).resolve()
 DEST.mkdir(parents=True, exist_ok=True)
 
 app = Flask(
