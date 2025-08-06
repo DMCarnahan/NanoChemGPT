@@ -17,6 +17,7 @@ from jinja2 import TemplateNotFound
 from bson import ObjectId
 import secrets
 import lzma
+import functools
 
 # Local imports
 import vector_store as vs
