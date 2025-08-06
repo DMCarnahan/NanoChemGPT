@@ -137,28 +137,11 @@ def gpt_steps(paragraphs: list[str], model: str = "gpt-4o-mini") -> list[dict]:
 # 5.  Public API: raw text ➜ NanoChem JSON
 # ---------------------------------------------------------------------------
 def convert_to_json(raw: str, *, robot: bool = False) -> Dict[str, Any]:
-    """
-    Convert a free-form protocol into structured NanoChemGPT JSON.
-
-    Parameters
-    ----------
-    raw : str
-        Input protocol text.
-    robot : bool, optional
-        If True, attempt atomic step extraction.  Falls back gracefully if the
-        translator is missing.
-
-    Returns
-    -------
-    dict
-        JSON compatible with NanoChemGPT UI.
-    """
     if not raw or not raw.strip():
         raise ParserError("Input text is empty.")
-
     raw = textwrap.dedent(raw).strip()
 
-    # ---- 5.1  Split into named sections -----------------------------------
+    # ---- Split into named sections ----
     sections: dict[str, list[str]] = {}
     current = None
     for line in raw.splitlines():
@@ -167,29 +150,28 @@ def convert_to_json(raw: str, *, robot: bool = False) -> Dict[str, Any]:
             current = m.group("name").lower()
             sections[current] = []
             continue
-        if current:
-            if _LIST_BULLET.match(line) or line.strip():
-                sections[current].append(line.strip())
+        if current and ( _LIST_BULLET.match(line) or line.strip() ):
+            sections[current].append(line.strip())
 
-    # ---- 5.2  Atomic steps --------------------------------------
+    # ---- Atomic steps ----
     procedure_structured: list[dict[str, Any]] = []
-    if robot:
+    if robot and sections.get("procedure"):
+        paragraphs = [ln for ln in sections["procedure"] if ln.strip()]
+        print("[convert] calling gpt_steps on", len(paragraphs), "lines")
         try:
-            procedure_structured = postprocess_steps(procedure_structured)
+            steps = gpt_steps(paragraphs)                 # ← call the model
+            procedure_structured = postprocess_steps(steps)  # ← enrich
         except Exception as exc:
-            procedure_structured = [{"action":"error","details":f"post-proc: {exc}"}]
+            procedure_structured = [{"action": "error", "details": f"extract: {exc}"}]
 
-    # ---- 5.3  Compose output ----------------------------------------------
+    # ---- Compose output ----
     return {
-        "title": sections.get("title", ["SynthesisProtocol"])[0]
-        if "title" in sections
-        else "SynthesisProtocol",
+        "title": sections.get("title", ["SynthesisProtocol"])[0] if "title" in sections else "SynthesisProtocol",
         "hardware": sections.get("hardware", []),
         "materials": sections.get("materials", []),
         "procedure": sections.get("procedure", []),
         "procedure_structured": procedure_structured,
     }
-
 
 # Stand-alone CLI use ---------------------------------------------------------
 if __name__ == "__main__":

@@ -489,6 +489,7 @@ def ask():
 # ---------------- Parse ----------------
 @app.post("/parse")
 def parse_route():
+    print("[/parse] robot =", robot, "len(text) =", len(text))
     payload = request.get_json(silent=True) or {}
     text = (payload.get("text") or "").strip()
     if not text:
