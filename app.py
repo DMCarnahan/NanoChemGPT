@@ -22,7 +22,6 @@ import functools
 # Local imports
 import vector_store as vs
 from converter import convert_to_json, ParserError
-from search import basic_search
 from mongo_client import get_db, ping as mongo_ping
 
 # App + folders
@@ -35,10 +34,35 @@ BUILTIN_DIR = Path(os.getenv("BUILTIN_DIR", "/mnt/data/builtin")).resolve()
 UPLOADS_DIR = Path(os.getenv("UPLOADS_DIR", "/mnt/data/uploads")).resolve()
 VECTORSTORE_DIR = Path(os.getenv("VECTORSTORE_DIR", "/mnt/data/index")).resolve()
 
-# ensure dirs exist
-BUILTIN_DIR.mkdir(parents=True, exist_ok=True)
-UPLOADS_DIR.mkdir(parents=True, exist_ok=True)
+# ----------  Dataset searcher  ----------
+from dataset_searcher import load_table, DatasetSearcher
 
+try:
+    _TABLE = load_table(BUILTIN_DIR)
+    _SEARCHER = DatasetSearcher(_TABLE)
+    print(f"[dataset_search] loaded '{BUILTIN_DIR}'  rows={_TABLE.shape[0]}")
+except Exception as e:
+    print("[dataset_search] failed to load lookup table:", e)
+    _SEARCHER = None
+
+def basic_search(query: str, n: int = 6):
+    """
+    Returns a list[dict] so the rest of the code ( /search , /ask ) keeps working.
+    """
+    if _SEARCHER is None or not query.strip():
+        return []
+
+    hits = _SEARCHER.query(query, topk=n)      
+    results = []
+    for _, row in hits.fillna("").iterrows():
+        d = row.to_dict()
+
+        for k in ("title", "year", "url", "doi"):
+            d.setdefault(k, "")
+
+        results.append(d)
+
+    return results
 
 app = Flask(
     __name__,
@@ -656,114 +680,6 @@ def api_uploads():
     cur = db.uploads.find({}).sort([("indexed_at", -1), ("ts", -1)]).limit(limit)
     items = [_doc(d) for d in cur]
     return jsonify({"items": items, "limit": limit})
-
-# --- Minimal admin HTML ---
-
-@app.get("/admin")
-def admin_page():
-    html = """<!doctype html><meta charset="utf-8">
-<h2>Admin</h2>
-<input id="tok" placeholder="Paste ADMIN_TOKEN (no 'Bearer ')" style="width:420px"><br><br>
-<button onclick="post('/admin/reindex_builtin')">reindex builtin</button>
-<button onclick="get('/admin/index_stats')">index_stats</button>
-<button onclick="get('/admin/volinfo')">volinfo</button>
-<input id="q" placeholder="query" style="width:260px">
-<button onclick="get('/admin/vs_search?q='+encodeURIComponent(document.getElementById('q').value))">vs_search</button>
-<button onclick="get('/admin/ping')">ping</button>
-<pre id="out" style="white-space:pre-wrap;border:1px solid #ccc;padding:8px;margin-top:12px"></pre>
-<script>
-async function req(m,p){
-  const t = document.getElementById('tok').value.trim();
-  const r = await fetch(p,{method:m,headers:{Authorization:'Bearer '+t}});
-  const txt = await r.text();
-  document.getElementById('out').textContent = `[${r.status}]\\n` + txt;
-}
-async function get(p){ await req('GET', p); }
-async function post(p){ await req('POST', p); }
-</script>"""
-    resp = make_response(html)
-    resp.headers["Content-Security-Policy"] = "default-src 'self'; connect-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:"
-    return resp
-
-@app.get("/admin/ping")
-@require_admin
-def admin_ping():
-    return {"ok": True, "ts": datetime.utcnow().isoformat()}
-
-# --- JSON admin endpoints ---
-@app.get("/admin/volinfo")
-@require_admin
-def volinfo():
-    files = []
-    if BUILTIN_DIR.exists():
-        for p in BUILTIN_DIR.rglob("*"):
-            if p.is_file():
-                try: files.append(str(p.relative_to(BUILTIN_DIR)))
-                except Exception: files.append(str(p))
-    return {"BUILTIN_DIR": str(BUILTIN_DIR), "count": len(files), "sample": files[:200]}
-
-@app.post("/admin/reindex_builtin")
-@require_admin
-def admin_reindex_builtin():
-    from vector_store import add_to_store
-    count = 0
-
-    def json_to_text(s: str, max_chars=200_000):
-        try: obj = json.loads(s)
-        except Exception: return s
-        out=[]
-        def walk(k,v,p=""):
-            key=".".join([x for x in [p,str(k)] if x])
-            if isinstance(v,str):
-                if len(v)>2: out.append(f"{key}: {v}")
-            elif isinstance(v,(int,float,bool)): out.append(f"{key}: {v}")
-            elif isinstance(v,dict):
-                for kk,vv in v.items(): walk(kk,vv,key)
-            elif isinstance(v,list):
-                for i,vv in enumerate(v[:50]): walk(i,vv,key)
-        if isinstance(obj,dict):
-            for k,v in obj.items(): walk(k,v)
-        elif isinstance(obj,list):
-            for i,v in enumerate(obj[:200]): walk(i,v)
-        return "\n".join(out)[:max_chars]
-
-    for f in BUILTIN_DIR.rglob("*"):
-        if not f.is_file(): continue
-        if f.suffix.lower() in {".txt",".md",".json"}:
-            try:
-                txt = f.read_text(encoding="utf-8", errors="ignore")
-                if f.suffix.lower()==".json":
-                    txt = json_to_text(txt)
-                if txt.strip():
-                    add_to_store(txt, tag=f"builtin:{f.name}")
-                    count += 1
-            except Exception as e:
-                print("[reindex] skip", f, e)
-    return {"ok": True, "indexed": count}
-
-@app.get("/admin/index_stats")
-@require_admin
-def admin_index_stats():
-    size = 0; files=0
-    if VECTORSTORE_DIR.exists():
-        for p in VECTORSTORE_DIR.rglob("*"):
-            files += 1
-            if p.is_file(): size += p.stat().st_size
-    stats = getattr(vs, "stats", lambda: {})()
-    return {"VECTORSTORE_DIR": str(VECTORSTORE_DIR), "exists": VECTORSTORE_DIR.exists(), "files": files, "bytes": size, "stats": stats}
-
-@app.get("/admin/vs_search")
-@require_admin
-def admin_vs_search():
-    q = (request.args.get("q") or "").strip()
-    if not q:
-        return {"error":"pass ?q="}, 400
-    k = int(request.args.get("k") or 5)
-    try:
-        hits = vs.search(q, k=k)
-    except Exception as e:
-        return {"error": f"vs.search failed: {e}"}, 500
-    return {"q": q, "hits": hits}
 
 @app.errorhandler(400)
 @app.errorhandler(422)
