@@ -1,215 +1,222 @@
 """
-converter.py  –  Turn a formatted “NanoChemGPT” answer into explicit JSON
------------------------------------------------------------------------
+converter.py – Convert NanoChemGPT answers into structured JSON
+----------------------------------------------------------------
 
-• Normalises “Hardware & Glassware”, “Hardware”, or “Glassware” → `sections["hardware"]`
-• Strips leading bullets and trailing `[CTX] / [GEN] / [n]` tags from materials & hardware.
-• Uses modern OpenAI function‑calling (no priming hack, parses messages with `role="tool"`).
+This version:
+  • Normalises section headings (“Hardware”, “Materials”, “Procedure”, etc.).
+  • Cleans bullets and trailing [CTX]/[GEN]/[n] tags from hardware/materials.
+  • Enriches materials (stub implementation).
+  • Calls an OpenAI function (‘add_step’) to extract atomic steps with
+    explicit fields (action, time, temperature, vessel, reagents, solvents).
+  • Maps each vessel description to an identifier (V1, V2, …) based on the
+    order of the hardware list; this makes the JSON robot-friendly.
 """
 
 from __future__ import annotations
-import os, re, json, textwrap
-from typing import List, Dict, Any
+import json
+import os
+import re
+import textwrap
+from typing import Any, Dict, List
 
-import openai
+try:
+    import openai
+except ImportError:
+    openai = None  # allow offline use
 
-# ════════════════════ 0. OpenAI client ════════════════════════════════════ #
-_openai_api_key = os.getenv("OPENAI_API_KEY", "")
-_client = openai.OpenAI(api_key=_openai_api_key) if _openai_api_key else None
+_CLIENT = None
+if openai and os.getenv("OPENAI_API_KEY"):
+    _CLIENT = openai.OpenAI(api_key=os.environ["OPENAI_API_KEY"])
 
-# ════════════════════ 1. Regex helpers ════════════════════════════════════ #
-_SUB_RX   = re.compile(r"^\s*\d+\.\s*\*\*(?P<name>[^*]+?)\*\*[:\s]*$", re.M)
+# ---------------------------------------------------------------------------
+# 1. Regex helpers: strip bullets & tags, detect section headings
+# ---------------------------------------------------------------------------
+_HEADING = re.compile(
+    r"^\s*(?:\d+[\.\)]\s*)?(?:\*\*)?(?P<name>hardware(?:\s*&\s*glassware)?|glassware|materials|reagents|procedure|steps|method|title)(?:\*\*)?\s*:?\s*$",
+    re.I
+)
+_BULLET = re.compile(r"^\s*(?:[-*•–—]\s+|\d+[\.\)]\s+)")
+_TAGS   = re.compile(r"\s*\[(?:CTX|DB|PARSED|GEN|\d+)]\s*[.。;:,-]?\s*$")
 
-_BULLET_RX = re.compile(r"^\s*[-*•–—]\s*")
-_TAG_RX    = re.compile(r"""\s*\[(?:CTX|DB|PARSED|GEN|\d+)\]\s*[.。;:,-]?\s*$""")
+def _clean_line(line: str) -> str:
+    """Remove leading bullet/number and trailing provenance tags."""
+    return _TAGS.sub("", _BULLET.sub("", line)).strip()
 
-def _clean_item(line: str) -> str:
-    """Remove leading bullets and trailing citation / provenance tags."""
-    return _TAG_RX.sub("", _BULLET_RX.sub("", line)).strip()
-
-def _split_sections(txt: str) -> Dict[str, List[str]]:
-    """Return a dict with keys hardware / materials / procedure / other."""
-    sections: Dict[str, List[str]] = {k: [] for k in
-                                      ("hardware", "materials", "procedure", "other")}
-    current = "other"
-
-    for raw in txt.splitlines():
-        m = _SUB_RX.match(raw)
+# ---------------------------------------------------------------------------
+# 2. Split answer into named sections
+# ---------------------------------------------------------------------------
+def _split_sections(raw: str) -> Dict[str, List[str]]:
+    sections: Dict[str, List[str]] = {}
+    current: str | None = None
+    for line in raw.splitlines():
+        m = _HEADING.match(line)
         if m:
-            name = m.group("name").lower().strip()
-            if name.startswith("hardware") or name == "glassware":
-                current = "hardware"
-            elif name.startswith("material"):
-                current = "materials"
-            elif name.startswith("procedure"):
-                current = "procedure"
-            else:
-                current = "other"
+            current = m.group("name").lower()
+            sections[current] = []
             continue
-        sections[current].append(raw.rstrip())
-
-    for k in sections:
-        sections[k] = [l for l in sections[k] if l.strip()]
+        if current:
+            stripped = line.strip()
+            if stripped:
+                sections[current].append(stripped)
     return sections
 
-
-# ════════════════════ 2. Material enrichment (best‑effort) ════════════════ #
+# ---------------------------------------------------------------------------
+# 3. Enrich materials (placeholder)
+# ---------------------------------------------------------------------------
 def enrich_materials(lines: List[str]) -> List[Dict[str, str]]:
     out: List[Dict[str, str]] = []
     for ln in lines:
         if " as " in ln:
             name, notes = ln.split(" as ", 1)
-            out.append({"name": name.strip(),
-                        "notes": _clean_item(notes)})
+            out.append({"name": name.strip(), "notes": _clean_line(notes)})
         else:
             out.append({"name": ln})
     return out
 
-
-# ════════════════════ 3. Function‑calling for atomic steps ════════════════ #
+# ---------------------------------------------------------------------------
+# 4. Function-calling schema for atomic steps
+# ---------------------------------------------------------------------------
 _FN_SCHEMA = {
     "name": "add_step",
-    "description": "Add an explicit atomic step to the procedure",
+    "description": (
+        "Add one atomic operation in a chemical synthesis step. "
+        "For each call, extract explicit fields when present: "
+        "action (a verb), time (duration), temperature, vessel, reagents, solvents, and optional notes. "
+        "Omit any field that is not present."
+    ),
     "parameters": {
         "type": "object",
         "properties": {
-            "action":   {"type": "string"},
-            "details":  {"type": "string"},
-            "reagents": {"type": "array", "items": {"type": "string"}},
-            "solvents": {"type": "array", "items": {"type": "string"}}
+            "action":      {"type": "string", "description": "verb for the step"},
+            "time":        {"type": "string", "description": "duration (e.g. '1 h')"},
+            "temperature": {"type": "string", "description": "temperature (e.g. '70 °C')"},
+            "vessel":      {"type": "string", "description": "reaction vessel (e.g. '250 mL beaker')"},
+            "reagents":    {"type": "array", "items": {"type": "string"}},
+            "solvents":    {"type": "array", "items": {"type": "string"}},
+            "notes":       {"type": "string", "description": "additional information"},
         },
-        "required": ["action", "details"]
-    }
+        "required": ["action"]
+    },
 }
 
-_SYSTEM_STEPS = textwrap.dedent("""    You are a chemistry protocol parser.
-    Break the PROCEDURE text into explicit atomic steps,
-    calling the add_step tool once for each distinct action.
+_SYSTEM_PROMPT = textwrap.dedent("""\
+    You are a chemistry assistant. Parse each line of PROCEDURE into atomic steps.
+    For each step, call the add_step function exactly once. If a line contains
+    multiple operations, split it into multiple calls. Extract: action (verb),
+    time (duration), temperature, vessel, reagents, solvents. Omit any field
+    that is absent in the text.
 """).strip()
 
 def gpt_steps(paragraphs: List[str], model: str = "gpt-4o-mini") -> List[Dict[str, Any]]:
-    if not _client or not paragraphs:
+    """Call the OpenAI model to extract atomic steps with explicit fields."""
+    if not _CLIENT or not paragraphs:
         return []
-
-    messages = [
-        {"role": "system", "content": _SYSTEM_STEPS},
-        {"role": "user",   "content": "PROCEDURE:\n" + "\n".join(paragraphs)}
+    msgs = [
+        {"role": "system", "content": _SYSTEM_PROMPT},
     ]
-
-    resp = _client.chat.completions.create(
+    # One user message per paragraph
+    for p in paragraphs:
+        clean = re.sub(r"^\s*\d+[.)]\s*", "", p).strip()
+        if clean:
+            msgs.append({"role": "user", "content": clean})
+    resp = _CLIENT.chat.completions.create(
         model=model,
         temperature=0,
         tools=[{"type": "function", "function": _FN_SCHEMA}],
-        messages=messages,
+        tool_choice={"type": "function", "function": {"name": "add_step"}},
+        messages=msgs,
     )
-
     steps: List[Dict[str, Any]] = []
     for ch in resp.choices:
-        if ch.message.role == "tool":
+        # New API returns tool role messages
+        if getattr(ch.message, "role", None) == "tool":
             steps.append(json.loads(ch.message.content))
-        elif ch.message.tool_calls:  # fallback for older models
+        elif getattr(ch.message, "tool_calls", None):
             for tc in ch.message.tool_calls:
                 steps.append(json.loads(tc.function.arguments))
     return steps
 
+# ---------------------------------------------------------------------------
+# 5. Vessel mapping: assign V1, V2,… based on hardware list
+# ---------------------------------------------------------------------------
+def _vessel_map(hardware: List[str]) -> Dict[str, str]:
+    return {hw.lower(): f"V{i+1}" for i, hw in enumerate(hardware)}
 
-# ════════════════════ 4. Public API ═══════════════════════════════════════ #
-class ParserError(RuntimeError):
-    """Raised when answer cannot be parsed into expected sections."""
+def _assign_vessels(steps: List[Dict[str, Any]], vmap: Dict[str, str]) -> List[Dict[str, Any]]:
+    """Replace vessel descriptions with IDs (e.g. 'V1', 'V2')."""
+    for s in steps:
+        vessel = s.get("vessel")
+        if vessel:
+            low = vessel.lower()
+            for key, vid in vmap.items():
+                if key in low:
+                    s["vessel"] = vid
+                    break
+    return steps
 
+# ---------------------------------------------------------------------------
+# 6. Public API: raw text → structured JSON
+# ---------------------------------------------------------------------------
+class ParserError(RuntimeError): ...
 
-def convert_to_json(answer_text: str, *, robot: bool = False) -> Dict[str, Any]:
-    secs = _split_sections(answer_text)
+def convert_to_json(raw: str, *, robot: bool = False) -> Dict[str, Any]:
+    if not raw or not raw.strip():
+        raise ParserError("Input text is empty.")
+    raw = textwrap.dedent(raw).strip()
 
-    hardware  = [_clean_item(l) for l in secs["hardware"]]
-    materials = [_clean_item(l) for l in secs["materials"]]
+    sections = _split_sections(raw)
+
+    # Structured steps (call model if requested)
+    procedure_structured: List[Dict[str, Any]] = []
+    if sections.get("procedure"):
+        if robot:
+            paragraphs = [ln for ln in sections["procedure"] if ln.strip()]
+            try:
+                steps = gpt_steps(paragraphs, model="gpt-4o-mini")
+                # Map vessel names to IDs and drop empty fields
+                vmap = _vessel_map(sections.get("hardware", []))
+                steps = _assign_vessels(steps, vmap)
+                procedure_structured = steps
+            except Exception as exc:
+                procedure_structured = [{"action": "error", "notes": f"extract: {exc}"}]
+        else:
+            procedure_structured = [{"action": "step", "notes": ln} for ln in sections["procedure"]]
+
+    # Materials enrichment
+    materials_lines = sections.get("materials", [])
     try:
-        materials_enriched = enrich_materials(materials)
-    except Exception as exc:  # never fail the whole parse
-        materials_enriched = [{"name": ln, "notes": f"enrich failed: {exc}"}
-                              for ln in materials]
+        materials_struct = enrich_materials([_clean_line(ln) for ln in materials_lines])
+    except Exception as exc:
+        materials_struct = [{"name": ln, "notes": f"enrich failed: {exc}"} for ln in materials_lines]
 
-    procedure   = secs["procedure"]
-    proc_struct = gpt_steps(procedure) if robot else []
+    # Title fallback
+    title = sections.get("title", ["SynthesisProtocol"])
+    title = title[0] if title else "SynthesisProtocol"
 
     return {
-        "hardware": hardware,
-        "materials": materials,
-        "materials_enriched": materials_enriched,
-        "procedure": procedure,
-        "procedure_structured": proc_struct,
-        "raw_answer": answer_text.strip(),
+        "title": title,
+        "hardware": sections.get("hardware", []),
+        "materials": materials_lines,
+        "materials_enriched": materials_struct,
+        "procedure": sections.get("procedure", []),
+        "procedure_structured": procedure_structured,
     }
 
-
-# ════════════════════ 5. CLI helper ═══════════════════════════════════════ #
+# ---------------------------------------------------------------------------
+# 7. Stand-alone CLI use
+# ---------------------------------------------------------------------------
 if __name__ == "__main__":
-    import argparse, pathlib, sys
-    p = argparse.ArgumentParser(description="Convert answer text to JSON.")
-    p.add_argument("file", help="answer.txt produced by NanoChemGPT")
-    p.add_argument("--robot", action="store_true",
-                   help="include OpenAI function‑calling split into atomic steps")
-    ns = p.parse_args()
-
-    txt = pathlib.Path(ns.file).read_text(encoding="utf‑8", errors="ignore")
-    try:
-        json.dump(convert_to_json(txt, robot=ns.robot),
-                  sys.stdout, indent=2, ensure_ascii=False)
-    except ParserError as exc:
-        print("ParserError:", exc, file=sys.stderr)
-        sys.exit(1)
-
-# ───────────── 6. simple post-parser for ‘details’ ────────────── #
-_TEMP_RX = re.compile(r"(?P<val>[-+]?\d+(?:\.\d+)?)\s*°?\s*C", re.I)
-_TIME_RX = re.compile(
-    r"(?P<val>[-+]?\d+(?:\.\d+)?)\s*(?P<unit>h(?:ours?)?|min(?:utes?)?)", re.I)
-
-def _mk_vessel_map(hardware: List[str]) -> Dict[str, str]:
-    """{'250 mL beaker': 'V1', 'round-bottom flask': 'V2', …}"""
-    vmap = {}
-    for idx, hw in enumerate(hardware, 1):
-        vmap[hw.lower()] = f"V{idx}"
-    return vmap
-
-def _extract_fields(step: Dict[str, Any], vmap: Dict[str, str]) -> Dict[str, Any]:
-    if "details" not in step:
-        return step
-    txt = step["details"]
-
-    # 1) temperature
-    if "temperature" not in step:
-        m = _TEMP_RX.search(txt)
-        if m:
-            step["temperature"] = m.group("val").strip()
-
-    # 2) time  (rename duration to time for clarity)
-    if "time" not in step and "duration" not in step:
-        m = _TIME_RX.search(txt)
-        if m:
-            tval = m.group("val").strip()
-            unit = m.group("unit").lower()
-            step["time"] = f"{tval} {unit}"
-
-    # 3) vessel
-    if "vessel" not in step:
-        for phrase, vid in vmap.items():
-            if phrase in txt.lower():
-                step["vessel"] = vid
-                break
-
-    # 4) clean up
-    step.pop("duration", None)          # prefer 'time'
-    step.pop("details",  None)          # drop the free text
-    return step
-
-# Hook it into convert_to_json
-_orig_convert = convert_to_json  # keep reference
-
-def convert_to_json(answer_text: str, *, robot: bool = False) -> Dict[str, Any]:  # type: ignore[override]
-    data = _orig_convert(answer_text, robot=robot)
-
-    vmap = _mk_vessel_map(data["hardware"])
-    data["procedure_structured"] = [
-        _extract_fields(step, vmap) for step in data["procedure_structured"]
-    ]
-    return data
+    import argparse
+    import pathlib
+    ap = argparse.ArgumentParser(description="Convert answer text to JSON.")
+    ap.add_argument("file", help="Path to text file containing NanoChemGPT answer")
+    ap.add_argument("--robot", action="store_true", help="Use model to extract atomic steps")
+    ns = ap.parse_args()
+    text = pathlib.Path(ns.file).read_text(encoding="utf-8")
+    print(
+        json.dumps(
+            convert_to_json(text, robot=ns.robot),
+            indent=2,
+            ensure_ascii=False,
+        )
+    )
