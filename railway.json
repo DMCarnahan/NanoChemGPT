@@ -34,7 +34,7 @@
     "SEARCH_CACHE_DIR": "/tmp/search_cache",
     "TMPDIR": "/tmp",
     "UPLOADS_DIR": "/mnt/data/uploads",
-    "USE_DB_CONTEXT": "1",
+    "USE_DB_CONTEXT": "0",
     "VECTORSTORE_DIR": "/mnt/data/index",
     "VS_MMR": "1",
     "VS_LLM_RERANLK": "1",
