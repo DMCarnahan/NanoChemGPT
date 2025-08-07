@@ -37,6 +37,7 @@ VECTORSTORE_DIR = Path(os.getenv("VECTORSTORE_DIR", "/mnt/data/index")).resolve(
 
 # ----------  Dataset searcher  ----------
 from dataset_searcher import load_table, DatasetSearcher
+import pandas as pd
 
 try:
     _TABLE = load_table(BUILTIN_DIR)
@@ -48,29 +49,30 @@ except Exception as e:
 
 def basic_search(query: str, n: int = 6):
     """
-    1) top-k from local dataset
-    2) top-k from OpenAlex
+    Returns a list[dict] so /search and /ask keep working.
+    Accepts either DataFrame or list coming back from _SEARCHER.query().
     """
-    local_hits = _SEARCHER.query(query, topk=n) if _SEARCHER is not None else []
-    local = [row.to_dict() for _, row in local_hits.fillna("").iterrows()]
+    if _SEARCHER is None or not query.strip():
+        return []
 
-    web  = search_papers(query, n)
-    # --- de-duplicate on DOI / title ---------------
-    seen = { (d.get("doi") or d.get("title")).lower() for d in local }
-    merged = local[:]
-    for d in web:
-        key = (d.get("doi") or d.get("title")).lower()
-        if key not in seen:
-            merged.append(d);  seen.add(key)
+    hits = _SEARCHER.query(query, topk=n)
 
-    # keep only the first n+n (max 12) to avoid prompt bloat
-    return merged[: 2*n]
+  
+    if isinstance(hits, list):
+        hits = pd.DataFrame(hits)              
+    elif not isinstance(hits, pd.DataFrame):
+        return []
+ 
 
-app = Flask(
-    __name__,
-    template_folder=str(BASE_DIR / "templates"),
-    static_folder=str(BASE_DIR / "static"),
-)
+    results = []
+    for _, row in hits.fillna("").iterrows():
+        d = row.to_dict()
+        for k in ("title", "year", "url", "doi"):  
+            d.setdefault(k, "")
+        results.append(d)
+
+    return results
+
 app.config["MAX_CONTENT_LENGTH"] = 100 * 1024 * 1024  # 100 MB
 
 # OpenAI
