@@ -1,83 +1,105 @@
-import os
-import io
-import json
-import threading
-import traceback
-import re
+import os, io, json, lzma, re, functools, threading, traceback
 from datetime import datetime
 from pathlib import Path
 
 import httpx
+import pandas as pd
 from dotenv import load_dotenv
+from flask import Flask, request, jsonify, abort, render_template, send_file, make_response
+from jinja2 import TemplateNotFound
 from openai import OpenAI
 from PyPDF2 import PdfReader
 from werkzeug.utils import secure_filename
-from flask import Flask, request, jsonify, abort, render_template, send_file, make_response
-from jinja2 import TemplateNotFound
 from bson import ObjectId
-import secrets
-import lzma
-import functools
 
-# Local imports
+# ───────────────────────────── Local modules ────────────────────────────── #
 import vector_store as vs
 from converter import convert_to_json, ParserError
 from mongo_client import get_db, ping as mongo_ping
-from internet_search import search_papers
-
-# App + folders
-BASE_DIR = Path(__file__).resolve().parent
-DATA_DIR = Path(os.getenv("DATA_DIR", BASE_DIR / "data"))
-
-# ---- admin auth + shared paths ----
-ADMIN_TOKEN = os.getenv("ADMIN_TOKEN", os.getenv("ADMIN_UPLOAD_SECRET", ""))  # support old name
-BUILTIN_DIR = Path(os.getenv("BUILTIN_DIR", "/mnt/data/builtin")).resolve()
-UPLOADS_DIR = Path(os.getenv("UPLOADS_DIR", "/mnt/data/uploads")).resolve()
-VECTORSTORE_DIR = Path(os.getenv("VECTORSTORE_DIR", "/mnt/data/index")).resolve()
-
-# ----------  Dataset searcher  ----------
 from dataset_searcher import load_table, DatasetSearcher
-import pandas as pd
+from internet_search import search_papers            # OpenAlex helper
+# ─────────────────────────────────────────────────────────────────────────── #
 
-try:
-    _TABLE = load_table(BUILTIN_DIR)
-    _SEARCHER = DatasetSearcher(_TABLE)
-    print(f"[dataset_search] loaded '{BUILTIN_DIR}'  rows={_TABLE.shape[0]}")
-except Exception as e:
-    print("[dataset_search] failed to load lookup table:", e)
-    _SEARCHER = None
+# ─── Directories & global paths ─────────────────────────────────────────── #
+BASE_DIR       = Path(__file__).resolve().parent
+DATA_DIR       = Path(os.getenv("DATA_DIR", BASE_DIR / "data"))
+BUILTIN_DIR    = Path(os.getenv("BUILTIN_DIR", "/mnt/data/builtin")).resolve()
+UPLOADS_DIR    = Path(os.getenv("UPLOADS_DIR", "/mnt/data/uploads")).resolve()
+VECTORSTORE_DIR= Path(os.getenv("VECTORSTORE_DIR", "/mnt/data/index")).resolve()
 
-def basic_search(query: str, n: int = 6):
-    """
-    Returns a list[dict] so /search and /ask keep working.
-    Accepts either DataFrame or list coming back from _SEARCHER.query().
-    """
-    if _SEARCHER is None or not query.strip():
-        return []
+ADMIN_TOKEN    = os.getenv("ADMIN_TOKEN", os.getenv("ADMIN_UPLOAD_SECRET", ""))  # legacy key support
 
-    hits = _SEARCHER.query(query, topk=n)
+for d in (BUILTIN_DIR, UPLOADS_DIR, VECTORSTORE_DIR):
+    d.mkdir(parents=True, exist_ok=True)
 
-  
-    if isinstance(hits, list):
-        hits = pd.DataFrame(hits)              
-    elif not isinstance(hits, pd.DataFrame):
-        return []
- 
-
-    results = []
-    for _, row in hits.fillna("").iterrows():
-        d = row.to_dict()
-        for k in ("title", "year", "url", "doi"):  
-            d.setdefault(k, "")
-        results.append(d)
-
-    return results
-
+# ─── Flask app ───────────────────────────────────────────────────────────── #
+app = Flask(
+    __name__,
+    template_folder=str(BASE_DIR / "templates"),
+    static_folder=str(BASE_DIR / "static"),
+)
 app.config["MAX_CONTENT_LENGTH"] = 100 * 1024 * 1024  # 100 MB
 
-# OpenAI
-_no_proxy_client = httpx.Client(trust_env=False, timeout=120.0)
+# ─── Dataset searcher (local table) ─────────────────────────────────────── #
+_LOOKUP_FALLBACK = BASE_DIR / "database" / "tables" / "coremof.xlsx"
+LOOKUP_FILE = (
+    os.getenv("LOOKUP_FILE")          # newest env var
+    or os.getenv("LOOKUP_DIR")        # legacy name
+    or (_LOOKUP_FALLBACK if _LOOKUP_FALLBACK.exists() else "")  # else ""
+)
+
+_SEARCHER: DatasetSearcher | None = None
+if LOOKUP_FILE:
+    try:
+        _TABLE     = load_table(LOOKUP_FILE)
+        _SEARCHER  = DatasetSearcher(_TABLE)
+        print(f"[dataset_search] loaded '{LOOKUP_FILE}'  rows={_TABLE.shape[0]}")
+    except Exception as e:
+        print("[dataset_search] failed to load lookup table:", e)
+else:
+    print("[dataset_search] no LOOKUP_FILE set – table searching disabled.")
+
+def basic_search(query: str, n: int = 6) -> list[dict]:
+    """
+    Combines (a) rows from the local dataset and (b) top-cited papers
+    from OpenAlex, returning a list[dict] suitable for the numbered
+    “REFERENCES” block in /search and /ask.
+    """
+    if not query.strip():
+        return []
+
+    # ---- local hits ------------------------------------------------------ #
+    local_hits = []
+    if _SEARCHER is not None:
+        try:
+            local_hits = _SEARCHER.query(query, topk=n)
+            if isinstance(local_hits, list):
+                local_hits = pd.DataFrame(local_hits)
+        except Exception as e:
+            print("[basic_search] local query failed:", e)
+
+    local = [row.to_dict() for _, row in local_hits.fillna("").iterrows()]
+
+    # ---- internet hits (OpenAlex) ---------------------------------------- #
+    web  = []
+    try:
+        web = search_papers(query, n)
+    except Exception as e:
+        print("[basic_search] OpenAlex fetch failed:", e)
+
+    # ---- de-dup + merge --------------------------------------------------- #
+    seen = { (d.get("doi") or d.get("title","")).lower() for d in local }
+    for w in web:
+        key = (w.get("doi") or w.get("title","")).lower()
+        if key not in seen:
+            local.append({k: w.get(k, "") for k in ("title","year","url","doi")})
+            seen.add(key)
+
+    return local[: 2*n]   # cap at local+n web entries
+
+# ─── OpenAI client (no proxy) ───────────────────────────────────────────── #
 load_dotenv()
+_no_proxy_client = httpx.Client(trust_env=False, timeout=120.0)
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"), http_client=_no_proxy_client)
 
 # Job registry
