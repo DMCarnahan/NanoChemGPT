@@ -515,10 +515,13 @@ def ask():
         )
 
         prompt = (
-            "You are NanoChemGPT. Use the CONTEXT and the numbered REFERENCES to propose a synthesis.\n"
+            "You are NanoChemGPT. Use the CONTEXT and the numbered REFERENCES "
+            "to propose a synthesis.\n"
             "Rules:\n"
             " - Prefer CONTEXT over general knowledge when relevant.\n"
             " - If you use any content from CONTEXT, append [CTX] on that line.\n"
+            " - When you pull a fact from any numbered REFERENCE, put its number in "
+            "   square brackets right after the sentence (e.g. “hydrothermal at 200 °C [3]”).\n"   # ← NEW
             " - If CONTEXT is insufficient, say so explicitly before generalizing.\n"
             "Return two blocks exactly in this order:\n"
             "## SynthesisProtocol\n"
@@ -570,6 +573,28 @@ def ask():
 
         try:
             used_summary = _extract_used_markers(answer or "", rationale or "")
+            if not used_summary.get("refs"):                          # no [n] markers found
+                try:
+                    revise_refs = client.chat.completions.create(
+                        model="gpt-4o-mini",
+                        temperature=0,
+                        messages=[
+                            {"role": "system", "content": (
+                                "Add inline [n] citations wherever you used information "
+                                "from the numbered REFERENCES list. Do NOT remove any "
+                                "existing [CTX] or other content. Only insert citations "
+                                "where appropriate."
+                            )},
+                            {"role": "user",   "content": f"REFERENCES:\n{refs_prompt}"},
+                            {"role": "user",   "content": f"ORIGINAL ANSWER:\n{answer}"}
+                        ]
+                    ).choices[0].message.content
+                    if revise_refs and len(revise_refs) >= 0.7 * len(answer):
+                        answer = revise_refs
+                        used_summary = _extract_used_markers(answer, rationale)
+                except Exception as e:
+                    print("[ask] ref-revise step failed:", e)
+
         except Exception as _e:
             print("[/ask] used extraction failed:", _e)
             used_summary = {"refs": [], "tags": {}, "has_ctx": False}
