@@ -18,6 +18,7 @@ import os
 import re
 import textwrap
 from typing import Any, Dict, List
+import itertools, math
 
 try:
     import openai
@@ -103,42 +104,52 @@ _SYSTEM_PROMPT = textwrap.dedent("""
   You are a chemistry protocol parser.
   For EACH individual sentence below call *add_step* exactly once.
   Do NOT combine multiple operations in one call.
-  Extract these fields when present:
-    • action  • time  • temperature  • vessel  • reagents  • solvents  • notes
-  Omit any field that is absent.
+  ALWAYS extract these fields:
+    • action  • time  • temperature  • vessel  • reagents  • solvents  
+  You must extract the 'action' field (a verb) in every call, in an atomic form.
+  For example, instead of "prepare", use "dispense", "mix", "heat", "stir", "filter", "wash", "dry", "collect", etc.
 """).strip()
 
-def gpt_steps(paragraphs: List[str], model: str = "gpt-4o-mini") -> List[Dict[str, Any]]:
-    """Call the OpenAI model to extract atomic steps with explicit fields."""
-    if not _CLIENT or not paragraphs:
+def gpt_steps(paragraphs: List[str],
+              model: str = "gpt-4o-mini",
+              batch: int = 15) -> List[Dict[str, Any]]:
+    """
+    Call GPT in small batches (<=15 sentences) so long paragraphs don’t truncate.
+    Returns a list of atomic-step dictionaries.
+    """
+    if not _CLIENT:
         return []
-    msgs = [{"role": "system", "content": _SYSTEM_PROMPT}]
-    for line in paragraphs:
-        # split on '.', ';', then strip
-        for sent in re.split(r"[.;](?=\s|$)", line):
-            sent = sent.strip()
-            if sent:
-                msgs.append({"role": "user", "content": sent})
-    # One user message per paragraph
+
+    # 1. split every paragraph into sentences → queue
+    sents: List[str] = []
     for p in paragraphs:
-        clean = re.sub(r"^\s*\d+[.)]\s*", "", p).strip()
-        if clean:
-            msgs.append({"role": "user", "content": clean})
-    resp = _CLIENT.chat.completions.create(
-        model=model,
-        temperature=0.1,
-        tools=[{"type": "function", "function": _FN_SCHEMA}],
-        tool_choice={"type": "function", "function": {"name": "add_step"}},
-        messages=msgs,
-    )
+        for s in re.split(r"[.;](?=\s|$)", p):
+            s = s.strip()
+            if s:
+                sents.append(s)
+
     steps: List[Dict[str, Any]] = []
-    for ch in resp.choices:
-        # New API returns tool role messages
-        if getattr(ch.message, "role", None) == "tool":
-            steps.append(json.loads(ch.message.content))
-        elif getattr(ch.message, "tool_calls", None):
-            for tc in ch.message.tool_calls:
-                steps.append(json.loads(tc.function.arguments))
+    # 2. process in mini-batches (to stay within context)
+    for i in range(0, len(sents), batch):
+        chunk = sents[i : i + batch]
+        messages = [{"role": "system", "content": _SYSTEM_PROMPT}]
+        for s in chunk:
+            messages.append({"role": "user", "content": s})
+
+        resp = _CLIENT.chat.completions.create(
+            model=model,
+            temperature=0,
+            tools=[{"type": "function", "function": _FN_SCHEMA}],
+            tool_choice={"type": "function", "function": {"name": "add_step"}},
+            messages=messages,
+        )
+        for ch in resp.choices:
+            if ch.message.role == "tool":           # new style
+                steps.append(json.loads(ch.message.content))
+            elif ch.message.tool_calls:             # legacy
+                for tc in ch.message.tool_calls:
+                    steps.append(json.loads(tc.function.arguments))
+
     return steps
 
 # ---------------------------------------------------------------------------
