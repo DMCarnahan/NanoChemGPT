@@ -24,9 +24,12 @@ _SUB_RX   = re.compile(r"^\s*\d+\.\s*\*\*(?P<name>[^*]+?)\*\*[:\s]*$", re.M)
 _BULLET_RX = re.compile(r"^\s*[-*•–—]\s*")
 _CITE_RX   = re.compile(r"\s*\[\d+\]\s*$")
 
+_TAG_RX = re.compile(r"\s*\[(?:CTX|DB|PARSED|GEN|\d+)\]\s*$")  
+
 def _clean_item(line: str) -> str:
-    """Strip bullet symbols and trailing [n] inline citations."""
-    return _CITE_RX.sub("", _BULLET_RX.sub("", line)).strip()
+    line = _BULLET_RX.sub("", line)   # remove leading bullet
+    line = _TAG_RX.sub("", line)      # remove [CTX], [GEN], [6] …
+    return line.strip()
 
 def _split_sections(txt: str) -> Dict[str, List[str]]:
     """

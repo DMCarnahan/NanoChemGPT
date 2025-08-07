@@ -658,14 +658,14 @@ def parse_route():
     try:
         payload = request.get_json(silent=True) or {}
         text = (payload.get("text") or "").strip()
-        robot = bool(payload.get("robot"))
+        robot = bool(payload.get("robot")) 
         question = (payload.get("question") or "").strip()
         print(f"[/parse] robot={robot} len(text)={len(text)}")
 
         if not text:
             return jsonify({"error": "JSON must contain non-empty 'text'"}), 400
 
-        out = convert_to_json(text, robot=robot)
+        out = convert_to_json(text, robot=True
         return jsonify(out)
 
     except ParserError as pe:
