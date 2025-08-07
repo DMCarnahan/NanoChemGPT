@@ -23,6 +23,7 @@ import functools
 import vector_store as vs
 from converter import convert_to_json, ParserError
 from mongo_client import get_db, ping as mongo_ping
+from internet_search import search_papers
 
 # App + folders
 BASE_DIR = Path(__file__).resolve().parent
@@ -47,22 +48,23 @@ except Exception as e:
 
 def basic_search(query: str, n: int = 6):
     """
-    Returns a list[dict] so the rest of the code ( /search , /ask ) keeps working.
+    1) top-k from local dataset
+    2) top-k from OpenAlex
     """
-    if _SEARCHER is None or not query.strip():
-        return []
+    local_hits = _SEARCHER.query(query, topk=n) if _SEARCHER is not None else []
+    local = [row.to_dict() for _, row in local_hits.fillna("").iterrows()]
 
-    hits = _SEARCHER.query(query, topk=n)      
-    results = []
-    for _, row in hits.fillna("").iterrows():
-        d = row.to_dict()
+    web  = search_papers(query, n)
+    # --- de-duplicate on DOI / title ---------------
+    seen = { (d.get("doi") or d.get("title")).lower() for d in local }
+    merged = local[:]
+    for d in web:
+        key = (d.get("doi") or d.get("title")).lower()
+        if key not in seen:
+            merged.append(d);  seen.add(key)
 
-        for k in ("title", "year", "url", "doi"):
-            d.setdefault(k, "")
-
-        results.append(d)
-
-    return results
+    # keep only the first n+n (max 12) to avoid prompt bloat
+    return merged[: 2*n]
 
 app = Flask(
     __name__,
