@@ -34,6 +34,14 @@ def load_table(path: str | Path) -> pd.DataFrame:
         case ".jsonl.xz":             return _read_jsonl(p, "xz")
         case _:                       raise ValueError(f"Unsupported table type: {suf}")
 
+def query(self, pattern: str, regex=False, case=False, topk=10) -> pd.DataFrame:
+    pat = re.compile(pattern, 0 if case else re.I) if not regex else pattern
+    mask = pd.Series(False, index=self.df.index)
+    for col in self.text_cols:
+        mask |= self.df[col].astype(str).str.contains(pat, regex=not isinstance(pat, re.Pattern))
+    # ALWAYS return a DataFrame
+    return self.df[mask].head(topk).copy()
+
 # ----------  Simple search logic  -------------------------------------------
 class DatasetSearcher:
     def __init__(self, table: pd.DataFrame, text_cols: list[str] | None = None):
