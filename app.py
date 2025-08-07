@@ -665,7 +665,7 @@ def parse_route():
         if not text:
             return jsonify({"error": "JSON must contain non-empty 'text'"}), 400
 
-        out = convert_to_json(text, robot=True
+        out = convert_to_json(text, robot=True)
         return jsonify(out)
 
     except ParserError as pe:
