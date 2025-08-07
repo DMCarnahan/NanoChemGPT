@@ -1,49 +1,43 @@
 """
-Turn a formatted “NanoChemGPT” answer into explicit JSON
+converter.py  –  Turn a formatted “NanoChemGPT” answer into explicit JSON
 -----------------------------------------------------------------------
-Key changes vs. previous version
-• Normalises “Hardware & Glassware”, “Hardware”, or “Glassware” → sections["hardware"]
-• Cleans leading bullets and trailing [n] citations from materials lines
-• Modern OpenAI tool-call: no forced priming; parses messages with role="tool"
+
+• Normalises “Hardware & Glassware”, “Hardware”, or “Glassware” → `sections["hardware"]`
+• Strips leading bullets and trailing `[CTX] / [GEN] / [n]` tags from materials & hardware.
+• Uses modern OpenAI function‑calling (no priming hack, parses messages with `role="tool"`).
 """
 
 from __future__ import annotations
-import os, re, json, textwrap, itertools
+import os, re, json, textwrap
 from typing import List, Dict, Any
 
 import openai
 
-# ════════════════════  0. OpenAI client  ═══════════════════════════════════ #
-_openai_api_key = os.getenv("OPENAI_API_KEY") or ""
+# ════════════════════ 0. OpenAI client ════════════════════════════════════ #
+_openai_api_key = os.getenv("OPENAI_API_KEY", "")
 _client = openai.OpenAI(api_key=_openai_api_key) if _openai_api_key else None
 
-# ════════════════════  1. Helpers  ════════════════════════════════════════ #
-_HDR_RX   = re.compile(r"^\s*##\s*(.+?)\s*$", re.M)
+# ════════════════════ 1. Regex helpers ════════════════════════════════════ #
 _SUB_RX   = re.compile(r"^\s*\d+\.\s*\*\*(?P<name>[^*]+?)\*\*[:\s]*$", re.M)
 
 _BULLET_RX = re.compile(r"^\s*[-*•–—]\s*")
-_CITE_RX   = re.compile(r"\s*\[\d+\]\s*$")
-
-_TAG_RX = re.compile(r"\s*\[(?:CTX|DB|PARSED|GEN|\d+)\]\s*[.。;:,-]?\s*$")
+_TAG_RX    = re.compile(r"""\s*\[(?:CTX|DB|PARSED|GEN|\d+)\]\s*[.。;:,-]?\s*$""")
 
 def _clean_item(line: str) -> str:
-    line = _BULLET_RX.sub("", line)   # strip leading bullet
-    return _TAG_RX.sub("", line).strip()
+    """Remove leading bullets and trailing citation / provenance tags."""
+    return _TAG_RX.sub("", _BULLET_RX.sub("", line)).strip()
 
 def _split_sections(txt: str) -> Dict[str, List[str]]:
-    """
-    Return {'hardware': [...], 'materials': [...], 'procedure': [...], 'other': [...]}
-    Keys are lowered; unrecognised headings go into 'other'.
-    """
-    sections: Dict[str, List[str]] = {"hardware": [], "materials": [], "procedure": [], "other": []}
+    """Return a dict with keys hardware / materials / procedure / other."""
+    sections: Dict[str, List[str]] = {k: [] for k in
+                                      ("hardware", "materials", "procedure", "other")}
     current = "other"
 
-    for line in txt.splitlines():
-        m = _SUB_RX.match(line)
+    for raw in txt.splitlines():
+        m = _SUB_RX.match(raw)
         if m:
             name = m.group("name").lower().strip()
-            # normalise heading names
-            if name.startswith("hardware") or name in ("glassware",):
+            if name.startswith("hardware") or name == "glassware":
                 current = "hardware"
             elif name.startswith("material"):
                 current = "materials"
@@ -52,117 +46,115 @@ def _split_sections(txt: str) -> Dict[str, List[str]]:
             else:
                 current = "other"
             continue
-        sections.setdefault(current, []).append(line.rstrip())
+        sections[current].append(raw.rstrip())
 
-    # strip blank lines from each section list
-    for k in list(sections):
+    for k in sections:
         sections[k] = [l for l in sections[k] if l.strip()]
     return sections
 
-# ════════════════════  2. Materials enrichment (toy example)  ═════════════ #
+
+# ════════════════════ 2. Material enrichment (best‑effort) ════════════════ #
 def enrich_materials(lines: List[str]) -> List[Dict[str, str]]:
-    out = []
+    out: List[Dict[str, str]] = []
     for ln in lines:
-        parts = ln.split(" as ", 1)
-        if len(parts) == 2:
-            name  = parts[0].strip()
-            notes = _clean_item(parts[1])        # ✨ strip tags here
-            out.append({"name": name, "notes": notes})
+        if " as " in ln:
+            name, notes = ln.split(" as ", 1)
+            out.append({"name": name.strip(),
+                        "notes": _clean_item(notes)})
         else:
             out.append({"name": ln})
     return out
 
-# ════════════════════  3. GPT function-calling to get atomic steps  ═══════ #
-_fn_schema = {
+
+# ════════════════════ 3. Function‑calling for atomic steps ════════════════ #
+_FN_SCHEMA = {
     "name": "add_step",
-    "description": "Add a fully explicit atomic step to the procedure",
+    "description": "Add an explicit atomic step to the procedure",
     "parameters": {
         "type": "object",
         "properties": {
-            "action":   {"type": "string", "description": "verb phrase, e.g. 'heat', 'add', 'filter'"},
-            "details":  {"type": "string", "description": "full description incl. temperature, time"},
-            "reagents": {"type": "array", "items": {"type": "string"}, "description": "chemical names"},
-            "solvents": {"type": "array", "items": {"type": "string"}, "description": "solvent names"}
+            "action":   {"type": "string"},
+            "details":  {"type": "string"},
+            "reagents": {"type": "array", "items": {"type": "string"}},
+            "solvents": {"type": "array", "items": {"type": "string"}}
         },
         "required": ["action", "details"]
     }
 }
 
-_SYSTEM_STEPS = textwrap.dedent("""
-    You are a chemistry protocol parser.
-    Break the PROCEDURE text into explicit atomic steps, calling the add_step
-    tool once for each distinct action. 8–20 steps is typical.
+_SYSTEM_STEPS = textwrap.dedent("""    You are a chemistry protocol parser.
+    Break the PROCEDURE text into explicit atomic steps,
+    calling the add_step tool once for each distinct action.
 """).strip()
 
 def gpt_steps(paragraphs: List[str], model: str = "gpt-4o-mini") -> List[Dict[str, Any]]:
-    if _client is None:
+    if not _client or not paragraphs:
         return []
 
-    msgs = [
+    messages = [
         {"role": "system", "content": _SYSTEM_STEPS},
-        {"role": "user", "content": "PROCEDURE:\n" + "\n".join(paragraphs)}
+        {"role": "user",   "content": "PROCEDURE:\n" + "\n".join(paragraphs)}
     ]
 
     resp = _client.chat.completions.create(
         model=model,
         temperature=0,
-        tools=[{"type": "function", "function": _fn_schema}],
-        messages=msgs,
+        tools=[{"type": "function", "function": _FN_SCHEMA}],
+        messages=messages,
     )
 
     steps: List[Dict[str, Any]] = []
     for ch in resp.choices:
         if ch.message.role == "tool":
             steps.append(json.loads(ch.message.content))
-        elif ch.message.tool_calls:
+        elif ch.message.tool_calls:  # fallback for older models
             for tc in ch.message.tool_calls:
                 steps.append(json.loads(tc.function.arguments))
     return steps
 
-# ════════════════════  4. Public API  ═════════════════════════════════════ #
-class ParserError(RuntimeError): ...
+
+# ════════════════════ 4. Public API ═══════════════════════════════════════ #
+class ParserError(RuntimeError):
+    """Raised when answer cannot be parsed into expected sections."""
+
 
 def convert_to_json(answer_text: str, *, robot: bool = False) -> Dict[str, Any]:
-    """
-    Convert the model's answer into rich JSON suitable for execution by a robot.
-    """
-    sections = _split_sections(answer_text)
+    secs = _split_sections(answer_text)
 
-    # ── Hardware ──────────────────────────────────────────────────────────
-    hardware = [_clean_item(l) for l in sections.get("hardware", [])]
-
-    # ── Materials (clean + enrich) ────────────────────────────────────────
-    materials_lines = [_clean_item(l) for l in sections.get("materials", [])]
+    hardware  = [_clean_item(l) for l in secs["hardware"]]
+    materials = [_clean_item(l) for l in secs["materials"]]
     try:
-        materials_enriched = enrich_materials(materials_lines)
-    except Exception as exc:
-        materials_enriched = [{"name": ln, "notes": f"enrich failed: {exc}"} for ln in materials_lines]
+        materials_enriched = enrich_materials(materials)
+    except Exception as exc:  # never fail the whole parse
+        materials_enriched = [{"name": ln, "notes": f"enrich failed: {exc}"}
+                              for ln in materials]
 
-    # ── Procedure ────────────────────────────────────────────────────────
-    procedure_paras = sections.get("procedure", [])
-    proc_struct = gpt_steps(procedure_paras) if robot else []
+    procedure   = secs["procedure"]
+    proc_struct = gpt_steps(procedure) if robot else []
 
     return {
         "hardware": hardware,
-        "materials": materials_lines,
+        "materials": materials,
         "materials_enriched": materials_enriched,
-        "procedure": procedure_paras,
+        "procedure": procedure,
         "procedure_structured": proc_struct,
-        "raw_answer": answer_text.strip()
+        "raw_answer": answer_text.strip(),
     }
 
-# ════════════════════  5. CLI convenience  ════════════════════════════════ #
-if __name__ == "__main__":
-    import argparse, pathlib, sys, pprint
-    ap = argparse.ArgumentParser(description="Convert answer text to JSON.")
-    ap.add_argument("file", help="txt file containing NanoChemGPT answer")
-    ap.add_argument("--robot", action="store_true", help="call OpenAI to split into atomic steps")
-    ns = ap.parse_args()
 
-    txt = pathlib.Path(ns.file).read_text(encoding="utf-8", errors="ignore")
+# ════════════════════ 5. CLI helper ═══════════════════════════════════════ #
+if __name__ == "__main__":
+    import argparse, pathlib, sys
+    p = argparse.ArgumentParser(description="Convert answer text to JSON.")
+    p.add_argument("file", help="answer.txt produced by NanoChemGPT")
+    p.add_argument("--robot", action="store_true",
+                   help="include OpenAI function‑calling split into atomic steps")
+    ns = p.parse_args()
+
+    txt = pathlib.Path(ns.file).read_text(encoding="utf‑8", errors="ignore")
     try:
-        out = convert_to_json(txt, robot=ns.robot)
-        json.dump(out, sys.stdout, indent=2, ensure_ascii=False)
-    except ParserError as e:
-        print("ParserError:", e, file=sys.stderr)
+        json.dump(convert_to_json(txt, robot=ns.robot),
+                  sys.stdout, indent=2, ensure_ascii=False)
+    except ParserError as exc:
+        print("ParserError:", exc, file=sys.stderr)
         sys.exit(1)
