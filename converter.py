@@ -158,3 +158,58 @@ if __name__ == "__main__":
     except ParserError as exc:
         print("ParserError:", exc, file=sys.stderr)
         sys.exit(1)
+
+# ───────────── 6. simple post-parser for ‘details’ ────────────── #
+_TEMP_RX = re.compile(r"(?P<val>[-+]?\d+(?:\.\d+)?)\s*°?\s*C", re.I)
+_TIME_RX = re.compile(
+    r"(?P<val>[-+]?\d+(?:\.\d+)?)\s*(?P<unit>h(?:ours?)?|min(?:utes?)?)", re.I)
+
+def _mk_vessel_map(hardware: List[str]) -> Dict[str, str]:
+    """{'250 mL beaker': 'V1', 'round-bottom flask': 'V2', …}"""
+    vmap = {}
+    for idx, hw in enumerate(hardware, 1):
+        vmap[hw.lower()] = f"V{idx}"
+    return vmap
+
+def _extract_fields(step: Dict[str, Any], vmap: Dict[str, str]) -> Dict[str, Any]:
+    if "details" not in step:
+        return step
+    txt = step["details"]
+
+    # 1) temperature
+    if "temperature" not in step:
+        m = _TEMP_RX.search(txt)
+        if m:
+            step["temperature"] = m.group("val").strip()
+
+    # 2) time  (rename duration to time for clarity)
+    if "time" not in step and "duration" not in step:
+        m = _TIME_RX.search(txt)
+        if m:
+            tval = m.group("val").strip()
+            unit = m.group("unit").lower()
+            step["time"] = f"{tval} {unit}"
+
+    # 3) vessel
+    if "vessel" not in step:
+        for phrase, vid in vmap.items():
+            if phrase in txt.lower():
+                step["vessel"] = vid
+                break
+
+    # 4) clean up
+    step.pop("duration", None)          # prefer 'time'
+    step.pop("details",  None)          # drop the free text
+    return step
+
+# Hook it into convert_to_json
+_orig_convert = convert_to_json  # keep reference
+
+def convert_to_json(answer_text: str, *, robot: bool = False) -> Dict[str, Any]:  # type: ignore[override]
+    data = _orig_convert(answer_text, robot=robot)
+
+    vmap = _mk_vessel_map(data["hardware"])
+    data["procedure_structured"] = [
+        _extract_fields(step, vmap) for step in data["procedure_structured"]
+    ]
+    return data
