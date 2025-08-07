@@ -99,21 +99,26 @@ _FN_SCHEMA = {
     },
 }
 
-_SYSTEM_PROMPT = textwrap.dedent("""\
-    You are a chemistry assistant. Parse each line of PROCEDURE into atomic steps.
-    For each step, call the add_step function exactly once. If a line contains
-    multiple operations, split it into multiple calls. Extract: action (verb),
-    time (duration), temperature, vessel, reagents, solvents. Omit any field
-    that is absent in the text.
+_SYSTEM_PROMPT = textwrap.dedent("""
+  You are a chemistry protocol parser.
+  For EACH individual sentence below call *add_step* exactly once.
+  Do NOT combine multiple operations in one call.
+  Extract these fields when present:
+    • action  • time  • temperature  • vessel  • reagents  • solvents  • notes
+  Omit any field that is absent.
 """).strip()
 
 def gpt_steps(paragraphs: List[str], model: str = "gpt-4o-mini") -> List[Dict[str, Any]]:
     """Call the OpenAI model to extract atomic steps with explicit fields."""
     if not _CLIENT or not paragraphs:
         return []
-    msgs = [
-        {"role": "system", "content": _SYSTEM_PROMPT},
-    ]
+    msgs = [{"role": "system", "content": _SYSTEM_PROMPT}]
+    for line in paragraphs:
+        # split on '.', ';', then strip
+        for sent in re.split(r"[.;](?=\s|$)", line):
+            sent = sent.strip()
+            if sent:
+                msgs.append({"role": "user", "content": sent})
     # One user message per paragraph
     for p in paragraphs:
         clean = re.sub(r"^\s*\d+[.)]\s*", "", p).strip()
@@ -121,7 +126,7 @@ def gpt_steps(paragraphs: List[str], model: str = "gpt-4o-mini") -> List[Dict[st
             msgs.append({"role": "user", "content": clean})
     resp = _CLIENT.chat.completions.create(
         model=model,
-        temperature=0,
+        temperature=0.1,
         tools=[{"type": "function", "function": _FN_SCHEMA}],
         tool_choice={"type": "function", "function": {"name": "add_step"}},
         messages=msgs,
