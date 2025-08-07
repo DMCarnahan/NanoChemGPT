@@ -119,23 +119,6 @@ def basic_search(query: str, n: int = 6) -> list[dict]:
 
     return local[: 2*n]
 
-    # ---- internet hits (OpenAlex) ---------------------------------------- #
-    web  = []
-    try:
-        web = search_papers(query, n)
-    except Exception as e:
-        print("[basic_search] OpenAlex fetch failed:", e)
-
-    # ---- de-dup + merge --------------------------------------------------- #
-    seen = { (d.get("doi") or d.get("title","")).lower() for d in local }
-    for w in web:
-        key = (w.get("doi") or w.get("title","")).lower()
-        if key not in seen:
-            local.append({k: w.get(k, "") for k in ("title","year","url","doi")})
-            seen.add(key)
-
-    return local[: 2*n]   # cap at local+n web entries
-
 # ─── OpenAI client (no proxy) ───────────────────────────────────────────── #
 load_dotenv()
 _no_proxy_client = httpx.Client(trust_env=False, timeout=120.0)
