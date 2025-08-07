@@ -24,12 +24,11 @@ _SUB_RX   = re.compile(r"^\s*\d+\.\s*\*\*(?P<name>[^*]+?)\*\*[:\s]*$", re.M)
 _BULLET_RX = re.compile(r"^\s*[-*•–—]\s*")
 _CITE_RX   = re.compile(r"\s*\[\d+\]\s*$")
 
-_TAG_RX = re.compile(r"\s*\[(?:CTX|DB|PARSED|GEN|\d+)\]\s*$")  
+_TAG_RX = re.compile(r"\s*\[(?:CTX|DB|PARSED|GEN|\d+)\]\s*[.。;:,-]?\s*$")
 
 def _clean_item(line: str) -> str:
-    line = _BULLET_RX.sub("", line)   # remove leading bullet
-    line = _TAG_RX.sub("", line)      # remove [CTX], [GEN], [6] …
-    return line.strip()
+    line = _BULLET_RX.sub("", line)   # strip leading bullet
+    return _TAG_RX.sub("", line).strip()
 
 def _split_sections(txt: str) -> Dict[str, List[str]]:
     """
@@ -62,12 +61,13 @@ def _split_sections(txt: str) -> Dict[str, List[str]]:
 
 # ════════════════════  2. Materials enrichment (toy example)  ═════════════ #
 def enrich_materials(lines: List[str]) -> List[Dict[str, str]]:
-    """Very naive split into 'name' & 'notes'."""
-    out: List[Dict[str, str]] = []
+    out = []
     for ln in lines:
         parts = ln.split(" as ", 1)
         if len(parts) == 2:
-            out.append({"name": parts[0].strip(), "notes": parts[1].strip()})
+            name  = parts[0].strip()
+            notes = _clean_item(parts[1])        # ✨ strip tags here
+            out.append({"name": name, "notes": notes})
         else:
             out.append({"name": ln})
     return out
