@@ -68,17 +68,56 @@ def basic_search(query: str, n: int = 6) -> list[dict]:
     if not query.strip():
         return []
 
-    # ---- local hits ------------------------------------------------------ #
-    local_hits = []
-    if _SEARCHER is not None:
+    # ---- hits ------------------------------------------------------ #
+
+def basic_search(query: str, n: int = 6) -> list[dict]:
+    if not query.strip():
+        return []
+
+    # ── 1) LOCAL DATASET ──────────────────────────────────────────────
+    local_hits: list[dict] | pd.DataFrame
+    if _SEARCHER is None:
+        local_hits = []                    
+    else:
         try:
             local_hits = _SEARCHER.query(query, topk=n)
-            if isinstance(local_hits, list):
-                local_hits = pd.DataFrame(local_hits)
         except Exception as e:
             print("[basic_search] local query failed:", e)
+            local_hits = []
 
-    local = [row.to_dict() for _, row in local_hits.fillna("").iterrows()]
+    local: list[dict] = []
+
+    # a) DataFrame → list[dict]
+    if isinstance(local_hits, pd.DataFrame):
+        for _, row in local_hits.fillna("").iterrows():
+            d = row.to_dict()
+            for k in ("title", "year", "url", "doi"):
+                d.setdefault(k, "")
+            local.append(d)
+
+    # b) already list[dict]
+    elif isinstance(local_hits, list):
+        for d in local_hits:
+            for k in ("title", "year", "url", "doi"):
+                d.setdefault(k, "")
+            local.append(d)
+
+    # ── 2) OPENALEX (internet) ───────────────────────────────────────
+    web = []
+    try:
+        web = search_papers(query, n)
+    except Exception as e:
+        print("[basic_search] OpenAlex fetch failed:", e)
+
+    # ── 3) MERGE + DEDUP ─────────────────────────────────────────────
+    seen = { (d.get("doi") or d.get("title", "")).lower() for d in local }
+    for w in web:
+        key = (w.get("doi") or w.get("title", "")).lower()
+        if key not in seen:
+            local.append({k: w.get(k, "") for k in ("title", "year", "url", "doi")})
+            seen.add(key)
+
+    return local[: 2*n]
 
     # ---- internet hits (OpenAlex) ---------------------------------------- #
     web  = []
