@@ -1,0 +1,27 @@
+# Mechanistic Answering Template (Jinja-like)
+System: {{ system }}
+Question: {{ question }}
+Route: {{ synthesis_method }}
+
+Use ONLY the retrieved mechanistic facts below. If conflicts exist, resolve by evidential strength and scope.
+Facts:
+{% for f in facts %}
+- {{ f }}
+{% endfor %}
+
+Step-by-step reasoning (explicit cause → effect chain):
+1) Define the target metric (e.g., aspect_ratio = length/diameter)
+2) Identify which parameters influence numerator and denominator
+3) Determine governing mechanism/regime (kinetic vs thermodynamic; facet passivation; precursor supply)
+4) Choose the most influential parameter for the asked route and justify
+
+Output JSON:
+{
+  "question": "{{ question }}",
+  "reasoning_steps": [
+    "..."
+  ],
+  "final_answer": "…",
+  "scope": "…",
+  "citations": ["doi:...", "..."]
+}

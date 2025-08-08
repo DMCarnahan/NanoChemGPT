@@ -1,0 +1,77 @@
+{
+  "system": "LaB6 nanorods",
+  "phase": "Pm-3m (cubic)",
+  "synthesis_method": "carbothermal reduction",
+  "route_details": "La2O3 + B4C under high temperature; boron-containing vapor feeds growth",
+  "mechanisms": [
+    {
+      "name": "kinetic control (supply-limited axial growth)",
+      "evidence_snippet": "Aspect ratio increases with B-supply and time; lateral growth slower.",
+      "confidence": 0.4
+    }
+  ],
+  "parameters": [
+    {
+      "name": "temperature",
+      "units": "\u00b0C",
+      "role": "controls B-containing vapor pressure and diffusion rate",
+      "effects": [
+        {
+          "target": "aspect_ratio",
+          "direction": "increase",
+          "regime": "up to onset of sintering",
+          "mechanistic_rationale": "Higher T increases supersaturation; axial growth outpaces radial."
+        }
+      ]
+    },
+    {
+      "name": "time",
+      "units": "min",
+      "role": "sets integrated axial growth length",
+      "effects": [
+        {
+          "target": "aspect_ratio",
+          "direction": "increase",
+          "regime": "constant precursor supply",
+          "mechanistic_rationale": "Longer growth extends length more than diameter."
+        }
+      ]
+    },
+    {
+      "name": "precursor_ratio",
+      "units": "molar",
+      "role": "sets effective B activity",
+      "effects": [
+        {
+          "target": "aspect_ratio",
+          "direction": "increase",
+          "regime": "B-rich",
+          "mechanistic_rationale": "Higher B activity increases axial growth rate."
+        }
+      ]
+    }
+  ],
+  "observed_outcomes": [
+    {
+      "metric": "aspect_ratio",
+      "value": "higher with T and time",
+      "units": ""
+    }
+  ],
+  "most_influential_parameter": {
+    "name": "temperature",
+    "justification": "Primary knob for B vapor pressure and diffusion in carbothermal routes; dominates axial growth vs lateral.",
+    "scope": "carbothermal reduction"
+  },
+  "evidence": [
+    {
+      "source_type": "paper",
+      "citation": "TODO: replace with DOI",
+      "url": "",
+      "quote": "placeholder",
+      "figure_label": ""
+    }
+  ],
+  "created_at": "2025-08-08T15:32:17.851411Z",
+  "updated_at": "2025-08-08T15:32:17.851423Z"
+}

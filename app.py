@@ -26,10 +26,11 @@ DATA_DIR       = Path(os.getenv("DATA_DIR", BASE_DIR / "data"))
 BUILTIN_DIR    = Path(os.getenv("BUILTIN_DIR", "/mnt/data/builtin")).resolve()
 UPLOADS_DIR    = Path(os.getenv("UPLOADS_DIR", "/mnt/data/uploads")).resolve()
 VECTORSTORE_DIR= Path(os.getenv("VECTORSTORE_DIR", "/mnt/data/index")).resolve()
-
+MECH_KB_DIR    = Path(os.getenv("MECH_KB_DIR", BASE_DIR / "mechanistic_reasoning" / "mechanistic_kb")).resolve()
+MECH_INDEX_DIR = (MECH_KB_DIR / "index").resolve()
 ADMIN_TOKEN    = os.getenv("ADMIN_TOKEN", os.getenv("ADMIN_UPLOAD_SECRET", ""))  # legacy key support
 
-for d in (BUILTIN_DIR, UPLOADS_DIR, VECTORSTORE_DIR):
+for d in (BUILTIN_DIR, UPLOADS_DIR, VECTORSTORE_DIR, MECH_KB_DIR, MECH_INDEX_DIR):
     d.mkdir(parents=True, exist_ok=True)
 
 # ─── Flask app ───────────────────────────────────────────────────────────── #
@@ -39,6 +40,12 @@ app = Flask(
     static_folder=str(BASE_DIR / "static"),
 )
 app.config["MAX_CONTENT_LENGTH"] = 100 * 1024 * 1024  # 100 MB
+app.config["JSON_AS_ASCII"] = False  # allow UTF-8 in JSON responses
+
+# ─── Register mechanistic blueprint ─────────────────────────────────────── #
+from app_extensions.mechanism_routes import mechanism_bp
+app.register_blueprint(mechanism_bp)
+from ingestion.ingest_mechanisms import ingest as ingest_mechanisms
 
 # ─── Dataset searcher (local table) ─────────────────────────────────────── #
 _LOOKUP_FALLBACK = BASE_DIR / "database" / "tables" / "coremof.xlsx"
@@ -305,18 +312,64 @@ def admin_upload_builtin():
     f = request.files.get("file")
     if not f or f.filename == "":
         return jsonify({"error": "no file"}), 400
-
+    
+# ---------------- Mechanistic KB Upload/Ingester --------------------------
+@app.post("/admin/upload_mechanistic")
+@require_admin
+def admin_upload_mechanistic():
+    """
+    Accepts .json or .jsonl of mechanistic entries (matching schemas/mechanistic.schema.json)
+    and appends them to mechanistic_kb/mechanistic.jsonl via the ingestion pipeline.
+    """
+    f = request.files.get("file")
+    if not f or f.filename == "":
+        return jsonify({"error": "no file"}), 400
     fname = secure_filename(f.filename)
-    raw_path = BUILTIN_DIR / fname
+    raw_path = (MECH_KB_DIR / fname)
     raw_path.parent.mkdir(parents=True, exist_ok=True)
-
     f.save(raw_path)
 
-    out_path = raw_path
-    if fname.lower().endswith(".json.xz"):
-        out_path = BUILTIN_DIR / fname[:-3]
-        with lzma.open(raw_path, "rb") as xzf, open(out_path, "wb") as out:
-            out.write(xzf.read())
+    # Load entries
+    entries = []
+    try:
+        if fname.lower().endswith(".jsonl"):
+            with raw_path.open("r", encoding="utf-8", errors="ignore") as fh:
+                for line in fh:
+                    line = line.strip()
+                    if not line:
+                        continue
+                    entries.append(json.loads(line))
+        elif fname.lower().endswith(".json"):
+            payload = json.loads(raw_path.read_text(encoding="utf-8", errors="ignore"))
+            if isinstance(payload, list):
+                entries.extend(payload)
+            elif isinstance(payload, dict):
+                entries.append(payload)
+            else:
+                return jsonify({"error": "JSON must be an object or an array of objects"}), 400
+        else:
+            return jsonify({"error": "Unsupported file type (use .json or .jsonl)"}), 400
+    except Exception as e:
+        return jsonify({"error": f"failed to parse file: {e}"}), 400
+
+    try:
+        ids = ingest_mechanisms(entries)
+        return jsonify({"ok": True, "ingested": len(ids), "ids": ids})
+    except Exception as e:
+        traceback.print_exc()
+        return jsonify({"ok": False, "error": f"ingestion failed: {e}"}), 500
+
+fname = secure_filename(f.filename)
+raw_path = BUILTIN_DIR / fname
+raw_path.parent.mkdir(parents=True, exist_ok=True)
+
+f.save(raw_path)
+
+out_path = raw_path
+if fname.lower().endswith(".json.xz"):
+    out_path = BUILTIN_DIR / fname[:-3]
+    with lzma.open(raw_path, "rb") as xzf, open(out_path, "wb") as out:
+        out.write(xzf.read())
 
     return jsonify({
         "ok": True,
@@ -468,10 +521,11 @@ def ask():
         ctx_parsed = ""  # disabled: do not use parsed DB context
 
         context_parts = []
-        if vs_ctx: context_parts.append("<<<CTX_UPLOADS>>>\n" + vs_ctx)
-                        context_joined = "\n\n---\n\n".join(context_parts).strip()
-        print("[ask][debug] VS tags preview:", (vs_ctx or "").replace("\n"," ")[:220])
-        print("[ask] ctx parts:", f"VS={bool(vs_ctx)} len={len(vs_ctx) if vs_ctx else 0}")
+        if vs_ctx: 
+            context_parts.append("<<<CTX_UPLOADS>>>\n" + vs_ctx)
+            context_joined = "\n\n---\n\n".join(context_parts).strip()
+            print("[ask][debug] VS tags preview:", (vs_ctx or "").replace("\n"," ")[:220])
+            print("[ask] ctx parts:", f"VS={bool(vs_ctx)} len={len(vs_ctx) if vs_ctx else 0}")
 
         refs = []
         try:
@@ -665,6 +719,36 @@ def save_txt():
     buf.seek(0)
     fname = f"chatau_{datetime.utcnow():%Y%m%d_%H%M%S}.txt"
     return send_file(buf, mimetype="text/plain", as_attachment=True, download_name=fname)
+
+@app.post("/parse_upload")
+def parse_upload():
+    """
+    Accept a .txt or .md file containing a human-edited 'Robot mode' answer,
+    run it through the existing converter.validate_step(), and return JSON.
+    """
+    try:
+        f = request.files.get("file")
+        if not f or f.filename == "":
+            return jsonify({"ok": False, "error": "no file"}), 400
+
+        # read as utf-8 text (tolerant)
+        try:
+            text = f.read().decode("utf-8", errors="ignore")
+        except Exception:
+            # werkzeug FileStorage may already be str with .read() returning str on some stacks
+            text = f.read()
+
+        if not (text or "").strip():
+            return jsonify({"ok": False, "error": "file is empty"}), 400
+
+        data = validate_step(text)
+        return jsonify({"ok": True, "data": data})
+    except ValueError as ve:
+        # raised by validate_step with line-aware messages
+        return jsonify({"ok": False, "error": str(ve)}), 422
+    except Exception as e:
+        traceback.print_exc()
+        return jsonify({"ok": False, "error": f"parse_upload failed: {e}"}), 500
 
 @app.post("/clear_uploads")
 def clear_uploads_route():

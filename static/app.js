@@ -579,9 +579,7 @@ document.addEventListener('DOMContentLoaded', wireUI);
 
   if (!dz || !inp) return;
 
-  // 🔐 Put your ADMIN_UPLOAD_SECRET here while testing, or prompt each time.
-  // Better: render it into the page server-side for a private /admin route only.
-  let ADMIN_TOKEN = ""; // e.g. "paste-temporary-token-here"
+  let ADMIN_TOKEN = "";
 
   function setMsg(txt, ok=false) {
     msg.classList.remove('hidden');
@@ -621,3 +619,173 @@ document.addEventListener('DOMContentLoaded', wireUI);
   dz.addEventListener('drop', (e) => { e.preventDefault(); dz.classList.remove('hover'); handleFiles(e.dataTransfer.files); });
   inp.addEventListener('change', () => handleFiles(inp.files));
 })();
+
+// --- mode state ---
+let MODE = 'robot'; // 'robot' | 'reason'
+
+// toggle buttons
+const modeRobotBtn  = document.getElementById('modeRobot');
+const modeReasonBtn = document.getElementById('modeReason');
+const parseBtn      = document.getElementById('parseBtn');
+const askBtn        = document.getElementById('askBtn');
+const qEl           = document.getElementById('questionInput');
+const answerPre     = document.getElementById('answerPre');
+const rationalePre  = document.getElementById('rationalePre');
+const refsSection   = document.getElementById('refsSection');
+const refsList      = document.getElementById('refsList');
+const jsonBlock     = document.getElementById('jsonBlock');
+const jsonPre       = document.getElementById('jsonPre');
+const askMsg        = document.getElementById('askMsg');
+const showJsonPreview = document.getElementById('showJsonPreview');
+
+function setMode(m) {
+  MODE = m;
+  // aria pressed update
+  modeRobotBtn.setAttribute('aria-pressed', m === 'robot' ? 'true' : 'false');
+  modeReasonBtn.setAttribute('aria-pressed', m === 'reason' ? 'true' : 'false');
+  // parse button only useful in Robot mode
+  parseBtn.disabled = (m !== 'robot');
+  // JSON preview also only meaningful for Robot mode; hide block if switching to Reasoning
+  if (m !== 'robot') {
+    jsonBlock.classList.add('hidden');
+  }
+}
+
+modeRobotBtn.addEventListener('click', () => setMode('robot'));
+modeReasonBtn.addEventListener('click', () => setMode('reason'));
+
+// --- ask flow ---
+askBtn.addEventListener('click', async () => {
+  const question = (qEl.value || '').trim();
+  if (!question) return;
+
+  askMsg.classList.remove('hidden');
+  askMsg.textContent = 'Working…';
+  answerPre.textContent = '';
+  rationalePre.textContent = '';
+  refsList.innerHTML = '';
+  refsSection.classList.add('hidden');
+  jsonBlock.classList.add('hidden');
+
+  try {
+    let endpoint = MODE === 'robot' ? '/ask' : '/mechanism/ask';
+    const res = await fetch(endpoint, {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ question })
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Request failed');
+
+    if (MODE === 'robot') {
+      // Your existing /ask payload shape
+      const { answer, rationale, references } = data;
+      answerPre.textContent = answer || '';
+      rationalePre.textContent = rationale || '';
+      // refs
+      (references || []).forEach(r => {
+        const li = document.createElement('li');
+        const url = r.url || (r.doi ? `https://doi.org/${r.doi}` : '');
+        li.innerHTML = `${r.title || '(no title)'} ${r.year ? '('+r.year+')' : ''}${url ? ' — <a href="'+url+'" target="_blank" rel="noopener">link</a>' : ''}`;
+        refsList.appendChild(li);
+      });
+      refsSection.classList.toggle('hidden', !(data.references || []).length);
+
+      // optional JSON preview (if you already call /parse later)
+      if (showJsonPreview.checked) {
+        try {
+          const resp = await fetch('/parse', {
+            method: 'POST',
+            headers: {'Content-Type':'application/json'},
+            body: JSON.stringify({ text: answer })
+          });
+          const p = await resp.json();
+          if (p.ok) {
+            jsonPre.textContent = JSON.stringify(p.data, null, 2);
+            jsonBlock.classList.remove('hidden');
+          } else {
+            jsonPre.textContent = `Parse error: ${p.error || 'unknown'}`;
+            jsonBlock.classList.remove('hidden');
+          }
+        } catch (e) {
+          jsonPre.textContent = `Preview failed: ${e.message}`;
+          jsonBlock.classList.remove('hidden');
+        }
+      }
+
+    } else {
+      // Reasoning mode: /mechanism/ask payload
+      // shape: { model_raw, answer: {question, reasoning_steps[], final_answer, scope, citations[], parameter_ranking[]}, ... }
+      const ans = (data.answer || {});
+      const steps = Array.isArray(ans.reasoning_steps) ? ans.reasoning_steps : [];
+      const cites = Array.isArray(ans.citations) ? ans.citations : [];
+
+      answerPre.textContent   = (ans.final_answer || data.model_raw || '').trim();
+      rationalePre.textContent = steps.length ? steps.map((s,i)=>`${i+1}. ${s}`).join('\n') : '(no steps returned)';
+
+      refsList.innerHTML = '';
+      cites.forEach(c => {
+        const li = document.createElement('li');
+        const link = (c.startsWith('http') || c.startsWith('doi:')) ? c.replace(/^doi:/,'https://doi.org/') : c;
+        li.innerHTML = `<a href="${link}" target="_blank" rel="noopener">${c}</a>`;
+        refsList.appendChild(li);
+      });
+      refsSection.classList.toggle('hidden', cites.length === 0);
+
+      // hide parse JSON in reasoning mode
+      jsonBlock.classList.add('hidden');
+    }
+
+    askMsg.classList.add('hidden');
+  } catch (e) {
+    askMsg.classList.remove('hidden');
+    askMsg.textContent = `Error: ${e.message}`;
+  }
+});
+// --- Edited TXT -> JSON flow ---
+const editedFile        = document.getElementById('editedFile');
+const editedConvertBtn  = document.getElementById('editedConvertBtn');
+const editedDownloadA   = document.getElementById('editedDownloadJson');
+const jsonBlock         = document.getElementById('jsonBlock');
+const jsonPre           = document.getElementById('jsonPre');
+const askMsg            = document.getElementById('askMsg'); // reuse status area
+
+editedConvertBtn?.addEventListener('click', async () => {
+  try {
+    const f = editedFile?.files?.[0];
+    if (!f) throw new Error('Please choose a .txt or .md file first.');
+
+    askMsg.classList.remove('hidden');
+    askMsg.textContent = 'Converting…';
+    jsonBlock.classList.add('hidden');
+    editedDownloadA.classList.add('hidden');
+    jsonPre.textContent = '';
+
+    const fd = new FormData();
+    fd.append('file', f);
+
+    const res = await fetch('/parse_upload', { method: 'POST', body: fd });
+    const out = await res.json();
+
+    if (!res.ok || !out.ok) {
+      throw new Error(out.error || 'Conversion failed');
+    }
+
+    const pretty = JSON.stringify(out.data, null, 2);
+    jsonPre.textContent = pretty;
+    jsonBlock.classList.remove('hidden');
+
+    // prepare client-side download
+    const blob = new Blob([pretty], { type: 'application/json' });
+    const url  = URL.createObjectURL(blob);
+    editedDownloadA.href = url;
+    const stem = f.name.replace(/\.(txt|md)$/i, '') || 'converted';
+    editedDownloadA.download = `${stem}.json`;
+    editedDownloadA.classList.remove('hidden');
+
+    askMsg.classList.add('hidden');
+  } catch (e) {
+    askMsg.classList.remove('hidden');
+    askMsg.textContent = `Error: ${e.message || e}`;
+  }
+});

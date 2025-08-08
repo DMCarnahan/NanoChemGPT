@@ -16,7 +16,7 @@ INDEX_DIR = DATA_DIR / "index"; INDEX_DIR.mkdir(parents=True, exist_ok=True)
 
 TTL_SEC        = int(os.getenv("UPLOAD_TTL_SEC", "1800"))    # 30 min
 EMBED_BACKEND  = os.getenv("EMBED_BACKEND", "st").lower()    # "st" | "openai"
-EMBED_MODEL    = os.getenv("EMBED_MODEL", "sentence-transformers/all-MiniLM-L6-v2")
+EMBED_MODEL    = os.getenv("EMBED_MODEL", "sentence-transformers/all-mpnet-base-v2")
 OPENAI_EMB     = os.getenv("EMBED_OPENAI_MODEL", "text-embedding-3-small")
 EMB_BATCH      = int(os.getenv("EMBED_BATCH", "64"))
 DISABLE_PERSIST = os.getenv("VS_DISABLE_PERSIST", "0") == "1"

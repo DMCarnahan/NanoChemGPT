@@ -1,0 +1,199 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "MechanisticChemistryEntry",
+  "type": "object",
+  "required": [
+    "system",
+    "synthesis_method",
+    "mechanisms",
+    "parameters",
+    "evidence"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Unique entry id (e.g., DOI#fragment or UUID)"
+    },
+    "system": {
+      "type": "string",
+      "description": "Material system or composition (e.g., LaB6 nanorods)"
+    },
+    "phase": {
+      "type": "string",
+      "description": "Crystal phase if known"
+    },
+    "synthesis_method": {
+      "type": "string",
+      "description": "Named method (e.g., carbothermal, SLS, VLS, solvothermal)"
+    },
+    "route_details": {
+      "type": "string",
+      "description": "Short free text description of route to aid retrieval"
+    },
+    "mechanisms": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "name"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Mechanism class (e.g., oriented attachment, VLS, kinetic control)"
+          },
+          "evidence_snippet": {
+            "type": "string",
+            "description": "Quoted or paraphrased snippet that supports mechanism"
+          },
+          "confidence": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          }
+        }
+      }
+    },
+    "parameters": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "name"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Parameter name (temperature, ligand type, precursor ratio, time, etc.)"
+          },
+          "units": {
+            "type": "string"
+          },
+          "role": {
+            "type": "string",
+            "description": "e.g., 'controls B vapor pressure', 'facet-selective binding'"
+          },
+          "effects": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "target",
+                "direction"
+              ],
+              "properties": {
+                "target": {
+                  "type": "string",
+                  "description": "Outcome or variable affected (aspect_ratio, length, diameter, yield)"
+                },
+                "direction": {
+                  "type": "string",
+                  "enum": [
+                    "increase",
+                    "decrease",
+                    "nonmonotonic",
+                    "threshold",
+                    "unknown"
+                  ]
+                },
+                "regime": {
+                  "type": "string",
+                  "description": "When does this hold? (e.g., temp>1200C)"
+                },
+                "mechanistic_rationale": {
+                  "type": "string",
+                  "description": "Cause-effect explanation"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "observed_outcomes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "metric": {
+            "type": "string",
+            "description": "aspect_ratio, length, diameter, etc."
+          },
+          "value": {
+            "type": [
+              "number",
+              "string"
+            ]
+          },
+          "units": {
+            "type": "string"
+          },
+          "conditions_ref": {
+            "type": "string",
+            "description": "free-text or pointer to a subset of parameters"
+          },
+          "notes": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "most_influential_parameter": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "justification": {
+          "type": "string",
+          "description": "Why this parameter dominates control of the asked outcome"
+        },
+        "scope": {
+          "type": "string",
+          "description": "Which synthesis route or regime this holds for"
+        }
+      }
+    },
+    "evidence": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "source_type",
+          "citation"
+        ],
+        "properties": {
+          "source_type": {
+            "type": "string",
+            "enum": [
+              "paper",
+              "thesis",
+              "patent",
+              "preprint",
+              "dataset"
+            ]
+          },
+          "citation": {
+            "type": "string",
+            "description": "DOI or bibtex-like string"
+          },
+          "url": {
+            "type": "string"
+          },
+          "quote": {
+            "type": "string"
+          },
+          "figure_label": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "created_at": {
+      "type": "string"
+    },
+    "updated_at": {
+      "type": "string"
+    }
+  }
+}

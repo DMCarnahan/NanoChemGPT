@@ -53,16 +53,24 @@
       <div class="row mt-3">
         <button id="askBtn" class="btn"><span class="spinner hidden"></span>Ask</button>
         <button id="parseBtn" class="btn secondary" disabled>Convert answer → JSON</button>
-        <label class="row small" style="gap:8px;align-items:center;">
-          <input type="checkbox" id="robotMode"> Robot mode (clean + vessel labels)
-        </label>
-        <label class="row small" style="gap:8px;align-items:center;">
-          <input type="checkbox" id="showJsonPreview"> Show JSON preview
-        </label>
+      <!-- Upload an edited Robot-mode answer and convert it to JSON -->
+      <div class="mt-3">
+        <h3 class="subhead">Upload edited answer (TXT/MD) → JSON</h3>
+        <div class="row" style="gap:8px;align-items:center;">
+          <input id="editedFile" type="file" accept=".txt,.md">
+          <button id="editedConvertBtn" class="btn secondary" type="button">Convert file</button>
+          <a id="editedDownloadJson" class="btn secondary hidden" href="#" download="converted.json">Download JSON</a>
+        </div>
+      </div>
+
+        <!-- Mode toggle -->
+        <div class="segmented" role="group" aria-label="Answer mode" style="display:flex;gap:6px;margin-left:8px;">
+          <button id="modeRobot" class="btn tertiary" aria-pressed="true" title="Protocol for JSON conversion">Robot mode</button>
+          <button id="modeReason" class="btn tertiary" aria-pressed="false" title="Mechanistic reasoning answer">Reasoning mode</button>
+        </div>
         <button id="saveTxtBtn" class="btn secondary" disabled>Export answer → .txt</button>
       </div>
       <div id="askMsg" class="alert mt-3 hidden" aria-live="polite"></div>
-
       <div class="mt-4">
         <h3 class="subhead">Answer</h3>
         <pre id="answerPre" class="pre"></pre>
