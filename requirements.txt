@@ -47,4 +47,4 @@ pubchempy==1.0.4
 rapidfuzz==3.9.6      
 backoff==2.2.1 
 pandas
-jsonformer
+jsonschema
