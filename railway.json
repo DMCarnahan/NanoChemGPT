@@ -39,6 +39,9 @@
     "VS_MMR": "1",
     "VS_LLM_RERANLK": "1",
     "TOKENIZERS_PARALLELISM": "false",
-    "USER_AGENT":"${{shared.USER_AGENT}}"
+    "USER_AGENT":"${{shared.USER_AGENT}}",
+    "MP_API_URL": "https://api.materialsproject.org/materials/summary",
+    "MP_API_KEY": "${{shared.MP_API_KEY}}",
+    "ORD_API_URL": "https://api.open-reaction-database.org/records"
   }
 }

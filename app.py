@@ -825,6 +825,13 @@ def api_uploads():
     items = [_doc(d) for d in cur]
     return jsonify({"items": items, "limit": limit})
 
+@app.post("/admin/rebuild_mech_index")
+@require_admin
+def rebuild_mech_index():
+    from retriever.retriever import build_index, Embedder
+    idx, meta = build_index(Embedder())
+    return {"ok": True, "entries": len(meta)}
+
 @app.errorhandler(400)
 @app.errorhandler(422)
 @app.errorhandler(500)
