@@ -2,7 +2,7 @@
 --extra-index-url https://download.pytorch.org/whl/cpu
 torch==2.2.2+cpu
 
-# ↓ Hard pins for transitive deps to keep the resolver instant
+# Hard pins for transitive deps to keep the resolver instant
 spacy==3.7.4
 spacy-legacy==3.0.12          
 thinc==8.2.4
@@ -12,6 +12,7 @@ sentence-transformers==2.6.1
 transformers==4.40.2
 tokenizers>=0.19
 huggingface-hub==0.22.2
+regex
 
 PyYAML==6.0.1                 
 pydantic==2.6.4
