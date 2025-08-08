@@ -7,12 +7,10 @@ import traceback
 from pathlib import Path
 from typing import List, Dict, Any, Tuple
 
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, jsonify, current_app
 
 # RAG bits (mechanistic KB)
 from retriever.retriever import search, Embedder
-
-from app import client
 
 mechanism_bp = Blueprint("mechanism_bp", __name__, url_prefix="/mechanism")
 
@@ -58,7 +56,6 @@ def build_prompt(question: str, hits: List[Dict[str, Any]]) -> str:
             + "\n\nOutput JSON with keys: question, reasoning_steps, final_answer, scope, citations"
         )
 
-    # extremely simple placeholder substitution to avoid adding Jinja dep
     tmpl = tmpl.replace("{{ system }}", "N/A")
     tmpl = tmpl.replace("{{ question }}", question)
     tmpl = tmpl.replace("{{ synthesis_method }}", "N/A")
@@ -230,6 +227,9 @@ def ask():
     prompt = build_prompt(question, hits)
 
     # 1) Call the model
+    client = current_app.config.get("OPENAI_CLIENT")
+    if client is None:
+        return jsonify({"error": "OpenAI client not configured"}), 500
     try:
         raw = client.chat.completions.create(
             model=os.getenv("MECH_MODEL", "gpt-4o-mini"),

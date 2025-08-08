@@ -42,11 +42,6 @@ app = Flask(
 app.config["MAX_CONTENT_LENGTH"] = 100 * 1024 * 1024  # 100 MB
 app.config["JSON_AS_ASCII"] = False  # allow UTF-8 in JSON responses
 
-# ─── Register mechanistic blueprint ─────────────────────────────────────── #
-from app_extensions.mechanism_routes import mechanism_bp
-app.register_blueprint(mechanism_bp)
-from ingestion.ingest_mechanisms import ingest as ingest_mechanisms
-
 # ─── Dataset searcher (local table) ─────────────────────────────────────── #
 _LOOKUP_FALLBACK = BASE_DIR / "database" / "tables" / "coremof.xlsx"
 LOOKUP_FILE = (
@@ -116,6 +111,12 @@ def basic_search(query: str, n: int = 6) -> list[dict]:
 load_dotenv()
 _no_proxy_client = httpx.Client(trust_env=False, timeout=120.0)
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"), http_client=_no_proxy_client)
+app.config["OPENAI_CLIENT"] = client
+
+# ─── Register mechanistic blueprint ─────────────────────────────────────── #
+from app_extensions.mechanism_routes import mechanism_bp
+app.register_blueprint(mechanism_bp)
+from ingestion.ingest_mechanisms import ingest as ingest_mechanisms
 
 # Job registry
 JOBS = {}  # {job_id: {"status": "...", "progress": int, "error": str, "filename": str}}
