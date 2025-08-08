@@ -14,7 +14,7 @@ from bson import ObjectId
 
 # ───────────────────────────── Local modules ────────────────────────────── #
 import vector_store as vs
-from converter import convert_text_to_robot_ops  
+from converter import validate_step, validate_file  # line-aware, normalizing validator
 from mongo_client import get_db, ping as mongo_ping
 from dataset_searcher import load_table, DatasetSearcher
 from internet_search import search_papers            # OpenAlex helper
@@ -27,7 +27,7 @@ BUILTIN_DIR    = Path(os.getenv("BUILTIN_DIR", "/mnt/data/builtin")).resolve()
 UPLOADS_DIR    = Path(os.getenv("UPLOADS_DIR", "/mnt/data/uploads")).resolve()
 VECTORSTORE_DIR= Path(os.getenv("VECTORSTORE_DIR", "/mnt/data/index")).resolve()
 
-ADMIN_TOKEN    = os.getenv("ADMIN_TOKEN", os.getenv("ADMIN_UPLOAD_SECRET", ""))  
+ADMIN_TOKEN    = os.getenv("ADMIN_TOKEN", os.getenv("ADMIN_UPLOAD_SECRET", ""))  # legacy key support
 
 for d in (BUILTIN_DIR, UPLOADS_DIR, VECTORSTORE_DIR):
     d.mkdir(parents=True, exist_ok=True)
@@ -39,28 +39,6 @@ app = Flask(
     static_folder=str(BASE_DIR / "static"),
 )
 app.config["MAX_CONTENT_LENGTH"] = 100 * 1024 * 1024  # 100 MB
-
-# ─── Robot ops flattening helper ────────────────────────────────────────── #
-def _flatten_robot_ops(parsed: dict) -> list[dict]:
-    out = []
-    for i, step in enumerate(parsed.get("steps", []), 1):
-        base = {
-            "i": i,
-            "action": step.get("action"),
-            "vessel": step.get("vessel") or step.get("target_vessel"),
-            "source_vessel": step.get("source_vessel"),
-            "reagents": step.get("reagents", []),
-            "raw": step.get("raw", ""),
-        }
-        for op in step.get("ops", []):
-            rec = dict(base)
-            rec["op"] = op.get("op")
-            for k, v in op.items():
-                if k != "op":
-                    rec[k] = v
-            out.append(rec)
-    return out
-
 
 # ─── Dataset searcher (local table) ─────────────────────────────────────── #
 _LOOKUP_FALLBACK = BASE_DIR / "database" / "tables" / "coremof.xlsx"
@@ -486,19 +464,14 @@ def ask():
             print("[/ask] vs.search error:", e)
             vs_ctx = ""
 
-        db_ctx = fetch_db_context(q) if USE_DB_CONTEXT else ""
-        ctx_parsed = fetch_parsed_context(q) if USE_DB_CONTEXT else ""
+        db_ctx = ""  # disabled: do not use DB Q&A context
+        ctx_parsed = ""  # disabled: do not use parsed DB context
 
         context_parts = []
         if vs_ctx: context_parts.append("<<<CTX_UPLOADS>>>\n" + vs_ctx)
-        if ctx_parsed: context_parts.append("<<<CTX_PARSED>>>\n" + ctx_parsed)
-        if db_ctx: context_parts.append("<<<CTX_DB_QA>>>\n" + db_ctx)
-        context_joined = "\n\n---\n\n".join(context_parts).strip()
+                        context_joined = "\n\n---\n\n".join(context_parts).strip()
         print("[ask][debug] VS tags preview:", (vs_ctx or "").replace("\n"," ")[:220])
-        print("[ask] ctx parts:",
-              f"VS={bool(vs_ctx)} len={len(vs_ctx) if vs_ctx else 0}",
-              f"PARSED={bool(ctx_parsed)} len={len(ctx_parsed) if ctx_parsed else 0}",
-              f"DB={bool(db_ctx)} len={len(db_ctx) if db_ctx else 0}")
+        print("[ask] ctx parts:", f"VS={bool(vs_ctx)} len={len(vs_ctx) if vs_ctx else 0}")
 
         refs = []
         try:
@@ -645,10 +618,7 @@ def ask():
             "refs_used": used_summary.get("refs", []),
             "used": used_summary,
             "qa_id": qa_id,
-            "ctx_vs": (vs_ctx or "")[:8000],
-            "ctx_parsed": (ctx_parsed or "")[:8000],
-            "ctx_db": (db_ctx or "")[:8000],
-        })
+            "ctx_vs": (vs_ctx or "")[:8000],        })
 
     except Exception as e:
         print("[/ask] Unhandled error:", e)
@@ -656,23 +626,30 @@ def ask():
         return jsonify({"error": f"/ask failed: {e}"}), 500
 
 # ---------------- Parse & Save ----------------
-
 @app.post("/parse")
 def parse_route():
-    # Robot-ready parser endpoint
+    """
+    New parser endpoint using the validator/normalizer in converter.py.
+
+    Request JSON:
+      { "text": "<dict or Key: value lines>" }
+
+    Response JSON:
+      { "ok": true, "data": <normalized & validated dict> }
+    """
     try:
         payload = request.get_json(silent=True) or {}
         text = (payload.get("text") or "").strip()
-        single_ops_flag = bool(payload.get("single_ops"))
         if not text:
             return jsonify({"error": "JSON must contain non-empty 'text'"}), 400
 
-        parsed = convert_text_to_robot_ops(text)
-        resp = {"ok": True, "data": parsed}
-        if single_ops_flag:
-            resp["single_ops"] = _flatten_robot_ops(parsed)
-        return jsonify(resp)
+        # validate_step accepts either dict-like JSON (string) or Key: value text.
+        data = validate_step(text)
+        return jsonify({"ok": True, "data": data})
 
+    except ValueError as ve:
+        # Raised by validate_step with line-aware messages
+        return jsonify({"ok": False, "error": str(ve)}), 422
     except Exception as e:
         traceback.print_exc()
         return jsonify({"ok": False, "error": f"parse failed: {e}"}), 500
