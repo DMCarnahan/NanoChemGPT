@@ -1,884 +1,144 @@
-"use strict";
-
-// Unified JSON fetch with timeout, robust error normalization, and abort support
-async function fetchJSON(url, opts = {}, timeoutMs = 30000) {
-  const ctrl = new AbortController();
-  const timer = setTimeout(() => ctrl.abort(new Error("Timeout after " + timeoutMs + " ms")), timeoutMs);
-  const merged = Object.assign({}, opts, { signal: ctrl.signal });
-
-  try {
-    const res = await fetch(url, merged);
-    const ct = res.headers.get('content-type') || '';
-    let payload;
-
-    if (ct.includes('application/json')) {
-      payload = await res.json().catch(() => ({ error: 'Invalid JSON' }));
-    } else {
-      const text = await res.text();
-      try { payload = JSON.parse(text); } catch { payload = { text }; }
-    }
-
-    if (!res.ok) {
-      const msg = (payload && (payload.error || payload.message)) || ('HTTP ' + res.status);
-      throw new Error(msg);
-    }
-    return payload;
-  } catch (err) {
-    // Normalize common fetch errors
-    const msg = (err && err.message) ? err.message : String(err);
-    if (DEBUG) console.error('fetchJSON error:', msg);
-    throw new Error(msg);
-  } finally {
-    clearTimeout(timer);
-  }
-}
-
-// Event helper: direct and delegated
-function on(target, type, selectorOrHandler, maybeHandler) {
-  if (!target) return;
-  const delegated = typeof selectorOrHandler === 'string';
-  const handler = delegated ? maybeHandler : selectorOrHandler;
-  if (!handler) return;
-
-  target.addEventListener(type, (ev) => {
-    if (!delegated) return handler(ev);
-    const matches = target.querySelectorAll(selectorOrHandler);
-    for (const el of matches) {
-      if (el === ev.target || el.contains(ev.target)) {
-        return handler(ev, el);
-      }
-    }
-  });
-}
-
-// Safer selectors
-const byId = (id) => document.getElementById(id);
-const qsa  = (s, el = document) => Array.from(el.querySelectorAll(s));
-const must = (s, el = document) => {
-  const node = el.querySelector(s);
-  if (!node) throw new Error('Selector not found: ' + s);
-  return node;
+// ---- config ----
+const ENDPOINTS = {
+  health: '/health',
+  ask: '/ask',
+  upload: '/upload',
+  uploadBuiltin: '/upload_builtin',
+  uploadsList: '/uploads',
+  clearUploads: '/clear_uploads',
+  historyList: '/history'
 };
 
-// Central alert helper 
-if (typeof window.showAlert !== 'function') {
-  window.showAlert = function(target, kind, message) {
-    const host = typeof target === 'string' ? document.querySelector(target) : target;
-    if (!host) return;
-    const box = document.createElement('div');
-    box.className = 'alert ' + (kind || 'info');
-    box.textContent = String(message ?? '');
-    host.innerHTML = '';
-    host.appendChild(box);
-  }
+// ---- DOM helpers ----
+const $ = (id) => document.getElementById(id);
+const on = (el, ev, fn) => el && el.addEventListener(ev, fn);
+const show = (el, yes = true) => el && el.classList[yes ? 'remove' : 'add']('hidden');
+const text = (el, v = '') => { if (el) el.textContent = v; };
+const html = (el, v = '') => { if (el) el.innerHTML = v; };
+
+function setBusy(btn, busy = true) {
+  if (!btn) return;
+  const spin = btn.querySelector?.('.spinner');
+  if (spin) show(spin, busy);
+  btn.disabled = busy;
 }
 
-// Global error/display surface
-window.addEventListener('unhandledrejection', (e) => {
-  if (DEBUG) console.error('Unhandled promise rejection:', e.reason);
-  const msg = (e && e.reason && e.reason.message) ? e.reason.message : 'Unexpected error';
-  const slot = document.querySelector('#global-errors');
-  if (slot) showAlert(slot, 'error', msg);
-});
-
-window.addEventListener('error', (e) => {
-  if (DEBUG) console.error('Window error:', e.message);
-  const slot = document.querySelector('#global-errors');
-  if (slot) showAlert(slot, 'error', e.message || 'Unexpected error');
-});
-
-// ===== End add-ons =====
-// Cleaned 2025-08-08 by NanoChemGPT
-const DEBUG = false;
-
-// ------- DOM helpers -------
-const qs  = (s) => document.querySelector(s);
-const qsa = (s) => Array.from(document.querySelectorAll(s));
-
-// ------- Health indicator -------
-function setStatus(ok) {
-  const el = qs('#healthStatus');
+function toast(el, msg, type = 'success') {
   if (!el) return;
-  el.classList.remove('ok', 'err');
-  el.classList.add(ok ? 'ok' : 'err');
-  const t = el.querySelector('.status-txt');
-  if (t) t.textContent = ok ? 'healthy' : 'unhealthy';
+  el.className = `alert ${type}`;
+  text(el, msg);
+  show(el, true);
 }
 
+function ensureInteractive() {
+  ['modeRobot', 'modeReason', 'parseBtn', 'saveTxtBtn'].forEach(id => {
+    const el = $(id);
+    if (!el) return;
+    el.disabled = false;
+    el.style.pointerEvents = 'auto';
+    el.style.opacity = '1';
+    el.classList?.remove('disabled');
+  });
+}
+
+// ---- Health check ----
 async function checkHealth() {
+  const hs = $('healthStatus');
   try {
-    const r = await fetch('/health', { cache: 'no-store' });
-    setStatus(r.ok);
+    const res = await fetch(ENDPOINTS.health, { cache: 'no-store', credentials: 'include' });
+    const ok = res.ok;
+    hs?.classList.toggle('ok', ok);
+    text(hs?.querySelector('.status-txt'), ok ? 'healthy' : 'degraded');
   } catch {
-    setStatus(false);
+    hs?.classList.remove('ok');
+    text(hs?.querySelector('.status-txt'), 'offline');
   }
 }
 
-// ------- UI helpers -------
-function showAlert(id, kind, text) {
-  const el = qs(id);
-  if (!el) return;
-  el.classList.remove('hidden');
-  el.className = `alert ${kind}`;
-  el.textContent = text;
-}
+// ---- Ask handler ----
+async function handleAsk() {
+  const btn = $('askBtn');
+  const msg = $('askMsg');
+  const qEl = $('questionInput');
+  const q = qEl?.value?.trim() || '';
+  const mode = $('modeReason')?.getAttribute('aria-checked') === 'true' ? 'reason' : 'robot';
 
-function hide(el) {
-  el?.classList.add('hidden');
-}
-
-function setProgress(pct) {
-  const bar = qs('#progressInner');
-  if (bar) bar.style.width = `${Math.max(0, Math.min(100, pct))}%`;
-}
-
-// ------- Text/HTML helpers -------
-function escapeHtml(s) {
-  return (s || '').replace(/[&<>"']/g, (c) => (
-    { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]
-  ));
-}
-
-function renderRationaleWithCitations(text, refs) {
-  // Escape everything first
-  let html = escapeHtml(text || '');
-
-  // Normalize full-width brackets to ASCII and footnotes [^n] -> [n]
-  html = html.replaceAll('【', '[').replaceAll('】', ']');
-  html = html.replace(/\[\^(\d{1,4})\]/g, '[$1]');
-
-  // Link numeric citations [1], [2], ...
-  html = html.replace(/\[(\d{1,4})\]/g, (m, n) => {
-    const idx = parseInt(n, 10) - 1;
-    const r = Array.isArray(refs) ? refs[idx] : null;
-    const url = r && r.url ? r.url : (r && r.doi ? `https://doi.org/${r.doi}` : null);
-    return url ? `<a href="${url}" target="_blank" rel="noopener">[${n}]</a>` : m;
-  });
-
-  // Style tags: [CTX], [GEN], and new [DB], [PARSED]
-  html = html
-    .replace(/\[CTX\]/g, '<span class="badge badge-ctx">[CTX]</span>')
-    .replace(/\[GEN\]/g, '<span class="badge badge-gen">[GEN]</span>')
-    .replace(/\[DB\]/g, '<span class="badge badge-db">[DB]</span>')
-    .replace(/\[PARSED\]/g, '<span class="badge badge-parsed">[PARSED]</span>');
-
-  return html;
-}
-
-function renderReferencesList(refs) {
-  if (!Array.isArray(refs)) return '';
-  return refs.map((r, i) => {
-    const title = escapeHtml(r.title || '(no title)');
-    const url   = r.url || (r.doi ? `https://doi.org/${r.doi}` : '#');
-    const meta  = [r.venue, r.year, r.source].filter(Boolean).join(' • ');
-    const mh    = meta ? ` <span class="muted">(${escapeHtml(meta)})</span>` : '';
-    return `<li>[${i + 1}] <a href="${url}" target="_blank" rel="noopener">${title}</a>${mh}</li>`;
-  }).join('');
-}
-
-function showRefs(refs) {
-  const list = qs('#refsList');
-  const sec  = qs('#refsSection');
-  if (!list || !sec) return;
-
-  if (Array.isArray(refs) && refs.length) {
-    list.innerHTML = renderReferencesList(refs);
-    sec.classList.remove('hidden');
-  } else {
-    list.innerHTML = '';
-    sec.classList.add('hidden');
-  }
-}
-
-// ------- Sources-used viewer -------
-
-function updateSourcesUsed(data) {
-  if (DEBUG) console.log('updateSourcesUsed got:', data); // <-- see ctx_* in console
-
-  const s1 = document.getElementById('srcCtxVs');
-  const s2 = document.getElementById('srcCtxParsed');
-  const s3 = document.getElementById('srcCtxDb');
-  const usedEl = document.getElementById('srcUsedSummary');
-  const panel = document.getElementById('sourcesPanel');
-
-  const v1 = (data.ctx_vs || data.ctxVS || data.ctx_uploads || '').trim();
-  const v2 = (data.ctx_parsed || '').trim();
-  const v3 = (data.ctx_db || '').trim();
-
-  if (s1) s1.textContent = (v1 ? v1 : '(empty)').slice(0, 4000);
-  if (s2) s2.textContent = (v2 ? v2 : '(empty)').slice(0, 4000);
-  if (s3) s3.textContent = (v3 ? v3 : '(empty)').slice(0, 4000);
-
-  // Show usage summary if provided by server
-  if (usedEl) {
-    try {
-      const used = data.used || {};
-      const refs = used.refs || data.refs_used || [];
-      const tags = used.tags || {};
-      const bits = [];
-      if (Array.isArray(refs) && refs.length) bits.push(`refs [${refs.join(', ')}]`);
-      const tparts = Object.entries(tags).filter(([k,v]) => v > 0).map(([k,v]) => `${k}×${v}`);
-      if (tparts.length) bits.push(tparts.join(' • '));
-      usedEl.textContent = bits.length ? bits.join(' | ') : '(none detected)';
-    } catch (e) {
-      usedEl.textContent = '(none detected)';
-    }
-  }
-
-  if (panel && (v1 || v2 || v3)) panel.open = true;
-}
-
-// ------- Upload flow -------
-async function uploadFile(file) {
-  const fd = new FormData();
-  fd.append('file', file);
-
-  // Fake progress until server returns a job id
-  let pct = 10;
-  const fake = setInterval(() => {
-    if (pct < 85) { pct += 5; setProgress(pct); }
-  }, 150);
+  if (!q) { toast(msg, 'Please enter a question.', 'error'); return; }
+  show(msg, false);
+  setBusy(btn, true);
 
   try {
-    const resp = await fetch('/upload', { method: 'POST', body: fd });
-    clearInterval(fake);
-
-    if (!resp.ok) {
-      const txt = await resp.text();
-      showAlert('#result', 'error', `Upload failed (${resp.status}): ${txt || 'Unknown error'}`);
-      return;
-    }
-
-    const data = await resp.json();
-    showAlert('#result', 'success', `Uploaded: ${data.filename || file.name}`);
-
-    if (data.job_id) {
-      for (;;) {
-        const r = await fetch(`/status/${data.job_id}`, { cache: 'no-store' });
-        if (!r.ok) { showAlert('#result', 'error', `Status error: ${r.status}`); break; }
-        const st = await r.json();
-        if (typeof st.progress === 'number') setProgress(st.progress);
-        if (st.status === 'done') { showAlert('#result', 'success', `Processed ${st.filename || ''}`); break; }
-        if (st.status === 'error') { showAlert('#result', 'error', `Processing error: ${st.error || 'unknown'}`); break; }
-        await new Promise((res) => setTimeout(res, 1000));
-      }
-    } else {
-      setProgress(100);
-    }
-  } catch (err) {
-    clearInterval(fake);
-    showAlert('#result', 'error', `Network error: ${err}`);
-  }
-}
-
-// ------- Ask flow -------
-let lastAnswer   = '';
-let lastQuestion = '';
-
-async function askQuestion() {
-  hide(qs('#askMsg'));
-  hide(qs('#jsonBlock'));
-
-  const q = (qs('#questionInput').value || '').trim();
-  if (!q) {
-    showAlert('#askMsg', 'error', 'Type a question first.');
-    return;
-  }
-
-  const btn = qs('#askBtn');
-  btn.disabled = true;
-  btn.querySelector('.spinner')?.classList.remove('hidden');
-  qs('#parseBtn').disabled   = true;
-  qs('#saveTxtBtn').disabled = true;
-
-  let data;
-  try {
-    const r = await fetch('/ask', {
+    const res = await fetch(ENDPOINTS.ask, {
       method: 'POST',
-      headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ question: q })
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ question: q, mode })
     });
 
-    if (!r.ok) {
-      const txt = await r.text();
-      showAlert('#askMsg', 'error', `Ask failed (${r.status}): ${txt || 'Unknown error'}`);
-      return;
+    if (!res.ok) {
+      let body = ''; try { body = await res.text(); } catch {}
+      throw new Error(`HTTP ${res.status}${body ? ` – ${body.slice(0, 200)}` : ''}`);
     }
 
-    data = await r.json();
+    const raw = await res.text();
+    let data; try { data = JSON.parse(raw); } catch { data = { answer: raw }; }
 
-    lastAnswer   = data.answer || '';
-    lastQuestion = q;
+    const answer = (data.answer ?? data.result ?? data.response ?? data.message ?? '').toString();
+    const rationale = (data.rationale ?? data.explanation ?? '').toString();
+    const refs = Array.isArray(data.refs) ? data.refs :
+                 (Array.isArray(data.references) ? data.references : []);
+    const sources = data.sources || {};
+    const usage = data.usage || {};
 
-    // Fill UI
-    qs('#answerPre').textContent = lastAnswer || '(empty)';
-    qs('#rationalePre').innerHTML = renderRationaleWithCitations(
-      data.rationale || '',
-      data.references || []
-    );
-    showRefs(data.references || []);
+    text($('answerPre'), answer);
+    text($('rationalePre'), rationale);
+    html($('refsList'), refs.map(r => `<li>${r}</li>`).join(''));
+    show($('refsSection'), refs.length > 0);
 
-    // Fill Sources-used viewer if server returned ctx fields
-    updateSourcesUsed(data);
+    text($('srcUsedSummary'), usage.summary || (Object.keys(usage).length ? JSON.stringify(usage, null, 2) : ''));
+    text($('srcCtxVs'), (sources.ctx_vs && JSON.stringify(sources.ctx_vs, null, 2)) || '');
+    text($('srcCtxParsed'), (sources.ctx_parsed && JSON.stringify(sources.ctx_parsed, null, 2)) || '');
+    text($('srcCtxDb'), (sources.ctx_db && JSON.stringify(sources.ctx_db, null, 2)) || '');
 
-    // Buttons
-    qs('#parseBtn').disabled   = !lastAnswer;
-    qs('#saveTxtBtn').disabled = !lastAnswer;
+    const hasAnswer = !!$('answerPre')?.textContent?.trim();
+    if ($('parseBtn')) $('parseBtn').disabled = !hasAnswer;
+    if ($('saveTxtBtn')) $('saveTxtBtn').disabled = !hasAnswer;
 
-    showAlert('#askMsg', 'success', 'Answer ready.');
-
-    // Fallback: fetch context from history if missing
-    if ((!data.ctx_vs && !data.ctx_parsed && !data.ctx_db) && data.qa_id) {
-      try {
-        const r2 = await fetch(`/api/history/${data.qa_id}`, { cache: 'no-store' });
-        if (r2.ok) {
-          const doc = await r2.json();
-          updateSourcesUsed({
-            ctx_vs: doc.ctx_vs || '',
-            ctx_parsed: doc.ctx_parsed || '',
-            ctx_db: doc.ctx_db || ''
-          });
-        }
-      } catch {}
-    }
-
+    ensureInteractive();
+    toast(msg, 'Done.', 'success');
   } catch (err) {
-    showAlert('#askMsg', 'error', `Network error: ${err}`);
+    toast(msg, `Ask failed: ${err.message}`, 'error');
   } finally {
-    btn.disabled = false;
-    btn.querySelector('.spinner')?.classList.add('hidden');
+    setBusy(btn, false);
   }
 }
 
-// ------- Download helpers -------
-function downloadFile(filename, text, mime = 'application/json') {
-  const blob = new Blob([text], { type: mime });
-  const url  = URL.createObjectURL(blob);
-  const a    = document.createElement('a');
-  a.href = url;
-  a.download = filename;
-  document.body.appendChild(a);
+// ---- Mode toggle ----
+function toggleMode(which) {
+  const robot = $('modeRobot');
+  const reason = $('modeReason');
+  const r = which === 'robot';
+  robot?.setAttribute('aria-checked', r ? 'true' : 'false');
+  reason?.setAttribute('aria-checked', r ? 'false' : 'true');
+  ensureInteractive();
+}
+
+// ---- Export answer ----
+function exportAnswer() {
+  const blob = new Blob([$('answerPre')?.textContent || ''], { type: 'text/plain;charset=utf-8' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'answer.txt';
   a.click();
-  a.remove();
-  URL.revokeObjectURL(url);
+  URL.revokeObjectURL(a.href);
 }
 
-function safeName(s) {
-  return (s || 'parsed')
-    .toLowerCase()
-    .replace(/[^a-z0-9\-_.]+/g, '-')
-    .replace(/-+/g, '-')
-    .slice(0, 80);
-}
-
-// ------- JSON preview toggle -------
-function showJsonPreview(pretty) {
-  const block = qs('#jsonBlock');
-  if (!block) return;
-  const want = qs('#showJsonPreview')?.checked;
-  if (want) {
-    qs('#jsonPre').textContent = pretty;
-    block.classList.remove('hidden');
-  } else {
-    block.classList.add('hidden');
-  }
-}
-
-// ------- Convert answer to JSON -------
-async function parseAnswer() {
-  const robot = !!qs('#robotMode')?.checked;
-
-  let text = (typeof lastAnswer === 'string' && lastAnswer.trim())
-    ? lastAnswer
-    : (qs('#answerPre')?.textContent || '').trim();
-
-  hide(qs('#jsonBlock'));
-
-  if (!text) {
-    showAlert('#askMsg', 'error', 'No answer to parse yet. Click “Ask” first.');
-    return;
-  }
-
-  try {
-    const r = await fetch('/parse', {
-      method: 'POST',
-      headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ text, robot, question: lastQuestion || '' })
-    });
-
-
-    const raw = await r.text();
-
-    if (!r.ok) {
-      showAlert('#askMsg', 'error', `Parse failed (${r.status}): ${raw || 'Unknown error'}`);
-      return;
-    }
-
-    // Tolerant: parse or show raw
-    let obj;
-    try {
-      obj = JSON.parse(raw);
-    } catch {
-      qs('#jsonPre').textContent = raw;
-      qs('#jsonBlock').classList.remove('hidden');
-      showAlert('#askMsg', 'error', 'Server returned non‑JSON. Showing raw text.');
-      return;
-    }
-
-    const pretty = JSON.stringify(obj, null, 2);
-    showJsonPreview(pretty);
-    showAlert('#askMsg', 'success', 'Parsed to JSON (downloaded).');
-
-    // Auto‑download
-    const base = safeName(lastQuestion || 'answer');
-    downloadFile(`${base || 'answer'}.json`, pretty, 'application/json');
-  } catch (err) {
-    showAlert('#askMsg', 'error', `Network/JS error: ${err}`);
-  }
-}
-
-// ------- Save answer to TXT -------
-async function saveTxt() {
-  if (!lastAnswer) {
-    showAlert('#askMsg', 'error', 'No answer to save yet.');
-    return;
-  }
-  try {
-    const r = await fetch('/save_txt', {
-      method: 'POST',
-      headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ answer: lastAnswer, question: lastQuestion })
-    });
-
-    if (!r.ok) {
-      const txt = await r.text();
-      showAlert('#askMsg', 'error', `Save failed (${r.status}): ${txt || 'Unknown error'}`);
-      return;
-    }
-
-    const blob = await r.blob();
-    const url  = URL.createObjectURL(blob);
-    const a    = document.createElement('a');
-    a.href = url;
-    a.download = 'answer.txt';
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-    URL.revokeObjectURL(url);
-
-    showAlert('#askMsg', 'success', 'Saved as TXT.');
-  } catch (err) {
-    showAlert('#askMsg', 'error', `Network error: ${err}`);
-  }
-}
-
-// ------- Literature search -------
-async function runSearch() {
-  const q = (qs('#searchInput')?.value || '').trim();
-  if (!q) {
-    showAlert('#searchMsg', 'error', 'Enter a search query.');
-    return;
-  }
-
-  showAlert('#searchMsg', 'success', 'Searching…');
-
-  try {
-    const r = await fetch('/search', {
-      method: 'POST',
-      headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ q, n: 6 })
-    });
-
-    const raw = await r.text();
-
-    if (!r.ok) {
-      showAlert('#searchMsg', 'error', `Search failed (${r.status}): ${raw}`);
-      return;
-    }
-
-    const data = JSON.parse(raw);
-    const ol   = qs('#searchResults');
-    ol.innerHTML = (data.results || []).map((it, i) => {
-      const title = escapeHtml(it.title || '(no title)');
-      const url   = it.url || (it.doi ? `https://doi.org/${it.doi}` : '#');
-      const meta  = [it.venue, it.year, it.source].filter(Boolean).join(' • ');
-      return `<li>[${i + 1}] <a href="${url}" target="_blank" rel="noopener">${title}</a>` +
-             (meta ? ` <span class="muted">(${escapeHtml(meta)})</span>` : '') +
-             `</li>`;
-    }).join('');
-
-    showAlert('#searchMsg', 'success', `Found ${(data.results || []).length} results.`);
-  } catch (e) {
-    showAlert('#searchMsg', 'error', `Network/JS error: ${e}`);
-  }
-}
-
-// ------- History (Q&A) -------
-let histSkip  = 0;
-const histLimit = 10;
-
-function renderHistItems(items, append = false) {
-  const ol = qs('#histList');
-  if (!ol) return;
-
-  const html = (items || []).map((d) => {
-    const dt = d.created_at ? new Date(d.created_at).toISOString().slice(0, 19).replace('T', ' ') : '';
-    const qx = (d.question || '').slice(0, 120).replace(/\s+/g, ' ');
-    return `<li><a href="#" data-hist-id="${d._id}">[${dt}] ${escapeHtml(qx)}</a></li>`;
-  }).join('');
-
-  if (append) ol.insertAdjacentHTML('beforeend', html);
-  else ol.innerHTML = html;
-}
-
-async function loadHistory(reset = false) {
-  if (reset) {
-    histSkip = 0;
-    const list = qs('#histList');
-    if (list) list.innerHTML = '';
-  }
-
-  const query = (qs('#histQuery')?.value || '').trim();
-  const url   = `/api/history?skip=${histSkip}&limit=${histLimit}` +
-                (query ? `&q=${encodeURIComponent(query)}` : '');
-
-  try {
-    const r = await fetch(url, { cache: 'no-store' });
-    if (!r.ok) { showAlert('#histMsg', 'error', `History error (${r.status})`); return; }
-    const data = await r.json();
-
-    renderHistItems(data.items, (histSkip > 0));
-    if (data.items && data.items.length) histSkip += data.items.length;
-
-    showAlert('#histMsg', 'success', `Loaded ${data.items?.length || 0} items.`);
-  } catch (e) {
-    showAlert('#histMsg', 'error', `History load failed: ${e}`);
-  }
-}
-
-async function loadHistoryItem(id) {
-  try {
-    const r = await fetch(`/api/history/${id}`, { cache: 'no-store' });
-    if (!r.ok) { showAlert('#histMsg', 'error', `Open failed (${r.status})`); return; }
-    const d = await r.json();
-
-    // Fill UI
-    lastQuestion = d.question || '';
-    lastAnswer   = d.answer   || '';
-
-    qs('#questionInput').value  = d.question || '';
-    qs('#answerPre').textContent = lastAnswer || '(empty)';
-    qs('#rationalePre').innerHTML = renderRationaleWithCitations(d.rationale || '', d.references || []);
-    showRefs(d.references || []);
-
-    // Also populate the Sources‑Used viewer when loading from history (if fields exist)
-    updateSourcesUsed({
-      ctx_vs:     d.ctx_vs,
-      ctx_parsed: d.ctx_parsed,
-      ctx_db:     d.ctx_db
-    });
-
-    qs('#parseBtn').disabled   = !lastAnswer;
-    qs('#saveTxtBtn').disabled = !lastAnswer;
-
-    showAlert('#askMsg', 'success', 'Loaded from history.');
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  } catch (e) {
-    showAlert('#histMsg', 'error', `Open failed: ${e}`);
-  }
-}
-
-// ------- Upload Browser -------
-async function loadUploads() {
-  try {
-    const r = await fetch('/api/uploads', { cache: 'no-store' });
-    if (!r.ok) { showAlert('#uplMsg', 'error', `Uploads error (${r.status})`); return; }
-
-    const data = await r.json();
-    const ol   = qs('#uplList');
-
-    ol.innerHTML = (data.items || []).map((u) => {
-      const ts  = u.indexed_at || u.ts || '';
-      const dt  = ts ? new Date(ts).toISOString().slice(0, 19).replace('T', ' ') : '';
-      const info = [u.status, u.kind, (u.n_pages ? `${u.n_pages} pp` : '')].filter(Boolean).join(' • ');
-      return `<li>${escapeHtml(u.filename || '(unknown)')} ` +
-             `<span class="muted">— ${escapeHtml(info)} ${dt ? ` • ${dt}` : ''}</span></li>`;
-    }).join('');
-
-    showAlert('#uplMsg', 'success', `Loaded ${data.items?.length || 0} uploads.`);
-  } catch (e) {
-    showAlert('#uplMsg', 'error', `Uploads load failed: ${e}`);
-  }
-}
-
-// ------- Wire UI -------
-function wireUI() {
+// ---- Init ----
+document.addEventListener('DOMContentLoaded', () => {
   checkHealth();
-  setInterval(checkHealth, 30000);
-
-  // Upload
-  const input  = qs('#fileInput');
-  const button = qs('#uploadBtn');
-
-  input?.addEventListener('change', () => {
-    const f = input.files?.[0];
-    const hint = qs('#fileHint');
-    if (hint && f) hint.textContent = `${f.name} • ${(f.size / 1024 / 1024).toFixed(2)} MB`;
-  });
-
-  button?.addEventListener('click', async (e) => {
-    e.preventDefault();
-    const f = input?.files?.[0];
-    if (!f) { showAlert('#result', 'error', 'Choose a file first.'); return; }
-    button.disabled = true;
-    button.querySelector('.spinner')?.classList.remove('hidden');
-    await uploadFile(f);
-    button.disabled = false;
-    button.querySelector('.spinner')?.classList.add('hidden');
-    loadUploads(); // refresh uploads list after a new upload
-  });
-
-  // Ask / parse / save / search
-  qs('#askBtn')?.addEventListener('click',  (e) => { e.preventDefault(); askQuestion(); });
-  qs('#parseBtn')?.addEventListener('click',(e) => { e.preventDefault(); parseAnswer(); });
-  qs('#saveTxtBtn')?.addEventListener('click',(e)=> { e.preventDefault(); saveTxt(); });
-  qs('#searchBtn')?.addEventListener('click',(e)=> { e.preventDefault(); runSearch(); });
-
-  // History
-  qs('#histRefreshBtn')?.addEventListener('click', (e) => { e.preventDefault(); loadHistory(true); });
-  qs('#histMoreBtn')?.addEventListener('click',    (e) => { e.preventDefault(); loadHistory(false); });
-  qs('#histList')?.addEventListener('click', (e) => {
-    const a = e.target.closest('a[data-hist-id]');
-    if (!a) return;
-    e.preventDefault();
-    loadHistoryItem(a.getAttribute('data-hist-id'));
-  });
-
-  // Uploads
-  qs('#uplRefreshBtn')?.addEventListener('click', (e) => { e.preventDefault(); loadUploads(); });
-
-  // Initial data
-  loadHistory(true);
-  loadUploads();
-}
-
-document.addEventListener('DOMContentLoaded', wireUI);
-
-// ----- Builtin uploader → /admin/upload_builtin -----
-(() => {
-  const dz   = document.getElementById('builtinDrop');
-  const inp  = document.getElementById('builtinFile');
-  const msg  = document.getElementById('builtinMsg');
-
-  if (!dz || !inp) return;
-
-  let ADMIN_TOKEN = "";
-
-  function setMsg(txt, ok=false) {
-    msg.classList.remove('hidden');
-    msg.textContent = txt;
-    msg.classList.toggle('error', !ok);
-  }
-
-  async function uploadOne(file) {
-    const fd = new FormData();
-    fd.append('file', file);
-
-    const res = await fetch('/admin/upload_builtin', {
-      method: 'POST',
-      headers: { 'Authorization': 'Bearer ' + (ADMIN_TOKEN || prompt('Admin token:') || '') },
-      body: fd
-    });
-
-    let body;
-    try { body = await res.json(); } catch { body = {error: await res.text()} }
-
-    if (!res.ok || body.error) {
-      setMsg(`❌ ${file.name}: ${body.error || res.statusText}`, false);
-    } else {
-      const where = body.decompressed || body.saved;
-      setMsg(`✅ ${file.name} uploaded → ${where}`, true);
-    }
-  }
-
-  function handleFiles(files) {
-    [...files].forEach(f => uploadOne(f));
-  }
-
-  dz.addEventListener('click', () => inp.click());
-  dz.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); inp.click(); } });
-  dz.addEventListener('dragover', (e) => { e.preventDefault(); dz.classList.add('hover'); });
-  dz.addEventListener('dragleave', () => dz.classList.remove('hover'));
-  dz.addEventListener('drop', (e) => { e.preventDefault(); dz.classList.remove('hover'); handleFiles(e.dataTransfer.files); });
-  inp.addEventListener('change', () => handleFiles(inp.files));
-})();
-
-// --- mode state ---
-let MODE = 'robot'; // 'robot' | 'reason'
-
-// toggle buttons
-const modeRobotBtn  = document.getElementById('modeRobot');
-const modeReasonBtn = document.getElementById('modeReason');
-const parseBtn      = document.getElementById('parseBtn');
-const askBtn        = document.getElementById('askBtn');
-const qEl           = document.getElementById('questionInput');
-const answerPre     = document.getElementById('answerPre');
-const rationalePre  = document.getElementById('rationalePre');
-const refsSection   = document.getElementById('refsSection');
-const refsList      = document.getElementById('refsList');
-const jsonBlock     = document.getElementById('jsonBlock');
-const jsonPre       = document.getElementById('jsonPre');
-const askMsg        = document.getElementById('askMsg');
-const showJsonPreview = document.getElementById('showJsonPreview');
-
-function setMode(m) {
-  MODE = m;
-  // aria pressed update
-  modeRobotBtn.setAttribute('aria-pressed', m === 'robot' ? 'true' : 'false');
-  modeReasonBtn.setAttribute('aria-pressed', m === 'reason' ? 'true' : 'false');
-  // parse button only useful in Robot mode
-  parseBtn.disabled = (m !== 'robot');
-  // JSON preview also only meaningful for Robot mode; hide block if switching to Reasoning
-  if (m !== 'robot') {
-    jsonBlock.classList.add('hidden');
-  }
-}
-
-modeRobotBtn.addEventListener('click', () => setMode('robot'));
-modeReasonBtn.addEventListener('click', () => setMode('reason'));
-
-// --- ask flow ---
-askBtn.addEventListener('click', async () => {
-  const question = (qEl.value || '').trim();
-  if (!question) return;
-
-  askMsg.classList.remove('hidden');
-  askMsg.textContent = 'Working…';
-  answerPre.textContent = '';
-  rationalePre.textContent = '';
-  refsList.innerHTML = '';
-  refsSection.classList.add('hidden');
-  jsonBlock.classList.add('hidden');
-
-  try {
-    let endpoint = MODE === 'robot' ? '/ask' : '/mechanism/ask';
-    const res = await fetch(endpoint, {
-      method: 'POST',
-      headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({ question })
-    });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error || 'Request failed');
-
-    if (MODE === 'robot') {
-
-      const { answer, rationale, references } = data;
-      answerPre.textContent = answer || '';
-      rationalePre.textContent = rationale || '';
-      // refs
-      (references || []).forEach(r => {
-        const li = document.createElement('li');
-        const url = r.url || (r.doi ? `https://doi.org/${r.doi}` : '');
-        li.innerHTML = `${r.title || '(no title)'} ${r.year ? '('+r.year+')' : ''}${url ? ' — <a href="'+url+'" target="_blank" rel="noopener">link</a>' : ''}`;
-        refsList.appendChild(li);
-      });
-      refsSection.classList.toggle('hidden', !(data.references || []).length);
-
-      // optional JSON preview (if you already call /parse later)
-      if (showJsonPreview.checked) {
-        try {
-          const resp = await fetch('/parse', {
-            method: 'POST',
-            headers: {'Content-Type':'application/json'},
-            body: JSON.stringify({ text: answer })
-          });
-          const p = await resp.json();
-          if (p.ok) {
-            jsonPre.textContent = JSON.stringify(p.data, null, 2);
-            jsonBlock.classList.remove('hidden');
-          } else {
-            jsonPre.textContent = `Parse error: ${p.error || 'unknown'}`;
-            jsonBlock.classList.remove('hidden');
-          }
-        } catch (e) {
-          jsonPre.textContent = `Preview failed: ${e.message}`;
-          jsonBlock.classList.remove('hidden');
-        }
-      }
-
-    } else {
-      // Reasoning mode: /mechanism/ask payload
-      // shape: { model_raw, answer: {question, reasoning_steps[], final_answer, scope, citations[], parameter_ranking[]}, ... }
-      const ans = (data.answer || {});
-      const steps = Array.isArray(ans.reasoning_steps) ? ans.reasoning_steps : [];
-      const cites = Array.isArray(ans.citations) ? ans.citations : [];
-
-      answerPre.textContent   = (ans.final_answer || data.model_raw || '').trim();
-      rationalePre.textContent = steps.length ? steps.map((s,i)=>`${i+1}. ${s}`).join('\n') : '(no steps returned)';
-
-      refsList.innerHTML = '';
-      cites.forEach(c => {
-        const li = document.createElement('li');
-        const link = (c.startsWith('http') || c.startsWith('doi:')) ? c.replace(/^doi:/,'https://doi.org/') : c;
-        li.innerHTML = `<a href="${link}" target="_blank" rel="noopener">${c}</a>`;
-        refsList.appendChild(li);
-      });
-      refsSection.classList.toggle('hidden', cites.length === 0);
-
-      // hide parse JSON in reasoning mode
-      jsonBlock.classList.add('hidden');
-    }
-
-    askMsg.classList.add('hidden');
-  } catch (e) {
-    askMsg.classList.remove('hidden');
-    askMsg.textContent = `Error: ${e.message}`;
-  }
-});
-// --- Edited TXT -> JSON flow ---
-const editedFile        = document.getElementById('editedFile');
-const editedConvertBtn  = document.getElementById('editedConvertBtn');
-const editedDownloadA   = document.getElementById('editedDownloadJson');
-const jsonBlock         = document.getElementById('jsonBlock');
-const jsonPre           = document.getElementById('jsonPre');
-const askMsg            = document.getElementById('askMsg'); // reuse status area
-
-editedConvertBtn?.addEventListener('click', async () => {
-  try {
-    const f = editedFile?.files?.[0];
-    if (!f) throw new Error('Please choose a .txt or .md file first.');
-
-    askMsg.classList.remove('hidden');
-    askMsg.textContent = 'Converting…';
-    jsonBlock.classList.add('hidden');
-    editedDownloadA.classList.add('hidden');
-    jsonPre.textContent = '';
-
-    const fd = new FormData();
-    fd.append('file', f);
-
-    const res = await fetch('/parse_upload', { method: 'POST', body: fd });
-    const out = await res.json();
-
-    if (!res.ok || !out.ok) {
-      throw new Error(out.error || 'Conversion failed');
-    }
-
-    const pretty = JSON.stringify(out.data, null, 2);
-    jsonPre.textContent = pretty;
-    jsonBlock.classList.remove('hidden');
-
-    // prepare client-side download
-    const blob = new Blob([pretty], { type: 'application/json' });
-    const url  = URL.createObjectURL(blob);
-    editedDownloadA.href = url;
-    const stem = f.name.replace(/\.(txt|md)$/i, '') || 'converted';
-    editedDownloadA.download = `${stem}.json`;
-    editedDownloadA.classList.remove('hidden');
-
-    askMsg.classList.add('hidden');
-  } catch (e) {
-    askMsg.classList.remove('hidden');
-    askMsg.textContent = `Error: ${e.message || e}`;
-  }
+  on($('askBtn'), 'click', handleAsk);
+  on($('modeRobot'), 'click', () => toggleMode('robot'));
+  on($('modeReason'), 'click', () => toggleMode('reason'));
+  on($('saveTxtBtn'), 'click', exportAnswer);
+  // Add parseBtn wiring when parser is ready
 });
