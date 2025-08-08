@@ -2,7 +2,5 @@
     "python-envs.defaultEnvManager": "ms-python.python:conda",
     "python-envs.defaultPackageManager": "ms-python.python:conda",
     "python-envs.pythonProjects": [],
-    "python.analysis.extraPaths": [
-        "./mechanistic_reasoning_addon"
-    ]
+    "python.analysis.extraPaths": []
 }
