@@ -1,136 +1,137 @@
-"""
-dataset_searcher.py
-====================
-
-This module provides a file-agnostic mechanism for loading tabular data from a
-variety of common formats (CSV, Excel, JSON array, JSON Lines) and performing
-simple substring or regular-expression searches over the resulting table.
-
-It is deliberately kept lightweight: no external dependencies beyond
-``pandas`` are required. The returned objects are plain ``pandas.DataFrame``
-instances, so downstream callers can manipulate the data further or convert it
-to dictionaries as needed.
-
-Example usage::
-
-    from dataset_searcher import load_table, DatasetSearcher
-    df = load_table("data/coremof.jsonl")
-    searcher = DatasetSearcher(df)
-    hits = searcher.query("UiO-66", topk=5)
-    for _, row in hits.iterrows():
-        print(row.to_dict())
-
-"""
-
 from __future__ import annotations
 
+import csv
 import json
 import gzip
 import lzma
 import re
 from pathlib import Path
-from typing import Iterable, Optional
+from typing import Iterable, Optional, Sequence, List
 
 import pandas as pd
 
 
+# ---------------- I/O helpers ----------------
+def _normalize_records(obj):
+    """Return a list of dict-like records from common JSON structures."""
+    if obj is None:
+        return []
+    if isinstance(obj, list):
+        return obj
+    # Some files use { "records": [...] } or { "data": [...] }
+    for key in ("records", "data", "items", "rows"):
+        if isinstance(obj, dict) and key in obj:
+            return obj[key]
+    # Fallback: wrap object in list
+    return [obj]
+
+
+def _open_text(fp: str | Path, comp: Optional[str]) -> object:
+    if comp == "gzip":
+        return gzip.open(fp, "rt", encoding="utf-8", errors="replace")
+    if comp == "xz":
+        return lzma.open(fp, "rt", encoding="utf-8", errors="replace")
+    return open(fp, "rt", encoding="utf-8", errors="replace")
+
+
 def _read_json_array(fp: str | Path, comp: Optional[str] = None) -> pd.DataFrame:
-    """
-    Load a JSON file containing a top-level array of objects.
-
-    Parameters
-    ----------
-    fp : str or Path
-        Path to the JSON file.
-    comp : str, optional
-        Compression type if the file is compressed; one of ``"gzip"`` or
-        ``"xz"``. If ``None``, the file is assumed to be uncompressed.
-
-    Returns
-    -------
-    pandas.DataFrame
-        A flattened DataFrame of the objects in the JSON array.
-    """
-    opener = gzip.open if comp == "gzip" else lzma.open if comp == "xz" else open
-    with opener(fp, "rt") as f:
+    with _open_text(fp, comp) as f:
         data = json.load(f)
-    records = data if isinstance(data, list) else data.get("records", data)
-    return pd.json_normalize(records)
+    return pd.json_normalize(_normalize_records(data), sep=".")
 
 
 def _read_jsonl(fp: str | Path, comp: Optional[str] = None) -> pd.DataFrame:
+    rows: List[dict] = []
+    with _open_text(fp, comp) as f:
+        for line in f:
+            s = line.strip()
+            if not s:
+                continue
+            try:
+                rows.append(json.loads(s))
+            except json.JSONDecodeError:
+                # best-effort: ignore bad lines
+                continue
+    return pd.json_normalize(rows, sep=".")
+
+
+def _infer_suffixes(p: Path):
+    """Return (base_suffix, compression) from a path with possibly multiple suffixes."""
+    suff = [s.lower() for s in p.suffixes]  # e.g. ['.json', '.gz']
+    comp = None
+    if suff and suff[-1] in (".gz", ".gzip"):
+        comp = "gzip"
+        suff = suff[:-1]
+    elif suff and suff[-1] in (".xz", ".lzma"):
+        comp = "xz"
+        suff = suff[:-1]
+    ext = "".join(suff[-2:]) if suff and suff[-1] in (".json", ".jsonl", ".csv", ".tsv") and len(suff)>1 else (suff[-1] if suff else "")
+    # ext is like '.jsonl', '.csv', '.tsv', '.json', '.xlsx', '.parquet'
+    if not ext and p.suffix:
+        ext = p.suffix.lower()
+    return ext, comp
+
+
+def load_table(path: str | Path, *, encoding: str = "utf-8", errors: str = "replace", **csv_kwargs) -> pd.DataFrame:
     """
-    Load a JSON Lines (JSONL) file into a DataFrame.
+    Read a tabular dataset from *path*.
+
+    Supported formats:
+      - CSV/CSV.GZ/CSV.XZ
+      - TSV/TSV.GZ/TSV.XZ
+      - Excel (.xlsx)
+      - Parquet (.parquet)  (requires pyarrow or fastparquet)
+      - JSON array (.json)  + compressed variants
+      - JSON Lines (.jsonl) + compressed variants
 
     Parameters
     ----------
-    fp : str or Path
-        Path to the JSON Lines file.
-    comp : str, optional
-        Compression type; one of ``"gzip"`` or ``"xz"``.
+    path : str | Path
+        File path
+    encoding : str
+        Text encoding for CSV/TSV/JSON (default 'utf-8')
+    errors : str
+        Error handling for decoding (default 'replace')
+    **csv_kwargs :
+        Extra args passed to pandas.read_csv / read_table (e.g., dtype, engine)
 
     Returns
     -------
     pandas.DataFrame
-        A DataFrame where each line of the file becomes one record.
-    """
-    opener = gzip.open if comp == "gzip" else lzma.open if comp == "xz" else open
-    with opener(fp, "rt") as f:
-        rows = [json.loads(line) for line in f if line.strip()]
-    return pd.json_normalize(rows)
-
-
-def load_table(path: str | Path) -> pd.DataFrame:
-    """
-    Read a tabular dataset from the given file.
-
-    Supported formats include CSV/CSV.GZ, Excel (.xlsx), JSON array,
-    JSON Lines (.jsonl), and their gzip or xz-compressed variants.
-
-    Parameters
-    ----------
-    path : str or Path
-        Path to the file on disk.
-
-    Returns
-    -------
-    pandas.DataFrame
-        The loaded table.
-
-    Raises
-    ------
-    ValueError
-        If the file extension is not recognised.
     """
     p = Path(path)
-    suf = p.suffix.lower()
+    ext, comp = _infer_suffixes(p)
 
-    match suf:
-        case ".csv":
-            return pd.read_csv(p)
-        case ".csv.gz":
-            return pd.read_csv(p)
-        case ".xlsx":
-            return pd.read_excel(p)
-        case ".json":
-            return _read_json_array(p)
-        case ".jsonl":
-            return _read_jsonl(p)
-        case ".json.gz":
-            return _read_json_array(p, "gzip")
-        case ".jsonl.gz":
-            return _read_jsonl(p, "gzip")
-        case ".json.xz":
-            return _read_json_array(p, "xz")
-        case ".jsonl.xz":
-            return _read_jsonl(p, "xz")
-        case _:
-            raise ValueError(f"Unsupported table type: {suf}")
+    # Normalize for mixed case (e.g., .CSV, .Jsonl.GZ)
+    ext = (ext or "").lower()
+
+    # Choose reader
+    if ext in (".csv",):
+        return pd.read_csv(p, encoding=encoding, errors=errors, **csv_kwargs)
+    if ext in (".tsv",):
+        return pd.read_table(p, encoding=encoding, errors=errors, **csv_kwargs)
+    if ext in (".xlsx",):
+        return pd.read_excel(p)
+    if ext in (".parquet",):
+        try:
+            return pd.read_parquet(p) 
+        except Exception as e:
+            raise RuntimeError("Reading parquet requires pyarrow or fastparquet. Install one and retry.") from e
+    if ext in (".json",):
+        return _read_json_array(p, comp)
+    if ext in (".jsonl",):
+        return _read_jsonl(p, comp)
+
+    if p.suffix.lower() in (".csv", ".tsv"):
+        sep = "," if p.suffix.lower() == ".csv" else "\\t"
+        return pd.read_csv(p, sep=sep, encoding=encoding, errors=errors, **csv_kwargs)
+
+    raise ValueError(f"Unsupported or unknown table type: {{p.name}} (ext='{{ext}}', comp='{{comp}}')")
 
 
+# ---------------- Searcher ----------------
 class DatasetSearcher:
-    """
-    Simple keyword searcher over a Pandas DataFrame.
+    """Simple keyword/regex searcher over a Pandas DataFrame.
 
     Parameters
     ----------
@@ -138,21 +139,24 @@ class DatasetSearcher:
         The table to search.
     text_cols : iterable of str, optional
         Specific columns to search; if ``None``, all object-dtype columns are used.
-
-    Notes
-    -----
-    Searches are case-insensitive by default and use substring matching.
-    To perform regular-expression searches or case-sensitive searches, set the
-    ``regex`` and ``case`` parameters on :meth:`query`.
     """
-
     def __init__(self, table: pd.DataFrame, text_cols: Optional[Iterable[str]] = None) -> None:
         self.df: pd.DataFrame = table
         if text_cols is not None:
-            self.text_cols = list(text_cols)
+            self.text_cols = [c for c in text_cols if c in table.columns]
         else:
-            # infer columns of type object (strings)
-            self.text_cols = [c for c in table.columns if table[c].dtype == "object"]
+            # infer likely text columns (object dtype or pandas string dtype)
+            self.text_cols = [c for c in table.columns if str(table[c].dtype) in ("object", "string")]
+
+    def _compile(self, pattern: str, case: bool, regex: bool):
+        if not regex:
+            return pattern  # plain substring
+        flags = 0 if case else re.IGNORECASE
+        try:
+            return re.compile(pattern, flags)
+        except re.error:
+            # Fallback to a literal search if regex is invalid
+            return re.compile(re.escape(pattern), flags)
 
     def query(
         self,
@@ -160,38 +164,82 @@ class DatasetSearcher:
         regex: bool = False,
         case: bool = False,
         topk: int = 10,
+        all_matches: bool = False,
+        columns: Optional[Sequence[str]] = None,
     ) -> pd.DataFrame:
-        """
-        Return rows where any of the designated text columns match ``pattern``.
+        """Return rows where any of the designated text columns match *pattern*.
 
         Parameters
         ----------
         pattern : str
             The search string or regular expression.
         regex : bool, default False
-            If ``True``, treat ``pattern`` as a regular expression. If ``False``,
-            perform a substring search.
+            If ``True``, treat *pattern* as a regular expression.
         case : bool, default False
             If ``True``, searches are case-sensitive.
         topk : int, default 10
-            Maximum number of rows to return.
+            Maximum number of rows to return (ignored if *all_matches* is True).
+        all_matches : bool, default False
+            If True, return all matching rows (no truncation).
+        columns : sequence of str, optional
+            Subset of columns to search for this query (defaults to self.text_cols).
 
         Returns
         -------
         pandas.DataFrame
-            A DataFrame containing up to ``topk`` matching rows.
         """
         if not pattern:
-            # return an empty DataFrame with the same columns when no pattern is provided
-            return self.df.head(0)
-        # compile the pattern only once
-        pat = re.compile(pattern, 0 if case else re.IGNORECASE) if regex else pattern
+            return self.df.head(0).copy()
+
+        cols = [c for c in (columns or self.text_cols) if c in self.df.columns]
+        if not cols:
+            return self.df.head(0).copy()
+
+        pat = self._compile(pattern, case=case, regex=regex)
+
         mask = pd.Series(False, index=self.df.index)
-        for col in self.text_cols:
-            # convert to string before searching
-            series = self.df[col].astype(str)
-            if regex:
-                mask |= series.str.contains(pat)
+        for col in cols:
+            s = self.df[col].astype("string").fillna("")
+            if regex and hasattr(pat, "search"):
+                mask |= s.str.contains(pat)
             else:
-                mask |= series.str.contains(pat, case=case, regex=False)
-        return self.df[mask].head(topk).copy()
+                mask |= s.str.contains(pat if regex else str(pat), case=case, regex=bool(regex))
+
+        result = self.df[mask]
+        if all_matches:
+            return result.copy()
+        return result.head(max(0, int(topk))).copy()
+
+
+# ---------------- CLI ----------------
+if __name__ == "__main__":
+    import argparse, sys
+    ap = argparse.ArgumentParser(description="Load a dataset and run a substring/regex search.")
+    ap.add_argument("path", help="Path to dataset (csv/tsv/xlsx/parquet/json/jsonl, with optional .gz/.xz)")
+    ap.add_argument("pattern", help="Search string or regex")
+    ap.add_argument("--regex", action="store_true", help="Treat pattern as regex")
+    ap.add_argument("--case", action="store_true", help="Case-sensitive search")
+    ap.add_argument("--topk", type=int, default=10, help="Max rows (ignored with --all)")
+    ap.add_argument("--all", dest="all_matches", action="store_true", help="Return all matches")
+    ap.add_argument("--columns", nargs="*", default=None, help="Limit search to these columns")
+    ap.add_argument("--to", choices=["json","csv"], default="json", help="Output format")
+    ap.add_argument("--encoding", default="utf-8", help="Encoding for CSV/TSV/JSON reads")
+    ap.add_argument("--errors", default="replace", help="Decoding error policy (replace|ignore|strict)")
+    args, rest = ap.parse_known_args()
+
+    try:
+        df = load_table(args.path, encoding=args.encoding, errors=args.errors)
+        searcher = DatasetSearcher(df)
+        out = searcher.query(
+            args.pattern, regex=args.regex, case=args.case,
+            topk=args.topk, all_matches=args.all_matches, columns=args.columns
+        )
+        if args.to == "csv":
+            # write to stdout as CSV
+            out.to_csv(sys.stdout, index=False)
+        else:
+            # json to stdout
+            print(out.to_json(orient="records", force_ascii=False, indent=2))
+    except Exception as e:
+        print(json.dumps({{"error": str(e)}}), file=sys.stderr)
+        sys.exit(1)

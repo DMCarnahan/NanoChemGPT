@@ -38,6 +38,7 @@
     "VECTORSTORE_DIR": "/mnt/data/index",
     "VS_MMR": "1",
     "VS_LLM_RERANLK": "1",
-    "TOKENIZERS_PARALLELISM": "false"
+    "TOKENIZERS_PARALLELISM": "false",
+    "USER_AGENT":"${{shared.USER_AGENT}}"
   }
 }

@@ -4,90 +4,109 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>NanoChemGPT</title>
-  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css', v=25) }}">
-  <script src="{{ url_for('static', filename='app.js', v=25) }}" defer></script>
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.v2.css', v=26) }}">
+  <script src="{{ url_for('static', filename='app.v2.js', v=26) }}" defer></script>
 </head>
 <body>
-  <div class="container">
-    <!-- Header -->
+  <header class="container" role="banner" aria-label="App header">
     <div class="header">
       <h1>NanoChemGPT</h1>
-      <div id="healthStatus" class="status">
-        <span class="status-dot"></span>
+      <div id="healthStatus" class="status" role="status" aria-live="polite" aria-atomic="true">
+        <span class="status-dot" aria-hidden="true"></span>
         <span class="status-txt">checking…</span>
       </div>
     </div>
+  </header>
+
+  <main class="container" id="main" role="main">
+    <!-- Global error -->
+    <div id="global-errors" class="alert mt-3 hidden" role="alert" aria-live="assertive" aria-atomic="true"></div>
 
     <!-- Upload -->
-    <div class="card">
-      <h2 class="card-title">Upload source (PDF / JSON / TXT)</h2>
-      <div class="input-row">
+    <section class="card" aria-labelledby="sec-upload">
+      <h2 id="sec-upload" class="card-title">Upload source (PDF / JSON / TXT)</h2>
+      <div class="input-row" role="group" aria-labelledby="upload-choose">
+        <span id="upload-choose" class="visually-hidden">Choose a file to upload and then press Upload</span>
         <label for="fileInput" class="visually-hidden">Choose file</label>
-        <input id="fileInput" type="file" accept=".pdf,.json,.txt,.md,.csv">
-        <button id="uploadBtn" class="btn" type="button">
-          <span class="spinner hidden"></span>Upload
+        <input id="fileInput" type="file" accept=".pdf,.json,.txt,.md,.csv" aria-describedby="fileHint">
+        <button id="uploadBtn" class="btn" type="button" aria-controls="result progressInner">
+          <span class="spinner hidden" aria-hidden="true"></span>Upload
         </button>
       </div>
-      <div id="fileHint" class="small muted"></div>
-      <div class="progress mt-3"><div id="progressInner"></div></div>
-      <div id="result" class="alert mt-3 hidden" aria-live="polite"></div>
-    </div>
+      <div id="fileHint" class="small muted" role="note">Supported: .pdf, .json, .txt, .md, .csv</div>
+      <div class="progress mt-3" role="progressbar" aria-label="Upload progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+        <div id="progressInner"></div>
+      </div>
+      <div id="result" class="alert mt-3 hidden" role="status" aria-live="polite" aria-atomic="true"></div>
+    </section>
 
-    <!-- Builtin uploader (goes to /admin/upload_builtin) -->
-    <div class="card mt-6">
-      <h2 class="card-title">Upload builtin data (.json / .json.xz)</h2>
+    <!-- Builtin uploader -->
+    <section class="card mt-6" aria-labelledby="sec-builtin">
+      <h2 id="sec-builtin" class="card-title">Upload builtin data (.json / .json.xz)</h2>
 
-      <div id="builtinDrop" class="dropzone" tabindex="0" role="button" aria-label="Drop files or click to choose">
-        <strong>Drag & drop</strong> files here (or click to choose)
+      <div id="builtinDrop" class="dropzone" tabindex="0" role="button" aria-label="Drop files or press Enter to choose">
+        <strong>Drag &amp; drop</strong> files here (or press Enter to choose)
       </div>
 
       <input id="builtinFile" type="file" class="visually-hidden" accept=".json,.json.xz" multiple>
-      <div class="small muted mt-2">Files land in <code>BUILTIN_DIR</code> and <code>.json.xz</code> is decompressed server-side.</div>
-      <div id="builtinMsg" class="alert mt-2 hidden" aria-live="polite"></div>
-    </div>
+      <div class="small muted mt-2">Files land in <code>BUILTIN_DIR</code>; <code>.json.xz</code> is decompressed server-side.</div>
+      <div id="builtinMsg" class="alert mt-2 hidden" role="status" aria-live="polite" aria-atomic="true"></div>
+    </section>
 
     <!-- Ask -->
-    <div class="card mt-6">
-      <h2 class="card-title">Ask NanoChemGPT</h2>
-      <textarea id="questionInput" class="textarea" rows="5" placeholder="Ask a synthesis question…"></textarea>
-      <div class="row mt-3">
-        <button id="askBtn" class="btn"><span class="spinner hidden"></span>Ask</button>
-        <button id="parseBtn" class="btn secondary" disabled>Convert answer → JSON</button>
-      <!-- Upload an edited Robot-mode answer and convert it to JSON -->
-      <div class="mt-3">
-        <h3 class="subhead">Upload edited answer (TXT/MD) → JSON</h3>
-        <div class="row" style="gap:8px;align-items:center;">
-          <input id="editedFile" type="file" accept=".txt,.md">
-          <button id="editedConvertBtn" class="btn secondary" type="button">Convert file</button>
-          <a id="editedDownloadJson" class="btn secondary hidden" href="#" download="converted.json">Download JSON</a>
+    <section class="card mt-6" aria-labelledby="sec-ask">
+      <h2 id="sec-ask" class="card-title">Ask NanoChemGPT</h2>
+      <label class="visually-hidden" for="questionInput">Enter your question</label>
+      <textarea id="questionInput" class="textarea" rows="5" placeholder="Ask a synthesis question…" aria-describedby="askHelp"></textarea>
+      <div id="askHelp" class="small muted mt-2">Tip: Describe reagents, solvents, temps, and any constraints.</div>
+
+      <div class="row mt-3" role="group" aria-label="Ask and parse controls">
+        <button id="askBtn" class="btn" type="button" aria-controls="answerPre rationalePre refsSection askMsg">
+          <span class="spinner hidden" aria-hidden="true"></span>Ask
+        </button>
+        <button id="parseBtn" class="btn secondary" type="button" disabled aria-controls="jsonBlock">Convert answer → JSON</button>
+        <button id="saveTxtBtn" class="btn secondary" type="button" disabled aria-controls="answerPre">Export answer → .txt</button>
+
+        <!-- Mode toggle -->
+        <div class="segmented" role="radiogroup" aria-label="Answer mode" style="display:flex;gap:6px;margin-left:8px;">
+          <button id="modeRobot" class="btn tertiary" role="radio" aria-checked="true" aria-label="Robot mode: structured protocol" title="Protocol for JSON conversion">Robot mode</button>
+          <button id="modeReason" class="btn tertiary" role="radio" aria-checked="false" aria-label="Reasoning mode: mechanistic explanation" title="Mechanistic reasoning answer">Reasoning mode</button>
         </div>
       </div>
 
-        <!-- Mode toggle -->
-        <div class="segmented" role="group" aria-label="Answer mode" style="display:flex;gap:6px;margin-left:8px;">
-          <button id="modeRobot" class="btn tertiary" aria-pressed="true" title="Protocol for JSON conversion">Robot mode</button>
-          <button id="modeReason" class="btn tertiary" aria-pressed="false" title="Mechanistic reasoning answer">Reasoning mode</button>
+      <!-- Upload an edited Robot-mode answer and convert it to JSON -->
+      <section class="mt-3" aria-labelledby="sec-edited">
+        <h3 id="sec-edited" class="subhead">Upload edited answer (TXT/MD) → JSON</h3>
+        <div class="row" style="gap:8px;align-items:center;" role="group" aria-label="Convert edited file">
+          <input id="editedFile" type="file" accept=".txt,.md" aria-label="Choose edited answer file">
+          <button id="editedConvertBtn" class="btn secondary" type="button" aria-controls="editedDownloadJson">Convert file</button>
+          <a id="editedDownloadJson" class="btn secondary hidden" href="#" download="converted.json" aria-hidden="true">Download JSON</a>
         </div>
-        <button id="saveTxtBtn" class="btn secondary" disabled>Export answer → .txt</button>
-      </div>
-      <div id="askMsg" class="alert mt-3 hidden" aria-live="polite"></div>
-      <div class="mt-4">
-        <h3 class="subhead">Answer</h3>
-        <pre id="answerPre" class="pre"></pre>
-      </div>
-      <div class="mt-4">
-        <h3 class="subhead">Rationale</h3>
-        <pre id="rationalePre" class="pre muted"></pre>
-      </div>
-      <div id="refsSection" class="mt-4 hidden">
-        <h3 class="subhead">References</h3>
+      </section>
+
+      <div id="askMsg" class="alert mt-3 hidden" role="status" aria-live="polite" aria-atomic="true"></div>
+
+      <section class="mt-4" aria-labelledby="sec-answer">
+        <h3 id="sec-answer" class="subhead">Answer</h3>
+        <pre id="answerPre" class="pre" tabindex="0"></pre>
+      </section>
+
+      <section class="mt-4" aria-labelledby="sec-rationale">
+        <h3 id="sec-rationale" class="subhead">Rationale</h3>
+        <pre id="rationalePre" class="pre muted" tabindex="0"></pre>
+      </section>
+
+      <section id="refsSection" class="mt-4 hidden" aria-labelledby="sec-refs">
+        <h3 id="sec-refs" class="subhead">References</h3>
         <ol id="refsList" class="small"></ol>
-      </div>
-      <div id="jsonBlock" class="mt-4 hidden">
-        <h3 class="subhead">Parsed JSON</h3>
-        <pre id="jsonPre" class="pre"></pre>
-      </div>
-      <div class="mt-4">
+      </section>
+
+      <section id="jsonBlock" class="mt-4 hidden" aria-labelledby="sec-json">
+        <h3 id="sec-json" class="subhead">Parsed JSON</h3>
+        <pre id="jsonPre" class="pre" tabindex="0"></pre>
+      </section>
+
+      <section class="mt-4" aria-labelledby="sec-sources">
         <details id="sourcesPanel">
           <summary class="subhead">Sources used (debug)</summary>
           <div class="small muted mt-2">
@@ -95,58 +114,61 @@
             <div class="small mt-2"><strong>Usage summary</strong>: <span id="srcUsedSummary" class="muted">(pending)</span></div>
           </div>
           <div class="mt-2">
-            <h4 class="subhead">Uploaded context [CTX]</h4>
-            <pre id="srcCtxVs" class="pre small"></pre>
+            <h4 class="subhead">Uploaded context <span class="badge badge-ctx">[CTX]</span></h4>
+            <pre id="srcCtxVs" class="pre small" tabindex="0"></pre>
           </div>
           <div class="mt-2">
-            <h4 class="subhead">Parsed protocols [PARSED]</h4>
-            <pre id="srcCtxParsed" class="pre small"></pre>
+            <h4 class="subhead">Parsed protocols <span class="badge badge-parsed">[PARSED]</span></h4>
+            <pre id="srcCtxParsed" class="pre small" tabindex="0"></pre>
           </div>
           <div class="mt-2">
-            <h4 class="subhead">Mongo Q&amp;A matches [DB]</h4>
-            <pre id="srcCtxDb" class="pre small"></pre>
+            <h4 class="subhead">Mongo Q&amp;A matches <span class="badge badge-db">[DB]</span></h4>
+            <pre id="srcCtxDb" class="pre small" tabindex="0"></pre>
           </div>
         </details>
-      </div>
-    </div>
+      </section>
+    </section>
 
     <!-- History (Q&A) -->
-    <div class="card mt-6">
-      <h2 class="card-title">History (Q&amp;A)</h2>
-      <div class="row">
+    <section class="card mt-6" aria-labelledby="sec-history">
+      <h2 id="sec-history" class="card-title">History (Q&amp;A)</h2>
+      <div class="row" role="group" aria-label="History filters and actions">
+        <label class="visually-hidden" for="histQuery">Filter history by keywords</label>
         <input id="histQuery" class="textarea" placeholder="Filter (optional): keywords in question">
-        <button id="histRefreshBtn" class="btn secondary" type="button">Refresh</button>
-        <button id="histMoreBtn" class="btn secondary" type="button">Load more</button>
+        <button id="histRefreshBtn" class="btn secondary" type="button" aria-controls="histList histMsg">Refresh</button>
+        <button id="histMoreBtn" class="btn secondary" type="button" aria-controls="histList histMsg">Load more</button>
       </div>
-      <div id="histMsg" class="alert mt-2 hidden" aria-live="polite"></div>
+      <div id="histMsg" class="alert mt-2 hidden" role="status" aria-live="polite" aria-atomic="true"></div>
       <ol id="histList" class="mt-3 small"></ol>
       <p class="small muted mt-2">Tip: Click a history item to load its answer/rationale back into the page.</p>
-    </div>
+    </section>
 
     <!-- Upload Browser -->
-    <div class="card mt-6">
-      <h2 class="card-title">Uploads</h2>
-      <div class="row">
-        <button id="uplRefreshBtn" class="btn secondary" type="button">Refresh</button>
+    <section class="card mt-6" aria-labelledby="sec-uploads">
+      <h2 id="sec-uploads" class="card-title">Uploads</h2>
+      <div class="row" role="group" aria-label="Uploads actions">
+        <button id="uplRefreshBtn" class="btn secondary" type="button" aria-controls="uplList uplMsg">Refresh</button>
       </div>
-      <div id="uplMsg" class="alert mt-2 hidden" aria-live="polite"></div>
+      <div id="uplMsg" class="alert mt-2 hidden" role="status" aria-live="polite" aria-atomic="true"></div>
       <ol id="uplList" class="mt-3 small"></ol>
-    </div>
+    </section>
 
     <!-- Maintenance -->
-    <div class="card mt-6">
-      <h2 class="card-title">Maintenance</h2>
+    <section class="card mt-6" aria-labelledby="sec-maint">
+      <h2 id="sec-maint" class="card-title">Maintenance</h2>
       <div class="row">
         <button id="clearBtn" class="btn secondary" type="button"
-          onclick="fetch('/clear_uploads',{method:'POST'}).then(()=>{document.getElementById('uplMsg').classList.remove('hidden');document.getElementById('uplMsg').textContent='Uploads cleared (vector memory)';loadUploads();});">
+          onclick="fetch('/clear_uploads',{method:'POST'}).then(()=>{document.getElementById('uplMsg').classList.remove('hidden');document.getElementById('uplMsg').textContent='Uploads cleared (vector memory)';loadUploads();});"
+          aria-controls="uplMsg uplList"
+          aria-label="Clear uploaded memory">
           Clear uploaded memory
         </button>
-        <div id="clearMsg" class="alert mt-2 hidden" aria-live="polite"></div>
+        <div id="clearMsg" class="alert mt-2 hidden" role="status" aria-live="polite" aria-atomic="true"></div>
       </div>
       <p class="small muted mt-3">
         Tip: Mount a volume at <code>/data</code> and set <code>HF_HOME=/data/hf</code> so model downloads persist.
       </p>
-    </div>
-  </div>
+    </section>
+  </main>
 </body>
 </html>

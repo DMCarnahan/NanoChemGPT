@@ -1,4 +1,3 @@
-# chem_post.py  (safe on Python 3.11)
 from __future__ import annotations
 import os, re, time
 from typing import List, Dict, Optional

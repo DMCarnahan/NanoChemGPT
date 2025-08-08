@@ -1,3 +1,96 @@
+"use strict";
+
+// Unified JSON fetch with timeout, robust error normalization, and abort support
+async function fetchJSON(url, opts = {}, timeoutMs = 30000) {
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(new Error("Timeout after " + timeoutMs + " ms")), timeoutMs);
+  const merged = Object.assign({}, opts, { signal: ctrl.signal });
+
+  try {
+    const res = await fetch(url, merged);
+    const ct = res.headers.get('content-type') || '';
+    let payload;
+
+    if (ct.includes('application/json')) {
+      payload = await res.json().catch(() => ({ error: 'Invalid JSON' }));
+    } else {
+      const text = await res.text();
+      try { payload = JSON.parse(text); } catch { payload = { text }; }
+    }
+
+    if (!res.ok) {
+      const msg = (payload && (payload.error || payload.message)) || ('HTTP ' + res.status);
+      throw new Error(msg);
+    }
+    return payload;
+  } catch (err) {
+    // Normalize common fetch errors
+    const msg = (err && err.message) ? err.message : String(err);
+    if (DEBUG) console.error('fetchJSON error:', msg);
+    throw new Error(msg);
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+// Event helper: direct and delegated
+function on(target, type, selectorOrHandler, maybeHandler) {
+  if (!target) return;
+  const delegated = typeof selectorOrHandler === 'string';
+  const handler = delegated ? maybeHandler : selectorOrHandler;
+  if (!handler) return;
+
+  target.addEventListener(type, (ev) => {
+    if (!delegated) return handler(ev);
+    const matches = target.querySelectorAll(selectorOrHandler);
+    for (const el of matches) {
+      if (el === ev.target || el.contains(ev.target)) {
+        return handler(ev, el);
+      }
+    }
+  });
+}
+
+// Safer selectors
+const byId = (id) => document.getElementById(id);
+const qsa  = (s, el = document) => Array.from(el.querySelectorAll(s));
+const must = (s, el = document) => {
+  const node = el.querySelector(s);
+  if (!node) throw new Error('Selector not found: ' + s);
+  return node;
+};
+
+// Central alert helper 
+if (typeof window.showAlert !== 'function') {
+  window.showAlert = function(target, kind, message) {
+    const host = typeof target === 'string' ? document.querySelector(target) : target;
+    if (!host) return;
+    const box = document.createElement('div');
+    box.className = 'alert ' + (kind || 'info');
+    box.textContent = String(message ?? '');
+    host.innerHTML = '';
+    host.appendChild(box);
+  }
+}
+
+// Global error/display surface
+window.addEventListener('unhandledrejection', (e) => {
+  if (DEBUG) console.error('Unhandled promise rejection:', e.reason);
+  const msg = (e && e.reason && e.reason.message) ? e.reason.message : 'Unexpected error';
+  const slot = document.querySelector('#global-errors');
+  if (slot) showAlert(slot, 'error', msg);
+});
+
+window.addEventListener('error', (e) => {
+  if (DEBUG) console.error('Window error:', e.message);
+  const slot = document.querySelector('#global-errors');
+  if (slot) showAlert(slot, 'error', e.message || 'Unexpected error');
+});
+
+// ===== End add-ons =====
+// Cleaned 2025-08-08 by NanoChemGPT
+const DEBUG = false;
+
 // ------- DOM helpers -------
 const qs  = (s) => document.querySelector(s);
 const qsa = (s) => Array.from(document.querySelectorAll(s));
@@ -100,7 +193,7 @@ function showRefs(refs) {
 // ------- Sources-used viewer -------
 
 function updateSourcesUsed(data) {
-  console.log('updateSourcesUsed got:', data); // <-- see ctx_* in console
+  if (DEBUG) console.log('updateSourcesUsed got:', data); // <-- see ctx_* in console
 
   const s1 = document.getElementById('srcCtxVs');
   const s2 = document.getElementById('srcCtxParsed');
@@ -678,7 +771,7 @@ askBtn.addEventListener('click', async () => {
     if (!res.ok) throw new Error(data.error || 'Request failed');
 
     if (MODE === 'robot') {
-      // Your existing /ask payload shape
+
       const { answer, rationale, references } = data;
       answerPre.textContent = answer || '';
       rationalePre.textContent = rationale || '';

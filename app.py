@@ -309,9 +309,35 @@ def _admin_csp(resp):
 @app.post("/admin/upload_builtin")
 @require_admin
 def admin_upload_builtin():
+    """
+    Upload a builtin dataset file. Accepts either a plain `.json` file or a
+    compressed `.json.xz` file. Saves the uploaded file into the configured
+    BUILTIN_DIR and, if compressed, writes a decompressed `.json` alongside
+    the original.
+    """
     f = request.files.get("file")
     if not f or f.filename == "":
         return jsonify({"error": "no file"}), 400
+
+    fname = secure_filename(f.filename)
+    raw_path = BUILTIN_DIR / fname
+    raw_path.parent.mkdir(parents=True, exist_ok=True)
+
+    # Save original upload
+    f.save(raw_path)
+
+    # If it’s .json.xz → decompress alongside to .json
+    out_path = raw_path
+    if fname.lower().endswith(".json.xz"):
+        out_path = BUILTIN_DIR / fname[:-3]  # strip ".xz" → keep ".json"
+        with lzma.open(raw_path, "rb") as xzf, open(out_path, "wb") as out:
+            out.write(xzf.read())
+
+    return jsonify({
+        "ok": True,
+        "saved": str(raw_path),
+        "decompressed": str(out_path) if out_path != raw_path else None
+    })
     
 # ---------------- Mechanistic KB Upload/Ingester --------------------------
 @app.post("/admin/upload_mechanistic")
@@ -358,24 +384,6 @@ def admin_upload_mechanistic():
     except Exception as e:
         traceback.print_exc()
         return jsonify({"ok": False, "error": f"ingestion failed: {e}"}), 500
-
-fname = secure_filename(f.filename)
-raw_path = BUILTIN_DIR / fname
-raw_path.parent.mkdir(parents=True, exist_ok=True)
-
-f.save(raw_path)
-
-out_path = raw_path
-if fname.lower().endswith(".json.xz"):
-    out_path = BUILTIN_DIR / fname[:-3]
-    with lzma.open(raw_path, "rb") as xzf, open(out_path, "wb") as out:
-        out.write(xzf.read())
-
-    return jsonify({
-        "ok": True,
-        "saved": str(raw_path),
-        "decompressed": str(out_path) if out_path != raw_path else None
-    })
 
 # ---------------- Upload ----------------
 @app.post("/upload")
