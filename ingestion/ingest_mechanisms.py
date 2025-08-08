@@ -10,12 +10,12 @@ from typing import Dict, Any, Iterable
 import jsonschema
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
-SCHEMA_PATH = ROOT / "mechanistic_reasoning" / "schemas" / "mechanistic.schema.json"
-DB_PATH = ROOT / "mechanistic_reasoning" / "mechanistic_kb"  / "mechanistic_meta.sqlite"
-JSONL_OUT = ROOT / "mechanistic_reasoning" / "mechanistic_kb" / "mechanistic.jsonl"
+SCHEMA_PATH = ROOT / "schemas" / "mechanistic.schema.json"
+DB_PATH = ROOT / "mechanistic_kb"  / "mechanistic_meta.sqlite"
+JSONL_OUT = ROOT / "mechanistic_kb" / "mechanistic.jsonl"
 
 def _ensure_dirs():
-    (ROOT / "mechanistic_reasoning" / "mechanistic_kb").mkdir(parents=True, exist_ok=True)
+    (ROOT / "mechanistic_kb").mkdir(parents=True, exist_ok=True)
 
 def validate_entry(entry: Dict[str, Any]) -> Dict[str, Any]:
     schema = json.loads(SCHEMA_PATH.read_text())

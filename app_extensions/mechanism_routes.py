@@ -10,7 +10,7 @@ from typing import List, Dict, Any, Tuple
 from flask import Blueprint, request, jsonify
 
 # RAG bits (mechanistic KB)
-from ..retriever.retriever import search, Embedder
+from retriever.retriever import search, Embedder
 
 from app import client
 
