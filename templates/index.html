@@ -9,9 +9,13 @@
 </head>
 <body>
   <div class="container">
+    <!-- Header -->
     <div class="header">
       <h1>NanoChemGPT</h1>
-      <div id="healthStatus" class="status"><span class="status-dot"></span><span class="status-txt">checking…</span></div>
+      <div id="healthStatus" class="status">
+        <span class="status-dot"></span>
+        <span class="status-txt">checking…</span>
+      </div>
     </div>
 
     <!-- Upload -->
@@ -20,11 +24,26 @@
       <div class="input-row">
         <label for="fileInput" class="visually-hidden">Choose file</label>
         <input id="fileInput" type="file" accept=".pdf,.json,.txt,.md,.csv">
-        <button id="uploadBtn" class="btn" type="button"><span class="spinner hidden"></span>Upload</button>
+        <button id="uploadBtn" class="btn" type="button">
+          <span class="spinner hidden"></span>Upload
+        </button>
       </div>
       <div id="fileHint" class="small muted"></div>
       <div class="progress mt-3"><div id="progressInner"></div></div>
       <div id="result" class="alert mt-3 hidden" aria-live="polite"></div>
+    </div>
+
+    <!-- Builtin uploader (goes to /admin/upload_builtin) -->
+    <div class="card mt-6">
+      <h2 class="card-title">Upload builtin data (.json / .json.xz)</h2>
+
+      <div id="builtinDrop" class="dropzone" tabindex="0" role="button" aria-label="Drop files or click to choose">
+        <strong>Drag & drop</strong> files here (or click to choose)
+      </div>
+
+      <input id="builtinFile" type="file" class="visually-hidden" accept=".json,.json.xz" multiple>
+      <div class="small muted mt-2">Files land in <code>BUILTIN_DIR</code> and <code>.json.xz</code> is decompressed server-side.</div>
+      <div id="builtinMsg" class="alert mt-2 hidden" aria-live="polite"></div>
     </div>
 
     <!-- Ask -->
@@ -42,55 +61,50 @@
         </label>
         <button id="saveTxtBtn" class="btn secondary" disabled>Export answer → .txt</button>
       </div>
-
       <div id="askMsg" class="alert mt-3 hidden" aria-live="polite"></div>
 
       <div class="mt-4">
         <h3 class="subhead">Answer</h3>
         <pre id="answerPre" class="pre"></pre>
       </div>
-
       <div class="mt-4">
         <h3 class="subhead">Rationale</h3>
         <pre id="rationalePre" class="pre muted"></pre>
       </div>
-
       <div id="refsSection" class="mt-4 hidden">
         <h3 class="subhead">References</h3>
         <ol id="refsList" class="small"></ol>
       </div>
-
       <div id="jsonBlock" class="mt-4 hidden">
         <h3 class="subhead">Parsed JSON</h3>
         <pre id="jsonPre" class="pre"></pre>
       </div>
-      
-    <div class="mt-4">
-      <details id="sourcesPanel">
-        <summary class="subhead">Sources used (debug)</summary>
-        <div class="small muted mt-2">
-          <p>This shows the context chunks that were sent to the model for the last answer.</p>
-          <div class="small mt-2"><strong>Usage summary</strong>: <span id="srcUsedSummary" class="muted">(pending)</span></div>
-
-        </div>
-        <div class="mt-2">
-          <h4 class="subhead">Uploaded context [CTX]</h4>
-          <pre id="srcCtxVs" class="pre small"></pre>
-        </div>
-        <div class="mt-2">
-          <h4 class="subhead">Parsed protocols [PARSED]</h4>
-          <pre id="srcCtxParsed" class="pre small"></pre>
-        </div>
-        <div class="mt-2">
-          <h4 class="subhead">Mongo Q&A matches [DB]</h4>
-          <pre id="srcCtxDb" class="pre small"></pre>
-        </div>
-      </details>
+      <div class="mt-4">
+        <details id="sourcesPanel">
+          <summary class="subhead">Sources used (debug)</summary>
+          <div class="small muted mt-2">
+            <p>This shows the context chunks that were sent to the model for the last answer.</p>
+            <div class="small mt-2"><strong>Usage summary</strong>: <span id="srcUsedSummary" class="muted">(pending)</span></div>
+          </div>
+          <div class="mt-2">
+            <h4 class="subhead">Uploaded context [CTX]</h4>
+            <pre id="srcCtxVs" class="pre small"></pre>
+          </div>
+          <div class="mt-2">
+            <h4 class="subhead">Parsed protocols [PARSED]</h4>
+            <pre id="srcCtxParsed" class="pre small"></pre>
+          </div>
+          <div class="mt-2">
+            <h4 class="subhead">Mongo Q&amp;A matches [DB]</h4>
+            <pre id="srcCtxDb" class="pre small"></pre>
+          </div>
+        </details>
+      </div>
     </div>
 
     <!-- History (Q&A) -->
     <div class="card mt-6">
-      <h2 class="card-title">History (Q&A)</h2>
+      <h2 class="card-title">History (Q&amp;A)</h2>
       <div class="row">
         <input id="histQuery" class="textarea" placeholder="Filter (optional): keywords in question">
         <button id="histRefreshBtn" class="btn secondary" type="button">Refresh</button>
@@ -115,7 +129,10 @@
     <div class="card mt-6">
       <h2 class="card-title">Maintenance</h2>
       <div class="row">
-        <button id="clearBtn" class="btn secondary" type="button" onclick="fetch('/clear_uploads',{method:'POST'}).then(()=>{document.getElementById('uplMsg').classList.remove('hidden');document.getElementById('uplMsg').textContent='Uploads cleared (vector memory)';loadUploads();});">Clear uploaded memory</button>
+        <button id="clearBtn" class="btn secondary" type="button"
+          onclick="fetch('/clear_uploads',{method:'POST'}).then(()=>{document.getElementById('uplMsg').classList.remove('hidden');document.getElementById('uplMsg').textContent='Uploads cleared (vector memory)';loadUploads();});">
+          Clear uploaded memory
+        </button>
         <div id="clearMsg" class="alert mt-2 hidden" aria-live="polite"></div>
       </div>
       <p class="small muted mt-3">

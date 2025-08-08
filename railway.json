@@ -1,0 +1,43 @@
+{
+  "$schema": "https://railway.com/railway.schema.json",
+  "build": {
+    "builder": "NIXPACKS"
+  },
+  "deploy": {
+    "startCommand": "gunicorn -k gthread --threads 8 --workers 2 --timeout 600 --graceful-timeout 60 --bind 0.0.0.0:$PORT --access-logfile - --error-logfile - app:app",
+    "healthcheckPath": "/health",
+    "healthcheckTimeout": 100,
+    "restartPolicyType": "on_failure"
+  },
+  "variables": {
+    "ADMIN_UPLOAD_SECRET": "${{shared.ADMIN_UPLOAD_SECRET}}",
+    "BUILTIN_DIR": "/mnt/data/builtin",
+    "DATA_DIR": "/mnt/data",
+    "DB_CTX_LIMIT": "3",
+    "DB_CTX_MAX_CHARS": "1200",
+    "EMBED_BACKEND": "openai",
+    "EMBED_MODEL": "sentence-transformers/all-MiniLM-L6-v2",
+    "EMBED_OPENAI_MODEL": "text-embedding-3-small",
+    "HF_HOME": "/mnt/data/hf_cache",
+    "MONGO_DB": "nanochem",
+    "MONGO_URL": "${{MongoDB.MONGO_URL}}",
+    "NIXPACKS_PYTHON_VERSION": "3.11",
+    "NIXPACKS_POST_INSTALL_CMD": "python -m spacy download en_core_web_sm",
+    "OPENAI_API_KEY": "${{shared.OPENAI_API_KEY}}",
+    "PERSIST_INDEX": "1",
+    "PIP_DISABLE_PIP_VERSION_CHECK": "1",
+    "PIP_EXTRA_INDEX_URL": "https://download.pytorch.org/whl/cpu",
+    "PIP_FIND_LINKS": "https://download.pytorch.org/whl/torch_stable.html",
+    "PIP_PREFER_BINARY": "1",
+    "PRELOAD_BUILTIN": "1",
+    "RERANK": "1",
+    "SEARCH_CACHE_DIR": "/tmp/search_cache",
+    "TMPDIR": "/tmp",
+    "UPLOADS_DIR": "/mnt/data/uploads",
+    "USE_DB_CONTEXT": "0",
+    "VECTORSTORE_DIR": "/mnt/data/index",
+    "VS_MMR": "1",
+    "VS_LLM_RERANLK": "1",
+    "TOKENIZERS_PARALLELISM": "false"
+  }
+}

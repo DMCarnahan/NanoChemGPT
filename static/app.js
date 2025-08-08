@@ -46,7 +46,6 @@ function escapeHtml(s) {
   ));
 }
 
-
 function renderRationaleWithCitations(text, refs) {
   // Escape everything first
   let html = escapeHtml(text || '');
@@ -571,3 +570,54 @@ function wireUI() {
 }
 
 document.addEventListener('DOMContentLoaded', wireUI);
+
+// ----- Builtin uploader → /admin/upload_builtin -----
+(() => {
+  const dz   = document.getElementById('builtinDrop');
+  const inp  = document.getElementById('builtinFile');
+  const msg  = document.getElementById('builtinMsg');
+
+  if (!dz || !inp) return;
+
+  // 🔐 Put your ADMIN_UPLOAD_SECRET here while testing, or prompt each time.
+  // Better: render it into the page server-side for a private /admin route only.
+  let ADMIN_TOKEN = ""; // e.g. "paste-temporary-token-here"
+
+  function setMsg(txt, ok=false) {
+    msg.classList.remove('hidden');
+    msg.textContent = txt;
+    msg.classList.toggle('error', !ok);
+  }
+
+  async function uploadOne(file) {
+    const fd = new FormData();
+    fd.append('file', file);
+
+    const res = await fetch('/admin/upload_builtin', {
+      method: 'POST',
+      headers: { 'Authorization': 'Bearer ' + (ADMIN_TOKEN || prompt('Admin token:') || '') },
+      body: fd
+    });
+
+    let body;
+    try { body = await res.json(); } catch { body = {error: await res.text()} }
+
+    if (!res.ok || body.error) {
+      setMsg(`❌ ${file.name}: ${body.error || res.statusText}`, false);
+    } else {
+      const where = body.decompressed || body.saved;
+      setMsg(`✅ ${file.name} uploaded → ${where}`, true);
+    }
+  }
+
+  function handleFiles(files) {
+    [...files].forEach(f => uploadOne(f));
+  }
+
+  dz.addEventListener('click', () => inp.click());
+  dz.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); inp.click(); } });
+  dz.addEventListener('dragover', (e) => { e.preventDefault(); dz.classList.add('hover'); });
+  dz.addEventListener('dragleave', () => dz.classList.remove('hover'));
+  dz.addEventListener('drop', (e) => { e.preventDefault(); dz.classList.remove('hover'); handleFiles(e.dataTransfer.files); });
+  inp.addEventListener('change', () => handleFiles(inp.files));
+})();
