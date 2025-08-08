@@ -1,300 +1,247 @@
 """
-step_validator.py — Parse, normalize, and validate lab step data from .txt or dict.
+Low-level procedure parser that emits machine-executable steps.
 
-Features:
-- Parses "Key: value" .txt files (case-insensitive keys).
-- Remembers line numbers to report helpful validation errors.
-- Normalizes units (ug→µg, ul→µL, umol→µmol, ml→mL, etc.).
-- Normalizes vessel aliases (rbf/r b f→round-bottom flask, erlenmeyer→flask, etc.).
-- Coerces numeric strings for amount/temperature/duration.
-- Cleans reagent lists (trim, remove empties, dedupe preserving order).
-- Validates against a strict JSON Schema (pairing rules, enums, ranges, regex).
+Key features:
+- ALWAYS emits an "action" for each step (never missing).
+- Converts high-level "prepare solution" into explicit "dispense" with:
+  solute, solvent, concentration (M), volume (mL/L).
+- Cleans bracket tags like [GEN], [CTX], [1].
+- Extracts coarse temperature (°C) and duration (minutes) when present.
+- Leaves original step text in "raw" for auditing.
 
-Usage:
-    from step_validator import validate_step, validate_file, ValidationError
-
-    # From plain text:
-    txt = "Action: Heat\nIdentity: Anneal Step\nReagents: NaCl, H2O\nVessel: rbf\n"
-    data = validate_step(txt)  # returns normalized dict
-
-    # From dict:
-    data = validate_step({"action": "mix", "identity": "prep", "reagents": ["NaCl"], "vessel": "beaker"})
-
-    # From file (auto-detect .json vs plain text):
-    data = validate_file("step.txt")
-
-    # Error handling:
-    try:
-        data = validate_step("Action: Mix\nVessel: Beaker 250 mL")
-    except ValueError as e:
-        print("Nice error:", e)
-
+CLI:
+    python converter.py /path/to/answer.txt /path/to/output.json
 """
 
-import re
-import json
-from jsonschema import validate as _js_validate, ValidationError
+from __future__ import annotations
+import re, json, sys, pathlib
+from typing import List, Dict, Optional
 
-# -------------------------
-# 1) JSON Schema
-# -------------------------
-json_schema_regex = {
-    "type": "object",
-    "additionalProperties": False,
-    "properties": {
-        "action": {"type": "string", "minLength": 1},
-        "identity": {"type": "string", "minLength": 1},
-        "reagents": {
-            "type": "array",
-            "items": {"type": "string", "minLength": 1},
-            "minItems": 1,
-            "uniqueItems": True
-        },
-        "solvent": {"type": "string", "minLength": 1},
-        "amount": {"type": "number", "exclusiveMinimum": 0},
-        "units": {
-            "type": "string",
-            "enum": [
-                "g","mg","ug","µg","kg",
-                "mL","L","uL","µL",
-                "mol","mmol","umol","µmol"
-            ]
-        },
-        "temperature": {"type": "number", "minimum": -273.15, "maximum": 1500},
-        "duration": {"type": "number", "exclusiveMinimum": 0},
-        "vessel": {
-            "type": "string",
-            "minLength": 1,
-            "pattern": "^(beaker|flask|round-bottom flask|vial|dewar|schlenk flask)$"
-        }
-    },
-    "required": ["action", "identity"],
-    "allOf": [
-        {"if": {"required": ["amount"]}, "then": {"required": ["units"]}},
-        {"if": {"required": ["units"]}, "then": {"required": ["amount"]}},
-        {"if": {"required": ["temperature"]}, "then": {"required": ["duration"]}},
-        {"if": {"required": ["duration"]}, "then": {"required": ["temperature"]}}
-    ]
+# ---------------- Utilities ----------------
+
+TAG_RX = re.compile(r"\s*\[(?:CTX|DB|PARSED|GEN|\d+)\]\s*$")
+
+def strip_tags(s: str) -> str:
+    return TAG_RX.sub("", s).strip()
+
+def _extract_temperature_c(t: str) -> float:
+    m = re.search(r"(-?\d+(?:\.\d+)?)\s*°?\s*C\b", t, re.I)
+    return float(m.group(1)) if m else 0.0
+
+def _extract_duration_minutes(t: str) -> float:
+    mins = 0.0
+    for m in re.finditer(r"(\d+(?:\.\d+)?)\s*(?:hour|hr|hrs|h)\b", t, re.I):
+        mins += float(m.group(1)) * 60
+    for m in re.finditer(r"(\d+(?:\.\d+)?)\s*(?:minute|min|mins|m)\b", t, re.I):
+        mins += float(m.group(1))
+    return mins
+
+# ---------------- Action inference ----------------
+
+_ACTION_PATTERNS = [
+    (re.compile(r"\ballow(?:s|ed)?\b.*?\bto\s+(stir|react|age|settle|cool|heat|evaporate)\b", re.I), lambda m: m.group(1)),
+    (re.compile(r"^\s*(?:\d+\.)?\s*(?:then\s+|and\s+)?\b"
+                r"(prepare|add|stir|mix|heat|cool|centrifuge|wash|dry|filter|sonicate|degas|inject|age|reflux|quench|"
+                r"dissolve|pour|transfer|grind|calcine|anneal|evaporate|precipitate|collect)\b", re.I), lambda m: m.group(1)),
+    (re.compile(r"\b(prepare|add|stir|mix|heat|cool|centrifuge|wash|dry|filter|sonicate|degas|inject|age|reflux|"
+                r"quench|dissolve|pour|transfer|grind|calcine|anneal|evaporate|precipitate|collect)\b", re.I), lambda m: m.group(1)),
+]
+
+_ACTION_MAP = {
+    "prepare": "prepare",
+    "add": "add",
+    "stir": "stir",
+    "mix": "mix",
+    "heat": "heat",
+    "cool": "cool",
+    "centrifuge": "centrifuge",
+    "wash": "wash",
+    "dry": "dry",
+    "filter": "filter",
+    "sonicate": "sonicate",
+    "degas": "degas",
+    "inject": "inject",
+    "age": "age",
+    "reflux": "reflux",
+    "quench": "quench",
+    "dissolve": "dissolve",
+    "pour": "pour",
+    "transfer": "transfer",
+    "grind": "grind",
+    "calcine": "calcine",
+    "anneal": "anneal",
+    "evaporate": "evaporate",
+    "precipitate": "precipitate",
+    "collect": "collect",
+    "react": "react",
+    "settle": "settle",
 }
 
-# -------------------------
-# 2) Normalizer
-# -------------------------
-def normalize_for_validation(data: dict) -> dict:
-    """
-    Normalize JSON data before schema validation.
-    - Strips whitespace from all strings (recursively)
-    - Lowercases 'vessel' and 'units'
-    - Canonicalizes units (ug/μg/mcg→µg, ul/μl→µL, umol/μmol→µmol, ml→mL, etc.)
-    - Numeric coercion for amount/temperature/duration if strings (supports sci. notation)
-    - Normalizes vessel aliases (rbf / r b f → round-bottom flask, round bottom → round-bottom, schlenk → schlenk flask, erlenmeyer → flask)
-    - Cleans reagent lists: trims, removes empties, deduplicates (preserving order)
-    """
-    unit_map = {
-        "ug": "µg", "μg": "µg", "mcg": "µg", "microgram": "µg", "micrograms": "µg",
-        "ul": "µL", "μl": "µL", "microliter": "µL", "microliters": "µL",
-        "umol": "µmol", "μmol": "µmol", "micromole": "µmol", "micromoles": "µmol",
-        "milliliter": "mL", "milliliters": "mL", "ml": "mL",
-        "liter": "L", "liters": "L", "lt": "L",
-        "gram": "g", "grams": "g",
-        "milligram": "mg", "milligrams": "mg",
-        "kilogram": "kg", "kilograms": "kg",
-        "mole": "mol", "moles": "mol",
-        "millimole": "mmol", "millimoles": "mmol",
-        "molarity": "M", "molarities": "M",
-        "millimolar": "mM", "millimolars": "mM",
-        "percent": "%", "percentage": "%",
-        "ppm": "ppm", "ppb": "ppb", "ppt": "ppt",
-        "pH": "pH", "ph": "pH", "ph value": "pH"
-    }
-    vessel_map = {
-        "rbf": "round-bottom flask",
-        "round bottom flask": "round-bottom flask",
-        "round‐bottom flask": "round-bottom flask",
-        "round – bottom flask": "round-bottom flask",
-        "erlenmeyer": "flask",
-        "erlenmeyer flask": "flask",
-        "schlenk": "schlenk flask",
-        "schlenk tube": "schlenk flask",
-        "rb flask": "round-bottom flask"
-    }
-    number_keys = {"amount", "temperature", "duration"}
-
-    def coerce_number(val):
-        if isinstance(val, (int, float)):
-            return val
-        if isinstance(val, str):
-            s = val.strip().replace(",", "")
-            if re.fullmatch(r"[+-]?(\d+(\.\d*)?|\.\d+)([eE][+-]?\d+)?", s):
-                num = float(s)
-                return int(num) if num.is_integer() else num
-        return val
-
-    def dedupe_preserve_order(seq):
-        seen, out = set(), []
-        for x in seq:
-            if x not in seen:
-                seen.add(x)
-                out.append(x)
-        return out
-
-    def normalize_value(key, value):
-        if isinstance(value, dict):
-            return {k: normalize_value(k, v) for k, v in value.items()}
-        if isinstance(value, list):
-            norm_list = [normalize_value(key, v) for v in value]
-            if key == "reagents":
-                norm_list = [v for v in norm_list if isinstance(v, str) and v.strip() != ""]
-                norm_list = dedupe_preserve_order(norm_list)
-            return norm_list
-        if isinstance(value, str):
-            s = value.strip()
-            if key in ("vessel", "units"):
-                s = s.lower()
-            if key == "units":
-                s = unit_map.get(s, s)
-            if key == "vessel":
-                s = s.replace("–", "-").replace("—", "-").replace("‐", "-")
-                s = re.sub(r"\s+", " ", s)
-                compact = s.replace(" ", "")
-                s = vessel_map.get(s, vessel_map.get(compact, s))
-            if key in number_keys:
-                return coerce_number(s)
-            return s
-        if key in number_keys:
-            return coerce_number(value)
-        return value
-
-    return {k: normalize_value(k, v) for k, v in data.items()}
-
-# -------------------------
-# 3) Text Parser (line-aware)
-# -------------------------
-def parse_step_text_verbose(txt: str):
-    """
-    Parse a plain-text step with line numbers retained for better errors.
-    Accepts lines like:
-        Action: Heat
-        Identity: Anneal Step
-        Reagents: NaCl, H2O
-        Solvent: water
-        Amount: 250
-        Units: ug
-        Temperature: 80
-        Duration: 30
-        Vessel: R B F
-
-    Unknown keys are ignored by default.
-    """
-    key_map = {
-        "action": "action",
-        "identity": "identity",
-        "reagents": "reagents",
-        "solvent": "solvent",
-        "amount": "amount",
-        "units": "units",
-        "temperature": "temperature",
-        "duration": "duration",
-        "vessel": "vessel"
-    }
-    out, line_map = {}, {}
-    for lineno, line in enumerate(txt.splitlines(), start=1):
-        if ":" not in line:
-            continue
-        k, v = line.split(":", 1)
-        k = k.strip().lower()
-        v = v.strip()
-        if not k:
-            continue
-        if k in key_map:
-            ck = key_map[k]
-            line_map[ck] = lineno
-            if ck == "reagents":
-                items = [s.strip() for s in re.split(r"[;,]", v)]
-                out[ck] = items
-            else:
-                out[ck] = v
-    return out, line_map
-
-# -------------------------
-# 4) Error pretty-printer
-# -------------------------
-def pretty_validation_error(err: ValidationError, line_map: dict) -> str:
-    # Create a path like reagents[1] or vessel, etc.
-    if err.path:
-        parts = []
-        for p in err.path:
-            if isinstance(p, int):
-                parts[-1] = f"{parts[-1]}[{p}]"
-            else:
-                parts.append(str(p))
-        inst_path = ".".join(parts)
-    else:
-        inst_path = "(root)"
-
-    # Attach line if we can
-    line_info = ""
-    top_key = err.path[0] if err.path else None
-    if isinstance(top_key, int):
-        top_key = None
-    if top_key in line_map:
-        line_info = f" (near line {line_map[top_key]})"
-
-    # Special-case required field errors
-    if err.validator == "required":
-        m = re.search(r"'(.+?)' is a required property", err.message)
+def get_action(step_text: str) -> str:
+    s = step_text.strip()
+    for rx, f in _ACTION_PATTERNS:
+        m = rx.search(s)
         if m:
-            missing_key = m.group(1)
-            hint_line = None
-            for anchor in ("action", "identity", "reagents", "solvent", "vessel"):
-                if anchor in line_map:
-                    hint_line = line_map[anchor]
-                    break
-            if hint_line:
-                return f"Missing required field '{missing_key}' around line {hint_line}."
-            return f"Missing required field '{missing_key}'."
+            verb = f(m).lower()
+            return _ACTION_MAP.get(verb, verb)
+    return "process"
 
-    return f"{err.message}{line_info} at {inst_path}."
+# ---------------- Solution prep → dispense ----------------
+# Broadened phrase detection:
+#   1) "Prepare a 0.1 M solution of X by dissolving Y in 100 mL of solvent"
+#   2) "Prepare a 0.1 M X solution by dissolving Y in 100 mL of solvent"
+#   3) "Dissolve Y in 100 mL of solvent to make a 0.1 M X solution"
+#   4) "Add/charge Y to 100 mL of solvent to obtain a 0.1 M X solution"
+#   5) "Make a 0.1 M X solution by dissolving Y in 100 mL solvent"
+#   6) "Formulate a 0.1 M X solution ..."
+#   7) "Compose a 0.1 M X solution ..."
 
-# -------------------------
-# 5) Public API
-# -------------------------
-def validate_step(obj) -> dict:
-    """
-    Accepts either:
-      - a dict matching the schema structure, or
-      - a text blob in the 'Key: value' format.
+_CONC_UNIT_RX = r"(?:M|m)"  # molarity only for now
 
-    Returns the normalized, validated dict.
-    Raises ValueError with a human-friendly message on failure.
-    """
-    if isinstance(obj, str):
-        data, line_map = parse_step_text_verbose(obj)
-    elif isinstance(obj, dict):
-        data, line_map = obj, {}
-    else:
-        raise TypeError("validate_step expects dict or str")
+def _clean_solvent_tail(solvent: str) -> str:
+    solvent = strip_tags(solvent.strip().rstrip(",."))
+    solvent = solvent.split(" in ")[0].strip()
+    return solvent
 
-    norm = normalize_for_validation(data)
-    try:
-        _js_validate(instance=norm, schema=json_schema_regex)
-    except ValidationError as e:
-        raise ValueError(pretty_validation_error(e, line_map))
-    return norm
+def _mk_dispense(solute: str, solvent: str, conc: float, vol: float, vol_unit: str) -> Dict:
+    solute = strip_tags(solute.strip().rstrip(",."))
+    solvent = _clean_solvent_tail(solvent)
+    return {
+        "action": "dispense",
+        "solute": solute,
+        "solvent": solvent,
+        "concentration": float(conc),
+        "concentration_units": "M",
+        "volume": float(vol),
+        "volume_units": vol_unit,
+        "identity": solute,
+        "reagents": [solute, solvent],
+    }
 
-def validate_file(path: str) -> dict:
-    """
-    Load a .txt (key: value lines) or .json file and validate.
-    Returns normalized, validated dict.
-    Raises ValueError with a human-friendly message on failure.
-    """
-    with open(path, "r", encoding="utf-8") as f:
-        raw = f.read()
+def parse_solution_prep(step_text: str) -> Optional[Dict]:
+    s = step_text.strip().rstrip(".")
 
-    # Try JSON first; otherwise treat as plain text
-    try:
-        loaded = json.loads(raw)
-    except json.JSONDecodeError:
-        loaded = raw  # plain text
+    patterns = [
+        # 1) Prepare a 0.1 M solution of X by dissolving Y in 100 mL of solvent
+        re.compile(
+            rf"""prepare\s+a\s+([\d\.]+)\s*({_CONC_UNIT_RX})\s+solution\s+of\s+.+?\s+
+                by\s+dissolving\s+(?:an\s+appropriate\s+amount\s+of\s+)?
+                (?P<solute>.+?)\s+in\s+(?P<vol>[\d\.]+)\s*(?P<vunit>mL|ml|l|L)\s+of\s+(?P<solvent>.+?)\s*(?:in\b|$)""",
+            re.I | re.X,
+        ),
+        # 2) Prepare a 0.1 M X solution by dissolving Y in 100 mL of solvent
+        re.compile(
+            rf"""prepare\s+a\s+([\d\.]+)\s*({_CONC_UNIT_RX})\s+(?P<xname>.+?)\s+solution\s+
+                by\s+dissolving\s+(?P<solute>.+?)\s+in\s+(?P<vol>[\d\.]+)\s*(?P<vunit>mL|ml|l|L)\s+of\s+(?P<solvent>.+?)\s*(?:in\b|$)""",
+            re.I | re.X,
+        ),
+        # 3) Dissolve Y in 100 mL of solvent to make a 0.1 M X solution
+        re.compile(
+            rf"""dissolv\w*\s+(?P<solute>.+?)\s+in\s+(?P<vol>[\d\.]+)\s*(?P<vunit>mL|ml|l|L)\s+of\s+(?P<solvent>.+?)\s+
+                to\s+(?:make|form|yield|obtain)\s+a\s+([\d\.]+)\s*({_CONC_UNIT_RX})\s+.+?\s+solution""",
+            re.I | re.X,
+        ),
+        # 4) Add/charge Y to 100 mL of solvent to obtain a 0.1 M X solution
+        re.compile(
+            rf"""(?:add|charge)\s+(?P<solute>.+?)\s+to\s+(?P<vol>[\d\.]+)\s*(?P<vunit>mL|ml|l|L)\s+of\s+(?P<solvent>.+?)\s+
+                to\s+(?:make|form|yield|obtain)\s+a\s+([\d\.]+)\s*({_CONC_UNIT_RX})\s+.+?\s+solution""",
+            re.I | re.X,
+        ),
+        # 5) Make a 0.1 M X solution by dissolving Y in 100 mL solvent
+        re.compile(
+            rf"""(?:make|formulate|compose)\s+a\s+([\d\.]+)\s*({_CONC_UNIT_RX})\s+.+?\s+solution\s+
+                by\s+dissolving\s+(?P<solute>.+?)\s+in\s+(?P<vol>[\d\.]+)\s*(?P<vunit>mL|ml|l|L)\s+of\s+(?P<solvent>.+?)\b""",
+            re.I | re.X,
+        ),
+        # 6) Make X (0.1 M) by dissolving Y in 100 mL of solvent
+        re.compile(
+            rf"""(?:make|formulate|compose)\s+.+?\(\s*([\d\.]+)\s*({_CONC_UNIT_RX})\s*\)\s+
+                by\s+dissolving\s+(?P<solute>.+?)\s+in\s+(?P<vol>[\d\.]+)\s*(?P<vunit>mL|ml|l|L)\s+of\s+(?P<solvent>.+?)\b""",
+            re.I | re.X,
+        ),
+    ]
 
-    return validate_step(loaded)
+    for rx in patterns:
+        m = rx.search(s)
+        if m:
+            conc = float(m.group(1))
+            solute = (m.groupdict().get("solute") or "").strip()
+            vol = float(m.group("vol"))
+            vunit = m.group("vunit")
+            solvent = m.group("solvent")
+            return _mk_dispense(solute, solvent, conc, vol, vunit)
+
+    return None
+
+# ---------------- Record construction ----------------
+
+def build_record_from_step(step_text: str) -> Dict:
+    # 1) Try solution-prep → dispense
+    sol_prep = parse_solution_prep(step_text)
+    if sol_prep:
+        sol_prep.setdefault("temperature", 0.0)
+        sol_prep.setdefault("duration", 0.0)
+        sol_prep["raw"] = step_text.strip()
+        return sol_prep
+
+    # 2) Fallback: infer action + minimal fields
+    action = get_action(step_text)
+    return {
+        "action": action,
+        "identity": "",
+        "reagents": [],
+        "solvent": "",
+        "amount": 0,
+        "units": "",
+        "temperature": _extract_temperature_c(step_text),
+        "duration": _extract_duration_minutes(step_text),
+        "raw": step_text.strip(),
+    }
+
+# ---------------- Markdown procedure extraction ----------------
+
+def parse_procedure_blocks(markdown_text: str) -> List[str]:
+    lines = markdown_text.splitlines()
+    in_proc = False
+    steps: List[str] = []
+    step_buf: List[str] = []
+    for line in lines:
+        if re.match(r"\s*3\.\s*\*\*Procedure\*\*:", line):
+            in_proc = True
+            continue
+        if in_proc:
+            if re.match(r"\s*\d+\.\s", line):
+                if step_buf:
+                    steps.append(" ".join(step_buf).strip())
+                    step_buf = []
+                step_buf.append(re.sub(r"^\s*\d+\.\s*", "", line).strip())
+            else:
+                step_buf.append(line.strip())
+    if step_buf:
+        steps.append(" ".join(step_buf).strip())
+    # Clean trailing tags
+    steps = [strip_tags(s) for s in steps if s.strip()]
+    return steps
+
+# ---------------- Public API ----------------
+
+def convert_text(text: str) -> List[Dict]:
+    steps = parse_procedure_blocks(text)
+    return [build_record_from_step(s) for s in steps]
+
+# ---------------- CLI ----------------
+
+def main(argv: List[str]) -> int:
+    if len(argv) < 3:
+        print("Usage: python converter.py <input_txt> <output_json>")
+        return 2
+    in_path = pathlib.Path(argv[1])
+    out_path = pathlib.Path(argv[2])
+    text = in_path.read_text(encoding="utf-8")
+    records = convert_text(text)
+    out_path.write_text(json.dumps(records, indent=2), encoding="utf-8")
+    print(f"Wrote {len(records)} records to {out_path}")
+    return 0
+
+if __name__ == "__main__":
+    raise SystemExit(main(sys.argv))
