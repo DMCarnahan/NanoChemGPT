@@ -1,238 +1,300 @@
 """
-converter.py – Convert NanoChemGPT answers into structured JSON
-----------------------------------------------------------------
+step_validator.py — Parse, normalize, and validate lab step data from .txt or dict.
 
-This version:
-  • Normalises section headings (“Hardware”, “Materials”, “Procedure”, etc.).
-  • Cleans bullets and trailing [CTX]/[GEN]/[n] tags from hardware/materials.
-  • Enriches materials (stub implementation).
-  • Calls an OpenAI function (‘add_step’) to extract atomic steps with
-    explicit fields (action, time, temperature, vessel, reagents, solvents).
-  • Maps each vessel description to an identifier (V1, V2, …) based on the
-    order of the hardware list; this makes the JSON robot-friendly.
+Features:
+- Parses "Key: value" .txt files (case-insensitive keys).
+- Remembers line numbers to report helpful validation errors.
+- Normalizes units (ug→µg, ul→µL, umol→µmol, ml→mL, etc.).
+- Normalizes vessel aliases (rbf/r b f→round-bottom flask, erlenmeyer→flask, etc.).
+- Coerces numeric strings for amount/temperature/duration.
+- Cleans reagent lists (trim, remove empties, dedupe preserving order).
+- Validates against a strict JSON Schema (pairing rules, enums, ranges, regex).
+
+Usage:
+    from step_validator import validate_step, validate_file, ValidationError
+
+    # From plain text:
+    txt = "Action: Heat\nIdentity: Anneal Step\nReagents: NaCl, H2O\nVessel: rbf\n"
+    data = validate_step(txt)  # returns normalized dict
+
+    # From dict:
+    data = validate_step({"action": "mix", "identity": "prep", "reagents": ["NaCl"], "vessel": "beaker"})
+
+    # From file (auto-detect .json vs plain text):
+    data = validate_file("step.txt")
+
+    # Error handling:
+    try:
+        data = validate_step("Action: Mix\nVessel: Beaker 250 mL")
+    except ValueError as e:
+        print("Nice error:", e)
+
 """
 
-from __future__ import annotations
-import json
-import os
 import re
-import textwrap
-from typing import Any, Dict, List
-import itertools, math
+import json
+from jsonschema import validate as _js_validate, ValidationError
 
-try:
-    import openai
-except ImportError:
-    openai = None  # allow offline use
-
-_CLIENT = None
-if openai and os.getenv("OPENAI_API_KEY"):
-    _CLIENT = openai.OpenAI(api_key=os.environ["OPENAI_API_KEY"])
-
-# ---------------------------------------------------------------------------
-# 1. Regex helpers: strip bullets & tags, detect section headings
-# ---------------------------------------------------------------------------
-_HEADING = re.compile(
-    r"^\s*(?:\d+[\.\)]\s*)?(?:\*\*)?(?P<name>hardware(?:\s*&\s*glassware)?|glassware|materials|reagents|procedure|steps|method|title)(?:\*\*)?\s*:?\s*$",
-    re.I
-)
-_BULLET = re.compile(r"^\s*(?:[-*•–—]\s+|\d+[\.\)]\s+)")
-_TAGS   = re.compile(r"\s*\[(?:CTX|DB|PARSED|GEN|\d+)]\s*[.。;:,-]?\s*$")
-
-def _clean_line(line: str) -> str:
-    """Remove leading bullet/number and trailing provenance tags."""
-    return _TAGS.sub("", _BULLET.sub("", line)).strip()
-
-# ---------------------------------------------------------------------------
-# 2. Split answer into named sections
-# ---------------------------------------------------------------------------
-def _split_sections(raw: str) -> Dict[str, List[str]]:
-    sections: Dict[str, List[str]] = {}
-    current: str | None = None
-    for line in raw.splitlines():
-        m = _HEADING.match(line)
-        if m:
-            current = m.group("name").lower()
-            sections[current] = []
-            continue
-        if current:
-            stripped = line.strip()
-            if stripped:
-                sections[current].append(stripped)
-    return sections
-
-# ---------------------------------------------------------------------------
-# 3. Enrich materials (placeholder)
-# ---------------------------------------------------------------------------
-def enrich_materials(lines: List[str]) -> List[Dict[str, str]]:
-    out: List[Dict[str, str]] = []
-    for ln in lines:
-        if " as " in ln:
-            name, notes = ln.split(" as ", 1)
-            out.append({"name": name.strip(), "notes": _clean_line(notes)})
-        else:
-            out.append({"name": ln})
-    return out
-
-# ---------------------------------------------------------------------------
-# 4. Function-calling schema for atomic steps
-# ---------------------------------------------------------------------------
-_FN_SCHEMA = {
-    "name": "add_step",
-    "description": (
-        "Add one atomic operation in a chemical synthesis step. "
-        "For each call, extract explicit fields when present: "
-        "action (a verb), time (duration), temperature, vessel, reagents, solvents, and optional notes. "
-        "Omit any field that is not present."
-    ),
-    "parameters": {
-        "type": "object",
-        "properties": {
-            "action":      {"type": "string", "description": "verb for the step"},
-            "time":        {"type": "string", "description": "duration (e.g. '1 h')"},
-            "temperature": {"type": "string", "description": "temperature (e.g. '70 °C')"},
-            "vessel":      {"type": "string", "description": "reaction vessel (e.g. '250 mL beaker')"},
-            "reagents":    {"type": "array", "items": {"type": "string"}},
-            "solvents":    {"type": "array", "items": {"type": "string"}},
-            "notes":       {"type": "string", "description": "additional information"},
+# -------------------------
+# 1) JSON Schema
+# -------------------------
+json_schema_regex = {
+    "type": "object",
+    "additionalProperties": False,
+    "properties": {
+        "action": {"type": "string", "minLength": 1},
+        "identity": {"type": "string", "minLength": 1},
+        "reagents": {
+            "type": "array",
+            "items": {"type": "string", "minLength": 1},
+            "minItems": 1,
+            "uniqueItems": True
         },
-        "required": ["action"]
+        "solvent": {"type": "string", "minLength": 1},
+        "amount": {"type": "number", "exclusiveMinimum": 0},
+        "units": {
+            "type": "string",
+            "enum": [
+                "g","mg","ug","µg","kg",
+                "mL","L","uL","µL",
+                "mol","mmol","umol","µmol"
+            ]
+        },
+        "temperature": {"type": "number", "minimum": -273.15, "maximum": 1500},
+        "duration": {"type": "number", "exclusiveMinimum": 0},
+        "vessel": {
+            "type": "string",
+            "minLength": 1,
+            "pattern": "^(beaker|flask|round-bottom flask|vial|dewar|schlenk flask)$"
+        }
     },
+    "required": ["action", "identity"],
+    "allOf": [
+        {"if": {"required": ["amount"]}, "then": {"required": ["units"]}},
+        {"if": {"required": ["units"]}, "then": {"required": ["amount"]}},
+        {"if": {"required": ["temperature"]}, "then": {"required": ["duration"]}},
+        {"if": {"required": ["duration"]}, "then": {"required": ["temperature"]}}
+    ]
 }
 
-_SYSTEM_PROMPT = textwrap.dedent("""
-  You are a chemistry protocol parser.
-  For EACH individual sentence below call *add_step* exactly once.
-  Do NOT combine multiple operations in one call.
-  ALWAYS extract these fields:
-    • action  • time  • temperature  • vessel  • reagents  • solvents  
-  You must extract the 'action' field (a verb) in every call, in an atomic form.
-  For example, instead of "prepare", use "dispense", "mix", "heat", "stir", "filter", "wash", "dry", "collect", etc.
-""").strip()
-
-def gpt_steps(paragraphs: List[str],
-              model: str = "gpt-4o-mini",
-              batch: int = 15) -> List[Dict[str, Any]]:
+# -------------------------
+# 2) Normalizer
+# -------------------------
+def normalize_for_validation(data: dict) -> dict:
     """
-    Call GPT in small batches (<=15 sentences) so long paragraphs don’t truncate.
-    Returns a list of atomic-step dictionaries.
+    Normalize JSON data before schema validation.
+    - Strips whitespace from all strings (recursively)
+    - Lowercases 'vessel' and 'units'
+    - Canonicalizes units (ug/μg/mcg→µg, ul/μl→µL, umol/μmol→µmol, ml→mL, etc.)
+    - Numeric coercion for amount/temperature/duration if strings (supports sci. notation)
+    - Normalizes vessel aliases (rbf / r b f → round-bottom flask, round bottom → round-bottom, schlenk → schlenk flask, erlenmeyer → flask)
+    - Cleans reagent lists: trims, removes empties, deduplicates (preserving order)
     """
-    if not _CLIENT:
-        return []
-
-    # 1. split every paragraph into sentences → queue
-    sents: List[str] = []
-    for p in paragraphs:
-        for s in re.split(r"[.;](?=\s|$)", p):
-            s = s.strip()
-            if s:
-                sents.append(s)
-
-    steps: List[Dict[str, Any]] = []
-    # 2. process in mini-batches (to stay within context)
-    for i in range(0, len(sents), batch):
-        chunk = sents[i : i + batch]
-        messages = [{"role": "system", "content": _SYSTEM_PROMPT}]
-        for s in chunk:
-            messages.append({"role": "user", "content": s})
-
-        resp = _CLIENT.chat.completions.create(
-            model=model,
-            temperature=0,
-            tools=[{"type": "function", "function": _FN_SCHEMA}],
-            tool_choice={"type": "function", "function": {"name": "add_step"}},
-            messages=messages,
-        )
-        for ch in resp.choices:
-            if ch.message.role == "tool":           # new style
-                steps.append(json.loads(ch.message.content))
-            elif ch.message.tool_calls:             # legacy
-                for tc in ch.message.tool_calls:
-                    steps.append(json.loads(tc.function.arguments))
-
-    return steps
-
-# ---------------------------------------------------------------------------
-# 5. Vessel mapping: assign V1, V2,… based on hardware list
-# ---------------------------------------------------------------------------
-def _vessel_map(hardware: List[str]) -> Dict[str, str]:
-    return {hw.lower(): f"V{i+1}" for i, hw in enumerate(hardware)}
-
-def _assign_vessels(steps: List[Dict[str, Any]], vmap: Dict[str, str]) -> List[Dict[str, Any]]:
-    """Replace vessel descriptions with IDs (e.g. 'V1', 'V2')."""
-    for s in steps:
-        vessel = s.get("vessel")
-        if vessel:
-            low = vessel.lower()
-            for key, vid in vmap.items():
-                if key in low:
-                    s["vessel"] = vid
-                    break
-    return steps
-
-# ---------------------------------------------------------------------------
-# 6. Public API: raw text → structured JSON
-# ---------------------------------------------------------------------------
-class ParserError(RuntimeError): ...
-
-def convert_to_json(raw: str, *, robot: bool = False) -> Dict[str, Any]:
-    if not raw or not raw.strip():
-        raise ParserError("Input text is empty.")
-    raw = textwrap.dedent(raw).strip()
-
-    sections = _split_sections(raw)
-
-    # Structured steps (call model if requested)
-    procedure_structured: List[Dict[str, Any]] = []
-    if sections.get("procedure"):
-        if robot:
-            paragraphs = [ln for ln in sections["procedure"] if ln.strip()]
-            try:
-                steps = gpt_steps(paragraphs, model="gpt-4o-mini")
-                # Map vessel names to IDs and drop empty fields
-                vmap = _vessel_map(sections.get("hardware", []))
-                steps = _assign_vessels(steps, vmap)
-                procedure_structured = steps
-            except Exception as exc:
-                procedure_structured = [{"action": "error", "notes": f"extract: {exc}"}]
-        else:
-            procedure_structured = [{"action": "step", "notes": ln} for ln in sections["procedure"]]
-
-    # Materials enrichment
-    materials_lines = sections.get("materials", [])
-    try:
-        materials_struct = enrich_materials([_clean_line(ln) for ln in materials_lines])
-    except Exception as exc:
-        materials_struct = [{"name": ln, "notes": f"enrich failed: {exc}"} for ln in materials_lines]
-
-    # Title fallback
-    title = sections.get("title", ["SynthesisProtocol"])
-    title = title[0] if title else "SynthesisProtocol"
-
-    return {
-        "title": title,
-        "hardware": sections.get("hardware", []),
-        "materials": materials_lines,
-        "materials_enriched": materials_struct,
-        "procedure": sections.get("procedure", []),
-        "procedure_structured": procedure_structured,
+    unit_map = {
+        "ug": "µg", "μg": "µg", "mcg": "µg", "microgram": "µg", "micrograms": "µg",
+        "ul": "µL", "μl": "µL", "microliter": "µL", "microliters": "µL",
+        "umol": "µmol", "μmol": "µmol", "micromole": "µmol", "micromoles": "µmol",
+        "milliliter": "mL", "milliliters": "mL", "ml": "mL",
+        "liter": "L", "liters": "L", "lt": "L",
+        "gram": "g", "grams": "g",
+        "milligram": "mg", "milligrams": "mg",
+        "kilogram": "kg", "kilograms": "kg",
+        "mole": "mol", "moles": "mol",
+        "millimole": "mmol", "millimoles": "mmol",
+        "molarity": "M", "molarities": "M",
+        "millimolar": "mM", "millimolars": "mM",
+        "percent": "%", "percentage": "%",
+        "ppm": "ppm", "ppb": "ppb", "ppt": "ppt",
+        "pH": "pH", "ph": "pH", "ph value": "pH"
     }
+    vessel_map = {
+        "rbf": "round-bottom flask",
+        "round bottom flask": "round-bottom flask",
+        "round‐bottom flask": "round-bottom flask",
+        "round – bottom flask": "round-bottom flask",
+        "erlenmeyer": "flask",
+        "erlenmeyer flask": "flask",
+        "schlenk": "schlenk flask",
+        "schlenk tube": "schlenk flask",
+        "rb flask": "round-bottom flask"
+    }
+    number_keys = {"amount", "temperature", "duration"}
 
-# ---------------------------------------------------------------------------
-# 7. Stand-alone CLI use
-# ---------------------------------------------------------------------------
-if __name__ == "__main__":
-    import argparse
-    import pathlib
-    ap = argparse.ArgumentParser(description="Convert answer text to JSON.")
-    ap.add_argument("file", help="Path to text file containing NanoChemGPT answer")
-    ap.add_argument("--robot", action="store_true", help="Use model to extract atomic steps")
-    ns = ap.parse_args()
-    text = pathlib.Path(ns.file).read_text(encoding="utf-8")
-    print(
-        json.dumps(
-            convert_to_json(text, robot=ns.robot),
-            indent=2,
-            ensure_ascii=False,
-        )
-    )
+    def coerce_number(val):
+        if isinstance(val, (int, float)):
+            return val
+        if isinstance(val, str):
+            s = val.strip().replace(",", "")
+            if re.fullmatch(r"[+-]?(\d+(\.\d*)?|\.\d+)([eE][+-]?\d+)?", s):
+                num = float(s)
+                return int(num) if num.is_integer() else num
+        return val
+
+    def dedupe_preserve_order(seq):
+        seen, out = set(), []
+        for x in seq:
+            if x not in seen:
+                seen.add(x)
+                out.append(x)
+        return out
+
+    def normalize_value(key, value):
+        if isinstance(value, dict):
+            return {k: normalize_value(k, v) for k, v in value.items()}
+        if isinstance(value, list):
+            norm_list = [normalize_value(key, v) for v in value]
+            if key == "reagents":
+                norm_list = [v for v in norm_list if isinstance(v, str) and v.strip() != ""]
+                norm_list = dedupe_preserve_order(norm_list)
+            return norm_list
+        if isinstance(value, str):
+            s = value.strip()
+            if key in ("vessel", "units"):
+                s = s.lower()
+            if key == "units":
+                s = unit_map.get(s, s)
+            if key == "vessel":
+                s = s.replace("–", "-").replace("—", "-").replace("‐", "-")
+                s = re.sub(r"\s+", " ", s)
+                compact = s.replace(" ", "")
+                s = vessel_map.get(s, vessel_map.get(compact, s))
+            if key in number_keys:
+                return coerce_number(s)
+            return s
+        if key in number_keys:
+            return coerce_number(value)
+        return value
+
+    return {k: normalize_value(k, v) for k, v in data.items()}
+
+# -------------------------
+# 3) Text Parser (line-aware)
+# -------------------------
+def parse_step_text_verbose(txt: str):
+    """
+    Parse a plain-text step with line numbers retained for better errors.
+    Accepts lines like:
+        Action: Heat
+        Identity: Anneal Step
+        Reagents: NaCl, H2O
+        Solvent: water
+        Amount: 250
+        Units: ug
+        Temperature: 80
+        Duration: 30
+        Vessel: R B F
+
+    Unknown keys are ignored by default.
+    """
+    key_map = {
+        "action": "action",
+        "identity": "identity",
+        "reagents": "reagents",
+        "solvent": "solvent",
+        "amount": "amount",
+        "units": "units",
+        "temperature": "temperature",
+        "duration": "duration",
+        "vessel": "vessel"
+    }
+    out, line_map = {}, {}
+    for lineno, line in enumerate(txt.splitlines(), start=1):
+        if ":" not in line:
+            continue
+        k, v = line.split(":", 1)
+        k = k.strip().lower()
+        v = v.strip()
+        if not k:
+            continue
+        if k in key_map:
+            ck = key_map[k]
+            line_map[ck] = lineno
+            if ck == "reagents":
+                items = [s.strip() for s in re.split(r"[;,]", v)]
+                out[ck] = items
+            else:
+                out[ck] = v
+    return out, line_map
+
+# -------------------------
+# 4) Error pretty-printer
+# -------------------------
+def pretty_validation_error(err: ValidationError, line_map: dict) -> str:
+    # Create a path like reagents[1] or vessel, etc.
+    if err.path:
+        parts = []
+        for p in err.path:
+            if isinstance(p, int):
+                parts[-1] = f"{parts[-1]}[{p}]"
+            else:
+                parts.append(str(p))
+        inst_path = ".".join(parts)
+    else:
+        inst_path = "(root)"
+
+    # Attach line if we can
+    line_info = ""
+    top_key = err.path[0] if err.path else None
+    if isinstance(top_key, int):
+        top_key = None
+    if top_key in line_map:
+        line_info = f" (near line {line_map[top_key]})"
+
+    # Special-case required field errors
+    if err.validator == "required":
+        m = re.search(r"'(.+?)' is a required property", err.message)
+        if m:
+            missing_key = m.group(1)
+            hint_line = None
+            for anchor in ("action", "identity", "reagents", "solvent", "vessel"):
+                if anchor in line_map:
+                    hint_line = line_map[anchor]
+                    break
+            if hint_line:
+                return f"Missing required field '{missing_key}' around line {hint_line}."
+            return f"Missing required field '{missing_key}'."
+
+    return f"{err.message}{line_info} at {inst_path}."
+
+# -------------------------
+# 5) Public API
+# -------------------------
+def validate_step(obj) -> dict:
+    """
+    Accepts either:
+      - a dict matching the schema structure, or
+      - a text blob in the 'Key: value' format.
+
+    Returns the normalized, validated dict.
+    Raises ValueError with a human-friendly message on failure.
+    """
+    if isinstance(obj, str):
+        data, line_map = parse_step_text_verbose(obj)
+    elif isinstance(obj, dict):
+        data, line_map = obj, {}
+    else:
+        raise TypeError("validate_step expects dict or str")
+
+    norm = normalize_for_validation(data)
+    try:
+        _js_validate(instance=norm, schema=json_schema_regex)
+    except ValidationError as e:
+        raise ValueError(pretty_validation_error(e, line_map))
+    return norm
+
+def validate_file(path: str) -> dict:
+    """
+    Load a .txt (key: value lines) or .json file and validate.
+    Returns normalized, validated dict.
+    Raises ValueError with a human-friendly message on failure.
+    """
+    with open(path, "r", encoding="utf-8") as f:
+        raw = f.read()
+
+    # Try JSON first; otherwise treat as plain text
+    try:
+        loaded = json.loads(raw)
+    except json.JSONDecodeError:
+        loaded = raw  # plain text
+
+    return validate_step(loaded)

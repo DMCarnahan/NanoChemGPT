@@ -14,7 +14,7 @@ from bson import ObjectId
 
 # ───────────────────────────── Local modules ────────────────────────────── #
 import vector_store as vs
-from converter import convert_to_json, ParserError
+from converter import validate_step, validate_file  # line-aware, normalizing validator
 from mongo_client import get_db, ping as mongo_ping
 from dataset_searcher import load_table, DatasetSearcher
 from internet_search import search_papers            # OpenAlex helper
@@ -43,9 +43,9 @@ app.config["MAX_CONTENT_LENGTH"] = 100 * 1024 * 1024  # 100 MB
 # ─── Dataset searcher (local table) ─────────────────────────────────────── #
 _LOOKUP_FALLBACK = BASE_DIR / "database" / "tables" / "coremof.xlsx"
 LOOKUP_FILE = (
-    os.getenv("LOOKUP_FILE")          # newest env var
-    or os.getenv("LOOKUP_DIR")        # legacy name
-    or (_LOOKUP_FALLBACK if _LOOKUP_FALLBACK.exists() else "")  # else ""
+    os.getenv("LOOKUP_FILE")
+    or os.getenv("LOOKUP_DIR")
+    or (_LOOKUP_FALLBACK if _LOOKUP_FALLBACK.exists() else "")
 )
 
 _SEARCHER: DatasetSearcher | None = None
@@ -60,24 +60,13 @@ else:
     print("[dataset_search] no LOOKUP_FILE set – table searching disabled.")
 
 def basic_search(query: str, n: int = 6) -> list[dict]:
-    """
-    Combines (a) rows from the local dataset and (b) top-cited papers
-    from OpenAlex, returning a list[dict] suitable for the numbered
-    “REFERENCES” block in /search and /ask.
-    """
-    if not query.strip():
-        return []
-
-    # ---- hits ------------------------------------------------------ #
-
-def basic_search(query: str, n: int = 6) -> list[dict]:
     if not query.strip():
         return []
 
     # ── 1) LOCAL DATASET ──────────────────────────────────────────────
     local_hits: list[dict] | pd.DataFrame
     if _SEARCHER is None:
-        local_hits = []                    
+        local_hits = []
     else:
         try:
             local_hits = _SEARCHER.query(query, topk=n)
@@ -87,15 +76,12 @@ def basic_search(query: str, n: int = 6) -> list[dict]:
 
     local: list[dict] = []
 
-    # a) DataFrame → list[dict]
     if isinstance(local_hits, pd.DataFrame):
         for _, row in local_hits.fillna("").iterrows():
             d = row.to_dict()
             for k in ("title", "year", "url", "doi"):
                 d.setdefault(k, "")
             local.append(d)
-
-    # b) already list[dict]
     elif isinstance(local_hits, list):
         for d in local_hits:
             for k in ("title", "year", "url", "doi"):
@@ -110,7 +96,7 @@ def basic_search(query: str, n: int = 6) -> list[dict]:
         print("[basic_search] OpenAlex fetch failed:", e)
 
     # ── 3) MERGE + DEDUP ─────────────────────────────────────────────
-    seen = { (d.get("doi") or d.get("title", "")).lower() for d in local }
+    seen = {(d.get("doi") or d.get("title", "")).lower() for d in local}
     for w in web:
         key = (w.get("doi") or w.get("title", "")).lower()
         if key not in seen:
@@ -240,7 +226,6 @@ DB_CTX_LIMIT = int(os.getenv("DB_CTX_LIMIT", "3"))
 DB_CTX_MAX_CHARS = int(os.getenv("DB_CTX_MAX_CHARS", "1200"))
 
 def fetch_db_context(q: str, limit: int = DB_CTX_LIMIT) -> str:
-    """Return recent similar Q&A from Mongo (db.qa) as a compact text block."""
     try:
         db = get_db()
         try:
@@ -312,6 +297,7 @@ def require_admin(fn):
 def _admin_csp(resp):
     resp.headers["Content-Security-Policy"] = "default-src 'self'; connect-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:"
     return resp
+
 # ---------------- Initialize Datasets ----------------
 @app.post("/admin/upload_builtin")
 @require_admin
@@ -324,13 +310,11 @@ def admin_upload_builtin():
     raw_path = BUILTIN_DIR / fname
     raw_path.parent.mkdir(parents=True, exist_ok=True)
 
-    # Save original upload
     f.save(raw_path)
 
-    # If it’s .json.xz → decompress alongside to .json
     out_path = raw_path
     if fname.lower().endswith(".json.xz"):
-        out_path = BUILTIN_DIR / fname[:-3]  # strip ".xz" => ".json"
+        out_path = BUILTIN_DIR / fname[:-3]
         with lzma.open(raw_path, "rb") as xzf, open(out_path, "wb") as out:
             out.write(xzf.read())
 
@@ -422,7 +406,6 @@ _CIT_FOOTNOTE_RX = re.compile(r"\[\^(?P<num>\d{1,4})\]")
 _TAGS = ("CTX", "PARSED", "DB", "GEN")
 
 def _extract_used_markers(*texts: str) -> dict:
-    """Extract used reference numbers and tag counts from the given texts."""
     seen = set()
     tag_counts = {t: 0 for t in _TAGS}
     for t in texts:
@@ -445,7 +428,6 @@ def _extract_used_markers(*texts: str) -> dict:
 @app.post("/ask")
 def ask():
     def split_reasoning(raw: str) -> tuple[str, str]:
-        """Extract rationale robustly from fences or headings."""
         if not raw:
             return "", ""
         text = raw.strip()
@@ -477,11 +459,10 @@ def ask():
 
         vs_ctx = ""
         try:
-            vs_ctx = vs.search(q, k=8) or ""   # was k=4
+            vs_ctx = vs.search(q, k=8) or ""
         except Exception as e:
             print("[/ask] vs.search error:", e)
             vs_ctx = ""
-
 
         db_ctx = fetch_db_context(q) if USE_DB_CONTEXT else ""
         ctx_parsed = fetch_parsed_context(q) if USE_DB_CONTEXT else ""
@@ -521,7 +502,7 @@ def ask():
             " - Prefer CONTEXT over general knowledge when relevant.\n"
             " - If you use any content from CONTEXT, append [CTX] on that line.\n"
             " - When you pull a fact from any numbered REFERENCE, put its number in "
-            "   square brackets right after the sentence (e.g. “hydrothermal at 200 °C [3]”).\n"   # ← NEW
+            "   square brackets right after the sentence (e.g. “hydrothermal at 200 °C [3]”).\n"
             " - If CONTEXT is insufficient, say so explicitly before generalizing.\n"
             "Return two blocks exactly in this order:\n"
             "## SynthesisProtocol\n"
@@ -573,7 +554,7 @@ def ask():
 
         try:
             used_summary = _extract_used_markers(answer or "", rationale or "")
-            if not used_summary.get("refs"):                          # no [n] markers found
+            if not used_summary.get("refs"):
                 try:
                     revise_refs = client.chat.completions.create(
                         model="gpt-4o-mini",
@@ -655,25 +636,31 @@ def ask():
 # ---------------- Parse & Save ----------------
 @app.post("/parse")
 def parse_route():
+    """
+    New parser endpoint using the validator/normalizer in converter.py.
+
+    Request JSON:
+      { "text": "<dict or Key: value lines>" }
+
+    Response JSON:
+      { "ok": true, "data": <normalized & validated dict> }
+    """
     try:
         payload = request.get_json(silent=True) or {}
         text = (payload.get("text") or "").strip()
-        robot = bool(payload.get("robot")) 
-        question = (payload.get("question") or "").strip()
-        print(f"[/parse] robot={robot} len(text)={len(text)}")
-
         if not text:
             return jsonify({"error": "JSON must contain non-empty 'text'"}), 400
 
-        out = convert_to_json(text, robot=True)
-        return jsonify(out)
+        # validate_step accepts either dict-like JSON (string) or Key: value text.
+        data = validate_step(text)
+        return jsonify({"ok": True, "data": data})
 
-    except ParserError as pe:
-        print("[/parse] ParserError:", pe)
-        return jsonify({"error": str(pe)}), 422
+    except ValueError as ve:
+        # Raised by validate_step with line-aware messages
+        return jsonify({"ok": False, "error": str(ve)}), 422
     except Exception as e:
         traceback.print_exc()
-        return jsonify({"error": f"parse failed: {e}"}), 500
+        return jsonify({"ok": False, "error": f"parse failed: {e}"}), 500
 
 @app.post("/save_txt")
 def save_txt():
