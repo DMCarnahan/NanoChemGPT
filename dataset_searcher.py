@@ -15,13 +15,24 @@ SUPPORTED_EXTS = {".csv", ".tsv", ".xlsx", ".parquet", ".json", ".jsonl"}
 
 def _is_supported(path: str) -> bool:
     p = Path(path)
-    return p.suffix.lower() in SUPPORTED_EXTS or "".join(p.suffixes[-2:]).lower() in (".json.gz",".jsonl.gz",".csv.gz",".tsv.gz",".json.xz",".jsonl.xz",".csv.xz",".tsv.xz")
+    suf = p.suffix.lower()
+    last2 = "".join(p.suffixes[-2:]).lower()
+    if last2 in (".json.gz",".jsonl.gz",".csv.gz",".tsv.gz",".json.xz",".jsonl.xz",".csv.xz",".tsv.xz"):
+        return True
+    return suf in SUPPORTED_EXTS
 
-def load_union_from_dir(root: str | Path, pattern: str = "**/*.*", max_files: int = 500) -> pd.DataFrame:
+def load_union_from_dir(root: str | Path, *, max_files: int = 500) -> pd.DataFrame:
     root = str(root)
-    paths = [p for p in glob.glob(os.path.join(root, pattern), recursive=True) if _is_supported(p)]
+    if not os.path.isdir(root):
+        raise FileNotFoundError(f"Lookup directory does not exist: {root}")
+    candidates = [p for p in glob.glob(os.path.join(root, "**", "*"), recursive=True)
+                  if os.path.isfile(p)]
+    paths = [p for p in candidates if _is_supported(p)]
+
     if not paths:
-        raise FileNotFoundError(f"No supported files under {root!r} with pattern {pattern!r}")
+        print(f"[dataset_search] no supported files under {root}")
+        return pd.DataFrame()
+
     if len(paths) > max_files:
         paths = paths[:max_files]
 
@@ -32,29 +43,35 @@ def load_union_from_dir(root: str | Path, pattern: str = "**/*.*", max_files: in
             df["__source__"] = os.path.relpath(p, root)
             frames.append(df)
         except Exception as e:
-            # Skip unreadable files but keep going
             print(f"[dataset_search] skip {p}: {e}")
-    if not frames:
-        raise RuntimeError("No files successfully loaded for union.")
-    # Align columns
-    df = pd.concat(frames, ignore_index=True, sort=False)
-    return df
+            continue
 
-# --- env-driven convenience loader ---
+    if not frames:
+        return pd.DataFrame()
+
+    return pd.concat(frames, ignore_index=True, sort=False)
+
 def get_env_searcher():
-    path = os.getenv("LOOKUP_FILE") or os.getenv("LOOKUP_TABLE")
+    path  = os.getenv("LOOKUP_FILE") or os.getenv("LOOKUP_TABLE")
     droot = os.getenv("LOOKUP_DIR")
-    if droot:
-        pattern = os.getenv("LOOKUP_GLOB", "**/*.*")
-        max_files = int(os.getenv("LOOKUP_MAX_FILES", "500"))
-        df = load_union_from_dir(droot, pattern=pattern, max_files=max_files)
-    elif path:
-        df = load_table(path)
-    else:
+    try:
+        if droot:
+            max_files = int(os.getenv("LOOKUP_MAX_FILES", "500"))
+            df = load_union_from_dir(droot, max_files=max_files)
+        elif path:
+            df = load_table(path)
+        else:
+            return None
+    except Exception as e:
+        print("[dataset_search] failed to init lookup:", e)
+        return None
+
+    if df is None or df.empty:
         return None
 
     txt_cols = [c.strip() for c in os.getenv("LOOKUP_TEXT_COLS","").split(",") if c.strip()] or None
     return DatasetSearcher(df, text_cols=txt_cols)
+
 
 # ---------------- I/O helpers ----------------
 def _normalize_records(obj):
