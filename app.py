@@ -15,23 +15,34 @@ from flask_wtf.csrf import CSRFProtect, generate_csrf
 import vector_store as vs
 from converter import validate_step, validate_file  # line-aware, normalizing validator
 from mongo_client import get_db, ping as mongo_ping
-from dataset_searcher import load_table, DatasetSearcher
 from internet_search import search_papers            # OpenAlex helper
-from dataset_searcher import get_env_searcher
-# ─────────────────────────────────────────────────────────────────────────── #
+# ───────────────────────────── DuckDB init ────────────────────────────── #
+try:
+    parq_glob = os.getenv("LOOKUP_PARQUET_GLOB")            
+    db_path   = os.getenv("LOOKUP_DUCKDB_PATH")             
+    tbl       = os.getenv("LOOKUP_DUCKDB_TABLE", "reactions")
+    if db_path and parq_glob and not os.path.exists(db_path):
+        import duckdb, pathlib
+        pathlib.Path(db_path).parent.mkdir(parents=True, exist_ok=True)
+        con = duckdb.connect(db_path)
+        con.execute(f"CREATE TABLE {tbl} AS SELECT * FROM read_parquet('{parq_glob}', hive_partitioning=1)")
+        con.execute("CHECKPOINT")
+        con.close()
+        app.logger.info("[duckdb-init] created %s from %s into table %s", db_path, parq_glob, tbl)
+except Exception as e:
+    app.logger.warning("[duckdb-init] build skipped/failed: %s", e)
 
+from DuckDB.duck_searcher import DuckSearcher, get_duck_searcher
 # ─── Directories & global paths ─────────────────────────────────────────── #
 
 BASE_DIR       = Path(__file__).resolve().parent
-DATA_DIR       = Path(os.getenv("DATA_DIR", BASE_DIR / "data"))
-BUILTIN_DIR    = Path(os.getenv("BUILTIN_DIR", "/mnt/data/builtin")).resolve()
 UPLOADS_DIR    = Path(os.getenv("UPLOADS_DIR", "/mnt/data/uploads")).resolve()
 VECTORSTORE_DIR= Path(os.getenv("VECTORSTORE_DIR", "/mnt/data/index")).resolve()
 MECH_KB_DIR    = Path(os.getenv("MECH_KB_DIR", BASE_DIR / "mechanistic_kb")).resolve()
 MECH_INDEX_DIR = (MECH_KB_DIR / "index").resolve()
 ADMIN_TOKEN    = os.getenv("ADMIN_TOKEN", os.getenv("ADMIN_UPLOAD_SECRET", ""))  # legacy key support
 
-for d in (BUILTIN_DIR, UPLOADS_DIR, VECTORSTORE_DIR, MECH_KB_DIR, MECH_INDEX_DIR):
+for d in (UPLOADS_DIR, VECTORSTORE_DIR, MECH_KB_DIR, MECH_INDEX_DIR):
     d.mkdir(parents=True, exist_ok=True)
 
 # ─── Flask app ───────────────────────────────────────────────────────────── #
@@ -46,52 +57,56 @@ app.config["JSON_AS_ASCII"] = False  # allow UTF-8 in JSON responses
 app.config['SECRET_KEY'] = os.getenv("FLASK_SECRET_KEY")
 app.config['WTF_CSRF_TIME_LIMIT'] = None
 
-# ─── Dataset searcher (local table; supports LOOKUP_DIR or LOOKUP_FILE) ─── #
-droot   = os.getenv("LOOKUP_DIR")
-lfpath  = os.getenv("LOOKUP_FILE")
-pattern = os.getenv("LOOKUP_GLOB", "**/*.*")
+# ─── Dataset searcher ───────────── #
+parq_glob = os.getenv("LOOKUP_PARQUET_GLOB")
+csv_glob  = os.getenv("LOOKUP_CSV_GLOB")
+db_path   = os.getenv("LOOKUP_DUCKDB_PATH")
+db_table  = os.getenv("LOOKUP_DUCKDB_TABLE")
 
-app.logger.info("[lookup-env] LOOKUP_DIR=%r LOOKUP_FILE=%r GLOB=%r", droot, lfpath, pattern)
-if droot:
-    app.logger.info("[lookup-env] dir exists? %s", os.path.isdir(droot))
-    try:
-        sample = glob.glob(os.path.join(droot, pattern), recursive=True)[:5]
-        app.logger.info("[lookup-env] sample files: %s", sample)
-    except Exception as e:
-        app.logger.warning("[lookup-env] glob failed: %s", e)
+app.logger.info("[lookup-env] PARQUET_GLOB=%r CSV_GLOB=%r DUCKDB_PATH=%r DUCKDB_TABLE=%r",
+                parq_glob, csv_glob, db_path, db_table)
 
-LOOKUP = get_env_searcher()
-if LOOKUP is not None:
-    try:
-        df = LOOKUP.df
-        app.logger.info("[dataset_search] loaded lookup (rows=%d, cols=%d) from env", len(df), len(df.columns))
-        try:
-            if "__source__" in df.columns:
-                sample_sources = df["__source__"].value_counts().head(5).to_dict()
-                app.logger.info("[dataset_search] top sources: %s", sample_sources)
-        except Exception:
-            pass
-    except Exception as e:
-        app.logger.warning("[dataset_search] loaded but cannot introspect: %s", e)
-else:
-    app.logger.warning("[dataset_search] no LOOKUP_FILE/LOOKUP_DIR set – table searching disabled.")
+try:
+    if parq_glob:
+        sample = glob.glob(parq_glob, recursive=True)[:5]
+        app.logger.info("[lookup-env] parquet sample: %s", sample)
+    if csv_glob:
+        sample = glob.glob(csv_glob, recursive=True)[:5]
+        app.logger.info("[lookup-env] csv sample: %s", sample)
+except Exception as e:
+    app.logger.warning("[lookup-env] glob preview failed: %s", e)
+
+LOOKUP = None
+try:
+    LOOKUP = get_duck_searcher()
+    if LOOKUP:
+        view = getattr(LOOKUP, "view", None)
+        con  = getattr(LOOKUP, "con", None)
+        if view and con:
+            try:
+                nrows = con.execute(f"SELECT COUNT(*) FROM {view}").fetchone()[0]
+                app.logger.info("[dataset_search] DuckDB view '%s' rows=%d", view, nrows)
+            except Exception as e:
+                app.logger.info("[dataset_search] DuckDB connected (count failed: %s)", e)
+except Exception as e:
+    app.logger.warning("[dataset_search] DuckDB init failed: %s", e)
+
+if LOOKUP is None:
+    app.logger.warning("[dataset_search] no lookup source configured.")
 
 def basic_search(query: str, n: int = 6) -> list[dict]:
     if not query.strip():
         return []
-
-    # ── 1) LOCAL DATASET (volume-backed via LOOKUP) ───────────────────
     local: list[dict] = []
     if LOOKUP is not None:
         try:
-            hits = LOOKUP.query(query, topk=n)  # returns DataFrame
-            if isinstance(hits, pd.DataFrame):
+            hits = LOOKUP.query(query, topk=n)
+            if isinstance(hits, pd.DataFrame) and not hits.empty:
                 for _, row in hits.fillna("").iterrows():
-                    # Try to map common columns into title/year/url/doi
-                    title = (row.get("title") or row.get("name") or row.get("__source__") or "table hit")
-                    year  = (row.get("year") or row.get("publication_year") or "")
-                    doi   = (row.get("doi") or "")
-                    url   = (row.get("url") or (f"https://doi.org/{doi}" if doi else ""))
+                    title = row.get("title") or row.get("name") or row.get("__source__") or "table hit"
+                    year  = row.get("year") or row.get("publication_year") or ""
+                    doi   = row.get("doi") or ""
+                    url   = row.get("url") or (f"https://doi.org/{doi}" if doi else "")
                     local.append({
                         "title": str(title)[:300],
                         "year":  str(year),
@@ -101,14 +116,14 @@ def basic_search(query: str, n: int = 6) -> list[dict]:
         except Exception as e:
             print("[basic_search] lookup query failed:", e)
 
-    # ── 2) OPENALEX (internet) ───────────────────────────────────────
+    # 2) OPENALEX (internet)
     web = []
     try:
         web = search_papers(query, n)
     except Exception as e:
         print("[basic_search] OpenAlex fetch failed:", e)
 
-    # ── 3) MERGE + DEDUP ─────────────────────────────────────────────
+    # 3) MERGE + DEDUP
     seen = {(d.get("doi") or d.get("title", "")).lower() for d in local}
     for w in web:
         key = (w.get("doi") or w.get("title", "")).lower()
@@ -599,7 +614,6 @@ def ask():
         # --- Prompt shaping by mode ---
         robot_rules = (
             "Return a discrete lab protocol with exact quantities on a small scale (~0.5 mmol Co):\n"
-            " - Choose ONE organic solvent and stick to it (oleylamine OR octadecene) based on CONTEXT; do not hedge.\n"
             " - Include specific masses (mg) or mmol for reagents; volumes (mL) for liquids.\n"
             " - Specify temperatures (°C), ramp rates (°C/min), hold times (min/h), and atmosphere (Ar/N2/vacuum).\n"
             " - Include workup and purification (quench, washing/centrifugation, drying) with volumes.\n"
