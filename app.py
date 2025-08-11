@@ -11,7 +11,7 @@ from openai import OpenAI
 from PyPDF2 import PdfReader
 from werkzeug.utils import secure_filename
 from bson import ObjectId
-
+from flask_wtf.csrf import CSRFProtect, generate_csrf
 # ───────────────────────────── Local modules ────────────────────────────── #
 import vector_store as vs
 from converter import validate_step, validate_file  # line-aware, normalizing validator
@@ -39,8 +39,11 @@ app = Flask(
     template_folder=str(BASE_DIR / "templates"),
     static_folder=str(BASE_DIR / "static"),
 )
+csrf = CSRFProtect(app)
 app.config["MAX_CONTENT_LENGTH"] = 100 * 1024 * 1024  # 100 MB
 app.config["JSON_AS_ASCII"] = False  # allow UTF-8 in JSON responses
+app.config['SECRET_KEY'] = os.getenv("FLASK_SECRET_KEY")
+app.config['WTF_CSRF_TIME_LIMIT'] = None
 
 # ─── Dataset searcher (local table) ─────────────────────────────────────── #
 _LOOKUP_FALLBACK = BASE_DIR / "database" / "tables" / "coremof.xlsx"
@@ -201,6 +204,10 @@ try:
         preload_builtin()
 except Exception as e:
     print("[preload] failed:", e)
+
+@app.context_processor
+def inject_csrf_token():
+    return dict(csrf_token=generate_csrf)
 
 @app.before_request
 def _log_path():

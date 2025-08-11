@@ -42,6 +42,7 @@
     "USER_AGENT":"${{shared.USER_AGENT}}",
     "MP_API_URL": "https://api.materialsproject.org/materials/summary",
     "MP_API_KEY": "${{shared.MP_API_KEY}}",
-    "ORD_API_URL": "https://api.open-reaction-database.org/records"
+    "ORD_API_URL": "https://api.open-reaction-database.org/records",
+    "FLASK_SECRET_KEY": "${{shared.FLASK_SECRET_KEY}}"
   }
 }
