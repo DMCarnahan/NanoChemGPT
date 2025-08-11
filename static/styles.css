@@ -297,6 +297,11 @@ input:focus, select:focus, textarea:focus {
   border: none;
   padding: 0;
 }
+.btn.tertiary.is-selected {
+  border-color: var(--brand);
+  color: var(--brand);
+  background: color-mix(in srgb, var(--brand), transparent 90%);
+}
 
 /* ----------- Tables ----------- */
 .table {

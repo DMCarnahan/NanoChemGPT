@@ -22,13 +22,17 @@
     const editedDownloadJson = $('editedDownloadJson');
 
     // Mode toggles
-    const reasoningBtn = $('reasoningBtn');
-    const robotBtn = $('robotBtn');
+    const reasoningBtn = document.getElementById('reasoningBtn');
+    const robotBtn     = document.getElementById('robotBtn');
     let mode = 'robot';
+
     function setMode(next) {
       mode = next;
-      robotBtn?.setAttribute('aria-checked', String(next === 'robot'));
-      reasoningBtn?.setAttribute('aria-checked', String(next === 'reasoning'));
+      const rb = robotBtn, rs = reasoningBtn;
+      rb?.setAttribute('aria-checked', String(next === 'robot'));
+      rs?.setAttribute('aria-checked', String(next === 'reasoning'));
+      rb?.classList.toggle('is-selected', next === 'robot');
+      rs?.classList.toggle('is-selected', next === 'reasoning');
     }
     robotBtn?.addEventListener('click', () => setMode('robot'));
     reasoningBtn?.addEventListener('click', () => setMode('reasoning'));
@@ -75,18 +79,46 @@
         askMsg.classList.add('hidden');
       }
     }
+
     function renderAnswer(payload) {
-      const { answer, rationale, refs } = payload || {};
-      if (answerPre) answerPre.textContent = (answer ?? '').trim() || '(no answer)';
+      const answerPre    = document.getElementById('answerPre');
+      const rationalePre = document.getElementById('rationalePre');
+      const refsSection  = document.getElementById('refsSection');
+      const refsList     = document.getElementById('refsList');
+
+      const { answer, rationale } = payload || {};
+      if (answerPre)    answerPre.textContent    = (answer ?? '').trim() || '(no answer)';
       if (rationalePre) rationalePre.textContent = (rationale ?? '').trim();
-      if (Array.isArray(refs) && refs.length) {
-        refsSection?.classList.remove('hidden');
-        if (refsList) refsList.innerHTML = refs.map(r => `<li>${(r.title || 'ref')}</li>`).join('');
-      } else {
-        refsSection?.classList.add('hidden');
-        if (refsList) refsList.innerHTML = '';
+
+      // Accept multiple possible keys for references
+      let refs = payload?.refs
+              || payload?.references
+              || payload?.sources
+              || payload?.citations
+              || [];
+
+      // Normalize refs into [{title, url}] if possible
+      if (typeof refs === 'string') {
+        refs = refs.split(/\n+/).map(s => ({title: s.trim()})).filter(x => x.title);
+      } else if (refs && typeof refs === 'object' && !Array.isArray(refs)) {
+        refs = Object.values(refs);
+      }
+      if (!Array.isArray(refs)) refs = [];
+
+      if (refs.length && refsSection && refsList) {
+        refsSection.classList.remove('hidden');
+        refsList.innerHTML = refs.map(r => {
+          const title = (r.title || r.name || r.url || r.doi || 'reference').toString();
+          const url   = r.url || (r.doi ? `https://doi.org/${r.doi}` : '');
+          return url ? `<li><a href="${url}" target="_blank" rel="noopener">${title}</a></li>`
+                    : `<li>${title}</li>`;
+        }).join('');
+      } else if (refsSection && refsList) {
+        refsSection.classList.add('hidden');
+        refsList.innerHTML = '';
       }
     }
+
     async function postJSON(url, payload) {
       const headers = { 'Content-Type': 'application/json' };
       const csrf = readCsrfToken();
@@ -128,21 +160,67 @@
 
     // Convert answer → JSON
     parseBtn?.addEventListener('click', async () => {
-      const answerText = (answerPre?.textContent || '').trim();
+      const answerText = (document.getElementById('answerPre')?.textContent || '').trim();
       if (!answerText || answerText === '(no answer)') {
         setStatus('Nothing to convert. Ask a question first.', true);
         return;
       }
       parseBtn.disabled = true; setStatus('Converting to JSON…');
+
+      async function postJSON(url, body) {
+        const headers = {'Content-Type':'application/json'};
+        const csrf = readCsrfToken(); if (csrf) headers['X-CSRFToken'] = csrf;
+        const res = await fetch(url, {method:'POST', headers, body: JSON.stringify(body)});
+        const text = await res.text();
+        let data; try { data = JSON.parse(text); } catch { data = {raw: text}; }
+        return {res, data};
+      }
+      async function postTextPlain(url, textBody) {
+        const headers = {'Content-Type':'text/plain'};
+        const csrf = readCsrfToken(); if (csrf) headers['X-CSRFToken'] = csrf;
+        const res = await fetch(url, {method:'POST', headers, body: textBody});
+        const text = await res.text();
+        let data; try { data = JSON.parse(text); } catch { data = {raw: text}; }
+        return {res, data};
+      }
+
+      const endpoints = ['/convert', '/parse', '/api/convert'];
+      const shapes = [
+        (t)=>({ text: t, mode }),
+        (t)=>({ answer: t, mode }),
+        (t)=>({ markdown: t, mode }),
+        (t)=>({ content: t, mode }),
+        (t)=>({ raw: t, mode }),
+      ];
+
       try {
-        const payload = { text: answerText, mode };
-        const r = await tryEndpoints(['/convert', '/parse', '/api/convert'], payload);
-        const pretty = JSON.stringify(r.data, null, 2);
-        if (jsonPre && jsonBlock) {
-          jsonBlock.classList.remove('hidden');
-          jsonPre.textContent = pretty;
+        let final = null;
+
+        // Try JSON shapes first
+        outer: for (const ep of endpoints) {
+          for (const shape of shapes) {
+            const {res, data} = await postJSON(ep, shape(answerText));
+            if (res.status !== 404 && res.status !== 405 && res.status !== 422) {
+              final = {res, data}; break outer;
+            }
+            // If 200 OK, also accept and break
+            if (res.ok) { final = {res, data}; break outer; }
+          }
         }
-        setStatus(r.ok ? 'Converted.' : `Convert error ${r.status}`);
+
+        // Fallback: text/plain to /convert
+        if (!final) {
+          const {res, data} = await postTextPlain('/convert', answerText);
+          if (res.ok || (res.status !== 404 && res.status !== 405)) final = {res, data};
+        }
+
+        if (!final) throw new Error('No compatible conversion endpoint/shape found');
+
+        const {res, data} = final;
+        const pretty = JSON.stringify(data, null, 2);
+        document.getElementById('jsonBlock')?.classList.remove('hidden');
+        const jp = document.getElementById('jsonPre'); if (jp) jp.textContent = pretty;
+        setStatus(res.ok ? 'Converted.' : `Convert error ${res.status}`);
       } catch (err) {
         console.error('[CONVERT answer]', err);
         setStatus('Convert failed. See console.');
