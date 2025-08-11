@@ -5,117 +5,228 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>NanoChemGPT</title>
   <meta name="csrf-token" content="{{ csrf_token() }}">
-
   <style>
     :root {
-      --bg: #0b0f14;
-      --bg-elev: #0f1520;
-      --card: #111827;
-      --card-2: #0e1726;
-      --text: #e5e7eb;
-      --text-muted: #a5b4cf;
-      --brand: #60a5fa;
-      --brand-strong: #3b82f6;
-      --ok: #34d399;
-      --warn: #f59e0b;
-      --err: #ef4444;
+      --bg: #0b0f14; --bg-elev: #0f1520;
+      --card: #111827; --card-2: #0e1726;
+      --text: #e5e7eb; --text-muted: #a5b4cf;
+      --brand: #60a5fa; --brand-strong:#3b82f6;
+      --ok:#34d399; --warn:#f59e0b; --err:#ef4444;
       --ring: 0 0 0 3px rgba(59,130,246,.35);
       --radius: 16px;
       --shadow-1: 0 1px 2px rgba(0,0,0,.25), 0 8px 24px rgba(0,0,0,.35);
       --shadow-2: 0 1px 2px rgba(0,0,0,.25), 0 12px 32px rgba(0,0,0,.45);
       --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
-      --sans: system-ui, -apple-system, Segoe UI, Roboto, Inter, Cantarell, "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+      --sans: system-ui, -apple-system, Segoe UI, Roboto, Inter, Cantarell, "Helvetica Neue", Arial, "Noto Sans";
     }
     @media (prefers-color-scheme: light) {
       :root {
-        --bg: #f7f9fc; --bg-elev: #ffffff; --card: #ffffff; --card-2:#f8fafc;
-        --text: #0b1220; --text-muted: #5b6b7d;
-        --brand: #2563eb; --brand-strong:#1d4ed8;
+        --bg:#f7f9fc; --bg-elev:#fff; --card:#fff; --card-2:#f8fafc;
+        --text:#0b1220; --text-muted:#5b6b7d;
+        --brand:#2563eb; --brand-strong:#1d4ed8;
         --shadow-1: 0 1px 2px rgba(0,0,0,.05), 0 8px 24px rgba(0,0,0,.08);
         --shadow-2: 0 1px 2px rgba(0,0,0,.06), 0 12px 32px rgba(0,0,0,.12);
       }
     }
-    * { box-sizing: border-box; }
-    html, body { height: 100%; }
-    body { margin: 0; background: linear-gradient(180deg, var(--bg), var(--bg-elev)); color: var(--text); font-family: var(--sans); line-height: 1.45; }
-    a { color: var(--brand); text-decoration: none; }
-    a:hover { text-decoration: underline; }
-    .container { width: min(1100px, 92vw); margin-inline: auto; }
-    .stack-2 > * + * { margin-top: .5rem; }
-    .stack-4 > * + * { margin-top: 1rem; }
-    .stack-6 > * + * { margin-top: 1.5rem; }
-    header.site { position: sticky; top: 0; z-index: 40; backdrop-filter: saturate(120%) blur(6px); background: color-mix(in srgb, var(--bg-elev), transparent 30%); border-bottom: 1px solid color-mix(in srgb, var(--text-muted), transparent 85%); }
-    .topbar { display:flex; align-items:center; justify-content:space-between; padding: .9rem 0; }
-    .brand { display:flex; align-items:center; gap:.75rem; font-weight:700; }
-    .brand .logo { width: 28px; height:28px; display:grid; place-items:center; border-radius:8px; background: radial-gradient(65% 65% at 50% 35%, var(--brand), var(--brand-strong)); box-shadow: var(--shadow-1); }
-    #healthStatus.status { display:flex; align-items:center; gap:.5rem; font-size:.9rem; color:var(--text-muted); }
-    .status-dot { width:10px; height:10px; border-radius:50%; background: var(--warn); box-shadow:0 0 0 3px rgba(245,158,11,.15); }
-    main { padding: 1.5rem 0 3rem; }
-    .grid { display:grid; gap: 1rem; grid-template-columns: repeat(12, minmax(0,1fr)); }
-    .card { grid-column: span 12; background: linear-gradient(180deg, var(--card), var(--card-2)); border: 1px solid color-mix(in srgb, var(--text-muted), transparent 85%); border-radius: var(--radius); padding: 1.1rem; box-shadow: var(--shadow-1); }
-    @media (min-width: 900px) {
-      .card.span-6 { grid-column: span 6; }
-      .card.span-8 { grid-column: span 8; }
-      .card.span-4 { grid-column: span 4; }
-    }
-    .card-title { margin: 0 0 .5rem; font-size: 1.1rem; letter-spacing:.2px; }
-    .subhead { margin: 0 0 .25rem; font-size: .95rem; color: var(--text-muted); font-weight: 600; }
-    .row { display:flex; flex-wrap:wrap; gap:.6rem; align-items:center; }
-    .btn { appearance:none; border: 1px solid color-mix(in srgb, var(--brand), transparent 60%); background: linear-gradient(180deg, var(--brand), var(--brand-strong)); color: white; font-weight:600; padding: .6rem .85rem; border-radius: 12px; cursor:pointer; box-shadow: var(--shadow-1); }
-    .btn:hover { filter: brightness(1.05); }
-    .btn.secondary { background: transparent; color: var(--text); border-color: color-mix(in srgb, var(--text), transparent 75%); }
-    .btn.tertiary { background: transparent; color: var(--text-muted); border-color: color-mix(in srgb, var(--text), transparent 85%); }
-    .btn[disabled] { opacity:.6; cursor:not-allowed; }
-    .textarea { width: min(700px, 100%); padding: .7rem .8rem; border-radius: 12px; border:1px solid color-mix(in srgb, var(--text), transparent 80%); background: color-mix(in srgb, var(--bg-elev), transparent 0%); color: var(--text); outline: none; box-shadow: inset 0 2px 0 rgba(0,0,0,.05); }
-    .textarea:focus { box-shadow: var(--ring); border-color: var(--brand); }
-    .pre { background: color-mix(in srgb, var(--bg-elev), transparent 6%); border-radius: 12px; padding: .8rem; overflow:auto; border:1px solid color-mix(in srgb, var(--text), transparent 85%); box-shadow: inset 0 1px 0 rgba(0,0,0,.08); font-family: var(--mono); }
-    .hidden { display:none !important; }
+    *{box-sizing:border-box} html,body{height:100%}
+    body{margin:0;background:linear-gradient(180deg,var(--bg),var(--bg-elev));color:var(--text);font-family:var(--sans);line-height:1.45}
+    a{color:var(--brand);text-decoration:none} a:hover{text-decoration:underline}
+    .container{width:min(1100px,92vw);margin-inline:auto}
+    header.site{position:sticky;top:0;z-index:40;backdrop-filter:saturate(120%) blur(6px);background:color-mix(in srgb,var(--bg-elev),transparent 30%);border-bottom:1px solid color-mix(in srgb,var(--text-muted),transparent 85%)}
+    .topbar{display:flex;align-items:center;justify-content:space-between;padding:.9rem 0}
+    .brand{display:flex;align-items:center;gap:.75rem;font-weight:700}
+    .brand .logo{width:28px;height:28px;display:grid;place-items:center;border-radius:8px;background:radial-gradient(65% 65% at 50% 35%,var(--brand),var(--brand-strong));box-shadow:var(--shadow-1)}
+    #healthStatus{display:flex;align-items:center;gap:.5rem;font-size:.9rem;color:var(--text-muted)}
+    .status-dot{width:10px;height:10px;border-radius:50%;background:var(--warn);box-shadow:0 0 0 3px rgba(245,158,11,.15)}
+    main{padding:1.5rem 0 3rem}
+    .grid{display:grid;gap:1rem;grid-template-columns:repeat(12,minmax(0,1fr))}
+    .card{grid-column:span 12;background:linear-gradient(180deg,var(--card),var(--card-2));border:1px solid color-mix(in srgb,var(--text-muted),transparent 85%);border-radius:16px;padding:1.1rem;box-shadow:var(--shadow-1)}
+    @media(min-width:900px){.card.span-6{grid-column:span 6}.card.span-8{grid-column:span 8}.card.span-4{grid-column:span 4}}
+    .card-title{margin:0 0 .5rem;font-size:1.1rem;letter-spacing:.2px}
+    .subhead{margin:0 0 .25rem;font-size:.95rem;color:var(--text-muted);font-weight:600}
+    .row{display:flex;flex-wrap:wrap;gap:.6rem;align-items:center}
+    .btn{appearance:none;border:1px solid color-mix(in srgb,var(--brand),transparent 60%);background:linear-gradient(180deg,var(--brand),var(--brand-strong));color:#fff;font-weight:600;padding:.6rem .85rem;border-radius:12px;cursor:pointer;box-shadow:var(--shadow-1)}
+    .btn:hover{filter:brightness(1.05)} .btn.secondary{background:transparent;color:var(--text);border-color:color-mix(in srgb,var(--text),transparent 75%)} .btn.tertiary{background:transparent;color:var(--text-muted);border-color:color-mix(in srgb,var(--text),transparent 85%)}
+    .btn[disabled]{opacity:.6;cursor:not-allowed}
+    .textarea,input[type="file"],input[type="text"]{width:min(700px,100%);padding:.7rem .8rem;border-radius:12px;border:1px solid color-mix(in srgb,var(--text),transparent 80%);background:color-mix(in srgb,var(--bg-elev),transparent 0%);color:var(--text);outline:none;box-shadow:inset 0 2px 0 rgba(0,0,0,.05)}
+    .textarea:focus,input:focus{box-shadow:var(--ring);border-color:var(--brand)}
+    .small{font-size:.9rem}.muted{color:var(--text-muted)} .mt-2{margin-top:.5rem}.mt-3{margin-top:.75rem}.mt-4{margin-top:1rem}.mt-6{margin-top:1.5rem}
+    .progress{width:100%;height:10px;border-radius:999px;background:color-mix(in srgb,var(--text),transparent 90%);overflow:hidden}
+    .progress > #progressInner{height:100%;width:0%;background:linear-gradient(90deg,var(--brand),var(--brand-strong))}
+    .alert{padding:.7rem .85rem;border-radius:12px;border:1px solid color-mix(in srgb,var(--text),transparent 80%);background:color-mix(in srgb,var(--bg-elev),transparent 10%);box-shadow:var(--shadow-1)}
+    .badge{display:inline-block;padding:.15rem .45rem;border-radius:999px;background:color-mix(in srgb,var(--text),transparent 85%);color:var(--text);font-size:.75rem}
+    .badge-ctx{background:#2dd4bf33;color:#2dd4bf}.badge-parsed{background:#60a5fa33;color:#60a5fa}.badge-db{background:#f59e0b33;color:#f59e0b}
+    .dropzone{border:1.5px dashed color-mix(in srgb,var(--text),transparent 70%);border-radius:14px;padding:1rem;text-align:center;background:color-mix(in srgb,var(--bg-elev),transparent 4%)}
+    .segmented{background:color-mix(in srgb,var(--text),transparent 92%);border:1px solid color-mix(in srgb,var(--text),transparent 80%);border-radius:12px;padding:.25rem}
+    .pre{background:color-mix(in srgb,var(--bg-elev),transparent 6%);border-radius:12px;padding:.8rem;overflow:auto;border:1px solid color-mix(in srgb,var(--text),transparent 85%);box-shadow:inset 0 1px 0 rgba(0,0,0,.08);font-family:var(--mono)}
+    .hidden{display:none !important}
+    footer.site{margin:2rem 0 1rem;color:var(--text-muted);font-size:.9rem;text-align:center}
   </style>
 </head>
 <body>
   <header class="site">
-    <div class="container topbar">
+    <div class="container topbar" role="banner" aria-label="App header">
       <div class="brand">
-        <div class="logo">
+        <div class="logo" aria-hidden="true">
           <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
             <path d="M6 3h12"/><path d="M9 3v5l-4 8a4 4 0 0 0 3.6 6h6.8A4 4 0 0 0 19 16l-4-8V3"/>
           </svg>
         </div>
         <h1 style="font-size:1.1rem;margin:0">NanoChemGPT</h1>
       </div>
-      <div id="healthStatus" class="status">
-        <span class="status-dot"></span>
+      <div id="healthStatus" class="status" role="status" aria-live="polite" aria-atomic="true" title="Service health">
+        <span class="status-dot" aria-hidden="true"></span>
         <span class="status-txt">checking…</span>
       </div>
     </div>
   </header>
 
-  <main id="main" class="container">
-    <section class="card span-8 mt-6" aria-labelledby="sec-ask">
-      <h2 id="sec-ask" class="card-title">Ask NanoChemGPT</h2>
-      <label class="visually-hidden" for="question">Enter your question</label>
-      <textarea id="question" class="textarea" rows="5" placeholder="Ask a synthesis question…"></textarea>
-      <div class="row mt-3">
-        <button id="askBtn" class="btn" type="button">Ask</button>
-        <div class="segmented" role="radiogroup" style="display:flex;gap:6px;margin-left:8px;">
-          <button id="robotBtn" class="btn tertiary" role="radio" aria-checked="true">Robot mode</button>
-          <button id="reasoningBtn" class="btn tertiary" role="radio" aria-checked="false">Reasoning mode</button>
+  <main id="main" class="container" role="main">
+    <div id="global-errors" class="alert mt-3 hidden" role="alert" aria-live="assertive" aria-atomic="true"></div>
+
+    <section class="grid mt-4">
+      <!-- Upload -->
+      <section class="card span-6" aria-labelledby="sec-upload">
+        <h2 id="sec-upload" class="card-title">Upload source (PDF / JSON / TXT)</h2>
+        <div class="row" role="group" aria-label="Upload source">
+          <input id="fileInput" type="file" accept=".pdf,.json,.txt,.md,.csv" aria-describedby="fileHint">
+          <button id="uploadBtn" class="btn" type="button" aria-controls="result progressInner">Upload</button>
         </div>
-      </div>
-      <div id="askMsg" class="alert mt-3 hidden"></div>
-      <section class="mt-4">
-        <h3 class="subhead">Answer</h3>
-        <pre id="answerPre" class="pre"></pre>
+        <div id="fileHint" class="small muted mt-2" role="note">Supported: .pdf, .json, .txt, .md, .csv</div>
+        <div class="progress mt-3" role="progressbar" aria-label="Upload progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+          <div id="progressInner"></div>
+        </div>
+        <div id="result" class="alert mt-3 hidden" role="status" aria-live="polite" aria-atomic="true"></div>
       </section>
-      <section class="mt-4">
-        <h3 class="subhead">Rationale</h3>
-        <pre id="rationalePre" class="pre"></pre>
+
+      <!-- Builtin uploader -->
+      <section class="card span-6" aria-labelledby="sec-builtin">
+        <h2 id="sec-builtin" class="card-title">Upload builtin data (.json / .json.xz)</h2>
+        <div id="builtinDrop" class="dropzone" tabindex="0" role="button" aria-label="Drop files or press Enter to choose">
+          <strong>Drag &amp; drop</strong> files here (or press Enter to choose)
+        </div>
+        <input id="builtinFile" type="file" class="hidden" accept=".json,.json.xz" multiple>
+        <div class="small muted mt-2">Files land in <code>BUILTIN_DIR</code>; <code>.json.xz</code> is decompressed server-side.</div>
+        <div id="builtinMsg" class="alert mt-2 hidden" role="status" aria-live="polite" aria-atomic="true"></div>
+      </section>
+
+      <!-- Ask -->
+      <section class="card span-8 mt-6" aria-labelledby="sec-ask">
+        <h2 id="sec-ask" class="card-title">Ask NanoChemGPT</h2>
+        <label class="visually-hidden" for="question">Enter your question</label>
+        <textarea id="question" class="textarea" rows="5" placeholder="Ask a synthesis question…" aria-describedby="askHelp"></textarea>
+        <div id="askHelp" class="small muted mt-2">Tip: Describe reagents, solvents, temps, and any constraints.</div>
+
+        <div class="row mt-3" role="group" aria-label="Ask and parse controls">
+          <button id="askBtn" class="btn" type="button" aria-controls="answerPre rationalePre refsSection askMsg">Ask</button>
+          <button id="parseBtn" class="btn secondary" type="button" aria-controls="jsonBlock">Convert answer → JSON</button>
+          <button id="saveTxtBtn" class="btn secondary" type="button" aria-controls="answerPre">Export answer → .txt</button>
+          <div class="segmented" role="radiogroup" aria-label="Answer mode" style="display:flex;gap:6px;margin-left:8px;">
+            <button id="robotBtn" class="btn tertiary" role="radio" aria-checked="true" title="Protocol for JSON conversion">Robot mode</button>
+            <button id="reasoningBtn" class="btn tertiary" role="radio" aria-checked="false" title="Mechanistic reasoning answer">Reasoning mode</button>
+          </div>
+        </div>
+
+        <section class="mt-3" aria-labelledby="sec-edited">
+          <h3 id="sec-edited" class="subhead">Upload edited answer (TXT/MD) → JSON</h3>
+          <div class="row" role="group" aria-label="Convert edited file">
+            <input id="editedFile" type="file" accept=".txt,.md" aria-label="Choose edited answer file">
+            <button id="editedConvertBtn" class="btn secondary" type="button" aria-controls="editedDownloadJson">Convert file</button>
+            <a id="editedDownloadJson" class="btn secondary hidden" href="#" download="converted.json" aria-hidden="true">Download JSON</a>
+          </div>
+        </section>
+
+        <div id="askMsg" class="alert mt-3 hidden" role="status" aria-live="polite" aria-atomic="true"></div>
+
+        <section class="mt-4" aria-labelledby="sec-answer">
+          <h3 id="sec-answer" class="subhead">Answer</h3>
+          <pre id="answerPre" class="pre" tabindex="0"></pre>
+        </section>
+
+        <section class="mt-4" aria-labelledby="sec-rationale">
+          <h3 id="sec-rationale" class="subhead">Rationale</h3>
+          <pre id="rationalePre" class="pre muted" tabindex="0"></pre>
+        </section>
+
+        <section id="refsSection" class="mt-4 hidden" aria-labelledby="sec-refs">
+          <h3 id="sec-refs" class="subhead">References</h3>
+          <ol id="refsList" class="small"></ol>
+        </section>
+
+        <section id="jsonBlock" class="mt-4 hidden" aria-labelledby="sec-json">
+          <h3 id="sec-json" class="subhead">Parsed JSON</h3>
+          <pre id="jsonPre" class="pre" tabindex="0"></pre>
+        </section>
+
+        <section class="mt-4" aria-labelledby="sec-sources">
+          <details id="sourcesPanel">
+            <summary class="subhead">Sources used (debug)</summary>
+            <div class="small muted mt-2">
+              <p>This shows the context chunks that were sent to the model for the last answer.</p>
+              <div class="small mt-2"><strong>Usage summary</strong>: <span id="srcUsedSummary" class="muted">(pending)</span></div>
+            </div>
+            <div class="mt-2">
+              <h4 class="subhead">Uploaded context <span class="badge badge-ctx">[CTX]</span></h4>
+              <pre id="srcCtxVs" class="pre small" tabindex="0"></pre>
+            </div>
+            <div class="mt-2">
+              <h4 class="subhead">Parsed protocols <span class="badge badge-parsed">[PARSED]</span></h4>
+              <pre id="srcCtxParsed" class="pre small" tabindex="0"></pre>
+            </div>
+            <div class="mt-2">
+              <h4 class="subhead">Mongo Q&amp;A matches <span class="badge badge-db">[DB]</span></h4>
+              <pre id="srcCtxDb" class="pre small" tabindex="0"></pre>
+            </div>
+          </details>
+        </section>
+      </section>
+
+      <!-- History -->
+      <section class="card span-4 mt-6" aria-labelledby="sec-history">
+        <h2 id="sec-history" class="card-title">History (Q&amp;A)</h2>
+        <div class="row" role="group" aria-label="History filters and actions">
+          <input id="histQuery" class="textarea" placeholder="Filter (optional): keywords in question">
+          <button id="histRefreshBtn" class="btn secondary" type="button" aria-controls="histList histMsg">Refresh</button>
+          <button id="histMoreBtn" class="btn secondary" type="button" aria-controls="histList histMsg">Load more</button>
+        </div>
+        <div id="histMsg" class="alert mt-2 hidden" role="status" aria-live="polite" aria-atomic="true"></div>
+        <ol id="histList" class="mt-3 small"></ol>
+        <p class="small muted mt-2">Tip: Click a history item to load its answer/rationale back into the page.</p>
+      </section>
+
+      <!-- Upload Browser -->
+      <section class="card span-6 mt-6" aria-labelledby="sec-uploads">
+        <h2 id="sec-uploads" class="card-title">Uploads</h2>
+        <div class="row" role="group" aria-label="Uploads actions">
+          <button id="uplRefreshBtn" class="btn secondary" type="button" aria-controls="uplList uplMsg">Refresh</button>
+        </div>
+        <div id="uplMsg" class="alert mt-2 hidden" role="status" aria-live="polite" aria-atomic="true"></div>
+        <ol id="uplList" class="mt-3 small"></ol>
+      </section>
+
+      <!-- Maintenance -->
+      <section class="card span-6 mt-6" aria-labelledby="sec-maint">
+        <h2 id="sec-maint" class="card-title">Maintenance</h2>
+        <div class="row">
+          <button
+            id="clearBtn"
+            class="btn secondary"
+            type="button"
+            aria-controls="uplMsg uplList"
+            aria-label="Clear uploaded memory">
+            Clear uploaded memory
+          </button>
+          <div id="clearMsg" class="alert mt-2 hidden" role="status" aria-live="polite" aria-atomic="true"></div>
+        </div>
+        <p class="small muted mt-3">
+          Tip: Mount a volume at <code>/data</code> and set <code>HF_HOME=/data/hf</code> so model downloads persist.
+        </p>
       </section>
     </section>
   </main>
 
-  <footer class="site container">
-    <span>© <span id="year"></span> NanoChemGPT · Built for rapid synthesis Q&A</span>
+  <footer class="site container" role="contentinfo">
+    <span>© <span id="year"></span> NanoChemGPT · Built for rapid synthesis Q&amp;A</span>
   </footer>
 
   <script>
