@@ -16,23 +16,7 @@ import vector_store as vs
 from converter import validate_step, validate_file  # line-aware, normalizing validator
 from mongo_client import get_db, ping as mongo_ping
 from internet_search import search_papers            # OpenAlex helper
-# ───────────────────────────── DuckDB init ────────────────────────────── #
-try:
-    parq_glob = os.getenv("LOOKUP_PARQUET_GLOB")            
-    db_path   = os.getenv("LOOKUP_DUCKDB_PATH")             
-    tbl       = os.getenv("LOOKUP_DUCKDB_TABLE", "reactions")
-    if db_path and parq_glob and not os.path.exists(db_path):
-        import duckdb, pathlib
-        pathlib.Path(db_path).parent.mkdir(parents=True, exist_ok=True)
-        con = duckdb.connect(db_path)
-        con.execute(f"CREATE TABLE {tbl} AS SELECT * FROM read_parquet('{parq_glob}', hive_partitioning=1)")
-        con.execute("CHECKPOINT")
-        con.close()
-        app.logger.info("[duckdb-init] created %s from %s into table %s", db_path, parq_glob, tbl)
-except Exception as e:
-    app.logger.warning("[duckdb-init] build skipped/failed: %s", e)
 
-from DuckDB.duck_searcher import DuckSearcher, get_duck_searcher
 # ─── Directories & global paths ─────────────────────────────────────────── #
 
 BASE_DIR       = Path(__file__).resolve().parent
@@ -56,6 +40,24 @@ app.config["MAX_CONTENT_LENGTH"] = 100 * 1024 * 1024  # 100 MB
 app.config["JSON_AS_ASCII"] = False  # allow UTF-8 in JSON responses
 app.config['SECRET_KEY'] = os.getenv("FLASK_SECRET_KEY")
 app.config['WTF_CSRF_TIME_LIMIT'] = None
+
+# ───────────────────────────── DuckDB init ────────────────────────────── #
+try:
+    parq_glob = os.getenv("LOOKUP_PARQUET_GLOB")            
+    db_path   = os.getenv("LOOKUP_DUCKDB_PATH")             
+    tbl       = os.getenv("LOOKUP_DUCKDB_TABLE", "reactions")
+    if db_path and parq_glob and not os.path.exists(db_path):
+        import duckdb, pathlib
+        pathlib.Path(db_path).parent.mkdir(parents=True, exist_ok=True)
+        con = duckdb.connect(db_path)
+        con.execute(f"CREATE TABLE {tbl} AS SELECT * FROM read_parquet('{parq_glob}', hive_partitioning=1)")
+        con.execute("CHECKPOINT")
+        con.close()
+        app.logger.info("[duckdb-init] created %s from %s into table %s", db_path, parq_glob, tbl)
+except Exception as e:
+    app.logger.warning("[duckdb-init] build skipped/failed: %s", e)
+
+from DuckDB.duck_searcher import DuckSearcher, get_duck_searcher
 
 # ─── Dataset searcher ───────────── #
 parq_glob = os.getenv("LOOKUP_PARQUET_GLOB")
