@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import os, glob
 import csv
 import json
 import gzip
@@ -7,9 +8,53 @@ import lzma
 import re
 from pathlib import Path
 from typing import Iterable, Optional, Sequence, List
-
 import pandas as pd
 
+# --- directory loader for many files ---
+SUPPORTED_EXTS = {".csv", ".tsv", ".xlsx", ".parquet", ".json", ".jsonl"}
+
+def _is_supported(path: str) -> bool:
+    p = Path(path)
+    return p.suffix.lower() in SUPPORTED_EXTS or "".join(p.suffixes[-2:]).lower() in (".json.gz",".jsonl.gz",".csv.gz",".tsv.gz",".json.xz",".jsonl.xz",".csv.xz",".tsv.xz")
+
+def load_union_from_dir(root: str | Path, pattern: str = "**/*.*", max_files: int = 500) -> pd.DataFrame:
+    root = str(root)
+    paths = [p for p in glob.glob(os.path.join(root, pattern), recursive=True) if _is_supported(p)]
+    if not paths:
+        raise FileNotFoundError(f"No supported files under {root!r} with pattern {pattern!r}")
+    if len(paths) > max_files:
+        paths = paths[:max_files]
+
+    frames = []
+    for p in paths:
+        try:
+            df = load_table(p)
+            df["__source__"] = os.path.relpath(p, root)
+            frames.append(df)
+        except Exception as e:
+            # Skip unreadable files but keep going
+            print(f"[dataset_search] skip {p}: {e}")
+    if not frames:
+        raise RuntimeError("No files successfully loaded for union.")
+    # Align columns
+    df = pd.concat(frames, ignore_index=True, sort=False)
+    return df
+
+# --- env-driven convenience loader ---
+def get_env_searcher():
+    path = os.getenv("LOOKUP_FILE") or os.getenv("LOOKUP_TABLE")
+    droot = os.getenv("LOOKUP_DIR")
+    if droot:
+        pattern = os.getenv("LOOKUP_GLOB", "**/*.*")
+        max_files = int(os.getenv("LOOKUP_MAX_FILES", "500"))
+        df = load_union_from_dir(droot, pattern=pattern, max_files=max_files)
+    elif path:
+        df = load_table(path)
+    else:
+        return None
+
+    txt_cols = [c.strip() for c in os.getenv("LOOKUP_TEXT_COLS","").split(",") if c.strip()] or None
+    return DatasetSearcher(df, text_cols=txt_cols)
 
 # ---------------- I/O helpers ----------------
 def _normalize_records(obj):
@@ -210,7 +255,13 @@ class DatasetSearcher:
             return result.copy()
         return result.head(max(0, int(topk))).copy()
 
-
+    def get_env_searcher() -> Optional[DatasetSearcher]:
+        path = os.getenv("LOOKUP_FILE") or os.getenv("LOOKUP_TABLE")
+        if not path:
+            return None
+        df = load_table(path)
+        txt_cols = [c.strip() for c in os.getenv("LOOKUP_TEXT_COLS","").split(",") if c.strip()] or None
+        return DatasetSearcher(df, text_cols=txt_cols)
 # ---------------- CLI ----------------
 if __name__ == "__main__":
     import argparse, sys

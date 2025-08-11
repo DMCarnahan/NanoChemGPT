@@ -302,6 +302,7 @@ input:focus, select:focus, textarea:focus {
   color: var(--brand);
   background: color-mix(in srgb, var(--brand), transparent 90%);
 }
+.segmented, .segmented .btn { pointer-events: auto; } 
 
 /* ----------- Tables ----------- */
 .table {

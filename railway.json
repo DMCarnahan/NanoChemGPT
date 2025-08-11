@@ -43,6 +43,8 @@
     "MP_API_URL": "https://api.materialsproject.org/materials/summary",
     "MP_API_KEY": "${{shared.MP_API_KEY}}",
     "ORD_API_URL": "https://api.open-reaction-database.org/records",
-    "FLASK_SECRET_KEY": "${{shared.FLASK_SECRET_KEY}}"
+    "FLASK_SECRET_KEY": "${{shared.FLASK_SECRET_KEY}}",
+    "LOOKUP_DIR": "/mnt/data",
+    "LOOKUP_GLOB": "**/*.{csv,tsv,json,jsonl,parquet,xlsx}"
   }
 }

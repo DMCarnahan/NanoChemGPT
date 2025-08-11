@@ -1,7 +1,6 @@
 import os, io, json, lzma, re, functools, threading, traceback
 from datetime import datetime
 from pathlib import Path
-
 import httpx
 import pandas as pd
 from dotenv import load_dotenv
@@ -18,9 +17,11 @@ from converter import validate_step, validate_file  # line-aware, normalizing va
 from mongo_client import get_db, ping as mongo_ping
 from dataset_searcher import load_table, DatasetSearcher
 from internet_search import search_papers            # OpenAlex helper
+from dataset_searcher import get_env_searcher
 # ─────────────────────────────────────────────────────────────────────────── #
 
 # ─── Directories & global paths ─────────────────────────────────────────── #
+
 BASE_DIR       = Path(__file__).resolve().parent
 DATA_DIR       = Path(os.getenv("DATA_DIR", BASE_DIR / "data"))
 BUILTIN_DIR    = Path(os.getenv("BUILTIN_DIR", "/mnt/data/builtin")).resolve()
@@ -45,53 +46,50 @@ app.config["JSON_AS_ASCII"] = False  # allow UTF-8 in JSON responses
 app.config['SECRET_KEY'] = os.getenv("FLASK_SECRET_KEY")
 app.config['WTF_CSRF_TIME_LIMIT'] = None
 
-# ─── Dataset searcher (local table) ─────────────────────────────────────── #
-_LOOKUP_FALLBACK = BASE_DIR / "database" / "tables" / "coremof.xlsx"
-LOOKUP_FILE = (
-    os.getenv("LOOKUP_FILE")
-    or os.getenv("LOOKUP_DIR")
-    or (_LOOKUP_FALLBACK if _LOOKUP_FALLBACK.exists() else "")
-)
+# ─── Dataset searcher (local table; supports LOOKUP_DIR or LOOKUP_FILE) ─── #
+from dataset_searcher import get_env_searcher
+import pandas as pd
 
-_SEARCHER: DatasetSearcher | None = None
-if LOOKUP_FILE:
+LOOKUP = get_env_searcher()
+if LOOKUP is not None:
     try:
-        _TABLE     = load_table(LOOKUP_FILE)
-        _SEARCHER  = DatasetSearcher(_TABLE)
-        print(f"[dataset_search] loaded '{LOOKUP_FILE}'  rows={_TABLE.shape[0]}")
+        df = LOOKUP.df
+        app.logger.info("[dataset_search] loaded lookup (rows=%d, cols=%d) from env", len(df), len(df.columns))
+        try:
+            if "__source__" in df.columns:
+                sample_sources = df["__source__"].value_counts().head(5).to_dict()
+                app.logger.info("[dataset_search] top sources: %s", sample_sources)
+        except Exception:
+            pass
     except Exception as e:
-        print("[dataset_search] failed to load lookup table:", e)
+        app.logger.warning("[dataset_search] loaded but cannot introspect: %s", e)
 else:
-    print("[dataset_search] no LOOKUP_FILE set – table searching disabled.")
+    app.logger.warning("[dataset_search] no LOOKUP_FILE/LOOKUP_DIR set – table searching disabled.")
 
 def basic_search(query: str, n: int = 6) -> list[dict]:
     if not query.strip():
         return []
 
-    # ── 1) LOCAL DATASET ──────────────────────────────────────────────
-    local_hits: list[dict] | pd.DataFrame
-    if _SEARCHER is None:
-        local_hits = []
-    else:
-        try:
-            local_hits = _SEARCHER.query(query, topk=n)
-        except Exception as e:
-            print("[basic_search] local query failed:", e)
-            local_hits = []
-
+    # ── 1) LOCAL DATASET (volume-backed via LOOKUP) ───────────────────
     local: list[dict] = []
-
-    if isinstance(local_hits, pd.DataFrame):
-        for _, row in local_hits.fillna("").iterrows():
-            d = row.to_dict()
-            for k in ("title", "year", "url", "doi"):
-                d.setdefault(k, "")
-            local.append(d)
-    elif isinstance(local_hits, list):
-        for d in local_hits:
-            for k in ("title", "year", "url", "doi"):
-                d.setdefault(k, "")
-            local.append(d)
+    if LOOKUP is not None:
+        try:
+            hits = LOOKUP.query(query, topk=n)  # returns DataFrame
+            if isinstance(hits, pd.DataFrame):
+                for _, row in hits.fillna("").iterrows():
+                    # Try to map common columns into title/year/url/doi
+                    title = (row.get("title") or row.get("name") or row.get("__source__") or "table hit")
+                    year  = (row.get("year") or row.get("publication_year") or "")
+                    doi   = (row.get("doi") or "")
+                    url   = (row.get("url") or (f"https://doi.org/{doi}" if doi else ""))
+                    local.append({
+                        "title": str(title)[:300],
+                        "year":  str(year),
+                        "url":   url,
+                        "doi":   str(doi),
+                    })
+        except Exception as e:
+            print("[basic_search] lookup query failed:", e)
 
     # ── 2) OPENALEX (internet) ───────────────────────────────────────
     web = []
@@ -108,7 +106,7 @@ def basic_search(query: str, n: int = 6) -> list[dict]:
             local.append({k: w.get(k, "") for k in ("title", "year", "url", "doi")})
             seen.add(key)
 
-    return local[: 2*n]
+    return local[: 2 * n]
 
 # ─── OpenAI client (no proxy) ───────────────────────────────────────────── #
 load_dotenv()
@@ -523,9 +521,12 @@ def ask():
     try:
         payload = request.get_json(silent=True) or {}
         q = (payload.get("question") or "").strip()
+        mode = (payload.get("mode") or "robot").strip().lower()
+        want_inline = bool(payload.get("want_inline_citations", True))
         if not q:
             abort(400, "No question.")
 
+        # --- Retrieval: vector store ---
         vs_ctx = ""
         try:
             vs_ctx = vs.search(q, k=8) or ""
@@ -533,22 +534,47 @@ def ask():
             print("[/ask] vs.search error:", e)
             vs_ctx = ""
 
-        db_ctx = ""  # disabled: do not use DB Q&A context
-        ctx_parsed = ""  # disabled: do not use parsed DB context
+        # --- Retrieval: table lookup (if configured) ---
+        table_ctx = ""
+        table_refs = []
+        if LOOKUP is not None:
+            try:
+                hits = LOOKUP.query(q, regex=False, case=False, topk=5, all_matches=False)
+                rows = hits.to_dict(orient="records")
+                lines = []
+                for i, row in enumerate(rows, start=1):
+                    solvent = row.get("solvent") or row.get("solvent_system")
+                    temp    = row.get("temp_C") or row.get("temperature_C")
+                    time_h  = row.get("time_h") or row.get("duration_h")
+                    note    = row.get("notes") or ""
+                    line = f"[T{i}] solvent={solvent}; temp_C={temp}; time_h={time_h}; {note}".strip()
+                    lines.append(line)
+                    url = row.get("url") or (row.get("doi") and f"https://doi.org/{row['doi']}")
+                    if url:
+                        table_refs.append({"title": f"Table row {i}", "url": url})
+                table_ctx = "\n".join(lines)
+            except Exception as e:
+                print("[/ask] LOOKUP query error:", e)
 
+        # --- Build CONTEXT pieces (always define) ---
         context_parts = []
-        if vs_ctx: 
+        if vs_ctx:
             context_parts.append("<<<CTX_UPLOADS>>>\n" + vs_ctx)
-            context_joined = "\n\n---\n\n".join(context_parts).strip()
-            print("[ask][debug] VS tags preview:", (vs_ctx or "").replace("\n"," ")[:220])
-            print("[ask] ctx parts:", f"VS={bool(vs_ctx)} len={len(vs_ctx) if vs_ctx else 0}")
+        if table_ctx:
+            context_parts.append("<<<CTX_TABLE>>>\n" + table_ctx)
+        context_joined = "\n\n---\n\n".join(context_parts).strip()
 
+        # --- Web/basic references ---
         refs = []
         try:
             refs = basic_search(q, n=6) or []
         except Exception as e:
             print("[/ask] basic_search error:", e)
             refs = []
+
+        # Merge table refs (if any) after web refs, then renumber
+        if table_refs:
+            refs = list(refs) + table_refs
 
         def _ref_url(r):
             if r.get("url"): return r["url"]
@@ -558,25 +584,50 @@ def ask():
         refs_prompt = "\n".join(
             f"[{i+1}] {(r.get('title') or '(no title)')} ({r.get('year') or ''}) — {_ref_url(r)}"
             for i, r in enumerate(refs)
+        ).strip()
+
+        # --- Prompt shaping by mode ---
+        robot_rules = (
+            "Return a discrete lab protocol with exact quantities on a small scale (~0.5 mmol Co):\n"
+            " - Choose ONE organic solvent and stick to it (oleylamine OR octadecene) based on CONTEXT; do not hedge.\n"
+            " - Include specific masses (mg) or mmol for reagents; volumes (mL) for liquids.\n"
+            " - Specify temperatures (°C), ramp rates (°C/min), hold times (min/h), and atmosphere (Ar/N2/vacuum).\n"
+            " - Include workup and purification (quench, washing/centrifugation, drying) with volumes.\n"
+            " - Safety notes for pyrophoric/amine vapors/pressurized vials.\n"
+            "No placeholders (avoid “e.g.”/“or”). Be decisive."
+        )
+        reasoning_rules = (
+            "Provide a concise mechanistic rationale focused on shape control (nanorods):\n"
+            " - Role of solvent/surfactant and coordinating amines; reduction pathways; temperature dependence.\n"
+            " - Nucleation vs growth regime; aspect ratio control; side-phase suppression.\n"
+            "Be terse and cite when appropriate."
         )
 
+        inline_rule = (
+            " - When you pull a fact from any numbered REFERENCE, put its number in square brackets right after the sentence "
+            "(e.g. “hydrothermal at 200 °C [3]”)."
+            if want_inline else
+            " - Inline numeric citations are optional for this request."
+        )
+
+        mode_rules = robot_rules + ("\n\n" + reasoning_rules if mode == "reasoning" else "")
+
         prompt = (
-            "You are NanoChemGPT. Use the CONTEXT and the numbered REFERENCES "
-            "to propose a synthesis.\n"
+            "You are NanoChemGPT. Use the CONTEXT and the numbered REFERENCES to propose a synthesis.\n"
             "Rules:\n"
-            " - Prefer CONTEXT over general knowledge when relevant.\n"
+            " - Prefer CONTEXT and REFERENCES over general knowledge when relevant.\n"
             " - If you use any content from CONTEXT, append [CTX] on that line.\n"
-            " - When you pull a fact from any numbered REFERENCE, put its number in "
-            "   square brackets right after the sentence (e.g. “hydrothermal at 200 °C [3]”).\n"
+            f"{inline_rule}\n"
             " - If CONTEXT is insufficient, say so explicitly before generalizing.\n"
+            f"{mode_rules}\n"
             "Return two blocks exactly in this order:\n"
             "## SynthesisProtocol\n"
             "1. **Hardware & Glassware**:\n[]\n"
             "2. **Materials**:\n[]\n"
             "3. **Procedure**\n[]\n\n"
             "```reason\n"
-            "For each key justification, add inline tags: [CTX] for uploaded/context hits, "
-            "[DB] for Mongo Q&A, [PARSED] for parsed protocols, [n] for numbered web REFERENCES, [GEN] if inferred.\n"
+            "For each key justification, add inline tags: [CTX] for uploaded/context hits, [DB] for Mongo Q&A, "
+            "[PARSED] for parsed protocols, [n] for numbered web REFERENCES, [GEN] if inferred.\n"
             "Keep rationales terse.\n"
             "```\n\n"
             f"CONTEXT:\n{context_joined}\n\n"
@@ -592,13 +643,13 @@ def ask():
 
         answer, rationale = split_reasoning(raw)
 
+        # --- Rationale fallback if missing ---
         if not (rationale or "").strip():
             try:
                 rationale_only = (
                     "You previously produced the SynthesisProtocol below.\n"
                     "Write a short rationale (5–8 bullets max). For each key justification add inline tags:\n"
                     "[CTX] uploaded/context hits, [DB] Mongo Q&A, [PARSED] parsed protocols, [n] for numbered web REFERENCES, [GEN] for general.\n"
-                    "Base your reasoning strictly on the ANSWER, CONTEXT, and REFERENCES.\n"
                     "Return just the rationale text, no code fences, no extra headings."
                 )
                 rraw = client.chat.completions.create(
@@ -617,19 +668,18 @@ def ask():
                 print("[/ask] rationale fallback failed:", e)
                 rationale = rationale or ""
 
+        # --- Post-pass: enforce citations & CTX usage if missing ---
         try:
             used_summary = _extract_used_markers(answer or "", rationale or "")
-            if not used_summary.get("refs"):
+            if want_inline and not used_summary.get("refs"):
                 try:
                     revise_refs = client.chat.completions.create(
                         model="gpt-4o-mini",
                         temperature=0,
                         messages=[
                             {"role": "system", "content": (
-                                "Add inline [n] citations wherever you used information "
-                                "from the numbered REFERENCES list. Do NOT remove any "
-                                "existing [CTX] or other content. Only insert citations "
-                                "where appropriate."
+                                "Add inline [n] citations wherever information was taken from the numbered REFERENCES list. "
+                                "Do NOT remove any existing [CTX] content. Only insert citations where appropriate."
                             )},
                             {"role": "user",   "content": f"REFERENCES:\n{refs_prompt}"},
                             {"role": "user",   "content": f"ORIGINAL ANSWER:\n{answer}"}
@@ -640,20 +690,19 @@ def ask():
                         used_summary = _extract_used_markers(answer, rationale)
                 except Exception as e:
                     print("[ask] ref-revise step failed:", e)
-
         except Exception as _e:
             print("[/ask] used extraction failed:", _e)
             used_summary = {"refs": [], "tags": {}, "has_ctx": False}
-            
-        if not used_summary.get("has_ctx"):
+
+        if context_joined and not used_summary.get("has_ctx"):
             try:
                 revise = client.chat.completions.create(
                     model="gpt-4o-mini",
                     temperature=0,
                     messages=[
-                    {"role":"system","content":"Revise the answer to explicitly use CONTEXT where relevant. Insert [CTX] markers on lines that derive from CONTEXT, and prefer CONTEXT over general knowledge. Do not change structure."},
-                    {"role":"user","content": f"CONTEXT:\n{context_joined}"},
-                    {"role":"user","content": f"ORIGINAL ANSWER:\n{answer}"}
+                        {"role":"system","content":"Revise the answer to explicitly use CONTEXT where relevant. Insert [CTX] markers on lines that derive from CONTEXT, and prefer CONTEXT over general knowledge. Do not change structure."},
+                        {"role":"user","content": f"CONTEXT:\n{context_joined}"},
+                        {"role":"user","content": f"ORIGINAL ANSWER:\n{answer}"}
                     ]
                 ).choices[0].message.content
                 if revise and len(revise) >= 0.7 * len(answer):
@@ -668,14 +717,14 @@ def ask():
             ins = db.qa.insert_one({
                 "created_at": datetime.utcnow(),
                 "question": q,
+                "mode": mode,
                 "answer": (answer or "").strip(),
                 "rationale": rationale,
                 "references": refs,
                 "refs_used": used_summary.get("refs", []),
                 "used_tags": used_summary.get("tags", {}),
                 "ctx_vs": vs_ctx,
-                "ctx_db": db_ctx,
-                "ctx_parsed": ctx_parsed,
+                "ctx_table": table_ctx,
             })
             qa_id = str(ins.inserted_id)
         except Exception as e:
@@ -684,11 +733,15 @@ def ask():
         return jsonify({
             "answer": (answer or "").strip(),
             "rationale": rationale,
-            "references": refs,
+            "references": refs,   # keep original key
+            "refs": refs,         # also expose as 'refs' for UI tolerance
             "refs_used": used_summary.get("refs", []),
             "used": used_summary,
+            "mode": mode,
             "qa_id": qa_id,
-            "ctx_vs": (vs_ctx or "")[:8000],        })
+            "ctx_vs": (vs_ctx or "")[:8000],
+            "ctx_table": (table_ctx or "")[:4000],
+        })
 
     except Exception as e:
         print("[/ask] Unhandled error:", e)
