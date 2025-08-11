@@ -5,7 +5,7 @@
 
     // --- tiny CSS to show selected mode ---
     (function injectModeCSS(){
-      const css = `.btn.tertiary.is-selected{border-color:var(--brand);color:var(--brand);background:color-mix(in srgb,var(--brand),transparent 90%)} .segmented, .segmented .btn{pointer-events:auto}`;
+      const css = `.btn.tertiary.is-selected{border-color:var(--brand);color:var(--brand);background:color-mix(in srgb,var(--brand),transparent 90%)}`;
       const el = document.createElement('style'); el.textContent = css; document.head.appendChild(el);
     })();
 
@@ -19,29 +19,28 @@
       else { askMsg.textContent = msg || ''; askMsg.classList.add('hidden'); }
     }
 
-    // --- Extract and flatten Synthesis Protocol into Key: Value lines for /parse ---
+    // --- Extract and flatten SynthesisProtocol into Key: Value lines for /parse ---
     function extractProtocolForParse(fullText) {
       if (!fullText) return "";
       let txt = String(fullText);
 
       // 1) Trim to Synthesis Protocol block if present
-      const h = txt.indexOf("## Synthesis Protocol");
-      if (h >= 0) {
-        txt = txt.slice(h + "## Synthesis Protocol".length);
+      const header = /##\s*Synthesis Protocol/;
+      const m = txt.match(header);
+      if (m && m.index !== undefined) {
+        txt = txt.slice(m.index + m[0].length);
       }
 
-      // Stop at a rationale/code fence if present
-      const stopIdxs = [];
-      const fenceIdx = txt.indexOf("```");
-      if (fenceIdx >= 0) stopIdxs.push(fenceIdx);
+      // Stop at a rationale fence or heading
+      const fences = [txt.indexOf("```")].filter(x => x >= 0);
       const ratH = txt.search(/\n#{1,3}\s*(rationale|reasoning)\b/i);
-      if (ratH >= 0) stopIdxs.push(ratH);
-      const stopAt = stopIdxs.length ? Math.min(...stopIdxs) : -1;
+      if (ratH >= 0) fences.push(ratH);
+      const stopAt = fences.length ? Math.min(...fences) : -1;
       if (stopAt > 0) txt = txt.slice(0, stopAt);
 
       const lines = txt.split(/\r?\n/);
 
-      // 2) Parse sections like: "1. **Hardware & Glassware**:" etc.
+      // 2) Parse "1. **Section**:" style headings
       const sections = {};
       const titleMap = {
         "hardware & glassware": "Hardware & Glassware",
@@ -54,20 +53,19 @@
       for (let i=0; i<lines.length; i++) {
         const line = lines[i].trim();
         if (!line) continue;
-        const m = line.match(headingRE);
-        if (m) {
-          const raw = m[1].toLowerCase();
-          const key = titleMap[raw] || m[1];
+        const h = line.match(headingRE);
+        if (h) {
+          const raw = h[1].toLowerCase();
+          const key = titleMap[raw] || h[1];
           current = key;
           if (!sections[current]) sections[current] = [];
           continue;
         }
         if (!current) continue;
-        // collect content lines under current section
         sections[current].push(line);
       }
 
-      // If no sections detected, fall back: strip leading markdown symbols and return plain text
+      // Fallback: just strip list markers/tags and return
       if (Object.keys(sections).length === 0) {
         return lines
           .map(l => l.replace(/^\s*[-*•]\s*/, '').replace(/\[(CTX|GEN|PARSED|DB|\d+)\]/g, '').trim())
@@ -75,11 +73,11 @@
           .join("\n");
       }
 
-      // 3) Clean bullets/numbering/tags and flatten each section into a single Key: value line
+      // 3) Clean bullets/numbering/tags and flatten
       function cleanJoin(arr) {
         return arr.map(s => s
             .replace(/^\s*[-*•]\s*/, '')        // bullets
-            .replace(/^\s*\d+\.\s*/, '')        // numbers "1. "
+            .replace(/^\s*\d+\.\s*/, '')        // numbers
             .replace(/\s*\[(CTX|GEN|PARSED|DB|\d+)\]\s*/g, '') // tags
             .replace(/\*\*(.*?)\*\*/g, '$1')    // bold
             .trim()
@@ -135,7 +133,7 @@
       return {res, data, url, sent: obj};
     }
 
-    // Elements
+    // Elements (declare ONCE)
     const askBtn = $('askBtn');
     const qInput = $('question');
     const parseBtn = $('parseBtn');
@@ -158,14 +156,10 @@
       reasoningBtn?.setAttribute('aria-checked', String(next === 'reasoning'));
       robotBtn?.classList.toggle('is-selected', next === 'robot');
       reasoningBtn?.classList.toggle('is-selected', next === 'reasoning');
-
-      // Disable parse when in reasoning mode (no structured protocol present)
-      const parseBtn = document.getElementById('parseBtn');
       if (parseBtn) {
-        parseBtn.disabled = (next === 'reasoning');
-        parseBtn.title = (next === 'reasoning')
-          ? 'Parsing is only available for structured protocols (Robot mode).'
-          : '';
+        const disable = (next === 'reasoning');
+        parseBtn.disabled = disable;
+        parseBtn.title = disable ? 'Parsing is only available for structured protocols (Robot mode).' : '';
       }
     }
     robotBtn?.removeAttribute('disabled');
@@ -191,7 +185,7 @@
 
     // Convert displayed answer → JSON via /parse (with extraction)
     parseBtn?.addEventListener('click', async () => {
-      const full = ($('answerPre')?.textContent || '').trim();
+      const full = ( $('answerPre')?.textContent || '' ).trim();
       if (!full || full === '(no answer)') { setStatus('Nothing to convert. Ask first.', true); return; }
       const text = extractProtocolForParse(full);
       if (!text) { setStatus('Could not extract protocol section.', true); return; }
@@ -203,7 +197,7 @@
           jsonBlock.classList.remove('hidden');
           jsonPre.textContent = JSON.stringify(data, null, 2);
         }
-        if (!res.ok || data?.ok === False || data?.ok === false) {
+        if (!res.ok || data?.ok === false) {
           const code = res.status;
           const msg = (data && (data.error || data.message)) || 'Parser error';
           setStatus(`Convert error ${code}: ${msg}`);
@@ -217,7 +211,7 @@
 
     // Export answer → .txt
     saveTxtBtn?.addEventListener('click', () => {
-      const txt = ($('answerPre')?.textContent || '').trim();
+      const txt = ( $('answerPre')?.textContent || '' ).trim();
       if (!txt || txt === '(no answer)') { setStatus('Nothing to export.', true); return; }
       const blob = new Blob([txt], {type:'text/plain'});
       const url = URL.createObjectURL(blob);
@@ -232,8 +226,7 @@
       editedConvertBtn.disabled = true; setStatus('Converting file…');
       try {
         let text = await f.text();
-        // If the edited file contains the same Synthesis Protocol markdown, extract it
-        if (/##\s*Synthesis Protocol/.test(text)) {
+        if (/##\s*SynthesisProtocol/.test(text)) {
           text = extractProtocolForParse(text);
         }
         const {res, data} = await postJSON('/parse', { text });
@@ -246,7 +239,7 @@
           editedDownloadJson.href = url;
           editedDownloadJson.download = (f.name.replace(/\.(txt|md)$/i,'') || 'converted') + '.json';
         }
-        if (!res.ok || data?.ok === False || data?.ok === false) {
+        if (!res.ok || data?.ok === false) {
           const code = res.status;
           const msg = (data && (data.error || data.message)) || 'Parser error';
           setStatus(`Convert error ${code}: ${msg}`);
@@ -259,7 +252,6 @@
     });
 
     // Clear uploads (CSRF)
-    const clearBtn = $('clearBtn'); const uplMsg = $('uplMsg');
     clearBtn?.addEventListener('click', async () => {
       try {
         clearBtn.disabled = true;
@@ -275,7 +267,6 @@
     });
 
     // Keyboard shortcut
-    const qInput = $('question');
     qInput?.addEventListener('keydown', (e) => {
       if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') $('askBtn')?.click();
     });

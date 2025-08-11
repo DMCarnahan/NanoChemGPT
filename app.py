@@ -1,4 +1,4 @@
-import os, io, json, lzma, re, functools, threading, traceback
+import os, io, json, lzma, re, functools, threading, traceback, glob
 from datetime import datetime
 from pathlib import Path
 import httpx
@@ -47,8 +47,18 @@ app.config['SECRET_KEY'] = os.getenv("FLASK_SECRET_KEY")
 app.config['WTF_CSRF_TIME_LIMIT'] = None
 
 # ─── Dataset searcher (local table; supports LOOKUP_DIR or LOOKUP_FILE) ─── #
-from dataset_searcher import get_env_searcher
-import pandas as pd
+droot   = os.getenv("LOOKUP_DIR")
+lfpath  = os.getenv("LOOKUP_FILE")
+pattern = os.getenv("LOOKUP_GLOB", "**/*.*")
+
+app.logger.info("[lookup-env] LOOKUP_DIR=%r LOOKUP_FILE=%r GLOB=%r", droot, lfpath, pattern)
+if droot:
+    app.logger.info("[lookup-env] dir exists? %s", os.path.isdir(droot))
+    try:
+        sample = glob.glob(os.path.join(droot, pattern), recursive=True)[:5]
+        app.logger.info("[lookup-env] sample files: %s", sample)
+    except Exception as e:
+        app.logger.warning("[lookup-env] glob failed: %s", e)
 
 LOOKUP = get_env_searcher()
 if LOOKUP is not None:
