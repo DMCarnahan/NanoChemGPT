@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import os
 import httpx
 import functools
 import json
@@ -8,6 +9,23 @@ import urllib.parse
 from typing import Any, Dict, Iterable, List, Optional
 
 BASE = "https://api.openalex.org/works"
+
+# ---- User-Agent resolution (env-aware) ----
+_DEFAULT_APP = "NanoChemGPT/1.0"
+_CONTACT_ENV_KEYS = ("OPENALEX_CONTACT_EMAIL", "CONTACT_EMAIL", "ADMIN_EMAIL")
+
+def _build_user_agent_from_env() -> Optional[str]:
+    ua = os.getenv("USER_AGENT", "").strip()
+    if ua:
+        return ua
+    for key in _CONTACT_ENV_KEYS:
+        email = os.getenv(key, "").strip()
+        if email and "@" in email:
+            return f"{_DEFAULT_APP} (+mailto:{email})"
+    return None
+
+
+USER_AGENT: str = _build_user_agent_from_env() or _DEFAULT_APP
 
 # ---- TTL cache (5 minutes) ----
 _TTL_SECONDS = 300
@@ -33,7 +51,7 @@ def _http_get_json(url: str, *, timeout: float = 30.0, retries: int = 3, backoff
         return cached
 
     last_exc: Optional[Exception] = None
-    headers = {"User-Agent": USER_AGENT}
+    headers = {"User-Agent": USER_AGENT or _DEFAULT_APP}
     for attempt in range(1, retries + 1):
         try:
             with httpx.Client(timeout=timeout, headers=headers) as client:
