@@ -5,7 +5,7 @@
 
     // --- tiny CSS to show selected mode ---
     (function injectModeCSS(){
-      const css = `.btn.tertiary.is-selected{border-color:var(--brand);color:var(--brand);background:color-mix(in srgb,var(--brand),transparent 90%)}`;
+      const css = `.btn.tertiary.is-selected{border-color:var(--brand);color:var(--brand);background:color-mix(in srgb,var(--brand),transparent 90%)} .segmented, .segmented .btn{pointer-events:auto}`;
       const el = document.createElement('style'); el.textContent = css; document.head.appendChild(el);
     })();
 
@@ -18,6 +18,84 @@
       if (show) { askMsg.classList.remove('hidden'); askMsg.textContent = msg; }
       else { askMsg.textContent = msg || ''; askMsg.classList.add('hidden'); }
     }
+
+    // --- Extract and flatten Synthesis Protocol into Key: Value lines for /parse ---
+    function extractProtocolForParse(fullText) {
+      if (!fullText) return "";
+      let txt = String(fullText);
+
+      // 1) Trim to Synthesis Protocol block if present
+      const h = txt.indexOf("## Synthesis Protocol");
+      if (h >= 0) {
+        txt = txt.slice(h + "## Synthesis Protocol".length);
+      }
+
+      // Stop at a rationale/code fence if present
+      const stopIdxs = [];
+      const fenceIdx = txt.indexOf("```");
+      if (fenceIdx >= 0) stopIdxs.push(fenceIdx);
+      const ratH = txt.search(/\n#{1,3}\s*(rationale|reasoning)\b/i);
+      if (ratH >= 0) stopIdxs.push(ratH);
+      const stopAt = stopIdxs.length ? Math.min(...stopIdxs) : -1;
+      if (stopAt > 0) txt = txt.slice(0, stopAt);
+
+      const lines = txt.split(/\r?\n/);
+
+      // 2) Parse sections like: "1. **Hardware & Glassware**:" etc.
+      const sections = {};
+      const titleMap = {
+        "hardware & glassware": "Hardware & Glassware",
+        "materials": "Materials",
+        "procedure": "Procedure",
+      };
+
+      let current = null;
+      const headingRE = /^\s*\d+\.\s*\*\*(.+?)\*\*\s*:?\s*$/i;
+      for (let i=0; i<lines.length; i++) {
+        const line = lines[i].trim();
+        if (!line) continue;
+        const m = line.match(headingRE);
+        if (m) {
+          const raw = m[1].toLowerCase();
+          const key = titleMap[raw] || m[1];
+          current = key;
+          if (!sections[current]) sections[current] = [];
+          continue;
+        }
+        if (!current) continue;
+        // collect content lines under current section
+        sections[current].push(line);
+      }
+
+      // If no sections detected, fall back: strip leading markdown symbols and return plain text
+      if (Object.keys(sections).length === 0) {
+        return lines
+          .map(l => l.replace(/^\s*[-*•]\s*/, '').replace(/\[(CTX|GEN|PARSED|DB|\d+)\]/g, '').trim())
+          .filter(Boolean)
+          .join("\n");
+      }
+
+      // 3) Clean bullets/numbering/tags and flatten each section into a single Key: value line
+      function cleanJoin(arr) {
+        return arr.map(s => s
+            .replace(/^\s*[-*•]\s*/, '')        // bullets
+            .replace(/^\s*\d+\.\s*/, '')        // numbers "1. "
+            .replace(/\s*\[(CTX|GEN|PARSED|DB|\d+)\]\s*/g, '') // tags
+            .replace(/\*\*(.*?)\*\*/g, '$1')    // bold
+            .trim()
+          )
+          .filter(Boolean)
+          .join('; ');
+      }
+
+      const out = [];
+      for (const key of Object.keys(sections)) {
+        const val = cleanJoin(sections[key]);
+        if (val) out.push(`${key}: ${val}`);
+      }
+      return out.join("\n");
+    }
+
     function renderAnswer(payload) {
       const answerPre    = $('answerPre');
       const rationalePre = $('rationalePre');
@@ -47,6 +125,7 @@
         refsList.innerHTML = '';
       }
     }
+
     async function postJSON(url, obj, headersExtra={}) {
       const headers = {'Content-Type':'application/json', ...headersExtra};
       const csrf = readCsrfToken(); if (csrf) headers['X-CSRFToken'] = csrf;
@@ -79,6 +158,15 @@
       reasoningBtn?.setAttribute('aria-checked', String(next === 'reasoning'));
       robotBtn?.classList.toggle('is-selected', next === 'robot');
       reasoningBtn?.classList.toggle('is-selected', next === 'reasoning');
+
+      // Disable parse when in reasoning mode (no structured protocol present)
+      const parseBtn = document.getElementById('parseBtn');
+      if (parseBtn) {
+        parseBtn.disabled = (next === 'reasoning');
+        parseBtn.title = (next === 'reasoning')
+          ? 'Parsing is only available for structured protocols (Robot mode).'
+          : '';
+      }
     }
     robotBtn?.removeAttribute('disabled');
     reasoningBtn?.removeAttribute('disabled');
@@ -101,18 +189,21 @@
       } finally { askBtn.disabled = false; }
     });
 
-    // Convert displayed answer → JSON via /parse
+    // Convert displayed answer → JSON via /parse (with extraction)
     parseBtn?.addEventListener('click', async () => {
-      const answerText = ($('answerPre')?.textContent || '').trim();
-      if (!answerText || answerText === '(no answer)') { setStatus('Nothing to convert. Ask first.', true); return; }
+      const full = ($('answerPre')?.textContent || '').trim();
+      if (!full || full === '(no answer)') { setStatus('Nothing to convert. Ask first.', true); return; }
+      const text = extractProtocolForParse(full);
+      if (!text) { setStatus('Could not extract protocol section.', true); return; }
+
       parseBtn.disabled = true; setStatus('Converting to JSON…');
       try {
-        const {res, data} = await postJSON('/parse', { text: answerText });
+        const {res, data} = await postJSON('/parse', { text });
         if (jsonBlock && jsonPre) {
           jsonBlock.classList.remove('hidden');
           jsonPre.textContent = JSON.stringify(data, null, 2);
         }
-        if (!res.ok || data?.ok === false) {
+        if (!res.ok || data?.ok === False || data?.ok === false) {
           const code = res.status;
           const msg = (data && (data.error || data.message)) || 'Parser error';
           setStatus(`Convert error ${code}: ${msg}`);
@@ -134,13 +225,17 @@
       document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
     });
 
-    // Edited file → JSON (uses /parse)
+    // Edited file → JSON (uses /parse with extraction too if needed)
     editedConvertBtn?.addEventListener('click', async () => {
       const f = editedFile?.files && editedFile.files[0];
       if (!f) { setStatus('Choose a TXT/MD file to convert.', true); return; }
       editedConvertBtn.disabled = true; setStatus('Converting file…');
       try {
-        const text = await f.text();
+        let text = await f.text();
+        // If the edited file contains the same Synthesis Protocol markdown, extract it
+        if (/##\s*Synthesis Protocol/.test(text)) {
+          text = extractProtocolForParse(text);
+        }
         const {res, data} = await postJSON('/parse', { text });
         const pretty = JSON.stringify(data, null, 2);
         if (jsonBlock && jsonPre) { jsonBlock.classList.remove('hidden'); jsonPre.textContent = pretty; }
@@ -151,7 +246,7 @@
           editedDownloadJson.href = url;
           editedDownloadJson.download = (f.name.replace(/\.(txt|md)$/i,'') || 'converted') + '.json';
         }
-        if (!res.ok || data?.ok === false) {
+        if (!res.ok || data?.ok === False || data?.ok === false) {
           const code = res.status;
           const msg = (data && (data.error || data.message)) || 'Parser error';
           setStatus(`Convert error ${code}: ${msg}`);
@@ -164,6 +259,7 @@
     });
 
     // Clear uploads (CSRF)
+    const clearBtn = $('clearBtn'); const uplMsg = $('uplMsg');
     clearBtn?.addEventListener('click', async () => {
       try {
         clearBtn.disabled = true;
@@ -179,6 +275,7 @@
     });
 
     // Keyboard shortcut
+    const qInput = $('question');
     qInput?.addEventListener('keydown', (e) => {
       if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') $('askBtn')?.click();
     });

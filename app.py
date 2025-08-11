@@ -597,10 +597,10 @@ def ask():
             "No placeholders (avoid “e.g.”/“or”). Be decisive."
         )
         reasoning_rules = (
-            "Provide a concise mechanistic rationale focused on shape control (nanorods):\n"
-            " - Role of solvent/surfactant and coordinating amines; reduction pathways; temperature dependence.\n"
-            " - Nucleation vs growth regime; aspect ratio control; side-phase suppression.\n"
-            "Be terse and cite when appropriate."
+            "Provide a mechanistic explanation and design considerations for achieving cobalt nanorods.\n"
+            "Focus on: nucleation vs growth regime; amine/solvent coordination; surfactant roles; reduction pathways;\n"
+            "temperature profile and aspect-ratio control; atmosphere; common pitfalls; safety.\n"
+            "Do NOT return a step-by-step protocol. Be concise but specific."
         )
 
         inline_rule = (
@@ -610,30 +610,45 @@ def ask():
             " - Inline numeric citations are optional for this request."
         )
 
-        mode_rules = robot_rules + ("\n\n" + reasoning_rules if mode == "reasoning" else "")
-
-        prompt = (
-            "You are NanoChemGPT. Use the CONTEXT and the numbered REFERENCES to propose a synthesis.\n"
-            "Rules:\n"
-            " - Prefer CONTEXT and REFERENCES over general knowledge when relevant.\n"
-            " - If you use any content from CONTEXT, append [CTX] on that line.\n"
-            f"{inline_rule}\n"
-            " - If CONTEXT is insufficient, say so explicitly before generalizing.\n"
-            f"{mode_rules}\n"
-            "Return two blocks exactly in this order:\n"
-            "## SynthesisProtocol\n"
-            "1. **Hardware & Glassware**:\n[]\n"
-            "2. **Materials**:\n[]\n"
-            "3. **Procedure**\n[]\n\n"
-            "```reason\n"
-            "For each key justification, add inline tags: [CTX] for uploaded/context hits, [DB] for Mongo Q&A, "
-            "[PARSED] for parsed protocols, [n] for numbered web REFERENCES, [GEN] if inferred.\n"
-            "Keep rationales terse.\n"
-            "```\n\n"
-            f"CONTEXT:\n{context_joined}\n\n"
-            f"REFERENCES:\n{refs_prompt}\n\n"
-            f"User question: {q}"
-        )
+        if mode == "reasoning":
+            prompt = (
+                "You are NanoChemGPT. Use the CONTEXT and numbered REFERENCES.\n"
+                "Rules:\n"
+                " - Prefer CONTEXT and REFERENCES over general knowledge when relevant.\n"
+                " - If you use any content from CONTEXT, append [CTX] on that line.\n"
+                f"{inline_rule}\n"
+                " - If CONTEXT is insufficient, say so explicitly before generalizing.\n"
+                f"{reasoning_rules}\n"
+                "Return exactly ONE block:\n"
+                "## Mechanistic reasoning\n"
+                "- bullet points with inline [n] and [CTX] where appropriate.\n\n"
+                f"CONTEXT:\n{context_joined}\n\n"
+                f"REFERENCES:\n{refs_prompt}\n\n"
+                f"User question: {q}"
+            )
+        else:
+            prompt = (
+                "You are NanoChemGPT. Use the CONTEXT and the numbered REFERENCES to propose a synthesis.\n"
+                "Rules:\n"
+                " - Prefer CONTEXT and REFERENCES over general knowledge when relevant.\n"
+                " - If you use any content from CONTEXT, append [CTX] on that line.\n"
+                f"{inline_rule}\n"
+                " - If CONTEXT is insufficient, say so explicitly before generalizing.\n"
+                f"{robot_rules}\n"
+                "Return two blocks exactly in this order:\n"
+                "## Synthesis Protocol\n"
+                "1. **Hardware & Glassware**:\n[]\n"
+                "2. **Materials**:\n[]\n"
+                "3. **Procedure**\n[]\n\n"
+                "```reason\n"
+                "For each key justification, add inline tags: [CTX] for uploaded/context hits, [DB] for Mongo Q&A, "
+                "[PARSED] for parsed protocols, [n] for numbered web REFERENCES, [GEN] if inferred.\n"
+                "Keep rationales terse.\n"
+                "```\n\n"
+                f"CONTEXT:\n{context_joined}\n\n"
+                f"REFERENCES:\n{refs_prompt}\n\n"
+                f"User question: {q}"
+            )
 
         raw = client.chat.completions.create(
             model="gpt-4o-mini",
@@ -641,7 +656,13 @@ def ask():
             temperature=0.2
         ).choices[0].message.content
 
-        answer, rationale = split_reasoning(raw)
+        # IMPORTANT: only split when in robot mode
+        if mode == "reasoning":
+            answer = (raw or "").strip()   # show reasoning in the main Answer box
+            rationale = ""
+        else:
+            answer, rationale = split_reasoning(raw)
+
 
         # --- Rationale fallback if missing ---
         if not (rationale or "").strip():
