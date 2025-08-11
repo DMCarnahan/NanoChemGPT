@@ -603,7 +603,6 @@ def ask():
             " - Include specific masses (mg) or mmol for reagents; volumes (mL) for liquids.\n"
             " - Specify temperatures (°C), ramp rates (°C/min), hold times (min/h), and atmosphere (Ar/N2/vacuum).\n"
             " - Include workup and purification (quench, washing/centrifugation, drying) with volumes.\n"
-            " - Safety notes for pyrophoric/amine vapors/pressurized vials.\n"
             "No placeholders (avoid “e.g.”/“or”). Be decisive."
         )
         reasoning_rules = (

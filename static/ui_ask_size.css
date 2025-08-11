@@ -1,0 +1,16 @@
+#question.textarea, textarea#question {
+  width: min(1000px, 100%);
+  min-height: 160px;
+  line-height: 1.4;
+  resize: vertical;
+}
+/* If #question is still an <input>, make it full-width */
+#question[type="text"] {
+  width: min(1000px, 100%);
+  padding: .8rem .9rem;
+}
+/* Wrap long lines in answer/rationale */
+.pre, #answerPre, #rationalePre {
+  white-space: pre-wrap;
+  word-break: break-word;
+}

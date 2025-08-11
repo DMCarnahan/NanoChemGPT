@@ -11,7 +11,7 @@
 
     function readCsrfToken() {
       return by('meta[name="csrf-token"]')?.content
-          || (document.cookie.match(/(?:^|;\s*)csrf_token=([^;]+)/)?.[1] || '');
+          || (document.cookie.match(/(?:^|;\\s*)csrf_token=([^;]+)/)?.[1] || '');
     }
     function setStatus(msg, show = true) {
       const askMsg = $('askMsg'); if (!askMsg) return;
@@ -24,8 +24,8 @@
       if (!fullText) return "";
       let txt = String(fullText);
 
-      // 1) Trim to Synthesis Protocol block if present
-      const header = /##\s*Synthesis Protocol/;
+      // 1) Trim to SynthesisProtocol block if present
+      const header = /##\\s*SynthesisProtocol/;
       const m = txt.match(header);
       if (m && m.index !== undefined) {
         txt = txt.slice(m.index + m[0].length);
@@ -33,12 +33,12 @@
 
       // Stop at a rationale fence or heading
       const fences = [txt.indexOf("```")].filter(x => x >= 0);
-      const ratH = txt.search(/\n#{1,3}\s*(rationale|reasoning)\b/i);
+      const ratH = txt.search(/\\n#{1,3}\\s*(rationale|reasoning)\\b/i);
       if (ratH >= 0) fences.push(ratH);
       const stopAt = fences.length ? Math.min(...fences) : -1;
       if (stopAt > 0) txt = txt.slice(0, stopAt);
 
-      const lines = txt.split(/\r?\n/);
+      const lines = txt.split(/\\r?\\n/);
 
       // 2) Parse "1. **Section**:" style headings
       const sections = {};
@@ -49,7 +49,7 @@
       };
 
       let current = null;
-      const headingRE = /^\s*\d+\.\s*\*\*(.+?)\*\*\s*:?\s*$/i;
+      const headingRE = /^\\s*\\d+\\.\\s*\\*\\*(.+?)\\*\\*\\s*:?\\s*$/i;
       for (let i=0; i<lines.length; i++) {
         const line = lines[i].trim();
         if (!line) continue;
@@ -68,18 +68,18 @@
       // Fallback: just strip list markers/tags and return
       if (Object.keys(sections).length === 0) {
         return lines
-          .map(l => l.replace(/^\s*[-*•]\s*/, '').replace(/\[(CTX|GEN|PARSED|DB|\d+)\]/g, '').trim())
+          .map(l => l.replace(/^\\s*[-*•]\\s*/, '').replace(/\\[(CTX|GEN|PARSED|DB|\\d+)\\]/g, '').trim())
           .filter(Boolean)
-          .join("\n");
+          .join("\\n");
       }
 
       // 3) Clean bullets/numbering/tags and flatten
       function cleanJoin(arr) {
         return arr.map(s => s
-            .replace(/^\s*[-*•]\s*/, '')        // bullets
-            .replace(/^\s*\d+\.\s*/, '')        // numbers
-            .replace(/\s*\[(CTX|GEN|PARSED|DB|\d+)\]\s*/g, '') // tags
-            .replace(/\*\*(.*?)\*\*/g, '$1')    // bold
+            .replace(/^\\s*[-*•]\\s*/, '')        // bullets
+            .replace(/^\\s*\\d+\\.\\s*/, '')        // numbers
+            .replace(/\\s*\\[(CTX|GEN|PARSED|DB|\\d+)\\]\\s*/g, '') // tags
+            .replace(/\\*\\*(.*?)\\*\\*/g, '$1')    // bold
             .trim()
           )
           .filter(Boolean)
@@ -91,7 +91,7 @@
         const val = cleanJoin(sections[key]);
         if (val) out.push(`${key}: ${val}`);
       }
-      return out.join("\n");
+      return out.join("\\n");
     }
 
     function renderAnswer(payload) {
@@ -106,7 +106,7 @@
       // Accept refs under refs|references|sources|citations
       let refs = payload?.refs || payload?.references || payload?.sources || payload?.citations || [];
       if (typeof refs === 'string') {
-        refs = refs.split(/\n+/).map(s => ({title: s.trim()})).filter(x => x.title);
+        refs = refs.split(/\\n+/).map(s => ({title: s.trim()})).filter(x => x.title);
       } else if (refs && typeof refs === 'object' && !Array.isArray(refs)) {
         refs = Object.values(refs);
       }
@@ -133,7 +133,23 @@
       return {res, data, url, sent: obj};
     }
 
-    // Elements (declare ONCE)
+    function autoDownloadJSON(obj, baseName='protocol') {
+      const pretty = JSON.stringify(obj, null, 2);
+      const blob = new Blob([pretty], {type:'application/json'});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      const q = document.getElementById('question')?.value || '';
+      const safe = (q.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'').slice(0,40)) || baseName;
+      a.href = url;
+      a.download = safe + '.json';
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 1500);
+      return pretty;
+    }
+
+    // Elements
     const askBtn = $('askBtn');
     const qInput = $('question');
     const parseBtn = $('parseBtn');
@@ -183,7 +199,7 @@
       } finally { askBtn.disabled = false; }
     });
 
-    // Convert displayed answer → JSON via /parse (with extraction)
+    // Convert displayed answer to JSON via /parse (with extraction + auto-download)
     parseBtn?.addEventListener('click', async () => {
       const full = ( $('answerPre')?.textContent || '' ).trim();
       if (!full || full === '(no answer)') { setStatus('Nothing to convert. Ask first.', true); return; }
@@ -193,16 +209,20 @@
       parseBtn.disabled = true; setStatus('Converting to JSON…');
       try {
         const {res, data} = await postJSON('/parse', { text });
+        const ok = res.ok && data?.ok !== false;
+        const toShow = ok ? (data.data ?? data) : data;
+        const pretty = JSON.stringify(toShow, null, 2);
         if (jsonBlock && jsonPre) {
           jsonBlock.classList.remove('hidden');
-          jsonPre.textContent = JSON.stringify(data, null, 2);
+          jsonPre.textContent = pretty;
         }
-        if (!res.ok || data?.ok === false) {
+        if (ok) {
+          autoDownloadJSON(toShow, 'protocol');
+          setStatus('Converted.');
+        } else {
           const code = res.status;
           const msg = (data && (data.error || data.message)) || 'Parser error';
           setStatus(`Convert error ${code}: ${msg}`);
-        } else {
-          setStatus('Converted.');
         }
       } catch (err) {
         console.error('[PARSE]', err); setStatus('Convert failed. See console.');
@@ -219,32 +239,34 @@
       document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
     });
 
-    // Edited file → JSON (uses /parse with extraction too if needed)
+    // Edited file → JSON (uses /parse; keep manual download link)
     editedConvertBtn?.addEventListener('click', async () => {
       const f = editedFile?.files && editedFile.files[0];
       if (!f) { setStatus('Choose a TXT/MD file to convert.', true); return; }
       editedConvertBtn.disabled = true; setStatus('Converting file…');
       try {
         let text = await f.text();
-        if (/##\s*SynthesisProtocol/.test(text)) {
+        if (/##\\s*Synthesis Protocol/.test(text)) {
           text = extractProtocolForParse(text);
         }
         const {res, data} = await postJSON('/parse', { text });
-        const pretty = JSON.stringify(data, null, 2);
+        const ok = res.ok && data?.ok !== false;
+        const toShow = ok ? (data.data ?? data) : data;
+        const pretty = JSON.stringify(toShow, null, 2);
         if (jsonBlock && jsonPre) { jsonBlock.classList.remove('hidden'); jsonPre.textContent = pretty; }
         if (editedDownloadJson) {
           const blob = new Blob([pretty], {type:'application/json'});
           const url = URL.createObjectURL(blob);
           editedDownloadJson.classList.remove('hidden');
           editedDownloadJson.href = url;
-          editedDownloadJson.download = (f.name.replace(/\.(txt|md)$/i,'') || 'converted') + '.json';
+          editedDownloadJson.download = (f.name.replace(/\\.(txt|md)$/i,'') || 'converted') + '.json';
         }
-        if (!res.ok || data?.ok === false) {
+        if (ok) {
+          setStatus('File converted.');
+        } else {
           const code = res.status;
           const msg = (data && (data.error || data.message)) || 'Parser error';
           setStatus(`Convert error ${code}: ${msg}`);
-        } else {
-          setStatus('File converted.');
         }
       } catch (err) {
         console.error('[PARSE file]', err); setStatus('File convert failed. See console.');
@@ -252,6 +274,7 @@
     });
 
     // Clear uploads (CSRF)
+    const clearBtn = $('clearBtn'); const uplMsg = $('uplMsg');
     clearBtn?.addEventListener('click', async () => {
       try {
         clearBtn.disabled = true;
