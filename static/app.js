@@ -1,144 +1,108 @@
-// ---- config ----
-const ENDPOINTS = {
-  health: '/health',
-  ask: '/ask',
-  upload: '/upload',
-  uploadBuiltin: '/upload_builtin',
-  uploadsList: '/uploads',
-  clearUploads: '/clear_uploads',
-  historyList: '/history'
-};
+(function () {
+  // Run after DOM is ready
+  document.addEventListener('DOMContentLoaded', () => {
+    const $ = (id) => document.getElementById(id);
 
-// ---- DOM helpers ----
-const $ = (id) => document.getElementById(id);
-const on = (el, ev, fn) => el && el.addEventListener(ev, fn);
-const show = (el, yes = true) => el && el.classList[yes ? 'remove' : 'add']('hidden');
-const text = (el, v = '') => { if (el) el.textContent = v; };
-const html = (el, v = '') => { if (el) el.innerHTML = v; };
+    // Core elements (IDs must match index.html)
+    const askBtn = $('askBtn');
+    const qInput = $('question');           // textarea
+    const answerPre = $('answerPre');       // <pre> for answer (markdown text for now)
+    const rationalePre = $('rationalePre'); // <pre> optional rationale
+    const askMsg = $('askMsg');             // status alert
+    const reasoningBtn = $('reasoningBtn'); // mode toggle
+    const robotBtn = $('robotBtn');         // mode toggle
 
-function setBusy(btn, busy = true) {
-  if (!btn) return;
-  const spin = btn.querySelector?.('.spinner');
-  if (spin) show(spin, busy);
-  btn.disabled = busy;
-}
-
-function toast(el, msg, type = 'success') {
-  if (!el) return;
-  el.className = `alert ${type}`;
-  text(el, msg);
-  show(el, true);
-}
-
-function ensureInteractive() {
-  ['modeRobot', 'modeReason', 'parseBtn', 'saveTxtBtn'].forEach(id => {
-    const el = $(id);
-    if (!el) return;
-    el.disabled = false;
-    el.style.pointerEvents = 'auto';
-    el.style.opacity = '1';
-    el.classList?.remove('disabled');
-  });
-}
-
-// ---- Health check ----
-async function checkHealth() {
-  const hs = $('healthStatus');
-  try {
-    const res = await fetch(ENDPOINTS.health, { cache: 'no-store', credentials: 'include' });
-    const ok = res.ok;
-    hs?.classList.toggle('ok', ok);
-    text(hs?.querySelector('.status-txt'), ok ? 'healthy' : 'degraded');
-  } catch {
-    hs?.classList.remove('ok');
-    text(hs?.querySelector('.status-txt'), 'offline');
-  }
-}
-
-// ---- Ask handler ----
-async function handleAsk() {
-  const btn = $('askBtn');
-  const msg = $('askMsg');
-  const qEl = $('questionInput');
-  const q = qEl?.value?.trim() || '';
-  const mode = $('modeReason')?.getAttribute('aria-checked') === 'true' ? 'reason' : 'robot';
-
-  if (!q) { toast(msg, 'Please enter a question.', 'error'); return; }
-  show(msg, false);
-  setBusy(btn, true);
-
-  try {
-    const res = await fetch(ENDPOINTS.ask, {
-      method: 'POST',
-      credentials: 'include',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ question: q, mode })
-    });
-
-    if (!res.ok) {
-      let body = ''; try { body = await res.text(); } catch {}
-      throw new Error(`HTTP ${res.status}${body ? ` – ${body.slice(0, 200)}` : ''}`);
+    if (!askBtn || !qInput) {
+      console.warn('[NanoChemGPT] Missing #askBtn or #question in DOM.');
+      return;
     }
 
-    const raw = await res.text();
-    let data; try { data = JSON.parse(raw); } catch { data = { answer: raw }; }
+    let mode = 'robot';
+    function setMode(next) {
+      mode = next;
+      if (robotBtn) robotBtn.setAttribute('aria-checked', String(next === 'robot'));
+      if (reasoningBtn) reasoningBtn.setAttribute('aria-checked', String(next === 'reasoning'));
+    }
+    robotBtn?.addEventListener('click', () => setMode('robot'));
+    reasoningBtn?.addEventListener('click', () => setMode('reasoning'));
+    setMode('robot'); // initialize
 
-    const answer = (data.answer ?? data.result ?? data.response ?? data.message ?? '').toString();
-    const rationale = (data.rationale ?? data.explanation ?? '').toString();
-    const refs = Array.isArray(data.refs) ? data.refs :
-                 (Array.isArray(data.references) ? data.references : []);
-    const sources = data.sources || {};
-    const usage = data.usage || {};
+    function readCsrfToken() {
+      const meta = document.querySelector('meta[name="csrf-token"]')?.content;
+      if (meta) return meta;
+      const m = document.cookie.match(/(?:^|;\s*)csrf_token=([^;]+)/);
+      return m ? decodeURIComponent(m[1]) : null;
+    }
 
-    text($('answerPre'), answer);
-    text($('rationalePre'), rationale);
-    html($('refsList'), refs.map(r => `<li>${r}</li>`).join(''));
-    show($('refsSection'), refs.length > 0);
+    async function callAsk(questionText) {
+      const headers = { 'Content-Type': 'application/json' };
+      const csrf = readCsrfToken();
+      if (csrf) headers['X-CSRFToken'] = csrf;
 
-    text($('srcUsedSummary'), usage.summary || (Object.keys(usage).length ? JSON.stringify(usage, null, 2) : ''));
-    text($('srcCtxVs'), (sources.ctx_vs && JSON.stringify(sources.ctx_vs, null, 2)) || '');
-    text($('srcCtxParsed'), (sources.ctx_parsed && JSON.stringify(sources.ctx_parsed, null, 2)) || '');
-    text($('srcCtxDb'), (sources.ctx_db && JSON.stringify(sources.ctx_db, null, 2)) || '');
+      const body = JSON.stringify({ question: questionText /*, mode*/ });
 
-    const hasAnswer = !!$('answerPre')?.textContent?.trim();
-    if ($('parseBtn')) $('parseBtn').disabled = !hasAnswer;
-    if ($('saveTxtBtn')) $('saveTxtBtn').disabled = !hasAnswer;
+      const res = await fetch('/ask', { method: 'POST', headers, body });
+      const raw = await res.text();
+      let data;
+      try { data = JSON.parse(raw); } catch { data = { answer: raw }; }
+      return { ok: res.ok, status: res.status, data };
+    }
 
-    ensureInteractive();
-    toast(msg, 'Done.', 'success');
-  } catch (err) {
-    toast(msg, `Ask failed: ${err.message}`, 'error');
-  } finally {
-    setBusy(btn, false);
-  }
-}
+    function setStatus(msg, show = true) {
+      if (!askMsg) return;
+      if (show) {
+        askMsg.classList.remove('hidden');
+        askMsg.textContent = msg;
+      } else {
+        askMsg.textContent = msg || '';
+        askMsg.classList.add('hidden');
+      }
+    }
 
-// ---- Mode toggle ----
-function toggleMode(which) {
-  const robot = $('modeRobot');
-  const reason = $('modeReason');
-  const r = which === 'robot';
-  robot?.setAttribute('aria-checked', r ? 'true' : 'false');
-  reason?.setAttribute('aria-checked', r ? 'false' : 'true');
-  ensureInteractive();
-}
+    function renderAnswer(payload) {
+      const { answer, rationale } = payload || {};
+      if (answerPre) {
+        
+        answerPre.textContent = (answer ?? '').trim() || '(no answer)';
+      }
+      if (rationalePre) {
+        rationalePre.textContent = (rationale ?? '').trim();
+      }
+    }
 
-// ---- Export answer ----
-function exportAnswer() {
-  const blob = new Blob([$('answerPre')?.textContent || ''], { type: 'text/plain;charset=utf-8' });
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = 'answer.txt';
-  a.click();
-  URL.revokeObjectURL(a.href);
-}
+    askBtn.addEventListener('click', async (e) => {
+      e.preventDefault();
+      const question = (qInput.value || '').trim();
+      if (!question) {
+        setStatus('Please enter a question.');
+        qInput.focus();
+        return;
+      }
 
-// ---- Init ----
-document.addEventListener('DOMContentLoaded', () => {
-  checkHealth();
-  on($('askBtn'), 'click', handleAsk);
-  on($('modeRobot'), 'click', () => toggleMode('robot'));
-  on($('modeReason'), 'click', () => toggleMode('reason'));
-  on($('saveTxtBtn'), 'click', exportAnswer);
-  // Add parseBtn wiring when parser is ready
-});
+      askBtn.disabled = true;
+      setStatus('Asking…');
+
+      try {
+        const resp = await callAsk(question);
+        renderAnswer(resp.data);
+        setStatus(resp.ok ? 'Done.' : `Error ${resp.status}`);
+        if (resp.status === 401) {
+        }
+      } catch (err) {
+        console.error('[NanoChemGPT] /ask failed', err);
+        setStatus('Request failed. See console.');
+      } finally {
+        askBtn.disabled = false;
+      }
+    });
+
+    qInput.addEventListener('keydown', (e) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+        askBtn.click();
+      }
+    });
+
+    const yr = document.getElementById('year');
+    if (yr) yr.textContent = String(new Date().getFullYear());
+  });
+})();
