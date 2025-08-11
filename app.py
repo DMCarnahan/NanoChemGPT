@@ -20,6 +20,7 @@ from internet_search import search_papers            # OpenAlex helper
 # ─── Directories & global paths ─────────────────────────────────────────── #
 
 BASE_DIR       = Path(__file__).resolve().parent
+BUILTIN_DIR    = Path(os.getenv("BUILTIN_DIR", BASE_DIR / "builtin")).resolve()
 UPLOADS_DIR    = Path(os.getenv("UPLOADS_DIR", "/mnt/data/uploads")).resolve()
 VECTORSTORE_DIR= Path(os.getenv("VECTORSTORE_DIR", "/mnt/data/index")).resolve()
 MECH_KB_DIR    = Path(os.getenv("MECH_KB_DIR", BASE_DIR / "mechanistic_kb")).resolve()
