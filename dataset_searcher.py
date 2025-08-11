@@ -25,28 +25,56 @@ def load_union_from_dir(root: str | Path, *, max_files: int = 500) -> pd.DataFra
     root = str(root)
     if not os.path.isdir(root):
         raise FileNotFoundError(f"Lookup directory does not exist: {root}")
-    candidates = [p for p in glob.glob(os.path.join(root, "**", "*"), recursive=True)
-                  if os.path.isfile(p)]
+
+    max_files = int(os.getenv("LOOKUP_MAX_FILES", str(max_files)))
+    max_file_mb = float(os.getenv("LOOKUP_MAX_FILE_MB", "20"))     # skip any single file > this
+    max_total_mb = float(os.getenv("LOOKUP_MAX_TOTAL_MB", "200"))  # stop loading once sum exceeds this
+    nrows_per_file = int(os.getenv("LOOKUP_NROWS_PER_FILE", "0"))  # CSV/TSV only; 0 = all rows
+
+    # list files then filter by extension
+    candidates = [p for p in glob.glob(os.path.join(root, "**", "*"), recursive=True) if os.path.isfile(p)]
     paths = [p for p in candidates if _is_supported(p)]
 
-    if not paths:
-        print(f"[dataset_search] no supported files under {root}")
-        return pd.DataFrame()
-
-    if len(paths) > max_files:
-        paths = paths[:max_files]
+    # sort smaller files first to pack more before hitting cap
+    def _size_mb(p): 
+        try: return os.path.getsize(p) / 1e6
+        except: return 0.0
+    paths.sort(key=_size_mb)
 
     frames = []
+    total_mb = 0.0
+    taken = 0
+
     for p in paths:
+        if taken >= max_files:
+            break
+        size_mb = _size_mb(p)
+        if size_mb > max_file_mb:
+            print(f"[dataset_search] skip big file ({size_mb:.1f} MB): {p}")
+            continue
+        if total_mb + size_mb > max_total_mb:
+            print(f"[dataset_search] total cap reached ({total_mb:.1f} MB), stopping load")
+            break
+
         try:
-            df = load_table(p)
+            kw = {}
+            # Only CSV/TSV can be row-limited cheaply
+            low = p.lower()
+            if nrows_per_file > 0 and (low.endswith(".csv") or low.endswith(".tsv")):
+                kw["nrows"] = nrows_per_file
+            df = load_table(p, **kw)
+            if df is None or df.empty:
+                continue
             df["__source__"] = os.path.relpath(p, root)
             frames.append(df)
+            total_mb += size_mb
+            taken += 1
         except Exception as e:
             print(f"[dataset_search] skip {p}: {e}")
             continue
 
     if not frames:
+        print(f"[dataset_search] no supported/loaded files under {root}")
         return pd.DataFrame()
 
     return pd.concat(frames, ignore_index=True, sort=False)
@@ -56,8 +84,7 @@ def get_env_searcher():
     droot = os.getenv("LOOKUP_DIR")
     try:
         if droot:
-            max_files = int(os.getenv("LOOKUP_MAX_FILES", "500"))
-            df = load_union_from_dir(droot, max_files=max_files)
+            df = load_union_from_dir(droot)    
         elif path:
             df = load_table(path)
         else:
@@ -71,7 +98,6 @@ def get_env_searcher():
 
     txt_cols = [c.strip() for c in os.getenv("LOOKUP_TEXT_COLS","").split(",") if c.strip()] or None
     return DatasetSearcher(df, text_cols=txt_cols)
-
 
 # ---------------- I/O helpers ----------------
 def _normalize_records(obj):

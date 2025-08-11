@@ -45,6 +45,9 @@
     "ORD_API_URL": "https://api.open-reaction-database.org/records",
     "FLASK_SECRET_KEY": "${{shared.FLASK_SECRET_KEY}}",
     "LOOKUP_DIR": "/mnt/data",
-    "LOOKUP_GLOB": "**/*.{csv,tsv,json,jsonl,parquet,xlsx}"
+    "LOOKUP_GLOB": "**/*.{csv,tsv,json,jsonl,parquet,xlsx}",
+    "LOOKUP_MAX_FILES": "10",
+    "LOOKUP_MAX_FILE_MB": "10",
+    "LOOKUP_MAX_TOTAL_MB": "100"
   }
 }
