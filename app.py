@@ -21,7 +21,7 @@ import vector_store as vs                     # add_to_store(text, tag), search(
 from converter import validate_step           # line-aware normalizer→dict (raises ValueError on bad format)
 from mongo_client import get_db, ping as mongo_ping
 from internet_search import search_papers     # OpenAlex helper (respects USER_AGENT env via your earlier fix)
-from duck_searcher import get_duck_searcher   # DuckDB/Parquet/CSV-backed searcher
+from DuckDB.duck_searcher import get_duck_searcher   # DuckDB/Parquet/CSV-backed searcher
 
 # ─────────────────────────────── Paths/Config ────────────────────────────── #
 BASE_DIR         = Path(__file__).resolve().parent
@@ -40,7 +40,6 @@ app = Flask(__name__, template_folder=str(TEMPLATES_DIR), static_folder=str(STAT
 app.config["MAX_CONTENT_LENGTH"] = 100 * 1024 * 1024  # 100 MB
 app.config["JSON_AS_ASCII"] = False  # allow UTF-8
 
-# CSRF (optional, if Flask-WTF installed)
 try:
     from flask_wtf.csrf import CSRFProtect, generate_csrf
     app.config['SECRET_KEY'] = os.getenv("FLASK_SECRET_KEY", "change-me")
