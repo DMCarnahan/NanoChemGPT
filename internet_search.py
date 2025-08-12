@@ -221,9 +221,12 @@ _MORPH = {
     "nanocube":["nanocube","nanocubes","cube","cubes","octahedron","octahedra","sphere","spheres"],
 }
 
-_ROUTES = ["polyol","hydrothermal","solvothermal","electrodeposition","seed-mediated",
-           "template","microwave","photochemical","galvanic","chemical reduction","PVP","CTAB",
-           "oleylamine","ethylene glycol"]
+_ROUTES = [
+    "polyol","hydrothermal","solvothermal","autoclave",  
+    "electrodeposition","seed-mediated","template","microwave",
+    "photochemical","galvanic","chemical reduction","PVP","CTAB",
+    "oleylamine","ethylene glycol",
+]
 
 _SCALE = ["facile","scalable","scaleable","gram-scale","large scale","high yield"]
 

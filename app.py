@@ -423,7 +423,8 @@ def ask():
             " - Include specific masses (mg) or mmol for reagents; volumes (mL) for liquids.\n"
             " - Specify temperatures (°C), ramp rates (°C/min), hold times (min/h), and atmosphere (Ar/N2/vacuum).\n"
             " - Include workup and purification (quench, washing/centrifugation, drying) with volumes.\n"
-            "No placeholders (avoid “e.g.”/“or”). Be decisive."
+            " - No placeholders (avoid “e.g.”/“or”). Be decisive.\n"
+            " - Output only the final protocol in markdown. Do not include any fenced blocks named reason or rationale in the answer. Put all reasoning in the separate rationale channel."
         )
         reasoning_rules = (
             " - Provide a mechanistic explanation and design considerations for the target.\n"
