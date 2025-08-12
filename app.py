@@ -410,16 +410,23 @@ def ask():
             "(e.g. “hydrothermal at 200 °C [3]”)." if want_inline else
             " - Inline numeric citations are optional for this request."
         )
+        acs_rule = (
+            " - Write the REFERENCES block in ACS format: author(s), title, journal, year, volume, pages, DOI."
+        )
 
         if mode == "reasoning":
             prompt = (
                 "You are NanoChemGPT. Use the CONTEXT and numbered REFERENCES.\n"
                 "Rules:\n"
                 " - Prefer CONTEXT and REFERENCES over general knowledge when relevant.\n"
+                " - For each bullet, quote or paraphrase a specific finding from CONTEXT or REFERENCES, and cite the source. Do not generalize or invent citations.\n"
                 " - If you use any content from CONTEXT, append [CTX] on that line.\n"
                 f"{inline_rule}\n"
                 " - If CONTEXT is insufficient, say so explicitly before generalizing.\n"
+                " - For each cited reference, briefly summarize the relevant finding and explain how it relates to aspect ratio and temperature.\n"
+                " - If no reference supports a statement, say so explicitly and do not cite it.\n"
                 f"{reasoning_rules}\n"
+                f"{acs_rule}\n"  
                 "Return exactly ONE block:\n"
                 "## Mechanistic reasoning\n"
                 "- bullet points with inline [n] and [CTX] where appropriate.\n\n"
@@ -436,6 +443,7 @@ def ask():
                 f"{inline_rule}\n"
                 " - If CONTEXT is insufficient, say so explicitly before generalizing.\n"
                 f"{robot_rules}\n"
+                f"{acs_rule}\n"  # <-- Add this line
                 "Return two blocks exactly in this order:\n"
                 "## Synthesis Protocol:\n"
                 "1. **Hardware & Glassware**:\n[]\n"

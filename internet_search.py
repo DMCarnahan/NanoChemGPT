@@ -114,12 +114,15 @@ def _pick_doi(work: dict) -> str:
         doi = doi.replace("https://doi.org/", "", 1)
     return doi
 
+def _pick_abstract(work: dict) -> str:
+    return _norm_str(work.get("abstract_inverted_index", ""))  # OpenAlex uses inverted index
+
 def search_papers(query: str, n: int = 6, *, sort: str = "cited_by_count:desc",
                   from_year: Optional[int] = None, to_year: Optional[int] = None,
-                  is_oa: Optional[bool] = None) -> List[dict]:
+                  is_oa: Optional[bool] = None, keywords: Optional[List[str]] = None) -> List[dict]:
     """
-    Return up to *n* dicts with keys: title, year, url, doi.
-    Optional filters: sort, from_year, to_year, is_oa.
+    Return up to *n* dicts with keys: title, year, url, doi, abstract, authors, journal.
+    Optionally filter results for keywords.
     """
     q = (query or "").strip()
     if not q:
@@ -136,7 +139,12 @@ def search_papers(query: str, n: int = 6, *, sort: str = "cited_by_count:desc",
             "year":  w.get("publication_year") or "",
             "url":   _pick_url(w),
             "doi":   _pick_doi(w),
+            "abstract": _pick_abstract(w),
+            "authors": [a.get("author", {}).get("display_name", "") for a in w.get("authorships", [])],
+            "journal": w.get("host_venue", {}).get("display_name", "")
         })
+    if keywords:
+        out = filter_results(out, keywords)
     return out
 
 def set_user_agent(email: str) -> None:
@@ -149,6 +157,21 @@ def set_user_agent(email: str) -> None:
         USER_AGENT = f"NanoChemGPT/1.0 (+mailto:{email})"
     else:
         raise ValueError("Please provide a valid email address for the User-Agent.")
+
+def build_chem_query(chem: str, property: str = "", method: str = "", extra: str = "") -> str:
+    parts = [chem]
+    if property: parts.append(property)
+    if method: parts.append(method)
+    if extra: parts.append(extra)
+    return " ".join(parts)
+
+def filter_results(results: List[dict], keywords: List[str]) -> List[dict]:
+    filtered = []
+    for r in results:
+        text = (r.get("title", "") + " " + r.get("abstract", "")).lower()
+        if all(k.lower() in text for k in keywords):
+            filtered.append(r)
+    return filtered if filtered else results  # fallback to all if none match
 
 __all__ = ["search_papers", "set_user_agent"]
 

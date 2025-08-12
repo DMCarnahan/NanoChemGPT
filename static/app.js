@@ -75,7 +75,12 @@ document.addEventListener('DOMContentLoaded', () => {
       rationalePre.textContent = data.rationale ?? '';
       if (Array.isArray(data.references) && data.references.length) {
         refsSection.classList.remove('hidden');
-        refsList.innerHTML = data.references.map(r => `<li>${r.title || 'ref'}</li>`).join('');
+        refsList.innerHTML = data.references.map((r, i) => {
+          const url = r.url || (r.doi ? `https://doi.org/${r.doi}` : "#");
+          const title = r.title || `Reference ${i + 1}`;
+          const year = r.year ? ` (${r.year})` : "";
+          return `<li><a href="${url}" target="_blank" rel="noopener">${title}${year}</a></li>`;
+        }).join('');
       } else {
         refsSection.classList.add('hidden');
         refsList.innerHTML = '';
