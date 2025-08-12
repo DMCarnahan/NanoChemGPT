@@ -134,9 +134,11 @@ document.addEventListener('DOMContentLoaded', () => {
         a.href = url;
         a.download = 'converted.json';
         document.body.appendChild(a); // Required for Firefox
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
+        setTimeout(() => {
+          a.click();
+          document.body.removeChild(a);
+          URL.revokeObjectURL(url);
+        }, 50);
       } else {
         jsonBlock.textContent = 'Error: ' + (data.error || 'unknown');
         document.getElementById('jsonBlock')?.classList.remove('hidden');

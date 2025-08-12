@@ -5,72 +5,119 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>NanoChemGPT</title>
   <meta name="csrf-token" content="{{ csrf_token() }}">
-  <link rel="stylesheet" href="/static/ui_ask_size.css">
   <link rel="icon" href="/static/favicon.ico">
+  <link rel="stylesheet" href="/static/ui_ask_size.css">
   <style>
-    :root {
-      --bg: #0b0f14; --bg-elev: #0f1520;
-      --card: #111827; --card-2: #0e1726;
-      --text: #e5e7eb; --text-muted: #a5b4cf;
-      --brand: #60a5fa; --brand-strong:#3b82f6;
-      --ok:#34d399; --warn:#f59e0b; --err:#ef4444;
-      --ring: 0 0 0 3px rgba(59,130,246,.35);
-      --radius: 16px;
+    /* ----------------------
+       Design tokens
+    ---------------------- */
+    :root{
+      --bg:#0b0f14;           /* app background */
+      --bg-elev:#0f1520;      /* elevated background */
+      --surface:#0d1420;      /* cards */
+      --surface-2:#0f1a2a;    /* cards subtle gradient end */
+      --text:#e6eaf2;         /* primary text */
+      --muted:#96a0b8;        /* secondary text */
+      --brand:#60a5fa;        /* brand */
+      --brand-strong:#3b82f6; /* brand deep */
+      --ok:#22c55e; --warn:#f59e0b; --err:#ef4444;
+      --border: color-mix(in srgb, var(--muted), transparent 80%);
+      --radius:16px;
       --shadow-1: 0 1px 2px rgba(0,0,0,.25), 0 8px 24px rgba(0,0,0,.35);
-      --shadow-2: 0 1px 2px rgba(0,0,0,.25), 0 12px 32px rgba(0,0,0,.45);
+      --shadow-2: 0 1px 2px rgba(0,0,0,.25), 0 12px 32px rgba(0,0,0,.5);
+      --ring: 0 0 0 3px rgba(96,165,250,.35);
       --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
-      --sans: system-ui, -apple-system, Segoe UI, Roboto, Inter, Cantarell, "Helvetica Neue", Arial, "Noto Sans";
+      --sans: Inter, system-ui, -apple-system, Segoe UI, Roboto, Cantarell, "Helvetica Neue", Arial, "Noto Sans";
     }
-    @media (prefers-color-scheme: light) {
-      :root {
-        --bg:#f7f9fc; --bg-elev:#fff; --card:#fff; --card-2:#f8fafc;
-        --text:#0b1220; --text-muted:#5b6b7d;
-        --brand:#2563eb; --brand-strong:#1d4ed8;
+    @media (prefers-color-scheme: light){
+      :root{
+        --bg:#f7f9fc; --bg-elev:#fff; --surface:#fff; --surface-2:#f7fafc;
+        --text:#0a1220; --muted:#5a6a7d; --border: color-mix(in srgb, var(--muted), transparent 75%);
         --shadow-1: 0 1px 2px rgba(0,0,0,.05), 0 8px 24px rgba(0,0,0,.08);
-        --shadow-2: 0 1px 2px rgba(0,0,0,.06), 0 12px 32px rgba(0,0,0,.12);
+        --shadow-2: 0 1px 2px rgba(0,0,0,.06), 0 12px 32px rgba(0,0,0,.14);
+        --ring: 0 0 0 3px rgba(37,99,235,.30);
       }
     }
-    *{box-sizing:border-box} html,body{height:100%}
-    body{margin:0;background:linear-gradient(180deg,var(--bg),var(--bg-elev));color:var(--text);font-family:var(--sans);line-height:1.45}
-    a{color:var(--brand);text-decoration:none} a:hover{text-decoration:underline}
+
+    /* ----------------------
+       Base
+    ---------------------- */
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{margin:0;background:linear-gradient(180deg,var(--bg),var(--bg-elev));color:var(--text);font-family:var(--sans);line-height:1.45;-webkit-font-smoothing:antialiased}
+    a{color:var(--brand);text-decoration:none}
+    a:hover{text-decoration:underline}
     .container{width:min(1100px,92vw);margin-inline:auto}
-    header.site{position:sticky;top:0;z-index:40;backdrop-filter:saturate(120%) blur(6px);background:color-mix(in srgb,var(--bg-elev),transparent 30%);border-bottom:1px solid color-mix(in srgb,var(--text-muted),transparent 85%)}
+
+    /* Utility */
+    .stack{display:flex;flex-direction:column;gap:1rem}
+    .cluster{display:flex;flex-wrap:wrap;gap:.6rem;align-items:center}
+    .muted{color:var(--muted)}
+    .small{font-size:.92rem}
+    .mt-2{margin-top:.5rem}.mt-3{margin-top:.75rem}.mt-4{margin-top:1rem}.mt-6{margin-top:1.5rem}
+    .hidden{display:none !important}
+    .visually-hidden{position:absolute!important;height:1px;width:1px;overflow:hidden;clip:rect(1px,1px,1px,1px);white-space:nowrap}
+
+    /* ----------------------
+       Header
+    ---------------------- */
+    header.site{position:sticky;top:0;z-index:40;backdrop-filter:saturate(120%) blur(6px);background:color-mix(in srgb, var(--bg-elev), transparent 25%);border-bottom:1px solid var(--border)}
     .topbar{display:flex;align-items:center;justify-content:space-between;padding:.9rem 0}
     .brand{display:flex;align-items:center;gap:.75rem;font-weight:700}
-    .brand .logo{width:28px;height:28px;display:grid;place-items:center;border-radius:8px;background:radial-gradient(65% 65% at 50% 35%,var(--brand),var(--brand-strong));box-shadow:var(--shadow-1)}
-    #healthStatus{display:flex;align-items:center;gap:.5rem;font-size:.9rem;color:var(--text-muted)}
+    .logo{width:28px;height:28px;display:grid;place-items:center;border-radius:8px;background:radial-gradient(65% 65% at 50% 35%,var(--brand),var(--brand-strong));box-shadow:var(--shadow-1)}
+    #healthStatus{display:flex;align-items:center;gap:.5rem;font-size:.9rem;color:var(--muted)}
     .status-dot{width:10px;height:10px;border-radius:50%;background:var(--warn);box-shadow:0 0 0 3px rgba(245,158,11,.15)}
+
+    /* ----------------------
+       Layout
+    ---------------------- */
     main{padding:1.5rem 0 3rem}
     .grid{display:grid;gap:1rem;grid-template-columns:repeat(12,minmax(0,1fr))}
-    .card{grid-column:span 12;background:linear-gradient(180deg,var(--card),var(--card-2));border:1px solid color-mix(in srgb,var(--text-muted),transparent 85%);border-radius:16px;padding:1.1rem;box-shadow:var(--shadow-1)}
-    @media(min-width:900px){.card.span-6{grid-column:span 6}.card.span-8{grid-column:span 8}.card.span-4{grid-column:span 4}}
-    .card-title{margin:0 0 .5rem;font-size:1.1rem;letter-spacing:.2px}
-    .subhead{margin:0 0 .25rem;font-size:.95rem;color:var(--text-muted);font-weight:600}
-    .row{display:flex;flex-wrap:wrap;gap:.6rem;align-items:center}
-    .btn{appearance:none;border:1px solid color-mix(in srgb,var(--brand),transparent 60%);background:linear-gradient(180deg,var(--brand),var(--brand-strong));color:#fff;font-weight:600;padding:.6rem .85rem;border-radius:12px;cursor:pointer;box-shadow:var(--shadow-1)}
-    .btn:hover{filter:brightness(1.05)} .btn.secondary{background:transparent;color:var(--text);border-color:color-mix(in srgb,var(--text),transparent 75%)} .btn.tertiary{background:transparent;color:var(--text-muted);border-color:color-mix(in srgb,var(--text),transparent 85%)}
-    .btn.tertiary.active {
-      background: #e0e0ff;
-      border-color: #4444aa;
-      color: #222;
+    .card{grid-column:span 12;background:linear-gradient(180deg,var(--surface),var(--surface-2));border:1px solid var(--border);border-radius:var(--radius);padding:1.1rem;box-shadow:var(--shadow-1)}
+    @media (min-width: 960px){
+      .card.span-8{grid-column:span 8}
+      .card.span-4{grid-column:span 4}
+      .card.span-6{grid-column:span 6}
     }
+    .card-title{margin:0 0 .35rem;font-size:1.05rem;letter-spacing:.2px}
+    .subhead{margin:0 0 .25rem;font-size:.95rem;color:var(--muted);font-weight:600}
+
+    /* ----------------------
+       Controls
+    ---------------------- */
+    .btn{appearance:none;border:1px solid color-mix(in srgb,var(--brand),transparent 60%);background:linear-gradient(180deg,var(--brand),var(--brand-strong));color:#fff;font-weight:600;padding:.6rem .85rem;border-radius:12px;cursor:pointer;box-shadow:var(--shadow-1);transition:transform .06s ease, filter .15s ease}
+    .btn:hover{filter:brightness(1.05)}
+    .btn:active{transform:translateY(1px)}
     .btn[disabled]{opacity:.6;cursor:not-allowed}
-    .textarea,input[type="file"],input[type="text"]{width:min(700px,100%);padding:.7rem .8rem;border-radius:12px;border:1px solid color-mix(in srgb,var(--text),transparent 80%);background:color-mix(in srgb,var(--bg-elev),transparent 0%);color:var(--text);outline:none;box-shadow:inset 0 2px 0 rgba(0,0,0,.05)}
+    .btn.secondary{background:transparent;color:var(--text);border-color:color-mix(in srgb,var(--text),transparent 75%)}
+    .btn.tertiary{background:transparent;color:var(--muted);border-color:color-mix(in srgb,var(--text),transparent 85%)}
+    .btn.tertiary.active{background:color-mix(in srgb,var(--brand),transparent 85%);color:var(--text);border-color:color-mix(in srgb,var(--brand),transparent 50%)}
+
+    .textarea,input[type="file"],input[type="text"]{width:min(720px,100%);padding:.72rem .84rem;border-radius:12px;border:1px solid color-mix(in srgb,var(--text),transparent 82%);background:color-mix(in srgb,var(--bg-elev),transparent 0%);color:var(--text);outline:none;box-shadow:inset 0 2px 0 rgba(0,0,0,.05)}
     .textarea:focus,input:focus{box-shadow:var(--ring);border-color:var(--brand)}
-    .small{font-size:.9rem}.muted{color:var(--text-muted)} .mt-2{margin-top:.5rem}.mt-3{margin-top:.75rem}.mt-4{margin-top:1rem}.mt-6{margin-top:1.5rem}
+
+    .toolbar{display:flex;flex-wrap:wrap;gap:.6rem;align-items:center}
+    .toolbar .spacer{flex:1 1 auto}
+
     .progress{width:100%;height:10px;border-radius:999px;background:color-mix(in srgb,var(--text),transparent 90%);overflow:hidden}
     .progress > #progressInner{height:100%;width:0%;background:linear-gradient(90deg,var(--brand),var(--brand-strong))}
+
+    .dropzone{border:1.5px dashed color-mix(in srgb,var(--text),transparent 70%);border-radius:14px;padding:1rem;text-align:center;background:color-mix(in srgb,var(--bg-elev),transparent 4%)}
+
+    .pre{background:color-mix(in srgb,var(--bg-elev),transparent 6%);border-radius:12px;padding:.8rem;overflow:auto;border:1px solid color-mix(in srgb,var(--text),transparent 85%);box-shadow:inset 0 1px 0 rgba(0,0,0,.08);font-family:var(--mono)}
+
     .alert{padding:.7rem .85rem;border-radius:12px;border:1px solid color-mix(in srgb,var(--text),transparent 80%);background:color-mix(in srgb,var(--bg-elev),transparent 10%);box-shadow:var(--shadow-1)}
     .badge{display:inline-block;padding:.15rem .45rem;border-radius:999px;background:color-mix(in srgb,var(--text),transparent 85%);color:var(--text);font-size:.75rem}
     .badge-ctx{background:#2dd4bf33;color:#2dd4bf}.badge-parsed{background:#60a5fa33;color:#60a5fa}.badge-db{background:#f59e0b33;color:#f59e0b}
-    .dropzone{border:1.5px dashed color-mix(in srgb,var(--text),transparent 70%);border-radius:14px;padding:1rem;text-align:center;background:color-mix(in srgb,var(--bg-elev),transparent 4%)}
-    .segmented{background:color-mix(in srgb,var(--text),transparent 92%);border:1px solid color-mix(in srgb,var(--text),transparent 80%);border-radius:12px;padding:.25rem}
-    .pre{background:color-mix(in srgb,var(--bg-elev),transparent 6%);border-radius:12px;padding:.8rem;overflow:auto;border:1px solid color-mix(in srgb,var(--text),transparent 85%);box-shadow:inset 0 1px 0 rgba(0,0,0,.08);font-family:var(--mono)}
-    .hidden{display:none !important}
-    footer.site{margin:2rem 0 1rem;color:var(--text-muted);font-size:.9rem;text-align:center}
+
+    footer.site{margin:2rem 0 1rem;color:var(--muted);font-size:.9rem;text-align:center}
+
+    details.clean > summary{cursor:pointer;user-select:none;padding:.25rem .4rem;border-radius:10px;color:var(--muted)}
+    details.clean[open] > summary{color:var(--text)}
   </style>
 </head>
 <body>
+  <a href="#main" class="visually-hidden">Skip to main content</a>
   <header class="site">
     <div class="container topbar" role="banner" aria-label="App header">
       <div class="brand">
@@ -79,7 +126,7 @@
             <path d="M6 3h12"/><path d="M9 3v5l-4 8a4 4 0 0 0 3.6 6h6.8A4 4 0 0 0 19 16l-4-8V3"/>
           </svg>
         </div>
-        <h1 style="font-size:1.1rem;margin:0">NanoChemGPT</h1>
+        <h1 style="font-size:1.12rem;margin:0">NanoChemGPT</h1>
       </div>
       <div id="healthStatus" class="status" role="status" aria-live="polite" aria-atomic="true" title="Service health">
         <span class="status-dot" aria-hidden="true"></span>
@@ -92,62 +139,26 @@
     <div id="global-errors" class="alert mt-3 hidden" role="alert" aria-live="assertive" aria-atomic="true"></div>
 
     <section class="grid mt-4">
-      <!-- Upload -->
-      <section class="card span-6" aria-labelledby="sec-upload">
-        <h2 id="sec-upload" class="card-title">Upload source (PDF / JSON / TXT)</h2>
-        <div class="row" role="group" aria-label="Upload source">
-          <input id="fileInput" type="file" accept=".pdf,.json,.txt,.md,.csv,.parquet" aria-describedby="fileHint">
-          <button id="uploadBtn" class="btn" type="button" aria-controls="result progressInner">Upload</button>
-        </div>
-        <div id="fileHint" class="small muted mt-2" role="note">Supported: .pdf, .json, .txt, .md, .csv</div>
-        <div class="progress mt-3" role="progressbar" aria-label="Upload progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
-          <div id="progressInner"></div>
-        </div>
-        <div id="result" class="alert mt-3 hidden" role="status" aria-live="polite" aria-atomic="true"></div>
-      </section>
-
-      <!-- Builtin uploader -->
-      <section class="card span-6" aria-labelledby="sec-builtin">
-        <h2 id="sec-builtin" class="card-title">Upload builtin data (.json / .json.xz)</h2>
-        <div id="builtinDrop" class="dropzone" tabindex="0" role="button" aria-label="Drop files or press Enter to choose">
-          <strong>Drag &amp; drop</strong> files here (or press Enter to choose)
-        </div>
-        <input id="builtinFile" type="file" class="hidden" accept=".json,.json.xz" multiple>
-        <div class="small muted mt-2">Files land in <code>BUILTIN_DIR</code>; <code>.json.xz</code> is decompressed server-side.</div>
-        <div id="builtinMsg" class="alert mt-2 hidden" role="status" aria-live="polite" aria-atomic="true"></div>
-      </section>
-
-      <!-- Ask -->
-      <section class="card span-8 mt-6" aria-labelledby="sec-ask">
+      <!-- Primary workspace -->
+      <section class="card span-8" aria-labelledby="sec-ask">
         <h2 id="sec-ask" class="card-title">Ask NanoChemGPT</h2>
+        <p class="small muted mt-2">Tip: Describe reagents, solvents, temps, and any constraints.</p>
         <label class="visually-hidden" for="question">Enter your question</label>
         <textarea id="question" class="textarea" rows="8" autocomplete="off" placeholder="Ask a synthesis question…" aria-describedby="askHelp"></textarea>
-        <div id="askHelp" class="small muted mt-2">Tip: Describe reagents, solvents, temps, and any constraints.</div>
 
-        <div class="row mt-3" role="group" aria-label="Ask and parse controls">
+        <div class="toolbar mt-3" role="group" aria-label="Ask toolbar">
           <button id="askBtn" class="btn" type="button" aria-controls="answerPre rationalePre refsSection askMsg">Ask</button>
-          <button id="parseBtn" class="btn secondary">Convert answer → JSON</button>
-          <div class="small muted mt-2" id="jsonFinePrint">
-            <em>Note: Conversion to JSON is only supported for facile reactions.</em>
-          </div>
-          <button id="saveTxtBtn" class="btn secondary">Export answer → .txt</button>
-          <div class="segmented" role="radiogroup" aria-label="Answer mode" style="display:flex;gap:6px;margin-left:8px;">
-            <button id="modeRobot" class="btn tertiary" role="radio" aria-checked="true">Robot mode</button>
+          <button id="parseBtn" class="btn secondary" type="button">Convert → JSON</button>
+          <button id="saveTxtBtn" class="btn secondary" type="button">Export → .txt</button>
+          <span class="spacer" aria-hidden="true"></span>
+          <div class="cluster segmented" role="radiogroup" aria-label="Answer mode">
+            <button id="modeRobot" class="btn tertiary active" role="radio" aria-checked="true">Robot mode</button>
             <button id="modeReason" class="btn tertiary" role="radio" aria-checked="false">Reasoning mode</button>
           </div>
         </div>
-
-        <section class="mt-3" aria-labelledby="sec-edited">
-          <h3 id="sec-edited" class="subhead">Upload edited answer (TXT/MD) → JSON</h3>
-          <div class="row" role="group" aria-label="Convert edited file">
-            <input id="editedFile" type="file" accept=".txt,.md" aria-label="Choose edited answer file">
-            <button id="editedConvertBtn" class="btn secondary" type="button" aria-controls="editedDownloadJson">Convert file</button>
-            <a id="editedDownloadJson" class="btn secondary hidden" href="#" download="converted.json" aria-hidden="true">Download JSON</a>
-          </div>
-        </section>
+        <div class="small muted mt-2" id="jsonFinePrint"><em>Note: Conversion to JSON is only supported for facile reactions.</em></div>
 
         <div id="askMsg" class="alert mt-3 hidden" role="status" aria-live="polite" aria-atomic="true"></div>
-        <div id="uplMsg" class="alert mt-2 hidden" role="status" aria-live="polite" aria-atomic="true"></div>
 
         <section class="mt-4" aria-labelledby="sec-answer">
           <h3 id="sec-answer" class="subhead">Answer</h3>
@@ -165,7 +176,7 @@
         </section>
 
         <section class="mt-4" aria-labelledby="sec-sources">
-          <details id="sourcesPanel">
+          <details id="sourcesPanel" class="clean">
             <summary class="subhead">Sources used (debug)</summary>
             <div class="small muted mt-2">
               <p>This shows the context chunks that were sent to the model for the last answer.</p>
@@ -187,47 +198,71 @@
         </section>
       </section>
 
-      <!-- History -->
-      <section class="card span-4 mt-6" aria-labelledby="sec-history">
-        <h2 id="sec-history" class="card-title">History (Q&amp;A)</h2>
-        <div class="row" role="group" aria-label="History filters and actions">
-          <input id="histQuery" class="textarea" placeholder="Filter (optional): keywords in question" autocomplete="off">
-          <button id="historyBtn" class="btn secondary" type="button" aria-controls="historyList histMsg">Refresh</button>
-          <button id="histMoreBtn" class="btn secondary" type="button" aria-controls="historyList histMsg">Load more</button>
-        </div>
-        <div id="histMsg" class="alert mt-2 hidden" role="status" aria-live="polite" aria-atomic="true"></div>
-        <ol id="historyList" class="mt-3 small"></ol>
-        <p class="small muted mt-2">Tip: Click a history item to load its answer/rationale back into the page.</p>
-      </section>
+      <!-- Sidebar -->
+      <aside class="card span-4" aria-labelledby="sec-quick">
+        <h2 id="sec-quick" class="card-title">Data & tools</h2>
 
-      <!-- Upload Browser -->
-      <section class="card span-6 mt-6" aria-labelledby="sec-uploads">
-        <h2 id="sec-uploads" class="card-title">Uploads</h2>
-        <div class="row" role="group" aria-label="Uploads actions">
-          <button id="uplRefreshBtn" class="btn secondary" type="button" aria-controls="uplList uplMsg">Refresh</button>
-        </div>
-        <div id="uplMsg" class="alert mt-2 hidden" role="status" aria-live="polite" aria-atomic="true"></div>
-        <ol id="uplList" class="mt-3 small"></ol>
-      </section>
+        <details class="clean" open>
+          <summary class="subhead">Upload source (PDF / JSON / TXT)</summary>
+          <div class="stack mt-2" role="group" aria-label="Upload source">
+            <div class="cluster">
+              <input id="fileInput" type="file" accept=".pdf,.json,.txt,.md,.csv,.parquet" aria-describedby="fileHint">
+              <button id="uploadBtn" class="btn secondary" type="button" aria-controls="result progressInner">Upload</button>
+            </div>
+            <div id="fileHint" class="small muted" role="note">Supported: .pdf, .json, .txt, .md, .csv</div>
+            <div class="progress" role="progressbar" aria-label="Upload progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+              <div id="progressInner"></div>
+            </div>
+            <div id="result" class="alert hidden" role="status" aria-live="polite" aria-atomic="true"></div>
+          </div>
+        </details>
 
-      <!-- Maintenance -->
-      <section class="card span-6 mt-6" aria-labelledby="sec-maint">
-        <h2 id="sec-maint" class="card-title">Maintenance</h2>
-        <div class="row">
-          <button
-            id="clearBtn"
-            class="btn secondary"
-            type="button"
-            aria-controls="uplMsg uplList"
-            aria-label="Clear uploaded memory">
-            Clear uploaded memory
-          </button>
-          <div id="clearMsg" class="alert mt-2 hidden" role="status" aria-live="polite" aria-atomic="true"></div>
-        </div>
-        <p class="small muted mt-3">
-          Tip: Mount a volume at <code>/data</code> and set <code>HF_HOME=/data/hf</code> so model downloads persist.
-        </p>
-      </section>
+        <details class="clean mt-3">
+          <summary class="subhead">Upload builtin data (.json / .json.xz)</summary>
+          <div class="stack mt-2">
+            <div id="builtinDrop" class="dropzone" tabindex="0" role="button" aria-label="Drop files or press Enter to choose">
+              <strong>Drag &amp; drop</strong> files here (or press Enter to choose)
+            </div>
+            <input id="builtinFile" type="file" class="hidden" accept=".json,.json.xz" multiple>
+            <div class="small muted">Files land in <code>BUILTIN_DIR</code>; <code>.json.xz</code> is decompressed server-side.</div>
+            <div id="builtinMsg" class="alert hidden" role="status" aria-live="polite" aria-atomic="true"></div>
+          </div>
+        </details>
+
+        <details class="clean mt-3" open>
+          <summary class="subhead">History (Q&amp;A)</summary>
+          <div class="stack mt-2">
+            <div class="cluster" role="group" aria-label="History actions">
+              <input id="histQuery" class="textarea" placeholder="Filter (optional): keywords in question" autocomplete="off">
+              <button id="historyBtn" class="btn secondary" type="button" aria-controls="historyList histMsg">Refresh</button>
+              <button id="histMoreBtn" class="btn secondary" type="button" aria-controls="historyList histMsg">Load more</button>
+            </div>
+            <div id="histMsg" class="alert hidden" role="status" aria-live="polite" aria-atomic="true"></div>
+            <ol id="historyList" class="mt-2 small"></ol>
+            <p class="small muted">Tip: Click a history item to load its answer/rationale back into the page.</p>
+          </div>
+        </details>
+
+        <details class="clean mt-3">
+          <summary class="subhead">Uploads browser</summary>
+          <div class="stack mt-2">
+            <div class="cluster" role="group" aria-label="Uploads actions">
+              <button id="uplRefreshBtn" class="btn secondary" type="button" aria-controls="uplList uplMsg">Refresh</button>
+            </div>
+            <div id="uplMsg" class="alert hidden" role="status" aria-live="polite" aria-atomic="true"></div>
+            <ol id="uplList" class="mt-2 small"></ol>
+          </div>
+        </details>
+
+        <details class="clean mt-3">
+          <summary class="subhead">Maintenance</summary>
+          <div class="stack mt-2">
+            <button id="clearBtn" class="btn secondary" type="button" aria-controls="uplMsg uplList" aria-label="Clear uploaded memory">Clear uploaded memory</button>
+            <div id="clearMsg" class="alert hidden" role="status" aria-live="polite" aria-atomic="true"></div>
+            <p class="small muted">Tip: Mount a volume at <code>/data</code> and set <code>HF_HOME=/data/hf</code> so model downloads persist.</p>
+          </div>
+        </details>
+      </aside>
     </section>
   </main>
 
@@ -236,9 +271,7 @@
   </footer>
 
   <noscript>
-    <div class="alert" role="alert">
-      This app requires JavaScript to function.
-    </div>
+    <div class="alert" role="alert">This app requires JavaScript to function.</div>
   </noscript>
 
   <script>
