@@ -330,6 +330,7 @@ def ask():
             rationale = m.group(2).strip()
             answer = text[:m.start()].strip()
             return answer, rationale
+        # If no rationale found, treat all as answer, rationale is empty
         return text, ""
 
     try:

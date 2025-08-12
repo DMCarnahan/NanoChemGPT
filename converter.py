@@ -489,6 +489,8 @@ def validate_step(text: str) -> Dict[str, Any]:
     data: Dict[str, Any] = {}
     for lineno, line in enumerate(raw.splitlines(), start=1):
         if not line.strip(): continue
+        if ":" not in line:
+            raise ValueError(f"line {lineno}: missing ':' separator")
         key, value = line.split(":", 1)
         key = key.strip(); value = value.strip()
         if not key: raise ValueError(f"line {lineno}: key is empty")
@@ -523,5 +525,6 @@ if __name__ == "__main__":
     if args.out == "-":
         print(js)
     else:
-        pathlib.Path(args.out).write_text(js, encoding="utf-8")
+        with open(args.out, "w", encoding="utf-8") as f:
+            f.write(js)
         print(f"Wrote {args.out}")
