@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import os
-from warnings import filters
 import httpx
 import functools
 import json
@@ -14,62 +13,53 @@ BASE = "https://api.openalex.org/works"
 
 # ---- User-Agent resolution (env-aware) ----
 _DEFAULT_APP = "NanoChemGPT/1.0"
-_CONTACT_ENV_KEYS = ("OPENALEX_CONTACT_EMAIL", "CONTACT_EMAIL", "ADMIN_EMAIL")
+OPENALEX_BASE = "https://api.openalex.org/works"
+OPENALEX_TEXT = "https://api.openalex.org/text"
 
-def _build_user_agent_from_env() -> Optional[str]:
+_CONTACT_ENV_KEYS = ("OPENALEX_CONTACT", "CONTACT_EMAIL", "ADMIN_EMAIL")
+
+_DEFAULT_APP = "NanoChemGPT/1.0"
+
+def _get_contact_email() -> str:
+    for k in _CONTACT_ENV_KEYS:
+        v = os.getenv(k, "").strip()
+        if "@" in v:
+            return v
+    return ""
+
+def _build_user_agent_from_env() -> str:
+    # 1) Respect explicit override
     ua = os.getenv("USER_AGENT", "").strip()
     if ua:
         return ua
-    for key in _CONTACT_ENV_KEYS:
-        email = os.getenv(key, "").strip()
-        if email and "@" in email:
-            return f"{_DEFAULT_APP} (+mailto:{email})"
-    return None
+    # 2) Otherwise include mailto if we have it
+    email = _get_contact_email()
+    return f"{_DEFAULT_APP} (mailto:{email})" if email else _DEFAULT_APP
 
+USER_AGENT = _build_user_agent_from_env()
+CONTACT_EMAIL = _get_contact_email()
 
-USER_AGENT: str = _build_user_agent_from_env() or _DEFAULT_APP
-
-# ---- TTL cache (5 minutes) ----
-_TTL_SECONDS = 300
-_cache: Dict[str, tuple[float, Any]] = {}  # url -> (timestamp, payload)
-
-def _get_cached(url: str) -> Optional[Any]:
-    ts_payload = _cache.get(url)
-    if not ts_payload:
-        return None
-    ts, payload = ts_payload
-    if (time.time() - ts) > _TTL_SECONDS:
-        _cache.pop(url, None)
-        return None
-    return payload
-
-def _set_cached(url: str, payload: Any) -> None:
-    _cache[url] = (time.time(), payload)
+HTTP_HEADERS = {
+    "User-Agent": USER_AGENT,
+    "Accept": "application/json",
+}
 
 # ---- HTTP with retries ----
-def _http_get_json(url: str, *, timeout: float = 30.0, retries: int = 3, backoff: float = 0.75) -> Any:
-    cached = _get_cached(url)
-    if cached is not None:
-        return cached
-
-    last_exc: Optional[Exception] = None
-    headers = {"User-Agent": USER_AGENT or _DEFAULT_APP}
-    for attempt in range(1, retries + 1):
+def _http_get_json(url: str, *, tries: int = 3, timeout: float = 20.0) -> dict | None:
+    last_err = None
+    for i in range(tries):
         try:
-            with httpx.Client(timeout=timeout, headers=headers) as client:
-                resp = client.get(url)
-                resp.raise_for_status()
-                # Try JSON; if it fails, raise
-                data = resp.json()
-                _set_cached(url, data)
-                return data
+            with httpx.Client(headers=HTTP_HEADERS, timeout=timeout) as client:
+                r = client.get(url)
+            if r.status_code == 403:
+                time.sleep(0.6 * (i + 1))
+            r.raise_for_status()
+            return r.json()
         except Exception as e:
-            last_exc = e
-            if attempt >= retries:
-                break
-            time.sleep(backoff * attempt)  # simple linear backoff
-    raise RuntimeError(f"GET failed after {retries} attempts: {last_exc}")
-
+            last_err = e
+            time.sleep(0.4 * (i + 1))
+    print(f"[basic_search] OpenAlex fetch failed: {last_err}")
+    return None
 
 def _invert_openalex_abstract(inv: Any) -> str:
     """Rebuild plain-text abstract from OpenAlex abstract_inverted_index."""
@@ -173,20 +163,24 @@ def _build_boolean_query(question: str) -> str:
     if scale:  clauses.append(f"({_or_group(scale)})")
     return " AND ".join(clauses)
 
+def _strip_openalex_id(x: str) -> str:
+    # accepts 'https://openalex.org/T123' or 'T123' -> 'T123'
+    return x.rsplit("/", 1)[-1]
+
 def _aboutness_topics_from_text(text: str, k: int = 3) -> list[str]:
-    # Use OpenAlex /text endpoint to get Topics, then return top-k IDs
-    base = "https://api.openalex.org/text"
-    url = f"{base}?{urllib.parse.urlencode({'title': text[:2000]})}"
+    url = f"{OPENALEX_TEXT}?{urllib.parse.urlencode({'title': text[:2000], 'mailto': CONTACT_EMAIL})}"
     data = _http_get_json(url) or {}
-    topic_ids = []
+    out = []
     pt = (data.get("primary_topic") or {}).get("id")
     if pt:
-        topic_ids.append(pt)
+        out.append(_strip_openalex_id(pt))
     for t in (data.get("topics") or [])[:k]:
         tid = t.get("id")
-        if tid and tid not in topic_ids:
-            topic_ids.append(tid)
-    return topic_ids
+        if tid:
+            tid = _strip_openalex_id(tid)
+            if tid not in out:
+                out.append(tid)
+    return out
 
 def _is_offtopic(rec: dict) -> bool:
     t = (rec.get("title","") + " " + rec.get("journal","")).lower()
@@ -194,43 +188,44 @@ def _is_offtopic(rec: dict) -> bool:
     return any(b in t for b in bad)
 
 # ---- Query builder ----
-
 def _build_url_smart(question: str, *, n: int = 6, from_year: int | None = 2005,
                      lang: str = "en", use_aboutness: bool = True) -> str:
     per_page = max(1, min(n, 25))
-    filters = []
+    filters: List[str] = []
 
-    # 1) Title+abstract boolean search (precise)
-    q = _build_boolean_query(question)
-    filters.append(f'title_and_abstract.search:({q})')
+    # 1) precise title+abstract search
+    search_expr = _build_boolean_query(question)
+    filters.append(f'title_and_abstract.search:({search_expr})')
 
-    # 2) Narrow by type/year/language
+    # 2) narrow by type/year/language
     filters.append("type:journal-article")
     if lang:
         filters.append(f"language:{lang}")
     if from_year:
         filters.append(f"from_publication_date:{from_year}-01-01")
 
-    # 3) Optional topic filter using /text aboutness
+    # 3) topics via /text "aboutness"
+    tids: List[str] = []
     if use_aboutness:
         tids = _aboutness_topics_from_text(question, k=3)
         if tids:
+            # pass bare IDs ('T12345'), let urlencode escape pipes
             filters.append("topics.id:" + "|".join(tids))
 
     params = {
-        # use hyphenated key (official)
         "per-page": str(per_page),
-        # relevance_score is available because we used a search filter
         "sort": "relevance_score:desc",
-        # keep response lean
         "select": ",".join([
             "id","display_name","publication_year","primary_location",
             "doi","abstract_inverted_index","authorships","host_venue",
             "type","language","topics","primary_topic","cited_by_count"
-        ])
+        ]),
+        "filter": ",".join(filters),
     }
-    params["filter"] = ",".join(filters)
-    qs = urllib.parse.urlencode(params, doseq=True, safe=":|(),\" ")
+    if CONTACT_EMAIL:
+        params["mailto"] = CONTACT_EMAIL
+
+    qs = urllib.parse.urlencode(params, doseq=True, safe=':()," ')  
     return f"{BASE}?{qs}"
 
 def _norm_str(x: Any) -> str:
@@ -285,14 +280,18 @@ def search_papers(query: str, n: int = 6, *,
 
 def set_user_agent(email: str) -> None:
     """
-    Set a compliant User-Agent with a contact email, per OpenAlex guidelines.
+    Set a compliant User-Agent and contact email.
     """
-    global USER_AGENT
+    global USER_AGENT, CONTACT_EMAIL, HTTP_HEADERS
     email = (email or "").strip()
-    if email and "@" in email:
-        USER_AGENT = f"NanoChemGPT/1.0 (+mailto:{email})"
-    else:
+    if not ("@" in email):
         raise ValueError("Please provide a valid email address for the User-Agent.")
+    CONTACT_EMAIL = email
+    USER_AGENT = f"NanoChemGPT/1.0 (mailto:{email})"
+    HTTP_HEADERS = {
+        "User-Agent": USER_AGENT,
+        "Accept": "application/json",
+    }
 
 def build_chem_query(chem: str, property: str = "", method: str = "", extra: str = "") -> str:
     parts = [chem]

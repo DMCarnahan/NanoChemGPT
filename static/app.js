@@ -104,55 +104,53 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Parse button (Convert to JSON + Download)
   parseBtn?.addEventListener('click', async () => {
-    const text = answerPre?.textContent || '';
-    if (!text) return;
+  const text = answerPre?.textContent || '';
+  if (!text) return;
 
-    parseBtn.disabled = true;
-    parseBtn.textContent = 'Converting…';
+  parseBtn.disabled = true;
+  parseBtn.textContent = 'Converting…';
 
-    try {
-      const headers = { 'Content-Type': 'application/json' };
-      const csrf = readCsrfToken();
-      if (csrf) headers['X-CSRFToken'] = csrf;
+  try {
+    const headers = { 'Content-Type': 'application/json' };
+    const csrf = readCsrfToken();
+    if (csrf) headers['X-CSRFToken'] = csrf;
 
-      const res = await fetch('/parse', {
-        method: 'POST',
-        headers,
-        body: JSON.stringify({ text })
-      });
+    const res = await fetch('/parse', {
+      method: 'POST',
+      headers,
+      body: JSON.stringify({ text })
+    });
 
-      const data = await res.json();
-      if (data.ok && data.data) {
-        const pretty = JSON.stringify(data.data, null, 2);
-        jsonBlock.textContent = pretty;
-        document.getElementById('jsonBlock')?.classList.remove('hidden');
-
-        // Download the JSON file
-        const blob = new Blob([pretty], { type: 'application/json' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = 'converted.json';
-        document.body.appendChild(a); // Required for Firefox
-        setTimeout(() => {
-          a.click();
-          document.body.removeChild(a);
-          URL.revokeObjectURL(url);
-        }, 50);
-      } else {
-        jsonBlock.textContent = 'Error: ' + (data.error || 'unknown');
-        document.getElementById('jsonBlock')?.classList.remove('hidden');
-      }
-
-    } catch (err) {
-      console.error(err);
-      jsonBlock.textContent = 'Request failed';
-      document.getElementById('jsonBlock')?.classList.remove('hidden');
-    } finally {
-      parseBtn.disabled = false;
-      parseBtn.textContent = 'Convert → JSON';
+    const data = await res.json();
+    if (!data || !data.ok || !data.data) {
+      throw new Error(data?.error || 'Parse failed');
     }
-  });
+
+    const pretty = JSON.stringify(data.data, null, 2);
+
+    if (jsonBlock) jsonBlock.textContent = pretty;
+    document.getElementById('jsonBlock')?.classList.remove('hidden');
+
+    // Trigger download
+    const blob = new Blob([pretty], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = (data.filename || 'converted') + '.json';
+    document.body.appendChild(a); // needed for Firefox
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+
+  } catch (err) {
+    console.error(err);
+    if (jsonBlock) jsonBlock.textContent = 'Request failed';
+    document.getElementById('jsonBlock')?.classList.remove('hidden');
+  } finally {
+    parseBtn.disabled = false;
+    parseBtn.textContent = 'Convert → JSON';
+  }
+});
 
   // Upload button
   uploadBtn?.addEventListener('click', async () => {
