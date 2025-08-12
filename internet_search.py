@@ -187,46 +187,64 @@ def _is_offtopic(rec: dict) -> bool:
     bad = ("battery","supercapacitor","review")
     return any(b in t for b in bad)
 
+def _build_search_string(question: str) -> str:
+    """
+    Return a plain string for OpenAlex `search=` (no boolean operators).
+    Includes detected material/morphology/routes/scale terms, de-duplicated.
+    """
+    mats  = _extract_material_terms(question)        
+    morph = _extract_morphology_terms(question)      
+    routes = _ROUTES
+    scale  = _SCALE
+
+    terms = []
+    terms.extend(mats)
+    terms.extend(morph)
+    terms.extend(routes)
+    terms.extend(scale)
+
+    # Remove operators if the question had them
+    BAD = {"and", "or", "not", "(", ")", "AND", "OR", "NOT"}
+    terms = [t for t in dict.fromkeys(terms) if t and t not in BAD]
+
+    # Join with spaces; avoid quotes/parentheses entirely
+    return " ".join(terms)
+
 # ---- Query builder ----
 def _build_url_smart(question: str, *, n: int = 6, from_year: int | None = 2005,
-                     lang: str = "en", use_aboutness: bool = True) -> str:
+                     lang: str = "en", use_aboutness: bool = True) -> tuple[str, list[str]]:
     per_page = max(1, min(n, 25))
     filters: List[str] = []
 
-    # 1) precise title+abstract search
-    search_expr = _build_boolean_query(question)
-    filters.append(f'title_and_abstract.search:({search_expr})')
-
-    # 2) narrow by type/year/language
+    # Narrow by type/year/language ONLY via filters
     filters.append("type:journal-article")
     if lang:
         filters.append(f"language:{lang}")
     if from_year:
         filters.append(f"from_publication_date:{from_year}-01-01")
 
-    # 3) topics via /text "aboutness"
     tids: List[str] = []
     if use_aboutness:
         tids = _aboutness_topics_from_text(question, k=3)
         if tids:
-            # pass bare IDs ('T12345'), let urlencode escape pipes
-            filters.append("topics.id:" + "|".join(tids))
+            filters.append("topics.id:" + "|".join(tids))  # let urlencode encode pipes
 
     params = {
         "per-page": str(per_page),
-        "sort": "relevance_score:desc",
+        "sort": "relevance_score:desc",  # works with `search=`
         "select": ",".join([
             "id","display_name","publication_year","primary_location",
             "doi","abstract_inverted_index","authorships","host_venue",
             "type","language","topics","primary_topic","cited_by_count"
         ]),
         "filter": ",".join(filters),
+        "search": _build_search_string(question),
     }
     if CONTACT_EMAIL:
         params["mailto"] = CONTACT_EMAIL
 
-    qs = urllib.parse.urlencode(params, doseq=True, safe=':()," ')  
-    return f"{BASE}?{qs}"
+    qs = urllib.parse.urlencode(params, doseq=True, safe=':," ')  # no parentheses or '|'
+    return f"{BASE}?{qs}", tids
 
 def _norm_str(x: Any) -> str:
     if x is None:
@@ -257,8 +275,20 @@ def search_papers(query: str, n: int = 6, *,
     if not q:
         return []
 
-    url = _build_url_smart(q, n=n, from_year=from_year, use_aboutness=use_aboutness)
-    data = _http_get_json(url) or {}
+    url, tids = _build_url_smart(q, n=n, from_year=from_year, use_aboutness=use_aboutness)
+    data = _http_get_json(url)
+
+    # Fallback 1: retry without topics filter if the first call failed (403 or None)
+    if (not data) and tids:
+        url, _ = _build_url_smart(q, n=n, from_year=from_year, use_aboutness=False)
+        data = _http_get_json(url)
+
+    # Fallback 2: if still nothing, remove the year bound as a last resort
+    if not data:
+        url, _ = _build_url_smart(q, n=n, from_year=None, use_aboutness=False)
+        data = _http_get_json(url)
+
+    data = data or {}
     results = data.get("results", []) or []
 
     out: List[dict] = []
