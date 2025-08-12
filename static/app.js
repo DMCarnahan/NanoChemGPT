@@ -20,6 +20,9 @@ document.addEventListener('DOMContentLoaded', () => {
   const modeRobot = $('modeRobot');
   const modeReason = $('modeReason');
   const saveTxtBtn = $('saveTxtBtn');
+  const builtinDrop = $('builtinDrop');
+  const builtinFile = $('builtinFile');
+  const builtinMsg = $('builtinMsg');
 
   let mode = 'robot';
 
@@ -202,5 +205,48 @@ document.addEventListener('DOMContentLoaded', () => {
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
   });
+
+  // Built-in file upload
+  builtinDrop?.addEventListener('click', () => builtinFile?.click());
+  builtinDrop?.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') builtinFile?.click();
+  });
+  builtinDrop?.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    builtinDrop.classList.add('dragover');
+  });
+  builtinDrop?.addEventListener('dragleave', () => {
+    builtinDrop.classList.remove('dragover');
+  });
+  builtinDrop?.addEventListener('drop', (e) => {
+    e.preventDefault();
+    builtinDrop.classList.remove('dragover');
+    if (e.dataTransfer.files.length) {
+      builtinFile.files = e.dataTransfer.files;
+      uploadBuiltinFiles(e.dataTransfer.files);
+    }
+  });
+  builtinFile?.addEventListener('change', () => {
+    if (builtinFile.files.length) uploadBuiltinFiles(builtinFile.files);
+  });
+
+  async function uploadBuiltinFiles(files) {
+    if (!files.length) return;
+    builtinMsg.textContent = 'Uploading…';
+    builtinMsg.classList.remove('hidden');
+    try {
+      const fd = new FormData();
+      for (const file of files) fd.append('file', file);
+      const res = await fetch('/upload_builtin', {
+        method: 'POST',
+        body: fd
+      });
+      const json = await res.json();
+      builtinMsg.textContent = json.ok ? 'Uploaded OK' : 'Error: ' + (json.error || 'unknown');
+    } catch (err) {
+      builtinMsg.textContent = 'Upload failed';
+      console.error(err);
+    }
+  }
 
 });

@@ -436,7 +436,7 @@ def ask():
                 " - If CONTEXT is insufficient, say so explicitly before generalizing.\n"
                 f"{robot_rules}\n"
                 "Return two blocks exactly in this order:\n"
-                "## Synthesis Protocol\n"
+                "## Synthesis Protocol:\n"
                 "1. **Hardware & Glassware**:\n[]\n"
                 "2. **Materials**:\n[]\n"
                 "3. **Procedure**\n[]\n\n"
@@ -699,6 +699,20 @@ def handle_err(e):
 @app.errorhandler(413)
 def too_large(e):
     return jsonify(error="File bigger than 100 MB — compress or split it."), 413
+
+@app.post("/upload_builtin")
+def upload_builtin():
+    files = request.files.getlist("file")
+    if not files:
+        return jsonify({"ok": False, "error": "No files uploaded"}), 400
+    saved = []
+    for f in files:
+        fname = secure_filename(f.filename)
+        dest = BUILTIN_DIR / fname
+        dest.parent.mkdir(parents=True, exist_ok=True)
+        f.save(dest)
+        saved.append(fname)
+    return jsonify({"ok": True, "files": saved})
 
 if __name__ == "__main__":
     app.run(
