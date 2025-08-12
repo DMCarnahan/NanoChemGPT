@@ -20,14 +20,221 @@ DEVICE_IDS = {
     "sonicator_id": "US1",
 }
 
-TAG_RX = re.compile(r"\s*\[(?:CTX|DB|PARSED|GEN|\d+)\]\s*$")
+FENCE_START_RX = re.compile(r"^\s*```")                    # start of any fenced block
+NON_PROC_HEAD_RX = re.compile(
+    r"^\s*#{1,6}\s*(references?|sources?|bibliography|rationale|reasoning|notes|discussion|supplementary|appendix|acknowledge?ments?)\b",
+    re.I
+)
+INLINE_TAG_RX = re.compile(r"\s*\[(?:CTX|DB|PARSED|GEN|\d+)\]\s*", re.I)
+
+# quantities like: 0.5 mmol | 58 mg | 10 mL | 1–2 mmol (range ok)
+_AMOUNT_UNIT = r"(?:~?\d+(?:[.\u2013\u2014-]\d+)?\s*(?:µ?u?L|mL|ml|L|l|mg|g|µg|ug|mol|mmol|µmol|umol)\b)"
+
+# split boundary: comma / + / "and" / "along with" / "together with"
+# only split if the next token looks like a fresh quantity+unit
+SPLIT_BOUNDARY_RX = re.compile(
+    rf"\s*(?:,|\+|\band\b|\balong with\b|\btogether with\b)\s*(?=(?:{_AMOUNT_UNIT}))",
+    re.I,
+)
+
+# Canonicalize unit spellings
+_UNIT_CANON = {
+    "l": "L", "L": "L",
+    "ml": "mL", "mL": "mL",
+    "ul": "µL", "uL": "µL", "µl": "µL", "µL": "µL",
+    "g": "g", "mg": "mg", "µg": "µg", "ug": "µg",
+    "mol": "mol", "mmol": "mmol", "µmol": "µmol", "umol": "µmol",
+    "m": "M", "M": "M", "mm": "mM", "mM": "mM", "µM": "µM", "uM": "µM",
+    "wt%": "wt%", "vol%": "vol%"
+}
+
+# Amount (mass/volume/moles) like: 98 mg | 10 mL | 0.5 mmol | 1–2 mmol
+_AMOUNT_RE = r"(?P<approx>[~≈])?\s*(?P<val>\d+(?:\.\d+)?(?:[–-]\d+(?:\.\d+)?)?)\s*(?P<unit>µ?u?L|mL|ml|L|l|mg|g|µg|ug|mol|mmol|µmol|umol)\b"
+
+# Secondary amount in parentheses: (98 mg), (10 mL)
+_PAREN_AMOUNT_RX = re.compile(r"\(\s*(?P<val>\d+(?:\.\d+)?)\s*(?P<unit>µ?u?L|mL|ml|L|l|mg|g|µg|ug|mol|mmol|µmol|umol)\s*\)")
+
+# Concentration form: 0.1 M HAuCl4 [in water]
+_CONC_RX = re.compile(
+    r"(?P<approx>[~≈])?\s*(?P<val>\d+(?:\.\d+)?)\s*(?P<unit>M|mM|µM|uM)\s+(?P<name>[^(),;]+?)(?:\s+in\s+(?P<solvent>[^(),;]+))?\b",
+    re.I
+)
+
+# Leading amount form: 98 mg PVP | 0.5 mmol of copper(II) acetate ...
+_LEAD_AMT_RX = re.compile(
+    rf"{_AMOUNT_RE}" + r"\s*(?:of\s+)?(?P<name>.+?)\s*(?P<paren>\([^)]*\))?\s*$",
+    re.I
+)
+
+# Loose "about/approximately" flags anywhere
+_APPROX_WORD_RX = re.compile(r"\b(about|approximately|approx\.)\b", re.I)
+
+def _canon_unit(u: str) -> str:
+    return _UNIT_CANON.get((u or "").strip(), (u or "").strip())
+
+def _to_float_range(s: str) -> tuple[float, float] | tuple[float, None]:
+    """Parse '1–2' or '1-2' into (1.0, 2.0); else single -> (x, None)."""
+    s = s.replace("–", "-")
+    if "-" in s and not s.startswith("-"):
+        a, b = s.split("-", 1)
+        try:
+            return (float(a), float(b))
+        except Exception:
+            pass
+    try:
+        return (float(s), None)
+    except Exception:
+        return (None, None)
 
 def strip_tags(s: str) -> str:
-    return TAG_RX.sub("", s).strip()
+    s = _clean_unicode(s)
+    s = re.sub(r"`{3,}.*$", "", s)
+    s = INLINE_TAG_RX.sub(" ", s)
+    s = re.sub(r"</?[^>]+>", "", s)   # <-- new
+    s = s.replace("**","").replace("__","")
+    s = re.sub(r"\s{2,}", " ", s)
+    return s.strip()
+
+def split_reagent_phrases(text: str) -> list[str]:
+    """
+    Split a multi-reagent phrase into separate items:
+    e.g., '0.5 mmol Cu(OAc)2 (98 mg) and 0.5 mmol PVP (58 mg)'
+      -> ['0.5 mmol Cu(OAc)2 (98 mg)', '0.5 mmol PVP (58 mg)']
+    Only splits where a new quantity+unit begins; avoids over-splitting names.
+    """
+    s = (text or "").strip()
+    if not s:
+        return []
+    parts = re.split(SPLIT_BOUNDARY_RX, s)
+    out = []
+    for p in parts:
+        p = p.strip().strip(",").strip()
+        if p:
+            out.append(p)
+    return out
+
+def parse_reagent_phrase_to_struct(s: str) -> dict:
+    """
+    Parse a single reagent phrase into a structured dict.
+    Supports:
+      - '0.5 mmol copper(II) acetate monohydrate (98 mg)'
+      - '98 mg PVP'
+      - '10 mL ethylene glycol'
+      - '0.1 M HAuCl4 in water'
+    Returns a dict with keys:
+      name, amount, amount_unit, amount_range, alt_amount, alt_unit,
+      concentration, conc_unit, solvent, approx, original
+    """
+    original = s
+    s = strip_tags(_clean_unicode((s or "").strip()))
+    approx = bool(_APPROX_WORD_RX.search(s))
+
+    # 1) Try concentration pattern first
+    m = _CONC_RX.search(s)
+    if m:
+        val = float(m.group("val"))
+        unit = _canon_unit(m.group("unit"))
+        name = m.group("name").strip()
+        solvent = (m.group("solvent") or "").strip() or None
+        approx = approx or bool(m.group("approx"))
+        return {
+            "name": name,
+            "amount": None,
+            "amount_unit": None,
+            "amount_range": None,
+            "alt_amount": None,
+            "alt_unit": None,
+            "concentration": val,
+            "conc_unit": unit,
+            "solvent": solvent,
+            "approx": approx,
+            "original": original
+        }
+
+    # 2) Try leading amount pattern
+    m = _LEAD_AMT_RX.match(s)
+    if m:
+        rng = _to_float_range(m.group("val"))
+        amount = rng[0]
+        amount_range = None
+        if rng[1] is not None:
+            amount_range = [rng[0], rng[1]]
+
+        unit = _canon_unit(m.group("unit"))
+        name = (m.group("name") or "").strip().strip(",;")
+        approx = approx or bool(m.group("approx"))
+
+        # Optional secondary amount in parentheses
+        alt_amount = None
+        alt_unit = None
+        par = m.group("paren") or ""
+        pm = _PAREN_AMOUNT_RX.search(par)
+        if pm:
+            alt_amount = float(pm.group("val"))
+            alt_unit = _canon_unit(pm.group("unit"))
+
+        return {
+            "name": name,
+            "amount": amount,
+            "amount_unit": unit,
+            "amount_range": amount_range,
+            "alt_amount": alt_amount,
+            "alt_unit": alt_unit,
+            "concentration": None,
+            "conc_unit": None,
+            "solvent": None,
+            "approx": approx,
+            "original": original
+        }
+
+    # 3) Fallback: just return name
+    return {
+        "name": s,
+        "amount": None,
+        "amount_unit": None,
+        "amount_range": None,
+        "alt_amount": None,
+        "alt_unit": None,
+        "concentration": None,
+        "conc_unit": None,
+        "solvent": None,
+        "approx": approx,
+        "original": original
+    }
 
 def _clean_unicode(s: str) -> str:
     s = unicodedata.normalize("NFKC", s)
     return s.replace("° ", "°").replace("–", "-").replace("—", "-")
+
+def _normalize_reagents_inplace(record: dict) -> None:
+    # reagents: flatten and split strings
+    reag = record.get("reagents", [])
+    flat: list[str] = []
+    for item in (reag if isinstance(reag, list) else [reag]):
+        if isinstance(item, str):
+            flat.extend(split_reagent_phrases(item))
+        elif item:
+            # preserve dicts/structured entries 
+            flat.append(item)
+    record["reagents"] = flat
+
+    solute_str = record.get("solute", "")
+    if isinstance(solute_str, str) and solute_str.strip():
+        record["solutes"] = split_reagent_phrases(solute_str)
+
+def _add_structured_reagents_inplace(record: dict) -> None:
+    """
+    Populate record['reagents_structured'] from record['reagents'] (strings).
+    Also populate record['solutes_structured'] from record['solutes'] if present.
+    """
+    reag = record.get("reagents", []) or []
+    if not isinstance(reag, list):
+        reag = [reag]
+    record["reagents_structured"] = [parse_reagent_phrase_to_struct(x) for x in reag if isinstance(x, str) and x.strip()]
+
+    solutes = record.get("solutes", []) or []
+    if isinstance(solutes, list) and solutes:
+        record["solutes_structured"] = [parse_reagent_phrase_to_struct(x) for x in solutes if isinstance(x, str) and x.strip()]
 
 # -------- Units parsing --------
 def find_temp_c(t: str) -> Optional[float]:
@@ -219,6 +426,21 @@ def detect_solution_prep(line: str) -> Optional[Dict]:
             }
     return None
 
+def detect_add_solvent(line: str) -> Optional[Dict]:
+    s = strip_tags(_clean_unicode(line.strip()))
+    m = re.search(
+        r"\badd\s+(?P<vol>[\d\.]+)\s*(?P<vunit>µ?u?L|mL|ml|l|L)\s+of\s+(?P<solvent>.+?)\s+to\s+(?:the\s+)?(?:solution|mixture|suspension|dispersion)\b",
+        s, re.I
+    )
+    if not m:
+        return None
+    return {
+        "action": "add_solvent",
+        "volume": float(m.group("vol")),
+        "volume_units": m.group("vunit"),
+        "solvent": m.group("solvent").strip()
+    }
+
 def detect_add(line: str) -> Optional[Dict]:
     s = strip_tags(_clean_unicode(line.strip()))
     m = re.search(r"\b(add|charge)\s+(?:the\s+)?(?P<src>.+?)\s+to\s+(?:the\s+)?(?P<dst>.+?)\b", s, re.I)
@@ -241,7 +463,7 @@ def detect_stir(line: str) -> Optional[Dict]:
 
 def detect_heat(line: str) -> Optional[List[Dict]]:
     s = strip_tags(_clean_unicode(line.strip()))
-    if not re.search(r"\bheat|\bmaintain|\bhold", s, re.I): return None
+    if not re.search(r"\b(heat|maintain|hold)\b", s, re.I): return None
     temp = find_temp_c(s) or DEFAULTS["room_temp_C"]
     minutes = find_minutes(s) or 60.0
     return [{"action":"heat_to","temperature_C": temp}, {"action":"hold","minutes": minutes}]
@@ -415,15 +637,24 @@ def extract_steps(markdown_text: str) -> List[str]:
     lines = markdown_text.splitlines()
     in_proc = False; steps = []; buf = []
     for line in lines:
-        if re.match(r"\s*3\.\s*\*\*Procedure\*\*:", line):
-            in_proc = True; continue
+        if re.match(r"^\s*\d+\.\s*\*\*Procedure\*\*:", line):
+            in_proc = True
+            continue
         if in_proc:
+            # hard stops to avoid pulling rich-text sections
+            if FENCE_START_RX.match(line) or NON_PROC_HEAD_RX.match(line):
+                break
+
             if re.match(r"\s*\d+\.\s", line):
-                if buf: steps.append(" ".join(buf).strip()); buf = []
+                if buf:
+                    steps.append(" ".join(buf).strip()); buf = []
                 buf.append(re.sub(r"^\s*\d+\.\s*", "", line).strip())
             else:
-                if line.strip(): buf.append(line.strip())
-    if buf: steps.append(" ".join(buf).strip())
+                # ignore empty or fence continuation lines if any slipped in
+                if line.strip() and not line.strip().startswith("```"):
+                    buf.append(line.strip())
+    if buf:
+        steps.append(" ".join(buf).strip())
     return [strip_tags(s) for s in steps if s.strip()]
 
 # -------- Main converter --------
@@ -439,7 +670,7 @@ def convert_text_to_robot_ops(text: str) -> Dict:
         weigh = detect_weigh(step)
         if weigh:
             target_vessel = vessels.primary_vessel or vessels.ensure_glassware("Beaker")
-            records.append({
+            record = {
                 "action": "weigh",
                 "vessel": target_vessel,
                 "reagent": weigh["reagent"],
@@ -448,27 +679,33 @@ def convert_text_to_robot_ops(text: str) -> Dict:
                 "ops": [{"op": "weigh", "reagent": weigh["reagent"], "amount": weigh["amount"], "unit": weigh["unit"]}],
                 "raw": step,
                 "reagents": [weigh["reagent"]]
-            })
+            }
+            _normalize_reagents_inplace(record)
+            _add_structured_reagents_inplace(record)
+            records.append(record)
             continue
 
         # Transfer (explicit)
         transfer_exp = detect_transfer_explicit(step)
         if transfer_exp:
             target_vessel = vessels.ensure_glassware(transfer_exp["target"])
-            records.append({
+            record = {
                 "action": "transfer",
                 "vessel": target_vessel,
                 "ops": [{"op": "transfer", "to": transfer_exp["target"], "tube": f"{target_vessel}_tube"}],
                 "raw": step,
                 "reagents": []
-            })
+            }
+            _normalize_reagents_inplace(record)
+            _add_structured_reagents_inplace(record)
+            records.append(record)
             continue
 
         # Dissolve
         dissolve = detect_dissolve(step)
         if dissolve:
             target_vessel = vessels.primary_vessel or vessels.ensure_glassware("Beaker")
-            records.append({
+            record = {
                 "action": "dissolve",
                 "vessel": target_vessel,
                 "solute": dissolve["solute"],
@@ -484,20 +721,26 @@ def convert_text_to_robot_ops(text: str) -> Dict:
                 ],
                 "raw": step,
                 "reagents": [dissolve["solute"], dissolve["solvent"]]
-            })
+            }
+            _normalize_reagents_inplace(record)
+            _add_structured_reagents_inplace(record)
+            records.append(record)
             continue
 
         # Isolate/filter
         isolate = detect_filter_isolate(step)
         if isolate:
             target_vessel = vessels.primary_vessel or vessels.ensure_glassware("Beaker")
-            records.append({
+            record = {
                 "action": "isolate",
                 "vessel": target_vessel,
                 "ops": [{"op": "filter", "vessel": target_vessel}, {"op": "collect", "vessel": target_vessel}],
                 "raw": step,
                 "reagents": []
-            })
+            }
+            _normalize_reagents_inplace(record)
+            _add_structured_reagents_inplace(record)
+            records.append(record)
             continue
 
         # Solution preparation
@@ -509,7 +752,7 @@ def convert_text_to_robot_ops(text: str) -> Dict:
             vid = vessels.ensure_glassware(label, prefer_capacity_ml=vol_ml, explicit_hardware_hint=explicit)
             vessels.map_contents(vid, f"{prep['solvent']} {prep['concentration']} {prep['concentration_units']} solution of {prep['solute']}")
             hw_id = vessels.vessel_hardware(vid)
-            records.append({
+            record = {
                 "action":"dispense",
                 "vessel": vid,
                 "hardware_id": hw_id,
@@ -522,17 +765,39 @@ def convert_text_to_robot_ops(text: str) -> Dict:
                 "reagents": [prep["solute"], prep["solvent"]],
                 "ops": ops_for_dispense(vid, hw_id, prep["solute"], prep["solvent"], prep["volume"], prep["volume_units"]),
                 "raw": step,
-            })
+            }
+            _normalize_reagents_inplace(record)
+            _add_structured_reagents_inplace(record)
+            records.append(record)
             continue
 
         # Additions (with optional temp/rate/time)
+        solv = detect_add_solvent(step)
+        if solv:
+            target_vessel = vessels.primary_vessel or vessels.ensure_glassware("Beaker")
+            record = {
+                "action": "add_solvent",
+                "vessel": target_vessel,
+                "solvent": solv["solvent"],
+                "volume": solv["volume"],
+                "volume_units": solv["volume_units"],
+                "reagents": [solv["solvent"]],
+                "ops": [{"op": "add_solvent", "vessel": target_vessel, "solvent": solv["solvent"],
+                        "volume": solv["volume"], "volume_units": solv["volume_units"]}],
+                "raw": step
+            }
+            _normalize_reagents_inplace(record)
+            _add_structured_reagents_inplace(record)
+            records.append(record)
+            continue
+
         add = detect_add(step)
         if add:
             src_key = re.sub(r"^\bthe\b\s+","",add["source_name"], flags=re.I).strip()
             dst_key = re.sub(r"^\bthe\b\s+","",add["target_name"], flags=re.I).strip()
             src_vid = vessels.ensure_glassware(src_key) if "beaker" in src_key.lower() or "flask" in src_key.lower() else (vessels.primary_vessel or vessels.ensure_glassware("Beaker"))
             dst_vid = vessels.ensure_glassware(dst_key) if "beaker" in dst_key.lower() or "flask" in dst_key.lower() else (vessels.primary_vessel or vessels.ensure_glassware("Beaker"))
-            records.append({
+            record = {
                 "action": "add",
                 "source_vessel": src_vid,
                 "target_vessel": dst_vid,
@@ -543,18 +808,24 @@ def convert_text_to_robot_ops(text: str) -> Dict:
                 "minutes": add.get("minutes"),
                 "ops": ops_for_add(src_vid, dst_vid, add["rate"], temperature_C=add.get("temperature_C"), minutes=add.get("minutes")),
                 "raw": step,
-            })
+            }
+            _normalize_reagents_inplace(record)
+            _add_structured_reagents_inplace(record)
+            records.append(record)
             continue
 
         # Stirring
         st = detect_stir(step)
         if st:
             target_vessel = vessels.primary_vessel or vessels.ensure_glassware("Beaker")
-            records.append({
+            record = {
                 "action":"stir","vessel":target_vessel,"reagents":[],
                 "minutes":st["minutes"], "temperature_C":st["temperature_C"], "rpm":st["rpm"],
                 "ops":ops_for_stir(target_vessel, st["minutes"], st["rpm"], st["temperature_C"]), "raw": step
-            })
+            }
+            _normalize_reagents_inplace(record)
+            _add_structured_reagents_inplace(record)
+            records.append(record)
             continue
 
         # Heating
@@ -562,100 +833,127 @@ def convert_text_to_robot_ops(text: str) -> Dict:
         if ht:
             target_vessel = vessels.primary_vessel or vessels.ensure_glassware("Beaker")
             temp = ht[0]["temperature_C"]; minutes = ht[1]["minutes"]
-            records.append({
+            record = {
                 "action":"heat_hold","vessel":target_vessel,"reagents":[],
                 "minutes": minutes, "temperature_C": temp,
                 "ops": ops_for_heat(target_vessel, temp, minutes), "raw": step
-            })
+            }
+            _normalize_reagents_inplace(record)
+            _add_structured_reagents_inplace(record)
+            records.append(record)
             continue
 
         # Cooling
         cl = detect_cool(step)
         if cl:
             target_vessel = vessels.primary_vessel or vessels.ensure_glassware("Beaker")
-            records.append({
+            record = {
                 "action":"cool_to","vessel":target_vessel,"reagents":[],
                 "temperature_C": cl["temperature_C"],
                 "ops": [{"op":"set_hotplate_temperature","hotplate_id":DEVICE_IDS["hotplate_id"],"temperature_C":cl["temperature_C"]}],
                 "raw": step
-            })
+            }
+            _normalize_reagents_inplace(record)
+            _add_structured_reagents_inplace(record)
+            records.append(record)
             continue
 
         # Sonication
         so = detect_sonicate(step)
         if so:
             target_vessel = vessels.primary_vessel or vessels.ensure_glassware("Beaker")
-            records.append({
+            record = {
                 "action":"sonicate","vessel":target_vessel,"reagents":[],
                 "minutes": so["minutes"],
                 "ops": [{"op":"sonicate","sonicator_id":DEVICE_IDS["sonicator_id"],"minutes":so["minutes"]}],
                 "raw": step
-            })
+            }
+            _normalize_reagents_inplace(record)
+            _add_structured_reagents_inplace(record)
+            records.append(record)
             continue
 
         # Filtration / washing / drying
         filt = detect_filter(step)
         if filt:
             target_vessel = vessels.primary_vessel or vessels.ensure_glassware("Beaker")
-            records.append({"action":"postprocess","vessel":target_vessel,"reagents":[],"ops":ops_for_postproc(target_vessel,filt), "raw": step})
+            record = {"action":"postprocess","vessel":target_vessel,"reagents":[],"ops":ops_for_postproc(target_vessel,filt), "raw": step}
+            _normalize_reagents_inplace(record)
+            _add_structured_reagents_inplace(record)
+            records.append(record)
             continue
 
         wd = detect_wash_dry(step)
         if wd:
             target_vessel = vessels.primary_vessel or vessels.ensure_glassware("Beaker")
-            records.append({"action":"postprocess","vessel":target_vessel,"reagents":[],"ops":ops_for_postproc(target_vessel,wd), "raw": step})
+            record = {"action":"postprocess","vessel":target_vessel,"reagents":[],"ops":ops_for_postproc(target_vessel,wd), "raw": step}
+            _normalize_reagents_inplace(record)
+            _add_structured_reagents_inplace(record)
+            records.append(record)
             continue
 
         # Resuspend
         res = detect_resuspend(step)
         if res:
             target_vessel = vessels.primary_vessel or vessels.ensure_glassware("Beaker")
-            records.append({
+            record = {
                 "action": "resuspend",
                 "vessel": target_vessel,
                 "ops": [{"op": "resuspend", "tube": f"{target_vessel}_tube"}],
                 "raw": step,
                 "reagents": []
-            })
+            }
+            _normalize_reagents_inplace(record)
+            _add_structured_reagents_inplace(record)
+            records.append(record)
             continue
 
         # Collect
         col = detect_collect(step)
         if col:
             target_vessel = vessels.primary_vessel or vessels.ensure_glassware("Beaker")
-            records.append({
+            record = {
                 "action": "collect",
                 "vessel": target_vessel,
                 "ops": [{"op": "collect", "tube": f"{target_vessel}_tube"}],
                 "raw": step,
                 "reagents": []
-            })
+            }
+            _normalize_reagents_inplace(record)
+            _add_structured_reagents_inplace(record)
+            records.append(record)
             continue
 
         # Discard
         dis = detect_discard(step)
         if dis:
             target_vessel = vessels.primary_vessel or vessels.ensure_glassware("Beaker")
-            records.append({
+            record = {
                 "action": "discard",
                 "vessel": target_vessel,
                 "ops": [{"op": "discard_supernatant", "tube": f"{target_vessel}_tube"}],
                 "raw": step,
                 "reagents": []
-            })
+            }
+            _normalize_reagents_inplace(record)
+            _add_structured_reagents_inplace(record)
+            records.append(record)
             continue
 
         # Transfer
         tra = detect_transfer(step)
         if tra:
             target_vessel = vessels.primary_vessel or vessels.ensure_glassware("Beaker")
-            records.append({
+            record = {
                 "action": "transfer",
                 "vessel": target_vessel,
                 "ops": [{"op": "transfer", "to": tra["target"], "tube": f"{target_vessel}_tube"}],
                 "raw": step,
                 "reagents": []
-            })
+            }
+            _normalize_reagents_inplace(record)
+            _add_structured_reagents_inplace(record)
+            records.append(record)
             continue
 
         # Fallback generic process node
@@ -667,7 +965,7 @@ def convert_text_to_robot_ops(text: str) -> Dict:
             # Try all detectors again for each substep
             weigh = detect_weigh(sub)
             if weigh:
-                records.append({
+                record = {
                     "action": "weigh",
                     "vessel": target_vessel,
                     "reagent": weigh["reagent"],
@@ -676,21 +974,27 @@ def convert_text_to_robot_ops(text: str) -> Dict:
                     "ops": [{"op": "weigh", "reagent": weigh["reagent"], "amount": weigh["amount"], "unit": weigh["unit"]}],
                     "raw": sub,
                     "reagents": [weigh["reagent"]]
-                })
+                }
+                _normalize_reagents_inplace(record)
+                _add_structured_reagents_inplace(record)
+                records.append(record)
                 continue
             transfer_exp = detect_transfer_explicit(sub)
             if transfer_exp:
-                records.append({
+                record = {
                     "action": "transfer",
                     "vessel": target_vessel,
                     "ops": [{"op": "transfer", "to": transfer_exp["target"], "tube": f"{target_vessel}_tube"}],
                     "raw": sub,
                     "reagents": []
-                })
+                }
+                _normalize_reagents_inplace(record)
+                _add_structured_reagents_inplace(record)
+                records.append(record)
                 continue
             dissolve = detect_dissolve(sub)
             if dissolve:
-                records.append({
+                record = {
                     "action": "dissolve",
                     "vessel": target_vessel,
                     "solute": dissolve["solute"],
@@ -706,61 +1010,82 @@ def convert_text_to_robot_ops(text: str) -> Dict:
                     ],
                     "raw": sub,
                     "reagents": [dissolve["solute"], dissolve["solvent"]]
-                })
+                }
+                _normalize_reagents_inplace(record)
+                _add_structured_reagents_inplace(record)
+                records.append(record)
                 continue
             isolate = detect_filter_isolate(sub)
             if isolate:
-                records.append({
+                record = {
                     "action": "isolate",
                     "vessel": target_vessel,
                     "ops": [{"op": "filter", "vessel": target_vessel}, {"op": "collect", "vessel": target_vessel}],
                     "raw": sub,
                     "reagents": []
-                })
+                }
+                _normalize_reagents_inplace(record)
+                _add_structured_reagents_inplace(record)
+                records.append(record)
                 continue
             # ...existing fallback detectors (resuspend, collect, discard, transfer)...
             res = detect_resuspend(sub)
             if res:
-                records.append({
+                record = {
                     "action": "resuspend",
                     "vessel": target_vessel,
                     "ops": [{"op": "resuspend", "tube": f"{target_vessel}_tube"}],
                     "raw": sub,
                     "reagents": []
-                })
+                }
+                _normalize_reagents_inplace(record)
+                _add_structured_reagents_inplace(record)
+                records.append(record)
                 continue
             col = detect_collect(sub)
             if col:
-                records.append({
+                record = {
                     "action": "collect",
                     "vessel": target_vessel,
                     "ops": [{"op": "collect", "tube": f"{target_vessel}_tube"}],
                     "raw": sub,
                     "reagents": []
-                })
+                }
+                _normalize_reagents_inplace(record)
+                _add_structured_reagents_inplace(record)
+                records.append(record)
                 continue
             dis = detect_discard(sub)
             if dis:
-                records.append({
+                record = {
                     "action": "discard",
                     "vessel": target_vessel,
                     "ops": [{"op": "discard_supernatant", "tube": f"{target_vessel}_tube"}],
                     "raw": sub,
                     "reagents": []
-                })
+                }
+                _normalize_reagents_inplace(record)
+                _add_structured_reagents_inplace(record)
+                records.append(record)
                 continue
             tra = detect_transfer(sub)
             if tra:
-                records.append({
+                record = {
                     "action": "transfer",
                     "vessel": target_vessel,
                     "ops": [{"op": "transfer", "to": tra["target"], "tube": f"{target_vessel}_tube"}],
                     "raw": sub,
                     "reagents": []
-                })
+                }
+                _normalize_reagents_inplace(record)
+                _add_structured_reagents_inplace(record)
+                records.append(record)
                 continue
             # If still nothing, add as process
-            records.append({"action": "process", "vessel": target_vessel, "reagents": [], "ops": [], "raw": sub})
+            record = {"action": "process", "vessel": target_vessel, "reagents": [], "ops": [], "raw": sub}
+            _normalize_reagents_inplace(record)
+            _add_structured_reagents_inplace(record)
+            records.append(record)
 
     return {
         "hardware": hardware,
@@ -770,7 +1095,6 @@ def convert_text_to_robot_ops(text: str) -> Dict:
         "defaults": DEFAULTS,
         "steps": records,
     }
-
 # -------- Validation helpers (unchanged API) --------
 def validate_step(text: str) -> Dict[str, Any]:
     if not isinstance(text, str): raise ValueError("input must be a string")
