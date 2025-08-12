@@ -187,17 +187,14 @@ def detect_solution_prep(line: str) -> Optional[Dict]:
             rf"""dissolv\w*\s+(?P<solute>.+?)\s+in\s+(?P<vol>[\d\.]+)\s*(?P<vunit>µ?u?L|mL|ml|l|L)\s+of\s+(?P<solvent>.+?)\s+
                 to\s+(?:make|form|yield|obtain)\s+a\s+([\d\.]+)\s*({_CONC_UNIT_RX})\s+.+?\s+solution""",
             re.I|re.X),
+        re.compile(
+            r"dissolv\w*\s+(?P<solute>.+?)\s+in\s+(?P<vol>[\d\.]+)\s*(?P<vunit>µ?u?L|mL|ml|l|L)\s+of\s+(?P<solvent>.+?)(?:\.|$)",
+            re.I
+        ),
     ]
     for rx in pats:
         m = rx.search(s)
         if m:
-            try:
-                conc_val = float(m.group(1))
-            except Exception:
-                conc_val = None
-            cu = m.group(2) if m.groups() else "M"
-            if cu:
-                cu = cu.replace(" ", "")
             solute = m.groupdict().get("solute","").strip()
             vol = float(m.group("vol"))
             vunit = m.group("vunit")
@@ -205,7 +202,21 @@ def detect_solution_prep(line: str) -> Optional[Dict]:
             hint = None
             mh = re.search(r"in a\s+(\d+\s*(?:µ?u?L|mL|L)\s+(?:glass\s+)?(?:beaker|flask))", s, re.I)
             if mh: hint = mh.group(1)
-            return {"action":"dispense","solute":solute,"solvent":solvent,"concentration":conc_val,"concentration_units":cu,"volume":vol,"volume_units":vunit,"hardware_hint":hint}
+            conc_val, conc_unit = None, None
+            conc_match = re.search(r"(\d+(?:\.\d+)?)\s*(M|mM|%)\s+solution", s)
+            if conc_match:
+                conc_val = float(conc_match.group(1))
+                conc_unit = conc_match.group(2)
+            return {
+                "action":"dispense",
+                "solute":solute,
+                "solvent":solvent,
+                "concentration":conc_val,
+                "concentration_units":conc_unit,
+                "volume":vol,
+                "volume_units":vunit,
+                "hardware_hint":hint
+            }
     return None
 
 def detect_add(line: str) -> Optional[Dict]:
@@ -296,6 +307,49 @@ def detect_transfer(line: str) -> Optional[Dict]:
         return {"action": "transfer", "target": m.group("target").strip()}
     return None
 
+def detect_weigh(line: str) -> Optional[Dict]:
+    s = strip_tags(_clean_unicode(line.strip()))
+    m = re.search(r"\bweigh\s+(?P<amount>[\d\.]+)\s*(?P<unit>mg|g|µg|kg)\s+of\s+(?P<reagent>.+?)(?:\.|$)", s, re.I)
+    if m:
+        return {
+            "action": "weigh",
+            "reagent": m.group("reagent").strip(),
+            "amount": float(m.group("amount")),
+            "unit": m.group("unit")
+        }
+    return None
+
+def detect_transfer_explicit(line: str) -> Optional[Dict]:
+    s = strip_tags(_clean_unicode(line.strip()))
+    m = re.search(r"\btransfer\s+(?:it|the\s+mixture|solution|precipitate)?\s*(?:into|to)\s+(?P<target>.+?)(?:\.|$)", s, re.I)
+    if m:
+        return {
+            "action": "transfer",
+            "target": m.group("target").strip()
+        }
+    return None
+
+def detect_dissolve(line: str) -> Optional[Dict]:
+    s = strip_tags(_clean_unicode(line.strip()))
+    m = re.search(r"\bdissolv\w*\s+(?P<amount>[\d\.]+)\s*(?P<unit>mg|g|µg|kg)\s+of\s+(?P<solute>.+?)\s+in\s+(?P<vol>[\d\.]+)\s*(?P<vunit>µ?u?L|mL|ml|l|L)\s+of\s+(?P<solvent>.+?)(?:\.|$)", s, re.I)
+    if m:
+        return {
+            "action": "dissolve",
+            "solute": m.group("solute").strip(),
+            "amount": float(m.group("amount")),
+            "unit": m.group("unit"),
+            "solvent": m.group("solvent").strip(),
+            "volume": float(m.group("vol")),
+            "volume_units": m.group("vunit")
+        }
+    return None
+
+def detect_filter_isolate(line: str) -> Optional[Dict]:
+    s = strip_tags(_clean_unicode(line.strip()))
+    if re.search(r"\b(isolate|collect|obtain)\s+(?:the\s+)?(precipitate|solid|product)", s, re.I):
+        return {"action": "isolate"}
+    return None
+
 # -------- Ops builders --------
 def ops_for_dispense(vessel: str, hardware_id: Optional[str], solute: str, solvent: str, volume_val: float, volume_unit: str) -> List[Dict]:
     return [
@@ -381,6 +435,71 @@ def convert_text_to_robot_ops(text: str) -> Dict:
     steps = extract_steps(text)
 
     for step in steps:
+        # Weighing
+        weigh = detect_weigh(step)
+        if weigh:
+            target_vessel = vessels.primary_vessel or vessels.ensure_glassware("Beaker")
+            records.append({
+                "action": "weigh",
+                "vessel": target_vessel,
+                "reagent": weigh["reagent"],
+                "amount": weigh["amount"],
+                "unit": weigh["unit"],
+                "ops": [{"op": "weigh", "reagent": weigh["reagent"], "amount": weigh["amount"], "unit": weigh["unit"]}],
+                "raw": step,
+                "reagents": [weigh["reagent"]]
+            })
+            continue
+
+        # Transfer (explicit)
+        transfer_exp = detect_transfer_explicit(step)
+        if transfer_exp:
+            target_vessel = vessels.ensure_glassware(transfer_exp["target"])
+            records.append({
+                "action": "transfer",
+                "vessel": target_vessel,
+                "ops": [{"op": "transfer", "to": transfer_exp["target"], "tube": f"{target_vessel}_tube"}],
+                "raw": step,
+                "reagents": []
+            })
+            continue
+
+        # Dissolve
+        dissolve = detect_dissolve(step)
+        if dissolve:
+            target_vessel = vessels.primary_vessel or vessels.ensure_glassware("Beaker")
+            records.append({
+                "action": "dissolve",
+                "vessel": target_vessel,
+                "solute": dissolve["solute"],
+                "amount": dissolve["amount"],
+                "unit": dissolve["unit"],
+                "solvent": dissolve["solvent"],
+                "volume": dissolve["volume"],
+                "volume_units": dissolve["volume_units"],
+                "ops": [
+                    {"op": "add_solute", "vessel": target_vessel, "reagent": dissolve["solute"], "amount": dissolve["amount"], "unit": dissolve["unit"]},
+                    {"op": "add_solvent", "vessel": target_vessel, "solvent": dissolve["solvent"], "volume": dissolve["volume"], "volume_units": dissolve["volume_units"]},
+                    {"op": "stir", "vessel": target_vessel, "rpm": DEFAULTS["stir_rpm"], "minutes": 2}
+                ],
+                "raw": step,
+                "reagents": [dissolve["solute"], dissolve["solvent"]]
+            })
+            continue
+
+        # Isolate/filter
+        isolate = detect_filter_isolate(step)
+        if isolate:
+            target_vessel = vessels.primary_vessel or vessels.ensure_glassware("Beaker")
+            records.append({
+                "action": "isolate",
+                "vessel": target_vessel,
+                "ops": [{"op": "filter", "vessel": target_vessel}, {"op": "collect", "vessel": target_vessel}],
+                "raw": step,
+                "reagents": []
+            })
+            continue
+
         # Solution preparation
         prep = detect_solution_prep(step)
         if prep:
@@ -546,6 +665,60 @@ def convert_text_to_robot_ops(text: str) -> Dict:
             sub = sub.strip()
             if not sub: continue
             # Try all detectors again for each substep
+            weigh = detect_weigh(sub)
+            if weigh:
+                records.append({
+                    "action": "weigh",
+                    "vessel": target_vessel,
+                    "reagent": weigh["reagent"],
+                    "amount": weigh["amount"],
+                    "unit": weigh["unit"],
+                    "ops": [{"op": "weigh", "reagent": weigh["reagent"], "amount": weigh["amount"], "unit": weigh["unit"]}],
+                    "raw": sub,
+                    "reagents": [weigh["reagent"]]
+                })
+                continue
+            transfer_exp = detect_transfer_explicit(sub)
+            if transfer_exp:
+                records.append({
+                    "action": "transfer",
+                    "vessel": target_vessel,
+                    "ops": [{"op": "transfer", "to": transfer_exp["target"], "tube": f"{target_vessel}_tube"}],
+                    "raw": sub,
+                    "reagents": []
+                })
+                continue
+            dissolve = detect_dissolve(sub)
+            if dissolve:
+                records.append({
+                    "action": "dissolve",
+                    "vessel": target_vessel,
+                    "solute": dissolve["solute"],
+                    "amount": dissolve["amount"],
+                    "unit": dissolve["unit"],
+                    "solvent": dissolve["solvent"],
+                    "volume": dissolve["volume"],
+                    "volume_units": dissolve["volume_units"],
+                    "ops": [
+                        {"op": "add_solute", "vessel": target_vessel, "reagent": dissolve["solute"], "amount": dissolve["amount"], "unit": dissolve["unit"]},
+                        {"op": "add_solvent", "vessel": target_vessel, "solvent": dissolve["solvent"], "volume": dissolve["volume"], "volume_units": dissolve["volume_units"]},
+                        {"op": "stir", "vessel": target_vessel, "rpm": DEFAULTS["stir_rpm"], "minutes": 2}
+                    ],
+                    "raw": sub,
+                    "reagents": [dissolve["solute"], dissolve["solvent"]]
+                })
+                continue
+            isolate = detect_filter_isolate(sub)
+            if isolate:
+                records.append({
+                    "action": "isolate",
+                    "vessel": target_vessel,
+                    "ops": [{"op": "filter", "vessel": target_vessel}, {"op": "collect", "vessel": target_vessel}],
+                    "raw": sub,
+                    "reagents": []
+                })
+                continue
+            # ...existing fallback detectors (resuspend, collect, discard, transfer)...
             res = detect_resuspend(sub)
             if res:
                 records.append({
