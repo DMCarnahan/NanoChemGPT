@@ -19,6 +19,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const historyList = $('historyList');
   const modeRobot = $('modeRobot');
   const modeReason = $('modeReason');
+  const saveTxtBtn = $('saveTxtBtn');
 
   let mode = 'robot';
 
@@ -178,6 +179,20 @@ document.addEventListener('DOMContentLoaded', () => {
     } catch (err) {
       console.error(err);
     }
+  });
+
+  // Save as TXT button
+  saveTxtBtn?.addEventListener('click', () => {
+    const text = answerPre?.textContent || '';
+    if (!text) return;
+
+    const blob = new Blob([text], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'answer.txt';
+    a.click();
+    URL.revokeObjectURL(url);
   });
 
 });
