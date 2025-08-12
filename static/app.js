@@ -1,6 +1,7 @@
 document.addEventListener('DOMContentLoaded', () => {
   const $ = (id) => document.getElementById(id);
 
+  // Elements
   const askBtn = $('askBtn');
   const parseBtn = $('parseBtn');
   const uploadBtn = $('uploadBtn');
@@ -11,7 +12,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const rationalePre = $('rationalePre');
   const refsSection = $('refsSection');
   const refsList = $('refsList');
-  const jsonBlock = $('jsonBlock');
+  const jsonBlock = $('jsonPre'); // Should match HTML id for JSON output
   const uplList = $('uplList');
   const uplMsg = $('uplMsg');
   const historyBtn = $('historyBtn');
@@ -20,6 +21,8 @@ document.addEventListener('DOMContentLoaded', () => {
   const modeReason = $('modeReason');
 
   let mode = 'robot';
+
+  // Mode toggle
   modeRobot?.addEventListener('click', () => {
     mode = 'robot';
     modeRobot.setAttribute('aria-checked', 'true');
@@ -36,6 +39,7 @@ document.addEventListener('DOMContentLoaded', () => {
       (document.cookie.match(/(?:^|;\s*)csrf_token=([^;]+)/)?.[1]);
   }
 
+  // Ask button
   askBtn?.addEventListener('click', async () => {
     const question = qInput?.value.trim();
     if (!question) return;
@@ -78,6 +82,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
+  // Parse button
   parseBtn?.addEventListener('click', async () => {
     const text = answerPre?.textContent || '';
     if (!text) return;
@@ -121,6 +126,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
+  // Upload button
   uploadBtn?.addEventListener('click', async () => {
     const file = fileInput?.files?.[0];
     if (!file) return;
@@ -145,9 +151,9 @@ document.addEventListener('DOMContentLoaded', () => {
       const json = await res.json();
       if (json.ok) {
         uplMsg.textContent = 'Uploaded OK';
-        if (json.name) {
+        if (json.filename) {
           const li = document.createElement('li');
-          li.textContent = json.name;
+          li.textContent = json.filename;
           uplList?.appendChild(li);
         }
       } else {
@@ -162,11 +168,13 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
+  // History button
   historyBtn?.addEventListener('click', async () => {
     try {
-      const res = await fetch('/history');
-      const rows = await res.json();
-      historyList.innerHTML = (rows || []).map(r => `<li>${r.question || ''}</li>`).join('');
+      const res = await fetch('/api/history');
+      const data = await res.json();
+      const items = data.items || [];
+      historyList.innerHTML = items.map(r => `<li>${r.question || ''}</li>`).join('');
     } catch (err) {
       console.error(err);
     }

@@ -16,30 +16,31 @@ from jinja2 import TemplateNotFound
 from openai import OpenAI
 from werkzeug.utils import secure_filename
 
-# ───────────────── Local modules (must exist in your repo) ───────────────── #
-import vector_store as vs                     # add_to_store(text, tag), search(q,k), clear_uploads()
-from converter import validate_step           # line-aware normalizer→dict (raises ValueError on bad format)
+# ──────────────── Local modules ──────────────── #
+import vector_store as vs
+from converter import validate_step
 from mongo_client import get_db, ping as mongo_ping
-from internet_search import search_papers     # OpenAlex helper (respects USER_AGENT env via your earlier fix)
-from DuckDB.duck_searcher import get_duck_searcher   # DuckDB/Parquet/CSV-backed searcher
+from internet_search import search_papers
+from DuckDB.duck_searcher import get_duck_searcher
 
-# ─────────────────────────────── Paths/Config ────────────────────────────── #
-BASE_DIR         = Path(__file__).resolve().parent
-TEMPLATES_DIR    = BASE_DIR / "templates"
-STATIC_DIR       = BASE_DIR / "static"
-BUILTIN_DIR      = Path(os.getenv("BUILTIN_DIR", BASE_DIR / "builtin")).resolve()
-UPLOADS_DIR      = Path(os.getenv("UPLOADS_DIR", "/mnt/data/uploads")).resolve()
-LOOKUP_UPLOAD_DIR= Path(os.getenv("LOOKUP_UPLOAD_DIR", "/mnt/data/datasets")).resolve()  # structured data landing spot
-VECTORSTORE_DIR  = Path(os.getenv("VECTORSTORE_DIR", "/mnt/data/index")).resolve()
+# ──────────────── Paths/Config ──────────────── #
+BASE_DIR = Path(__file__).resolve().parent
+TEMPLATES_DIR = BASE_DIR / "templates"
+STATIC_DIR = BASE_DIR / "static"
+BUILTIN_DIR = Path(os.getenv("BUILTIN_DIR", BASE_DIR / "builtin")).resolve()
+UPLOADS_DIR = Path(os.getenv("UPLOADS_DIR", "/mnt/data/uploads")).resolve()
+LOOKUP_UPLOAD_DIR = Path(os.getenv("LOOKUP_UPLOAD_DIR", "/mnt/data/datasets")).resolve()
+VECTORSTORE_DIR = Path(os.getenv("VECTORSTORE_DIR", "/mnt/data/index")).resolve()
 
 for d in (BUILTIN_DIR, UPLOADS_DIR, LOOKUP_UPLOAD_DIR, VECTORSTORE_DIR):
     d.mkdir(parents=True, exist_ok=True)
 
-# ─────────────────────────────── Flask app ───────────────────────────────── #
+# ──────────────── Flask app ──────────────── #
 app = Flask(__name__, template_folder=str(TEMPLATES_DIR), static_folder=str(STATIC_DIR))
 app.config["MAX_CONTENT_LENGTH"] = 100 * 1024 * 1024  # 100 MB
 app.config["JSON_AS_ASCII"] = False  # allow UTF-8
 
+# CSRF setup
 try:
     from flask_wtf.csrf import CSRFProtect, generate_csrf
     app.config['SECRET_KEY'] = os.getenv("FLASK_SECRET_KEY", "change-me")
@@ -47,7 +48,7 @@ try:
     csrf = CSRFProtect(app)
 except Exception:
     csrf = None
-    def generate_csrf() -> str:  # fallback no-op
+    def generate_csrf() -> str:
         return ""
 
 @app.context_processor
@@ -56,27 +57,17 @@ def inject_csrf_token():
 
 @app.before_request
 def _log_req():
-    try:
-        print(f"[req] {request.method} {request.path}")
-    except Exception:
-        pass
+    print(f"[req] {request.method} {request.path}")
 
-# ────────────────────────────── DuckDB setup ─────────────────────────────── #
+# ──────────────── DuckDB setup ──────────────── #
 def maybe_build_duckdb():
-    """
-    Create a .duckdb from Parquet once if DUCKDB_BOOTSTRAP=1 and files exist.
-    Env:
-      - DUCKDB_BOOTSTRAP=1
-      - LOOKUP_PARQUET_GLOB=/mnt/data/datasets/**/*.parquet
-      - LOOKUP_DUCKDB_PATH=/mnt/data/DuckDB/datasets.duckdb
-      - LOOKUP_DUCKDB_TABLE=reactions
-    """
+    """Create a .duckdb from Parquet once if DUCKDB_BOOTSTRAP=1 and files exist."""
     if os.getenv("DUCKDB_BOOTSTRAP", "0").lower() not in ("1", "true", "yes"):
         app.logger.info("[duckdb-init] skipped (DUCKDB_BOOTSTRAP not set)")
         return
     parq_glob = os.getenv("LOOKUP_PARQUET_GLOB")
-    db_path   = os.getenv("LOOKUP_DUCKDB_PATH")
-    tbl       = os.getenv("LOOKUP_DUCKDB_TABLE", "reactions")
+    db_path = os.getenv("LOOKUP_DUCKDB_PATH")
+    tbl = os.getenv("LOOKUP_DUCKDB_TABLE", "reactions")
     if not (parq_glob and db_path):
         app.logger.info("[duckdb-init] missing LOOKUP_PARQUET_GLOB or LOOKUP_DUCKDB_PATH")
         return
@@ -101,13 +92,12 @@ def maybe_build_duckdb():
 
 maybe_build_duckdb()
 
-# Instantiate LOOKUP via env (Parquet/CSV glob or DuckDB table)
 LOOKUP = None
 try:
     LOOKUP = get_duck_searcher()
     if LOOKUP:
         view = getattr(LOOKUP, "view", None)
-        con  = getattr(LOOKUP, "con", None)
+        con = getattr(LOOKUP, "con", None)
         if view and con:
             try:
                 nrows = con.execute(f"SELECT COUNT(*) FROM {view}").fetchone()[0]
@@ -119,27 +109,26 @@ try:
 except Exception as e:
     app.logger.warning("[dataset_search] init failed: %s", e)
 
-# ─────────────────────────── OpenAI client (no proxy) ────────────────────── #
+# ──────────────── OpenAI client ──────────────── #
 load_dotenv()
 _no_proxy = httpx.Client(trust_env=False, timeout=120.0)
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"), http_client=_no_proxy)
 
-# ─────────────────────────────── Utilities ───────────────────────────────── #
+# ──────────────── Utilities ──────────────── #
 def _safe_text(x: Any) -> str:
-    if x is None: return ""
     try:
-        return str(x)
+        return str(x) if x is not None else ""
     except Exception:
         return ""
 
 def _extract_used_markers(*texts: str) -> dict:
     """Find [n] citations and [CTX]/[PARSED]/[DB]/[GEN] tags."""
     _CIT_BRACKET_RX = re.compile(r"\[(?P<num>\d{1,4})\]")
-    _CIT_FULL_RX    = re.compile(r"【(?P<num>\d{1,4})】")
-    _CIT_FOOT_RX    = re.compile(r"\[\^(?P<num>\d{1,4})\]")
-    TAGS = ("CTX","PARSED","DB","GEN")
+    _CIT_FULL_RX = re.compile(r"【(?P<num>\d{1,4})】")
+    _CIT_FOOT_RX = re.compile(r"\[\^(?P<num>\d{1,4})\]")
+    TAGS = ("CTX", "PARSED", "DB", "GEN")
     seen = set()
-    tag_counts = {t:0 for t in TAGS}
+    tag_counts = {t: 0 for t in TAGS}
     for t in texts:
         if not t: continue
         for rx in (_CIT_BRACKET_RX, _CIT_FULL_RX, _CIT_FOOT_RX):
@@ -148,27 +137,27 @@ def _extract_used_markers(*texts: str) -> dict:
                 except Exception: pass
         for tag in TAGS:
             tag_counts[tag] += len(re.findall(rf"\[{tag}\]", t))
-    return {"refs": sorted(seen), "tags": tag_counts, "has_ctx": any(tag_counts[k]>0 for k in ("CTX","PARSED","DB"))}
+    return {"refs": sorted(seen), "tags": tag_counts, "has_ctx": any(tag_counts[k] > 0 for k in ("CTX", "PARSED", "DB"))}
 
 def basic_search(query: str, n: int = 6) -> list[dict]:
     """Merge local LOOKUP hits + OpenAlex web hits; de-dup by doi/title."""
-    if not (query or "").strip():
+    if not query.strip():
         return []
-    local: list[dict] = []
+    local = []
     if LOOKUP is not None:
         try:
             hits = LOOKUP.query(query, topk=n)
             if isinstance(hits, pd.DataFrame) and not hits.empty:
                 for _, row in hits.fillna("").iterrows():
                     title = row.get("title") or row.get("name") or row.get("__source__") or "table hit"
-                    year  = row.get("year") or row.get("publication_year") or ""
-                    doi   = row.get("doi") or ""
-                    url   = row.get("url") or (f"https://doi.org/{doi}" if doi else "")
+                    year = row.get("year") or row.get("publication_year") or ""
+                    doi = row.get("doi") or ""
+                    url = row.get("url") or (f"https://doi.org/{doi}" if doi else "")
                     local.append({
                         "title": _safe_text(title)[:300],
-                        "year":  _safe_text(year),
-                        "url":   _safe_text(url),
-                        "doi":   _safe_text(doi),
+                        "year": _safe_text(year),
+                        "url": _safe_text(url),
+                        "doi": _safe_text(doi),
                     })
         except Exception as e:
             print("[basic_search] lookup query failed:", e)
@@ -179,15 +168,15 @@ def basic_search(query: str, n: int = 6) -> list[dict]:
     except Exception as e:
         print("[basic_search] OpenAlex fetch failed:", e)
 
-    seen = {(d.get("doi") or d.get("title","")).lower() for d in local}
+    seen = {(d.get("doi") or d.get("title", "")).lower() for d in local}
     for w in web:
-        key = (w.get("doi") or w.get("title","")).lower()
+        key = (w.get("doi") or w.get("title", "")).lower()
         if key not in seen:
-            local.append({k: w.get(k,"") for k in ("title","year","url","doi")})
+            local.append({k: w.get(k, "") for k in ("title", "year", "url", "doi")})
             seen.add(key)
-    return local[: 2*n]
+    return local[:2 * n]
 
-# ──────────────────────────────── Routes ─────────────────────────────────── #
+# ──────────────── Routes ──────────────── #
 @app.get("/health")
 def health():
     return "ok", 200
@@ -196,9 +185,9 @@ def health():
 def db_health():
     try:
         mongo_ping()
-        return {"mongo":"ok"}, 200
+        return {"mongo": "ok"}, 200
     except Exception as e:
-        return {"mongo":"error","detail":str(e)}, 500
+        return {"mongo": "error", "detail": str(e)}, 500
 
 @app.get("/")
 def home():
@@ -207,7 +196,7 @@ def home():
     except TemplateNotFound:
         return "<h1>NanoChemGPT</h1><p>templates/index.html missing.</p>", 200
 
-# ---- Uploads -------------------------------------------------------------- #
+# ---- Uploads ---- #
 JOBS: dict[str, dict] = {}
 def _set_job(jid: str, **kw): JOBS.setdefault(jid, {}).update(kw)
 
@@ -219,12 +208,10 @@ def upload():
     fname = secure_filename(f.filename)
     lower = fname.lower()
 
-    # route structured files to datasets dir so LOOKUP globs can see them
-    dest = LOOKUP_UPLOAD_DIR / fname if lower.endswith((".parquet",".csv",".tsv",".xlsx")) else (UPLOADS_DIR / fname)
+    dest = LOOKUP_UPLOAD_DIR / fname if lower.endswith((".parquet", ".csv", ".tsv", ".xlsx")) else (UPLOADS_DIR / fname)
     dest.parent.mkdir(parents=True, exist_ok=True)
     f.save(dest)
 
-    # record upload
     try:
         db = get_db()
         db.uploads.update_one(
@@ -246,7 +233,7 @@ def upload():
             vs.add_to_store(txt, tag=f"upload:{fname}")
             _mark_uploaded(fname, kind="json", status="indexed")
             _set_job(jid, status="done", progress=100)
-        elif lower.endswith((".parquet",".csv",".tsv",".xlsx")):
+        elif lower.endswith((".parquet", ".csv", ".tsv", ".xlsx")):
             _mark_uploaded(fname, kind="table", status="stored")
             _set_job(jid, status="done", progress=100)
         else:
@@ -313,7 +300,7 @@ def _process_pdf_job(jid: str, path: Path, filename: str):
                 pass
         _set_job(jid, status="error", error=str(e))
 
-# ---- Search API (returns refs) ------------------------------------------- #
+# ---- Search API ---- #
 @app.post("/search")
 def search_route():
     payload = request.get_json(silent=True) or {}
@@ -324,7 +311,7 @@ def search_route():
     refs = basic_search(q, n)
     return jsonify({"results": refs})
 
-# ---- Ask ----------------------------------------------------------------- #
+# ---- Ask ---- #
 @app.post("/ask")
 def ask():
     def split_reasoning(raw: str) -> tuple[str, str]:
@@ -370,9 +357,9 @@ def ask():
                 lines = []
                 for i, row in enumerate(rows, start=1):
                     solvent = row.get("solvent") or row.get("solvent_system")
-                    temp    = row.get("temp_C") or row.get("temperature_C")
-                    time_h  = row.get("time_h") or row.get("duration_h")
-                    note    = row.get("notes") or ""
+                    temp = row.get("temp_C") or row.get("temperature_C")
+                    time_h = row.get("time_h") or row.get("duration_h")
+                    note = row.get("notes") or ""
                     line = f"[T{i}] solvent={solvent}; temp_C={temp}; time_h={time_h}; {note}".strip()
                     lines.append(line)
                     url = row.get("url") or (row.get("doi") and f"https://doi.org/{row['doi']}")
@@ -469,15 +456,14 @@ def ask():
             temperature=0.2
         ).choices[0].message.content
 
-        # IMPORTANT: only split when in robot mode
+        # Split answer/rationale
         if mode == "reasoning":
-            answer = (raw or "").strip()   # show reasoning in the main Answer box
+            answer = (raw or "").strip()
             rationale = ""
         else:
             answer, rationale = split_reasoning(raw)
 
-
-        # --- Rationale fallback if missing ---
+        # Rationale fallback if missing
         if not (rationale or "").strip():
             try:
                 rationale_only = (
@@ -502,7 +488,7 @@ def ask():
                 print("[/ask] rationale fallback failed:", e)
                 rationale = rationale or ""
 
-        # --- Post-pass: enforce citations & CTX usage if missing ---
+        # Post-pass: enforce citations & CTX usage if missing
         try:
             used_summary = _extract_used_markers(answer or "", rationale or "")
             if want_inline and not used_summary.get("refs"):
@@ -515,8 +501,8 @@ def ask():
                                 "Add inline [n] citations wherever information was taken from the numbered REFERENCES list. "
                                 "Do NOT remove any existing [CTX] content. Only insert citations where appropriate."
                             )},
-                            {"role": "user",   "content": f"REFERENCES:\n{refs_prompt}"},
-                            {"role": "user",   "content": f"ORIGINAL ANSWER:\n{answer}"}
+                            {"role": "user", "content": f"REFERENCES:\n{refs_prompt}"},
+                            {"role": "user", "content": f"ORIGINAL ANSWER:\n{answer}"}
                         ]
                     ).choices[0].message.content
                     if revise_refs and len(revise_refs) >= 0.7 * len(answer):
@@ -534,9 +520,9 @@ def ask():
                     model="gpt-4o-mini",
                     temperature=0,
                     messages=[
-                        {"role":"system","content":"Revise the answer to explicitly use CONTEXT where relevant. Insert [CTX] markers on lines that derive from CONTEXT, and prefer CONTEXT over general knowledge. Do not change structure."},
-                        {"role":"user","content": f"CONTEXT:\n{context_joined}"},
-                        {"role":"user","content": f"ORIGINAL ANSWER:\n{answer}"}
+                        {"role": "system", "content": "Revise the answer to explicitly use CONTEXT where relevant. Insert [CTX] markers on lines that derive from CONTEXT, and prefer CONTEXT over general knowledge. Do not change structure."},
+                        {"role": "user", "content": f"CONTEXT:\n{context_joined}"},
+                        {"role": "user", "content": f"ORIGINAL ANSWER:\n{answer}"}
                     ]
                 ).choices[0].message.content
                 if revise and len(revise) >= 0.7 * len(answer):
@@ -567,8 +553,8 @@ def ask():
         return jsonify({
             "answer": (answer or "").strip(),
             "rationale": rationale,
-            "references": refs,   # keep original key
-            "refs": refs,         # also expose as 'refs' for UI tolerance
+            "references": refs,
+            "refs": refs,
             "refs_used": used_summary.get("refs", []),
             "used": used_summary,
             "mode": mode,
@@ -582,30 +568,17 @@ def ask():
         traceback.print_exc()
         return jsonify({"error": f"/ask failed: {e}"}), 500
 
-# ---------------- Parse & Save ----------------
+# ---- Parse & Save ---- #
 @app.post("/parse")
 def parse_route():
-    """
-    New parser endpoint using the validator/normalizer in converter.py.
-
-    Request JSON:
-      { "text": "<dict or Key: value lines>" }
-
-    Response JSON:
-      { "ok": true, "data": <normalized & validated dict> }
-    """
     try:
         payload = request.get_json(silent=True) or {}
         text = (payload.get("text") or "").strip()
         if not text:
             return jsonify({"error": "JSON must contain non-empty 'text'"}), 400
-
-        # validate_step accepts either dict-like JSON (string) or Key: value text.
         data = validate_step(text)
         return jsonify({"ok": True, "data": data})
-
     except ValueError as ve:
-        # Raised by validate_step with line-aware messages
         return jsonify({"ok": False, "error": str(ve)}), 422
     except Exception as e:
         traceback.print_exc()
@@ -625,29 +598,19 @@ def save_txt():
 
 @app.post("/parse_upload")
 def parse_upload():
-    """
-    Accept a .txt or .md file containing a human-edited 'Robot mode' answer,
-    run it through the existing converter.validate_step(), and return JSON.
-    """
     try:
         f = request.files.get("file")
         if not f or f.filename == "":
             return jsonify({"ok": False, "error": "no file"}), 400
-
-        # read as utf-8 text (tolerant)
         try:
             text = f.read().decode("utf-8", errors="ignore")
         except Exception:
-            # werkzeug FileStorage may already be str with .read() returning str on some stacks
             text = f.read()
-
         if not (text or "").strip():
             return jsonify({"ok": False, "error": "file is empty"}), 400
-
         data = validate_step(text)
         return jsonify({"ok": True, "data": data})
     except ValueError as ve:
-        # raised by validate_step with line-aware messages
         return jsonify({"ok": False, "error": str(ve)}), 422
     except Exception as e:
         traceback.print_exc()
@@ -663,6 +626,7 @@ def clear_uploads_route():
 
 def _safe_id(x):
     try:
+        from bson import ObjectId
         return ObjectId(x)
     except Exception:
         return None
