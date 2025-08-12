@@ -292,7 +292,7 @@ def _mmr_select(query_vec: np.ndarray, doc_vecs: np.ndarray, k: int,
         selected.append(i); candidates.remove(i)
     return selected
 
-# LLM reranker (optional)
+# LLM reranker
 def _llm_rerank(query: str, items: List[Tuple[int,str,str]]) -> List[Tuple[int,str,str]]:
     """items: list of (meta_idx, tag, text). Returns reordered list."""
     if not DO_LLM_RERANK or not items:

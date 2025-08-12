@@ -76,10 +76,18 @@ document.addEventListener('DOMContentLoaded', () => {
       if (Array.isArray(data.references) && data.references.length) {
         refsSection.classList.remove('hidden');
         refsList.innerHTML = data.references.map((r, i) => {
-          const url = r.url || (r.doi ? `https://doi.org/${r.doi}` : "#");
+          // Compose ACS format
+          const authors = r.authors ? r.authors.join(', ') : '';
           const title = r.title || `Reference ${i + 1}`;
-          const year = r.year ? ` (${r.year})` : "";
-          return `<li><a href="${url}" target="_blank" rel="noopener">${title}${year}</a></li>`;
+          const journal = r.journal || '';
+          const year = r.year || '';
+          const volume = r.volume || '';
+          const pages = r.pages || '';
+          const doi = r.doi ? `https://doi.org/${r.doi}` : '';
+          const url = r.url || doi || '#';
+          // ACS format: Author(s), Title, Journal, Year, Volume, Pages, DOI
+          const acs = `${authors}. ${title}. ${journal} ${year}, ${volume}, ${pages}. <a href="${url}" target="_blank" rel="noopener">${doi ? r.doi : url}</a>`;
+          return `<li>${acs}</li>`;
         }).join('');
       } else {
         refsSection.classList.add('hidden');

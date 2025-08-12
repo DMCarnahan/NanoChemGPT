@@ -4,6 +4,7 @@ import os, io, json, re, glob, traceback, threading
 from datetime import datetime
 from pathlib import Path
 from typing import Any
+from functools import lru_cache
 
 import httpx
 import pandas as pd
@@ -175,6 +176,26 @@ def basic_search(query: str, n: int = 6) -> list[dict]:
             local.append({k: w.get(k, "") for k in ("title", "year", "url", "doi")})
             seen.add(key)
     return local[:2 * n]
+
+@lru_cache(maxsize=128)
+def cached_vs_search(q):
+    return vs.search(q, k=8) or ""
+
+@lru_cache(maxsize=128)
+def cached_lookup_query(q):
+    if LOOKUP is not None:
+        try:
+            return LOOKUP.query(q, topk=5)
+        except Exception:
+            return None
+    return None
+
+@lru_cache(maxsize=128)
+def cached_basic_search(q, n):
+    try:
+        return basic_search(q, n) or []
+    except Exception:
+        return []
 
 # ──────────────── Routes ──────────────── #
 @app.get("/health")
@@ -400,10 +421,10 @@ def ask():
             "No placeholders (avoid “e.g.”/“or”). Be decisive."
         )
         reasoning_rules = (
-            "Provide a mechanistic explanation and design considerations for the target.\n"
-            "Focus on: nucleation vs growth; ligand/solvent coordination; surfactants; "
-            "reduction/oxidation; temperature profile and morphology control; atmosphere; pitfalls; safety.\n"
-            "Do NOT return a step-by-step protocol. Be concise but specific."
+            " - Provide a mechanistic explanation and design considerations for the target.\n"
+            " - Focus on: nucleation vs growth; ligand/solvent coordination; surfactants; "
+            " - reduction/oxidation; temperature profile and morphology control; atmosphere; pitfalls; safety.\n"
+            " - Do NOT return a step-by-step protocol. Be concise but specific."
         )
         inline_rule = (
             " - When you pull a fact from any numbered REFERENCE, put its number in square brackets right after the sentence "
@@ -411,8 +432,13 @@ def ask():
             " - Inline numeric citations are optional for this request."
         )
         acs_rule = (
-            " - Write the REFERENCES block in ACS format: author(s), title, journal, year, volume, pages, DOI."
+            " - Write the REFERENCES block in ACS format: author(s), title, journal, year, volume, pages, DOI.\n"
+            " - Use inline numeric citations ([n]) for facts from REFERENCES. Do NOT include a REFERENCES block in your answer."
         )
+
+        def strip_references_block(text: str) -> str:
+            # Remove everything from '## References' to the end
+            return re.sub(r"## References[\s\S]*", "", text, flags=re.I).strip()
 
         if mode == "reasoning":
             prompt = (
@@ -443,7 +469,7 @@ def ask():
                 f"{inline_rule}\n"
                 " - If CONTEXT is insufficient, say so explicitly before generalizing.\n"
                 f"{robot_rules}\n"
-                f"{acs_rule}\n"  # <-- Add this line
+                f"{acs_rule}\n"  
                 "Return two blocks exactly in this order:\n"
                 "## Synthesis Protocol:\n"
                 "1. **Hardware & Glassware**:\n[]\n"
@@ -467,10 +493,10 @@ def ask():
 
         # Split answer/rationale
         if mode == "reasoning":
-            answer = (raw or "").strip()
+            answer = strip_references_block((raw or "").strip())
             rationale = ""
         else:
-            answer, rationale = split_reasoning(raw)
+            answer, rationale = split_reasoning(strip_references_block(raw))
 
         # Rationale fallback if missing
         if not (rationale or "").strip():
@@ -478,11 +504,11 @@ def ask():
                 rationale_only = (
                     "You previously produced the SynthesisProtocol below.\n"
                     "Write a short rationale (5–8 bullets max). For each key justification add inline tags:\n"
-                    "[CTX] uploaded/context hits, [DB] Mongo Q&A, [PARSED] parsed protocols, [n] for numbered web REFERENCES, [GEN] for general.\n"
+                    "[CTX] uploaded/context hits, [PARSED] parsed protocols, [n] for numbered web REFERENCES, [GEN] for general.\n"
                     "Return just the rationale text, no code fences, no extra headings."
                 )
                 rraw = client.chat.completions.create(
-                    model="gpt-4o-mini",
+                    model="gpt-4o",
                     messages=[
                         {"role": "user", "content": rationale_only},
                         {"role": "user", "content": f"CONTEXT:\n{context_joined}"},
