@@ -367,3 +367,7 @@ code, pre, .code {
   outline: none;
 }
 
+#parseBtn {
+  min-width: 140px; 
+}
+

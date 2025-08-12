@@ -271,6 +271,31 @@ def detect_wash_dry(line: str) -> Optional[List[Dict]]:
         ops.append({"action":"oven_dry","temperature_C":temp,"minutes":minutes})
     return ops or None
 
+def detect_resuspend(line: str) -> Optional[Dict]:
+    s = strip_tags(_clean_unicode(line.strip()))
+    if re.search(r"\bresuspend\b", s, re.I):
+        return {"action": "resuspend"}
+    return None
+
+def detect_collect(line: str) -> Optional[Dict]:
+    s = strip_tags(_clean_unicode(line.strip()))
+    if re.search(r"\bcollect\b", s, re.I):
+        return {"action": "collect"}
+    return None
+
+def detect_discard(line: str) -> Optional[Dict]:
+    s = strip_tags(_clean_unicode(line.strip()))
+    if re.search(r"\bdiscard\b", s, re.I):
+        return {"action": "discard"}
+    return None
+
+def detect_transfer(line: str) -> Optional[Dict]:
+    s = strip_tags(_clean_unicode(line.strip()))
+    m = re.search(r"\btransfer\b.*\bto\b\s+(?P<target>.+)", s, re.I)
+    if m:
+        return {"action": "transfer", "target": m.group("target").strip()}
+    return None
+
 # -------- Ops builders --------
 def ops_for_dispense(vessel: str, hardware_id: Optional[str], solute: str, solvent: str, volume_val: float, volume_unit: str) -> List[Dict]:
     return [
@@ -515,12 +540,52 @@ def convert_text_to_robot_ops(text: str) -> Dict:
             continue
 
         # Fallback generic process node
+        target_vessel = vessels.primary_vessel or vessels.ensure_glassware("Beaker")
         substeps = re.split(r"\band\b|;|\.", step)
         for sub in substeps:
             sub = sub.strip()
             if not sub: continue
             # Try all detectors again for each substep
-            # ...repeat detector logic here...
+            res = detect_resuspend(sub)
+            if res:
+                records.append({
+                    "action": "resuspend",
+                    "vessel": target_vessel,
+                    "ops": [{"op": "resuspend", "tube": f"{target_vessel}_tube"}],
+                    "raw": sub,
+                    "reagents": []
+                })
+                continue
+            col = detect_collect(sub)
+            if col:
+                records.append({
+                    "action": "collect",
+                    "vessel": target_vessel,
+                    "ops": [{"op": "collect", "tube": f"{target_vessel}_tube"}],
+                    "raw": sub,
+                    "reagents": []
+                })
+                continue
+            dis = detect_discard(sub)
+            if dis:
+                records.append({
+                    "action": "discard",
+                    "vessel": target_vessel,
+                    "ops": [{"op": "discard_supernatant", "tube": f"{target_vessel}_tube"}],
+                    "raw": sub,
+                    "reagents": []
+                })
+                continue
+            tra = detect_transfer(sub)
+            if tra:
+                records.append({
+                    "action": "transfer",
+                    "vessel": target_vessel,
+                    "ops": [{"op": "transfer", "to": tra["target"], "tube": f"{target_vessel}_tube"}],
+                    "raw": sub,
+                    "reagents": []
+                })
+                continue
             # If still nothing, add as process
             records.append({"action": "process", "vessel": target_vessel, "reagents": [], "ops": [], "raw": sub})
 
