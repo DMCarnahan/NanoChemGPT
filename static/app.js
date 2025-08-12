@@ -12,7 +12,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const rationalePre = $('rationalePre');
   const refsSection = $('refsSection');
   const refsList = $('refsList');
-  const jsonBlock = $('jsonPre'); // Should match HTML id for JSON output
+  const jsonBlock = $('jsonPre');
   const uplList = $('uplList');
   const uplMsg = $('uplMsg');
   const historyBtn = $('historyBtn');
@@ -83,7 +83,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  // Parse button
+  // Parse button (Convert to JSON + Download)
   parseBtn?.addEventListener('click', async () => {
     const text = answerPre?.textContent || '';
     if (!text) return;
@@ -106,21 +106,27 @@ document.addEventListener('DOMContentLoaded', () => {
       if (data.ok && data.data) {
         const pretty = JSON.stringify(data.data, null, 2);
         jsonBlock.textContent = pretty;
+        document.getElementById('jsonBlock')?.classList.remove('hidden');
 
+        // Download the JSON file
         const blob = new Blob([pretty], { type: 'application/json' });
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
         a.download = 'converted.json';
+        document.body.appendChild(a); // Required for Firefox
         a.click();
+        document.body.removeChild(a);
         URL.revokeObjectURL(url);
       } else {
         jsonBlock.textContent = 'Error: ' + (data.error || 'unknown');
+        document.getElementById('jsonBlock')?.classList.remove('hidden');
       }
 
     } catch (err) {
       console.error(err);
       jsonBlock.textContent = 'Request failed';
+      document.getElementById('jsonBlock')?.classList.remove('hidden');
     } finally {
       parseBtn.disabled = false;
       parseBtn.textContent = 'Convert → JSON';
@@ -181,7 +187,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  // Save as TXT button
+  // Save as TXT button (Export answer)
   saveTxtBtn?.addEventListener('click', () => {
     const text = answerPre?.textContent || '';
     if (!text) return;
@@ -191,7 +197,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const a = document.createElement('a');
     a.href = url;
     a.download = 'answer.txt';
+    document.body.appendChild(a); // Required for Firefox
     a.click();
+    document.body.removeChild(a);
     URL.revokeObjectURL(url);
   });
 

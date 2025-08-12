@@ -6,6 +6,7 @@
   <title>NanoChemGPT</title>
   <meta name="csrf-token" content="{{ csrf_token() }}">
   <link rel="stylesheet" href="/static/ui_ask_size.css">
+  <link rel="icon" href="/static/favicon.ico">
   <style>
     :root {
       --bg: #0b0f14; --bg-elev: #0f1520;
@@ -115,7 +116,7 @@
       <section class="card span-8 mt-6" aria-labelledby="sec-ask">
         <h2 id="sec-ask" class="card-title">Ask NanoChemGPT</h2>
         <label class="visually-hidden" for="question">Enter your question</label>
-        <textarea id="question" class="textarea" rows="8" placeholder="Ask a synthesis question…" aria-describedby="askHelp"></textarea>
+        <textarea id="question" class="textarea" rows="8" autocomplete="off" placeholder="Ask a synthesis question…" aria-describedby="askHelp"></textarea>
         <div id="askHelp" class="small muted mt-2">Tip: Describe reagents, solvents, temps, and any constraints.</div>
 
         <div class="row mt-3" role="group" aria-label="Ask and parse controls">
@@ -138,6 +139,7 @@
         </section>
 
         <div id="askMsg" class="alert mt-3 hidden" role="status" aria-live="polite" aria-atomic="true"></div>
+        <div id="uplMsg" class="alert mt-2 hidden" role="status" aria-live="polite" aria-atomic="true"></div>
 
         <section class="mt-4" aria-labelledby="sec-answer">
           <h3 id="sec-answer" class="subhead">Answer</h3>
@@ -154,7 +156,7 @@
           <ol id="refsList" class="small"></ol>
         </section>
 
-        <section id="jsonBlock" class="mt-4 hidden" aria-labelledby="sec-json">
+        <section id="jsonBlock" class="mt-4 hidden" aria-labelledby="sec-json" aria-live="polite">
           <h3 id="sec-json" class="subhead">Parsed JSON</h3>
           <pre id="jsonPre" class="pre" tabindex="0"></pre>
         </section>
@@ -186,7 +188,7 @@
       <section class="card span-4 mt-6" aria-labelledby="sec-history">
         <h2 id="sec-history" class="card-title">History (Q&amp;A)</h2>
         <div class="row" role="group" aria-label="History filters and actions">
-          <input id="histQuery" class="textarea" placeholder="Filter (optional): keywords in question">
+          <input id="histQuery" class="textarea" placeholder="Filter (optional): keywords in question" autocomplete="off">
           <button id="historyBtn" class="btn secondary" type="button" aria-controls="historyList histMsg">Refresh</button>
           <button id="histMoreBtn" class="btn secondary" type="button" aria-controls="historyList histMsg">Load more</button>
         </div>
@@ -230,11 +232,17 @@
     <span>© <span id="year"></span> NanoChemGPT · Built for rapid synthesis Q&amp;A</span>
   </footer>
 
+  <noscript>
+    <div class="alert" role="alert">
+      This app requires JavaScript to function.
+    </div>
+  </noscript>
+
   <script>
     document.getElementById('year').textContent = new Date().getFullYear();
     const hs = document.getElementById('healthStatus');
     if (hs) setTimeout(()=>{ hs.querySelector('.status-dot').style.background = 'var(--ok)'; hs.querySelector('.status-txt').textContent = 'healthy'; }, 600);
   </script>
-  <script src="/static/app.js"></script>
+  <script src="/static/app.js" defer></script>
 </body>
 </html>
