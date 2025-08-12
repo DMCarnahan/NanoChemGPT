@@ -61,8 +61,9 @@ def _http_get_json(url: str, *, tries: int = 3, timeout: float = 20.0) -> dict |
     print(f"[basic_search] OpenAlex fetch failed: {last_err}")
     return None
 
-def _invert_openalex_abstract(inv: Any) -> str:
-    """Rebuild plain-text abstract from OpenAlex abstract_inverted_index."""
+# --- Helpers -----------------
+
+def _invert_openalex_abstract(inv: dict | None) -> str:
     if not isinstance(inv, dict) or not inv:
         return ""
     size = max(p for positions in inv.values() for p in positions) + 1
@@ -72,6 +73,99 @@ def _invert_openalex_abstract(inv: Any) -> str:
             if 0 <= p < size:
                 words[p] = token
     return " ".join(w for w in words if w)
+
+def _pick_doi(w: dict) -> str:
+    doi = (w.get("doi") or "").strip()
+    # OpenAlex often returns a full URL; normalize to bare DOI
+    for prefix in ("https://doi.org/", "http://doi.org/"):
+        if doi.lower().startswith(prefix):
+            doi = doi[len(prefix):]
+            break
+    return doi
+
+def _pick_url(w: dict) -> str:
+    pl = w.get("primary_location") or {}
+    url = pl.get("landing_page_url") or (w.get("host_venue") or {}).get("url") or ""
+    doi = _pick_doi(w)
+    if (not url) and doi:
+        url = f"https://doi.org/{doi}"
+    return url
+
+def _is_offtopic(rec: dict) -> bool:
+    t = f"{rec.get('title','')} {rec.get('journal','')}".lower()
+    bad = (
+        "battery","supercapacitor","capacitor","fuel cell","electrode",
+        "cathode","anode","voc","ceo2","ceria","adsorption","review"
+    )
+    return any(b in t for b in bad)
+
+# --- Post-process OpenAlex results ------------------------------------------
+def _postprocess_openalex_results(data: dict, n: int, query: str = "") -> list[dict]:
+    """
+    Convert OpenAlex 'works' payload into app records:
+      {title, year, url, doi, abstract, authors, journal}
+    Dedup, filter off-topic, and rank by simple relevance score.
+    """
+    works = (data or {}).get("results", []) or []
+    out: list[dict] = []
+    seen_titles = set()
+    seen_dois = set()
+
+    for w in works:
+        title = (w.get("display_name") or "").strip()
+        if not title:
+            continue
+        year = w.get("publication_year") or None
+        doi = _pick_doi(w)
+        url = _pick_url(w)
+        abstract = _invert_openalex_abstract(w.get("abstract_inverted_index"))
+        authors = [a.get("author", {}).get("display_name", "") for a in (w.get("authorships") or [])]
+        journal = (w.get("host_venue") or {}).get("display_name", "") or ""
+
+        # Dedupe
+        tkey = title.lower()
+        if doi:
+            if doi in seen_dois:
+                continue
+            seen_dois.add(doi)
+        else:
+            if tkey in seen_titles:
+                continue
+            seen_titles.add(tkey)
+
+        rec = {
+            "title": title,
+            "year": year,
+            "url": url,
+            "doi": doi or "",
+            "abstract": abstract,
+            "authors": authors,
+            "journal": journal,
+        }
+        if not _is_offtopic(rec):
+            out.append(rec)
+
+    # ---- Lightweight ranking ----------------------------------------------
+    # Use your core terms for scoring + a tiny popularity nudge
+    key_terms = set((_build_search_string(query, level="core") or "").lower().split())
+    def _score(rec: dict) -> float:
+        hay = f"{rec['title']} {rec['abstract']} {rec['journal']}".lower()
+        base = sum(1.0 for k in key_terms if k and k in hay)
+        # small bonus for “hot injection” (removed from URL to avoid WAF)
+        if "hot injection" in hay or "hot-injection" in hay:
+            base += 1.5
+        # tiny popularity nudge if cited_by_count present
+        # try to grab it from original works list by title match:
+        try:
+            w = next((_w for _w in works if (_w.get("display_name") or "").strip() == rec["title"]), None)
+            c = (w or {}).get("cited_by_count") or 0
+            base += (c ** 0.5) * 0.05
+        except Exception:
+            pass
+        return base
+
+    out.sort(key=_score, reverse=True)
+    return out[:n]
 
 _FORMULA_RX = re.compile(r"\b(?:[A-Z][a-z]?[\d]{0,3}){2,}\b")  # Cu2O, NiCo, Fe3O4, CoNi, etc.
 # Common material-class words to catch 
@@ -105,7 +199,7 @@ _MORPH = {
     "nanocube":["nanocube","nanocubes","cube","cubes","octahedron","octahedra","sphere","spheres"],
 }
 
-_ROUTES = ["polyol","hydrothermal","solvothermal","electrodeposition","seed-mediated","hot injection",
+_ROUTES = ["polyol","hydrothermal","solvothermal","electrodeposition","seed-mediated",
            "template","microwave","photochemical","galvanic","chemical reduction","PVP","CTAB",
            "oleylamine","ethylene glycol"]
 
@@ -187,28 +281,44 @@ def _is_offtopic(rec: dict) -> bool:
     bad = ("battery","supercapacitor","review")
     return any(b in t for b in bad)
 
-def _build_search_string(question: str) -> str:
+WAF_BLOCK_TERMS = {"injection", "sql", "payload", "drop", "truncate"}  # keep small; 'injection' is the big one
+
+def _build_search_string(question: str, *, level: str = "full") -> str:
     """
-    Return a plain string for OpenAlex `search=` (no boolean operators).
-    Includes detected material/morphology/routes/scale terms, de-duplicated.
+    Build a plain string for OpenAlex `search=`.
+    level: 'full' (material+morph+routes+scale),
+           'core' (material+morph+scale),
+           'minimal' (morph only).
     """
-    mats  = _extract_material_terms(question)        
-    morph = _extract_morphology_terms(question)      
+    mats  = _extract_material_terms(question)
+    morph = _extract_morphology_terms(question)
     routes = _ROUTES
     scale  = _SCALE
 
     terms = []
-    terms.extend(mats)
+    # always include morphology
     terms.extend(morph)
-    terms.extend(routes)
-    terms.extend(scale)
+    # include material if present
+    terms.extend(mats)
 
-    # Remove operators if the question had them
-    BAD = {"and", "or", "not", "(", ")", "AND", "OR", "NOT"}
-    terms = [t for t in dict.fromkeys(terms) if t and t not in BAD]
+    if level == "full":
+        terms.extend(routes)
+        terms.extend(scale)
+    elif level == "core":
+        terms.extend(scale)
+    # 'minimal' adds nothing more
 
-    # Join with spaces; avoid quotes/parentheses entirely
-    return " ".join(terms)
+    # sanitize: split tokens by spaces/hyphens and drop WAF triggers
+    safe_terms = []
+    for t in dict.fromkeys(terms):
+        if not t:
+            continue
+        pieces = t.replace("–", "-").replace("/", " ").split()
+        if any(p.lower() in WAF_BLOCK_TERMS for p in pieces):
+            continue
+        safe_terms.append(t)
+
+    return " ".join(safe_terms)
 
 # ---- Query builder ----
 def _build_url_smart(question: str, *, n: int = 6, from_year: int | None = 2005,
@@ -264,49 +374,82 @@ def _pick_doi(work: dict) -> str:
         doi = doi.replace("https://doi.org/", "", 1)
     return doi
 
+def _crossref_search(query: str, n: int = 6, from_year: Optional[int] = 2005) -> List[dict]:
+    base = "https://api.crossref.org/works"
+    params = {
+        "query": _build_search_string(query, level="core"),
+        "rows": str(n * 2),
+        "filter": ",".join([f"from-pub-date:{from_year}-01-01"] if from_year else []),
+        "select": "title,DOI,URL,issued,container-title,type,abstract,author"
+    }
+    if CONTACT_EMAIL:
+        params["mailto"] = CONTACT_EMAIL
+    url = f"{base}?{urllib.parse.urlencode(params)}"
+    data = _http_get_json(url) or {}
+    items = ((data.get("message") or {}).get("items") or [])[:n*2]
+
+    out = []
+    for it in items:
+        title = " ".join(it.get("title") or []) or ""
+        year = None
+        try:
+            year = (it.get("issued") or {}).get("date-parts", [[None]])[0][0]
+        except Exception:
+            pass
+        out.append({
+            "title": title,
+            "year": year,
+            "url": it.get("URL") or (f"https://doi.org/{it.get('DOI')}" if it.get("DOI") else ""),
+            "doi": it.get("DOI") or "",
+            "abstract": (it.get("abstract") or "").replace("\n", " ").strip(),
+            "authors": [a.get("family","") + (", " + a.get("given","") if a.get("given") else "") for a in it.get("author", []) if isinstance(a, dict)],
+            "journal": (it.get("container-title") or [""])[0],
+        })
+
+    # lightweight on-topic filter using your keywords
+    key = set(_build_search_string(query, level="core").lower().split())
+    scored = []
+    for r in out:
+        text = f"{r['title']} {r['abstract']} {r['journal']}".lower()
+        score = sum(1 for k in key if k in text)
+        scored.append((score, r))
+    scored.sort(key=lambda x: x[0], reverse=True)
+    return [r for _, r in scored[:n]]
+
+def _is_403(err: Exception) -> bool:
+    return "403" in str(err)
+
 def search_papers(query: str, n: int = 6, *,
                   from_year: Optional[int] = 2005,
                   use_aboutness: bool = True) -> List[dict]:
-    """
-    Search tuned for materials synthesis questions.
-    Returns dicts with title, year, url, doi, abstract, authors, journal.
-    """
     q = (query or "").strip()
     if not q:
         return []
 
-    url, tids = _build_url_smart(q, n=n, from_year=from_year, use_aboutness=use_aboutness)
-    data = _http_get_json(url)
+    # try full search (routes+scale)
+    for level in ("full", "core", "minimal"):
+        url, tids = _build_url_smart(q, n=n, from_year=from_year, use_aboutness=use_aboutness, level=level)
+        try:
+            data = _http_get_json(url)
+        except Exception as e:
+            data = None
 
-    # Fallback 1: retry without topics filter if the first call failed (403 or None)
-    if (not data) and tids:
-        url, _ = _build_url_smart(q, n=n, from_year=from_year, use_aboutness=False)
-        data = _http_get_json(url)
+        if data and data.get("results"):
+            return _postprocess_openalex_results(data, n)
 
-    # Fallback 2: if still nothing, remove the year bound as a last resort
-    if not data:
-        url, _ = _build_url_smart(q, n=n, from_year=None, use_aboutness=False)
-        data = _http_get_json(url)
+        # drop topics if we had them
+        if (not data) and tids:
+            url, _ = _build_url_smart(q, n=n, from_year=from_year, use_aboutness=False, level=level)
+            data = _http_get_json(url)
+            if data and data.get("results"):
+                return _postprocess_openalex_results(data, n)
 
-    data = data or {}
-    results = data.get("results", []) or []
+    # FINAL FALLBACK: Crossref
+    x = _crossref_search(q, n=n, from_year=from_year)
+    if x:
+        return x
 
-    out: List[dict] = []
-    for w in results[:n*2]:  
-        abs_text = _invert_openalex_abstract(w.get("abstract_inverted_index"))
-        rec = {
-            "title": _norm_str(w.get("display_name")),
-            "year":  w.get("publication_year") or "",
-            "url":   _pick_url(w),
-            "doi":   _pick_doi(w),
-            "abstract": abs_text,
-            "authors": [a.get("author", {}).get("display_name", "") for a in w.get("authorships", [])],
-            "journal": (w.get("host_venue") or {}).get("display_name", ""),
-        }
-        if not _is_offtopic(rec):
-            out.append(rec)
-
-    return out[:n] or out[:n]  # fall back gracefully
+    return []
 
 def set_user_agent(email: str) -> None:
     """
