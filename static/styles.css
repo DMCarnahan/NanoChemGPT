@@ -371,3 +371,9 @@ code, pre, .code {
   min-width: 140px; 
 }
 
+#refsList {
+  white-space: normal;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+

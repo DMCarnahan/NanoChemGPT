@@ -1,0 +1,10 @@
+datasets.parquet includes the following datasets:
+
+## Solution, Solid-State, and Sol-gel text-mined inorganic syntheses [1,2].
+
+## Syntheses of Metal Oxides [3].
+
+References.
+(1) Kononova, O.; Huo, H.; He, T.; Rong, Z.; Botari, T.; Sun, W.; Tshitoyan, V.; Ceder, G. Text-Mined Dataset of Inorganic Materials Synthesis Recipes. Sci Data 2019, 6 (1), 203. https://doi.org/10.1038/s41597-019-0224-1.
+(2) Wang, Z.; Kononova, O.; Cruse, K.; He, T.; Huo, H.; Fei, Y.; Zeng, Y.; Sun, Y.; Cai, Z.; Sun, W.; Ceder, G. Dataset of Solution-Based Inorganic Materials Synthesis Procedures Extracted from the Scientific Literature. Sci Data 2022, 9 (1), 231. https://doi.org/10.1038/s41597-022-01317-2.
+(3) Kim, E.; Huang, K.; Tomala, A.; Matthews, S.; Strubell, E.; Saunders, A.; McCallum, A.; Olivetti, E. Machine-Learned and Codified Synthesis Parameters of Oxide Materials. Sci Data 2017, 4 (1), 170127. https://doi.org/10.1038/sdata.2017.127.

@@ -339,12 +339,15 @@ def ask():
         if not raw:
             return "", ""
         text = raw.strip()
+        # Find code fence rationale block
         fence = re.compile(r"```(?:reason|rationale|reasoning)\s*(.*?)```", re.I | re.S)
         m = fence.search(text)
         if m:
             rationale = m.group(1).strip()
+            # Remove the code fence block from the answer
             answer = (text[:m.start()] + text[m.end():]).strip()
             return answer, rationale
+        # Find heading rationale block
         head = re.compile(r"(?:^|\n)#{1,3}\s*(rationale|reasoning)\b[^\n]*\n((?:.*\n?)*)$", re.I | re.S)
         m = head.search(text)
         if m:

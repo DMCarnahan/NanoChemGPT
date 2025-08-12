@@ -75,9 +75,8 @@ document.addEventListener('DOMContentLoaded', () => {
       rationalePre.textContent = data.rationale ?? '';
       if (Array.isArray(data.references) && data.references.length) {
         refsSection.classList.remove('hidden');
-        refsList.innerHTML = data.references.map((r, i) => {
-          // Compose ACS format
-          const authors = r.authors ? r.authors.join(', ') : '';
+        refsList.innerHTML = (data.references || []).map((r, i) => {
+          const authors = Array.isArray(r.authors) ? r.authors.join(', ') : (r.authors || '');
           const title = r.title || `Reference ${i + 1}`;
           const journal = r.journal || '';
           const year = r.year || '';
@@ -85,8 +84,8 @@ document.addEventListener('DOMContentLoaded', () => {
           const pages = r.pages || '';
           const doi = r.doi ? `https://doi.org/${r.doi}` : '';
           const url = r.url || doi || '#';
-          // ACS format: Author(s), Title, Journal, Year, Volume, Pages, DOI
-          const acs = `${authors}. ${title}. ${journal} ${year}, ${volume}, ${pages}. <a href="${url}" target="_blank" rel="noopener">${doi ? r.doi : url}</a>`;
+          // Compose ACS format
+          const acs = `${authors}. <i>${title}</i>. <b>${journal}</b> ${year}, ${volume}, ${pages}. <a href="${url}" target="_blank" rel="noopener">${r.doi || url}</a>`;
           return `<li>${acs}</li>`;
         }).join('');
       } else {
@@ -216,7 +215,6 @@ document.addEventListener('DOMContentLoaded', () => {
             const data = await res.json();
             answerPre.textContent = data.answer ?? '(no answer)';
             rationalePre.textContent = data.rationale ?? '';
-            // Optionally update other UI elements here
           } catch (err) {
             console.error(err);
           }
@@ -293,4 +291,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
+  // Auto-load history on page load
+  if (historyBtn) historyBtn.click();
 });

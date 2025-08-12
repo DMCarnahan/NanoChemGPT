@@ -232,7 +232,7 @@ def ask():
         return jsonify({"error": "OpenAI client not configured"}), 500
     try:
         raw = client.chat.completions.create(
-            model=os.getenv("MECH_MODEL", "gpt-4o-mini"),
+            model=os.getenv("MECH_MODEL", "gpt-4o"),
             messages=[{"role": "user", "content": prompt}],
             temperature=0.2,
         ).choices[0].message.content
@@ -253,7 +253,7 @@ def ask():
                 "scope (string), citations (array of strings). No prose, no markdown, JSON only."
             )
             repaired = client.chat.completions.create(
-                model=os.getenv("MECH_MODEL", "gpt-4o-mini"),
+                model=os.getenv("MECH_MODEL", "gpt-4o"),
                 messages=[
                     {"role": "user", "content": repair_instr},
                     {"role": "user", "content": raw},
