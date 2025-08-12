@@ -76,20 +76,42 @@ def _invert_openalex_abstract(inv: dict | None) -> str:
 
 def _pick_doi(w: dict) -> str:
     doi = (w.get("doi") or "").strip()
-    # OpenAlex often returns a full URL; normalize to bare DOI
-    for prefix in ("https://doi.org/", "http://doi.org/"):
-        if doi.lower().startswith(prefix):
-            doi = doi[len(prefix):]
-            break
+    for pref in ("https://doi.org/", "http://doi.org/"):
+        if doi.lower().startswith(pref):
+            return doi[len(pref):]
     return doi
 
 def _pick_url(w: dict) -> str:
     pl = w.get("primary_location") or {}
-    url = pl.get("landing_page_url") or (w.get("host_venue") or {}).get("url") or ""
-    doi = _pick_doi(w)
-    if (not url) and doi:
-        url = f"https://doi.org/{doi}"
-    return url
+    boa = w.get("best_oa_location") or {}
+    url = (
+        pl.get("landing_page_url")
+        or boa.get("landing_page_url")
+    )
+    if not url:
+        for loc in (w.get("locations") or []):
+            url = loc.get("landing_page_url")
+            if url:
+                break
+    if not url:
+        doi = _pick_doi(w)
+        if doi:
+            url = f"https://doi.org/{doi}"
+    return url or ""
+
+def _pick_journal_name(w: dict) -> str:
+    # Preferred: primary_location.source.display_name
+    pl = w.get("primary_location") or {}
+    src = pl.get("source") or {}
+    name = (src.get("display_name") or "").strip()
+    if name:
+        return name
+    # Fallback: first locations[*].source.display_name
+    for loc in (w.get("locations") or []):
+        s = (loc.get("source") or {}).get("display_name")
+        if s:
+            return s.strip()
+    return ""
 
 def _is_offtopic(rec: dict) -> bool:
     t = f"{rec.get('title','')} {rec.get('journal','')}".lower()
@@ -112,7 +134,7 @@ def _postprocess_openalex_results(data: dict, n: int, query: str = "") -> list[d
     seen_dois = set()
 
     for w in works:
-        title = (w.get("display_name") or "").strip()
+        title = (w.get("title") or w.get("display_name") or "").strip()
         if not title:
             continue
         year = w.get("publication_year") or None
@@ -120,7 +142,7 @@ def _postprocess_openalex_results(data: dict, n: int, query: str = "") -> list[d
         url = _pick_url(w)
         abstract = _invert_openalex_abstract(w.get("abstract_inverted_index"))
         authors = [a.get("author", {}).get("display_name", "") for a in (w.get("authorships") or [])]
-        journal = (w.get("host_venue") or {}).get("display_name", "") or ""
+        journal = _pick_journal_name(w)
 
         # Dedupe
         tkey = title.lower()
@@ -136,10 +158,10 @@ def _postprocess_openalex_results(data: dict, n: int, query: str = "") -> list[d
         rec = {
             "title": title,
             "year": year,
-            "url": url,
-            "doi": doi or "",
-            "abstract": abstract,
-            "authors": authors,
+            "url": _pick_url(w),
+            "doi": _pick_doi(w),
+            "abstract": _invert_openalex_abstract(w.get("abstract_inverted_index")),
+            "authors": [a.get("author", {}).get("display_name", "") for a in (w.get("authorships") or [])],
             "journal": journal,
         }
         if not _is_offtopic(rec):
@@ -351,9 +373,22 @@ def _build_url_smart(question: str, *,
     params = {
         "per-page": str(per_page),
         "sort": "relevance_score:desc",
-        "select": "id,display_name,publication_year,primary_location,doi,abstract_inverted_index,authorships,host_venue,type,language,topics,primary_topic,cited_by_count",
+        "select": ",".join([
+            # titles / ids,
+            "id", "title", "display_name", "doi",
+            # dates / counts,
+            "publication_year", "cited_by_count",
+            # people,
+            "authorships",
+            # text,
+            "abstract_inverted_index",
+            # venue / access, 
+            "primary_location", "best_oa_location", "locations",
+            # typing / topics,
+            "type", "language", "topics", "primary_topic"
+        ]),
         "filter": ",".join(filters),
-        "search": _build_search_string(question, level=level),  
+        "search": _build_search_string(question, level=level),
     }
     if CONTACT_EMAIL:
         params["mailto"] = CONTACT_EMAIL
