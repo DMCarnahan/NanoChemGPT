@@ -237,8 +237,15 @@ document.addEventListener('DOMContentLoaded', () => {
     try {
       const fd = new FormData();
       for (const file of files) fd.append('file', file);
+
+      // Add CSRF token to headers
+      const headers = {};
+      const csrf = readCsrfToken();
+      if (csrf) headers['X-CSRFToken'] = csrf;
+
       const res = await fetch('/upload_builtin', {
         method: 'POST',
+        headers,
         body: fd
       });
       const json = await res.json();
