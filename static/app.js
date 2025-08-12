@@ -188,7 +188,27 @@ document.addEventListener('DOMContentLoaded', () => {
       const res = await fetch('/api/history');
       const data = await res.json();
       const items = data.items || [];
-      historyList.innerHTML = items.map(r => `<li>${r.question || ''}</li>`).join('');
+      historyList.innerHTML = items.map(r =>
+        `<li><a href="#" data-id="${r._id}">${r.question || '(no question)'}</a></li>`
+      ).join('');
+
+      // Add click handler for each link
+      historyList.querySelectorAll('a[data-id]').forEach(a => {
+        a.addEventListener('click', async (e) => {
+          e.preventDefault();
+          const id = a.getAttribute('data-id');
+          if (!id) return;
+          try {
+            const res = await fetch(`/api/history/${id}`);
+            const data = await res.json();
+            answerPre.textContent = data.answer ?? '(no answer)';
+            rationalePre.textContent = data.rationale ?? '';
+            // Optionally update other UI elements here
+          } catch (err) {
+            console.error(err);
+          }
+        });
+      });
     } catch (err) {
       console.error(err);
     }

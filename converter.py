@@ -462,9 +462,67 @@ def convert_text_to_robot_ops(text: str) -> Dict:
             records.append({"action":"postprocess","vessel":target_vessel,"reagents":[],"ops":ops_for_postproc(target_vessel,wd), "raw": step})
             continue
 
+        # Resuspend
+        res = detect_resuspend(step)
+        if res:
+            target_vessel = vessels.primary_vessel or vessels.ensure_glassware("Beaker")
+            records.append({
+                "action": "resuspend",
+                "vessel": target_vessel,
+                "ops": [{"op": "resuspend", "tube": f"{target_vessel}_tube"}],
+                "raw": step,
+                "reagents": []
+            })
+            continue
+
+        # Collect
+        col = detect_collect(step)
+        if col:
+            target_vessel = vessels.primary_vessel or vessels.ensure_glassware("Beaker")
+            records.append({
+                "action": "collect",
+                "vessel": target_vessel,
+                "ops": [{"op": "collect", "tube": f"{target_vessel}_tube"}],
+                "raw": step,
+                "reagents": []
+            })
+            continue
+
+        # Discard
+        dis = detect_discard(step)
+        if dis:
+            target_vessel = vessels.primary_vessel or vessels.ensure_glassware("Beaker")
+            records.append({
+                "action": "discard",
+                "vessel": target_vessel,
+                "ops": [{"op": "discard_supernatant", "tube": f"{target_vessel}_tube"}],
+                "raw": step,
+                "reagents": []
+            })
+            continue
+
+        # Transfer
+        tra = detect_transfer(step)
+        if tra:
+            target_vessel = vessels.primary_vessel or vessels.ensure_glassware("Beaker")
+            records.append({
+                "action": "transfer",
+                "vessel": target_vessel,
+                "ops": [{"op": "transfer", "to": tra["target"], "tube": f"{target_vessel}_tube"}],
+                "raw": step,
+                "reagents": []
+            })
+            continue
+
         # Fallback generic process node
-        target_vessel = vessels.primary_vessel or vessels.ensure_glassware("Beaker")
-        records.append({"action":"process","vessel":target_vessel,"reagents":[],"ops":[], "raw": step})
+        substeps = re.split(r"\band\b|;|\.", step)
+        for sub in substeps:
+            sub = sub.strip()
+            if not sub: continue
+            # Try all detectors again for each substep
+            # ...repeat detector logic here...
+            # If still nothing, add as process
+            records.append({"action": "process", "vessel": target_vessel, "reagents": [], "ops": [], "raw": sub})
 
     return {
         "hardware": hardware,
