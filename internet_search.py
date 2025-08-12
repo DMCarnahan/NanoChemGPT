@@ -7,7 +7,7 @@ import json
 import time
 import urllib.parse
 import re
-from typing import Any, Dict, Iterable, List, Optional
+from typing import Any, Dict, Iterable, List, Optional, Tuple
 
 BASE = "https://api.openalex.org/works"
 
@@ -321,40 +321,45 @@ def _build_search_string(question: str, *, level: str = "full") -> str:
     return " ".join(safe_terms)
 
 # ---- Query builder ----
-def _build_url_smart(question: str, *, n: int = 6, from_year: int | None = 2005,
-                     lang: str = "en", use_aboutness: bool = True) -> tuple[str, list[str]]:
+def _build_url_smart(question: str, *,
+                     n: int = 6,
+                     from_year: Optional[int] = 2005,
+                     lang: str = "en",
+                     use_aboutness: bool = True,
+                     level: str = "full") -> Tuple[str, List[str]]:
+    """
+    Build an OpenAlex works URL. Returns (url, tids) where tids are topic IDs.
+    `level` controls how many terms go into `search=`:
+      - 'full'    -> material + morphology + routes + scale
+      - 'core'    -> material + morphology + scale
+      - 'minimal' -> morphology only
+    """
     per_page = max(1, min(n, 25))
-    filters: List[str] = []
-
-    # Narrow by type/year/language ONLY via filters
-    filters.append("type:journal-article")
+    filters: List[str] = ["type:journal-article"]
     if lang:
-        filters.append(f"language:{lang}")
+        filters.append("language:%s" % lang)
     if from_year:
-        filters.append(f"from_publication_date:{from_year}-01-01")
+        filters.append("from_publication_date:%d-01-01" % from_year)
 
     tids: List[str] = []
     if use_aboutness:
         tids = _aboutness_topics_from_text(question, k=3)
         if tids:
-            filters.append("topics.id:" + "|".join(tids))  # let urlencode encode pipes
+            # bare IDs like T12345; pipes will be url-encoded later
+            filters.append("topics.id:" + "|".join(tids))
 
     params = {
         "per-page": str(per_page),
-        "sort": "relevance_score:desc",  # works with `search=`
-        "select": ",".join([
-            "id","display_name","publication_year","primary_location",
-            "doi","abstract_inverted_index","authorships","host_venue",
-            "type","language","topics","primary_topic","cited_by_count"
-        ]),
+        "sort": "relevance_score:desc",
+        "select": "id,display_name,publication_year,primary_location,doi,abstract_inverted_index,authorships,host_venue,type,language,topics,primary_topic,cited_by_count",
         "filter": ",".join(filters),
-        "search": _build_search_string(question),
+        "search": _build_search_string(question, level=level),  
     }
     if CONTACT_EMAIL:
         params["mailto"] = CONTACT_EMAIL
 
-    qs = urllib.parse.urlencode(params, doseq=True, safe=':," ')  # no parentheses or '|'
-    return f"{BASE}?{qs}", tids
+    qs = urllib.parse.urlencode(params, doseq=True, safe=':," ')
+    return ("%s?%s" % (BASE, qs), tids)
 
 def _norm_str(x: Any) -> str:
     if x is None:
