@@ -18,7 +18,7 @@ from werkzeug.utils import secure_filename
 
 # ──────────────── Local modules ──────────────── #
 import vector_store as vs
-from converter import validate_step
+from converter import validate_step, convert_text_to_robot_ops
 from mongo_client import get_db, ping as mongo_ping
 from internet_search import search_papers
 from DuckDB.duck_searcher import get_duck_searcher
@@ -577,7 +577,7 @@ def parse_route():
         text = (payload.get("text") or "").strip()
         if not text:
             return jsonify({"error": "JSON must contain non-empty 'text'"}), 400
-        data = validate_step(text)
+        data = convert_text_to_robot_ops(text)
         return jsonify({"ok": True, "data": data})
     except ValueError as ve:
         return jsonify({"ok": False, "error": str(ve)}), 422

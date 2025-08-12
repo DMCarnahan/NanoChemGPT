@@ -31,11 +31,15 @@ document.addEventListener('DOMContentLoaded', () => {
     mode = 'robot';
     modeRobot.setAttribute('aria-checked', 'true');
     modeReason?.setAttribute('aria-checked', 'false');
+    modeRobot.classList.add('active');
+    modeReason?.classList.remove('active');
   });
   modeReason?.addEventListener('click', () => {
     mode = 'reasoning';
     modeReason.setAttribute('aria-checked', 'true');
     modeRobot?.setAttribute('aria-checked', 'false');
+    modeReason.classList.add('active');
+    modeRobot?.classList.remove('active');
   });
 
   function readCsrfToken() {

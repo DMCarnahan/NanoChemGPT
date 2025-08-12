@@ -108,6 +108,11 @@ h1 { font-size: 26px; margin: 0; }
   opacity: .6;
   cursor: not-allowed;
 }
+.btn.tertiary.active {
+  background: #e0e0ff;
+  border-color: #4444aa;
+  color: #222;
+}
 
 /* ----------- Spinner ----------- */
 .spinner {
