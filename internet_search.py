@@ -1,11 +1,13 @@
 from __future__ import annotations
 
 import os
+from warnings import filters
 import httpx
 import functools
 import json
 import time
 import urllib.parse
+import re
 from typing import Any, Dict, Iterable, List, Optional
 
 BASE = "https://api.openalex.org/works"
@@ -68,32 +70,167 @@ def _http_get_json(url: str, *, timeout: float = 30.0, retries: int = 3, backoff
             time.sleep(backoff * attempt)  # simple linear backoff
     raise RuntimeError(f"GET failed after {retries} attempts: {last_exc}")
 
+
+def _invert_openalex_abstract(inv: Any) -> str:
+    """Rebuild plain-text abstract from OpenAlex abstract_inverted_index."""
+    if not isinstance(inv, dict) or not inv:
+        return ""
+    size = max(p for positions in inv.values() for p in positions) + 1
+    words = [""] * size
+    for token, positions in inv.items():
+        for p in positions:
+            if 0 <= p < size:
+                words[p] = token
+    return " ".join(w for w in words if w)
+
+_FORMULA_RX = re.compile(r"\b(?:[A-Z][a-z]?[\d]{0,3}){2,}\b")  # Cu2O, NiCo, Fe3O4, CoNi, etc.
+# Common material-class words to catch 
+_MAT_CLASSES = ["oxide","sulfide","selenide","telluride","nitride","phosphide",
+                "carbide","boride","hydroxide","perovskite","spinel","alloy","intermetallic"]
+
+# Lightweight element dictionary
+_ELEMENT_WORDS = {
+    "copper":"copper","cu":"copper",
+    "nickel":"nickel","ni":"nickel",
+    "cobalt":"cobalt","co":"cobalt",
+    "iron":"iron","fe":"iron",
+    "silver":"silver","ag":"silver",
+    "gold":"gold","au":"gold",
+    "zinc":"zinc","zn":"zinc",
+    "tin":"tin","sn":"tin",
+    "platinum":"platinum","pt":"platinum",
+    "palladium":"palladium","pd":"palladium",
+    "titanium":"titanium","ti":"titanium",
+    "aluminum":"aluminum","aluminium":"aluminum","al":"aluminum",
+}
+
+# Broad morphology vocabulary
+_MORPH = {
+    "nanorod":["nanorod","nanorods","rod","rods"],
+    "nanowire":["nanowire","nanowires","wire","wires"],
+    "nanotube":["nanotube","nanotubes","tube","tubes"],
+    "nanoribbon":["nanoribbon","nanoribbons","ribbon","ribbons"],
+    "nanobelt":["nanobelt","nanobelts","belt","belts"],
+    "nanoplate":["nanoplate","nanoplates","plate","plates","nanosheet","nanosheets","sheet","sheets","flake","flakes"],
+    "nanocube":["nanocube","nanocubes","cube","cubes","octahedron","octahedra","sphere","spheres"],
+}
+
+_ROUTES = ["polyol","hydrothermal","solvothermal","electrodeposition","seed-mediated","hot injection",
+           "template","microwave","photochemical","galvanic","chemical reduction","PVP","CTAB",
+           "oleylamine","ethylene glycol"]
+
+_SCALE = ["facile","scalable","scaleable","gram-scale","large scale","high yield"]
+
+def _tokenize_lower(s: str) -> List[str]:
+    return re.findall(r"[A-Za-z0-9\-\+/\.]+", (s or "").lower())
+
+def _extract_material_terms(question: str) -> List[str]:
+    toks = _tokenize_lower(question)
+    mats: List[str] = []
+
+    # element names/symbols that appear
+    for t in toks:
+        if t in _ELEMENT_WORDS:
+            mats.append(_ELEMENT_WORDS[t])
+
+    # chemical formulas like Cu2O, NiCo, Fe3O4
+    mats.extend(_FORMULA_RX.findall(question))
+
+    # generic material classes present in text
+    for cls in _MAT_CLASSES:
+        if cls in toks:
+            mats.append(cls)
+
+    # de-dup, keep short
+    mats = list(dict.fromkeys(mats))[:10]
+    return mats
+
+def _extract_morphology_terms(question: str) -> List[str]:
+    q = (question or "").lower()
+    found = []
+    for group in _MORPH.values():
+        if any(w in q for w in group):
+            found.extend(group)
+    if not found:
+        for key in ("nanorod","nanowire","nanotube","nanoribbon","nanobelt"):
+            found.extend(_MORPH[key])
+    return list(dict.fromkeys(found))
+
+def _or_group(words: List[str]) -> str:
+    words = [w for w in dict.fromkeys(words) if w]  # de-dup, keep order
+    return " OR ".join(f'"{w}"' if " " in w else w for w in words)
+
+def _build_boolean_query(question: str) -> str:
+    mats  = _extract_material_terms(question)        # optional
+    morph = _extract_morphology_terms(question)      # required/fallback
+    routes = _ROUTES
+    scale  = _SCALE
+
+    clauses = []
+    if mats:   clauses.append(f"({_or_group(mats)})")
+    if morph:  clauses.append(f"({_or_group(morph)})")
+    if routes: clauses.append(f"({_or_group(routes)})")
+    if scale:  clauses.append(f"({_or_group(scale)})")
+    return " AND ".join(clauses)
+
+def _aboutness_topics_from_text(text: str, k: int = 3) -> list[str]:
+    # Use OpenAlex /text endpoint to get Topics, then return top-k IDs
+    base = "https://api.openalex.org/text"
+    url = f"{base}?{urllib.parse.urlencode({'title': text[:2000]})}"
+    data = _http_get_json(url) or {}
+    topic_ids = []
+    pt = (data.get("primary_topic") or {}).get("id")
+    if pt:
+        topic_ids.append(pt)
+    for t in (data.get("topics") or [])[:k]:
+        tid = t.get("id")
+        if tid and tid not in topic_ids:
+            topic_ids.append(tid)
+    return topic_ids
+
+def _is_offtopic(rec: dict) -> bool:
+    t = (rec.get("title","") + " " + rec.get("journal","")).lower()
+    bad = ("battery","supercapacitor","review")
+    return any(b in t for b in bad)
+
 # ---- Query builder ----
-def _build_url(query: str, *, n: int = 6, sort: str = "cited_by_count:desc",
-               from_year: Optional[int] = None, to_year: Optional[int] = None,
-               is_oa: Optional[bool] = None) -> str:
-    if n <= 0:
-        n = 1
-    per_page = max(1, min(n, 25))  # OpenAlex caps per_page at 200; 25 keeps payloads small
-    params = {
-        "search": query,
-        "per_page": str(per_page),
-        "sort": sort,
-    }
-    # Build filters
+
+def _build_url_smart(question: str, *, n: int = 6, from_year: int | None = 2005,
+                     lang: str = "en", use_aboutness: bool = True) -> str:
+    per_page = max(1, min(n, 25))
     filters = []
+
+    # 1) Title+abstract boolean search (precise)
+    q = _build_boolean_query(question)
+    filters.append(f'title_and_abstract.search:({q})')
+
+    # 2) Narrow by type/year/language
+    filters.append("type:journal-article")
+    if lang:
+        filters.append(f"language:{lang}")
     if from_year:
         filters.append(f"from_publication_date:{from_year}-01-01")
-    if to_year:
-        filters.append(f"to_publication_date:{to_year}-12-31")
-    if is_oa is True:
-        filters.append("is_oa:true")
-    if is_oa is False:
-        filters.append("is_oa:false")
-    if filters:
-        params["filter"] = ",".join(filters)
 
-    qs = urllib.parse.urlencode(params, doseq=True, safe=":,")
+    # 3) Optional topic filter using /text aboutness
+    if use_aboutness:
+        tids = _aboutness_topics_from_text(question, k=3)
+        if tids:
+            filters.append("topics.id:" + "|".join(tids))
+
+    params = {
+        # use hyphenated key (official)
+        "per-page": str(per_page),
+        # relevance_score is available because we used a search filter
+        "sort": "relevance_score:desc",
+        # keep response lean
+        "select": ",".join([
+            "id","display_name","publication_year","primary_location",
+            "doi","abstract_inverted_index","authorships","host_venue",
+            "type","language","topics","primary_topic","cited_by_count"
+        ])
+    }
+    params["filter"] = ",".join(filters)
+    qs = urllib.parse.urlencode(params, doseq=True, safe=":|(),\" ")
     return f"{BASE}?{qs}"
 
 def _norm_str(x: Any) -> str:
@@ -114,38 +251,37 @@ def _pick_doi(work: dict) -> str:
         doi = doi.replace("https://doi.org/", "", 1)
     return doi
 
-def _pick_abstract(work: dict) -> str:
-    return _norm_str(work.get("abstract_inverted_index", ""))  # OpenAlex uses inverted index
-
-def search_papers(query: str, n: int = 6, *, sort: str = "cited_by_count:desc",
-                  from_year: Optional[int] = None, to_year: Optional[int] = None,
-                  is_oa: Optional[bool] = None, keywords: Optional[List[str]] = None) -> List[dict]:
+def search_papers(query: str, n: int = 6, *,
+                  from_year: Optional[int] = 2005,
+                  use_aboutness: bool = True) -> List[dict]:
     """
-    Return up to *n* dicts with keys: title, year, url, doi, abstract, authors, journal.
-    Optionally filter results for keywords.
+    Search tuned for materials synthesis questions.
+    Returns dicts with title, year, url, doi, abstract, authors, journal.
     """
     q = (query or "").strip()
     if not q:
         return []
 
-    url = _build_url(q, n=n, sort=sort, from_year=from_year, to_year=to_year, is_oa=is_oa)
+    url = _build_url_smart(q, n=n, from_year=from_year, use_aboutness=use_aboutness)
     data = _http_get_json(url) or {}
     results = data.get("results", []) or []
 
     out: List[dict] = []
-    for w in results[:n]:
-        out.append({
+    for w in results[:n*2]:  
+        abs_text = _invert_openalex_abstract(w.get("abstract_inverted_index"))
+        rec = {
             "title": _norm_str(w.get("display_name")),
             "year":  w.get("publication_year") or "",
             "url":   _pick_url(w),
             "doi":   _pick_doi(w),
-            "abstract": _pick_abstract(w),
+            "abstract": abs_text,
             "authors": [a.get("author", {}).get("display_name", "") for a in w.get("authorships", [])],
-            "journal": w.get("host_venue", {}).get("display_name", "")
-        })
-    if keywords:
-        out = filter_results(out, keywords)
-    return out
+            "journal": (w.get("host_venue") or {}).get("display_name", ""),
+        }
+        if not _is_offtopic(rec):
+            out.append(rec)
+
+    return out[:n] or out[:n]  # fall back gracefully
 
 def set_user_agent(email: str) -> None:
     """
@@ -205,8 +341,12 @@ if __name__ == "__main__":
         sys.exit(2)
 
     try:
-        items = search_papers(query, n=args.n, sort=args.sort,
-                              from_year=args.from_year, to_year=args.to_year, is_oa=is_oa)
+        items = search_papers(
+            query,
+            n=args.n,
+            from_year=args.from_year,
+            use_aboutness=True
+        )
         print(json.dumps(items, indent=2, ensure_ascii=False))
     except Exception as e:
         print(json.dumps({"error": str(e)}), file=sys.stderr)
