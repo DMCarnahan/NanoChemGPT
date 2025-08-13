@@ -591,10 +591,10 @@ def ask():
             if r.get("doi"): return f"https://doi.org/{r['doi']}"
             return ""
         
-    refs_prompt = "\n".join(
-        f"[{i+1}] {(r.get('title') or '(no title)')} ({r.get('year') or ''}) — {_ref_url(r)}"
-        for i, r in enumerate(refs)
-    ).strip()
+        refs_prompt = "\n".join(
+            f"[{i+1}] {(r.get('title') or '(no title)')} ({r.get('year') or ''}) — {_ref_url(r)}"
+            for i, r in enumerate(refs)
+        ).strip()
 
     # --- strict path ---
     if mode in ("robot_strict", "reasoning_strict"):
