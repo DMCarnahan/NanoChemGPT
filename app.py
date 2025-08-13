@@ -307,6 +307,38 @@ def _safe_text(x: Any) -> str:
     except Exception:
         return ""
 
+def _format_acs_reference(r: dict) -> str:
+    # Authors
+    authors = r.get("authors") or []
+    if isinstance(authors, list):
+        names = []
+        for a in authors[:6]:
+            # handle either dicts from OpenAlex or plain strings
+            n = (a.get("display_name") if isinstance(a, dict) else str(a)).strip()
+            if n:
+                names.append(n)
+        auth = "; ".join(names)
+        if len(authors) > 6:
+            auth += "; et al."
+    else:
+        auth = str(authors).strip()
+
+    title = (r.get("title") or "(no title)").strip()
+    journal = (r.get("journal") or r.get("venue") or "").strip()
+    year = str(r.get("year") or "").strip()
+
+    doi = (r.get("doi") or "").strip()
+    url = (r.get("url") or "").strip()
+    if doi and not doi.startswith("http"):
+        tail = f" https://doi.org/{doi}"
+    elif url:
+        tail = f" {url}"
+    else:
+        tail = ""
+
+    parts = [p for p in [auth and f"{auth}.", title and f"{title}.", journal, year] if p]
+    return (" ".join(parts) + tail).strip()
+
 def _extract_used_markers(*texts: str) -> dict:
     """Find [n] citations and [CTX]/[PARSED]/[DB]/[GEN] tags."""
     _CIT_BRACKET_RX = re.compile(r"\[(?P<num>\d{1,4})\]")
@@ -809,6 +841,20 @@ def ask():
             except Exception as e:
                 print("[ask] revise step skipped:", e)
 
+        # ---- Build a references block ----
+        want_refs_block = bool(payload.get("want_reference_block", True))
+        is_strict = mode in ("robot_strict", "reasoning_strict")
+
+        refs_block_text = ""
+        if want_refs_block and refs:
+            refs_block_text = "\n".join(
+                f"{i+1}. {_format_acs_reference(r)}" for i, r in enumerate(refs)
+            )
+
+        # Append the human-readable block to the answer only in non-strict modes
+        if want_refs_block and not is_strict and refs_block_text:
+            answer = f"{(answer or '').rstrip()}\n\n## References\n{refs_block_text}"
+
         qa_id = None
         try:
             db = get_db()
@@ -832,6 +878,7 @@ def ask():
             "answer": (answer or "").strip(),
             "rationale": rationale,
             "references": refs,
+            "references_block": refs_block_text,
             "refs": refs,
             "refs_used": used_summary.get("refs", []),
             "used": used_summary,
