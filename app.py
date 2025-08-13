@@ -93,8 +93,7 @@ def derive_query_profile(q: str) -> Dict[str, Set[str]]:
     mats = _augment_material_terms(mats_raw)
 
     chem_name_hits = set()  # disabled to avoid regex corruption in deployment
-        )
-    )
+
     mats |= {m.lower() for m in chem_name_hits}
 
     shapes = _extract_multiword_phrases(q_ascii, SHAPE_TERMS) | (SHAPE_TERMS & toks)
