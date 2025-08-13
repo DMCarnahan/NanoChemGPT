@@ -21,7 +21,7 @@ from pathlib import Path
 from typing import Any
 from functools import lru_cache
 
-
+from typing import List, Dict, Tuple, Set
 import httpx
 import pandas as pd
 from dotenv import load_dotenv
@@ -32,7 +32,6 @@ from flask import (
 from jinja2 import TemplateNotFound
 from openai import OpenAI
 from werkzeug.utils import secure_filename
-
 
 # ---- Local Modules ---- #
 import vector_store as vs
@@ -280,6 +279,197 @@ def basic_search(query: str, n: int = 6) -> list[dict]:
             seen.add(key)
     return local
 
+# Light stoplist
+_STOP = {
+    "the","a","an","of","and","or","for","to","in","on","at","by","with","from",
+    "using","via","how","what","which","based","study","paper","approach","method",
+    "large","scale","facile","simple","novel","new","effect","effects","based","describe",
+}
+
+# Common topic vocab (broad, domain-agnostic)
+SHAPE_TERMS = {
+    "nanorod","nanowire","nanotube","nanofiber","nanoparticle","nanocube","nanoplate",
+    "nanosheet","nanosphere","nanocluster","quantum dot","quantum dots","nanobelt",
+    "thin film","thin-film","microrod","microfiber","microtube","nanoflake","nanoribbon",
+}
+PROCESS_TERMS = {
+    "hydrothermal","solvothermal","sol-gel","polyol","microwave","autoclave","calcination",
+    "anneal","annealing","seed-mediated","galvanic replacement","hot injection","precipitation",
+    "co-precipitation","electrodeposition","chemical bath","chemical bath deposition","cbd",
+    "cvd","pvd","ald","sputtering","spin coating","dip coating","spray pyrolysis","templated",
+    "template-assisted","microemulsion","micelle",
+}
+MEASURE_TERMS = {
+    "xrd","tem","sem","afm","xps","raman","ftir","uv-vis","pl","vsm","squid","fmr","hall",
+    "fourier","impedance","conductivity","permittivity","dielectric","magnetization",
+}
+INTENT_SYN = {
+    "synthesize": {"synthesize","synthesis","prepare","fabricate","grow","make","deposit"},
+    "characterize": {"characterize","measure","quantify","analyze","determine","evaluate"},
+    "theory": {"theory","mechanism","dft","first-principles","simulation","model"},
+}
+
+# Prefer reputable publishers
+PUBLISHER_BOOST = (
+    "acs.org","rsc.org","sciencedirect","elsevier","springer","wiley","nature.com",
+    "aip.org","iop.org","electrochem.org","tandfonline","spiedigitallibrary",
+    "ieee.org","aps.org","arxiv.org","pnas.org"
+)
+# Drop obvious non-technical or low-signal hits 
+BAD_DOMAINS = (
+    "ssrn.com","medium.com","researchgate.net","quora.com","stackexchange",
+)
+
+CHEM_FORMULA_RX = re.compile(r"\b(?:[A-Z][a-z]?\d*){1,4}\b")  # light heuristic for formulas
+
+def _norm(x: str) -> str:
+    return (x or "").lower()
+
+def _tokenize(q: str) -> List[str]:
+    # keep hyphenated, split on non-letters/numbers, drop stopwords
+    qn = _norm(q)
+    toks = re.findall(r"[a-z0-9][a-z0-9\-]+", qn)
+    return [t for t in toks if t not in _STOP and len(t) > 1]
+
+def _extract_formulas(q: str) -> Set[str]:
+    return set(CHEM_FORMULA_RX.findall(re.sub(r"\s", "", q)))
+
+def _extract_multiword_phrases(q: str, vocab: Set[str]) -> Set[str]:
+    qn = _norm(q)
+    found = set()
+    for phrase in vocab:
+        if phrase in qn:
+            found.add(phrase)
+    return found
+
+def derive_query_profile(q: str) -> Dict[str, Set[str]]:
+    toks = set(_tokenize(q))
+    mats = _extract_formulas(q)  # NiO, CoFe, etc.
+    # Also treat capitalized chemical names typed plainly (fallback): nickel oxide, cobalt ferrite, etc.
+    chem_name_hits = set()
+    for m in re.findall(r"\b([a-z][a-z0-9\-]+(?:\s+(?:oxide|nitride|carbide|sulfide|sulphide|phosphide|ferrite|perovskite|aluminate|titanate|ferrate)))\b", _norm(q)):
+        chem_name_hits.add(m)
+
+    shapes = _extract_multiword_phrases(q, SHAPE_TERMS) | (SHAPE_TERMS & toks)
+    procs  = _extract_multiword_phrases(q, PROCESS_TERMS) | (PROCESS_TERMS & toks)
+    meas   = _extract_multiword_phrases(q, MEASURE_TERMS) | (MEASURE_TERMS & toks)
+
+    # Intent
+    intent = set()
+    for k, syns in INTENT_SYN.items():
+        if any(s in _norm(q) for s in syns):
+            intent.add(k)
+    if not intent:
+        # default: if shape/process words present, assume synthesis/fabrication
+        if shapes or procs:
+            intent.add("synthesize")
+
+    return {
+        "materials": mats | chem_name_hits,
+        "shapes": shapes,
+        "processes": procs,
+        "measure": meas,
+        "intent": intent,
+        "tokens": toks,
+    }
+
+def _domain_ok(url: str) -> bool:
+    u = _norm(url)
+    if not u: return True
+    return not any(bad in u for bad in BAD_DOMAINS)
+
+def _publisher_score(url: str) -> int:
+    u = _norm(url)
+    return 1 if any(p in u for p in PUBLISHER_BOOST) else 0
+
+def _blob(r: Dict) -> str:
+    return _norm(f"{r.get('title','')} {r.get('abstract','')}")
+
+def _match_any(blob: str, terms: Set[str]) -> int:
+    return sum(1 for t in terms if t and t in blob)
+
+def _has_any(blob: str, terms: Set[str]) -> bool:
+    return any(t for t in terms if t in blob)
+
+def filter_and_rerank_generic(q: str, refs: List[Dict]) -> List[Dict]:
+    """
+    General-purpose gate:
+      - Prefer matches on materials + (shapes or processes or measure), depending on intent.
+      - Drop obvious bad domains.
+      - Score by overlap + publisher boost.
+      - Adaptive fallback if the query is sparse/broad.
+    """
+    prof = derive_query_profile(q)
+    mats = prof["materials"]
+    shapes = prof["shapes"]
+    procs  = prof["processes"]
+    meas   = prof["measure"]
+    intent = prof["intent"]
+
+    candidates = []
+    for r in refs or []:
+        url = r.get("url") or (r.get("doi") and f"https://doi.org/{r['doi']}") or ""
+        if not _domain_ok(url):
+            continue
+        b = _blob(r)
+
+        # Hard-ish filter: if materials specified, require at least one material token in title/abstract
+        if mats and not _has_any(b, mats):
+            continue
+
+        # Intent-aware requirement
+        want_any_topic = False
+        if "synthesize" in intent:
+            if shapes or procs:
+                if not (_has_any(b, shapes) or _has_any(b, procs)):
+                    continue
+            else:
+                # synthesis intent but no explicit shape/process -> just ensure generic synthesis verbs
+                if not any(w in b for w in ("synthesis","prepare","fabricat","grow","deposit","autoclave","hydrothermal","solvothermal","calcination","anneal")):
+                    want_any_topic = True  # score but don't drop
+        elif "characterize" in intent:
+            if meas and not _has_any(b, meas):
+                want_any_topic = True
+        # theory intent has no strong gate
+
+        # Score
+        score = 0
+        score += 3 * _match_any(b, mats)         # material is highly important
+        score += 2 * _match_any(b, shapes)       # morphology
+        score += 2 * _match_any(b, procs)        # process
+        score += 1 * _match_any(b, meas)         # measurements
+        score += _publisher_score(url)
+
+        # Soft bonus if text contains generic verbs and we wanted any topic
+        if want_any_topic and any(w in b for w in ("synthesis","prepare","fabricat","grow","deposit","measure","characteriz","theory","mechanism","dft")):
+            score += 1
+
+        # Keep even low scores; we will fallback if too few strong hits
+        candidates.append((score, r))
+
+    # If materials weren’t specified (truly broad Q), don’t overfilter—just keep top refs by score
+    if not mats and not candidates:
+        candidates = [(0, r) for r in refs]
+
+    candidates.sort(key=lambda x: x[0], reverse=True)
+    filtered = [r for s, r in candidates if s > 0]
+
+    # Adaptive fallbacks
+    if len(filtered) < 3:
+        # Relax gates: allow matches with any topic terms or generic verbs
+        looser = []
+        for r in refs or []:
+            b = _blob(r)
+            score = 0
+            score += 2 * _match_any(b, shapes | procs | meas)
+            score += 1 * int(any(w in b for w in ("synthesis","prepare","fabricat","grow","deposit","measure","characteriz","dft","theory")))
+            score += _publisher_score(r.get("url") or "")
+            looser.append((score, r))
+        looser.sort(key=lambda x: x[0], reverse=True)
+        filtered = [r for s, r in looser[:8] if s > 0] or [r for s, r in candidates[:8]]
+
+    # Cap for evidence pack
+    return filtered[:8]
 
 @lru_cache(maxsize=128)
 def cached_vs_search(q):
@@ -577,10 +767,9 @@ def ask():
             context_parts.append("<<<CTX_TABLE>>>\n" + (table_ctx if isinstance(table_ctx, str) else str(table_ctx)))
         context_joined = "\n\n---\n\n".join(context_parts).strip()
 
-        # refs
         refs = []
         try:
-            refs = basic_search(q, n=6) or []
+            refs = basic_search(q, n=20) or []
         except Exception as e:
             print("[/ask] basic_search error:", e)
         if table_refs:
@@ -590,6 +779,11 @@ def ask():
             if r.get("url"): return r["url"]
             if r.get("doi"): return f"https://doi.org/{r['doi']}"
             return ""
+
+        # General relevance filter + reranker (domain-agnostic)
+        refs_filtered = filter_and_rerank_generic(q, refs)
+        if refs_filtered:
+            refs = refs_filtered
 
         refs_prompt = "\n".join(
             f"[{i+1}] {(r.get('title') or '(no title)')} ({r.get('year') or ''}) — {_ref_url(r)}"
