@@ -59,7 +59,7 @@ SPECIAL_FORMULA_ALIASES = {
     "al2o3": {"alumina"}, "sio2": {"silica"},
 }
 
-CHEM_FORMULA_RX = re.compile(r"\\b(?:[A-Z][a-z]?\\d*){1,5}\\b")
+CHEM_FORMULA_RX = re.compile(r"\b(?:[A-Z][a-z]?\\d*){1,5}\\b")
 
 def _extract_formulas(q: str) -> Set[str]:
     return set(CHEM_FORMULA_RX.findall(q or ""))
@@ -93,7 +93,7 @@ def derive_query_profile(q: str) -> Dict[str, Set[str]]:
     mats = _augment_material_terms(mats_raw)
 
     chem_name_hits = set(re.findall(
-        r"\\b([a-z][a-z0-9\\-]+(?:\\s+(?:oxide|nitride|carbide|sulfide|sulphide|phosphide|ferrite|perovskite|aluminate|titanate|ferrate)))\\b",
+        r"\b([a-z][a-z0-9\\-]+(?:\\s+(?:oxide|nitride|carbide|sulfide|sulphide|phosphide|ferrite|perovskite|aluminate|titanate|ferrate)))\\b",
         _norm(q_ascii)))
     mats |= {m.lower() for m in chem_name_hits}
 
