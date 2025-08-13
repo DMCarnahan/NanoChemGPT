@@ -1,10 +1,26 @@
+
+# NanoChemGPT Flask Application
+# --------------------------------
+# Main server and API for NanoChemGPT, a chemistry protocol and reasoning assistant.
+# Author: [Your Name or Organization]
+# License: MIT
+# --------------------------------
+
 from __future__ import annotations
 
-import os, io, json, re, glob, traceback, threading
+
+import os
+import io
+import json
+import re
+import glob
+import traceback
+import threading
 from datetime import datetime
 from pathlib import Path
 from typing import Any
 from functools import lru_cache
+
 
 import httpx
 import pandas as pd
@@ -17,14 +33,16 @@ from jinja2 import TemplateNotFound
 from openai import OpenAI
 from werkzeug.utils import secure_filename
 
-# ──────────────── Local modules ──────────────── #
+
+# ---- Local Modules ---- #
 import vector_store as vs
 from converter import validate_step, convert_text_to_robot_ops
 from mongo_client import get_db, ping as mongo_ping
 from internet_search import search_papers
 from DuckDB.duck_searcher import get_duck_searcher
 
-# ──────────────── Paths/Config ──────────────── #
+
+# ---- Paths & Config ---- #
 BASE_DIR = Path(__file__).resolve().parent
 TEMPLATES_DIR = BASE_DIR / "templates"
 STATIC_DIR = BASE_DIR / "static"
@@ -33,15 +51,19 @@ UPLOADS_DIR = Path(os.getenv("UPLOADS_DIR", "/mnt/data/uploads")).resolve()
 LOOKUP_UPLOAD_DIR = Path(os.getenv("LOOKUP_UPLOAD_DIR", "/mnt/data/datasets")).resolve()
 VECTORSTORE_DIR = Path(os.getenv("VECTORSTORE_DIR", "/mnt/data/index")).resolve()
 
+
+# Ensure all required directories exist
 for d in (BUILTIN_DIR, UPLOADS_DIR, LOOKUP_UPLOAD_DIR, VECTORSTORE_DIR):
     d.mkdir(parents=True, exist_ok=True)
 
-# ──────────────── Flask app ──────────────── #
+
+# ---- Flask App Setup ---- #
 app = Flask(__name__, template_folder=str(TEMPLATES_DIR), static_folder=str(STATIC_DIR))
 app.config["MAX_CONTENT_LENGTH"] = 100 * 1024 * 1024  # 100 MB
 app.config["JSON_AS_ASCII"] = False  # allow UTF-8
 
-# CSRF setup
+
+# CSRF setup (optional)
 try:
     from flask_wtf.csrf import CSRFProtect, generate_csrf
     app.config['SECRET_KEY'] = os.getenv("FLASK_SECRET_KEY", "change-me")
@@ -52,15 +74,20 @@ except Exception:
     def generate_csrf() -> str:
         return ""
 
+
 @app.context_processor
 def inject_csrf_token():
+    """Inject CSRF token for Jinja templates."""
     return dict(csrf_token=generate_csrf)
+
 
 @app.before_request
 def _log_req():
+    """Log every incoming request."""
     print(f"[req] {request.method} {request.path}")
 
-# ──────────────── DuckDB setup ──────────────── #
+    
+# ---- DuckDB Setup ---- #
 def maybe_build_duckdb():
     """Create a .duckdb from Parquet once if DUCKDB_BOOTSTRAP=1 and files exist."""
     if os.getenv("DUCKDB_BOOTSTRAP", "0").lower() not in ("1", "true", "yes"):
@@ -85,7 +112,8 @@ def maybe_build_duckdb():
         con = duckdb.connect(db_path)
         con.execute(f"CREATE TABLE {tbl} AS SELECT * FROM read_parquet('{parq_glob}', hive_partitioning=1)")
         con.execute("CHECKPOINT")
-        rows = con.execute(f"SELECT COUNT(*) FROM {tbl}").fetchone()[0]
+        row = con.execute(f"SELECT COUNT(*) FROM {tbl}").fetchone()
+        rows = row[0] if row else 0
         con.close()
         app.logger.info("[duckdb-init] created %s rows=%d table=%s", db_path, rows, tbl)
     except Exception as e:
@@ -110,20 +138,24 @@ try:
 except Exception as e:
     app.logger.warning("[dataset_search] init failed: %s", e)
 
-# ──────────────── OpenAI client ──────────────── #
+
+# ---- OpenAI Client ---- #
 load_dotenv()
 _no_proxy = httpx.Client(trust_env=False, timeout=120.0)
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"), http_client=_no_proxy)
 
-# ──────────────── Utilities ──────────────── #
+
+# ---- Utility Functions ---- #
 def _safe_text(x: Any) -> str:
+    """Convert any value to string, safely handling None."""
     try:
         return str(x) if x is not None else ""
     except Exception:
         return ""
 
+
 def _extract_used_markers(*texts: str) -> dict:
-    """Find [n] citations and [CTX]/[PARSED]/[DB]/[GEN] tags."""
+    """Find [n] citations and [CTX]/[PARSED]/[DB]/[GEN] tags in text."""
     _CIT_BRACKET_RX = re.compile(r"\[(?P<num>\d{1,4})\]")
     _CIT_FULL_RX = re.compile(r"【(?P<num>\d{1,4})】")
     _CIT_FOOT_RX = re.compile(r"\[\^(?P<num>\d{1,4})\]")
@@ -131,18 +163,86 @@ def _extract_used_markers(*texts: str) -> dict:
     seen = set()
     tag_counts = {t: 0 for t in TAGS}
     for t in texts:
-        if not t: continue
+        if not t:
+            continue
         for rx in (_CIT_BRACKET_RX, _CIT_FULL_RX, _CIT_FOOT_RX):
             for m in rx.finditer(t):
-                try: seen.add(int(m.group("num")))
-                except Exception: pass
+                try:
+                    seen.add(int(m.group("num")))
+                except Exception:
+                    pass
         for tag in TAGS:
             tag_counts[tag] += len(re.findall(rf"\[{tag}\]", t))
-    return {"refs": sorted(seen), "tags": tag_counts, "has_ctx": any(tag_counts[k] > 0 for k in ("CTX", "PARSED", "DB"))}
+    return {
+        "refs": sorted(seen),
+        "tags": tag_counts,
+        "has_ctx": any(tag_counts[k] > 0 for k in ("CTX", "PARSED", "DB")),
+    }
+
+
+def _split_ctx(ctx: str, max_snips: int = 6, max_tokens: int = 140) -> list[dict]:
+    """Split context into short, trimmed blocks for evidence packing."""
+    blocks = [b.strip() for b in re.split(r"\n\s*\n", ctx or "") if b.strip()]
+    snips = []
+    for b in blocks:
+        t = b
+        # crude token limiter ~ chars
+        if len(t) > 800:
+            t = t[:800] + " …"
+        snips.append({"id": None, "source": "CTX", "text": t})
+        if len(snips) >= max_snips:
+            break
+    return snips
+
+
+def _pick_web_snips(refs: list[dict], max_per_src: int = 1, max_total: int = 6, max_chars: int = 800) -> list[dict]:
+    """Extract up to max_total web snippets from references for evidence packing."""
+    out = []
+    for i, r in enumerate(refs, start=1):
+        abs_ = (r.get("abstract") or "").strip()
+        if not abs_:
+            continue
+        txt = abs_
+        if len(txt) > max_chars:
+            txt = txt[:max_chars] + " …"
+        out.append({"id": f"S{i}", "source": "WEB", "text": txt})
+    return out[:max_total]
+
+
+def build_evidence_pack(q: str, vs_ctx: str, refs: list[dict]) -> tuple[str, list[str]]:
+    """Builds an EVIDENCE block and id list for strict protocol generation."""
+    ctx_snips = _split_ctx(vs_ctx, max_snips=6)
+    web_snips = _pick_web_snips(refs, max_total=6)
+
+    lines = ["EVIDENCE"]
+    ids: list[str] = []
+
+    # Number web sources S1..Sk and attach one child chunk each (S1_C1)
+    for i, r in enumerate(refs, start=1):
+        s_id = f"S{i}"
+        title = (r.get("title") or "(no title)")[:180]
+        year = r.get("year") or ""
+        url = r.get("url") or (r.get("doi") and f"https://doi.org/{r['doi']}" ) or ""
+        lines.append(f"[{s_id}] {title} ({year}) — {url}".strip())
+        abs_ = (r.get("abstract") or "").strip()
+        if abs_:
+            c_id = f"{s_id}_C1"
+            lines.append(f"[{c_id}] \"{abs_[:600]}\"")
+            ids.extend([s_id, c_id])
+
+    # Attach CTX snippets as CTX1.. if present
+    for j, s in enumerate(ctx_snips, start=1):
+        cid = f"CTX{j}"
+        lines.append(f"[{cid}] \"{s['text'][:600]}\"")
+        ids.append(cid)
+
+    lines.append("END EVIDENCE")
+    return "\n".join(lines), ids
+
 
 def basic_search(query: str, n: int = 6) -> list[dict]:
-    """Merge local LOOKUP hits + OpenAlex web hits; de-dup by doi/title."""
-    if not query.strip():
+    """Merge local LOOKUP hits + OpenAlex web hits; de-duplicate by DOI/title."""
+    if not query or not query.strip():
         return []
     local = []
     if LOOKUP is not None:
@@ -173,16 +273,23 @@ def basic_search(query: str, n: int = 6) -> list[dict]:
     for w in web:
         key = (w.get("doi") or w.get("title", "")).lower()
         if key not in seen:
-            local.append({k: w.get(k, "") for k in ("title", "year", "url", "doi")})
+            local.append({
+                k: w.get(k, "")
+                for k in ("title", "year", "url", "doi", "abstract", "journal", "authors")
+            })
             seen.add(key)
-    return local[:2 * n]
+    return local
+
 
 @lru_cache(maxsize=128)
 def cached_vs_search(q):
+    """Cached vector store search."""
     return vs.search(q, k=8) or ""
+
 
 @lru_cache(maxsize=128)
 def cached_lookup_query(q):
+    """Cached lookup query for DuckDB."""
     if LOOKUP is not None:
         try:
             return LOOKUP.query(q, topk=5)
@@ -190,43 +297,56 @@ def cached_lookup_query(q):
             return None
     return None
 
+
 @lru_cache(maxsize=128)
 def cached_basic_search(q, n):
+    """Cached basic search (local + web)."""
     try:
         return basic_search(q, n) or []
     except Exception:
         return []
 
-# ──────────────── Routes ──────────────── #
+
+# ---- Flask Routes ---- #
 @app.get("/health")
 def health():
+    """Health check endpoint."""
     return "ok", 200
+
 
 @app.get("/db_health")
 def db_health():
+    """MongoDB health check endpoint."""
     try:
         mongo_ping()
         return {"mongo": "ok"}, 200
     except Exception as e:
         return {"mongo": "error", "detail": str(e)}, 500
 
+
 @app.get("/")
 def home():
+    """Render the home page."""
     try:
         return render_template("index.html")
     except TemplateNotFound:
         return "<h1>NanoChemGPT</h1><p>templates/index.html missing.</p>", 200
 
+
 # ---- Uploads ---- #
 JOBS: dict[str, dict] = {}
-def _set_job(jid: str, **kw): JOBS.setdefault(jid, {}).update(kw)
+def _set_job(jid: str, **kw):
+    """Set or update a job status in the JOBS dict."""
+    JOBS.setdefault(jid, {}).update(kw)
+
 
 @app.post("/upload")
 def upload():
+    """Upload a file and process it for context or table ingestion."""
     f = request.files.get("file")
     if not f or f.filename == "":
         abort(400, "No file uploaded.")
-    fname = secure_filename(f.filename)
+    fname = secure_filename(f.filename or "uploaded_file")
     lower = fname.lower()
 
     dest = LOOKUP_UPLOAD_DIR / fname if lower.endswith((".parquet", ".csv", ".tsv", ".xlsx")) else (UPLOADS_DIR / fname)
@@ -267,7 +387,9 @@ def upload():
 
     return jsonify({"ok": True, "job_id": jid, "filename": fname, "path": str(dest)})
 
+
 def _mark_uploaded(fname: str, *, kind: str, status: str):
+    """Mark a file as uploaded and update DB status."""
     try:
         get_db().uploads.update_one(
             {"filename": fname},
@@ -277,14 +399,18 @@ def _mark_uploaded(fname: str, *, kind: str, status: str):
     except Exception as e:
         print("[/upload] DB update warn:", e)
 
+
 @app.get("/status/<jid>")
 def status(jid: str):
+    """Get the status of an upload or processing job."""
     j = JOBS.get(jid)
     if not j:
         abort(404, "unknown job id")
     return jsonify(j)
 
+
 def _process_pdf_job(jid: str, path: Path, filename: str):
+    """Extract text from PDF and add to vector store."""
     from PyPDF2 import PdfReader
     db = None
     try:
@@ -299,7 +425,7 @@ def _process_pdf_job(jid: str, path: Path, filename: str):
             texts.append(page.extract_text() or "")
             _set_job(jid, progress=int(100 * i / n))
         text = "\n".join(texts)
-        if not text.strip():
+        if not text or not text.strip():
             raise ValueError("PDF contains no extractable text.")
         vs.add_to_store(text, tag=f"upload:{filename}")
         if db is not None:
@@ -321,9 +447,11 @@ def _process_pdf_job(jid: str, path: Path, filename: str):
                 pass
         _set_job(jid, status="error", error=str(e))
 
+
 # ---- Search API ---- #
 @app.post("/search")
 def search_route():
+    """Search for references using local and web sources."""
     payload = request.get_json(silent=True) or {}
     q = (payload.get("q") or payload.get("query") or "").strip()
     n = int(payload.get("n") or 6)
@@ -332,10 +460,60 @@ def search_route():
     refs = basic_search(q, n)
     return jsonify({"results": refs})
 
-# ---- Ask ---- #
+
+def _validate_strict_json(raw_json: str, evidence_ids: list[str]) -> str:
+    """Ensure every sentence in procedure[].text and reasoning[].claim has a bracketed id that exists."""
+    try:
+        data = json.loads(raw_json)
+    except Exception:
+        # ask model to fix formatting
+        fix = client.chat.completions.create(
+            model="gpt-4o-mini",
+            temperature=0,
+            messages=[{"role":"system","content":"Fix the JSON to be valid UTF-8 JSON; do not change semantics."},
+                      {"role":"user","content":raw_json}]
+        ).choices[0].message.content
+        if fix is None:
+            raise ValueError("Unable to fix JSON")
+        data = json.loads(fix)
+
+    def has_valid_cite(s: str) -> bool:
+        ids = re.findall(r"\[([A-Z0-9_]+)\]", s or "")
+        return any(i in evidence_ids for i in ids)
+
+    data.setdefault("uncited", [])
+    data.setdefault("insufficient_evidence", [])
+
+    # Validate procedure steps
+    proc_out = []
+    for step in data.get("procedure", []):
+        txt = (step.get("text") or "").strip()
+        if not has_valid_cite(txt):
+            data["uncited"].append(txt)
+        else:
+            proc_out.append(step)
+    data["procedure"] = proc_out
+
+    # Validate reasoning claims
+    reas_out = []
+    for cl in data.get("reasoning", []):
+        claim = (cl.get("claim") or "").strip()
+        cits = cl.get("citations") or []
+        if not claim or not any(c in evidence_ids for c in cits):
+            data["uncited"].append(claim)
+        else:
+            reas_out.append(cl)
+    data["reasoning"] = reas_out
+
+    return json.dumps(data, ensure_ascii=False, indent=None)
+
+
+# ---- Ask API ---- #
 @app.post("/ask")
 def ask():
+    """Main endpoint for question answering and protocol generation."""
     def split_reasoning(raw: str) -> tuple[str, str]:
+        """Split answer and rationale from model output."""
         if not raw:
             return "", ""
         text = raw.strip()
@@ -396,8 +574,8 @@ def ask():
                 print("[/ask] LOOKUP query error:", e)
 
         context_parts = []
-        if vs_ctx: context_parts.append("<<<CTX_UPLOADS>>>\n" + vs_ctx)
-        if table_ctx: context_parts.append("<<<CTX_TABLE>>>\n" + table_ctx)
+        if vs_ctx: context_parts.append("<<<CTX_UPLOADS>>>\n" + (vs_ctx if isinstance(vs_ctx, str) else str(vs_ctx)))
+        if table_ctx: context_parts.append("<<<CTX_TABLE>>>\n" + (table_ctx if isinstance(table_ctx, str) else str(table_ctx)))
         context_joined = "\n\n---\n\n".join(context_parts).strip()
 
         refs = []
@@ -416,7 +594,46 @@ def ask():
             f"[{i+1}] {(r.get('title') or '(no title)')} ({r.get('year') or ''}) — {_ref_url(r)}"
             for i, r in enumerate(refs)
         ).strip()
+        
+    # --- strict path ---
+    if mode in ("robot_strict", "reasoning_strict"):
+        evidence_text, evidence_ids = build_evidence_pack(q, context_joined, refs)
 
+        STRICT_SCHEMA = (
+            'You are writing for materials chemists. Use ONLY the passages in EVIDENCE.\n'
+            'If a claim or step is not supported there, list it under "insufficient_evidence".\n'
+            'Every sentence that makes a claim MUST include bracket citations to [S#], [S#_C#] or [CTX#].\n'
+            'Do NOT use prior knowledge.\n'
+            'Return valid JSON only, matching this schema exactly:\n'
+            '{\n'
+            ' "procedure": [ {"step": 1, "text": "… [S1_C1][CTX1]"}, ... ],\n'
+            ' "reasoning": [ {"claim": "…", "citations": ["S1_C1","CTX1"]}, ... ],\n'
+            ' "uncited": [],\n'
+            ' "insufficient_evidence": []\n'
+            '}\n'
+        )
+
+        strict_task = (
+            f'TASK\n'
+            f'Write a step-by-step procedure and a brief reasoning section for: "{q}".\n'
+            f'{evidence_text}\n'
+            f'END EVIDENCE\n'
+            f'OUTPUT JSON ONLY.'
+        )
+
+        raw = client.chat.completions.create(
+            model="gpt-4o-mini",
+            temperature=0.1,
+            messages=[
+                {"role": "system", "content": STRICT_SCHEMA},
+                {"role": "user", "content": strict_task},
+            ],
+        ).choices[0].message.content
+
+        answer = _validate_strict_json((raw or "").strip(), evidence_ids)
+        rationale = ""
+        used_summary = {"refs": [], "tags": {}, "has_ctx": bool(context_joined)}
+    else:
         # prompt variants
         robot_rules = (
             "Return a discrete lab protocol with exact quantities on a small scale (~0.5 mmol Co):\n"
@@ -504,7 +721,7 @@ def ask():
             answer = strip_references_block((raw or "").strip())
             rationale = ""
         else:
-            answer, rationale = split_reasoning(strip_references_block(raw))
+            answer, rationale = split_reasoning(strip_references_block(raw or ""))
 
         # Rationale fallback if missing
         if not (rationale or "").strip():
@@ -602,8 +819,8 @@ def ask():
             "used": used_summary,
             "mode": mode,
             "qa_id": qa_id,
-            "ctx_vs": (vs_ctx or "")[:8000],
-            "ctx_table": (table_ctx or "")[:4000],
+            "ctx_vs": (vs_ctx if isinstance(vs_ctx, str) else str(vs_ctx or ""))[:8000],
+            "ctx_table": (table_ctx if isinstance(table_ctx, str) else str(table_ctx or ""))[:4000],
         })
 
     except Exception as e:
@@ -750,13 +967,15 @@ def upload_builtin():
         return jsonify({"ok": False, "error": "No files uploaded"}), 400
     saved = []
     for f in files:
-        fname = secure_filename(f.filename)
+        fname = secure_filename(f.filename or "uploaded_file")
         dest = BUILTIN_DIR / fname
         dest.parent.mkdir(parents=True, exist_ok=True)
         f.save(dest)
         saved.append(fname)
     return jsonify({"ok": True, "files": saved})
 
+
+# ---- Main Entrypoint ---- #
 if __name__ == "__main__":
     app.run(
         host="0.0.0.0",
