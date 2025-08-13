@@ -62,7 +62,7 @@ app.config["MAX_CONTENT_LENGTH"] = 100 * 1024 * 1024  # 100 MB
 app.config["JSON_AS_ASCII"] = False  # allow UTF-8
 
 
-# CSRF setup (optional)
+# CSRF setup
 try:
     from flask_wtf.csrf import CSRFProtect, generate_csrf
     app.config['SECRET_KEY'] = os.getenv("FLASK_SECRET_KEY", "change-me")
@@ -285,6 +285,15 @@ def basic_search(query: str, n: int = 6) -> list[dict]:
     
     return local[:2 * n]
 
+SUBS = str.maketrans("0123456789", "₀₁₂₃₄₅₆₇₈₉")
+
+def _with_subscripts(s: str) -> str:
+    # "MnO2" -> "MnO₂"
+    return "".join(ch.translate(SUBS) if ch.isdigit() else ch for ch in s)
+
+def _lower_set(xs):
+    return { (x or "").lower() for x in (xs or []) if x }
+
 # Light stoplist
 _STOP = {
     "the","a","an","of","and","or","for","to","in","on","at","by","with","from",
@@ -323,7 +332,7 @@ PUBLISHER_BOOST = (
 )
 # Drop obvious non-technical or low-signal hits 
 BAD_DOMAINS = (
-    "ssrn.com","medium.com","researchgate.net","quora.com","stackexchange",
+    "ssrn.com","medium.com","researchgate.net","quora.com","stackexchange", "zenodo.org", "researchsquare.com", "osf.io", "preprints.org"
 )
 
 CHEM_FORMULA_RX = re.compile(r"\b(?:[A-Z][a-z]?\d*){1,4}\b")  # light heuristic for formulas
@@ -350,8 +359,12 @@ def _extract_multiword_phrases(q: str, vocab: Set[str]) -> Set[str]:
 
 def derive_query_profile(q: str) -> Dict[str, Set[str]]:
     toks = set(_tokenize(q))
-    mats = _extract_formulas(q)  # NiO, CoFe, etc.
-    # Also treat capitalized chemical names typed plainly (fallback): nickel oxide, cobalt ferrite, etc.
+    mats_raw = _extract_formulas(q)               # e.g., {"MnO2"}
+    mats = _lower_set(mats_raw)                   # {"mno2"}
+    # Add Unicode subscript form: {"mno₂"}
+    mats |= { _with_subscripts(m).lower() for m in mats_raw }
+
+    # two-word chemical names like "nickel oxide", "manganese dioxide"
     chem_name_hits = set()
     for m in re.findall(r"\b([a-z][a-z0-9\-]+(?:\s+(?:oxide|nitride|carbide|sulfide|sulphide|phosphide|ferrite|perovskite|aluminate|titanate|ferrate)))\b", _norm(q)):
         chem_name_hits.add(m)
@@ -360,21 +373,18 @@ def derive_query_profile(q: str) -> Dict[str, Set[str]]:
     procs  = _extract_multiword_phrases(q, PROCESS_TERMS) | (PROCESS_TERMS & toks)
     meas   = _extract_multiword_phrases(q, MEASURE_TERMS) | (MEASURE_TERMS & toks)
 
-    # Intent
     intent = set()
     for k, syns in INTENT_SYN.items():
         if any(s in _norm(q) for s in syns):
             intent.add(k)
-    if not intent:
-        # default: if shape/process words present, assume synthesis/fabrication
-        if shapes or procs:
-            intent.add("synthesize")
+    if not intent and (shapes or procs):
+        intent.add("synthesize")
 
     return {
-        "materials": mats | chem_name_hits,
-        "shapes": shapes,
-        "processes": procs,
-        "measure": meas,
+        "materials": mats | chem_name_hits,   # all lowercase
+        "shapes": {s.lower() for s in shapes},
+        "processes": {p.lower() for p in procs},
+        "measure": {m.lower() for m in meas},
         "intent": intent,
         "tokens": toks,
     }
@@ -392,10 +402,12 @@ def _blob(r: Dict) -> str:
     return _norm(f"{r.get('title','')} {r.get('abstract','')}")
 
 def _match_any(blob: str, terms: Set[str]) -> int:
-    return sum(1 for t in terms if t and t in blob)
+    b = (blob or "").lower()
+    return sum(1 for t in terms if t and t in b)
 
 def _has_any(blob: str, terms: Set[str]) -> bool:
-    return any(t for t in terms if t in blob)
+    b = (blob or "").lower()
+    return any(t for t in terms if t in b)
 
 def filter_and_rerank_generic(q: str, refs: List[Dict]) -> List[Dict]:
     """
@@ -473,6 +485,9 @@ def filter_and_rerank_generic(q: str, refs: List[Dict]) -> List[Dict]:
             looser.append((score, r))
         looser.sort(key=lambda x: x[0], reverse=True)
         filtered = [r for s, r in looser[:8] if s > 0] or [r for s, r in candidates[:8]]
+
+    prof = derive_query_profile(q)
+    print(f"[rerank] mats={sorted(list(prof['materials']))} shapes={sorted(list(prof['shapes']))} procs={sorted(list(prof['processes']))} intent={sorted(list(prof['intent']))}")
 
     # Cap for evidence pack
     return filtered[:8]
@@ -649,7 +664,7 @@ def search_route():
     n = int(payload.get("n") or 6)
     if not q:
         abort(400, "Missing 'q' (query).")
-    refs = basic_search(q, n)
+    refs = basic_search(q, n=20) or []
     return jsonify({"results": refs})
 
 
