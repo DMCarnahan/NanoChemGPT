@@ -229,7 +229,7 @@ except Exception:
         return ""
 
 @app.context_processor
-def enriched_search(query: str, materials: Set[str], shapes: Set[str]) -> list[dict]:
+def _enriched_search_helper(query: str, materials: Set[str], shapes: Set[str]) -> list[dict]:
     """Try focused rewrites (material + morphology) and merge results."""
     mats = sorted(list({m for m in materials if any(ch.isalpha() for ch in m)}))[:2]
     shape = next(iter(shapes), "nanorod")
@@ -617,7 +617,7 @@ def ask():
         prof = derive_query_profile(q)
         if prof.get("materials") and len(refs) < 3:
             try:
-                more = enriched_search(q, prof["materials"], prof["shapes"])
+                more = _enriched_search_helper(q, prof["materials"], prof["shapes"])
                 if more:
                     refs = filter_and_rerank_generic(q, refs + more) or refs
             except Exception as e:
