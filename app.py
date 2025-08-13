@@ -93,7 +93,6 @@ def derive_query_profile(q: str) -> Dict[str, Set[str]]:
     mats = _augment_material_terms(mats_raw)
 
     chem_name_hits = set()  # disabled to avoid regex corruption in deployment
-
     mats |= {m.lower() for m in chem_name_hits}
 
     shapes = _extract_multiword_phrases(q_ascii, SHAPE_TERMS) | (SHAPE_TERMS & toks)
@@ -166,7 +165,10 @@ def filter_and_rerank_generic(q: str, refs: List[Dict]) -> List[Dict]:
     cands.sort(key=lambda x: x[0], reverse=True)
     filtered = [r for s, r in cands if s > 0]
     if not filtered:
-        # relaxed pass
+        # If a material is specified, do NOT relax to generic nanorod papers.
+        if mats:
+            return []
+        # Otherwise, relaxed pass for broad queries.
         looser = []
         for r in refs or []:
             b = f"{r.get('title','')} {r.get('abstract','')} {r.get('journal','')}".lower()
@@ -227,6 +229,29 @@ except Exception:
         return ""
 
 @app.context_processor
+def enriched_search(query: str, materials: Set[str], shapes: Set[str]) -> list[dict]:
+    """Try focused rewrites (material + morphology) and merge results."""
+    mats = sorted(list({m for m in materials if any(ch.isalpha() for ch in m)}))[:2]
+    shape = next(iter(shapes), "nanorod")
+    seeds = [
+        query,
+        f"{' '.join(mats)} {shape} synthesis",
+        f"{' '.join(mats)} hydrothermal {shape}",
+        f"{' '.join(mats)} {shape} preparation",
+    ]
+    all_refs: list[dict] = []
+    seen = set()
+    for s in seeds:
+        try:
+            hits = basic_search(s, n=12) or []
+        except Exception as e:
+            print("[enriched_search] basic_search fail:", e); continue
+        for h in hits:
+            key = (h.get("doi") or h.get("title","")).lower()
+            if key in seen: continue
+            seen.add(key); all_refs.append(h)
+    return all_refs[:24]
+
 def inject_csrf_token():
     return dict(csrf_token=generate_csrf)
 
@@ -581,7 +606,27 @@ def ask():
             print("[/ask] basic_search error:", e)
         if table_refs:
             refs = list(refs) + table_refs
-        # Filter and rerank references generically (material/topic aware)
+        
+        # Material/topic-aware filtering
+        try:
+            refs = filter_and_rerank_generic(q, refs) or []
+        except Exception as e:
+            print("[/ask] filter error:", e)
+
+        # Focused re-search if material is specified but refs are too sparse
+        prof = derive_query_profile(q)
+        if prof.get("materials") and len(refs) < 3:
+            try:
+                more = enriched_search(q, prof["materials"], prof["shapes"])
+                if more:
+                    refs = filter_and_rerank_generic(q, refs + more) or refs
+            except Exception as e:
+                print("[/ask] enriched_search error:", e)
+
+        print("[/ask] refs (filtered):")
+        for i, r in enumerate(refs, 1):
+            print(f"  [{i}] {r.get('title')} — {r.get('doi') or r.get('url')}")
+# Filter and rerank references generically (material/topic aware)
         try:
             refs = filter_and_rerank_generic(q, refs) or refs
         except Exception as e:
