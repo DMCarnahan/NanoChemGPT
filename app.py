@@ -517,24 +517,19 @@ def ask():
         if not raw:
             return "", ""
         text = raw.strip()
-        # Remove all code-fenced reason/rationale blocks from the answer
         fence_rx = re.compile(r"```(?:reason|rationale|reasoning)\s*([\s\S]*?)```", re.I)
         rationale = ""
         fences = list(fence_rx.finditer(text))
         if fences:
-            # Use the last rationale block found
             rationale = fences[-1].group(1).strip()
-            # Remove all rationale blocks from the answer
             answer = fence_rx.sub("", text).strip()
             return answer, rationale
-        # Heading rationale block
         head = re.compile(r"(?:^|\n)#{1,3}\s*(rationale|reasoning)\b[^\n]*\n((?:.*\n?)*)$", re.I | re.S)
         m = head.search(text)
         if m:
             rationale = m.group(2).strip()
             answer = text[:m.start()].strip()
             return answer, rationale
-        # If no rationale found, treat all as answer, rationale is empty
         return text, ""
 
     try:
@@ -568,16 +563,21 @@ def ask():
                     line = f"[T{i}] solvent={solvent}; temp_C={temp}; time_h={time_h}; {note}".strip()
                     lines.append(line)
                     url = row.get("url") or (row.get("doi") and f"https://doi.org/{row['doi']}")
-                    if url: table_refs.append({"title": f"Table row {i}", "url": url})
+                    if url:
+                        table_refs.append({"title": f"Table row {i}", "url": url})
                 table_ctx = "\n".join(lines)
             except Exception as e:
                 print("[/ask] LOOKUP query error:", e)
 
+        # join contexts
         context_parts = []
-        if vs_ctx: context_parts.append("<<<CTX_UPLOADS>>>\n" + (vs_ctx if isinstance(vs_ctx, str) else str(vs_ctx)))
-        if table_ctx: context_parts.append("<<<CTX_TABLE>>>\n" + (table_ctx if isinstance(table_ctx, str) else str(table_ctx)))
+        if vs_ctx:
+            context_parts.append("<<<CTX_UPLOADS>>>\n" + (vs_ctx if isinstance(vs_ctx, str) else str(vs_ctx)))
+        if table_ctx:
+            context_parts.append("<<<CTX_TABLE>>>\n" + (table_ctx if isinstance(table_ctx, str) else str(table_ctx)))
         context_joined = "\n\n---\n\n".join(context_parts).strip()
 
+        # refs
         refs = []
         try:
             refs = basic_search(q, n=6) or []
@@ -590,52 +590,53 @@ def ask():
             if r.get("url"): return r["url"]
             if r.get("doi"): return f"https://doi.org/{r['doi']}"
             return ""
-        
+
         refs_prompt = "\n".join(
             f"[{i+1}] {(r.get('title') or '(no title)')} ({r.get('year') or ''}) — {_ref_url(r)}"
             for i, r in enumerate(refs)
         ).strip()
 
-    # --- strict path ---
-    if mode in ("robot_strict", "reasoning_strict"):
-        evidence_text, evidence_ids = build_evidence_pack(q, context_joined, refs)
+        # ========== STRICT PATH ==========
+        if mode in ("robot_strict", "reasoning_strict"):
+            evidence_text, evidence_ids = build_evidence_pack(q, context_joined, refs)
 
-        STRICT_SCHEMA = (
-            'You are writing for materials chemists. Use ONLY the passages in EVIDENCE.\n'
-            'If a claim or step is not supported there, list it under "insufficient_evidence".\n'
-            'Every sentence that makes a claim MUST include bracket citations to [S#], [S#_C#] or [CTX#].\n'
-            'Do NOT use prior knowledge.\n'
-            'Return valid JSON only, matching this schema exactly:\n'
-            '{\n'
-            ' "procedure": [ {"step": 1, "text": "… [S1_C1][CTX1]"}, ... ],\n'
-            ' "reasoning": [ {"claim": "…", "citations": ["S1_C1","CTX1"]}, ... ],\n'
-            ' "uncited": [],\n'
-            ' "insufficient_evidence": []\n'
-            '}\n'
-        )
+            STRICT_SCHEMA = (
+                'You are writing for materials chemists. Use ONLY the passages in EVIDENCE.\n'
+                'If a claim or step is not supported there, list it under "insufficient_evidence".\n'
+                'Every sentence that makes a claim MUST include bracket citations to [S#], [S#_C#] or [CTX#].\n'
+                'Do NOT use prior knowledge.\n'
+                'Return valid JSON only, matching this schema exactly:\n'
+                '{\n'
+                ' "procedure": [ {"step": 1, "text": "… [S1_C1][CTX1]"}, ... ],\n'
+                ' "reasoning": [ {"claim": "…", "citations": ["S1_C1","CTX1"]}, ... ],\n'
+                ' "uncited": [],\n'
+                ' "insufficient_evidence": []\n'
+                '}\n'
+            )
 
-        strict_task = (
-            f'TASK\n'
-            f'Write a step-by-step procedure and a brief reasoning section for: "{q}".\n'
-            f'{evidence_text}\n'
-            f'END EVIDENCE\n'
-            f'OUTPUT JSON ONLY.'
-        )
+            strict_task = (
+                f'TASK\n'
+                f'Write a step-by-step procedure and a brief reasoning section for: "{q}".\n'
+                f'{evidence_text}\n'
+                f'END EVIDENCE\n'
+                f'OUTPUT JSON ONLY.'
+            )
 
-        raw = client.chat.completions.create(
-            model="gpt-4o-mini",
-            temperature=0.1,
-            messages=[
-                {"role": "system", "content": STRICT_SCHEMA},
-                {"role": "user", "content": strict_task},
-            ],
-        ).choices[0].message.content
+            raw = client.chat.completions.create(
+                model="gpt-4o-mini",
+                temperature=0.1,
+                messages=[
+                    {"role": "system", "content": STRICT_SCHEMA},
+                    {"role": "user", "content": strict_task},
+                ],
+            ).choices[0].message.content
 
-        answer = _validate_strict_json((raw or "").strip(), evidence_ids)
-        rationale = ""
-        used_summary = {"refs": [], "tags": {}, "has_ctx": bool(context_joined)}
-    else:
-            # prompt variants
+            answer = _validate_strict_json((raw or "").strip(), evidence_ids)
+            rationale = ""  # reasoning lives inside the JSON
+            used_summary = {"refs": [], "tags": {}, "has_ctx": bool(context_joined)}
+
+        # ========== LEGACY PATHS ==========
+        else:
             robot_rules = (
                 "Return a discrete lab protocol with exact quantities on a small scale (~0.5 mmol Co):\n"
                 " - Include specific masses (mg) or mmol for reagents; volumes (mL) for liquids.\n"
@@ -661,7 +662,6 @@ def ask():
             )
 
             def strip_references_block(text: str) -> str:
-                # Remove everything from '## References' to the end
                 return re.sub(r"## References[\s\S]*", "", text, flags=re.I).strip()
 
             if mode == "reasoning":
@@ -676,7 +676,7 @@ def ask():
                     " - For each cited reference, briefly summarize the relevant finding and explain how it relates to aspect ratio and temperature.\n"
                     " - If no reference supports a statement, say so explicitly and do not cite it.\n"
                     f"{reasoning_rules}\n"
-                    f"{acs_rule}\n"  
+                    f"{acs_rule}\n"
                     "Return exactly ONE block:\n"
                     "## Mechanistic reasoning\n"
                     "- bullet points with inline [n] and [CTX] where appropriate.\n\n"
@@ -694,7 +694,7 @@ def ask():
                     f"{inline_rule}\n"
                     " - If CONTEXT is insufficient, say so explicitly before generalizing.\n"
                     f"{robot_rules}\n"
-                    f"{acs_rule}\n"  
+                    f"{acs_rule}\n"
                     "Return two blocks exactly in this order:\n"
                     "## Synthesis Protocol:\n"
                     "1. **Hardware & Glassware**:\n[]\n"
@@ -749,7 +749,7 @@ def ask():
                     print("[/ask] rationale fallback failed:", e)
                     rationale = rationale or ""
 
-            # Post-pass: enforce citations & CTX usage if missing
+            # Post-pass: enforce citations & CTX usage if missing (legacy only)
             try:
                 used_summary = _extract_used_markers(answer or "", rationale or "")
                 if want_inline and not used_summary.get("refs"):
@@ -792,37 +792,38 @@ def ask():
                 except Exception as e:
                     print("[ask] revise step skipped:", e)
 
-            qa_id = None
-            try:
-                db = get_db()
-                ins = db.qa.insert_one({
-                    "created_at": datetime.utcnow(),
-                    "question": q,
-                    "mode": mode,
-                    "answer": (answer or "").strip(),
-                    "rationale": rationale,
-                    "references": refs,
-                    "refs_used": used_summary.get("refs", []),
-                    "used_tags": used_summary.get("tags", {}),
-                    "ctx_vs": vs_ctx,
-                    "ctx_table": table_ctx,
-                })
-                qa_id = str(ins.inserted_id)
-            except Exception as e:
-                print("[/ask] DB insert warn:", e)
-
-            return jsonify({
+        # ========== COMMON DB INSERT + RETURN (both paths) ==========
+        qa_id = None
+        try:
+            db = get_db()
+            ins = db.qa.insert_one({
+                "created_at": datetime.utcnow(),
+                "question": q,
+                "mode": mode,
                 "answer": (answer or "").strip(),
                 "rationale": rationale,
                 "references": refs,
-                "refs": refs,
                 "refs_used": used_summary.get("refs", []),
-                "used": used_summary,
-                "mode": mode,
-                "qa_id": qa_id,
-                "ctx_vs": (vs_ctx if isinstance(vs_ctx, str) else str(vs_ctx or ""))[:8000],
-                "ctx_table": (table_ctx if isinstance(table_ctx, str) else str(table_ctx or ""))[:4000],
+                "used_tags": used_summary.get("tags", {}),
+                "ctx_vs": vs_ctx,
+                "ctx_table": table_ctx,
             })
+            qa_id = str(ins.inserted_id)
+        except Exception as e:
+            print("[/ask] DB insert warn:", e)
+
+        return jsonify({
+            "answer": (answer or "").strip(),
+            "rationale": rationale,
+            "references": refs,
+            "refs": refs,
+            "refs_used": used_summary.get("refs", []),
+            "used": used_summary,
+            "mode": mode,
+            "qa_id": qa_id,
+            "ctx_vs": (vs_ctx if isinstance(vs_ctx, str) else str(vs_ctx or ""))[:8000],
+            "ctx_table": (table_ctx if isinstance(table_ctx, str) else str(table_ctx or ""))[:4000],
+        })
 
     except Exception as e:
         print("[/ask] Unhandled error:", e)
