@@ -229,7 +229,7 @@ except Exception:
         return ""
 
 @app.context_processor
-def __es_helper(query: str, materials: Set[str], shapes: Set[str]) -> list[dict]:
+def enriched_search(query: str, materials: Set[str], shapes: Set[str]) -> list[dict]:
     """Try focused rewrites (material + morphology) and merge results."""
     mats = sorted(list({m for m in materials if any(ch.isalpha() for ch in m)}))[:2]
     shape = next(iter(shapes), "nanorod")
@@ -254,12 +254,6 @@ def __es_helper(query: str, materials: Set[str], shapes: Set[str]) -> list[dict]
 
 def inject_csrf_token():
     return dict(csrf_token=generate_csrf)
-
-
-@app.context_processor
-def __es_helper():
-    # Harmless stub to satisfy Flask's context processor call; real helper has a different name.
-    return {}
 
 @app.before_request
 def _log_req():
@@ -623,7 +617,7 @@ def ask():
         prof = derive_query_profile(q)
         if prof.get("materials") and len(refs) < 3:
             try:
-                more = __es_helper(q, prof["materials"], prof["shapes"])
+                more = enriched_search(q, prof["materials"], prof["shapes"])
                 if more:
                     refs = filter_and_rerank_generic(q, refs + more) or refs
             except Exception as e:
