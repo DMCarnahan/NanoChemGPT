@@ -590,11 +590,12 @@ def ask():
             if r.get("url"): return r["url"]
             if r.get("doi"): return f"https://doi.org/{r['doi']}"
             return ""
-        refs_prompt = "\n".join(
-            f"[{i+1}] {(r.get('title') or '(no title)')} ({r.get('year') or ''}) — {_ref_url(r)}"
-            for i, r in enumerate(refs)
-        ).strip()
         
+    refs_prompt = "\n".join(
+        f"[{i+1}] {(r.get('title') or '(no title)')} ({r.get('year') or ''}) — {_ref_url(r)}"
+        for i, r in enumerate(refs)
+    ).strip()
+
     # --- strict path ---
     if mode in ("robot_strict", "reasoning_strict"):
         evidence_text, evidence_ids = build_evidence_pack(q, context_joined, refs)
@@ -634,194 +635,194 @@ def ask():
         rationale = ""
         used_summary = {"refs": [], "tags": {}, "has_ctx": bool(context_joined)}
     else:
-        # prompt variants
-        robot_rules = (
-            "Return a discrete lab protocol with exact quantities on a small scale (~0.5 mmol Co):\n"
-            " - Include specific masses (mg) or mmol for reagents; volumes (mL) for liquids.\n"
-            " - Specify temperatures (°C), ramp rates (°C/min), hold times (min/h), and atmosphere (Ar/N2/vacuum).\n"
-            " - Include workup and purification (quench, washing/centrifugation, drying) with volumes.\n"
-            " - No placeholders (avoid “e.g.”/“or”). Be decisive.\n"
-            " - Output only the final protocol in markdown. Do not include any fenced blocks named reason or rationale in the answer. Put all reasoning in the separate rationale channel."
-        )
-        reasoning_rules = (
-            " - Provide a mechanistic explanation and design considerations for the target.\n"
-            " - Focus on: nucleation vs growth; ligand/solvent coordination; surfactants; "
-            " - reduction/oxidation; temperature profile and morphology control; atmosphere; pitfalls; safety.\n"
-            " - Do NOT return a step-by-step protocol. Be concise but specific."
-        )
-        inline_rule = (
-            " - When you pull a fact from any numbered REFERENCE, put its number in square brackets right after the sentence "
-            "(e.g. “hydrothermal at 200 °C [3]”)." if want_inline else
-            " - Inline numeric citations are optional for this request."
-        )
-        acs_rule = (
-            " - Write the REFERENCES block in ACS format: author(s), title, journal, year, volume, pages, DOI.\n"
-            " - Use inline numeric citations ([n]) for facts from REFERENCES. Do NOT include a REFERENCES block in your answer."
-        )
-
-        def strip_references_block(text: str) -> str:
-            # Remove everything from '## References' to the end
-            return re.sub(r"## References[\s\S]*", "", text, flags=re.I).strip()
-
-        if mode == "reasoning":
-            prompt = (
-                "You are NanoChemGPT. Use the CONTEXT and numbered REFERENCES.\n"
-                "Rules:\n"
-                " - Prefer CONTEXT and REFERENCES over general knowledge when relevant.\n"
-                " - For each bullet, quote or paraphrase a specific finding from CONTEXT or REFERENCES, and cite the source. Do not generalize or invent citations.\n"
-                " - If you use any content from CONTEXT, append [CTX] on that line.\n"
-                f"{inline_rule}\n"
-                " - If CONTEXT is insufficient, say so explicitly before generalizing.\n"
-                " - For each cited reference, briefly summarize the relevant finding and explain how it relates to aspect ratio and temperature.\n"
-                " - If no reference supports a statement, say so explicitly and do not cite it.\n"
-                f"{reasoning_rules}\n"
-                f"{acs_rule}\n"  
-                "Return exactly ONE block:\n"
-                "## Mechanistic reasoning\n"
-                "- bullet points with inline [n] and [CTX] where appropriate.\n\n"
-                f"CONTEXT:\n{context_joined}\n\n"
-                f"REFERENCES:\n{refs_prompt}\n\n"
-                f"User question: {q}"
+            # prompt variants
+            robot_rules = (
+                "Return a discrete lab protocol with exact quantities on a small scale (~0.5 mmol Co):\n"
+                " - Include specific masses (mg) or mmol for reagents; volumes (mL) for liquids.\n"
+                " - Specify temperatures (°C), ramp rates (°C/min), hold times (min/h), and atmosphere (Ar/N2/vacuum).\n"
+                " - Include workup and purification (quench, washing/centrifugation, drying) with volumes.\n"
+                " - No placeholders (avoid “e.g.”/“or”). Be decisive.\n"
+                " - Output only the final protocol in markdown. Do not include any fenced blocks named reason or rationale in the answer. Put all reasoning in the separate rationale channel."
             )
-        else:
-            prompt = (
-                "You are NanoChemGPT. Use the CONTEXT and the numbered REFERENCES to propose a synthesis.\n"
-                "Rules:\n"
-                " - Prefer CONTEXT and REFERENCES over general knowledge when relevant.\n"
-                " - For each step, quote or paraphrase a specific finding from CONTEXT or REFERENCES, and cite the source. Do not generalize or invent citations.\n"
-                " - If you use any content from CONTEXT, append [CTX] on that line.\n"
-                f"{inline_rule}\n"
-                " - If CONTEXT is insufficient, say so explicitly before generalizing.\n"
-                f"{robot_rules}\n"
-                f"{acs_rule}\n"  
-                "Return two blocks exactly in this order:\n"
-                "## Synthesis Protocol:\n"
-                "1. **Hardware & Glassware**:\n[]\n"
-                "2. **Materials**:\n[]\n"
-                "3. **Procedure**\n[]\n\n"
-                "```reason\n"
-                "For each key justification, add inline tags: [CTX] for uploaded/context hits, [DB] for Mongo Q&A, "
-                "[PARSED] for parsed protocols, [n] for numbered web REFERENCES, [GEN] if inferred.\n"
-                "Keep rationales terse.\n"
-                "Add NO other blocks of text.\n"
-                "```\n\n"
-                f"CONTEXT:\n{context_joined}\n\n"
-                f"REFERENCES:\n{refs_prompt}\n\n"
-                f"User question: {q}"
+            reasoning_rules = (
+                " - Provide a mechanistic explanation and design considerations for the target.\n"
+                " - Focus on: nucleation vs growth; ligand/solvent coordination; surfactants; "
+                " - reduction/oxidation; temperature profile and morphology control; atmosphere; pitfalls; safety.\n"
+                " - Do NOT return a step-by-step protocol. Be concise but specific."
+            )
+            inline_rule = (
+                " - When you pull a fact from any numbered REFERENCE, put its number in square brackets right after the sentence "
+                "(e.g. “hydrothermal at 200 °C [3]”)." if want_inline else
+                " - Inline numeric citations are optional for this request."
+            )
+            acs_rule = (
+                " - Write the REFERENCES block in ACS format: author(s), title, journal, year, volume, pages, DOI.\n"
+                " - Use inline numeric citations ([n]) for facts from REFERENCES. Do NOT include a REFERENCES block in your answer."
             )
 
-        raw = client.chat.completions.create(
-            model="gpt-4o-mini",
-            messages=[{"role": "user", "content": prompt}],
-            temperature=0.2
-        ).choices[0].message.content
+            def strip_references_block(text: str) -> str:
+                # Remove everything from '## References' to the end
+                return re.sub(r"## References[\s\S]*", "", text, flags=re.I).strip()
 
-        # Split answer/rationale
-        if mode == "reasoning":
-            answer = strip_references_block((raw or "").strip())
-            rationale = ""
-        else:
-            answer, rationale = split_reasoning(strip_references_block(raw or ""))
-
-        # Rationale fallback if missing
-        if not (rationale or "").strip():
-            try:
-                rationale_only = (
-                    "You previously produced the SynthesisProtocol below.\n"
-                    "Write a short rationale (5–8 bullets max). For each key justification add inline tags:\n"
-                    "[CTX] uploaded/context hits, [PARSED] parsed protocols, [n] for numbered web REFERENCES, [GEN] for general.\n"
-                    "Return just the rationale text, no code fences, no extra headings."
+            if mode == "reasoning":
+                prompt = (
+                    "You are NanoChemGPT. Use the CONTEXT and numbered REFERENCES.\n"
+                    "Rules:\n"
+                    " - Prefer CONTEXT and REFERENCES over general knowledge when relevant.\n"
+                    " - For each bullet, quote or paraphrase a specific finding from CONTEXT or REFERENCES, and cite the source. Do not generalize or invent citations.\n"
+                    " - If you use any content from CONTEXT, append [CTX] on that line.\n"
+                    f"{inline_rule}\n"
+                    " - If CONTEXT is insufficient, say so explicitly before generalizing.\n"
+                    " - For each cited reference, briefly summarize the relevant finding and explain how it relates to aspect ratio and temperature.\n"
+                    " - If no reference supports a statement, say so explicitly and do not cite it.\n"
+                    f"{reasoning_rules}\n"
+                    f"{acs_rule}\n"  
+                    "Return exactly ONE block:\n"
+                    "## Mechanistic reasoning\n"
+                    "- bullet points with inline [n] and [CTX] where appropriate.\n\n"
+                    f"CONTEXT:\n{context_joined}\n\n"
+                    f"REFERENCES:\n{refs_prompt}\n\n"
+                    f"User question: {q}"
                 )
-                rraw = client.chat.completions.create(
-                    model="gpt-4o",
-                    messages=[
-                        {"role": "user", "content": rationale_only},
-                        {"role": "user", "content": f"CONTEXT:\n{context_joined}"},
-                        {"role": "user", "content": f"REFERENCES:\n{refs_prompt}"},
-                        {"role": "user", "content": f"ANSWER:\n{(answer or '').strip()}"},
-                        {"role": "user", "content": f"QUESTION:\n{q}"},
-                    ],
-                    temperature=0.2,
-                ).choices[0].message.content
-                rationale = (rraw or "").strip()
-            except Exception as e:
-                print("[/ask] rationale fallback failed:", e)
-                rationale = rationale or ""
+            else:
+                prompt = (
+                    "You are NanoChemGPT. Use the CONTEXT and the numbered REFERENCES to propose a synthesis.\n"
+                    "Rules:\n"
+                    " - Prefer CONTEXT and REFERENCES over general knowledge when relevant.\n"
+                    " - For each step, quote or paraphrase a specific finding from CONTEXT or REFERENCES, and cite the source. Do not generalize or invent citations.\n"
+                    " - If you use any content from CONTEXT, append [CTX] on that line.\n"
+                    f"{inline_rule}\n"
+                    " - If CONTEXT is insufficient, say so explicitly before generalizing.\n"
+                    f"{robot_rules}\n"
+                    f"{acs_rule}\n"  
+                    "Return two blocks exactly in this order:\n"
+                    "## Synthesis Protocol:\n"
+                    "1. **Hardware & Glassware**:\n[]\n"
+                    "2. **Materials**:\n[]\n"
+                    "3. **Procedure**\n[]\n\n"
+                    "```reason\n"
+                    "For each key justification, add inline tags: [CTX] for uploaded/context hits, [DB] for Mongo Q&A, "
+                    "[PARSED] for parsed protocols, [n] for numbered web REFERENCES, [GEN] if inferred.\n"
+                    "Keep rationales terse.\n"
+                    "Add NO other blocks of text.\n"
+                    "```\n\n"
+                    f"CONTEXT:\n{context_joined}\n\n"
+                    f"REFERENCES:\n{refs_prompt}\n\n"
+                    f"User question: {q}"
+                )
 
-        # Post-pass: enforce citations & CTX usage if missing
-        try:
-            used_summary = _extract_used_markers(answer or "", rationale or "")
-            if want_inline and not used_summary.get("refs"):
+            raw = client.chat.completions.create(
+                model="gpt-4o-mini",
+                messages=[{"role": "user", "content": prompt}],
+                temperature=0.2
+            ).choices[0].message.content
+
+            # Split answer/rationale
+            if mode == "reasoning":
+                answer = strip_references_block((raw or "").strip())
+                rationale = ""
+            else:
+                answer, rationale = split_reasoning(strip_references_block(raw or ""))
+
+            # Rationale fallback if missing
+            if not (rationale or "").strip():
                 try:
-                    revise_refs = client.chat.completions.create(
+                    rationale_only = (
+                        "You previously produced the SynthesisProtocol below.\n"
+                        "Write a short rationale (5–8 bullets max). For each key justification add inline tags:\n"
+                        "[CTX] uploaded/context hits, [PARSED] parsed protocols, [n] for numbered web REFERENCES, [GEN] for general.\n"
+                        "Return just the rationale text, no code fences, no extra headings."
+                    )
+                    rraw = client.chat.completions.create(
+                        model="gpt-4o",
+                        messages=[
+                            {"role": "user", "content": rationale_only},
+                            {"role": "user", "content": f"CONTEXT:\n{context_joined}"},
+                            {"role": "user", "content": f"REFERENCES:\n{refs_prompt}"},
+                            {"role": "user", "content": f"ANSWER:\n{(answer or '').strip()}"},
+                            {"role": "user", "content": f"QUESTION:\n{q}"},
+                        ],
+                        temperature=0.2,
+                    ).choices[0].message.content
+                    rationale = (rraw or "").strip()
+                except Exception as e:
+                    print("[/ask] rationale fallback failed:", e)
+                    rationale = rationale or ""
+
+            # Post-pass: enforce citations & CTX usage if missing
+            try:
+                used_summary = _extract_used_markers(answer or "", rationale or "")
+                if want_inline and not used_summary.get("refs"):
+                    try:
+                        revise_refs = client.chat.completions.create(
+                            model="gpt-4o-mini",
+                            temperature=0,
+                            messages=[
+                                {"role": "system", "content": (
+                                    "Add inline [n] citations wherever information was taken from the numbered REFERENCES list. "
+                                    "Do NOT remove any existing [CTX] content. Only insert citations where appropriate."
+                                )},
+                                {"role": "user", "content": f"REFERENCES:\n{refs_prompt}"},
+                                {"role": "user", "content": f"ORIGINAL ANSWER:\n{answer}"}
+                            ]
+                        ).choices[0].message.content
+                        if revise_refs and len(revise_refs) >= 0.7 * len(answer):
+                            answer = revise_refs
+                            used_summary = _extract_used_markers(answer, rationale)
+                    except Exception as e:
+                        print("[ask] ref-revise step failed:", e)
+            except Exception as _e:
+                print("[/ask] used extraction failed:", _e)
+                used_summary = {"refs": [], "tags": {}, "has_ctx": False}
+
+            if context_joined and not used_summary.get("has_ctx"):
+                try:
+                    revise = client.chat.completions.create(
                         model="gpt-4o-mini",
                         temperature=0,
                         messages=[
-                            {"role": "system", "content": (
-                                "Add inline [n] citations wherever information was taken from the numbered REFERENCES list. "
-                                "Do NOT remove any existing [CTX] content. Only insert citations where appropriate."
-                            )},
-                            {"role": "user", "content": f"REFERENCES:\n{refs_prompt}"},
+                            {"role": "system", "content": "Revise the answer to explicitly use CONTEXT where relevant. Insert [CTX] markers on lines that derive from CONTEXT, and prefer CONTEXT over general knowledge. Do not change structure."},
+                            {"role": "user", "content": f"CONTEXT:\n{context_joined}"},
                             {"role": "user", "content": f"ORIGINAL ANSWER:\n{answer}"}
                         ]
                     ).choices[0].message.content
-                    if revise_refs and len(revise_refs) >= 0.7 * len(answer):
-                        answer = revise_refs
-                        used_summary = _extract_used_markers(answer, rationale)
+                    if revise and len(revise) >= 0.7 * len(answer):
+                        answer = revise
+                        used_summary = _extract_used_markers(answer, rationale or "")
                 except Exception as e:
-                    print("[ask] ref-revise step failed:", e)
-        except Exception as _e:
-            print("[/ask] used extraction failed:", _e)
-            used_summary = {"refs": [], "tags": {}, "has_ctx": False}
+                    print("[ask] revise step skipped:", e)
 
-        if context_joined and not used_summary.get("has_ctx"):
+            qa_id = None
             try:
-                revise = client.chat.completions.create(
-                    model="gpt-4o-mini",
-                    temperature=0,
-                    messages=[
-                        {"role": "system", "content": "Revise the answer to explicitly use CONTEXT where relevant. Insert [CTX] markers on lines that derive from CONTEXT, and prefer CONTEXT over general knowledge. Do not change structure."},
-                        {"role": "user", "content": f"CONTEXT:\n{context_joined}"},
-                        {"role": "user", "content": f"ORIGINAL ANSWER:\n{answer}"}
-                    ]
-                ).choices[0].message.content
-                if revise and len(revise) >= 0.7 * len(answer):
-                    answer = revise
-                    used_summary = _extract_used_markers(answer, rationale or "")
+                db = get_db()
+                ins = db.qa.insert_one({
+                    "created_at": datetime.utcnow(),
+                    "question": q,
+                    "mode": mode,
+                    "answer": (answer or "").strip(),
+                    "rationale": rationale,
+                    "references": refs,
+                    "refs_used": used_summary.get("refs", []),
+                    "used_tags": used_summary.get("tags", {}),
+                    "ctx_vs": vs_ctx,
+                    "ctx_table": table_ctx,
+                })
+                qa_id = str(ins.inserted_id)
             except Exception as e:
-                print("[ask] revise step skipped:", e)
+                print("[/ask] DB insert warn:", e)
 
-        qa_id = None
-        try:
-            db = get_db()
-            ins = db.qa.insert_one({
-                "created_at": datetime.utcnow(),
-                "question": q,
-                "mode": mode,
+            return jsonify({
                 "answer": (answer or "").strip(),
                 "rationale": rationale,
                 "references": refs,
+                "refs": refs,
                 "refs_used": used_summary.get("refs", []),
-                "used_tags": used_summary.get("tags", {}),
-                "ctx_vs": vs_ctx,
-                "ctx_table": table_ctx,
+                "used": used_summary,
+                "mode": mode,
+                "qa_id": qa_id,
+                "ctx_vs": (vs_ctx if isinstance(vs_ctx, str) else str(vs_ctx or ""))[:8000],
+                "ctx_table": (table_ctx if isinstance(table_ctx, str) else str(table_ctx or ""))[:4000],
             })
-            qa_id = str(ins.inserted_id)
-        except Exception as e:
-            print("[/ask] DB insert warn:", e)
-
-        return jsonify({
-            "answer": (answer or "").strip(),
-            "rationale": rationale,
-            "references": refs,
-            "refs": refs,
-            "refs_used": used_summary.get("refs", []),
-            "used": used_summary,
-            "mode": mode,
-            "qa_id": qa_id,
-            "ctx_vs": (vs_ctx if isinstance(vs_ctx, str) else str(vs_ctx or ""))[:8000],
-            "ctx_table": (table_ctx if isinstance(table_ctx, str) else str(table_ctx or ""))[:4000],
-        })
 
     except Exception as e:
         print("[/ask] Unhandled error:", e)
