@@ -1,27 +1,186 @@
-
-# NanoChemGPT Flask Application
-# --------------------------------
-# Main server and API for NanoChemGPT, a chemistry protocol and reasoning assistant.
-# Author: [Your Name or Organization]
-# License: MIT
-# --------------------------------
-
 from __future__ import annotations
 
-
-import os
-import io
-import json
-import re
-import glob
-import traceback
-import threading
+import os, io, json, re, glob, traceback, threading
 from datetime import datetime
 from pathlib import Path
 from typing import Any
+
+# ---- Relevance helpers (material-agnostic) ----
+import string
+from typing import List, Dict, Tuple, Set
+
+_SUBSCRIPTS = str.maketrans("0123456789", "₀₁₂₃₄₅₆₇₈₉")
+_SUPERS = str.maketrans("₀₁₂₃₄₅₆₇₈₉", "0123456789")
+
+def to_subscript(s: str) -> str:
+    return "".join(ch.translate(_SUBSCRIPTS) if ch.isdigit() else ch for ch in s or "")
+
+def from_subscript(s: str) -> str:
+    return (s or "").translate(_SUPERS)
+
+def _norm(x: str) -> str:
+    return (x or "").lower()
+
+def _tokenize(q: str) -> List[str]:
+    qn = _norm(q)
+    toks = re.findall(r"[a-z0-9][a-z0-9\-]+", qn)
+    STOP = {"the","a","an","of","and","or","for","to","in","on","at","by","with","from","using","via",
+            "how","what","which","based","study","paper","approach","method","large","scale","facile","simple",
+            "novel","new","effect","effects","describe"}
+    return [t for t in toks if t not in STOP and len(t) > 1]
+
+# Topic vocab (compact)
+SHAPE_TERMS = {
+    "nanorod","nanowire","nanotube","nanofiber","nanoparticle","nanocube","nanoplate",
+    "nanosheet","nanosphere","nanobelt","thin film","thin-film","microrod","nanoflake","nanoribbon"
+}
+PROCESS_TERMS = {
+    "hydrothermal","solvothermal","sol-gel","polyol","microwave","autoclave","calcination","anneal","annealing",
+    "seed-mediated","hot injection","hot-injection","precipitation","co-precipitation","electrodeposition",
+    "chemical bath","cvd","pvd","ald","sputtering","spin coating","dip coating","spray pyrolysis","templated"
+}
+MEASURE_TERMS = {
+    "xrd","tem","sem","afm","xps","raman","ftir","uv-vis","pl","vsm","squid","hall","impedance","conductivity"
+}
+INTENT_SYN = {
+    "synthesize": {"synthesize","synthesis","prepare","fabricate","grow","make","deposit"},
+    "characterize": {"characterize","measure","quantify","analyze","determine","evaluate"},
+    "theory": {"theory","mechanism","dft","first-principles","simulation","model"},
+}
+
+ELEMENT_NAMES = {
+    "mn":"manganese","fe":"iron","ni":"nickel","co":"cobalt","cu":"copper","zn":"zinc","ti":"titanium",
+    "w":"tungsten","mo":"molybdenum","al":"aluminum","si":"silicon","pb":"lead","ag":"silver","au":"gold",
+}
+
+SPECIAL_FORMULA_ALIASES = {
+    "mn3o4": {"hausmannite","manganese(ii,iii) oxide","trimanganese tetraoxide","manganese tetroxide"},
+    "fe3o4": {"magnetite","iron(ii,iii) oxide"},
+    "al2o3": {"alumina"}, "sio2": {"silica"},
+}
+
+CHEM_FORMULA_RX = re.compile(r"\\b(?:[A-Z][a-z]?\\d*){1,5}\\b")
+
+def _extract_formulas(q: str) -> Set[str]:
+    return set(CHEM_FORMULA_RX.findall(q or ""))
+
+def _augment_material_terms(mats: Set[str]) -> Set[str]:
+    mats_lc = {(m or "").lower() for m in mats if m}
+    out: Set[str] = set(mats_lc)
+    # subscript variants
+    out |= { to_subscript(m).lower() for m in mats_lc }
+    # oxide heuristic + aliases
+    mrx = re.compile(r"^([a-z]{1,2})\\d*o\\d+$")
+    for fx in mats_lc:
+        g = mrx.match(fx)
+        if g:
+            el = g.group(1)
+            if el in ELEMENT_NAMES:
+                out.add(f"{ELEMENT_NAMES[el]} oxide")
+        out |= {a.lower() for a in SPECIAL_FORMULA_ALIASES.get(fx, set())}
+    return out
+
+def _extract_multiword_phrases(q: str, vocab: Set[str]) -> Set[str]:
+    qn = _norm(q)
+    return {p for p in vocab if p in qn}
+
+def derive_query_profile(q: str) -> Dict[str, Set[str]]:
+    q = q or ""
+    q_ascii = from_subscript(q)
+    toks = set(_tokenize(q_ascii))
+
+    mats_raw = _extract_formulas(q_ascii)
+    mats = _augment_material_terms(mats_raw)
+
+    chem_name_hits = set(re.findall(
+        r"\\b([a-z][a-z0-9\\-]+(?:\\s+(?:oxide|nitride|carbide|sulfide|sulphide|phosphide|ferrite|perovskite|aluminate|titanate|ferrate)))\\b",
+        _norm(q_ascii)))
+    mats |= {m.lower() for m in chem_name_hits}
+
+    shapes = _extract_multiword_phrases(q_ascii, SHAPE_TERMS) | (SHAPE_TERMS & toks)
+    procs  = _extract_multiword_phrases(q_ascii, PROCESS_TERMS) | (PROCESS_TERMS & toks)
+    meas   = _extract_multiword_phrases(q_ascii, MEASURE_TERMS) | (MEASURE_TERMS & toks)
+
+    intent = set()
+    for k, syns in INTENT_SYN.items():
+        if any(s in _norm(q_ascii) for s in syns):
+            intent.add(k)
+    if not intent and (shapes or procs):
+        intent.add("synthesize")
+
+    return {
+        "materials": mats,
+        "shapes": {s.lower() for s in shapes},
+        "processes": {p.lower() for p in procs},
+        "measure": {m.lower() for m in meas},
+        "intent": intent,
+        "tokens": toks,
+    }
+
+BAD_DOMAINS = ("ssrn.com","researchsquare.com","preprints.org","osf.io","zenodo.org","quora.com","medium.com")
+PUBLISHER_BOOST = ("acs.org","rsc.org","sciencedirect","elsevier","springer","wiley","nature.com","aip.org","iop.org","aps.org","pnas.org")
+
+def _has_any(blob: str, terms: Set[str]) -> bool:
+    b = (blob or "").lower()
+    return any(t for t in terms if t in b)
+
+def _match_any(blob: str, terms: Set[str]) -> int:
+    b = (blob or "").lower()
+    return sum(1 for t in terms if t and t in b)
+
+def _domain_ok(url: str) -> bool:
+    u = (url or "").lower()
+    return not any(bad in u for bad in BAD_DOMAINS)
+
+def _publisher_score(url: str) -> int:
+    u = (url or "").lower()
+    return 1 if any(p in u for p in PUBLISHER_BOOST) else 0
+
+def filter_and_rerank_generic(q: str, refs: List[Dict]) -> List[Dict]:
+    prof = derive_query_profile(q)
+    print(f"[rerank] mats={sorted(list(prof['materials']))} shapes={sorted(list(prof['shapes']))} procs={sorted(list(prof['processes']))} intent={sorted(list(prof['intent']))}")
+    mats, shapes, procs, meas, intent = prof["materials"], prof["shapes"], prof["processes"], prof["measure"], prof["intent"]
+
+    cands = []
+    for r in refs or []:
+        url = r.get("url") or (r.get("doi") and f"https://doi.org/{r['doi']}") or ""
+        if not _domain_ok(url):
+            continue
+        b = f"{r.get('title','')} {r.get('abstract','')} {r.get('journal','')}".lower()
+
+        if mats and not _has_any(b, mats):
+            continue
+
+        score = 0
+        score += 3 * _match_any(b, mats)
+        score += 2 * _match_any(b, shapes)
+        score += 2 * _match_any(b, procs)
+        score += 1 * _match_any(b, meas)
+        score += _publisher_score(url)
+
+        if "synthesize" in intent and not (shapes or procs):
+            if any(w in b for w in ("synthesis","prepare","fabricat","grow","deposit","hydrothermal","solvothermal","calcination","anneal")):
+                score += 1
+
+        cands.append((score, r))
+
+    cands.sort(key=lambda x: x[0], reverse=True)
+    filtered = [r for s, r in cands if s > 0]
+    if not filtered:
+        # relaxed pass
+        looser = []
+        for r in refs or []:
+            b = f"{r.get('title','')} {r.get('abstract','')} {r.get('journal','')}".lower()
+            s = 0
+            s += 2 * _match_any(b, shapes | procs | meas)
+            s += 1 * int(any(w in b for w in ("synthesis","prepare","fabricat","grow","deposit","measure","characteriz","dft","theory")))
+            s += _publisher_score(r.get("url") or "")
+            looser.append((s, r))
+        looser.sort(key=lambda x: x[0], reverse=True)
+        filtered = [r for s, r in looser[:8] if s > 0] or [r for s, r in cands[:8]]
+    return filtered[:8]
 from functools import lru_cache
 
-from typing import List, Dict, Tuple, Set
 import httpx
 import pandas as pd
 from dotenv import load_dotenv
@@ -33,15 +192,14 @@ from jinja2 import TemplateNotFound
 from openai import OpenAI
 from werkzeug.utils import secure_filename
 
-# ---- Local Modules ---- #
+# ──────────────── Local modules ──────────────── #
 import vector_store as vs
 from converter import validate_step, convert_text_to_robot_ops
 from mongo_client import get_db, ping as mongo_ping
 from internet_search import search_papers
 from DuckDB.duck_searcher import get_duck_searcher
 
-
-# ---- Paths & Config ---- #
+# ──────────────── Paths/Config ──────────────── #
 BASE_DIR = Path(__file__).resolve().parent
 TEMPLATES_DIR = BASE_DIR / "templates"
 STATIC_DIR = BASE_DIR / "static"
@@ -50,19 +208,15 @@ UPLOADS_DIR = Path(os.getenv("UPLOADS_DIR", "/mnt/data/uploads")).resolve()
 LOOKUP_UPLOAD_DIR = Path(os.getenv("LOOKUP_UPLOAD_DIR", "/mnt/data/datasets")).resolve()
 VECTORSTORE_DIR = Path(os.getenv("VECTORSTORE_DIR", "/mnt/data/index")).resolve()
 
-
-# Ensure all required directories exist
 for d in (BUILTIN_DIR, UPLOADS_DIR, LOOKUP_UPLOAD_DIR, VECTORSTORE_DIR):
     d.mkdir(parents=True, exist_ok=True)
 
-
-# ---- Flask App Setup ---- #
+# ──────────────── Flask app ──────────────── #
 app = Flask(__name__, template_folder=str(TEMPLATES_DIR), static_folder=str(STATIC_DIR))
 app.config["MAX_CONTENT_LENGTH"] = 100 * 1024 * 1024  # 100 MB
 app.config["JSON_AS_ASCII"] = False  # allow UTF-8
 
-
-# CSRF setup (optional)
+# CSRF setup
 try:
     from flask_wtf.csrf import CSRFProtect, generate_csrf
     app.config['SECRET_KEY'] = os.getenv("FLASK_SECRET_KEY", "change-me")
@@ -73,20 +227,15 @@ except Exception:
     def generate_csrf() -> str:
         return ""
 
-
 @app.context_processor
 def inject_csrf_token():
-    """Inject CSRF token for Jinja templates."""
     return dict(csrf_token=generate_csrf)
-
 
 @app.before_request
 def _log_req():
-    """Log every incoming request."""
     print(f"[req] {request.method} {request.path}")
 
-    
-# ---- DuckDB Setup ---- #
+# ──────────────── DuckDB setup ──────────────── #
 def maybe_build_duckdb():
     """Create a .duckdb from Parquet once if DUCKDB_BOOTSTRAP=1 and files exist."""
     if os.getenv("DUCKDB_BOOTSTRAP", "0").lower() not in ("1", "true", "yes"):
@@ -111,8 +260,7 @@ def maybe_build_duckdb():
         con = duckdb.connect(db_path)
         con.execute(f"CREATE TABLE {tbl} AS SELECT * FROM read_parquet('{parq_glob}', hive_partitioning=1)")
         con.execute("CHECKPOINT")
-        row = con.execute(f"SELECT COUNT(*) FROM {tbl}").fetchone()
-        rows = row[0] if row else 0
+        rows = con.execute(f"SELECT COUNT(*) FROM {tbl}").fetchone()[0]
         con.close()
         app.logger.info("[duckdb-init] created %s rows=%d table=%s", db_path, rows, tbl)
     except Exception as e:
@@ -137,24 +285,20 @@ try:
 except Exception as e:
     app.logger.warning("[dataset_search] init failed: %s", e)
 
-
-# ---- OpenAI Client ---- #
+# ──────────────── OpenAI client ──────────────── #
 load_dotenv()
 _no_proxy = httpx.Client(trust_env=False, timeout=120.0)
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"), http_client=_no_proxy)
 
-
-# ---- Utility Functions ---- #
+# ──────────────── Utilities ──────────────── #
 def _safe_text(x: Any) -> str:
-    """Convert any value to string, safely handling None."""
     try:
         return str(x) if x is not None else ""
     except Exception:
         return ""
 
-
 def _extract_used_markers(*texts: str) -> dict:
-    """Find [n] citations and [CTX]/[PARSED]/[DB]/[GEN] tags in text."""
+    """Find [n] citations and [CTX]/[PARSED]/[DB]/[GEN] tags."""
     _CIT_BRACKET_RX = re.compile(r"\[(?P<num>\d{1,4})\]")
     _CIT_FULL_RX = re.compile(r"【(?P<num>\d{1,4})】")
     _CIT_FOOT_RX = re.compile(r"\[\^(?P<num>\d{1,4})\]")
@@ -162,86 +306,18 @@ def _extract_used_markers(*texts: str) -> dict:
     seen = set()
     tag_counts = {t: 0 for t in TAGS}
     for t in texts:
-        if not t:
-            continue
+        if not t: continue
         for rx in (_CIT_BRACKET_RX, _CIT_FULL_RX, _CIT_FOOT_RX):
             for m in rx.finditer(t):
-                try:
-                    seen.add(int(m.group("num")))
-                except Exception:
-                    pass
+                try: seen.add(int(m.group("num")))
+                except Exception: pass
         for tag in TAGS:
             tag_counts[tag] += len(re.findall(rf"\[{tag}\]", t))
-    return {
-        "refs": sorted(seen),
-        "tags": tag_counts,
-        "has_ctx": any(tag_counts[k] > 0 for k in ("CTX", "PARSED", "DB")),
-    }
-
-
-def _split_ctx(ctx: str, max_snips: int = 6, max_tokens: int = 140) -> list[dict]:
-    """Split context into short, trimmed blocks for evidence packing."""
-    blocks = [b.strip() for b in re.split(r"\n\s*\n", ctx or "") if b.strip()]
-    snips = []
-    for b in blocks:
-        t = b
-        # crude token limiter ~ chars
-        if len(t) > 800:
-            t = t[:800] + " …"
-        snips.append({"id": None, "source": "CTX", "text": t})
-        if len(snips) >= max_snips:
-            break
-    return snips
-
-
-def _pick_web_snips(refs: list[dict], max_per_src: int = 1, max_total: int = 6, max_chars: int = 800) -> list[dict]:
-    """Extract up to max_total web snippets from references for evidence packing."""
-    out = []
-    for i, r in enumerate(refs, start=1):
-        abs_ = (r.get("abstract") or "").strip()
-        if not abs_:
-            continue
-        txt = abs_
-        if len(txt) > max_chars:
-            txt = txt[:max_chars] + " …"
-        out.append({"id": f"S{i}", "source": "WEB", "text": txt})
-    return out[:max_total]
-
-
-def build_evidence_pack(q: str, vs_ctx: str, refs: list[dict]) -> tuple[str, list[str]]:
-    """Builds an EVIDENCE block and id list for strict protocol generation."""
-    ctx_snips = _split_ctx(vs_ctx, max_snips=6)
-    web_snips = _pick_web_snips(refs, max_total=6)
-
-    lines = ["EVIDENCE"]
-    ids: list[str] = []
-
-    # Number web sources S1..Sk and attach one child chunk each (S1_C1)
-    for i, r in enumerate(refs, start=1):
-        s_id = f"S{i}"
-        title = (r.get("title") or "(no title)")[:180]
-        year = r.get("year") or ""
-        url = r.get("url") or (r.get("doi") and f"https://doi.org/{r['doi']}" ) or ""
-        lines.append(f"[{s_id}] {title} ({year}) — {url}".strip())
-        abs_ = (r.get("abstract") or "").strip()
-        if abs_:
-            c_id = f"{s_id}_C1"
-            lines.append(f"[{c_id}] \"{abs_[:600]}\"")
-            ids.extend([s_id, c_id])
-
-    # Attach CTX snippets as CTX1.. if present
-    for j, s in enumerate(ctx_snips, start=1):
-        cid = f"CTX{j}"
-        lines.append(f"[{cid}] \"{s['text'][:600]}\"")
-        ids.append(cid)
-
-    lines.append("END EVIDENCE")
-    return "\n".join(lines), ids
-
+    return {"refs": sorted(seen), "tags": tag_counts, "has_ctx": any(tag_counts[k] > 0 for k in ("CTX", "PARSED", "DB"))}
 
 def basic_search(query: str, n: int = 6) -> list[dict]:
-    """Merge local LOOKUP hits + OpenAlex web hits; de-duplicate by DOI/title."""
-    if not query or not query.strip():
+    """Merge local LOOKUP hits + OpenAlex web hits; de-dup by doi/title."""
+    if not query.strip():
         return []
     local = []
     if LOOKUP is not None:
@@ -254,11 +330,10 @@ def basic_search(query: str, n: int = 6) -> list[dict]:
                     doi = row.get("doi") or ""
                     url = row.get("url") or (f"https://doi.org/{doi}" if doi else "")
                     local.append({
-                    "title": _safe_text(title)[:300],
-                    "year": _safe_text(year),
-                    "url": _safe_text(url),
-                    "doi": _safe_text(doi),
-                    "source": "lookup",
+                        "title": _safe_text(title)[:300],
+                        "year": _safe_text(year),
+                        "url": _safe_text(url),
+                        "doi": _safe_text(doi),
                     })
         except Exception as e:
             print("[basic_search] lookup query failed:", e)
@@ -269,234 +344,20 @@ def basic_search(query: str, n: int = 6) -> list[dict]:
     except Exception as e:
         print("[basic_search] OpenAlex fetch failed:", e)
 
-    seen = {(d.get("doi") or d.get("title","")).lower() for d in local}
+    seen = {(d.get("doi") or d.get("title", "")).lower() for d in local}
     for w in web:
-        key = (w.get("doi") or w.get("title","")).lower()
+        key = (w.get("doi") or w.get("title", "")).lower()
         if key not in seen:
-            local.append({
-                k: w.get(k, "")
-                for k in ("title","year","url","doi","abstract","journal","authors")
-            } | {"source":"web"})
+            local.append({k: w.get(k, "") for k in ("title","year","url","doi","abstract","journal","authors")} | {"source":"web"})
             seen.add(key)
-
-        print(f"[basic_search] returned {len(local[:2*n])} refs "
-            f"(web={sum(1 for r in local if r.get('source')=='web')}, "
-            f"lookup={sum(1 for r in local if r.get('source')=='lookup')})")
-        
-        return local[:2 * n]
-
-# Light stoplist
-_STOP = {
-    "the","a","an","of","and","or","for","to","in","on","at","by","with","from",
-    "using","via","how","what","which","based","study","paper","approach","method",
-    "large","scale","facile","simple","novel","new","effect","effects","based","describe",
-}
-
-# Common topic vocab (broad, domain-agnostic)
-SHAPE_TERMS = {
-    "nanorod","nanowire","nanotube","nanofiber","nanoparticle","nanocube","nanoplate",
-    "nanosheet","nanosphere","nanocluster","quantum dot","quantum dots","nanobelt",
-    "thin film","thin-film","microrod","microfiber","microtube","nanoflake","nanoribbon",
-}
-PROCESS_TERMS = {
-    "hydrothermal","solvothermal","sol-gel","polyol","microwave","autoclave","calcination",
-    "anneal","annealing","seed-mediated","galvanic replacement","hot injection","precipitation",
-    "co-precipitation","electrodeposition","chemical bath","chemical bath deposition","cbd",
-    "cvd","pvd","ald","sputtering","spin coating","dip coating","spray pyrolysis","templated",
-    "template-assisted","microemulsion","micelle",
-}
-MEASURE_TERMS = {
-    "xrd","tem","sem","afm","xps","raman","ftir","uv-vis","pl","vsm","squid","fmr","hall",
-    "fourier","impedance","conductivity","permittivity","dielectric","magnetization",
-}
-INTENT_SYN = {
-    "synthesize": {"synthesize","synthesis","prepare","fabricate","grow","make","deposit"},
-    "characterize": {"characterize","measure","quantify","analyze","determine","evaluate"},
-    "theory": {"theory","mechanism","dft","first-principles","simulation","model"},
-}
-
-# Prefer reputable publishers
-PUBLISHER_BOOST = (
-    "acs.org","rsc.org","sciencedirect","elsevier","springer","wiley","nature.com",
-    "aip.org","iop.org","electrochem.org","tandfonline","spiedigitallibrary",
-    "ieee.org","aps.org","arxiv.org","pnas.org"
-)
-# Drop obvious non-technical or low-signal hits 
-BAD_DOMAINS = (
-    "ssrn.com","medium.com","researchgate.net","quora.com","stackexchange",
-)
-
-CHEM_FORMULA_RX = re.compile(r"\b(?:[A-Z][a-z]?\d*){1,4}\b")  # light heuristic for formulas
-
-def _norm(x: str) -> str:
-    return (x or "").lower()
-
-def _tokenize(q: str) -> List[str]:
-    # keep hyphenated, split on non-letters/numbers, drop stopwords
-    qn = _norm(q)
-    toks = re.findall(r"[a-z0-9][a-z0-9\-]+", qn)
-    return [t for t in toks if t not in _STOP and len(t) > 1]
-
-def _extract_formulas(q: str) -> Set[str]:
-    return set(CHEM_FORMULA_RX.findall(re.sub(r"\s", "", q)))
-
-def _extract_multiword_phrases(q: str, vocab: Set[str]) -> Set[str]:
-    qn = _norm(q)
-    found = set()
-    for phrase in vocab:
-        if phrase in qn:
-            found.add(phrase)
-    return found
-
-
-def derive_query_profile(q: str) -> Dict[str, Set[str]]:
-    q = q or ""
-    # Normalize Unicode subscripts to ASCII before formula detection (Mn₃O₄ -> Mn3O4)
-    q_ascii = from_subscript(q)
-    toks = set(_tokenize(q_ascii))
-
-    # Materials: formulas + aliases (subscripts, element oxide names, special aliases)
-    mats_raw = _extract_formulas(q_ascii)               # e.g., {"Mn3O4"}
-    mats = _augment_material_terms(mats_raw)            # {"mn3o4","mn3o₄","manganese oxide","hausmannite",...}
-
-    # Also include simple chemical names typed by user (oxide/nitride/etc.)
-    chem_name_hits = set(
-        re.findall(
-            r"\b([a-z][a-z0-9\-]+(?:\s+(?:oxide|nitride|carbide|sulfide|sulphide|phosphide|ferrite|perovskite|aluminate|titanate|ferrate)))\b",
-            _norm(q_ascii)
-        )
-    )
-    mats |= {m.lower() for m in chem_name_hits}
-
-    # Topic tokens
-    shapes = _extract_multiword_phrases(q_ascii, SHAPE_TERMS) | (SHAPE_TERMS & toks)
-    procs  = _extract_multiword_phrases(q_ascii, PROCESS_TERMS) | (PROCESS_TERMS & toks)
-    meas   = _extract_multiword_phrases(q_ascii, MEASURE_TERMS) | (MEASURE_TERMS & toks)
-
-    # Intent inference
-    intent = set()
-    for k, syns in INTENT_SYN.items():
-        if any(s in _norm(q_ascii) for s in syns):
-            intent.add(k)
-    if not intent and (shapes or procs):
-        intent.add("synthesize")
-
-    return {
-        "materials": mats,                         # already lower-cased
-        "shapes": {s.lower() for s in shapes},
-        "processes": {p.lower() for p in procs},
-        "measure": {m.lower() for m in meas},
-        "intent": intent,
-        "tokens": toks,
-    }
-
-def _domain_ok(url: str) -> bool:
-    u = _norm(url)
-    if not u: return True
-    return not any(bad in u for bad in BAD_DOMAINS)
-
-def _publisher_score(url: str) -> int:
-    u = _norm(url)
-    return 1 if any(p in u for p in PUBLISHER_BOOST) else 0
-
-def _blob(r: Dict) -> str:
-    return _norm(f"{r.get('title','')} {r.get('abstract','')}")
-
-def _match_any(blob: str, terms: Set[str]) -> int:
-    return sum(1 for t in terms if t and t in blob)
-
-def _has_any(blob: str, terms: Set[str]) -> bool:
-    return any(t for t in terms if t in blob)
-
-def filter_and_rerank_generic(q: str, refs: List[Dict]) -> List[Dict]:
-    """
-    General-purpose gate:
-      - Prefer matches on materials + (shapes or processes or measure), depending on intent.
-      - Drop obvious bad domains.
-      - Score by overlap + publisher boost.
-      - Adaptive fallback if the query is sparse/broad.
-    """
-    prof = derive_query_profile(q)
-    mats = prof["materials"]
-    shapes = prof["shapes"]
-    procs  = prof["processes"]
-    meas   = prof["measure"]
-    intent = prof["intent"]
-
-    candidates = []
-    for r in refs or []:
-        url = r.get("url") or (r.get("doi") and f"https://doi.org/{r['doi']}") or ""
-        if not _domain_ok(url):
-            continue
-        b = _blob(r)
-
-        # Hard-ish filter: if materials specified, require at least one material token in title/abstract
-        if mats and not _has_any(b, mats):
-            continue
-
-        # Intent-aware requirement
-        want_any_topic = False
-        if "synthesize" in intent:
-            if shapes or procs:
-                if not (_has_any(b, shapes) or _has_any(b, procs)):
-                    continue
-            else:
-                # synthesis intent but no explicit shape/process -> just ensure generic synthesis verbs
-                if not any(w in b for w in ("synthesis","prepare","fabricat","grow","deposit","autoclave","hydrothermal","solvothermal","calcination","anneal")):
-                    want_any_topic = True  # score but don't drop
-        elif "characterize" in intent:
-            if meas and not _has_any(b, meas):
-                want_any_topic = True
-        # theory intent has no strong gate
-
-        # Score
-        score = 0
-        score += 3 * _match_any(b, mats)         # material is highly important
-        score += 2 * _match_any(b, shapes)       # morphology
-        score += 2 * _match_any(b, procs)        # process
-        score += 1 * _match_any(b, meas)         # measurements
-        score += _publisher_score(url)
-
-        # Soft bonus if text contains generic verbs
-        if want_any_topic and any(w in b for w in ("synthesis","prepare","fabricat","grow","deposit","measure","characteriz","theory","mechanism","dft")):
-            score += 1
-
-        # Keep even low scores to fall back on
-        candidates.append((score, r))
-
-    # If materials weren’t specified (truly broad Q), don’t overfilter—just keep top refs by score
-    if not mats and not candidates:
-        candidates = [(0, r) for r in refs]
-
-    candidates.sort(key=lambda x: x[0], reverse=True)
-    filtered = [r for s, r in candidates if s > 0]
-
-    # Adaptive fallbacks
-    if len(filtered) < 3:
-        # Relax gates: allow matches with any topic terms or generic verbs
-        looser = []
-        for r in refs or []:
-            b = _blob(r)
-            score = 0
-            score += 2 * _match_any(b, shapes | procs | meas)
-            score += 1 * int(any(w in b for w in ("synthesis","prepare","fabricat","grow","deposit","measure","characteriz","dft","theory")))
-            score += _publisher_score(r.get("url") or "")
-            looser.append((score, r))
-        looser.sort(key=lambda x: x[0], reverse=True)
-        filtered = [r for s, r in looser[:8] if s > 0] or [r for s, r in candidates[:8]]
-
-    # Cap for evidence pack
-    return filtered[:8]
+    return local[:2 * n]
 
 @lru_cache(maxsize=128)
 def cached_vs_search(q):
-    """Cached vector store search."""
     return vs.search(q, k=8) or ""
-
 
 @lru_cache(maxsize=128)
 def cached_lookup_query(q):
-    """Cached lookup query for DuckDB."""
     if LOOKUP is not None:
         try:
             return LOOKUP.query(q, topk=5)
@@ -504,56 +365,43 @@ def cached_lookup_query(q):
             return None
     return None
 
-
 @lru_cache(maxsize=128)
 def cached_basic_search(q, n):
-    """Cached basic search (local + web)."""
     try:
         return basic_search(q, n) or []
     except Exception:
         return []
 
-
-# ---- Flask Routes ---- #
+# ──────────────── Routes ──────────────── #
 @app.get("/health")
 def health():
-    """Health check endpoint."""
     return "ok", 200
-
 
 @app.get("/db_health")
 def db_health():
-    """MongoDB health check endpoint."""
     try:
         mongo_ping()
         return {"mongo": "ok"}, 200
     except Exception as e:
         return {"mongo": "error", "detail": str(e)}, 500
 
-
 @app.get("/")
 def home():
-    """Render the home page."""
     try:
         return render_template("index.html")
     except TemplateNotFound:
         return "<h1>NanoChemGPT</h1><p>templates/index.html missing.</p>", 200
 
-
 # ---- Uploads ---- #
 JOBS: dict[str, dict] = {}
-def _set_job(jid: str, **kw):
-    """Set or update a job status in the JOBS dict."""
-    JOBS.setdefault(jid, {}).update(kw)
-
+def _set_job(jid: str, **kw): JOBS.setdefault(jid, {}).update(kw)
 
 @app.post("/upload")
 def upload():
-    """Upload a file and process it for context or table ingestion."""
     f = request.files.get("file")
     if not f or f.filename == "":
         abort(400, "No file uploaded.")
-    fname = secure_filename(f.filename or "uploaded_file")
+    fname = secure_filename(f.filename)
     lower = fname.lower()
 
     dest = LOOKUP_UPLOAD_DIR / fname if lower.endswith((".parquet", ".csv", ".tsv", ".xlsx")) else (UPLOADS_DIR / fname)
@@ -594,9 +442,7 @@ def upload():
 
     return jsonify({"ok": True, "job_id": jid, "filename": fname, "path": str(dest)})
 
-
 def _mark_uploaded(fname: str, *, kind: str, status: str):
-    """Mark a file as uploaded and update DB status."""
     try:
         get_db().uploads.update_one(
             {"filename": fname},
@@ -606,18 +452,14 @@ def _mark_uploaded(fname: str, *, kind: str, status: str):
     except Exception as e:
         print("[/upload] DB update warn:", e)
 
-
 @app.get("/status/<jid>")
 def status(jid: str):
-    """Get the status of an upload or processing job."""
     j = JOBS.get(jid)
     if not j:
         abort(404, "unknown job id")
     return jsonify(j)
 
-
 def _process_pdf_job(jid: str, path: Path, filename: str):
-    """Extract text from PDF and add to vector store."""
     from PyPDF2 import PdfReader
     db = None
     try:
@@ -632,7 +474,7 @@ def _process_pdf_job(jid: str, path: Path, filename: str):
             texts.append(page.extract_text() or "")
             _set_job(jid, progress=int(100 * i / n))
         text = "\n".join(texts)
-        if not text or not text.strip():
+        if not text.strip():
             raise ValueError("PDF contains no extractable text.")
         vs.add_to_store(text, tag=f"upload:{filename}")
         if db is not None:
@@ -654,11 +496,9 @@ def _process_pdf_job(jid: str, path: Path, filename: str):
                 pass
         _set_job(jid, status="error", error=str(e))
 
-
 # ---- Search API ---- #
 @app.post("/search")
 def search_route():
-    """Search for references using local and web sources."""
     payload = request.get_json(silent=True) or {}
     q = (payload.get("q") or payload.get("query") or "").strip()
     n = int(payload.get("n") or 6)
@@ -667,76 +507,31 @@ def search_route():
     refs = basic_search(q, n)
     return jsonify({"results": refs})
 
-
-def _validate_strict_json(raw_json: str, evidence_ids: list[str]) -> str:
-    """Ensure every sentence in procedure[].text and reasoning[].claim has a bracketed id that exists."""
-    try:
-        data = json.loads(raw_json)
-    except Exception:
-        # ask model to fix formatting
-        fix = client.chat.completions.create(
-            model="gpt-4o-mini",
-            temperature=0,
-            messages=[{"role":"system","content":"Fix the JSON to be valid UTF-8 JSON; do not change semantics."},
-                      {"role":"user","content":raw_json}]
-        ).choices[0].message.content
-        if fix is None:
-            raise ValueError("Unable to fix JSON")
-        data = json.loads(fix)
-
-    def has_valid_cite(s: str) -> bool:
-        ids = re.findall(r"\[([A-Z0-9_]+)\]", s or "")
-        return any(i in evidence_ids for i in ids)
-
-    data.setdefault("uncited", [])
-    data.setdefault("insufficient_evidence", [])
-
-    # Validate procedure steps
-    proc_out = []
-    for step in data.get("procedure", []):
-        txt = (step.get("text") or "").strip()
-        if not has_valid_cite(txt):
-            data["uncited"].append(txt)
-        else:
-            proc_out.append(step)
-    data["procedure"] = proc_out
-
-    # Validate reasoning claims
-    reas_out = []
-    for cl in data.get("reasoning", []):
-        claim = (cl.get("claim") or "").strip()
-        cits = cl.get("citations") or []
-        if not claim or not any(c in evidence_ids for c in cits):
-            data["uncited"].append(claim)
-        else:
-            reas_out.append(cl)
-    data["reasoning"] = reas_out
-
-    return json.dumps(data, ensure_ascii=False, indent=None)
-
-
-# ---- Ask API ---- #
+# ---- Ask ---- #
 @app.post("/ask")
 def ask():
-    """Main endpoint for question answering and protocol generation."""
     def split_reasoning(raw: str) -> tuple[str, str]:
-        """Split answer and rationale from model output."""
         if not raw:
             return "", ""
         text = raw.strip()
+        # Remove all code-fenced reason/rationale blocks from the answer
         fence_rx = re.compile(r"```(?:reason|rationale|reasoning)\s*([\s\S]*?)```", re.I)
         rationale = ""
         fences = list(fence_rx.finditer(text))
         if fences:
+            # Use the last rationale block found
             rationale = fences[-1].group(1).strip()
+            # Remove all rationale blocks from the answer
             answer = fence_rx.sub("", text).strip()
             return answer, rationale
+        # Heading rationale block
         head = re.compile(r"(?:^|\n)#{1,3}\s*(rationale|reasoning)\b[^\n]*\n((?:.*\n?)*)$", re.I | re.S)
         m = head.search(text)
         if m:
             rationale = m.group(2).strip()
             answer = text[:m.start()].strip()
             return answer, rationale
+        # If no rationale found, treat all as answer, rationale is empty
         return text, ""
 
     try:
@@ -770,34 +565,33 @@ def ask():
                     line = f"[T{i}] solvent={solvent}; temp_C={temp}; time_h={time_h}; {note}".strip()
                     lines.append(line)
                     url = row.get("url") or (row.get("doi") and f"https://doi.org/{row['doi']}")
-                    if url:
-                        table_refs.append({"title": f"Table row {i}", "url": url})
+                    if url: table_refs.append({"title": f"Table row {i}", "url": url})
                 table_ctx = "\n".join(lines)
             except Exception as e:
                 print("[/ask] LOOKUP query error:", e)
 
-        # join contexts
         context_parts = []
-        if vs_ctx:
-            context_parts.append("<<<CTX_UPLOADS>>>\n" + (vs_ctx if isinstance(vs_ctx, str) else str(vs_ctx)))
-        if table_ctx:
-            context_parts.append("<<<CTX_TABLE>>>\n" + (table_ctx if isinstance(table_ctx, str) else str(table_ctx)))
+        if vs_ctx: context_parts.append("<<<CTX_UPLOADS>>>\n" + vs_ctx)
+        if table_ctx: context_parts.append("<<<CTX_TABLE>>>\n" + table_ctx)
         context_joined = "\n\n---\n\n".join(context_parts).strip()
 
         refs = []
         try:
-            refs = basic_search(q, n=20) or []
+            refs = basic_search(q, n=6) or []
         except Exception as e:
             print("[/ask] basic_search error:", e)
         if table_refs:
             refs = list(refs) + table_refs
+        # Filter and rerank references generically (material/topic aware)
+        try:
+            refs = filter_and_rerank_generic(q, refs) or refs
+        except Exception as e:
+            print("[/ask] filter_and_rerank_generic error:", e)
+        print("[/ask] refs (filtered):")
+        for i, r in enumerate(refs, 1):
+            print(f"  [{i}] {r.get('title')} — {r.get('doi') or r.get('url')}")
+    
 
-        # General relevance filter + reranker 
-        refs_filtered = filter_and_rerank_generic(q, refs)
-        if refs_filtered:
-            refs = refs_filtered
-
-        # rebuild refs_prompt after possibly changing refs
         def _ref_url(r):
             if r.get("url"): return r["url"]
             if r.get("doi"): return f"https://doi.org/{r['doi']}"
@@ -807,215 +601,163 @@ def ask():
             for i, r in enumerate(refs)
         ).strip()
 
-        print("[/ask] refs:")
-        for i, r in enumerate(refs, 1):
-            print(f"  [{i}] {r.get('title')} — {r.get('doi') or r.get('url')}")
+        # prompt variants
+        robot_rules = (
+            "Return a discrete lab protocol with exact quantities on a small scale (~0.5 mmol Co):\n"
+            " - Include specific masses (mg) or mmol for reagents; volumes (mL) for liquids.\n"
+            " - Specify temperatures (°C), ramp rates (°C/min), hold times (min/h), and atmosphere (Ar/N2/vacuum).\n"
+            " - Include workup and purification (quench, washing/centrifugation, drying) with volumes.\n"
+            " - No placeholders (avoid “e.g.”/“or”). Be decisive.\n"
+            " - Output only the final protocol in markdown. Do not include any fenced blocks named reason or rationale in the answer. Put all reasoning in the separate rationale channel."
+        )
+        reasoning_rules = (
+            " - Provide a mechanistic explanation and design considerations for the target.\n"
+            " - Focus on: nucleation vs growth; ligand/solvent coordination; surfactants; "
+            " - reduction/oxidation; temperature profile and morphology control; atmosphere; pitfalls; safety.\n"
+            " - Do NOT return a step-by-step protocol. Be concise but specific."
+        )
+        inline_rule = (
+            " - When you pull a fact from any numbered REFERENCE, put its number in square brackets right after the sentence "
+            "(e.g. “hydrothermal at 200 °C [3]”)." if want_inline else
+            " - Inline numeric citations are optional for this request."
+        )
+        acs_rule = (
+            " - Write the REFERENCES block in ACS format: author(s), title, journal, year, volume, pages, DOI.\n"
+            " - Use inline numeric citations ([n]) for facts from REFERENCES. Do NOT include a REFERENCES block in your answer."
+        )
 
-        if not refs:
-            return jsonify({
-                "answer": "",
-                "rationale": "",
-                "references": [],
-                "error": "No sufficiently relevant references found for this query; please rephrase or provide seed refs."
-            }), 422
+        def strip_references_block(text: str) -> str:
+            # Remove everything from '## References' to the end
+            return re.sub(r"## References[\s\S]*", "", text, flags=re.I).strip()
 
-        # ========== STRICT PATH ==========
-        if mode in ("robot_strict", "reasoning_strict"):
-            evidence_text, evidence_ids = build_evidence_pack(q, context_joined, refs)
-
-            STRICT_SCHEMA = (
-                'You are writing for materials chemists. Use ONLY the passages in EVIDENCE.\n'
-                'If a claim or step is not supported there, list it under "insufficient_evidence".\n'
-                'Every sentence that makes a claim MUST include bracket citations to [S#], [S#_C#] or [CTX#].\n'
-                'Do NOT use prior knowledge.\n'
-                'Return valid JSON only, matching this schema exactly:\n'
-                '{\n'
-                ' "procedure": [ {"step": 1, "text": "… [S1_C1][CTX1]"}, ... ],\n'
-                ' "reasoning": [ {"claim": "…", "citations": ["S1_C1","CTX1"]}, ... ],\n'
-                ' "uncited": [],\n'
-                ' "insufficient_evidence": []\n'
-                '}\n'
+        if mode == "reasoning":
+            prompt = (
+                "You are NanoChemGPT. Use the CONTEXT and numbered REFERENCES.\n"
+                "Rules:\n"
+                " - Prefer CONTEXT and REFERENCES over general knowledge when relevant.\n"
+                " - For each bullet, quote or paraphrase a specific finding from CONTEXT or REFERENCES, and cite the source. Do not generalize or invent citations.\n"
+                " - If you use any content from CONTEXT, append [CTX] on that line.\n"
+                f"{inline_rule}\n"
+                " - If CONTEXT is insufficient, say so explicitly before generalizing.\n"
+                " - For each cited reference, briefly summarize the relevant finding and explain how it relates to aspect ratio and temperature.\n"
+                " - If no reference supports a statement, say so explicitly and do not cite it.\n"
+                f"{reasoning_rules}\n"
+                f"{acs_rule}\n"  
+                "Return exactly ONE block:\n"
+                "## Mechanistic reasoning\n"
+                "- bullet points with inline [n] and [CTX] where appropriate.\n\n"
+                f"CONTEXT:\n{context_joined}\n\n"
+                f"REFERENCES:\n{refs_prompt}\n\n"
+                f"User question: {q}"
             )
-
-            strict_task = (
-                f'TASK\n'
-                f'Write a step-by-step procedure and a brief reasoning section for: "{q}".\n'
-                f'{evidence_text}\n'
-                f'END EVIDENCE\n'
-                f'OUTPUT JSON ONLY.'
-            )
-
-            raw = client.chat.completions.create(
-                model="gpt-4o-mini",
-                temperature=0.1,
-                messages=[
-                    {"role": "system", "content": STRICT_SCHEMA},
-                    {"role": "user", "content": strict_task},
-                ],
-            ).choices[0].message.content
-
-            answer = _validate_strict_json((raw or "").strip(), evidence_ids)
-            rationale = ""  # reasoning lives inside the JSON
-            used_summary = {"refs": [], "tags": {}, "has_ctx": bool(context_joined)}
-
-        # ========== LEGACY PATHS ==========
         else:
-            robot_rules = (
-                "Return a discrete lab protocol with exact quantities on a small scale (~0.5 mmol Co):\n"
-                " - Include specific masses (mg) or mmol for reagents; volumes (mL) for liquids.\n"
-                " - Specify temperatures (°C), ramp rates (°C/min), hold times (min/h), and atmosphere (Ar/N2/vacuum).\n"
-                " - Include workup and purification (quench, washing/centrifugation, drying) with volumes.\n"
-                " - No placeholders (avoid “e.g.”/“or”). Be decisive.\n"
-                " - Output only the final protocol in markdown. Do not include any fenced blocks named reason or rationale in the answer. Put all reasoning in the separate rationale channel."
+            prompt = (
+                "You are NanoChemGPT. Use the CONTEXT and the numbered REFERENCES to propose a synthesis.\n"
+                "Rules:\n"
+                " - Prefer CONTEXT and REFERENCES over general knowledge when relevant.\n"
+                " - For each step, quote or paraphrase a specific finding from CONTEXT or REFERENCES, and cite the source. Do not generalize or invent citations.\n"
+                " - If you use any content from CONTEXT, append [CTX] on that line.\n"
+                f"{inline_rule}\n"
+                " - If CONTEXT is insufficient, say so explicitly before generalizing.\n"
+                f"{robot_rules}\n"
+                f"{acs_rule}\n"  
+                "Return two blocks exactly in this order:\n"
+                "## Synthesis Protocol:\n"
+                "1. **Hardware & Glassware**:\n[]\n"
+                "2. **Materials**:\n[]\n"
+                "3. **Procedure**\n[]\n\n"
+                "```reason\n"
+                "For each key justification, add inline tags: [CTX] for uploaded/context hits, [DB] for Mongo Q&A, "
+                "[PARSED] for parsed protocols, [n] for numbered web REFERENCES, [GEN] if inferred.\n"
+                "Keep rationales terse.\n"
+                "Add NO other blocks of text.\n"
+                "```\n\n"
+                f"CONTEXT:\n{context_joined}\n\n"
+                f"REFERENCES:\n{refs_prompt}\n\n"
+                f"User question: {q}"
             )
-            reasoning_rules = (
-                " - Provide a mechanistic explanation and design considerations for the target.\n"
-                " - Focus on: nucleation vs growth; ligand/solvent coordination; surfactants; "
-                " - reduction/oxidation; temperature profile and morphology control; atmosphere; pitfalls; safety.\n"
-                " - Do NOT return a step-by-step protocol. Be concise but specific."
-            )
-            inline_rule = (
-                " - When you pull a fact from any numbered REFERENCE, put its number in square brackets right after the sentence "
-                "(e.g. “hydrothermal at 200 °C [3]”)." if want_inline else
-                " - Inline numeric citations are optional for this request."
-            )
-            acs_rule = (
-                " - Write the REFERENCES block in ACS format: author(s), title, journal, year, volume, pages, DOI.\n"
-                " - Use inline numeric citations ([n]) for facts from REFERENCES. Do NOT include a REFERENCES block in your answer."
-            )
 
-            def strip_references_block(text: str) -> str:
-                return re.sub(r"## References[\s\S]*", "", text, flags=re.I).strip()
+        raw = client.chat.completions.create(
+            model="gpt-4o-mini",
+            messages=[{"role": "user", "content": prompt}],
+            temperature=0.2
+        ).choices[0].message.content
 
-            if mode == "reasoning":
-                prompt = (
-                    "You are NanoChemGPT. Use the CONTEXT and numbered REFERENCES.\n"
-                    "Rules:\n"
-                    " - Prefer CONTEXT and REFERENCES over general knowledge when relevant.\n"
-                    " - For each bullet, quote or paraphrase a specific finding from CONTEXT or REFERENCES, and cite the source. Do not generalize or invent citations.\n"
-                    " - If you use any content from CONTEXT, append [CTX] on that line.\n"
-                    f"{inline_rule}\n"
-                    " - If CONTEXT is insufficient, say so explicitly before generalizing.\n"
-                    " - For each cited reference, briefly summarize the relevant finding and explain how it relates to aspect ratio and temperature.\n"
-                    " - If no reference supports a statement, say so explicitly and do not cite it.\n"
-                    f"{reasoning_rules}\n"
-                    f"{acs_rule}\n"
-                    "Return exactly ONE block:\n"
-                    "## Mechanistic reasoning\n"
-                    "- bullet points with inline [n] and [CTX] where appropriate.\n\n"
-                    f"CONTEXT:\n{context_joined}\n\n"
-                    f"REFERENCES:\n{refs_prompt}\n\n"
-                    f"User question: {q}"
-                )
-            else:
-                prompt = (
-                    "You are NanoChemGPT. Use the CONTEXT and the numbered REFERENCES to propose a synthesis.\n"
-                    "Rules:\n"
-                    " - Prefer CONTEXT and REFERENCES over general knowledge when relevant.\n"
-                    " - For each step, quote or paraphrase a specific finding from CONTEXT or REFERENCES, and cite the source. Do not generalize or invent citations.\n"
-                    " - If you use any content from CONTEXT, append [CTX] on that line.\n"
-                    f"{inline_rule}\n"
-                    " - If CONTEXT is insufficient, say so explicitly before generalizing.\n"
-                    f"{robot_rules}\n"
-                    f"{acs_rule}\n"
-                    "Return two blocks exactly in this order:\n"
-                    "## Synthesis Protocol:\n"
-                    "1. **Hardware & Glassware**:\n[]\n"
-                    "2. **Materials**:\n[]\n"
-                    "3. **Procedure**\n[]\n\n"
-                    "```reason\n"
-                    "For each key justification, add inline tags: [CTX] for uploaded/context hits, [DB] for Mongo Q&A, "
-                    "[PARSED] for parsed protocols, [n] for numbered web REFERENCES, [GEN] if inferred.\n"
-                    "Keep rationales terse.\n"
-                    "Add NO other blocks of text.\n"
-                    "```\n\n"
-                    f"CONTEXT:\n{context_joined}\n\n"
-                    f"REFERENCES:\n{refs_prompt}\n\n"
-                    f"User question: {q}"
-                )
+        # Split answer/rationale
+        if mode == "reasoning":
+            answer = strip_references_block((raw or "").strip())
+            rationale = ""
+        else:
+            answer, rationale = split_reasoning(strip_references_block(raw))
 
-            raw = client.chat.completions.create(
-                model="gpt-4o-mini",
-                messages=[{"role": "user", "content": prompt}],
-                temperature=0.2
-            ).choices[0].message.content
-
-            # Split answer/rationale
-            if mode == "reasoning":
-                answer = strip_references_block((raw or "").strip())
-                rationale = ""
-            else:
-                answer, rationale = split_reasoning(strip_references_block(raw or ""))
-
-            # Rationale fallback if missing
-            if not (rationale or "").strip():
-                try:
-                    rationale_only = (
-                        "You previously produced the SynthesisProtocol below.\n"
-                        "Write a short rationale (5–8 bullets max). For each key justification add inline tags:\n"
-                        "[CTX] uploaded/context hits, [PARSED] parsed protocols, [n] for numbered web REFERENCES, [GEN] for general.\n"
-                        "Return just the rationale text, no code fences, no extra headings."
-                    )
-                    rraw = client.chat.completions.create(
-                        model="gpt-4o",
-                        messages=[
-                            {"role": "user", "content": rationale_only},
-                            {"role": "user", "content": f"CONTEXT:\n{context_joined}"},
-                            {"role": "user", "content": f"REFERENCES:\n{refs_prompt}"},
-                            {"role": "user", "content": f"ANSWER:\n{(answer or '').strip()}"},
-                            {"role": "user", "content": f"QUESTION:\n{q}"},
-                        ],
-                        temperature=0.2,
-                    ).choices[0].message.content
-                    rationale = (rraw or "").strip()
-                except Exception as e:
-                    print("[/ask] rationale fallback failed:", e)
-                    rationale = rationale or ""
-
-            # Post-pass: enforce citations & CTX usage if missing (legacy only)
+        # Rationale fallback if missing
+        if not (rationale or "").strip():
             try:
-                used_summary = _extract_used_markers(answer or "", rationale or "")
-                if want_inline and not used_summary.get("refs"):
-                    try:
-                        revise_refs = client.chat.completions.create(
-                            model="gpt-4o-mini",
-                            temperature=0,
-                            messages=[
-                                {"role": "system", "content": (
-                                    "Add inline [n] citations wherever information was taken from the numbered REFERENCES list. "
-                                    "Do NOT remove any existing [CTX] content. Only insert citations where appropriate."
-                                )},
-                                {"role": "user", "content": f"REFERENCES:\n{refs_prompt}"},
-                                {"role": "user", "content": f"ORIGINAL ANSWER:\n{answer}"}
-                            ]
-                        ).choices[0].message.content
-                        if revise_refs and len(revise_refs) >= 0.7 * len(answer):
-                            answer = revise_refs
-                            used_summary = _extract_used_markers(answer, rationale)
-                    except Exception as e:
-                        print("[ask] ref-revise step failed:", e)
-            except Exception as _e:
-                print("[/ask] used extraction failed:", _e)
-                used_summary = {"refs": [], "tags": {}, "has_ctx": False}
+                rationale_only = (
+                    "You previously produced the SynthesisProtocol below.\n"
+                    "Write a short rationale (5–8 bullets max). For each key justification add inline tags:\n"
+                    "[CTX] uploaded/context hits, [PARSED] parsed protocols, [n] for numbered web REFERENCES, [GEN] for general.\n"
+                    "Return just the rationale text, no code fences, no extra headings."
+                )
+                rraw = client.chat.completions.create(
+                    model="gpt-4o",
+                    messages=[
+                        {"role": "user", "content": rationale_only},
+                        {"role": "user", "content": f"CONTEXT:\n{context_joined}"},
+                        {"role": "user", "content": f"REFERENCES:\n{refs_prompt}"},
+                        {"role": "user", "content": f"ANSWER:\n{(answer or '').strip()}"},
+                        {"role": "user", "content": f"QUESTION:\n{q}"},
+                    ],
+                    temperature=0.2,
+                ).choices[0].message.content
+                rationale = (rraw or "").strip()
+            except Exception as e:
+                print("[/ask] rationale fallback failed:", e)
+                rationale = rationale or ""
 
-            if context_joined and not used_summary.get("has_ctx"):
+        # Post-pass: enforce citations & CTX usage if missing
+        try:
+            used_summary = _extract_used_markers(answer or "", rationale or "")
+            if want_inline and not used_summary.get("refs"):
                 try:
-                    revise = client.chat.completions.create(
+                    revise_refs = client.chat.completions.create(
                         model="gpt-4o-mini",
                         temperature=0,
                         messages=[
-                            {"role": "system", "content": "Revise the answer to explicitly use CONTEXT where relevant. Insert [CTX] markers on lines that derive from CONTEXT, and prefer CONTEXT over general knowledge. Do not change structure."},
-                            {"role": "user", "content": f"CONTEXT:\n{context_joined}"},
+                            {"role": "system", "content": (
+                                "Add inline [n] citations wherever information was taken from the numbered REFERENCES list. "
+                                "Do NOT remove any existing [CTX] content. Only insert citations where appropriate."
+                            )},
+                            {"role": "user", "content": f"REFERENCES:\n{refs_prompt}"},
                             {"role": "user", "content": f"ORIGINAL ANSWER:\n{answer}"}
                         ]
                     ).choices[0].message.content
-                    if revise and len(revise) >= 0.7 * len(answer):
-                        answer = revise
-                        used_summary = _extract_used_markers(answer, rationale or "")
+                    if revise_refs and len(revise_refs) >= 0.7 * len(answer):
+                        answer = revise_refs
+                        used_summary = _extract_used_markers(answer, rationale)
                 except Exception as e:
-                    print("[ask] revise step skipped:", e)
+                    print("[ask] ref-revise step failed:", e)
+        except Exception as _e:
+            print("[/ask] used extraction failed:", _e)
+            used_summary = {"refs": [], "tags": {}, "has_ctx": False}
 
-        # ========== COMMON DB INSERT + RETURN (both paths) ==========
+        if context_joined and not used_summary.get("has_ctx"):
+            try:
+                revise = client.chat.completions.create(
+                    model="gpt-4o-mini",
+                    temperature=0,
+                    messages=[
+                        {"role": "system", "content": "Revise the answer to explicitly use CONTEXT where relevant. Insert [CTX] markers on lines that derive from CONTEXT, and prefer CONTEXT over general knowledge. Do not change structure."},
+                        {"role": "user", "content": f"CONTEXT:\n{context_joined}"},
+                        {"role": "user", "content": f"ORIGINAL ANSWER:\n{answer}"}
+                    ]
+                ).choices[0].message.content
+                if revise and len(revise) >= 0.7 * len(answer):
+                    answer = revise
+                    used_summary = _extract_used_markers(answer, rationale or "")
+            except Exception as e:
+                print("[ask] revise step skipped:", e)
+
         qa_id = None
         try:
             db = get_db()
@@ -1044,8 +786,8 @@ def ask():
             "used": used_summary,
             "mode": mode,
             "qa_id": qa_id,
-            "ctx_vs": (vs_ctx if isinstance(vs_ctx, str) else str(vs_ctx or ""))[:8000],
-            "ctx_table": (table_ctx if isinstance(table_ctx, str) else str(table_ctx or ""))[:4000],
+            "ctx_vs": (vs_ctx or "")[:8000],
+            "ctx_table": (table_ctx or "")[:4000],
         })
 
     except Exception as e:
@@ -1192,15 +934,13 @@ def upload_builtin():
         return jsonify({"ok": False, "error": "No files uploaded"}), 400
     saved = []
     for f in files:
-        fname = secure_filename(f.filename or "uploaded_file")
+        fname = secure_filename(f.filename)
         dest = BUILTIN_DIR / fname
         dest.parent.mkdir(parents=True, exist_ok=True)
         f.save(dest)
         saved.append(fname)
     return jsonify({"ok": True, "files": saved})
 
-
-# ---- Main Entrypoint ---- #
 if __name__ == "__main__":
     app.run(
         host="0.0.0.0",
