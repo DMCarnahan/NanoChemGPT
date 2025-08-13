@@ -62,7 +62,7 @@ app.config["MAX_CONTENT_LENGTH"] = 100 * 1024 * 1024  # 100 MB
 app.config["JSON_AS_ASCII"] = False  # allow UTF-8
 
 
-# CSRF setup
+# CSRF setup (optional)
 try:
     from flask_wtf.csrf import CSRFProtect, generate_csrf
     app.config['SECRET_KEY'] = os.getenv("FLASK_SECRET_KEY", "change-me")
@@ -145,29 +145,6 @@ client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"), http_client=_no_proxy)
 
 
 # ---- Utility Functions ---- #
-def enriched_search(query: str, materials: Set[str], shapes: Set[str]) -> list[dict]:
-    """Try a few precise rewrites and merge results."""
-    mats = list({m for m in materials if any(ch.isalpha() for ch in m)})[:2]  # keep 1–2 material keys
-    shps = list(shapes)[:1] or ["nanoparticle"]  # default to nanoparticle if none
-    seeds = [
-        query,
-        f"{' '.join(mats)} {shps[0]} synthesis",
-        f"{' '.join(mats)} hydrothermal {shps[0]}",
-        f"{' '.join(mats)} nanoparticle preparation",
-    ]
-    all_refs: list[dict] = []
-    seen = set()
-    for s in seeds:
-        try:
-            hits = basic_search(s, n=12) or []
-        except Exception as e:
-            print("[enriched_search] basic_search fail:", e); continue
-        for h in hits:
-            key = (h.get("doi") or h.get("title","")).lower()
-            if key in seen: continue
-            seen.add(key); all_refs.append(h)
-    return all_refs[:24]
-
 def _safe_text(x: Any) -> str:
     """Convert any value to string, safely handling None."""
     try:
@@ -175,29 +152,6 @@ def _safe_text(x: Any) -> str:
     except Exception:
         return ""
 
-def _extract_formulas(q: str) -> Set[str]:
-    return set(CHEM_FORMULA_RX.findall(q or ""))
-
-def _augment_material_terms(mats: Set[str]) -> Set[str]:
-    mats_lc = _lower_set(mats)
-    out: Set[str] = set(mats_lc)
-
-    # add Unicode subscript variants (e.g. Mn3O4 → Mn3O₄)
-    out |= { _with_subscripts(m).lower() for m in mats }
-
-    # formula→element name “oxide/nitride/…” heuristic
-    m = re.compile(r"^([a-z]{1,2})\d*o\d+$") 
-    for fx in mats_lc:
-        g = m.match(fx)
-        if g:
-            el = g.group(1)
-            elname = ELEMENT_NAMES.get(el)
-            if elname:
-                out.add(f"{elname} oxide")
-        # add special aliases if known
-        out |= { a.lower() for a in SPECIAL_FORMULA_ALIASES.get(fx, set()) }
-
-    return out
 
 def _extract_used_markers(*texts: str) -> dict:
     """Find [n] citations and [CTX]/[PARSED]/[DB]/[GEN] tags in text."""
@@ -325,13 +279,11 @@ def basic_search(query: str, n: int = 6) -> list[dict]:
             } | {"source":"web"})
             seen.add(key)
 
-    print(f"[basic_search] returned {len(local[:2*n])} refs "
-        f"(web={sum(1 for r in local if r.get('source')=='web')}, "
-        f"lookup={sum(1 for r in local if r.get('source')=='lookup')})")
-    
-    return local[:2 * n]
-
-SUBS = str.maketrans("0123456789", "₀₁₂₃₄₅₆₇₈₉")
+        print(f"[basic_search] returned {len(local[:2*n])} refs "
+            f"(web={sum(1 for r in local if r.get('source')=='web')}, "
+            f"lookup={sum(1 for r in local if r.get('source')=='lookup')})")
+        
+        return local[:2 * n]
 
 # Light stoplist
 _STOP = {
@@ -371,7 +323,7 @@ PUBLISHER_BOOST = (
 )
 # Drop obvious non-technical or low-signal hits 
 BAD_DOMAINS = (
-    "ssrn.com","medium.com","researchgate.net","quora.com","stackexchange", "zenodo.org", "researchsquare.com", "osf.io", "preprints.org"
+    "ssrn.com","medium.com","researchgate.net","quora.com","stackexchange",
 )
 
 CHEM_FORMULA_RX = re.compile(r"\b(?:[A-Z][a-z]?\d*){1,4}\b")  # light heuristic for formulas
@@ -385,6 +337,9 @@ def _tokenize(q: str) -> List[str]:
     toks = re.findall(r"[a-z0-9][a-z0-9\-]+", qn)
     return [t for t in toks if t not in _STOP and len(t) > 1]
 
+def _extract_formulas(q: str) -> Set[str]:
+    return set(CHEM_FORMULA_RX.findall(re.sub(r"\s", "", q)))
+
 def _extract_multiword_phrases(q: str, vocab: Set[str]) -> Set[str]:
     qn = _norm(q)
     found = set()
@@ -393,31 +348,41 @@ def _extract_multiword_phrases(q: str, vocab: Set[str]) -> Set[str]:
             found.add(phrase)
     return found
 
+
 def derive_query_profile(q: str) -> Dict[str, Set[str]]:
-    toks = set(_tokenize(q))
-    mats_raw = _extract_formulas(q)               # e.g., {"MnO2"}
-    mats = _augment_material_terms(mats_raw)                   # {"mno2"}
-    # Add Unicode subscript form: {"mno₂"}
-    mats |= { _with_subscripts(m).lower() for m in mats_raw }
+    q = q or ""
+    # Normalize Unicode subscripts to ASCII before formula detection (Mn₃O₄ -> Mn3O4)
+    q_ascii = from_subscript(q)
+    toks = set(_tokenize(q_ascii))
 
-    # two-word chemical names like "nickel oxide", "manganese dioxide"
-    chem_name_hits = set()
-    for m in re.findall(r"\b([a-z][a-z0-9\-]+(?:\s+(?:oxide|nitride|carbide|sulfide|sulphide|phosphide|ferrite|perovskite|aluminate|titanate|ferrate)))\b", _norm(q)):
-        chem_name_hits.add(m)
+    # Materials: formulas + aliases (subscripts, element oxide names, special aliases)
+    mats_raw = _extract_formulas(q_ascii)               # e.g., {"Mn3O4"}
+    mats = _augment_material_terms(mats_raw)            # {"mn3o4","mn3o₄","manganese oxide","hausmannite",...}
 
-    shapes = _extract_multiword_phrases(q, SHAPE_TERMS) | (SHAPE_TERMS & toks)
-    procs  = _extract_multiword_phrases(q, PROCESS_TERMS) | (PROCESS_TERMS & toks)
-    meas   = _extract_multiword_phrases(q, MEASURE_TERMS) | (MEASURE_TERMS & toks)
+    # Also include simple chemical names typed by user (oxide/nitride/etc.)
+    chem_name_hits = set(
+        re.findall(
+            r"\b([a-z][a-z0-9\-]+(?:\s+(?:oxide|nitride|carbide|sulfide|sulphide|phosphide|ferrite|perovskite|aluminate|titanate|ferrate)))\b",
+            _norm(q_ascii)
+        )
+    )
+    mats |= {m.lower() for m in chem_name_hits}
 
+    # Topic tokens
+    shapes = _extract_multiword_phrases(q_ascii, SHAPE_TERMS) | (SHAPE_TERMS & toks)
+    procs  = _extract_multiword_phrases(q_ascii, PROCESS_TERMS) | (PROCESS_TERMS & toks)
+    meas   = _extract_multiword_phrases(q_ascii, MEASURE_TERMS) | (MEASURE_TERMS & toks)
+
+    # Intent inference
     intent = set()
     for k, syns in INTENT_SYN.items():
-        if any(s in _norm(q) for s in syns):
+        if any(s in _norm(q_ascii) for s in syns):
             intent.add(k)
     if not intent and (shapes or procs):
         intent.add("synthesize")
 
     return {
-        "materials": mats | chem_name_hits,   # all lowercase
+        "materials": mats,                         # already lower-cased
         "shapes": {s.lower() for s in shapes},
         "processes": {p.lower() for p in procs},
         "measure": {m.lower() for m in meas},
@@ -437,13 +402,11 @@ def _publisher_score(url: str) -> int:
 def _blob(r: Dict) -> str:
     return _norm(f"{r.get('title','')} {r.get('abstract','')}")
 
-def _has_any(blob: str, terms: Set[str]) -> bool:
-    b = (blob or "").lower()
-    return any(t for t in terms if t in b)
-
 def _match_any(blob: str, terms: Set[str]) -> int:
-    b = (blob or "").lower()
-    return sum(1 for t in terms if t and t in b)
+    return sum(1 for t in terms if t and t in blob)
+
+def _has_any(blob: str, terms: Set[str]) -> bool:
+    return any(t for t in terms if t in blob)
 
 def filter_and_rerank_generic(q: str, refs: List[Dict]) -> List[Dict]:
     """
@@ -494,11 +457,11 @@ def filter_and_rerank_generic(q: str, refs: List[Dict]) -> List[Dict]:
         score += 1 * _match_any(b, meas)         # measurements
         score += _publisher_score(url)
 
-        # Soft bonus if text contains generic verbs and we wanted any topic
+        # Soft bonus if text contains generic verbs
         if want_any_topic and any(w in b for w in ("synthesis","prepare","fabricat","grow","deposit","measure","characteriz","theory","mechanism","dft")):
             score += 1
 
-        # Keep even low scores; we will fallback if too few strong hits
+        # Keep even low scores to fall back on
         candidates.append((score, r))
 
     # If materials weren’t specified (truly broad Q), don’t overfilter—just keep top refs by score
@@ -522,35 +485,8 @@ def filter_and_rerank_generic(q: str, refs: List[Dict]) -> List[Dict]:
         looser.sort(key=lambda x: x[0], reverse=True)
         filtered = [r for s, r in looser[:8] if s > 0] or [r for s, r in candidates[:8]]
 
-    prof = derive_query_profile(q)
-    print(f"[rerank] mats={sorted(list(prof['materials']))} shapes={sorted(list(prof['shapes']))} procs={sorted(list(prof['processes']))} intent={sorted(list(prof['intent']))}")
-
     # Cap for evidence pack
     return filtered[:8]
-
-_SUBS = str.maketrans("0123456789", "₀₁₂₃₄₅₆₇₈₉")
-
-def _with_subscripts(s: str) -> str:
-    return "".join(ch.translate(_SUBS) if ch.isdigit() else ch for ch in s)
-
-def _lower_set(xs):
-    return { (x or "").lower() for x in (xs or []) if x }
-
-ELEMENT_NAMES = {
-    "mn": "manganese", "ni": "nickel", "co": "cobalt", "fe": "iron", "cu": "copper",
-    "zn": "zinc", "ti": "titanium", "w": "tungsten", "mo": "molybdenum", "sn": "tin",
-    "pb": "lead", "ag": "silver", "au": "gold", "al": "aluminum", "si": "silicon",
-}
-
-# Special aliases that papers use instead of the formula
-SPECIAL_FORMULA_ALIASES: Dict[str, Set[str]] = {
-    "mn3o4": {"hausmannite", "manganese(ii,iii) oxide", "trimanganese tetraoxide", "manganese tetroxide"},
-    "fe3o4": {"magnetite", "iron(ii,iii) oxide"},
-    "al2o3": {"alumina"},
-    "sio2": {"silica"},
-}
-
-CHEM_FORMULA_RX = re.compile(r"\b(?:[A-Z][a-z]?\d*){1,5}\b")
 
 @lru_cache(maxsize=128)
 def cached_vs_search(q):
@@ -584,6 +520,7 @@ def health():
     """Health check endpoint."""
     return "ok", 200
 
+
 @app.get("/db_health")
 def db_health():
     """MongoDB health check endpoint."""
@@ -593,6 +530,7 @@ def db_health():
     except Exception as e:
         return {"mongo": "error", "detail": str(e)}, 500
 
+
 @app.get("/")
 def home():
     """Render the home page."""
@@ -601,11 +539,13 @@ def home():
     except TemplateNotFound:
         return "<h1>NanoChemGPT</h1><p>templates/index.html missing.</p>", 200
 
+
 # ---- Uploads ---- #
 JOBS: dict[str, dict] = {}
 def _set_job(jid: str, **kw):
     """Set or update a job status in the JOBS dict."""
     JOBS.setdefault(jid, {}).update(kw)
+
 
 @app.post("/upload")
 def upload():
@@ -724,7 +664,7 @@ def search_route():
     n = int(payload.get("n") or 6)
     if not q:
         abort(400, "Missing 'q' (query).")
-    refs = basic_search(q, n=20) or []
+    refs = basic_search(q, n)
     return jsonify({"results": refs})
 
 
@@ -851,18 +791,6 @@ def ask():
             print("[/ask] basic_search error:", e)
         if table_refs:
             refs = list(refs) + table_refs
-        
-        prof = derive_query_profile(q)
-        refs1 = filter_and_rerank_generic(q, refs)
-        if refs1:
-            refs = refs1
-
-        # enriched re-search and refilter
-        if prof["materials"] and len(refs) < 3:
-            more = enriched_search(q, prof["materials"], prof["shapes"])
-            if more:
-                refs_combined = refs + more
-                refs = filter_and_rerank_generic(q, refs_combined)[:8]
 
         # General relevance filter + reranker 
         refs_filtered = filter_and_rerank_generic(q, refs)
