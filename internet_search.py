@@ -1,20 +1,18 @@
+
 from __future__ import annotations
 
 import os
-import httpx
-import json
 import time
+import httpx
 import urllib.parse
 import re
-from typing import Any, Dict, Iterable, List, Optional, Tuple
+from typing import List, Dict, Optional, Tuple
 
 BASE = "https://api.openalex.org/works"
+TEXT = "https://api.openalex.org/text"
 
-# ---- User-Agent resolution (env-aware) ----
+# ---- Contact / headers ------------------------------------------------------
 _DEFAULT_APP = "NanoChemGPT/1.0"
-OPENALEX_BASE = "https://api.openalex.org/works"
-OPENALEX_TEXT = "https://api.openalex.org/text"
-
 _CONTACT_ENV_KEYS = ("OPENALEX_CONTACT", "CONTACT_EMAIL", "ADMIN_EMAIL")
 
 def _get_contact_email() -> str:
@@ -25,30 +23,24 @@ def _get_contact_email() -> str:
     return ""
 
 def _build_user_agent_from_env() -> str:
-    # 1) Respect explicit override
     ua = os.getenv("USER_AGENT", "").strip()
     if ua:
         return ua
-    # 2) Otherwise include mailto if we have it
     email = _get_contact_email()
     return f"{_DEFAULT_APP} (mailto:{email})" if email else _DEFAULT_APP
 
 USER_AGENT = _build_user_agent_from_env()
 CONTACT_EMAIL = _get_contact_email()
+HTTP_HEADERS = {"User-Agent": USER_AGENT, "Accept": "application/json"}
 
-HTTP_HEADERS = {
-    "User-Agent": USER_AGENT,
-    "Accept": "application/json",
-}
-
-# ---- HTTP with retries ----
+# ---- HTTP helper with retries ----------------------------------------------
 def _http_get_json(url: str, *, tries: int = 3, timeout: float = 20.0) -> dict | None:
     last_err = None
     for i in range(tries):
         try:
             with httpx.Client(headers=HTTP_HEADERS, timeout=timeout) as client:
                 r = client.get(url)
-            if r.status_code == 403:
+            if r.status_code in (429, 403):
                 time.sleep(0.6 * (i + 1))
             r.raise_for_status()
             return r.json()
@@ -58,8 +50,18 @@ def _http_get_json(url: str, *, tries: int = 3, timeout: float = 20.0) -> dict |
     print(f"[internet_search] fetch failed: {last_err}")
     return None
 
-# --- Helpers -----------------
+# ---- Gating for OpenAlex /text ---------------------------------------------
+def _should_use_aboutness(q: str) -> bool:
+    if not q:
+        return False
+    q = q.strip()
+    if len(q) > 80:
+        return False
+    if any(ch in q for ch in ",;:!?/\|"):
+        return False
+    return True
 
+# ---- Post-processing --------------------------------------------------------
 def _invert_openalex_abstract(inv: dict | None) -> str:
     if not isinstance(inv, dict) or not inv:
         return ""
@@ -81,10 +83,7 @@ def _pick_doi(w: dict) -> str:
 def _pick_url(w: dict) -> str:
     pl = w.get("primary_location") or {}
     boa = w.get("best_oa_location") or {}
-    url = (
-        pl.get("landing_page_url")
-        or boa.get("landing_page_url")
-    )
+    url = pl.get("landing_page_url") or boa.get("landing_page_url")
     if not url:
         for loc in (w.get("locations") or []):
             url = loc.get("landing_page_url")
@@ -97,52 +96,18 @@ def _pick_url(w: dict) -> str:
     return url or ""
 
 def _pick_journal_name(w: dict) -> str:
-    # Preferred: primary_location.source.display_name
     pl = w.get("primary_location") or {}
     src = pl.get("source") or {}
     name = (src.get("display_name") or "").strip()
     if name:
         return name
-    # Fallback: first locations[*].source.display_name
     for loc in (w.get("locations") or []):
         s = (loc.get("source") or {}).get("display_name")
         if s:
-            return s.strip()
+            return (s or "").strip()
     return ""
 
-def _is_offtopic(rec: dict) -> bool:
-    t = f"{rec.get('title','')} {rec.get('journal','')}".lower()
-    bad = (
-        "battery","supercapacitor","capacitor","fuel cell","electrode",
-        "cathode","anode","voc","ceo2","ceria","adsorption","review"
-    )
-    return any(b in t for b in bad)
-
-def _is_offtopic_penalty(text: str) -> int:
-    return -2 if any(b in text for b in ("battery","supercapacitor","review")) else 0
-
-def _score(rec: dict) -> float:
-    hay = f"{rec['title']} {rec['abstract']} {rec['journal']}".lower()
-    base = sum(1.0 for k in key_terms if k and k in hay)
-    if "hot injection" in hay or "hot-injection" in hay:
-        base += 1.5
-    # popularity nudge
-    try:
-        w = next((_w for _w in works if (_w.get("display_name") or "").strip() == rec["title"]), None)
-        c = (w or {}).get("cited_by_count") or 0
-        base += (c ** 0.5) * 0.05
-    except Exception:
-        pass
-    base += _is_offtopic_penalty(hay)
-    return base
-
-# --- Post-process OpenAlex results ------------------------------------------
 def _postprocess_openalex_results(data: dict, n: int, query: str = "") -> list[dict]:
-    """
-    Convert OpenAlex 'works' payload into app records:
-      {title, year, url, doi, abstract, authors, journal}
-    Dedup and rank by simple relevance score to the query.
-    """
     works = (data or {}).get("results", []) or []
     out: list[dict] = []
     seen_titles = set()
@@ -159,18 +124,15 @@ def _postprocess_openalex_results(data: dict, n: int, query: str = "") -> list[d
         authors = [a.get("author", {}).get("display_name", "") for a in (w.get("authorships") or [])]
         journal = _pick_journal_name(w)
 
-        # Dedupe
         tkey = title.lower()
         if doi:
-            if doi in seen_dois:
-                continue
+            if doi in seen_dois: continue
             seen_dois.add(doi)
         else:
-            if tkey in seen_titles:
-                continue
+            if tkey in seen_titles: continue
             seen_titles.add(tkey)
 
-        rec = {
+        out.append({
             "title": title,
             "year": year,
             "url": url,
@@ -178,58 +140,23 @@ def _postprocess_openalex_results(data: dict, n: int, query: str = "") -> list[d
             "abstract": abstract,
             "authors": authors,
             "journal": journal,
-        }
-        out.append(rec)  # <-- IMPORTANT
+        })
 
-    # --- relevance scoring (query-aware) ---
+    # Simple query-aware sorting to nudge relevance
     key_terms = set((_build_search_string(query, level="core") or "").lower().split())
 
-    def _score_local(rec: dict) -> float:
+    def _score(rec: dict) -> float:
         hay = f"{rec.get('title','')} {rec.get('abstract','')} {rec.get('journal','')}".lower()
-        base = sum(1.0 for k in key_terms if k and k in hay)
-        if "hot injection" in hay or "hot-injection" in hay:
-            base += 1.5
-        # popularity nudge from OpenAlex record
-        try:
-            w = next(
-                (_w for _w in works
-                 if ((_w.get("display_name") or _w.get("title") or "").strip() == rec["title"])),
-                None
-            )
-            c = (w or {}).get("cited_by_count") or 0
-            base += (c ** 0.5) * 0.05
-        except Exception:
-            pass
-        # light penalty for generic off-topic buckets (don’t hard drop)
-        if any(b in hay for b in ("battery", "supercapacitor", "review")):
-            base -= 2
-        return base
+        return sum(1.0 for k in key_terms if k and k in hay)
 
-    out.sort(key=_score_local, reverse=True)
+    out.sort(key=_score, reverse=True)
     return out[:n]
 
-_FORMULA_RX = re.compile(r"\b(?:[A-Z][a-z]?[\d]{0,3}){2,}\b")  # Cu2O, NiCo, Fe3O4, CoNi, etc.
-# Common material-class words to catch 
+# ---- Query construction -----------------------------------------------------
+_FORMULA_RX = re.compile(r"\b(?:[A-Z][a-z]?\d*){1,5}\b")
 _MAT_CLASSES = ["oxide","sulfide","selenide","telluride","nitride","phosphide",
                 "carbide","boride","hydroxide","perovskite","spinel","alloy","intermetallic"]
 
-# Lightweight element dictionary
-_ELEMENT_WORDS = {
-    "copper":"copper","cu":"copper",
-    "nickel":"nickel","ni":"nickel",
-    "cobalt":"cobalt","co":"cobalt",
-    "iron":"iron","fe":"iron",
-    "silver":"silver","ag":"silver",
-    "gold":"gold","au":"gold",
-    "zinc":"zinc","zn":"zinc",
-    "tin":"tin","sn":"tin",
-    "platinum":"platinum","pt":"platinum",
-    "palladium":"palladium","pd":"palladium",
-    "titanium":"titanium","ti":"titanium",
-    "aluminum":"aluminum","aluminium":"aluminum","al":"aluminum",
-}
-
-# Broad morphology vocabulary
 _MORPH = {
     "nanorod":["nanorod","nanorods","rod","rods"],
     "nanowire":["nanowire","nanowires","wire","wires"],
@@ -241,9 +168,9 @@ _MORPH = {
 }
 
 _ROUTES = [
-    "polyol","hydrothermal","solvothermal","autoclave",  
+    "polyol","hydrothermal","solvothermal","autoclave",
     "electrodeposition","seed-mediated","template","microwave",
-    "photochemical","galvanic","chemical reduction","PVP","CTAB",
+    "photochemical","galvanic","chemical reduction","pvp","ctab",
     "oleylamine","ethylene glycol",
 ]
 
@@ -255,23 +182,23 @@ def _tokenize_lower(s: str) -> List[str]:
 def _extract_material_terms(question: str) -> List[str]:
     toks = _tokenize_lower(question)
     mats: List[str] = []
-
-    # element names/symbols that appear
+    # element words (very light)
+    E = {
+        "mn":"manganese","ni":"nickel","co":"cobalt","fe":"iron","cu":"copper","zn":"zinc",
+        "ti":"titanium","al":"aluminum","si":"silicon","pb":"lead","ag":"silver","au":"gold"
+    }
     for t in toks:
-        if t in _ELEMENT_WORDS:
-            mats.append(_ELEMENT_WORDS[t])
-
-    # chemical formulas like Cu2O, NiCo, Fe3O4
+        if t in E:
+            mats.append(E[t])
+        elif t in E.values():
+            mats.append(t)
+    # chemical formulas
     mats.extend(_FORMULA_RX.findall(question))
-
-    # generic material classes present in text
+    # class nouns
     for cls in _MAT_CLASSES:
         if cls in toks:
             mats.append(cls)
-
-    # de-dup, keep short
-    mats = list(dict.fromkeys(mats))[:10]
-    return mats
+    return list(dict.fromkeys(mats))[:10]
 
 def _extract_morphology_terms(question: str) -> List[str]:
     q = (question or "").lower()
@@ -282,12 +209,12 @@ def _extract_morphology_terms(question: str) -> List[str]:
     return list(dict.fromkeys(found))
 
 def _or_group(words: List[str]) -> str:
-    words = [w for w in dict.fromkeys(words) if w]  # de-dup, keep order
+    words = [w for w in dict.fromkeys(words) if w]
     return " OR ".join(f'"{w}"' if " " in w else w for w in words)
 
 def _build_boolean_query(question: str) -> str:
-    mats  = _extract_material_terms(question)        # optional
-    morph = _extract_morphology_terms(question)      # required/fallback
+    mats  = _extract_material_terms(question)
+    morph = _extract_morphology_terms(question)
     routes = _ROUTES
     scale  = _SCALE
 
@@ -298,53 +225,22 @@ def _build_boolean_query(question: str) -> str:
     if scale:  clauses.append(f"({_or_group(scale)})")
     return " AND ".join(clauses)
 
-def _strip_openalex_id(x: str) -> str:
-    # accepts 'https://openalex.org/T123' or 'T123' -> 'T123'
-    return x.rsplit("/", 1)[-1]
-
-def _aboutness_topics_from_text(text: str, k: int = 3) -> list[str]:
-    url = f"{OPENALEX_TEXT}?{urllib.parse.urlencode({'text': text[:2000], 'mailto': CONTACT_EMAIL})}"
-    data = _http_get_json(url) or {}
-    out = []
-    pt = (data.get("primary_topic") or {}).get("id")
-    if pt:
-        out.append(_strip_openalex_id(pt))
-    for t in (data.get("topics") or [])[:k]:
-        tid = t.get("id")
-        if tid:
-            tid = _strip_openalex_id(tid)
-            if tid not in out:
-                out.append(tid)
-    return out
-
-WAF_BLOCK_TERMS = {"injection", "sql", "payload", "drop", "truncate"}  # keep small; 'injection' is the big one
+WAF_BLOCK_TERMS = {"injection", "sql", "payload", "drop", "truncate"}
 
 def _build_search_string(question: str, *, level: str = "full") -> str:
-    """
-    Build a plain string for OpenAlex `search=`.
-    level: 'full' (material+morph+routes+scale),
-           'core' (material+morph+scale),
-           'minimal' (morph only).
-    """
     mats  = _extract_material_terms(question)
     morph = _extract_morphology_terms(question)
     routes = _ROUTES
     scale  = _SCALE
 
     terms = []
-    # always include morphology
     terms.extend(morph)
-    # include material if present
     terms.extend(mats)
-
     if level == "full":
-        terms.extend(routes)
-        terms.extend(scale)
+        terms.extend(routes); terms.extend(scale)
     elif level == "core":
         terms.extend(scale)
-    # 'minimal' adds nothing more
 
-    # sanitize: split tokens by spaces/hyphens and drop WAF triggers
     safe_terms = []
     for t in dict.fromkeys(terms):
         if not t:
@@ -356,60 +252,39 @@ def _build_search_string(question: str, *, level: str = "full") -> str:
 
     return " ".join(safe_terms)
 
-# ---- Query builder ----
+# ---- URL builder ------------------------------------------------------------
 def _build_url_smart(question: str, *,
                      n: int = 6,
                      from_year: Optional[int] = 2005,
                      lang: str = "en",
                      use_aboutness: bool = True,
-                     level: str = "full") -> Tuple[str, List[str]]:
-    """
-    Build an OpenAlex works URL. Returns (url, tids) where tids are topic IDs.
-    `level` controls how many terms go into `search=`:
-      - 'full'    -> material + morphology + routes + scale
-      - 'core'    -> material + morphology + scale
-      - 'minimal' -> morphology only
-    """
-    per_page = max(1, min(n, 25))
-    filters: List[str] = ["type:journal-article"]
+                     level: str = "full",
+                     topics: Optional[List[str]] = None) -> Tuple[str, List[str]]:
+    per_page = max(10, min(50, n))
+    filters = ["type:journal-article"]
     if lang:
-        filters.append("language:%s" % lang)
+        filters.append(f"language:{lang}")
     if from_year:
-        filters.append("from_publication_date:%d-01-01" % from_year)
+        filters.append(f"from_publication_date:{from_year}-01-01")
 
-    tids: List[str] = []
-    if use_aboutness:
-        tids = _aboutness_topics_from_text(question, k=3)
-        if tids:
-            # bare IDs like T12345; pipes will be url-encoded later
-            filters.append("topics.id:" + "|".join(tids))
+    # topics are provided by the caller; we never call /text here
+    tids = list(topics or [])
+    if use_aboutness and tids:
+        filters.append("topics.id:" + "|".join(tids))
 
     params = {
-        "per-page": str(per_page),
-        "sort": "relevance_score:desc",
-        "select": ",".join([
-            # titles / ids,
-            "id", "title", "display_name", "doi",
-            # dates / counts,
-            "publication_year", "cited_by_count",
-            # people,
-            "authorships",
-            # text,
-            "abstract_inverted_index",
-            # venue / access, 
-            "primary_location", "best_oa_location", "locations",
-            # typing / topics,
-            "type", "language", "topics", "primary_topic"
-        ]),
-        "filter": ",".join(filters),
+        "per_page": per_page,
+        "sort": "cited_by_count:desc",
         "search": _build_search_string(question, level=level),
+        "filter": ",".join(filters),
     }
     if CONTACT_EMAIL:
         params["mailto"] = CONTACT_EMAIL
 
     qs = urllib.parse.urlencode(params, doseq=True, safe=':," ')
-    return ("%s?%s" % (BASE, qs), tids)
+    return f"{BASE}?{qs}", tids
 
+# ---- Crossref fallback ------------------------------------------------------
 def _crossref_search(query: str, n: int = 6, from_year: Optional[int] = 2005) -> List[dict]:
     base = "https://api.crossref.org/works"
     params = {
@@ -442,7 +317,6 @@ def _crossref_search(query: str, n: int = 6, from_year: Optional[int] = 2005) ->
             "journal": (it.get("container-title") or [""])[0],
         })
 
-    # lightweight on-topic filter using your keywords
     key = set(_build_search_string(query, level="core").lower().split())
     scored = []
     for r in out:
@@ -452,114 +326,57 @@ def _crossref_search(query: str, n: int = 6, from_year: Optional[int] = 2005) ->
     scored.sort(key=lambda x: x[0], reverse=True)
     return [r for _, r in scored[:n]]
 
-def _is_403(err: Exception) -> bool:
-    return "403" in str(err)
+# ---- Public API -------------------------------------------------------------
+def search_papers(q: str, n: int = 20, from_year: int = 2005, use_aboutness: bool = True) -> list[dict]:
+    q = (q or "").strip()
+    use_aboutness = bool(use_aboutness) and _should_use_aboutness(q)
 
-def search_papers(query: str, n: int = 6, *,
-                  from_year: Optional[int] = 2005,
-                  use_aboutness: bool = True) -> List[dict]:
-    q = (query or "").strip()
-    if not q:
-        return []
+    # compute topics once (optional)
+    tids: list[str] = []
+    if use_aboutness:
+        try:
+            u = f"{TEXT}?{urllib.parse.urlencode({'text': q[:2000], 'mailto': CONTACT_EMAIL})}"
+            data = _http_get_json(u) or {}
+            pt = (data.get("primary_topic") or {}).get("id")
+            if pt:
+                tids.append(pt.rsplit("/", 1)[-1])
+            for t in (data.get("topics") or [])[:3]:
+                tid = (t.get("id") or "").rsplit("/", 1)[-1]
+                if tid and tid not in tids:
+                    tids.append(tid)
+        except Exception as e:
+            print("[internet_search] aboutness disabled due to error:", e)
+            use_aboutness = False
+            tids = []
 
-    print(f"[internet_search.search_papers] q={query!r} n={n} from_year={from_year} aboutness={use_aboutness}")
-
-    # try full search (routes+scale)
     for level in ("full", "core", "minimal"):
-        url, tids = _build_url_smart(q, n=n, from_year=from_year, use_aboutness=use_aboutness, level=level)
+        url, _ = _build_url_smart(q, n=n, from_year=from_year, use_aboutness=use_aboutness, level=level, topics=tids)
         data = _http_get_json(url)
-
         if data and data.get("results"):
-            pp = _postprocess_openalex_results(data, n, query=q)
-            if pp:
-                return pp
+            out = _postprocess_openalex_results(data, n, query=q)
+            if out:
+                return out
 
-        # retry without topics if we had them but got nothing useful
-        if tids:
-            url, _ = _build_url_smart(q, n=n, from_year=from_year, use_aboutness=False, level=level)
+        # If topics were applied but yielded nothing, retry once without topics
+        if use_aboutness and tids:
+            url, _ = _build_url_smart(q, n=n, from_year=from_year, use_aboutness=False, level=level, topics=[])
             data = _http_get_json(url)
             if data and data.get("results"):
-                pp = _postprocess_openalex_results(data, n, query=q)
-                if pp:
-                    return pp
+                out = _postprocess_openalex_results(data, n, query=q)
+                if out:
+                    return out
 
-
-    # FINAL FALLBACK: Crossref
+    # Crossref fallback
     x = _crossref_search(q, n=n, from_year=from_year)
-    if x:
-        return x
-
-    return []
+    return x or []
 
 def set_user_agent(email: str) -> None:
-    """
-    Set a compliant User-Agent and contact email.
-    """
     global USER_AGENT, CONTACT_EMAIL, HTTP_HEADERS
     email = (email or "").strip()
-    if not ("@" in email):
-        raise ValueError("Please provide a valid email address for the User-Agent.")
+    if "@" not in email:
+        raise ValueError("Please provide a valid email for the User-Agent.")
     CONTACT_EMAIL = email
-    USER_AGENT = f"NanoChemGPT/1.0 (mailto:{email})"
-    HTTP_HEADERS = {
-        "User-Agent": USER_AGENT,
-        "Accept": "application/json",
-    }
-
-def build_chem_query(chem: str, property: str = "", method: str = "", extra: str = "") -> str:
-    parts = [chem]
-    if property: parts.append(property)
-    if method: parts.append(method)
-    if extra: parts.append(extra)
-    return " ".join(parts)
-
-def filter_results(results: List[dict], keywords: List[str]) -> List[dict]:
-    filtered = []
-    for r in results:
-        text = (r.get("title", "") + " " + r.get("abstract", "")).lower()
-        if all(k.lower() in text for k in keywords):
-            filtered.append(r)
-    return filtered if filtered else results  # fallback to all if none match
+    USER_AGENT = f"{_DEFAULT_APP} (mailto:{email})"
+    HTTP_HEADERS = {"User-Agent": USER_AGENT, "Accept": "application/json"}
 
 __all__ = ["search_papers", "set_user_agent"]
-
-if __name__ == "__main__":
-    import argparse, sys
-    ap = argparse.ArgumentParser(description="Search OpenAlex for works.")
-    ap.add_argument("query", nargs="*", help="search terms")
-    ap.add_argument("-n", type=int, default=6, help="max results (default 6)")
-    ap.add_argument("--from-year", type=int, default=None)
-    ap.add_argument("--to-year", type=int, default=None)
-    ap.add_argument("--is-oa", choices=["true","false"], default=None)
-    ap.add_argument("--sort", default="cited_by_count:desc", help="OpenAlex sort (default cited_by_count:desc)")
-    ap.add_argument("--email", default=None, help="contact email for User-Agent")
-    args = ap.parse_args()
-
-    if args.email:
-        try:
-            set_user_agent(args.email)
-        except Exception as e:
-            print(f"warning: {e}", file=sys.stderr)
-
-    is_oa = None
-    if args.is_oa == "true":
-        is_oa = True
-    elif args.is_oa == "false":
-        is_oa = False
-
-    query = " ".join(args.query).strip()
-    if not query:
-        ap.print_help()
-        sys.exit(2)
-
-    try:
-        items = search_papers(
-            query,
-            n=args.n,
-            from_year=args.from_year,
-            use_aboutness=True
-        )
-        print(json.dumps(items, indent=2, ensure_ascii=False))
-    except Exception as e:
-        print(json.dumps({"error": str(e)}), file=sys.stderr)
-        sys.exit(1)

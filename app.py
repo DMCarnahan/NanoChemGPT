@@ -350,9 +350,9 @@ def basic_search(query: str, n: int = 6) -> list[dict]:
 
     web = []
     try:
-        web = search_papers(query, n)
+        web = search_papers(query, n=n, use_aboutness=aboutness) or []
     except Exception as e:
-        print("[basic_search] OpenAlex fetch failed:", e)
+        print("[basic_search] internet_search error:", e)
 
     seen = {(d.get("doi") or d.get("title", "")).lower() for d in local}
     for w in web:
@@ -588,9 +588,11 @@ def ask():
 
         refs = []
         try:
-            refs = basic_search(q, n=6) or []
+            # initial query is long/natural language → skip OpenAlex /text
+            refs = search_papers(q, n=20, use_aboutness=False) or []
         except Exception as e:
-            print("[/ask] basic_search error:", e)
+            print("[/ask] search_papers error:", e)
+
         if table_refs:
             refs = list(refs) + table_refs
         
@@ -609,7 +611,7 @@ def ask():
             all_refs, seen = [], set()
             for s in seeds:
                 try:
-                    hits = basic_search(s, n=12) or []
+                    hits = search_papers(s, n=12, use_aboutness=False) or []
                 except Exception as e:
                     print("[enriched_search] basic_search fail:", e); continue
                 for h in hits:
