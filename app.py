@@ -217,6 +217,14 @@ app = Flask(__name__, template_folder=str(TEMPLATES_DIR), static_folder=str(STAT
 app.config["MAX_CONTENT_LENGTH"] = 100 * 1024 * 1024  # 100 MB
 app.config["JSON_AS_ASCII"] = False  # allow UTF-8
 
+try:
+    app.template_context_processors[None] = [
+        f for f in app.template_context_processors.get(None, [])
+        if getattr(f, "__name__", "") not in {"enriched_search", "_enriched_search_helper", "__es_helper"}
+    ]
+except Exception as e:
+    print("[init] context processor cleanup:", e)
+
 # CSRF setup
 try:
     from flask_wtf.csrf import CSRFProtect, generate_csrf
@@ -229,28 +237,6 @@ except Exception:
         return ""
 
 @app.context_processor
-def enriched_search(query: str, materials: Set[str], shapes: Set[str]) -> list[dict]:
-    """Try focused rewrites (material + morphology) and merge results."""
-    mats = sorted(list({m for m in materials if any(ch.isalpha() for ch in m)}))[:2]
-    shape = next(iter(shapes), "nanorod")
-    seeds = [
-        query,
-        f"{' '.join(mats)} {shape} synthesis",
-        f"{' '.join(mats)} hydrothermal {shape}",
-        f"{' '.join(mats)} {shape} preparation",
-    ]
-    all_refs: list[dict] = []
-    seen = set()
-    for s in seeds:
-        try:
-            hits = basic_search(s, n=12) or []
-        except Exception as e:
-            print("[enriched_search] basic_search fail:", e); continue
-        for h in hits:
-            key = (h.get("doi") or h.get("title","")).lower()
-            if key in seen: continue
-            seen.add(key); all_refs.append(h)
-    return all_refs[:24]
 
 def inject_csrf_token():
     return dict(csrf_token=generate_csrf)
@@ -534,6 +520,7 @@ def search_route():
 # ---- Ask ---- #
 @app.post("/ask")
 def ask():
+    
     def split_reasoning(raw: str) -> tuple[str, str]:
         if not raw:
             return "", ""
@@ -613,11 +600,29 @@ def ask():
         except Exception as e:
             print("[/ask] filter error:", e)
 
+        def _es_local_helper(query: str, materials: set[str], shapes: set[str]) -> list[dict]:
+            mats = sorted(list({m for m in materials if any(ch.isalpha() for ch in m)}))[:2]
+            shape = next(iter(shapes), "nanorod")
+            seeds = [query, f"{' '.join(mats)} {shape} synthesis",
+                        f"{' '.join(mats)} hydrothermal {shape}",
+                        f"{' '.join(mats)} {shape} preparation"]
+            all_refs, seen = [], set()
+            for s in seeds:
+                try:
+                    hits = basic_search(s, n=12) or []
+                except Exception as e:
+                    print("[enriched_search] basic_search fail:", e); continue
+                for h in hits:
+                    k = (h.get("doi") or h.get("title","")).lower()
+                    if k in seen: continue
+                    seen.add(k); all_refs.append(h)
+            return all_refs[:24]
+        
         # Focused re-search if material is specified but refs are too sparse
         prof = derive_query_profile(q)
         if prof.get("materials") and len(refs) < 3:
             try:
-                more = enriched_search(q, prof["materials"], prof["shapes"])
+                more = _es_local_helper(q, prof["materials"], prof["shapes"])
                 if more:
                     refs = filter_and_rerank_generic(q, refs + more) or refs
             except Exception as e:
