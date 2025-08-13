@@ -254,10 +254,11 @@ def basic_search(query: str, n: int = 6) -> list[dict]:
                     doi = row.get("doi") or ""
                     url = row.get("url") or (f"https://doi.org/{doi}" if doi else "")
                     local.append({
-                        "title": _safe_text(title)[:300],
-                        "year": _safe_text(year),
-                        "url": _safe_text(url),
-                        "doi": _safe_text(doi),
+                    "title": _safe_text(title)[:300],
+                    "year": _safe_text(year),
+                    "url": _safe_text(url),
+                    "doi": _safe_text(doi),
+                    "source": "lookup",
                     })
         except Exception as e:
             print("[basic_search] lookup query failed:", e)
@@ -268,16 +269,21 @@ def basic_search(query: str, n: int = 6) -> list[dict]:
     except Exception as e:
         print("[basic_search] OpenAlex fetch failed:", e)
 
-    seen = {(d.get("doi") or d.get("title", "")).lower() for d in local}
+    seen = {(d.get("doi") or d.get("title","")).lower() for d in local}
     for w in web:
-        key = (w.get("doi") or w.get("title", "")).lower()
+        key = (w.get("doi") or w.get("title","")).lower()
         if key not in seen:
             local.append({
                 k: w.get(k, "")
-                for k in ("title", "year", "url", "doi", "abstract", "journal", "authors")
-            })
+                for k in ("title","year","url","doi","abstract","journal","authors")
+            } | {"source":"web"})
             seen.add(key)
-    return local
+
+    print(f"[basic_search] returned {len(local[:2*n])} refs "
+        f"(web={sum(1 for r in local if r.get('source')=='web')}, "
+        f"lookup={sum(1 for r in local if r.get('source')=='lookup')})")
+    
+    return local[:2 * n]
 
 # Light stoplist
 _STOP = {
@@ -503,7 +509,6 @@ def health():
     """Health check endpoint."""
     return "ok", 200
 
-
 @app.get("/db_health")
 def db_health():
     """MongoDB health check endpoint."""
@@ -513,7 +518,6 @@ def db_health():
     except Exception as e:
         return {"mongo": "error", "detail": str(e)}, 500
 
-
 @app.get("/")
 def home():
     """Render the home page."""
@@ -522,13 +526,11 @@ def home():
     except TemplateNotFound:
         return "<h1>NanoChemGPT</h1><p>templates/index.html missing.</p>", 200
 
-
 # ---- Uploads ---- #
 JOBS: dict[str, dict] = {}
 def _set_job(jid: str, **kw):
     """Set or update a job status in the JOBS dict."""
     JOBS.setdefault(jid, {}).update(kw)
-
 
 @app.post("/upload")
 def upload():
@@ -775,20 +777,32 @@ def ask():
         if table_refs:
             refs = list(refs) + table_refs
 
-        def _ref_url(r):
-            if r.get("url"): return r["url"]
-            if r.get("doi"): return f"https://doi.org/{r['doi']}"
-            return ""
-
-        # General relevance filter + reranker (domain-agnostic)
+        # General relevance filter + reranker 
         refs_filtered = filter_and_rerank_generic(q, refs)
         if refs_filtered:
             refs = refs_filtered
 
+        # rebuild refs_prompt after possibly changing refs
+        def _ref_url(r):
+            if r.get("url"): return r["url"]
+            if r.get("doi"): return f"https://doi.org/{r['doi']}"
+            return ""
         refs_prompt = "\n".join(
             f"[{i+1}] {(r.get('title') or '(no title)')} ({r.get('year') or ''}) — {_ref_url(r)}"
             for i, r in enumerate(refs)
         ).strip()
+
+        print("[/ask] refs:")
+        for i, r in enumerate(refs, 1):
+            print(f"  [{i}] {r.get('title')} — {r.get('doi') or r.get('url')}")
+
+        if not refs:
+            return jsonify({
+                "answer": "",
+                "rationale": "",
+                "references": [],
+                "error": "No sufficiently relevant references found for this query; please rephrase or provide seed refs."
+            }), 422
 
         # ========== STRICT PATH ==========
         if mode in ("robot_strict", "reasoning_strict"):

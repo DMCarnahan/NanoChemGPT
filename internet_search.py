@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import os
 import httpx
-import functools
 import json
 import time
 import urllib.parse
@@ -17,8 +16,6 @@ OPENALEX_BASE = "https://api.openalex.org/works"
 OPENALEX_TEXT = "https://api.openalex.org/text"
 
 _CONTACT_ENV_KEYS = ("OPENALEX_CONTACT", "CONTACT_EMAIL", "ADMIN_EMAIL")
-
-_DEFAULT_APP = "NanoChemGPT/1.0"
 
 def _get_contact_email() -> str:
     for k in _CONTACT_ENV_KEYS:
@@ -58,7 +55,7 @@ def _http_get_json(url: str, *, tries: int = 3, timeout: float = 20.0) -> dict |
         except Exception as e:
             last_err = e
             time.sleep(0.4 * (i + 1))
-    print(f"[basic_search] OpenAlex fetch failed: {last_err}")
+    print(f"[internet_search] fetch failed: {last_err}")
     return None
 
 # --- Helpers -----------------
@@ -121,12 +118,30 @@ def _is_offtopic(rec: dict) -> bool:
     )
     return any(b in t for b in bad)
 
+def _is_offtopic_penalty(text: str) -> int:
+    return -2 if any(b in text for b in ("battery","supercapacitor","review")) else 0
+
+def _score(rec: dict) -> float:
+    hay = f"{rec['title']} {rec['abstract']} {rec['journal']}".lower()
+    base = sum(1.0 for k in key_terms if k and k in hay)
+    if "hot injection" in hay or "hot-injection" in hay:
+        base += 1.5
+    # popularity nudge
+    try:
+        w = next((_w for _w in works if (_w.get("display_name") or "").strip() == rec["title"]), None)
+        c = (w or {}).get("cited_by_count") or 0
+        base += (c ** 0.5) * 0.05
+    except Exception:
+        pass
+    base += _is_offtopic_penalty(hay)
+    return base
+
 # --- Post-process OpenAlex results ------------------------------------------
 def _postprocess_openalex_results(data: dict, n: int, query: str = "") -> list[dict]:
     """
     Convert OpenAlex 'works' payload into app records:
       {title, year, url, doi, abstract, authors, journal}
-    Dedup, filter off-topic, and rank by simple relevance score.
+    Dedup and rank by simple relevance score to the query.
     """
     works = (data or {}).get("results", []) or []
     out: list[dict] = []
@@ -158,35 +173,39 @@ def _postprocess_openalex_results(data: dict, n: int, query: str = "") -> list[d
         rec = {
             "title": title,
             "year": year,
-            "url": _pick_url(w),
-            "doi": _pick_doi(w),
-            "abstract": _invert_openalex_abstract(w.get("abstract_inverted_index")),
-            "authors": [a.get("author", {}).get("display_name", "") for a in (w.get("authorships") or [])],
+            "url": url,
+            "doi": doi,
+            "abstract": abstract,
+            "authors": authors,
             "journal": journal,
         }
-        if not _is_offtopic(rec):
-            out.append(rec)
+        out.append(rec)  # <-- IMPORTANT
 
-    # ---- Lightweight ranking ----------------------------------------------
-    # Use your core terms for scoring + a tiny popularity nudge
+    # --- relevance scoring (query-aware) ---
     key_terms = set((_build_search_string(query, level="core") or "").lower().split())
-    def _score(rec: dict) -> float:
-        hay = f"{rec['title']} {rec['abstract']} {rec['journal']}".lower()
+
+    def _score_local(rec: dict) -> float:
+        hay = f"{rec.get('title','')} {rec.get('abstract','')} {rec.get('journal','')}".lower()
         base = sum(1.0 for k in key_terms if k and k in hay)
-        # small bonus for “hot injection” (removed from URL to avoid WAF)
         if "hot injection" in hay or "hot-injection" in hay:
             base += 1.5
-        # tiny popularity nudge if cited_by_count present
-        # try to grab it from original works list by title match:
+        # popularity nudge from OpenAlex record
         try:
-            w = next((_w for _w in works if (_w.get("display_name") or "").strip() == rec["title"]), None)
+            w = next(
+                (_w for _w in works
+                 if ((_w.get("display_name") or _w.get("title") or "").strip() == rec["title"])),
+                None
+            )
             c = (w or {}).get("cited_by_count") or 0
             base += (c ** 0.5) * 0.05
         except Exception:
             pass
+        # light penalty for generic off-topic buckets (don’t hard drop)
+        if any(b in hay for b in ("battery", "supercapacitor", "review")):
+            base -= 2
         return base
 
-    out.sort(key=_score, reverse=True)
+    out.sort(key=_score_local, reverse=True)
     return out[:n]
 
 _FORMULA_RX = re.compile(r"\b(?:[A-Z][a-z]?[\d]{0,3}){2,}\b")  # Cu2O, NiCo, Fe3O4, CoNi, etc.
@@ -260,9 +279,6 @@ def _extract_morphology_terms(question: str) -> List[str]:
     for group in _MORPH.values():
         if any(w in q for w in group):
             found.extend(group)
-    if not found:
-        for key in ("nanorod","nanowire","nanotube","nanoribbon","nanobelt"):
-            found.extend(_MORPH[key])
     return list(dict.fromkeys(found))
 
 def _or_group(words: List[str]) -> str:
@@ -287,7 +303,7 @@ def _strip_openalex_id(x: str) -> str:
     return x.rsplit("/", 1)[-1]
 
 def _aboutness_topics_from_text(text: str, k: int = 3) -> list[str]:
-    url = f"{OPENALEX_TEXT}?{urllib.parse.urlencode({'title': text[:2000], 'mailto': CONTACT_EMAIL})}"
+    url = f"{OPENALEX_TEXT}?{urllib.parse.urlencode({'text': text[:2000], 'mailto': CONTACT_EMAIL})}"
     data = _http_get_json(url) or {}
     out = []
     pt = (data.get("primary_topic") or {}).get("id")
@@ -300,11 +316,6 @@ def _aboutness_topics_from_text(text: str, k: int = 3) -> list[str]:
             if tid not in out:
                 out.append(tid)
     return out
-
-def _is_offtopic(rec: dict) -> bool:
-    t = (rec.get("title","") + " " + rec.get("journal","")).lower()
-    bad = ("battery","supercapacitor","review")
-    return any(b in t for b in bad)
 
 WAF_BLOCK_TERMS = {"injection", "sql", "payload", "drop", "truncate"}  # keep small; 'injection' is the big one
 
@@ -399,24 +410,6 @@ def _build_url_smart(question: str, *,
     qs = urllib.parse.urlencode(params, doseq=True, safe=':," ')
     return ("%s?%s" % (BASE, qs), tids)
 
-def _norm_str(x: Any) -> str:
-    if x is None:
-        return ""
-    s = str(x).strip()
-    return s
-
-def _pick_url(work: dict) -> str:
-    # Prefer landing page, else OpenAlex id
-    loc = work.get("primary_location") or {}
-    return _norm_str(loc.get("landing_page_url") or work.get("id", ""))
-
-def _pick_doi(work: dict) -> str:
-    doi = work.get("doi") or ""
-    doi = _norm_str(doi)
-    if doi.startswith("https://doi.org/"):
-        doi = doi.replace("https://doi.org/", "", 1)
-    return doi
-
 def _crossref_search(query: str, n: int = 6, from_year: Optional[int] = 2005) -> List[dict]:
     base = "https://api.crossref.org/works"
     params = {
@@ -469,23 +462,27 @@ def search_papers(query: str, n: int = 6, *,
     if not q:
         return []
 
+    print(f"[internet_search.search_papers] q={query!r} n={n} from_year={from_year} aboutness={use_aboutness}")
+
     # try full search (routes+scale)
     for level in ("full", "core", "minimal"):
         url, tids = _build_url_smart(q, n=n, from_year=from_year, use_aboutness=use_aboutness, level=level)
-        try:
-            data = _http_get_json(url)
-        except Exception as e:
-            data = None
+        data = _http_get_json(url)
 
         if data and data.get("results"):
-            return _postprocess_openalex_results(data, n)
+            pp = _postprocess_openalex_results(data, n, query=q)
+            if pp:
+                return pp
 
-        # drop topics if we had them
-        if (not data) and tids:
+        # retry without topics if we had them but got nothing useful
+        if tids:
             url, _ = _build_url_smart(q, n=n, from_year=from_year, use_aboutness=False, level=level)
             data = _http_get_json(url)
             if data and data.get("results"):
-                return _postprocess_openalex_results(data, n)
+                pp = _postprocess_openalex_results(data, n, query=q)
+                if pp:
+                    return pp
+
 
     # FINAL FALLBACK: Crossref
     x = _crossref_search(q, n=n, from_year=from_year)
