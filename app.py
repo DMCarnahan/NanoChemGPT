@@ -116,73 +116,70 @@ def derive_query_profile(question: str) -> dict:
     return {"materials": materials, "shapes": shapes}
 
 def _is_materials_domain(r: dict) -> bool:
-    """
-    Lightweight venue filter to drop obvious non-materials domains (CS/bioreactors/etc.).
-    """
     j = ((r.get("journal") or r.get("venue") or r.get("host_venue") or "") or "").lower()
     t = (r.get("title") or "").lower()
-    bad = [
-        "cytotherapy", "bioreactor", "stem cell", "computer", "distributed computing",
-        "fault tolerance", "software", "management", "education", "sociology"
-    ]
+    bad = ["cytotherapy","bioreactor","distributed computing","fault tolerance","software","management","education","sociology"]
     if any(b in t for b in bad):
         return False
-    good = ["chem", "mater", "nano", "phys", "catal", "solid state", "applied surface"]
-    return any(g in j for g in good) or ("doi" in r and (str(r["doi"]).startswith("10.1016") or str(r["doi"]).startswith("10.1039")))
+    good = ["chem","mater","nano","phys","catal","solid state","applied surface","inorg","cryst"]
+    return any(g in j for g in good) or (
+        "doi" in r and str(r["doi"]).startswith(("10.1016","10.1039","10.1021","10.1002"))
+    )
 
 def filter_and_rerank_generic(question: str, refs: list[dict]) -> list[dict]:
-    """
-    Two-pass filter:
-      1) If materials are present in the query, require a material hit in title/abstract.
-         If shape is also present, try requiring shape as well (then relax to material-only).
-      2) Light domain sanity filter (_is_materials_domain).
-      3) Score: material hits (+4 each), shape hits (+2 each), recency bonus (+year*0.001).
-    Falls back to the top 8 input refs if everything gets dropped.
-    """
     if not refs:
         return []
+
     prof = derive_query_profile(question)
     mats = prof.get("materials", set())
-    shapes = prof.get("shapes", set())
+    objs = prof.get("shapes", set())
 
-    def _blob(r: dict) -> str:
+    def blob(r: dict) -> str:
         title = from_subscript((r.get("title") or "")).lower()
         abstract = from_subscript((r.get("abstract") or "")).lower()
         return f"{title} {abstract}"
 
-    def _score(r: dict) -> tuple[float, bool, bool]:
-        b = _blob(r)
+    # Helper to roughly detect other materials (to penalize off-target like ZnO/TiO2)
+    def contains_other_formula(b: str) -> bool:
+        # any formula that isn't in our target set/synonyms
+        for m in re.findall(r"\b(?:[a-z]{1,2}\d*){1,5}\b", b):
+            if m and mats and (m not in mats):
+                return True
+        return False
+
+    scored = []
+    for r in refs:
+        b = blob(r)
         mat_hit = any(m in b for m in mats) if mats else False
-        shp_hit = any(sh in b for sh in shapes) if shapes else False
+        obj_hit = any(o in b for o in objs) if objs else False
+
+        # insist on material match when specified
+        if mats and not mat_hit:
+            continue
+        # drop obvious non-materials domains when materials are specified
+        if mats and not _is_materials_domain(r):
+            continue
+
         score = 0.0
-        if mats:
-            for m in mats:
-                if m and m in b:
-                    score += 4.0
-        if shapes:
-            for sh in shapes:
-                if sh and sh in b:
-                    score += 2.0
+        if mat_hit: score += 5.0         # strong boost for cdse/target
+        if obj_hit: score += 3.0         # boost for “nanocrystals”, etc.
+        if contains_other_formula(b):     # demote refs about ZnO/TiO2/etc.
+            score -= 3.0
         try:
-            y = int(r.get("year") or 0)
-            score += y * 0.001  # slight recency nudge
+            y = int(r.get("year") or 0)  # slight recency nudge
+            score += y * 0.001
         except Exception:
             pass
-        return score, mat_hit, shp_hit
 
-    # Pass 1: strict (material + shape), then relax to material-only
-    scored = [( *_score(r), r ) for r in refs]
-    strict = [r for s, mh, sh, r in scored if (not mats or mh) and (not shapes or sh)]
-    if not strict and mats:
-        strict = [r for s, mh, sh, r in scored if mh]
+        scored.append((score, r))
 
-    # Domain sanity
-    strict = [r for r in strict if _is_materials_domain(r) or not mats] or strict
+    if not scored:
+        # If filter nuked everything, return a domain-trimmed slice or raw top
+        trimmed = [r for r in refs if _is_materials_domain(r)]
+        return trimmed[:8] or refs[:8]
 
-    # Sort by score desc
-    chosen = [r for s, mh, sh, r in sorted(scored if not strict else [( *_score(r), r ) for r in strict ],
-                                           key=lambda x: x[0], reverse=True)]
-    return chosen[:8] or refs[:8]
+    scored.sort(key=lambda x: x[0], reverse=True)
+    return [r for _, r in scored][:8]
 
 def _format_acs_reference(r: dict) -> str:
     # Authors
@@ -644,16 +641,40 @@ def ask():
         if prof.get("materials") and len(refs) < 3:
             try:
                 mats = sorted({m for m in prof["materials"] if any(ch.isalpha() for ch in m)})[:3]
-                seeds = []
-                for m in mats:
-                    seeds.extend([
-                        f"{m} nanorod synthesis",
-                        f"{m} hydrothermal nanorods",
-                        f"{m} nanorod preparation",
-                    ])
+                ql = (q or "").lower()
+
+                if prof["shapes"]:
+                    objects = sorted(list(prof["shapes"]))[:2]   
+                else:
+                    if any(t in ql for t in ["nanocrystal","nanocrystals"]):
+                        objects = ["nanocrystals"]
+                    elif "nanoparticle" in ql or "nanoparticles" in ql:
+                        objects = ["nanocrystals"]
+                    else:
+                        objects = []
+
+                seeds = [q]
+                if objects:
+                    for obj in objects:
+                        for m in mats[:2]:
+                            seeds += [
+                                f"{m} {obj} synthesis",
+                                f"{m} {obj} hot-injection",
+                                f"{m} {obj} non-injection",
+                                f"{m} {obj} growth",
+                            ]
+                else:
+                    for m in mats[:2]:
+                        seeds += [
+                            f"{m} synthesis",
+                            f"{m} colloidal synthesis",
+                            f"{m} hot-injection",
+                            f"{m} nanocrystal synthesis",
+                        ]
+
                 more, seen = [], set()
                 for s in seeds:
-                    for h in (_call_search_papers(s, n=12, aboutness_flag=False) or []):
+                    for h in (_call_search_papers(s, n=12, aboutness_flag=True) or []):  # short seeds → aboutness=True
                         key = (h.get("doi") or h.get("title","")).lower()
                         if key in seen: 
                             continue
@@ -662,6 +683,7 @@ def ask():
                     refs = filter_and_rerank_generic(q, refs + more) or refs
             except Exception as e:
                 print("[/ask] enriched_search error:", e)
+
 
         # ---- Final relaxed material-only fallback if still empty ----
         if not refs and prof.get("materials"):
