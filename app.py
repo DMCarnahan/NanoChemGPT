@@ -197,7 +197,7 @@ from werkzeug.utils import secure_filename
 import vector_store as vs
 from converter import validate_step, convert_text_to_robot_ops
 from mongo_client import get_db, ping as mongo_ping
-from internet_search import search_papers
+from internet_search import search_papers, set_user_agent
 from DuckDB.duck_searcher import get_duck_searcher
 
 # ──────────────── Paths/Config ──────────────── #
@@ -301,6 +301,28 @@ _no_proxy = httpx.Client(trust_env=False, timeout=120.0)
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"), http_client=_no_proxy)
 
 # ──────────────── Utilities ──────────────── #
+def _call_search_papers(q: str, n: int = 20, aboutness_flag: bool = True) -> list[dict]:
+    """
+    Signature shim for search_papers(...).
+    Tries use_aboutness=..., then aboutness=..., then no kw.
+    Returns [] on error.
+    """
+    try:
+        return search_papers(q, n=n, use_aboutness=aboutness_flag) or []
+    except TypeError:
+        pass
+
+    try:
+        return search_papers(q, n=n, aboutness=aboutness_flag) or []
+    except TypeError:
+        pass
+
+    try:
+        return search_papers(q, n=n) or []
+    except Exception as e:
+        print("[_call_search_papers] search error:", e)
+        return []
+
 def _safe_text(x: Any) -> str:
     try:
         return str(x) if x is not None else ""
@@ -620,8 +642,8 @@ def ask():
 
         refs = []
         try:
-            # initial query is long/natural language → skip OpenAlex /text
-            refs = search_papers(q, n=20, use_aboutness=False) or []
+            # Initial query is long/natural-language → skip OpenAlex /text aboutness
+            refs = _call_search_papers(q, n=20, aboutness_flag=False)
         except Exception as e:
             print("[/ask] search_papers error:", e)
 
@@ -674,6 +696,72 @@ def ask():
         for i, r in enumerate(refs, 1):
             print(f"  [{i}] {r.get('title')} — {r.get('doi') or r.get('url')}")
     
+        # ---- Final relaxed material-only fallback if still empty ----
+try:
+    prof = derive_query_profile(q)
+except Exception:
+    prof = {}
+if not refs and prof.get("materials"):
+    mats_list = sorted(list(prof["materials"]))[:2]
+    seeds = []
+    for mmat in mats_list:
+        seeds.extend([f"{mmat} nanorod", f"{mmat} nanorods"])
+    more = []
+    seen = set()
+    for s in seeds:
+        try:
+            hits = _call_search_papers(s, n=12, aboutness_flag=False) or []
+        except Exception as e:
+            print("[/ask] final material-only search error:", e)
+            hits = []
+        for h in hits:
+            key = (h.get("doi") or h.get("title","")).lower()
+            if key in seen: 
+                continue
+            seen.add(key)
+            more.append(h)
+    if more:
+        try:
+            refs = filter_and_rerank_generic(q, more) or []
+        except Exception as e:
+            print("[/ask] final filter error:", e)
+
+        print("[/ask] refs (filtered):")
+        for i, r in enumerate(refs or [], 1):
+            print(f"  [{i}] {r.get('title')} — {r.get('doi') or r.get('url')}")
+        # ---- Final relaxed material-only fallback if still empty ----
+        try:
+            prof = derive_query_profile(q)
+        except Exception:
+            prof = {}
+        if not refs and prof.get("materials"):
+            mats_list = sorted(list(prof["materials"]))[:2]
+            seeds = []
+            for mmat in mats_list:
+                seeds.extend([f"{mmat} nanorod", f"{mmat} nanorods"])
+            more = []
+            seen = set()
+            for s in seeds:
+                try:
+                    hits = _call_search_papers(s, n=12, aboutness_flag=False) or []
+                except Exception as e:
+                    print("[/ask] final material-only search error:", e)
+                    hits = []
+                for h in hits:
+                    key = (h.get("doi") or h.get("title","")).lower()
+                    if key in seen: 
+                        continue
+                    seen.add(key)
+                    more.append(h)
+            if more:
+                try:
+                    refs = filter_and_rerank_generic(q, more) or []
+                except Exception as e:
+                    print("[/ask] final filter error:", e)
+
+        print("[/ask] refs (filtered):")
+        for i, r in enumerate(refs or [], 1):
+            print(f"  [{i}] {r.get('title')} — {r.get('doi') or r.get('url')}")
 
         def _ref_url(r):
             if r.get("url"): return r["url"]
