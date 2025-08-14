@@ -574,29 +574,23 @@ def search_route():
 # ---- Ask ---- #
 @app.post("/ask")
 def ask():
-    
     def split_reasoning(raw: str) -> tuple[str, str]:
         if not raw:
             return "", ""
         text = raw.strip()
-        # Remove all code-fenced reason/rationale blocks from the answer
         fence_rx = re.compile(r"```(?:reason|rationale|reasoning)\s*([\s\S]*?)```", re.I)
         rationale = ""
         fences = list(fence_rx.finditer(text))
         if fences:
-            # Use the last rationale block found
             rationale = fences[-1].group(1).strip()
-            # Remove all rationale blocks from the answer
             answer = fence_rx.sub("", text).strip()
             return answer, rationale
-        # Heading rationale block
         head = re.compile(r"(?:^|\n)#{1,3}\s*(rationale|reasoning)\b[^\n]*\n((?:.*\n?)*)$", re.I | re.S)
         m = head.search(text)
         if m:
             rationale = m.group(2).strip()
             answer = text[:m.start()].strip()
             return answer, rationale
-        # If no rationale found, treat all as answer, rationale is empty
         return text, ""
 
     try:
@@ -630,7 +624,8 @@ def ask():
                     line = f"[T{i}] solvent={solvent}; temp_C={temp}; time_h={time_h}; {note}".strip()
                     lines.append(line)
                     url = row.get("url") or (row.get("doi") and f"https://doi.org/{row['doi']}")
-                    if url: table_refs.append({"title": f"Table row {i}", "url": url})
+                    if url:
+                        table_refs.append({"title": f"Table row {i}", "url": url})
                 table_ctx = "\n".join(lines)
             except Exception as e:
                 print("[/ask] LOOKUP query error:", e)
@@ -640,41 +635,47 @@ def ask():
         if table_ctx: context_parts.append("<<<CTX_TABLE>>>\n" + table_ctx)
         context_joined = "\n\n---\n\n".join(context_parts).strip()
 
+        # ---- Initial web refs (skip aboutness for long NL queries) ----
         refs = []
         try:
-            # Initial query is long/natural-language → skip OpenAlex /text aboutness
             refs = _call_search_papers(q, n=20, aboutness_flag=False)
         except Exception as e:
             print("[/ask] search_papers error:", e)
-
         if table_refs:
             refs = list(refs) + table_refs
-        
-        # Material/topic-aware filtering
+
+        # ---- Material/topic-aware filtering ----
         try:
             refs = filter_and_rerank_generic(q, refs) or []
         except Exception as e:
             print("[/ask] filter error:", e)
 
+        # ---- Focused re-search helper (local; avoids template collisions) ----
         def _es_local_helper(query: str, materials: set[str], shapes: set[str]) -> list[dict]:
             mats = sorted(list({m for m in materials if any(ch.isalpha() for ch in m)}))[:2]
             shape = next(iter(shapes), "nanorod")
-            seeds = [query, f"{' '.join(mats)} {shape} synthesis",
-                        f"{' '.join(mats)} hydrothermal {shape}",
-                        f"{' '.join(mats)} {shape} preparation"]
+            seeds = [
+                query,
+                f"{' '.join(mats)} {shape} synthesis",
+                f"{' '.join(mats)} hydrothermal {shape}",
+                f"{' '.join(mats)} {shape} preparation",
+            ]
             all_refs, seen = [], set()
             for s in seeds:
                 try:
-                    hits = search_papers(s, n=12, use_aboutness=False) or []
+                    hits = _call_search_papers(s, n=12, aboutness_flag=False)
                 except Exception as e:
-                    print("[enriched_search] basic_search fail:", e); continue
+                    print("[enriched_search] search fail:", e)
+                    hits = []
                 for h in hits:
-                    k = (h.get("doi") or h.get("title","")).lower()
-                    if k in seen: continue
-                    seen.add(k); all_refs.append(h)
+                    k = (h.get("doi") or h.get("title", "")).lower()
+                    if k in seen:
+                        continue
+                    seen.add(k)
+                    all_refs.append(h)
             return all_refs[:24]
-        
-        # Focused re-search if material is specified but refs are too sparse
+
+        # ---- Enriched re-search if materials detected but refs sparse ----
         prof = derive_query_profile(q)
         if prof.get("materials") and len(refs) < 3:
             try:
@@ -684,72 +685,26 @@ def ask():
             except Exception as e:
                 print("[/ask] enriched_search error:", e)
 
-        print("[/ask] refs (filtered):")
-        for i, r in enumerate(refs, 1):
-            print(f"  [{i}] {r.get('title')} — {r.get('doi') or r.get('url')}")
-# Filter and rerank references generically (material/topic aware)
-        try:
-            refs = filter_and_rerank_generic(q, refs) or refs
-        except Exception as e:
-            print("[/ask] filter_and_rerank_generic error:", e)
-        print("[/ask] refs (filtered):")
-        for i, r in enumerate(refs, 1):
-            print(f"  [{i}] {r.get('title')} — {r.get('doi') or r.get('url')}")
-    
-        # ---- Final relaxed material-only fallback if still empty ----
-try:
-    prof = derive_query_profile(q)
-except Exception:
-    prof = {}
-if not refs and prof.get("materials"):
-    mats_list = sorted(list(prof["materials"]))[:2]
-    seeds = []
-    for mmat in mats_list:
-        seeds.extend([f"{mmat} nanorod", f"{mmat} nanorods"])
-    more = []
-    seen = set()
-    for s in seeds:
-        try:
-            hits = _call_search_papers(s, n=12, aboutness_flag=False) or []
-        except Exception as e:
-            print("[/ask] final material-only search error:", e)
-            hits = []
-        for h in hits:
-            key = (h.get("doi") or h.get("title","")).lower()
-            if key in seen: 
-                continue
-            seen.add(key)
-            more.append(h)
-    if more:
-        try:
-            refs = filter_and_rerank_generic(q, more) or []
-        except Exception as e:
-            print("[/ask] final filter error:", e)
-
-        print("[/ask] refs (filtered):")
-        for i, r in enumerate(refs or [], 1):
-            print(f"  [{i}] {r.get('title')} — {r.get('doi') or r.get('url')}")
         # ---- Final relaxed material-only fallback if still empty ----
         try:
-            prof = derive_query_profile(q)
+            prof2 = derive_query_profile(q)
         except Exception:
-            prof = {}
-        if not refs and prof.get("materials"):
-            mats_list = sorted(list(prof["materials"]))[:2]
+            prof2 = {}
+        if not refs and prof2.get("materials"):
+            mats_list = sorted(list(prof2["materials"]))[:2]
             seeds = []
             for mmat in mats_list:
                 seeds.extend([f"{mmat} nanorod", f"{mmat} nanorods"])
-            more = []
-            seen = set()
+            more, seen = [], set()
             for s in seeds:
                 try:
-                    hits = _call_search_papers(s, n=12, aboutness_flag=False) or []
+                    hits = _call_search_papers(s, n=12, aboutness_flag=False)
                 except Exception as e:
                     print("[/ask] final material-only search error:", e)
                     hits = []
                 for h in hits:
-                    key = (h.get("doi") or h.get("title","")).lower()
-                    if key in seen: 
+                    key = (h.get("doi") or h.get("title", "")).lower()
+                    if key in seen:
                         continue
                     seen.add(key)
                     more.append(h)
@@ -763,16 +718,18 @@ if not refs and prof.get("materials"):
         for i, r in enumerate(refs or [], 1):
             print(f"  [{i}] {r.get('title')} — {r.get('doi') or r.get('url')}")
 
+        # ---- Build numbered references prompt ----
         def _ref_url(r):
             if r.get("url"): return r["url"]
             if r.get("doi"): return f"https://doi.org/{r['doi']}"
             return ""
         refs_prompt = "\n".join(
-            f"[{i+1}] {(r.get('title') or '(no title)')} ({r.get('year') or ''}) — {_ref_url(r)}"
+            f"[{i+1}] {(r.get('title') or '(no title)')} "
+            f"({r.get('year') or ''}) — {_ref_url(r)}"
             for i, r in enumerate(refs)
         ).strip()
 
-        # prompt variants
+        # ----------------- Prompt variants -----------------
         robot_rules = (
             "Return a discrete lab protocol with exact quantities on a small scale (~0.5 mmol Co):\n"
             " - Include specific masses (mg) or mmol for reagents; volumes (mL) for liquids.\n"
@@ -798,7 +755,6 @@ if not refs and prof.get("materials"):
         )
 
         def strip_references_block(text: str) -> str:
-            # Remove everything from '## References' to the end
             return re.sub(r"## References[\s\S]*", "", text, flags=re.I).strip()
 
         if mode == "reasoning":
@@ -813,7 +769,7 @@ if not refs and prof.get("materials"):
                 " - For each cited reference, briefly summarize the relevant finding and explain how it relates to aspect ratio and temperature.\n"
                 " - If no reference supports a statement, say so explicitly and do not cite it.\n"
                 f"{reasoning_rules}\n"
-                f"{acs_rule}\n"  
+                f"{acs_rule}\n"
                 "Return exactly ONE block:\n"
                 "## Mechanistic reasoning\n"
                 "- bullet points with inline [n] and [CTX] where appropriate.\n\n"
@@ -831,7 +787,7 @@ if not refs and prof.get("materials"):
                 f"{inline_rule}\n"
                 " - If CONTEXT is insufficient, say so explicitly before generalizing.\n"
                 f"{robot_rules}\n"
-                f"{acs_rule}\n"  
+                f"{acs_rule}\n"
                 "Return two blocks exactly in this order:\n"
                 "## Synthesis Protocol:\n"
                 "1. **Hardware & Glassware**:\n[]\n"
@@ -929,7 +885,7 @@ if not refs and prof.get("materials"):
             except Exception as e:
                 print("[ask] revise step skipped:", e)
 
-        # ---- Build a references block ----
+        # ---- Build a references block (and optionally append) ----
         want_refs_block = bool(payload.get("want_reference_block", True))
         is_strict = mode in ("robot_strict", "reasoning_strict")
 
@@ -938,11 +894,10 @@ if not refs and prof.get("materials"):
             refs_block_text = "\n".join(
                 f"{i+1}. {_format_acs_reference(r)}" for i, r in enumerate(refs)
             )
-
-        # Append the human-readable block to the answer only in non-strict modes
         if want_refs_block and not is_strict and refs_block_text:
             answer = f"{(answer or '').rstrip()}\n\n## References\n{refs_block_text}"
 
+        # ---- Persist + return ----
         qa_id = None
         try:
             db = get_db()
