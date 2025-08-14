@@ -140,6 +140,32 @@ def _extract_used_markers(*texts: str) -> dict:
             tag_counts[tag] += len(re.findall(rf"\[{tag}\]", t))
     return {"refs": sorted(seen), "tags": tag_counts, "has_ctx": any(tag_counts[k] > 0 for k in ("CTX", "PARSED", "DB"))}
 
+def _format_acs_reference(r: dict) -> str:
+    # Authors
+    authors = r.get("authors") or []
+    if isinstance(authors, list):
+        names = []
+        for a in authors[:6]:
+            n = (a.get("author", {}).get("display_name") if isinstance(a, dict) else str(a)).strip()
+            if n:
+                names.append(n)
+        auth = "; ".join(names)
+        if len(authors) > 6:
+            auth += "; et al."
+    else:
+        auth = str(authors).strip()
+
+    title = (r.get("title") or "(no title)").strip()
+    journal = (r.get("journal") or r.get("venue") or "").strip()
+    year = str(r.get("year") or "").strip()
+
+    doi = (r.get("doi") or "").strip()
+    url = (r.get("url") or "").strip()
+    tail = f" https://doi.org/{doi}" if (doi and not doi.startswith("http")) else (f" {url}" if url else "")
+
+    parts = [p for p in [auth and f"{auth}.", title and f"{title}.", journal, year] if p]
+    return (" ".join(parts) + tail).strip()
+
 def basic_search(query: str, n: int = 6) -> list[dict]:
     """Merge local LOOKUP hits + OpenAlex web hits; de-dup by doi/title."""
     if not query.strip():
