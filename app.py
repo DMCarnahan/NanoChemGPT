@@ -4,182 +4,6 @@ import os, io, json, re, glob, traceback, threading
 from datetime import datetime
 from pathlib import Path
 from typing import Any
-
-# ---- Relevance helpers (material-agnostic) ----
-import string
-from typing import List, Dict, Tuple, Set
-
-_SUBSCRIPTS = str.maketrans("0123456789", "₀₁₂₃₄₅₆₇₈₉")
-_SUPERS = str.maketrans("₀₁₂₃₄₅₆₇₈₉", "0123456789")
-
-def to_subscript(s: str) -> str:
-    return "".join(ch.translate(_SUBSCRIPTS) if ch.isdigit() else ch for ch in s or "")
-
-def from_subscript(s: str) -> str:
-    return (s or "").translate(_SUPERS)
-
-def _norm(x: str) -> str:
-    return (x or "").lower()
-
-def _tokenize(q: str) -> List[str]:
-    qn = _norm(q)
-    toks = re.findall(r"[a-z0-9][a-z0-9\-]+", qn)
-    STOP = {"the","a","an","of","and","or","for","to","in","on","at","by","with","from","using","via",
-            "how","what","which","based","study","paper","approach","method","large","scale","facile","simple",
-            "novel","new","effect","effects","describe"}
-    return [t for t in toks if t not in STOP and len(t) > 1]
-
-# Topic vocab (compact)
-SHAPE_TERMS = {
-    "nanorod","nanowire","nanotube","nanofiber","nanoparticle","nanocube","nanoplate",
-    "nanosheet","nanosphere","nanobelt","thin film","thin-film","microrod","nanoflake","nanoribbon"
-}
-PROCESS_TERMS = {
-    "hydrothermal","solvothermal","sol-gel","polyol","microwave","autoclave","calcination","anneal","annealing",
-    "seed-mediated","hot injection","hot-injection","precipitation","co-precipitation","electrodeposition",
-    "chemical bath","cvd","pvd","ald","sputtering","spin coating","dip coating","spray pyrolysis","templated"
-}
-MEASURE_TERMS = {
-    "xrd","tem","sem","afm","xps","raman","ftir","uv-vis","pl","vsm","squid","hall","impedance","conductivity"
-}
-INTENT_SYN = {
-    "synthesize": {"synthesize","synthesis","prepare","fabricate","grow","make","deposit"},
-    "characterize": {"characterize","measure","quantify","analyze","determine","evaluate"},
-    "theory": {"theory","mechanism","dft","first-principles","simulation","model"},
-}
-
-ELEMENT_NAMES = {
-    "mn":"manganese","fe":"iron","ni":"nickel","co":"cobalt","cu":"copper","zn":"zinc","ti":"titanium",
-    "w":"tungsten","mo":"molybdenum","al":"aluminum","si":"silicon","pb":"lead","ag":"silver","au":"gold",
-}
-
-SPECIAL_FORMULA_ALIASES = {
-    "mn3o4": {"hausmannite","manganese(ii,iii) oxide","trimanganese tetraoxide","manganese tetroxide"},
-    "fe3o4": {"magnetite","iron(ii,iii) oxide"},
-    "al2o3": {"alumina"}, "sio2": {"silica"},
-}
-
-CHEM_FORMULA_RX = re.compile(r"\b(?:[A-Z][a-z]?\d*){1,5}\b")
-
-def _extract_formulas(q: str) -> Set[str]:
-    return set(CHEM_FORMULA_RX.findall(q or ""))
-
-def _augment_material_terms(mats: Set[str]) -> Set[str]:
-    mats_lc = {(m or "").lower() for m in mats if m}
-    out: Set[str] = set(mats_lc)
-    # subscript variants
-    out |= { to_subscript(m).lower() for m in mats_lc }
-    # oxide heuristic + aliases
-    mrx = re.compile(r"^([a-z]{1,2})\\d*o\\d+$")
-    for fx in mats_lc:
-        g = mrx.match(fx)
-        if g:
-            el = g.group(1)
-            if el in ELEMENT_NAMES:
-                out.add(f"{ELEMENT_NAMES[el]} oxide")
-        out |= {a.lower() for a in SPECIAL_FORMULA_ALIASES.get(fx, set())}
-    return out
-
-def _extract_multiword_phrases(q: str, vocab: Set[str]) -> Set[str]:
-    qn = _norm(q)
-    return {p for p in vocab if p in qn}
-
-def derive_query_profile(q: str) -> Dict[str, Set[str]]:
-    q = q or ""
-    q_ascii = from_subscript(q)
-    toks = set(_tokenize(q_ascii))
-
-    mats_raw = _extract_formulas(q_ascii)
-    mats = _augment_material_terms(mats_raw)
-
-    chem_name_hits = set()  # disabled to avoid regex corruption in deployment
-    mats |= {m.lower() for m in chem_name_hits}
-
-    shapes = _extract_multiword_phrases(q_ascii, SHAPE_TERMS) | (SHAPE_TERMS & toks)
-    procs  = _extract_multiword_phrases(q_ascii, PROCESS_TERMS) | (PROCESS_TERMS & toks)
-    meas   = _extract_multiword_phrases(q_ascii, MEASURE_TERMS) | (MEASURE_TERMS & toks)
-
-    intent = set()
-    for k, syns in INTENT_SYN.items():
-        if any(s in _norm(q_ascii) for s in syns):
-            intent.add(k)
-    if not intent and (shapes or procs):
-        intent.add("synthesize")
-
-    return {
-        "materials": mats,
-        "shapes": {s.lower() for s in shapes},
-        "processes": {p.lower() for p in procs},
-        "measure": {m.lower() for m in meas},
-        "intent": intent,
-        "tokens": toks,
-    }
-
-BAD_DOMAINS = ("ssrn.com","researchsquare.com","preprints.org","osf.io","zenodo.org","quora.com","medium.com")
-PUBLISHER_BOOST = ("acs.org","rsc.org","sciencedirect","elsevier","springer","wiley","nature.com","aip.org","iop.org","aps.org","pnas.org")
-
-def _has_any(blob: str, terms: Set[str]) -> bool:
-    b = (blob or "").lower()
-    return any(t for t in terms if t in b)
-
-def _match_any(blob: str, terms: Set[str]) -> int:
-    b = (blob or "").lower()
-    return sum(1 for t in terms if t and t in b)
-
-def _domain_ok(url: str) -> bool:
-    u = (url or "").lower()
-    return not any(bad in u for bad in BAD_DOMAINS)
-
-def _publisher_score(url: str) -> int:
-    u = (url or "").lower()
-    return 1 if any(p in u for p in PUBLISHER_BOOST) else 0
-
-def filter_and_rerank_generic(q: str, refs: List[Dict]) -> List[Dict]:
-    prof = derive_query_profile(q)
-    print(f"[rerank] mats={sorted(list(prof['materials']))} shapes={sorted(list(prof['shapes']))} procs={sorted(list(prof['processes']))} intent={sorted(list(prof['intent']))}")
-    mats, shapes, procs, meas, intent = prof["materials"], prof["shapes"], prof["processes"], prof["measure"], prof["intent"]
-
-    cands = []
-    for r in refs or []:
-        url = r.get("url") or (r.get("doi") and f"https://doi.org/{r['doi']}") or ""
-        if not _domain_ok(url):
-            continue
-        b = f"{r.get('title','')} {r.get('abstract','')} {r.get('journal','')}".lower()
-
-        if mats and not _has_any(b, mats):
-            continue
-
-        score = 0
-        score += 3 * _match_any(b, mats)
-        score += 2 * _match_any(b, shapes)
-        score += 2 * _match_any(b, procs)
-        score += 1 * _match_any(b, meas)
-        score += _publisher_score(url)
-
-        if "synthesize" in intent and not (shapes or procs):
-            if any(w in b for w in ("synthesis","prepare","fabricat","grow","deposit","hydrothermal","solvothermal","calcination","anneal")):
-                score += 1
-
-        cands.append((score, r))
-
-    cands.sort(key=lambda x: x[0], reverse=True)
-    filtered = [r for s, r in cands if s > 0]
-    if not filtered:
-        # If a material is specified, do NOT relax to generic nanorod papers.
-        if mats:
-            return []
-        # Otherwise, relaxed pass for broad queries.
-        looser = []
-        for r in refs or []:
-            b = f"{r.get('title','')} {r.get('abstract','')} {r.get('journal','')}".lower()
-            s = 0
-            s += 2 * _match_any(b, shapes | procs | meas)
-            s += 1 * int(any(w in b for w in ("synthesis","prepare","fabricat","grow","deposit","measure","characteriz","dft","theory")))
-            s += _publisher_score(r.get("url") or "")
-            looser.append((s, r))
-        looser.sort(key=lambda x: x[0], reverse=True)
-        filtered = [r for s, r in looser[:8] if s > 0] or [r for s, r in cands[:8]]
-    return filtered[:8]
 from functools import lru_cache
 
 import httpx
@@ -198,6 +22,187 @@ import vector_store as vs
 from converter import validate_step, convert_text_to_robot_ops
 from mongo_client import get_db, ping as mongo_ping
 from internet_search import search_papers, set_user_agent
+
+# ---------------------------------------------------------------------------
+#  Search helpers and reference filtering utilities
+#
+# These helpers encapsulate logic for performing OpenAlex/Crossref searches,
+# applying material/topic-aware filtering and ranking, and formatting
+# references. They exist here instead of in internet_search.py to avoid
+# circular imports and to keep this file self-contained. The functions
+# derive_query_profile and filter_and_rerank_generic implement a simple
+# token-based approach to extract chemical formulas and morphology terms
+# from the user question. The shim _call_search_papers() handles legacy
+# versus new keyword signatures for search_papers().
+
+# A lightweight regex for extracting chemical formulas like Mn3O4, NiO, Fe3O4.
+_FORMULA_REGEX = re.compile(r"\b(?:[A-Z][a-z]?\d*)+\b")
+
+# A mapping of known formula aliases to additional synonyms. This is not
+# exhaustive but covers a few common oxides encountered in the app.
+_MATERIAL_SYNONYMS = {
+    "mn3o4": [
+        "hausmannite",
+        "manganese tetroxide",
+        "manganese(ii,iii) oxide",
+        "trimanganese tetraoxide",
+    ],
+    "nio": [
+        "nickel oxide",
+        "nickel(ii) oxide",
+    ],
+    "fe3o4": [
+        "magnetite",
+        "iron(ii,iii) oxide",
+        "black iron oxide",
+    ],
+}
+
+# A small list of shape descriptors. These can be extended as needed.
+_SHAPE_TERMS = [
+    "nanorod", "nanorods",
+    "nanowire", "nanowires",
+    "nanotube", "nanotubes",
+    "nanoribbon", "nanoribbons",
+    "nanobelt", "nanobelts",
+    "nanosheet", "nanosheets",
+    "nanoplate", "nanoplates",
+]
+
+def _normalize_formula(f: str) -> str:
+    """Normalize a chemical formula to lowercase without unicode subscripts."""
+    return (f or "").strip().lower()
+
+def derive_query_profile(question: str) -> dict:
+    """
+    Derive a simple profile from the user question consisting of material
+    formulas (with synonyms) and shape descriptors. Chemical formulas are
+    extracted via regex and converted to lowercase. Known aliases are
+    appended from `_MATERIAL_SYNONYMS`. Shape descriptors are detected via
+    substring matching against `_SHAPE_TERMS`.
+
+    Returns a dict with keys: 'materials' and 'shapes' each containing
+    sets of lowercase strings.
+    """
+    materials: set[str] = set()
+    shapes: set[str] = set()
+    q_lower = (question or "").lower()
+    # Extract chemical formulas
+    for match in _FORMULA_REGEX.findall(question or ""):
+        m_norm = _normalize_formula(match)
+        materials.add(m_norm)
+        # include known aliases
+        if m_norm in _MATERIAL_SYNONYMS:
+            for alias in _MATERIAL_SYNONYMS[m_norm]:
+                materials.add(alias.lower())
+    # Extract shape keywords
+    for term in _SHAPE_TERMS:
+        if term in q_lower:
+            shapes.add(term)
+    return {"materials": materials, "shapes": shapes}
+
+def filter_and_rerank_generic(question: str, refs: list[dict]) -> list[dict]:
+    """
+    Filter and rerank search results based on material and shape tokens
+    derived from the question. Each reference is scored according to how
+    many material/shape tokens appear in its title or abstract. Material
+    matches count as two points; shape matches count as one point. Results
+    with a score of zero are discarded if any material tokens were present
+    in the query. If no material tokens are present, all results are
+    considered but still sorted by score.
+
+    Args:
+        question: the user question (string)
+        refs: list of reference dicts (from search_papers)
+    Returns:
+        a list of up to eight references sorted by score, or the original
+        refs if filtering returns an empty list.
+    """
+    if not refs:
+        return []
+    prof = derive_query_profile(question)
+    mats = prof.get("materials", set())
+    shapes = prof.get("shapes", set())
+    scored: list[tuple[int, dict]] = []
+    for r in refs:
+        title = (r.get("title") or "").lower()
+        abstract = (r.get("abstract") or "").lower()
+        blob = f"{title} {abstract}"
+        score = 0
+        # count material matches
+        for m in mats:
+            if m and m in blob:
+                score += 2
+        # count shape matches
+        for sh in shapes:
+            if sh and sh in blob:
+                score += 1
+        scored.append((score, r))
+    # If materials present, remove zero-score entries
+    if mats:
+        scored = [s for s in scored if s[0] > 0]
+    # Sort by score descending
+    scored.sort(key=lambda x: x[0], reverse=True)
+    filtered = [r for _, r in scored][:8]
+    # If filtering resulted in no entries, return original refs (up to 8)
+    if not filtered:
+        return refs[:8]
+    return filtered
+
+def _call_search_papers(q: str, n: int = 20, aboutness_flag: bool = True) -> list[dict]:
+    """
+    Compatibility shim for search_papers() to handle both 'use_aboutness'
+    and 'aboutness' keyword names. Attempts to call search_papers with
+    use_aboutness set to aboutness_flag. If that fails due to a TypeError
+    (unexpected keyword), falls back to 'aboutness' or no keyword.
+    Returns an empty list on error.
+    """
+    try:
+        return search_papers(q, n=n, use_aboutness=aboutness_flag) or []
+    except TypeError:
+        try:
+            return search_papers(q, n=n, aboutness=aboutness_flag) or []
+        except TypeError:
+            try:
+                return search_papers(q, n=n) or []
+            except Exception as e:
+                print("[_call_search_papers] search error:", e)
+                return []
+
+def _format_acs_reference(r: dict) -> str:
+    """
+    Format a reference dictionary as an ACS-style reference string.
+    This function expects keys: 'authors', 'title', 'journal', 'year',
+    'doi', 'url'. Missing fields are handled gracefully.
+    """
+    authors = r.get("authors") or []
+    if isinstance(authors, list):
+        names = []
+        for a in authors[:6]:
+            if isinstance(a, dict):
+                # OpenAlex provides dicts with 'author' key
+                n = a.get("author", {}).get("display_name", "")
+            else:
+                n = str(a)
+            n = (n or "").strip()
+            if n:
+                names.append(n)
+        auth_str = "; ".join(names)
+        if len(authors) > 6:
+            auth_str += "; et al."
+    else:
+        auth_str = str(authors).strip()
+    title = (r.get("title") or "(no title)").strip()
+    journal = (r.get("journal") or r.get("venue") or "").strip()
+    year = str(r.get("year") or "").strip()
+    doi = (r.get("doi") or "").strip()
+    url = (r.get("url") or "").strip()
+    if doi and not doi.startswith("http"):
+        doi_str = f"https://doi.org/{doi}"
+    else:
+        doi_str = url
+    parts = [p for p in [auth_str and f"{auth_str}.", f"{title}.", journal, year] if p]
+    return (" ".join(parts) + (" " + doi_str if doi_str else "")).strip()
 from DuckDB.duck_searcher import get_duck_searcher
 
 # ──────────────── Paths/Config ──────────────── #
@@ -217,14 +222,6 @@ app = Flask(__name__, template_folder=str(TEMPLATES_DIR), static_folder=str(STAT
 app.config["MAX_CONTENT_LENGTH"] = 100 * 1024 * 1024  # 100 MB
 app.config["JSON_AS_ASCII"] = False  # allow UTF-8
 
-try:
-    app.template_context_processors[None] = [
-        f for f in app.template_context_processors.get(None, [])
-        if getattr(f, "__name__", "") not in {"enriched_search", "_enriched_search_helper", "__es_helper"}
-    ]
-except Exception as e:
-    print("[init] context processor cleanup:", e)
-
 # CSRF setup
 try:
     from flask_wtf.csrf import CSRFProtect, generate_csrf
@@ -237,7 +234,6 @@ except Exception:
         return ""
 
 @app.context_processor
-
 def inject_csrf_token():
     return dict(csrf_token=generate_csrf)
 
@@ -300,66 +296,22 @@ load_dotenv()
 _no_proxy = httpx.Client(trust_env=False, timeout=120.0)
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"), http_client=_no_proxy)
 
+# Set the contact email for OpenAlex API via set_user_agent if available.
+try:
+    # Use environment variables CONTACT_EMAIL or OPENALEX_CONTACT_EMAIL as the contact email.
+    contact_email = os.getenv("CONTACT_EMAIL") or os.getenv("OPENALEX_CONTACT_EMAIL")
+    if contact_email:
+        set_user_agent(contact_email)
+except Exception:
+    # If set_user_agent isn't available or fails, continue without raising.
+    pass
+
 # ──────────────── Utilities ──────────────── #
-def _call_search_papers(q: str, n: int = 20, aboutness_flag: bool = True) -> list[dict]:
-    """
-    Signature shim for search_papers(...).
-    Tries use_aboutness=..., then aboutness=..., then no kw.
-    Returns [] on error.
-    """
-    try:
-        return search_papers(q, n=n, use_aboutness=aboutness_flag) or []
-    except TypeError:
-        pass
-
-    try:
-        return search_papers(q, n=n, aboutness=aboutness_flag) or []
-    except TypeError:
-        pass
-
-    try:
-        return search_papers(q, n=n) or []
-    except Exception as e:
-        print("[_call_search_papers] search error:", e)
-        return []
-
 def _safe_text(x: Any) -> str:
     try:
         return str(x) if x is not None else ""
     except Exception:
         return ""
-
-def _format_acs_reference(r: dict) -> str:
-    # Authors
-    authors = r.get("authors") or []
-    if isinstance(authors, list):
-        names = []
-        for a in authors[:6]:
-            # handle either dicts from OpenAlex or plain strings
-            n = (a.get("display_name") if isinstance(a, dict) else str(a)).strip()
-            if n:
-                names.append(n)
-        auth = "; ".join(names)
-        if len(authors) > 6:
-            auth += "; et al."
-    else:
-        auth = str(authors).strip()
-
-    title = (r.get("title") or "(no title)").strip()
-    journal = (r.get("journal") or r.get("venue") or "").strip()
-    year = str(r.get("year") or "").strip()
-
-    doi = (r.get("doi") or "").strip()
-    url = (r.get("url") or "").strip()
-    if doi and not doi.startswith("http"):
-        tail = f" https://doi.org/{doi}"
-    elif url:
-        tail = f" {url}"
-    else:
-        tail = ""
-
-    parts = [p for p in [auth and f"{auth}.", title and f"{title}.", journal, year] if p]
-    return (" ".join(parts) + tail).strip()
 
 def _extract_used_markers(*texts: str) -> dict:
     """Find [n] citations and [CTX]/[PARSED]/[DB]/[GEN] tags."""
@@ -404,15 +356,15 @@ def basic_search(query: str, n: int = 6) -> list[dict]:
 
     web = []
     try:
-        web = search_papers(query, n=n, use_aboutness=aboutness) or []
+        web = search_papers(query, n)
     except Exception as e:
-        print("[basic_search] internet_search error:", e)
+        print("[basic_search] OpenAlex fetch failed:", e)
 
     seen = {(d.get("doi") or d.get("title", "")).lower() for d in local}
     for w in web:
         key = (w.get("doi") or w.get("title", "")).lower()
         if key not in seen:
-            local.append({k: w.get(k, "") for k in ("title","year","url","doi","abstract","journal","authors")} | {"source":"web"})
+            local.append({k: w.get(k, "") for k in ("title", "year", "url", "doi")})
             seen.add(key)
     return local[:2 * n]
 
@@ -574,10 +526,39 @@ def search_route():
 # ---- Ask ---- #
 @app.post("/ask")
 def ask():
+    """
+    Main endpoint for generating synthesis protocols and mechanistic reasoning.
+    This route performs the following steps:
+      1. Extract the question and mode from the request payload.
+      2. Gather context from uploads (vector store) and table lookups (DuckDB).
+      3. Perform a web search using OpenAlex/Crossref via search_papers. A compatibility
+         shim handles both legacy and modern keyword signatures. For long
+         natural-language queries, the search skips topic classification
+         ('aboutness') to avoid HTTP 400 errors. Results are de-duplicated
+         against table hits and then filtered/ranked based on material and
+         morphology tokens derived from the query.
+      4. If materials are detected and fewer than 3 references remain, an
+         enriched secondary search is performed using targeted query rewrites
+         (e.g., "<material> nanorod synthesis").
+      5. As a final fallback, if no references remain and materials are
+         present, a material-only search is executed using only the
+         material names plus 'nanorod(s)'.
+      6. A numbered reference list is built for prompting and display.
+      7. An appropriate prompt is constructed depending on the selected mode:
+         "robot" for protocol generation or "reasoning" for mechanistic insight.
+      8. The OpenAI model is invoked to generate a response, which is
+         post-processed to separate rationale sections, fix citations, and
+         insert [CTX] markers. A formatted ACS reference block is appended
+         unless the mode is strict.
+      9. The answer, rationale, and references are logged in the database
+         and returned as JSON.
+    """
     def split_reasoning(raw: str) -> tuple[str, str]:
+        """Extract rationale blocks and return (answer, rationale)"""
         if not raw:
             return "", ""
         text = raw.strip()
+        # Remove code-fenced rationale blocks
         fence_rx = re.compile(r"```(?:reason|rationale|reasoning)\s*([\s\S]*?)```", re.I)
         rationale = ""
         fences = list(fence_rx.finditer(text))
@@ -585,6 +566,7 @@ def ask():
             rationale = fences[-1].group(1).strip()
             answer = fence_rx.sub("", text).strip()
             return answer, rationale
+        # Remove heading rationale blocks
         head = re.compile(r"(?:^|\n)#{1,3}\s*(rationale|reasoning)\b[^\n]*\n((?:.*\n?)*)$", re.I | re.S)
         m = head.search(text)
         if m:
@@ -630,12 +612,15 @@ def ask():
             except Exception as e:
                 print("[/ask] LOOKUP query error:", e)
 
+        # Build unified context string
         context_parts = []
-        if vs_ctx: context_parts.append("<<<CTX_UPLOADS>>>\n" + vs_ctx)
-        if table_ctx: context_parts.append("<<<CTX_TABLE>>>\n" + table_ctx)
+        if vs_ctx:
+            context_parts.append("<<<CTX_UPLOADS>>>\n" + vs_ctx)
+        if table_ctx:
+            context_parts.append("<<<CTX_TABLE>>>\n" + table_ctx)
         context_joined = "\n\n---\n\n".join(context_parts).strip()
 
-        # ---- Initial web refs (skip aboutness for long NL queries) ----
+        # Initial web references (skip aboutness for long queries)
         refs = []
         try:
             refs = _call_search_papers(q, n=20, aboutness_flag=False)
@@ -643,41 +628,48 @@ def ask():
             print("[/ask] search_papers error:", e)
         if table_refs:
             refs = list(refs) + table_refs
+        # Log initial counts
+        print(f"[/ask] initial refs: {len(refs)}")
+        _pre_filter_refs = list(refs)
 
-        # ---- Material/topic-aware filtering ----
+        # Filter and rerank generically
         try:
             refs = filter_and_rerank_generic(q, refs) or []
         except Exception as e:
             print("[/ask] filter error:", e)
+        print(f"[/ask] after filter: {len(refs)}")
+        # If filter empties results but we had some, restore top raw entries
+        if not refs and _pre_filter_refs:
+            refs = _pre_filter_refs[:8]
+            print(f"[/ask] filter emptied results — restored {len(refs)} raw refs")
 
-        # ---- Focused re-search helper (local; avoids template collisions) ----
-        def _es_local_helper(query: str, materials: set[str], shapes: set[str]) -> list[dict]:
-            mats = sorted(list({m for m in materials if any(ch.isalpha() for ch in m)}))[:2]
-            shape = next(iter(shapes), "nanorod")
-            seeds = [
-                query,
-                f"{' '.join(mats)} {shape} synthesis",
-                f"{' '.join(mats)} hydrothermal {shape}",
-                f"{' '.join(mats)} {shape} preparation",
-            ]
-            all_refs, seen = [], set()
-            for s in seeds:
-                try:
-                    hits = _call_search_papers(s, n=12, aboutness_flag=False)
-                except Exception as e:
-                    print("[enriched_search] search fail:", e)
-                    hits = []
-                for h in hits:
-                    k = (h.get("doi") or h.get("title", "")).lower()
-                    if k in seen:
-                        continue
-                    seen.add(k)
-                    all_refs.append(h)
-            return all_refs[:24]
-
-        # ---- Enriched re-search if materials detected but refs sparse ----
+        # Enriched re-search if materials exist and refs are sparse
         prof = derive_query_profile(q)
         if prof.get("materials") and len(refs) < 3:
+            def _es_local_helper(query: str, materials: set[str], shapes: set[str]) -> list[dict]:
+                mats = sorted({m for m in materials if any(ch.isalpha() for ch in m)})[:2]
+                shape = next(iter(shapes), "nanorod")
+                seeds = [
+                    query,
+                    f"{' '.join(mats)} {shape} synthesis",
+                    f"{' '.join(mats)} hydrothermal {shape}",
+                    f"{' '.join(mats)} {shape} preparation",
+                ]
+                all_refs: list[dict] = []
+                seen: set[str] = set()
+                for s in seeds:
+                    try:
+                        hits = _call_search_papers(s, n=12, aboutness_flag=False)
+                    except Exception as e:
+                        print("[enriched_search] search fail:", e)
+                        hits = []
+                    for h in hits:
+                        key = (h.get("doi") or h.get("title", "")).lower()
+                        if key in seen:
+                            continue
+                        seen.add(key)
+                        all_refs.append(h)
+                return all_refs[:24]
             try:
                 more = _es_local_helper(q, prof["materials"], prof["shapes"])
                 if more:
@@ -685,7 +677,7 @@ def ask():
             except Exception as e:
                 print("[/ask] enriched_search error:", e)
 
-        # ---- Final relaxed material-only fallback if still empty ----
+        # Final relaxed material-only fallback if still empty
         try:
             prof2 = derive_query_profile(q)
         except Exception:
@@ -695,41 +687,43 @@ def ask():
             seeds = []
             for mmat in mats_list:
                 seeds.extend([f"{mmat} nanorod", f"{mmat} nanorods"])
-            more, seen = [], set()
+            more: list[dict] = []
+            seen_keys: set[str] = set()
             for s in seeds:
                 try:
-                    hits = _call_search_papers(s, n=12, aboutness_flag=False)
+                    hits = _call_search_papers(s, n=12, aboutness_flag=False) or []
                 except Exception as e:
                     print("[/ask] final material-only search error:", e)
                     hits = []
                 for h in hits:
                     key = (h.get("doi") or h.get("title", "")).lower()
-                    if key in seen:
+                    if key in seen_keys:
                         continue
-                    seen.add(key)
+                    seen_keys.add(key)
                     more.append(h)
             if more:
                 try:
                     refs = filter_and_rerank_generic(q, more) or []
                 except Exception as e:
                     print("[/ask] final filter error:", e)
-
+        # Log final references
         print("[/ask] refs (filtered):")
         for i, r in enumerate(refs or [], 1):
             print(f"  [{i}] {r.get('title')} — {r.get('doi') or r.get('url')}")
 
-        # ---- Build numbered references prompt ----
-        def _ref_url(r):
-            if r.get("url"): return r["url"]
-            if r.get("doi"): return f"https://doi.org/{r['doi']}"
+        # Build numbered reference prompt
+        def _ref_url(r: dict) -> str:
+            if r.get("url"):
+                return r["url"]
+            if r.get("doi"):
+                return f"https://doi.org/{r['doi']}"
             return ""
         refs_prompt = "\n".join(
-            f"[{i+1}] {(r.get('title') or '(no title)')} "
-            f"({r.get('year') or ''}) — {_ref_url(r)}"
+            f"[{i+1}] {(r.get('title') or '(no title)')} ({r.get('year') or ''}) — {_ref_url(r)}"
             for i, r in enumerate(refs)
         ).strip()
 
-        # ----------------- Prompt variants -----------------
+        # ----------------- Prompt construction -----------------
         robot_rules = (
             "Return a discrete lab protocol with exact quantities on a small scale (~0.5 mmol Co):\n"
             " - Include specific masses (mg) or mmol for reagents; volumes (mL) for liquids.\n"
@@ -788,6 +782,213 @@ def ask():
                 " - If CONTEXT is insufficient, say so explicitly before generalizing.\n"
                 f"{robot_rules}\n"
                 f"{acs_rule}\n"
+                "Return two blocks exactly in this order:\n"
+                "## Synthesis Protocol:\n"
+                "1. **Hardware & Glassware**:\n[]\n"
+                "2. **Materials**:\n[]\n"
+                "3. **Procedure**\n[]\n\n"
+                "```reason\n"
+                "For each key justification, add inline tags: [CTX] for uploaded/context hits, [DB] for Mongo Q&A, "
+                "[PARSED] for parsed protocols, [n] for numbered web REFERENCES, [GEN] if inferred.\n"
+                "Keep rationales terse.\n"
+                "Add NO other blocks of text.\n"
+                "```\n\n"
+                f"CONTEXT:\n{context_joined}\n\n"
+                f"REFERENCES:\n{refs_prompt}\n\n"
+                f"User question: {q}"
+            )
+
+        raw = client.chat.completions.create(
+            model="gpt-4o-mini",
+            messages=[{"role": "user", "content": prompt}],
+            temperature=0.2
+        ).choices[0].message.content
+
+        # Split answer/rationale
+        if mode == "reasoning":
+            answer = strip_references_block((raw or "").strip())
+            rationale = ""
+        else:
+            answer, rationale = split_reasoning(strip_references_block(raw))
+
+        # Rationale fallback if missing
+        if not (rationale or "").strip() and mode != "reasoning":
+            try:
+                rationale_only = (
+                    "You previously produced the SynthesisProtocol below.\n"
+                    "Write a short rationale (5–8 bullets max). For each key justification add inline tags:\n"
+                    "[CTX] uploaded/context hits, [PARSED] parsed protocols, [n] for numbered web REFERENCES, [GEN] for general.\n"
+                    "Return just the rationale text, no code fences, no extra headings."
+                )
+                rraw = client.chat.completions.create(
+                    model="gpt-4o",
+                    messages=[
+                        {"role": "user", "content": rationale_only},
+                        {"role": "user", "content": f"CONTEXT:\n{context_joined}"},
+                        {"role": "user", "content": f"REFERENCES:\n{refs_prompt}"},
+                        {"role": "user", "content": f"ANSWER:\n{(answer or '').strip()}"},
+                        {"role": "user", "content": f"QUESTION:\n{q}"},
+                    ],
+                    temperature=0.2,
+                ).choices[0].message.content
+                rationale = (rraw or "").strip()
+            except Exception as e:
+                print("[/ask] rationale fallback failed:", e)
+                rationale = rationale or ""
+
+        # Post-pass: enforce citations & CTX usage if missing (non-strict modes)
+        try:
+            used_summary = _extract_used_markers(answer or "", rationale or "")
+            if want_inline and not used_summary.get("refs"):
+                try:
+                    revise_refs = client.chat.completions.create(
+                        model="gpt-4o-mini",
+                        temperature=0,
+                        messages=[
+                            {"role": "system", "content": (
+                                "Add inline [n] citations wherever information was taken from the numbered REFERENCES list. "
+                                "Do NOT remove any existing [CTX] content. Only insert citations where appropriate."
+                            )},
+                            {"role": "user", "content": f"REFERENCES:\n{refs_prompt}"},
+                            {"role": "user", "content": f"ORIGINAL ANSWER:\n{answer}"}
+                        ]
+                    ).choices[0].message.content
+                    if revise_refs and len(revise_refs) >= 0.7 * len(answer):
+                        answer = revise_refs
+                        used_summary = _extract_used_markers(answer, rationale)
+                except Exception as e:
+                    print("[ask] ref-revise step failed:", e)
+        except Exception as _e:
+            print("[/ask] used extraction failed:", _e)
+            used_summary = {"refs": [], "tags": {}, "has_ctx": False}
+
+        # Enforce [CTX] usage if missing and context present
+        if context_joined and not used_summary.get("has_ctx"):
+            try:
+                revise = client.chat.completions.create(
+                    model="gpt-4o-mini",
+                    temperature=0,
+                    messages=[
+                        {"role": "system", "content": "Revise the answer to explicitly use CONTEXT where relevant. Insert [CTX] markers on lines that derive from CONTEXT, and prefer CONTEXT over general knowledge. Do not change structure."},
+                        {"role": "user", "content": f"CONTEXT:\n{context_joined}"},
+                        {"role": "user", "content": f"ORIGINAL ANSWER:\n{answer}"}
+                    ]
+                ).choices[0].message.content
+                if revise and len(revise) >= 0.7 * len(answer):
+                    answer = revise
+                    used_summary = _extract_used_markers(answer, rationale or "")
+            except Exception as e:
+                print("[ask] revise step skipped:", e)
+
+        # Build a references block and optionally append to answer
+        want_refs_block = bool(payload.get("want_reference_block", True))
+        is_strict = mode in ("robot_strict", "reasoning_strict")
+        refs_block_text = ""
+        if want_refs_block and refs:
+            refs_block_text = "\n".join(
+                f"{i+1}. {_format_acs_reference(r)}" for i, r in enumerate(refs)
+            )
+        if want_refs_block and not is_strict and refs_block_text:
+            answer = f"{(answer or '').rstrip()}\n\n## References\n{refs_block_text}"
+
+        # Persist to DB and return
+        qa_id = None
+        try:
+            db = get_db()
+            ins = db.qa.insert_one({
+                "created_at": datetime.utcnow(),
+                "question": q,
+                "mode": mode,
+                "answer": (answer or "").strip(),
+                "rationale": rationale,
+                "references": refs,
+                "refs_used": used_summary.get("refs", []),
+                "used_tags": used_summary.get("tags", {}),
+                "ctx_vs": vs_ctx,
+                "ctx_table": table_ctx,
+            })
+            qa_id = str(ins.inserted_id)
+        except Exception as e:
+            print("[/ask] DB insert warn:", e)
+
+        return jsonify({
+            "answer": (answer or "").strip(),
+            "rationale": rationale,
+            "references": refs,
+            "references_block": refs_block_text,
+            "refs": refs,
+            "refs_used": used_summary.get("refs", []),
+            "used": used_summary,
+            "mode": mode,
+            "qa_id": qa_id,
+            "ctx_vs": (vs_ctx or "")[:8000],
+            "ctx_table": (table_ctx or "")[:4000],
+        })
+    except Exception as e:
+        print("[/ask] Unhandled error:", e)
+        traceback.print_exc()
+        return jsonify({"error": f"/ask failed: {e}"}), 500
+
+        # prompt variants
+        robot_rules = (
+            "Return a discrete lab protocol with exact quantities on a small scale (~0.5 mmol Co):\n"
+            " - Include specific masses (mg) or mmol for reagents; volumes (mL) for liquids.\n"
+            " - Specify temperatures (°C), ramp rates (°C/min), hold times (min/h), and atmosphere (Ar/N2/vacuum).\n"
+            " - Include workup and purification (quench, washing/centrifugation, drying) with volumes.\n"
+            " - No placeholders (avoid “e.g.”/“or”). Be decisive.\n"
+            " - Output only the final protocol in markdown. Do not include any fenced blocks named reason or rationale in the answer. Put all reasoning in the separate rationale channel."
+        )
+        reasoning_rules = (
+            " - Provide a mechanistic explanation and design considerations for the target.\n"
+            " - Focus on: nucleation vs growth; ligand/solvent coordination; surfactants; "
+            " - reduction/oxidation; temperature profile and morphology control; atmosphere; pitfalls; safety.\n"
+            " - Do NOT return a step-by-step protocol. Be concise but specific."
+        )
+        inline_rule = (
+            " - When you pull a fact from any numbered REFERENCE, put its number in square brackets right after the sentence "
+            "(e.g. “hydrothermal at 200 °C [3]”)." if want_inline else
+            " - Inline numeric citations are optional for this request."
+        )
+        acs_rule = (
+            " - Write the REFERENCES block in ACS format: author(s), title, journal, year, volume, pages, DOI.\n"
+            " - Use inline numeric citations ([n]) for facts from REFERENCES. Do NOT include a REFERENCES block in your answer."
+        )
+
+        def strip_references_block(text: str) -> str:
+            # Remove everything from '## References' to the end
+            return re.sub(r"## References[\s\S]*", "", text, flags=re.I).strip()
+
+        if mode == "reasoning":
+            prompt = (
+                "You are NanoChemGPT. Use the CONTEXT and numbered REFERENCES.\n"
+                "Rules:\n"
+                " - Prefer CONTEXT and REFERENCES over general knowledge when relevant.\n"
+                " - For each bullet, quote or paraphrase a specific finding from CONTEXT or REFERENCES, and cite the source. Do not generalize or invent citations.\n"
+                " - If you use any content from CONTEXT, append [CTX] on that line.\n"
+                f"{inline_rule}\n"
+                " - If CONTEXT is insufficient, say so explicitly before generalizing.\n"
+                " - For each cited reference, briefly summarize the relevant finding and explain how it relates to aspect ratio and temperature.\n"
+                " - If no reference supports a statement, say so explicitly and do not cite it.\n"
+                f"{reasoning_rules}\n"
+                f"{acs_rule}\n"  
+                "Return exactly ONE block:\n"
+                "## Mechanistic reasoning\n"
+                "- bullet points with inline [n] and [CTX] where appropriate.\n\n"
+                f"CONTEXT:\n{context_joined}\n\n"
+                f"REFERENCES:\n{refs_prompt}\n\n"
+                f"User question: {q}"
+            )
+        else:
+            prompt = (
+                "You are NanoChemGPT. Use the CONTEXT and the numbered REFERENCES to propose a synthesis.\n"
+                "Rules:\n"
+                " - Prefer CONTEXT and REFERENCES over general knowledge when relevant.\n"
+                " - For each step, quote or paraphrase a specific finding from CONTEXT or REFERENCES, and cite the source. Do not generalize or invent citations.\n"
+                " - If you use any content from CONTEXT, append [CTX] on that line.\n"
+                f"{inline_rule}\n"
+                " - If CONTEXT is insufficient, say so explicitly before generalizing.\n"
+                f"{robot_rules}\n"
+                f"{acs_rule}\n"  
                 "Return two blocks exactly in this order:\n"
                 "## Synthesis Protocol:\n"
                 "1. **Hardware & Glassware**:\n[]\n"
@@ -885,19 +1086,6 @@ def ask():
             except Exception as e:
                 print("[ask] revise step skipped:", e)
 
-        # ---- Build a references block (and optionally append) ----
-        want_refs_block = bool(payload.get("want_reference_block", True))
-        is_strict = mode in ("robot_strict", "reasoning_strict")
-
-        refs_block_text = ""
-        if want_refs_block and refs:
-            refs_block_text = "\n".join(
-                f"{i+1}. {_format_acs_reference(r)}" for i, r in enumerate(refs)
-            )
-        if want_refs_block and not is_strict and refs_block_text:
-            answer = f"{(answer or '').rstrip()}\n\n## References\n{refs_block_text}"
-
-        # ---- Persist + return ----
         qa_id = None
         try:
             db = get_db()
@@ -921,7 +1109,6 @@ def ask():
             "answer": (answer or "").strip(),
             "rationale": rationale,
             "references": refs,
-            "references_block": refs_block_text,
             "refs": refs,
             "refs_used": used_summary.get("refs", []),
             "used": used_summary,
