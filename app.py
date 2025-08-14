@@ -140,42 +140,42 @@ def _extract_used_markers(*texts: str) -> dict:
             tag_counts[tag] += len(re.findall(rf"\[{tag}\]", t))
     return {"refs": sorted(seen), "tags": tag_counts, "has_ctx": any(tag_counts[k] > 0 for k in ("CTX", "PARSED", "DB"))}
 
-def basic_search(query: str, n: int = 6) -> list[dict]:
-    """Merge local LOOKUP hits + OpenAlex web hits; de-dup by doi/title."""
-    if not query.strip():
-        return []
-    local = []
-    if LOOKUP is not None:
-        try:
-            hits = LOOKUP.query(query, topk=n)
-            if isinstance(hits, pd.DataFrame) and not hits.empty:
-                for _, row in hits.fillna("").iterrows():
-                    title = row.get("title") or row.get("name") or row.get("__source__") or "table hit"
-                    year = row.get("year") or row.get("publication_year") or ""
-                    doi = row.get("doi") or ""
-                    url = row.get("url") or (f"https://doi.org/{doi}" if doi else "")
-                    local.append({
-                        "title": _safe_text(title)[:300],
-                        "year": _safe_text(year),
-                        "url": _safe_text(url),
-                        "doi": _safe_text(doi),
-                    })
-        except Exception as e:
-            print("[basic_search] lookup query failed:", e)
+# def basic_search(query: str, n: int = 6) -> list[dict]:
+#     """Merge local LOOKUP hits + OpenAlex web hits; de-dup by doi/title."""
+#     if not query.strip():
+#         return []
+#     local = []
+#     if LOOKUP is not None:
+#         try:
+#             hits = LOOKUP.query(query, topk=n)
+#             if isinstance(hits, pd.DataFrame) and not hits.empty:
+#                 for _, row in hits.fillna("").iterrows():
+#                     title = row.get("title") or row.get("name") or row.get("__source__") or "table hit"
+#                     year = row.get("year") or row.get("publication_year") or ""
+#                     doi = row.get("doi") or ""
+#                     url = row.get("url") or (f"https://doi.org/{doi}" if doi else "")
+#                     local.append({
+#                         "title": _safe_text(title)[:300],
+#                         "year": _safe_text(year),
+#                         "url": _safe_text(url),
+#                         "doi": _safe_text(doi),
+#                     })
+#         except Exception as e:
+#             print("[basic_search] lookup query failed:", e)
 
-    web = []
-    try:
-        web = search_papers(query, n)
-    except Exception as e:
-        print("[basic_search] OpenAlex fetch failed:", e)
+#     web = []
+#     try:
+#         web = search_papers(query, n)
+#     except Exception as e:
+#         print("[basic_search] OpenAlex fetch failed:", e)
 
-    seen = {(d.get("doi") or d.get("title", "")).lower() for d in local}
-    for w in web:
-        key = (w.get("doi") or w.get("title", "")).lower()
-        if key not in seen:
-            local.append({k: w.get(k, "") for k in ("title", "year", "url", "doi")})
-            seen.add(key)
-    return local[:2 * n]
+#     seen = {(d.get("doi") or d.get("title", "")).lower() for d in local}
+#     for w in web:
+#         key = (w.get("doi") or w.get("title", "")).lower()
+#         if key not in seen:
+#             local.append({k: w.get(k, "") for k in ("title", "year", "url", "doi")})
+#             seen.add(key)
+#     return local[:2 * n]
 
 @lru_cache(maxsize=128)
 def cached_vs_search(q):
@@ -190,12 +190,12 @@ def cached_lookup_query(q):
             return None
     return None
 
-@lru_cache(maxsize=128)
-def cached_basic_search(q, n):
-    try:
-        return basic_search(q, n) or []
-    except Exception:
-        return []
+# @lru_cache(maxsize=128)
+# def cached_basic_search(q, n):
+#     try:
+#         return basic_search(q, n) or []
+#     except Exception:
+#         return []
 
 # ──────────────── Routes ──────────────── #
 @app.get("/health")
@@ -322,15 +322,15 @@ def _process_pdf_job(jid: str, path: Path, filename: str):
         _set_job(jid, status="error", error=str(e))
 
 # ---- Search API ---- #
-@app.post("/search")
-def search_route():
-    payload = request.get_json(silent=True) or {}
-    q = (payload.get("q") or payload.get("query") or "").strip()
-    n = int(payload.get("n") or 6)
-    if not q:
-        abort(400, "Missing 'q' (query).")
-    refs = basic_search(q, n)
-    return jsonify({"results": refs})
+# @app.post("/search")
+# def search_route():
+#     payload = request.get_json(silent=True) or {}
+#     q = (payload.get("q") or payload.get("query") or "").strip()
+#     n = int(payload.get("n") or 6)
+#     if not q:
+#         abort(400, "Missing 'q' (query).")
+#     refs = basic_search(q, n)
+#     return jsonify({"results": refs})
 
 # ---- Ask ---- #
 @app.post("/ask")
