@@ -25,15 +25,6 @@ from internet_search import search_papers, set_user_agent
 
 # ---------------------------------------------------------------------------
 #  Search helpers and reference filtering utilities
-#
-# These helpers encapsulate logic for performing OpenAlex/Crossref searches,
-# applying material/topic-aware filtering and ranking, and formatting
-# references. They exist here instead of in internet_search.py to avoid
-# circular imports and to keep this file self-contained. The functions
-# derive_query_profile and filter_and_rerank_generic implement a simple
-# token-based approach to extract chemical formulas and morphology terms
-# from the user question. The shim _call_search_papers() handles legacy
-# versus new keyword signatures for search_papers().
 
 # A lightweight regex for extracting chemical formulas like Mn3O4, NiO, Fe3O4.
 _FORMULA_REGEX = re.compile(r"\b(?:[A-Z][a-z]?\d*){1,5}\b")
@@ -71,95 +62,10 @@ _SHAPE_TERMS = [
     "nanocube", "nanocubes",
 ]
 
-def _normalize_formula(f: str) -> str:
-    """Normalize a chemical formula to lowercase without unicode subscripts."""
-    return (f or "").strip().lower()
-
-def derive_query_profile(question: str) -> dict:
-    """
-    Derive a simple profile from the user question consisting of material
-    formulas (with synonyms) and shape descriptors. Chemical formulas are
-    extracted via regex and converted to lowercase. Known aliases are
-    appended from `_MATERIAL_SYNONYMS`. Shape descriptors are detected via
-    substring matching against `_SHAPE_TERMS`.
-
-    Returns a dict with keys: 'materials' and 'shapes' each containing
-    sets of lowercase strings.
-    """
-
-    materials: set[str] = set()
-    shapes: set[str] = set()
-    q_lower = (question or "").lower()
-
-    # formulas (lowercase) + synonyms
-    for f in _extract_formulas(question or ""):
-        materials.add(f)
-        if f in _MATERIAL_SYNONYMS:
-            for alias in _MATERIAL_SYNONYMS[f]:
-                materials.add(alias.lower())
-
-    # shapes
-    for term in _SHAPE_TERMS:
-        if term in q_lower:
-            shapes.add(term)
-
-    return {"materials": materials, "shapes": shapes}
-
-def filter_and_rerank_generic(question: str, refs: list[dict]) -> list[dict]:
-    """
-    Filter and rerank search results based on material and shape tokens
-    derived from the question. Each reference is scored according to how
-    many material/shape tokens appear in its title or abstract. Material
-    matches count as two points; shape matches count as one point. Results
-    with a score of zero are discarded if any material tokens were present
-    in the query. If no material tokens are present, all results are
-    considered but still sorted by score.
-
-    Args:
-        question: the user question (string)
-        refs: list of reference dicts (from search_papers)
-    Returns:
-        a list of up to eight references sorted by score, or the original
-        refs if filtering returns an empty list.
-    """
-    if not refs:
-        return []
-    prof = derive_query_profile(question)
-    mats = prof.get("materials", set())
-    shapes = prof.get("shapes", set())
-    scored: list[tuple[int, dict]] = []
-    for r in refs:
-        title = (r.get("title") or "").lower()
-        abstract = (r.get("abstract") or "").lower()
-        blob = f"{title} {abstract}"
-        score = 0
-        # count material matches
-        for m in mats:
-            if m and m in blob:
-                score += 2
-        # count shape matches
-        for sh in shapes:
-            if sh and sh in blob:
-                score += 1
-        scored.append((score, r))
-    # If materials present, remove zero-score entries
-    if mats:
-        scored = [s for s in scored if s[0] > 0]
-    # Sort by score descending
-    scored.sort(key=lambda x: x[0], reverse=True)
-    filtered = [r for _, r in scored][:8]
-    # If filtering resulted in no entries, return original refs (up to 8)
-    if not filtered:
-        return refs[:8]
-    return filtered
-
 def _call_search_papers(q: str, n: int = 20, aboutness_flag: bool = True) -> list[dict]:
     """
-    Compatibility shim for search_papers() to handle both 'use_aboutness'
-    and 'aboutness' keyword names. Attempts to call search_papers with
-    use_aboutness set to aboutness_flag. If that fails due to a TypeError
-    (unexpected keyword), falls back to 'aboutness' or no keyword.
-    Returns an empty list on error.
+    Signature shim for search_papers(...).
+    Tries use_aboutness=..., then aboutness=..., then no kw; returns [] on error.
     """
     try:
         return search_papers(q, n=n, use_aboutness=aboutness_flag) or []
@@ -173,40 +79,137 @@ def _call_search_papers(q: str, n: int = 20, aboutness_flag: bool = True) -> lis
                 print("[_call_search_papers] search error:", e)
                 return []
 
+def _extract_formulas(q: str) -> Set[str]:
+    """
+    Extract chemical formulas; support lowercase & unicode subscripts (e.g., mn₃o₄).
+    Returns lowercase tokens (e.g., 'mn3o4').
+    """
+    s = from_subscript(q or "")
+    hits = set(_FORMULA_REGEX.findall(s)) | set(_FORMULA_REGEX.findall(s.upper()))
+    return {h.lower() for h in hits}
+
+def derive_query_profile(question: str) -> dict:
+    """
+    Materials: regex-extracted formulas + known aliases (lowercase).
+    Shapes: keyword hits from _SHAPE_TERMS (lowercase).
+    """
+    materials: set[str] = set()
+    shapes: set[str] = set()
+    q_lower = (question or "").lower()
+
+    # formulas (lowercase) + synonyms
+    for f in _extract_formulas(question or ""):
+        materials.add(f)
+        if f in _MATERIAL_SYNONYMS:
+            for alias in _MATERIAL_SYNONYMS[f]:
+                materials.add(alias.lower())
+
+    # generic material words (optional expansion)
+    if "manganese oxide" in q_lower and "mn3o4" not in materials:
+        materials.update({"mn3o4", "manganese oxide"})
+
+    # shapes
+    for term in _SHAPE_TERMS:
+        if term in q_lower:
+            shapes.add(term)
+
+    return {"materials": materials, "shapes": shapes}
+
+def _is_materials_domain(r: dict) -> bool:
+    """
+    Lightweight venue filter to drop obvious non-materials domains (CS/bioreactors/etc.).
+    """
+    j = ((r.get("journal") or r.get("venue") or r.get("host_venue") or "") or "").lower()
+    t = (r.get("title") or "").lower()
+    bad = [
+        "cytotherapy", "bioreactor", "stem cell", "computer", "distributed computing",
+        "fault tolerance", "software", "management", "education", "sociology"
+    ]
+    if any(b in t for b in bad):
+        return False
+    good = ["chem", "mater", "nano", "phys", "catal", "solid state", "applied surface"]
+    return any(g in j for g in good) or ("doi" in r and (str(r["doi"]).startswith("10.1016") or str(r["doi"]).startswith("10.1039")))
+
+def filter_and_rerank_generic(question: str, refs: list[dict]) -> list[dict]:
+    """
+    Two-pass filter:
+      1) If materials are present in the query, require a material hit in title/abstract.
+         If shape is also present, try requiring shape as well (then relax to material-only).
+      2) Light domain sanity filter (_is_materials_domain).
+      3) Score: material hits (+4 each), shape hits (+2 each), recency bonus (+year*0.001).
+    Falls back to the top 8 input refs if everything gets dropped.
+    """
+    if not refs:
+        return []
+    prof = derive_query_profile(question)
+    mats = prof.get("materials", set())
+    shapes = prof.get("shapes", set())
+
+    def _blob(r: dict) -> str:
+        title = from_subscript((r.get("title") or "")).lower()
+        abstract = from_subscript((r.get("abstract") or "")).lower()
+        return f"{title} {abstract}"
+
+    def _score(r: dict) -> tuple[float, bool, bool]:
+        b = _blob(r)
+        mat_hit = any(m in b for m in mats) if mats else False
+        shp_hit = any(sh in b for sh in shapes) if shapes else False
+        score = 0.0
+        if mats:
+            for m in mats:
+                if m and m in b:
+                    score += 4.0
+        if shapes:
+            for sh in shapes:
+                if sh and sh in b:
+                    score += 2.0
+        try:
+            y = int(r.get("year") or 0)
+            score += y * 0.001  # slight recency nudge
+        except Exception:
+            pass
+        return score, mat_hit, shp_hit
+
+    # Pass 1: strict (material + shape), then relax to material-only
+    scored = [( *_score(r), r ) for r in refs]
+    strict = [r for s, mh, sh, r in scored if (not mats or mh) and (not shapes or sh)]
+    if not strict and mats:
+        strict = [r for s, mh, sh, r in scored if mh]
+
+    # Domain sanity
+    strict = [r for r in strict if _is_materials_domain(r) or not mats] or strict
+
+    # Sort by score desc
+    chosen = [r for s, mh, sh, r in sorted(scored if not strict else [( *_score(r), r ) for r in strict ],
+                                           key=lambda x: x[0], reverse=True)]
+    return chosen[:8] or refs[:8]
+
 def _format_acs_reference(r: dict) -> str:
-    """
-    Format a reference dictionary as an ACS-style reference string.
-    This function expects keys: 'authors', 'title', 'journal', 'year',
-    'doi', 'url'. Missing fields are handled gracefully.
-    """
+    # Authors
     authors = r.get("authors") or []
     if isinstance(authors, list):
         names = []
         for a in authors[:6]:
-            if isinstance(a, dict):
-                # OpenAlex provides dicts with 'author' key
-                n = a.get("author", {}).get("display_name", "")
-            else:
-                n = str(a)
-            n = (n or "").strip()
+            n = (a.get("author", {}).get("display_name") if isinstance(a, dict) else str(a)).strip()
             if n:
                 names.append(n)
-        auth_str = "; ".join(names)
+        auth = "; ".join(names)
         if len(authors) > 6:
-            auth_str += "; et al."
+            auth += "; et al."
     else:
-        auth_str = str(authors).strip()
+        auth = str(authors).strip()
+
     title = (r.get("title") or "(no title)").strip()
     journal = (r.get("journal") or r.get("venue") or "").strip()
     year = str(r.get("year") or "").strip()
+
     doi = (r.get("doi") or "").strip()
     url = (r.get("url") or "").strip()
-    if doi and not doi.startswith("http"):
-        doi_str = f"https://doi.org/{doi}"
-    else:
-        doi_str = url
-    parts = [p for p in [auth_str and f"{auth_str}.", f"{title}.", journal, year] if p]
-    return (" ".join(parts) + (" " + doi_str if doi_str else "")).strip()
+    tail = f" https://doi.org/{doi}" if (doi and not doi.startswith("http")) else (f" {url}" if url else "")
+
+    parts = [p for p in [auth and f"{auth}.", title and f"{title}.", journal, year] if p]
+    return (" ".join(parts) + tail).strip()
+
 from DuckDB.duck_searcher import get_duck_searcher
 
 # ──────────────── Paths/Config ──────────────── #
@@ -322,15 +325,6 @@ except Exception:
 _SUB_MAP = str.maketrans("₀₁₂₃₄₅₆₇₈₉", "0123456789")
 def from_subscript(s: str) -> str:
     return (s or "").translate(_SUB_MAP)
-
-def _extract_formulas(q: str) -> Set[str]:
-    """
-    Extract chemical formulas; support lowercase & unicode subscripts (e.g., mn₃o₄).
-    Returns lowercase tokens (e.g., 'mn3o4').
-    """
-    s = from_subscript(q or "")
-    hits = set(_FORMULA_REGEX.findall(s)) | set(_FORMULA_REGEX.findall(s.upper()))
-    return {h.lower() for h in hits}
 
 def _safe_text(x: Any) -> str:
     try:
@@ -556,39 +550,11 @@ def search_route():
 # ---- Ask ---- #
 @app.post("/ask")
 def ask():
-    """
-    Main endpoint for generating synthesis protocols and mechanistic reasoning.
-    This route performs the following steps:
-      1. Extract the question and mode from the request payload.
-      2. Gather context from uploads (vector store) and table lookups (DuckDB).
-      3. Perform a web search using OpenAlex/Crossref via search_papers. A compatibility
-         shim handles both legacy and modern keyword signatures. For long
-         natural-language queries, the search skips topic classification
-         ('aboutness') to avoid HTTP 400 errors. Results are de-duplicated
-         against table hits and then filtered/ranked based on material and
-         morphology tokens derived from the query.
-      4. If materials are detected and fewer than 3 references remain, an
-         enriched secondary search is performed using targeted query rewrites
-         (e.g., "<material> nanorod synthesis").
-      5. As a final fallback, if no references remain and materials are
-         present, a material-only search is executed using only the
-         material names plus 'nanorod(s)'.
-      6. A numbered reference list is built for prompting and display.
-      7. An appropriate prompt is constructed depending on the selected mode:
-         "robot" for protocol generation or "reasoning" for mechanistic insight.
-      8. The OpenAI model is invoked to generate a response, which is
-         post-processed to separate rationale sections, fix citations, and
-         insert [CTX] markers. A formatted ACS reference block is appended
-         unless the mode is strict.
-      9. The answer, rationale, and references are logged in the database
-         and returned as JSON.
-    """
     def split_reasoning(raw: str) -> tuple[str, str]:
-        """Extract rationale blocks and return (answer, rationale)"""
         if not raw:
             return "", ""
         text = raw.strip()
-        # Remove code-fenced rationale blocks
+        # Remove any ```reason|rationale|reasoning fenced block
         fence_rx = re.compile(r"```(?:reason|rationale|reasoning)\s*([\s\S]*?)```", re.I)
         rationale = ""
         fences = list(fence_rx.finditer(text))
@@ -596,7 +562,7 @@ def ask():
             rationale = fences[-1].group(1).strip()
             answer = fence_rx.sub("", text).strip()
             return answer, rationale
-        # Remove heading rationale blocks
+        # Heading rationale block
         head = re.compile(r"(?:^|\n)#{1,3}\s*(rationale|reasoning)\b[^\n]*\n((?:.*\n?)*)$", re.I | re.S)
         m = head.search(text)
         if m:
@@ -604,7 +570,6 @@ def ask():
             answer = text[:m.start()].strip()
             return answer, rationale
         return text, ""
-
     try:
         payload = request.get_json(silent=True) or {}
         q = (payload.get("question") or "").strip()
@@ -669,76 +634,52 @@ def ask():
             refs = filter_and_rerank_generic(q, refs) or []
         except Exception as e:
             print("[/ask] filter error:", e)
+
         print(f"[/ask] after filter: {len(refs)}")
-        # If filter empties results but we had some, restore top raw entries
         if not refs and _pre_filter_refs:
             refs = _pre_filter_refs[:8]
-            print(f"[/ask] filter emptied results — restored {len(refs)} raw refs")
+            print("[/ask] filter emptied results — restored top raw refs:", len(refs))
 
-        # Enriched re-search if materials exist and refs are sparse
         prof = derive_query_profile(q)
         if prof.get("materials") and len(refs) < 3:
-            def _es_local_helper(query: str, materials: set[str], shapes: set[str]) -> list[dict]:
-                mats = sorted({m for m in materials if any(ch.isalpha() for ch in m)})[:2]
-                shape = next(iter(shapes), "nanorod")
-                seeds = [
-                    query,
-                    f"{' '.join(mats)} {shape} synthesis",
-                    f"{' '.join(mats)} hydrothermal {shape}",
-                    f"{' '.join(mats)} {shape} preparation",
-                ]
-                all_refs: list[dict] = []
-                seen: set[str] = set()
-                for s in seeds:
-                    try:
-                        hits = _call_search_papers(s, n=12, aboutness_flag=False)
-                    except Exception as e:
-                        print("[enriched_search] search fail:", e)
-                        hits = []
-                    for h in hits:
-                        key = (h.get("doi") or h.get("title", "")).lower()
-                        if key in seen:
-                            continue
-                        seen.add(key)
-                        all_refs.append(h)
-                return all_refs[:24]
             try:
-                more = _es_local_helper(q, prof["materials"], prof["shapes"])
+                mats = sorted({m for m in prof["materials"] if any(ch.isalpha() for ch in m)})[:3]
+                seeds = []
+                for m in mats:
+                    seeds.extend([
+                        f"{m} nanorod synthesis",
+                        f"{m} hydrothermal nanorods",
+                        f"{m} nanorod preparation",
+                    ])
+                more, seen = [], set()
+                for s in seeds:
+                    for h in (_call_search_papers(s, n=12, aboutness_flag=False) or []):
+                        key = (h.get("doi") or h.get("title","")).lower()
+                        if key in seen: 
+                            continue
+                        seen.add(key); more.append(h)
                 if more:
                     refs = filter_and_rerank_generic(q, refs + more) or refs
             except Exception as e:
                 print("[/ask] enriched_search error:", e)
 
-        # Final relaxed material-only fallback if still empty
-        try:
-            prof2 = derive_query_profile(q)
-        except Exception:
-            prof2 = {}
-        if not refs and prof2.get("materials"):
-            mats_list = sorted(list(prof2["materials"]))[:2]
-            seeds = []
-            for mmat in mats_list:
-                seeds.extend([f"{mmat} nanorod", f"{mmat} nanorods"])
-            more: list[dict] = []
-            seen_keys: set[str] = set()
+        # ---- Final relaxed material-only fallback if still empty ----
+        if not refs and prof.get("materials"):
+            mats_list = sorted(list(prof["materials"]))[:2]
+            seeds = [f"{m} nanorod" for m in mats_list] + [f"{m} nanorods" for m in mats_list]
+            more, seen = [], set()
             for s in seeds:
-                try:
-                    hits = _call_search_papers(s, n=12, aboutness_flag=False) or []
-                except Exception as e:
-                    print("[/ask] final material-only search error:", e)
-                    hits = []
-                for h in hits:
-                    key = (h.get("doi") or h.get("title", "")).lower()
-                    if key in seen_keys:
+                for h in (_call_search_papers(s, n=12, aboutness_flag=False) or []):
+                    key = (h.get("doi") or h.get("title","")).lower()
+                    if key in seen: 
                         continue
-                    seen_keys.add(key)
-                    more.append(h)
+                    seen.add(key); more.append(h)
             if more:
                 try:
                     refs = filter_and_rerank_generic(q, more) or []
                 except Exception as e:
                     print("[/ask] final filter error:", e)
-        # Log final references
+
         print("[/ask] refs (filtered):")
         for i, r in enumerate(refs or [], 1):
             print(f"  [{i}] {r.get('title')} — {r.get('doi') or r.get('url')}")
