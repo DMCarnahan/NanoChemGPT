@@ -607,9 +607,8 @@ def ask():
             used_refs_list = refs
 
         return jsonify({
-            
             "references_used_indexes": used_ref_idxs,
-"answer": (answer or "").strip(),
+            "answer": (answer or "").strip(),
             "rationale": rationale,
             "references": used_refs_list,
             "refs": used_refs_list,
