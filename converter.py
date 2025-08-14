@@ -551,18 +551,31 @@ def detect_transfer_explicit(line: str) -> Optional[Dict]:
         }
     return None
 
+
 def detect_dissolve(line: str) -> Optional[Dict]:
     s = strip_tags(_clean_unicode(line.strip()))
-    m = re.search(r"\bdissolv\w*\s+(?P<amount>[\d\.]+)\s*(?P<unit>mg|g|µg|kg)\s+of\s+(?P<solute>.+?)\s+in\s+(?P<vol>[\d\.]+)\s*(?P<vunit>µ?u?L|mL|ml|l|L)\s+of\s+(?P<solvent>.+?)(?:\.|$)", s, re.I)
+    m = re.search(
+        r"\bdissolv\w*\s+(?P<amount>[\d\.]+)\s*(?P<unit>mg|g|µg|kg)\s+of\s+(?P<solute>.+?)\s+in\s+(?P<vol>[\d\.]+)\s*(?P<vunit>µ?u?L|mL|ml|l|L)\s+of\s+(?P<solvent>.+?)(?:\.|$)",
+        s,
+        re.I,
+    )
     if m:
+        solvent_raw = m.group('solvent').strip()
+        solvent = _clean_solvent_tail(solvent_raw)
+        # Optional hardware hint: "in a 50 mL (glass) beaker/flask"
+        hint = None
+        mh = re.search(r"in\s+(?:a|the)\s+(\d+\s*(?:µ?u?L|mL|L)\s+(?:glass\s+)?(?:beaker|flask|round-?bottom\s+flask))", s, re.I)
+        if mh:
+            hint = mh.group(1)
         return {
             "action": "dissolve",
             "solute": m.group("solute").strip(),
             "amount": float(m.group("amount")),
             "unit": m.group("unit"),
-            "solvent": m.group("solvent").strip(),
+            "solvent": solvent,
             "volume": float(m.group("vol")),
-            "volume_units": m.group("vunit")
+            "volume_units": m.group("vunit"),
+            "hardware_hint": hint,
         }
     return None
 
@@ -704,7 +717,16 @@ def convert_text_to_robot_ops(text: str) -> Dict:
         # Dissolve
         dissolve = detect_dissolve(step)
         if dissolve:
-            target_vessel = vessels.primary_vessel or vessels.ensure_glassware("Beaker")
+            # honor explicit hardware hint if present
+            prefer_ml = None
+            if dissolve.get('volume') is not None:
+                vunit = (dissolve.get('volume_units') or '').lower()
+                prefer_ml = dissolve['volume'] * (0.001 if vunit in ('µl','ul') else (1.0 if vunit=='ml' else 1000.0))
+            target_vessel = vessels.primary_vessel or vessels.ensure_glassware(
+                dissolve.get('hardware_hint') or 'Beaker',
+                prefer_capacity_ml=prefer_ml,
+                explicit_hardware_hint=dissolve.get('hardware_hint')
+            )
             record = {
                 "action": "dissolve",
                 "vessel": target_vessel,
@@ -1095,7 +1117,7 @@ def convert_text_to_robot_ops(text: str) -> Dict:
         "defaults": DEFAULTS,
         "steps": records,
     }
-# -------- Validation helpers (unchanged API) --------
+# -------- Validation helpers --------
 def validate_step(text: str) -> Dict[str, Any]:
     if not isinstance(text, str): raise ValueError("input must be a string")
     raw = text.strip()

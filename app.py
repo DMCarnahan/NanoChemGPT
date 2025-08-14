@@ -606,8 +606,6 @@ def ask():
             # Fallback: if the model forgot to cite, keep original refs (so UI isn't empty)
             used_refs_list = refs
 
-
-
         return jsonify({
             
             "references_used_indexes": used_ref_idxs,
