@@ -722,11 +722,11 @@ def convert_text_to_robot_ops(text: str) -> Dict:
             if dissolve.get('volume') is not None:
                 vunit = (dissolve.get('volume_units') or '').lower()
                 prefer_ml = dissolve['volume'] * (0.001 if vunit in ('µl','ul') else (1.0 if vunit=='ml' else 1000.0))
-            target_vessel = vessels.primary_vessel or vessels.ensure_glassware(
-                dissolve.get('hardware_hint') or 'Beaker',
-                prefer_capacity_ml=prefer_ml,
-                explicit_hardware_hint=dissolve.get('hardware_hint')
-            )
+            sep = re.search(r"\b(?:in\s+a\s+)?separate\s+(?:container|vessel|beaker|flask)\b", step, re.I)
+            base_label = dissolve.get('hardware_hint') or 'Beaker'
+            label = base_label if not sep else f"{base_label} (separate {len(vessels._label_to_vid)+1})"
+            target_vessel = (vessels.ensure_glassware(label, prefer_capacity_ml=prefer_ml, explicit_hardware_hint=dissolve.get('hardware_hint')) if sep else (vessels.primary_vessel or vessels.ensure_glassware(label, prefer_capacity_ml=prefer_ml, explicit_hardware_hint=dissolve.get('hardware_hint'))))
+            vessels.map_contents(target_vessel, f"{dissolve['solute']} solution in {dissolve['solvent']}")
             record = {
                 "action": "dissolve",
                 "vessel": target_vessel,
@@ -743,6 +743,50 @@ def convert_text_to_robot_ops(text: str) -> Dict:
                 ],
                 "raw": step,
                 "reagents": [dissolve["solute"], dissolve["solvent"]]
+            }
+            _normalize_reagents_inplace(record)
+            _add_structured_reagents_inplace(record)
+            records.append(record)
+            continue
+
+        # Isolate/filter
+        isolate = detect_filter_isolate(step)
+        if isolate:
+            target_vessel = vessels.primary_vessel or vessels.ensure_glassware("Beaker")
+            record = {
+                "action": "isolate",
+                "vessel": target_vessel,
+                "ops": [{"op": "filter", "vessel": target_vessel}, {"op": "collect", "vessel": target_vessel}],
+                "raw": step,
+                "reagents": []
+            }
+            _normalize_reagents_inplace(record)
+            _add_structured_reagents_inplace(record)
+            records.append(record)
+            continue
+
+        # Solution preparation
+        prep = detect_solution_prep(step)
+        if prep:
+            vol_ml = prep["volume"] * (0.001 if prep["volume_units"].lower() in ("µl","ul") else (1.0 if prep["volume_units"].lower()=="ml" else 1000.0))
+            explicit = prep.get("hardware_hint")
+            label = explicit if explicit else "Beaker"
+            vid = vessels.ensure_glassware(label, prefer_capacity_ml=vol_ml, explicit_hardware_hint=explicit)
+            vessels.map_contents(vid, f"{prep['solvent']} {prep['concentration']} {prep['concentration_units']} solution of {prep['solute']}")
+            hw_id = vessels.vessel_hardware(vid)
+            record = {
+                "action":"dispense",
+                "vessel": vid,
+                "hardware_id": hw_id,
+                "solute": prep["solute"],
+                "solvent": prep["solvent"],
+                "concentration": prep["concentration"],
+                "concentration_units": prep["concentration_units"],
+                "volume": prep["volume"],
+                "volume_units": prep["volume_units"],
+                "reagents": [prep["solute"], prep["solvent"]],
+                "ops": ops_for_dispense(vid, hw_id, prep["solute"], prep["solvent"], prep["volume"], prep["volume_units"]),
+                "raw": step,
             }
             _normalize_reagents_inplace(record)
             _add_structured_reagents_inplace(record)
@@ -817,8 +861,20 @@ def convert_text_to_robot_ops(text: str) -> Dict:
         if add:
             src_key = re.sub(r"^\bthe\b\s+","",add["source_name"], flags=re.I).strip()
             dst_key = re.sub(r"^\bthe\b\s+","",add["target_name"], flags=re.I).strip()
-            src_vid = vessels.ensure_glassware(src_key) if "beaker" in src_key.lower() or "flask" in src_key.lower() else (vessels.primary_vessel or vessels.ensure_glassware("Beaker"))
-            dst_vid = vessels.ensure_glassware(dst_key) if "beaker" in dst_key.lower() or "flask" in dst_key.lower() else (vessels.primary_vessel or vessels.ensure_glassware("Beaker"))
+            # Resolve by vessel contents first
+            src_vid = None
+            dst_vid = None
+            for vid, contents in getattr(vessels, "_vessel_contents", {}).items():
+                if src_vid is None and src_key.lower() in contents.lower():
+                    src_vid = vid
+                if dst_vid is None and dst_key.lower() in contents.lower():
+                    dst_vid = vid
+            # Fallbacks
+            if src_vid is None:
+                src_vid = vessels.primary_vessel or vessels.ensure_glassware("Beaker")
+            if dst_vid is None:
+                dst_vid = vessels.primary_vessel or vessels.ensure_glassware("Beaker")
+
             record = {
                 "action": "add",
                 "source_vessel": src_vid,
@@ -1117,7 +1173,7 @@ def convert_text_to_robot_ops(text: str) -> Dict:
         "defaults": DEFAULTS,
         "steps": records,
     }
-# -------- Validation helpers --------
+# -------- Validation helpers (unchanged API) --------
 def validate_step(text: str) -> Dict[str, Any]:
     if not isinstance(text, str): raise ValueError("input must be a string")
     raw = text.strip()
