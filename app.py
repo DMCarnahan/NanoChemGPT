@@ -140,32 +140,6 @@ def _extract_used_markers(*texts: str) -> dict:
             tag_counts[tag] += len(re.findall(rf"\[{tag}\]", t))
     return {"refs": sorted(seen), "tags": tag_counts, "has_ctx": any(tag_counts[k] > 0 for k in ("CTX", "PARSED", "DB"))}
 
-def _format_acs_reference(r: dict) -> str:
-    # Authors
-    authors = r.get("authors") or []
-    if isinstance(authors, list):
-        names = []
-        for a in authors[:6]:
-            n = (a.get("author", {}).get("display_name") if isinstance(a, dict) else str(a)).strip()
-            if n:
-                names.append(n)
-        auth = "; ".join(names)
-        if len(authors) > 6:
-            auth += "; et al."
-    else:
-        auth = str(authors).strip()
-
-    title = (r.get("title") or "(no title)").strip()
-    journal = (r.get("journal") or r.get("venue") or "").strip()
-    year = str(r.get("year") or "").strip()
-
-    doi = (r.get("doi") or "").strip()
-    url = (r.get("url") or "").strip()
-    tail = f" https://doi.org/{doi}" if (doi and not doi.startswith("http")) else (f" {url}" if url else "")
-
-    parts = [p for p in [auth and f"{auth}.", title and f"{title}.", journal, year] if p]
-    return (" ".join(parts) + tail).strip()
-
 def basic_search(query: str, n: int = 6) -> list[dict]:
     """Merge local LOOKUP hits + OpenAlex web hits; de-dup by doi/title."""
     if not query.strip():
@@ -609,7 +583,7 @@ def ask():
                 "mode": mode,
                 "answer": (answer or "").strip(),
                 "rationale": rationale,
-                "references": refs,
+                "references": used_refs_list,
                 "refs_used": used_summary.get("refs", []),
                 "used_tags": used_summary.get("tags", {}),
                 "ctx_vs": vs_ctx,
@@ -618,22 +592,29 @@ def ask():
             qa_id = str(ins.inserted_id)
         except Exception as e:
             print("[/ask] DB insert warn:", e)
-
-        
         # ---- Replace references block with ONLY the sources actually cited in the text ----
         used_ref_idxs = _extract_used_ref_indexes(answer, rationale)
         used_refs_block = _format_references_block_from_used(used_ref_idxs, refs)
         if used_refs_block:
+            # Strip any existing trailing '## References' to avoid duplicates
             answer = (answer or "").rstrip()
             answer = re.sub(r"\n+##\s*References\s*\n[\s\S]*$", "", answer, flags=re.I)
             answer = f"{answer}\n\n## References\n{used_refs_block}"
-        return jsonify({
-            "references_used_indexes": used_ref_idxs,
+        # Build the list of reference dicts that were actually cited
+        used_refs_list = [refs[i-1] for i in (used_ref_idxs or []) if 1 <= i <= len(refs)]
+        if not used_refs_list and refs:
+            # Fallback: if the model forgot to cite, keep original refs (so UI isn't empty)
+            used_refs_list = refs
 
-            "answer": (answer or "").strip(),
+
+
+        return jsonify({
+            
+            "references_used_indexes": used_ref_idxs,
+"answer": (answer or "").strip(),
             "rationale": rationale,
-            "references": refs,
-            "refs": refs,
+            "references": used_refs_list,
+            "refs": used_refs_list,
             "refs_used": used_summary.get("refs", []),
             "used": used_summary,
             "mode": mode,
@@ -800,6 +781,100 @@ if __name__ == "__main__":
         debug=os.getenv("DEBUG", "0") == "1"
     )
 
+
+# =============================================================================
+# ACS-style reference formatter
+# =============================================================================
+def _format_acs_reference(r: dict) -> str:
+    # Format: Authors. Title. Journal Year, Volume(Issue), Pages. DOI/URL
+    def _s(x):
+        return str(x).strip() if x is not None else ""
+
+    # Authors
+    names = []
+    authors = r.get("authors") or r.get("authorships") or r.get("author") or []
+    if isinstance(authors, list):
+        for a in authors:
+            n = None
+            if isinstance(a, dict):
+                n = ((a.get("author") or {}).get("display_name")
+                     or a.get("display_name") or a.get("name") or a.get("full_name"))
+            else:
+                n = str(a)
+            if n:
+                names.append(_s(n))
+    elif isinstance(authors, dict):
+        n = authors.get("display_name") or authors.get("name")
+        if n:
+            names.append(_s(n))
+    elif isinstance(authors, str):
+        names.append(_s(authors))
+
+    if len(names) > 6:
+        names = names[:6] + ["et al."]
+    authors_str = "; ".join([n for n in names if n])
+
+    # Title
+    title = _s(r.get("title") or r.get("display_name") or r.get("paper_title") or "(no title)")
+
+    # Journal / venue
+    journal = r.get("journal") or r.get("venue") or r.get("host_venue") or r.get("container_title") or ""
+    if isinstance(journal, dict):
+        journal = journal.get("display_name") or journal.get("name") or journal.get("title") or ""
+    journal = _s(journal)
+
+    # Year
+    year = r.get("year") or r.get("published_year") or r.get("publication_year")
+    if not year:
+        pubdate = _s(r.get("publication_date") or r.get("published_date"))
+        if len(pubdate) >= 4 and pubdate[:4].isdigit():
+            year = pubdate[:4]
+    year = _s(year)
+
+    # Volume / Issue / Pages
+    biblio = r.get("biblio") or {}
+    volume = _s(r.get("volume") or biblio.get("volume"))
+    issue  = _s(r.get("issue")  or biblio.get("issue"))
+    fp     = _s(r.get("first_page") or biblio.get("first_page") or r.get("page_start"))
+    lp     = _s(r.get("last_page")  or biblio.get("last_page")  or r.get("page_end"))
+    pages  = ""
+    if fp and lp:
+        pages = f"{fp}-{lp}"
+    elif fp:
+        pages = fp
+    elif r.get("pages"):
+        pages = _s(r.get("pages"))
+
+    # DOI / URL
+    doi = _s(r.get("doi"))
+    url = _s(r.get("url") or r.get("pdf_url") or r.get("landing_page_url"))
+    tail = ""
+    if doi:
+        tail = f"https://doi.org/{doi}" if not doi.startswith("http") else doi
+    elif url:
+        tail = url
+
+    # Build string
+    parts = []
+    if authors_str: parts.append(f"{authors_str}.")
+    if title:       parts.append(f"{title}.")
+
+    trailer = []
+    if journal:     trailer.append(journal)
+    if year:        trailer.append(year)
+    vol_issue = volume if volume else ""
+    if issue:
+        vol_issue = f"{volume}({issue})" if volume else f"({issue})"
+    if vol_issue:   trailer.append(vol_issue)
+    if pages:       trailer.append(pages)
+
+    if trailer:
+        core = ", ".join([t for t in trailer if _s(t)])
+        parts.append(f"{core}.")
+    if tail:
+        parts.append(tail)
+
+    return " ".join([p for p in parts if _s(p)]).strip()
 # =============================================================================
 # Used-reference extraction helpers (build references from only what was cited)
 # =============================================================================
@@ -825,5 +900,6 @@ def _format_references_block_from_used(used_idxs: list[int], refs: list[dict]) -
     lines = []
     for idx in used_idxs:
         if 1 <= idx <= len(refs):
+            # Expect _format_acs_reference to exist in your app
             lines.append(f"{idx}. " + _format_acs_reference(refs[idx-1]))
     return "\n".join(lines)
