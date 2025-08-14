@@ -21,192 +21,7 @@ from werkzeug.utils import secure_filename
 import vector_store as vs
 from converter import validate_step, convert_text_to_robot_ops
 from mongo_client import get_db, ping as mongo_ping
-from internet_search import search_papers, set_user_agent
-
-# ---------------------------------------------------------------------------
-#  Search helpers and reference filtering utilities
-
-# A lightweight regex for extracting chemical formulas like Mn3O4, NiO, Fe3O4.
-_FORMULA_REGEX = re.compile(r"\b(?:[A-Z][a-z]?\d*){1,5}\b")
-
-# A mapping of known formula aliases to additional synonyms. This is not
-# exhaustive but covers a few common oxides encountered in the app.
-_MATERIAL_SYNONYMS = {
-    "mn3o4": [
-        "hausmannite",
-        "manganese tetroxide",
-        "manganese(ii,iii) oxide",
-        "trimanganese tetraoxide",
-    ],
-    "nio": [
-        "nickel oxide",
-        "nickel(ii) oxide",
-    ],
-    "fe3o4": [
-        "magnetite",
-        "iron(ii,iii) oxide",
-        "black iron oxide",
-    ],
-}
-
-# A small list of shape descriptors. These can be extended as needed.
-_SHAPE_TERMS = [
-    "nanorod", "nanorods",
-    "nanowire", "nanowires",
-    "nanotube", "nanotubes",
-    "nanoribbon", "nanoribbons",
-    "nanobelt", "nanobelts",
-    "nanosheet", "nanosheets",
-    "nanoplate", "nanoplates",
-    "nanoparticle", "nanoparticles",
-    "nanocube", "nanocubes",
-]
-
-def _call_search_papers(q: str, n: int = 20, aboutness_flag: bool = True) -> list[dict]:
-    """
-    Signature shim for search_papers(...).
-    Tries use_aboutness=..., then aboutness=..., then no kw; returns [] on error.
-    """
-    try:
-        return search_papers(q, n=n, use_aboutness=aboutness_flag) or []
-    except TypeError:
-        try:
-            return search_papers(q, n=n, aboutness=aboutness_flag) or []
-        except TypeError:
-            try:
-                return search_papers(q, n=n) or []
-            except Exception as e:
-                print("[_call_search_papers] search error:", e)
-                return []
-
-def _extract_formulas(q: str) -> Set[str]:
-    """
-    Extract chemical formulas; support lowercase & unicode subscripts (e.g., mn₃o₄).
-    Returns lowercase tokens (e.g., 'mn3o4').
-    """
-    s = from_subscript(q or "")
-    hits = set(_FORMULA_REGEX.findall(s)) | set(_FORMULA_REGEX.findall(s.upper()))
-    return {h.lower() for h in hits}
-
-def derive_query_profile(question: str) -> dict:
-    """
-    Materials: regex-extracted formulas + known aliases (lowercase).
-    Shapes: keyword hits from _SHAPE_TERMS (lowercase).
-    """
-    materials: set[str] = set()
-    shapes: set[str] = set()
-    q_lower = (question or "").lower()
-
-    # formulas (lowercase) + synonyms
-    for f in _extract_formulas(question or ""):
-        materials.add(f)
-        if f in _MATERIAL_SYNONYMS:
-            for alias in _MATERIAL_SYNONYMS[f]:
-                materials.add(alias.lower())
-
-    # generic material words (optional expansion)
-    if "manganese oxide" in q_lower and "mn3o4" not in materials:
-        materials.update({"mn3o4", "manganese oxide"})
-
-    # shapes
-    for term in _SHAPE_TERMS:
-        if term in q_lower:
-            shapes.add(term)
-
-    return {"materials": materials, "shapes": shapes}
-
-def _is_materials_domain(r: dict) -> bool:
-    j = ((r.get("journal") or r.get("venue") or r.get("host_venue") or "") or "").lower()
-    t = (r.get("title") or "").lower()
-    bad = ["cytotherapy","bioreactor","distributed computing","fault tolerance","software","management","education","sociology"]
-    if any(b in t for b in bad):
-        return False
-    good = ["chem","mater","nano","phys","catal","solid state","applied surface","inorg","cryst"]
-    return any(g in j for g in good) or (
-        "doi" in r and str(r["doi"]).startswith(("10.1016","10.1039","10.1021","10.1002"))
-    )
-
-def filter_and_rerank_generic(question: str, refs: list[dict]) -> list[dict]:
-    if not refs:
-        return []
-
-    prof = derive_query_profile(question)
-    mats = prof.get("materials", set())
-    objs = prof.get("shapes", set())
-
-    def blob(r: dict) -> str:
-        title = from_subscript((r.get("title") or "")).lower()
-        abstract = from_subscript((r.get("abstract") or "")).lower()
-        return f"{title} {abstract}"
-
-    # Helper to roughly detect other materials (to penalize off-target like ZnO/TiO2)
-    def contains_other_formula(b: str) -> bool:
-        # any formula that isn't in our target set/synonyms
-        for m in re.findall(r"\b(?:[a-z]{1,2}\d*){1,5}\b", b):
-            if m and mats and (m not in mats):
-                return True
-        return False
-
-    scored = []
-    for r in refs:
-        b = blob(r)
-        mat_hit = any(m in b for m in mats) if mats else False
-        obj_hit = any(o in b for o in objs) if objs else False
-
-        # insist on material match when specified
-        if mats and not mat_hit:
-            continue
-        # drop obvious non-materials domains when materials are specified
-        if mats and not _is_materials_domain(r):
-            continue
-
-        score = 0.0
-        if mat_hit: score += 5.0         # strong boost for cdse/target
-        if obj_hit: score += 3.0         # boost for “nanocrystals”, etc.
-        if contains_other_formula(b):     # demote refs about ZnO/TiO2/etc.
-            score -= 3.0
-        try:
-            y = int(r.get("year") or 0)  # slight recency nudge
-            score += y * 0.001
-        except Exception:
-            pass
-
-        scored.append((score, r))
-
-    if not scored:
-        # If filter nuked everything, return a domain-trimmed slice or raw top
-        trimmed = [r for r in refs if _is_materials_domain(r)]
-        return trimmed[:8] or refs[:8]
-
-    scored.sort(key=lambda x: x[0], reverse=True)
-    return [r for _, r in scored][:8]
-
-def _format_acs_reference(r: dict) -> str:
-    # Authors
-    authors = r.get("authors") or []
-    if isinstance(authors, list):
-        names = []
-        for a in authors[:6]:
-            n = (a.get("author", {}).get("display_name") if isinstance(a, dict) else str(a)).strip()
-            if n:
-                names.append(n)
-        auth = "; ".join(names)
-        if len(authors) > 6:
-            auth += "; et al."
-    else:
-        auth = str(authors).strip()
-
-    title = (r.get("title") or "(no title)").strip()
-    journal = (r.get("journal") or r.get("venue") or "").strip()
-    year = str(r.get("year") or "").strip()
-
-    doi = (r.get("doi") or "").strip()
-    url = (r.get("url") or "").strip()
-    tail = f" https://doi.org/{doi}" if (doi and not doi.startswith("http")) else (f" {url}" if url else "")
-
-    parts = [p for p in [auth and f"{auth}.", title and f"{title}.", journal, year] if p]
-    return (" ".join(parts) + tail).strip()
-
+from internet_search import search_papers
 from DuckDB.duck_searcher import get_duck_searcher
 
 # ──────────────── Paths/Config ──────────────── #
@@ -300,29 +115,7 @@ load_dotenv()
 _no_proxy = httpx.Client(trust_env=False, timeout=120.0)
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"), http_client=_no_proxy)
 
-# Set the contact email for OpenAlex API via set_user_agent if available.
-try:
-    # Use environment variables CONTACT_EMAIL or OPENALEX_CONTACT_EMAIL as the contact email.
-    contact_email = os.getenv("CONTACT_EMAIL") or os.getenv("OPENALEX_CONTACT_EMAIL")
-    if contact_email:
-        set_user_agent(contact_email)
-except Exception:
-    # If set_user_agent isn't available or fails, continue without raising.
-    pass
-
-try:
-    contact_email = os.getenv("CONTACT_EMAIL") or os.getenv("OPENALEX_CONTACT_EMAIL")
-    if contact_email:
-        set_user_agent(contact_email)
-except Exception:
-    pass
-
 # ──────────────── Utilities ──────────────── #
-# --- unicode subscript → ascii digits helper ---
-_SUB_MAP = str.maketrans("₀₁₂₃₄₅₆₇₈₉", "0123456789")
-def from_subscript(s: str) -> str:
-    return (s or "").translate(_SUB_MAP)
-
 def _safe_text(x: Any) -> str:
     try:
         return str(x) if x is not None else ""
@@ -349,7 +142,7 @@ def _extract_used_markers(*texts: str) -> dict:
 
 def basic_search(query: str, n: int = 6) -> list[dict]:
     """Merge local LOOKUP hits + OpenAlex web hits; de-dup by doi/title."""
-    if not (query or "").strip():
+    if not query.strip():
         return []
     local = []
     if LOOKUP is not None:
@@ -370,22 +163,17 @@ def basic_search(query: str, n: int = 6) -> list[dict]:
         except Exception as e:
             print("[basic_search] lookup query failed:", e)
 
-    uq = (query or "").strip()
-    use_aboutness = len(uq) <= 80 and uq.count(" ") < 12 and not any(p in uq for p in ",;:!?/\\|")
-
     web = []
     try:
-        web = _call_search_papers(query, n=n, aboutness_flag=use_aboutness) or []
+        web = search_papers(query, n)
     except Exception as e:
-        print("[basic_search] internet_search error:", e)
+        print("[basic_search] OpenAlex fetch failed:", e)
 
     seen = {(d.get("doi") or d.get("title", "")).lower() for d in local}
     for w in web:
         key = (w.get("doi") or w.get("title", "")).lower()
         if key not in seen:
-            local.append({
-                k: w.get(k, "") for k in ("title","year","url","doi","abstract","journal","authors")
-            } | {"source":"web"})
+            local.append({k: w.get(k, "") for k in ("title", "year", "url", "doi")})
             seen.add(key)
     return local[:2 * n]
 
@@ -551,12 +339,14 @@ def ask():
         if not raw:
             return "", ""
         text = raw.strip()
-        # Remove any ```reason|rationale|reasoning fenced block
+        # Remove all code-fenced reason/rationale blocks from the answer
         fence_rx = re.compile(r"```(?:reason|rationale|reasoning)\s*([\s\S]*?)```", re.I)
         rationale = ""
         fences = list(fence_rx.finditer(text))
         if fences:
+            # Use the last rationale block found
             rationale = fences[-1].group(1).strip()
+            # Remove all rationale blocks from the answer
             answer = fence_rx.sub("", text).strip()
             return answer, rationale
         # Heading rationale block
@@ -566,7 +356,9 @@ def ask():
             rationale = m.group(2).strip()
             answer = text[:m.start()].strip()
             return answer, rationale
+        # If no rationale found, treat all as answer, rationale is empty
         return text, ""
+
     try:
         payload = request.get_json(silent=True) or {}
         q = (payload.get("question") or "").strip()
@@ -598,127 +390,34 @@ def ask():
                     line = f"[T{i}] solvent={solvent}; temp_C={temp}; time_h={time_h}; {note}".strip()
                     lines.append(line)
                     url = row.get("url") or (row.get("doi") and f"https://doi.org/{row['doi']}")
-                    if url:
-                        table_refs.append({"title": f"Table row {i}", "url": url})
+                    if url: table_refs.append({"title": f"Table row {i}", "url": url})
                 table_ctx = "\n".join(lines)
             except Exception as e:
                 print("[/ask] LOOKUP query error:", e)
 
-        # Build unified context string
         context_parts = []
-        if vs_ctx:
-            context_parts.append("<<<CTX_UPLOADS>>>\n" + vs_ctx)
-        if table_ctx:
-            context_parts.append("<<<CTX_TABLE>>>\n" + table_ctx)
+        if vs_ctx: context_parts.append("<<<CTX_UPLOADS>>>\n" + vs_ctx)
+        if table_ctx: context_parts.append("<<<CTX_TABLE>>>\n" + table_ctx)
         context_joined = "\n\n---\n\n".join(context_parts).strip()
 
-        print("[/ask] search impl:", getattr(search_papers, "__module__", None), getattr(search_papers, "__name__", None))
-
-        # Initial web references (skip aboutness for long queries)
         refs = []
         try:
-            refs = _call_search_papers(q, n=20, aboutness_flag=False)
+            refs = basic_search(q, n=6) or []
         except Exception as e:
-            print("[/ask] search_papers error:", e)
+            print("[/ask] basic_search error:", e)
         if table_refs:
             refs = list(refs) + table_refs
-        # Log initial counts
-        print(f"[/ask] initial refs: {len(refs)}")
-        _pre_filter_refs = list(refs)
 
-        # Filter and rerank generically
-        try:
-            refs = filter_and_rerank_generic(q, refs) or []
-        except Exception as e:
-            print("[/ask] filter error:", e)
-
-        print(f"[/ask] after filter: {len(refs)}")
-        if not refs and _pre_filter_refs:
-            refs = _pre_filter_refs[:8]
-            print("[/ask] filter emptied results — restored top raw refs:", len(refs))
-
-        prof = derive_query_profile(q)
-        if prof.get("materials") and len(refs) < 3:
-            try:
-                mats = sorted({m for m in prof["materials"] if any(ch.isalpha() for ch in m)})[:3]
-                ql = (q or "").lower()
-
-                if prof["shapes"]:
-                    objects = sorted(list(prof["shapes"]))[:2]   
-                else:
-                    if any(t in ql for t in ["nanocrystal","nanocrystals"]):
-                        objects = ["nanocrystals"]
-                    elif "nanoparticle" in ql or "nanoparticles" in ql:
-                        objects = ["nanocrystals"]
-                    else:
-                        objects = []
-
-                seeds = [q]
-                if objects:
-                    for obj in objects:
-                        for m in mats[:2]:
-                            seeds += [
-                                f"{m} {obj} synthesis",
-                                f"{m} {obj} hot-injection",
-                                f"{m} {obj} non-injection",
-                                f"{m} {obj} growth",
-                            ]
-                else:
-                    for m in mats[:2]:
-                        seeds += [
-                            f"{m} synthesis",
-                            f"{m} colloidal synthesis",
-                            f"{m} hot-injection",
-                            f"{m} nanocrystal synthesis",
-                        ]
-
-                more, seen = [], set()
-                for s in seeds:
-                    for h in (_call_search_papers(s, n=12, aboutness_flag=True) or []):  # short seeds → aboutness=True
-                        key = (h.get("doi") or h.get("title","")).lower()
-                        if key in seen: 
-                            continue
-                        seen.add(key); more.append(h)
-                if more:
-                    refs = filter_and_rerank_generic(q, refs + more) or refs
-            except Exception as e:
-                print("[/ask] enriched_search error:", e)
-
-
-        # ---- Final relaxed material-only fallback if still empty ----
-        if not refs and prof.get("materials"):
-            mats_list = sorted(list(prof["materials"]))[:2]
-            seeds = [f"{m} nanorod" for m in mats_list] + [f"{m} nanorods" for m in mats_list]
-            more, seen = [], set()
-            for s in seeds:
-                for h in (_call_search_papers(s, n=12, aboutness_flag=False) or []):
-                    key = (h.get("doi") or h.get("title","")).lower()
-                    if key in seen: 
-                        continue
-                    seen.add(key); more.append(h)
-            if more:
-                try:
-                    refs = filter_and_rerank_generic(q, more) or []
-                except Exception as e:
-                    print("[/ask] final filter error:", e)
-
-        print("[/ask] refs (filtered):")
-        for i, r in enumerate(refs or [], 1):
-            print(f"  [{i}] {r.get('title')} — {r.get('doi') or r.get('url')}")
-
-        # Build numbered reference prompt
-        def _ref_url(r: dict) -> str:
-            if r.get("url"):
-                return r["url"]
-            if r.get("doi"):
-                return f"https://doi.org/{r['doi']}"
+        def _ref_url(r):
+            if r.get("url"): return r["url"]
+            if r.get("doi"): return f"https://doi.org/{r['doi']}"
             return ""
         refs_prompt = "\n".join(
             f"[{i+1}] {(r.get('title') or '(no title)')} ({r.get('year') or ''}) — {_ref_url(r)}"
             for i, r in enumerate(refs)
         ).strip()
 
-        # ----------------- Prompt construction -----------------
+        # prompt variants
         robot_rules = (
             "Return a discrete lab protocol with exact quantities on a small scale (~0.5 mmol Co):\n"
             " - Include specific masses (mg) or mmol for reagents; volumes (mL) for liquids.\n"
@@ -744,6 +443,7 @@ def ask():
         )
 
         def strip_references_block(text: str) -> str:
+            # Remove everything from '## References' to the end
             return re.sub(r"## References[\s\S]*", "", text, flags=re.I).strip()
 
         if mode == "reasoning":
@@ -758,7 +458,7 @@ def ask():
                 " - For each cited reference, briefly summarize the relevant finding and explain how it relates to aspect ratio and temperature.\n"
                 " - If no reference supports a statement, say so explicitly and do not cite it.\n"
                 f"{reasoning_rules}\n"
-                f"{acs_rule}\n"
+                f"{acs_rule}\n"  
                 "Return exactly ONE block:\n"
                 "## Mechanistic reasoning\n"
                 "- bullet points with inline [n] and [CTX] where appropriate.\n\n"
@@ -776,7 +476,7 @@ def ask():
                 f"{inline_rule}\n"
                 " - If CONTEXT is insufficient, say so explicitly before generalizing.\n"
                 f"{robot_rules}\n"
-                f"{acs_rule}\n"
+                f"{acs_rule}\n"  
                 "Return two blocks exactly in this order:\n"
                 "## Synthesis Protocol:\n"
                 "1. **Hardware & Glassware**:\n[]\n"
@@ -807,7 +507,7 @@ def ask():
             answer, rationale = split_reasoning(strip_references_block(raw))
 
         # Rationale fallback if missing
-        if not (rationale or "").strip() and mode != "reasoning":
+        if not (rationale or "").strip():
             try:
                 rationale_only = (
                     "You previously produced the SynthesisProtocol below.\n"
@@ -831,7 +531,7 @@ def ask():
                 print("[/ask] rationale fallback failed:", e)
                 rationale = rationale or ""
 
-        # Post-pass: enforce citations & CTX usage if missing (non-strict modes)
+        # Post-pass: enforce citations & CTX usage if missing
         try:
             used_summary = _extract_used_markers(answer or "", rationale or "")
             if want_inline and not used_summary.get("refs"):
@@ -857,7 +557,6 @@ def ask():
             print("[/ask] used extraction failed:", _e)
             used_summary = {"refs": [], "tags": {}, "has_ctx": False}
 
-        # Enforce [CTX] usage if missing and context present
         if context_joined and not used_summary.get("has_ctx"):
             try:
                 revise = client.chat.completions.create(
@@ -875,18 +574,6 @@ def ask():
             except Exception as e:
                 print("[ask] revise step skipped:", e)
 
-        # Build a references block and optionally append to answer
-        want_refs_block = bool(payload.get("want_reference_block", True))
-        is_strict = mode in ("robot_strict", "reasoning_strict")
-        refs_block_text = ""
-        if want_refs_block and refs:
-            refs_block_text = "\n".join(
-                f"{i+1}. {_format_acs_reference(r)}" for i, r in enumerate(refs)
-            )
-        if want_refs_block and not is_strict and refs_block_text:
-            answer = f"{(answer or '').rstrip()}\n\n## References\n{refs_block_text}"
-
-        # Persist to DB and return
         qa_id = None
         try:
             db = get_db()
@@ -906,11 +593,20 @@ def ask():
         except Exception as e:
             print("[/ask] DB insert warn:", e)
 
+        
+        # ---- Replace references block with ONLY the sources actually cited in the text ----
+        used_ref_idxs = _extract_used_ref_indexes(answer, rationale)
+        used_refs_block = _format_references_block_from_used(used_ref_idxs, refs)
+        if used_refs_block:
+            answer = (answer or "").rstrip()
+            answer = re.sub(r"\n+##\s*References\s*\n[\s\S]*$", "", answer, flags=re.I)
+            answer = f"{answer}\n\n## References\n{used_refs_block}"
         return jsonify({
+            "references_used_indexes": used_ref_idxs,
+
             "answer": (answer or "").strip(),
             "rationale": rationale,
             "references": refs,
-            "references_block": refs_block_text,
             "refs": refs,
             "refs_used": used_summary.get("refs", []),
             "used": used_summary,
@@ -919,6 +615,7 @@ def ask():
             "ctx_vs": (vs_ctx or "")[:8000],
             "ctx_table": (table_ctx or "")[:4000],
         })
+
     except Exception as e:
         print("[/ask] Unhandled error:", e)
         traceback.print_exc()
@@ -1076,3 +773,31 @@ if __name__ == "__main__":
         port=int(os.getenv("PORT", 8000)),
         debug=os.getenv("DEBUG", "0") == "1"
     )
+
+# =============================================================================
+# Used-reference extraction helpers (build references from only what was cited)
+# =============================================================================
+_USED_NUM_CIT_RX = re.compile(r"\[(\d{1,3})\]")
+
+def _extract_used_ref_indexes(*texts: str) -> list[int]:
+    """Return sorted unique numeric citation indexes found like [1], [2], ..."""
+    used = set()
+    for t in texts:
+        if not t:
+            continue
+        for m in _USED_NUM_CIT_RX.finditer(t):
+            try:
+                used.add(int(m.group(1)))
+            except Exception:
+                pass
+    return sorted(used)
+
+def _format_references_block_from_used(used_idxs: list[int], refs: list[dict]) -> str:
+    """Build '## References' block containing ONLY cited items."""
+    if not used_idxs or not refs:
+        return ""
+    lines = []
+    for idx in used_idxs:
+        if 1 <= idx <= len(refs):
+            lines.append(f"{idx}. " + _format_acs_reference(refs[idx-1]))
+    return "\n".join(lines)
