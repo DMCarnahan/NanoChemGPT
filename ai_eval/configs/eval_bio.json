@@ -1,0 +1,28 @@
+{
+  "task": "bio_token",
+  "dataset": {
+    "gold_path": "datasets/gold_bio.jsonl"
+  },
+  "predictions": {
+    "pred_path": "datasets/preds_bio.jsonl"
+  },
+  "labels": [
+    "ACTION",
+    "AMOUNT",
+    "ATMOS",
+    "CONC",
+    "EQUIPMENT",
+    "MATERIAL",
+    "SPEED",
+    "TEMP",
+    "TIME",
+    "UNIT"
+  ],
+  "bio": {
+    "ignore_o": true,
+    "report_entities": true
+  },
+  "report": {
+    "out_path": "reports/report_bio.json"
+  }
+}

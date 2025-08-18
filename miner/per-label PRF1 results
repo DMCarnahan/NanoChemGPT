@@ -1,0 +1,13 @@
+ents_p = 0.924  ents_r = 0.990  ents_f = 0.956
+
+Per-label:
+    ACTION  P=0.946  R=1.000  F1=0.972
+    AMOUNT  P=0.939  R=0.976  F1=0.957
+     ATMOS  P=1.000  R=0.995  F1=0.998
+      CONC  P=0.949  R=0.969  F1=0.959
+ EQUIPMENT  P=0.995  R=0.998  F1=0.997
+  MATERIAL  P=0.837  R=0.977  F1=0.902
+     SPEED  P=0.938  R=1.000  F1=0.968
+      TEMP  P=0.998  R=0.998  F1=0.998
+      TIME  P=0.996  R=1.000  F1=0.998
+    VESSEL  P=0.996  R=1.000  F1=0.998

@@ -1,0 +1,44 @@
+openapi: 3.1.0
+info:
+  title: Nanochem Retriever (Hybrid)
+  version: "1.1.0"
+servers:
+  - url: http://localhost:8000
+paths:
+  /search:
+    post:
+      operationId: search
+      summary: Hybrid semantic search over nanochem methods
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                query: {type: string}
+                k: {type: integer, default: 5}
+                mode: {type: string, enum: [tfidf, embed, hybrid], default: hybrid}
+                alpha: {type: number, default: 0.7}
+              required: [query]
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  hits:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        score: {type: number}
+                        text: {type: string}
+                        paper_id: {type: string}
+                        title: {type: string}
+                        url: {type: string, nullable: true}
+                        license: {type: object, nullable: true}
+                        ents: {type: array, items: {type: object}, nullable: true}
+                        links: {type: array, items: {type: object}, nullable: true}

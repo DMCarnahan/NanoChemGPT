@@ -1,0 +1,17 @@
+{
+  "task": "relations",
+  "dataset": {
+    "gold_path": "datasets/gold_rel.jsonl"
+  },
+  "predictions": {
+    "pred_path": "datasets/preds_rel.jsonl"
+  },
+  "matching": {
+    "mode": "iou",
+    "iou_threshold": 0.5
+  },
+  "report": {
+    "out_path": "reports/report_rel.json",
+    "errors_path": "reports/errors_rel.jsonl"
+  }
+}

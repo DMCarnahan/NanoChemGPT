@@ -1,0 +1,88 @@
+{
+  "task": "entity_extraction",
+  "micro": {
+    "precision": 1.0,
+    "recall": 0.8666666666666667,
+    "f1": 0.9285714285714286,
+    "tp": 13,
+    "fp": 0,
+    "fn": 2
+  },
+  "per_label": [
+    {
+      "label": "ACTION",
+      "support": 2,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0
+    },
+    {
+      "label": "AMOUNT",
+      "support": 3,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0
+    },
+    {
+      "label": "ATMOS",
+      "support": 1,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0
+    },
+    {
+      "label": "EQUIPMENT",
+      "support": 1,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0
+    },
+    {
+      "label": "MATERIAL",
+      "support": 2,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0
+    },
+    {
+      "label": "SPEED",
+      "support": 1,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0
+    },
+    {
+      "label": "TEMP",
+      "support": 1,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0
+    },
+    {
+      "label": "TIME",
+      "support": 1,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0
+    },
+    {
+      "label": "UNIT",
+      "support": 3,
+      "precision": 1.0,
+      "recall": 0.6666666666666666,
+      "f1": 0.8
+    }
+  ],
+  "support": {
+    "AMOUNT": 3,
+    "UNIT": 3,
+    "EQUIPMENT": 1,
+    "ACTION": 2,
+    "MATERIAL": 2,
+    "ATMOS": 1,
+    "TEMP": 1,
+    "SPEED": 1,
+    "TIME": 1
+  },
+  "attribute_demoted_tp": 0
+}

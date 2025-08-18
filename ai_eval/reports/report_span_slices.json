@@ -1,0 +1,38 @@
+{
+  "has_TEMP": {
+    "micro": {
+      "precision": 1.0,
+      "recall": 0.8666666666666667,
+      "f1": 0.9285714285714286
+    },
+    "support": {
+      "AMOUNT": 3,
+      "UNIT": 3,
+      "EQUIPMENT": 1,
+      "ACTION": 2,
+      "MATERIAL": 2,
+      "ATMOS": 1,
+      "TEMP": 1,
+      "SPEED": 1,
+      "TIME": 1
+    }
+  },
+  "has_ATMOS": {
+    "micro": {
+      "precision": 1.0,
+      "recall": 0.8666666666666667,
+      "f1": 0.9285714285714286
+    },
+    "support": {
+      "AMOUNT": 3,
+      "UNIT": 3,
+      "EQUIPMENT": 1,
+      "ACTION": 2,
+      "MATERIAL": 2,
+      "ATMOS": 1,
+      "TEMP": 1,
+      "SPEED": 1,
+      "TIME": 1
+    }
+  }
+}

@@ -11,7 +11,7 @@ import pandas as pd
 from dotenv import load_dotenv
 from flask import (
     Flask, request, jsonify, abort, render_template,
-    send_file, make_response
+    send_file
 )
 from jinja2 import TemplateNotFound
 from openai import OpenAI
@@ -21,7 +21,10 @@ from werkzeug.utils import secure_filename
 import vector_store as vs
 from converter import validate_step, convert_text_to_robot_ops
 from mongo_client import get_db, ping as mongo_ping
-from internet_search import search_papers
+from decider.intent import classify_intent
+from decider.kb import kb_search, kb_fetch
+from decider.judge_sufficiency import judge_sufficiency
+from decider.miner_queue import enqueue_text_mining_job
 from DuckDB.duck_searcher import get_duck_searcher
 
 # ──────────────── Paths/Config ──────────────── #
@@ -115,12 +118,122 @@ load_dotenv()
 _no_proxy = httpx.Client(trust_env=False, timeout=120.0)
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"), http_client=_no_proxy)
 
+RETRIEVER_URL = os.getenv("RETRIEVER_URL", "http://localhost:8000")
+
+def retriever_search(query: str, k: int = 8, mode: str = "hybrid", alpha: float = 0.7) -> list[dict]:
+    try:
+        r = _no_proxy.post(f"{RETRIEVER_URL}/search", json={"query": query, "k": k, "mode": mode, "alpha": alpha}, timeout=60)
+        r.raise_for_status()
+        return r.json().get("hits", [])
+    except Exception as e:
+        print("[retriever] search failed:", e)
+        return []
+
 # ──────────────── Utilities ──────────────── #
 def _safe_text(x: Any) -> str:
     try:
         return str(x) if x is not None else ""
     except Exception:
         return ""
+
+
+# ---- Citation extraction and formatting helpers ----
+_CIT_RX_BRACKET = re.compile(r"\[(\d{1,4})\]")
+_CIT_RX_FULL    = re.compile(r"【(\d{1,4})】")
+_CIT_RX_FOOT    = re.compile(r"\[\^(\d{1,4})\]")
+
+def _extract_used_ref_indexes(*texts: str) -> list[int]:
+    """Return sorted unique numeric citation indexes found like [1], [2], 【3】, or [^4]."""
+    seen = set()
+    for t in texts:
+        if not t:
+            continue
+        for rx in (_CIT_RX_BRACKET, _CIT_RX_FULL, _CIT_RX_FOOT):
+            for m in rx.finditer(t):
+                try:
+                    seen.add(int(m.group(1)))
+                except Exception:
+                    pass
+    return sorted(seen)
+
+def _format_acs_reference(ref: dict) -> str:
+    """Lightweight ACS-ish formatting from a heterogeneous ref dict."""
+    def _s(x): return _safe_text(x)
+    # Authors
+    authors = ref.get("authors") or ref.get("authorships") or []
+    names = []
+    for a in authors:
+        if isinstance(a, dict):
+            nm = a.get("name") or a.get("author", {}).get("display_name") or a.get("display_name") or a.get("last_name")
+            if nm: names.append(_s(nm))
+        elif isinstance(a, str):
+            names.append(_s(a))
+    if len(names) > 6:
+        names = names[:6] + ["et al."]
+    authors_str = "; ".join([n for n in names if n])
+
+    # Title
+    title = _s(ref.get("title") or ref.get("display_name") or ref.get("paper_title") or "(no title)")
+
+    # Journal / Venue
+    journal = ref.get("journal") or ref.get("venue") or ref.get("host_venue") or ref.get("container_title") or ""
+    if isinstance(journal, dict):
+        journal = journal.get("display_name") or journal.get("name") or journal.get("title") or ""
+    journal = _s(journal)
+
+    # Year (derive from date if missing)
+    year = ref.get("year") or ref.get("published_year") or ref.get("publication_year")
+    if not year:
+        pubdate = _s(ref.get("publication_date") or ref.get("published_date"))
+        if len(pubdate) >= 4 and pubdate[:4].isdigit():
+            year = pubdate[:4]
+    year = _s(year)
+
+    # Volume / Issue / Pages
+    biblio = ref.get("biblio") or {}
+    volume = _s(ref.get("volume") or biblio.get("volume"))
+    issue  = _s(ref.get("issue")  or biblio.get("issue"))
+    fp     = _s(ref.get("first_page") or biblio.get("first_page") or ref.get("page_start"))
+    lp     = _s(ref.get("last_page")  or biblio.get("last_page")  or ref.get("page_end"))
+    pages  = ""
+    if fp and lp:
+        pages = f"{fp}-{lp}"
+    elif fp:
+        pages = fp
+
+    # DOI/URL
+    doi = _s(ref.get("doi"))
+    url = _s(ref.get("url"))
+    tail = ""
+    if doi:
+        tail = f"DOI: {doi}"
+    elif url:
+        tail = url
+
+    parts = []
+    if authors_str: parts.append(authors_str + ".")
+    if title:       parts.append(title + ".")
+    trailer = []
+    if journal:     trailer.append(journal)
+    if year:        trailer.append(year)
+    if volume:      trailer.append(volume if not issue else f"{volume}({issue})")
+    if pages:       trailer.append(pages)
+    if trailer:
+        parts.append(", ".join(trailer) + ".")
+    if tail:
+        parts.append(tail)
+    return " ".join(p for p in parts if p).strip()
+
+def _format_references_block_from_used(used_indexes: list[int], refs: list[dict]) -> str:
+    """Create a numbered reference block (1-based) for only the cited refs present in `refs`."""
+    if not used_indexes or not refs:
+        return ""
+    lines = []
+    for idx in sorted(set(used_indexes)):
+        if not isinstance(idx, int) or idx < 1 or idx > len(refs):
+            continue
+        lines.append(f"{idx}. " + _format_acs_reference(refs[idx-1]))
+    return "\\n".join(lines)
 
 def _extract_used_markers(*texts: str) -> dict:
     """Find [n] citations and [CTX]/[PARSED]/[DB]/[GEN] tags."""
@@ -335,51 +448,85 @@ def _process_pdf_job(jid: str, path: Path, filename: str):
 # ---- Ask ---- #
 @app.post("/ask")
 def ask():
-    def split_reasoning(raw: str) -> tuple[str, str]:
+    """
+    Unified Q&A endpoint that:
+      • Classifies intent (classify_intent) to steer behavior (mode, search breadth).
+      • Pulls context from uploads, DuckDB, and **KB** (kb_search/kb_fetch).
+      • Builds a numbered REFERENCES list (web + KB), asks the LLM to cite with [n].
+      • Extracts **used** citation indexes and returns only those in an ACS-style block.
+      • Computes usage markers via _extract_used_markers.
+      • Judges sufficiency and, if thin, enqueues text-mining for future runs.
+    """
+    # ----------------- tiny helpers -----------------
+    def _s(x):
+        return _safe_text(x)
+
+    def _split_reasoning(raw: str) -> tuple[str, str]:
         if not raw:
             return "", ""
         text = raw.strip()
-        # Remove all code-fenced reason/rationale blocks from the answer
-        fence_rx = re.compile(r"```(?:reason|rationale|reasoning)\s*([\s\S]*?)```", re.I)
+        fence_rx = re.compile(r"```(?:reason|rationale|reasoning)\s*([\\s\\S]*?)```", re.I)
         rationale = ""
         fences = list(fence_rx.finditer(text))
         if fences:
-            # Use the last rationale block found
             rationale = fences[-1].group(1).strip()
-            # Remove all rationale blocks from the answer
             answer = fence_rx.sub("", text).strip()
             return answer, rationale
-        # Heading rationale block
-        head = re.compile(r"(?:^|\n)#{1,3}\s*(rationale|reasoning)\b[^\n]*\n((?:.*\n?)*)$", re.I | re.S)
+        head = re.compile(r"(?:^|\\n)#{1,3}\\s*(rationale|reasoning)\\b[^\\n]*\\n((?:.*\\n?)*)$", re.I | re.S)
         m = head.search(text)
         if m:
             rationale = m.group(2).strip()
             answer = text[:m.start()].strip()
             return answer, rationale
-        # If no rationale found, treat all as answer, rationale is empty
         return text, ""
+
+    def _ref_url(r: dict) -> str:
+        if r.get("url"): return r["url"]
+        if r.get("doi"): return f"https://doi.org/{r['doi']}"
+        return ""
 
     try:
         payload = request.get_json(silent=True) or {}
-        q = (payload.get("question") or "").strip()
-        mode = (payload.get("mode") or "robot").strip().lower()
+        user_mode = _s(payload.get("mode") or "").lower().strip()
+        question = _s(payload.get("question")).strip()
         want_inline = bool(payload.get("want_inline_citations", True))
-        if not q:
+        if not question:
             abort(400, "No question.")
 
-        # vector context
-        vs_ctx = ""
+        # ----------------- classify intent -----------------
+        intent = None
         try:
-            vs_ctx = vs.search(q, k=8) or ""
+            intent = classify_intent(question)
+        except Exception as e:
+            print("[/ask] classify_intent failed:", e)
+            intent = None
+        intent_str = _s(intent.get("label") if isinstance(intent, dict) else intent)
+
+        # Decide mode from user preference > intent > default
+        if user_mode in ("robot","reasoning"):
+            mode = user_mode
+        elif intent_str.lower() in ("mechanism","explain","reason"):
+            mode = "reasoning"
+        else:
+            mode = "robot"
+
+        # Search breadth from intent (fallbacks are conservative)
+        kb_k = 6 if "kb" in intent_str.lower() else 4
+        web_k = 8
+
+        # ----------------- uploads vector context -----------------
+        try:
+            uploads_ctx = _s(vs.search(question, k=8) or "")
         except Exception as e:
             print("[/ask] vs.search error:", e)
+            uploads_ctx = ""
 
-        # table lookup context
+        # ----------------- DuckDB context -----------------
         table_ctx = ""
         table_refs = []
         if LOOKUP is not None:
             try:
-                hits = LOOKUP.query(q, topk=5)
+                hits = LOOKUP.query(question, topk=5)
                 rows = hits.to_dict(orient="records")
                 lines = []
                 for i, row in enumerate(rows, start=1):
@@ -387,49 +534,99 @@ def ask():
                     temp = row.get("temp_C") or row.get("temperature_C")
                     time_h = row.get("time_h") or row.get("duration_h")
                     note = row.get("notes") or ""
-                    line = f"[T{i}] solvent={solvent}; temp_C={temp}; time_h={time_h}; {note}".strip()
+                    line = f"[T{i}] solvent={_s(solvent)}; temp_C={_s(temp)}; time_h={_s(time_h)}; {_s(note)}".strip()
                     lines.append(line)
                     url = row.get("url") or (row.get("doi") and f"https://doi.org/{row['doi']}")
                     if url: table_refs.append({"title": f"Table row {i}", "url": url})
-                table_ctx = "\n".join(lines)
+                table_ctx = "\\n".join(lines)
             except Exception as e:
                 print("[/ask] LOOKUP query error:", e)
 
-        context_parts = []
-        if vs_ctx: context_parts.append("<<<CTX_UPLOADS>>>\n" + vs_ctx)
-        if table_ctx: context_parts.append("<<<CTX_TABLE>>>\n" + table_ctx)
-        context_joined = "\n\n---\n\n".join(context_parts).strip()
+        # ----------------- KB search + fetch -----------------
+        kb_ctx = ""
+        kb_refs_raw = []
+        try:
+            try:
+                kb_hits = kb_search(question, k=kb_k) or []
+            except TypeError:
+                kb_hits = kb_search(question) or []
+
+            kb_ids = [h.get("id") for h in kb_hits if isinstance(h, dict) and h.get("id")]
+            kb_docs = []
+            if kb_ids:
+                try:
+                    kb_docs = kb_fetch(kb_ids) or []
+                except Exception as e:
+                    print("[/ask] kb_fetch failed:", e)
+                    kb_docs = []
+
+            def _mk_kb_ref(d: dict) -> dict:
+                return {
+                    "title": _s(d.get("title") or d.get("name") or "(KB item)"),
+                    "year": _s(d.get("year") or d.get("publication_year") or ""),
+                    "url": _s(d.get("url") or d.get("link") or ""),
+                    "doi": _s(d.get("doi") or ""),
+                    "authors": d.get("authors") or d.get("authorships") or [],
+                    "biblio": d.get("biblio") or {},
+                }
+
+            items = kb_docs if kb_docs else kb_hits
+            kb_refs_raw = [_mk_kb_ref(d) for d in items if isinstance(d, dict)]
+            if kb_refs_raw:
+                kb_lines = [f"[KB{i}] {r['title']}" for i,r in enumerate(kb_refs_raw, 1)]
+                kb_ctx = "\\n".join(kb_lines)
+        except Exception as e:
+            print("[/ask] KB search failed:", e)
+
+        # ----------------- Web/hybrid retriever -----------------
+        hits = retriever_search(question, k=web_k, mode="hybrid", alpha=0.7) or []
+        web_refs = []
+        for h in hits:
+            web_refs.append({
+                "title": _s(h.get("title") or "(no title)"),
+                "year": "",
+                "url": _s(h.get("url") or ""),
+                "doi": _s(h.get("paper_id") if (h.get("paper_id","").startswith("10.")) else ""),
+                "authors": h.get("authors", []),
+                "biblio": {},
+            })
+
+        # ----------------- Deduplicate & enumerate references -----------------
+        def _normkey(r: dict) -> str:
+            return (r.get("doi") or r.get("title") or "").strip().lower()
 
         refs = []
-        try:
-            refs = basic_search(q, n=6) or []
-        except Exception as e:
-            print("[/ask] basic_search error:", e)
-        if table_refs:
-            refs = list(refs) + table_refs
+        seen = set()
+        for r in web_refs + kb_refs_raw:
+            key = _normkey(r)
+            if key and key not in seen:
+                refs.append(r)
+                seen.add(key)
 
-        def _ref_url(r):
-            if r.get("url"): return r["url"]
-            if r.get("doi"): return f"https://doi.org/{r['doi']}"
-            return ""
-        refs_prompt = "\n".join(
+        refs_prompt = "\\n".join(
             f"[{i+1}] {(r.get('title') or '(no title)')} ({r.get('year') or ''}) — {_ref_url(r)}"
             for i, r in enumerate(refs)
         ).strip()
 
-        # prompt variants
+        # ----------------- Compose CONTEXT -----------------
+        ctx_parts = []
+        if uploads_ctx: ctx_parts.append("<<<CTX_UPLOADS>>>\\n" + uploads_ctx)
+        if table_ctx:   ctx_parts.append("<<<CTX_TABLE>>>\\n" + table_ctx)
+        if kb_ctx:      ctx_parts.append("<<<CTX_KB>>>\\n" + kb_ctx)
+        context_joined = "\\n\\n---\\n\\n".join(ctx_parts).strip()
+
+        # ----------------- Prompting -----------------
         robot_rules = (
-            "Return a discrete lab protocol with exact quantities on a small scale (~0.5 mmol Co):\n"
-            " - Include specific masses (mg) or mmol for reagents; volumes (mL) for liquids.\n"
-            " - Specify temperatures (°C), ramp rates (°C/min), hold times (min/h), and atmosphere (Ar/N2/vacuum).\n"
-            " - Include workup and purification (quench, washing/centrifugation, drying) with volumes.\n"
-            " - No placeholders (avoid “e.g.”/“or”). Be decisive.\n"
+            "Return a discrete lab protocol with exact quantities on a small scale (~0.5 mmol Co):\\n"
+            " - Include specific masses (mg) or mmol for reagents; volumes (mL) for liquids.\\n"
+            " - Specify temperatures (°C), ramp rates (°C/min), hold times (min/h), and atmosphere (Ar/N2/vacuum).\\n"
+            " - Include workup and purification (quench, washing/centrifugation, drying) with volumes.\\n"
+            " - No placeholders (avoid “e.g.”/“or”). Be decisive.\\n"
             " - Output only the final protocol in markdown. Do not include any fenced blocks named reason or rationale in the answer. Put all reasoning in the separate rationale channel."
         )
         reasoning_rules = (
-            " - Provide a mechanistic explanation and design considerations for the target.\n"
-            " - Focus on: nucleation vs growth; ligand/solvent coordination; surfactants; "
-            " - reduction/oxidation; temperature profile and morphology control; atmosphere; pitfalls; safety.\n"
+            " - Provide a mechanistic explanation and design considerations for the target.\\n"
+            " - Focus on: nucleation vs growth; ligand/solvent coordination; surfactants; reduction/oxidation; temperature profile and morphology control; atmosphere; pitfalls; safety.\\n"
             " - Do NOT return a step-by-step protocol. Be concise but specific."
         )
         inline_rule = (
@@ -438,59 +635,55 @@ def ask():
             " - Inline numeric citations are optional for this request."
         )
         acs_rule = (
-            " - Write the REFERENCES block in ACS format: author(s), title, journal, year, volume, pages, DOI.\n"
+            " - Write the REFERENCES block in ACS format: author(s), title, journal, year, volume, pages, DOI.\\n"
             " - Use inline numeric citations ([n]) for facts from REFERENCES. Do NOT include a REFERENCES block in your answer."
         )
 
         def strip_references_block(text: str) -> str:
-            # Remove everything from '## References' to the end
-            return re.sub(r"## References[\s\S]*", "", text, flags=re.I).strip()
+            return re.sub(r"##\\s*References[\\s\\S]*", "", text, flags=re.I).strip()
 
         if mode == "reasoning":
             prompt = (
-                "You are NanoChemGPT. Use the CONTEXT and numbered REFERENCES.\n"
-                "Rules:\n"
-                " - Prefer CONTEXT and REFERENCES over general knowledge when relevant.\n"
-                " - For each bullet, quote or paraphrase a specific finding from CONTEXT or REFERENCES, and cite the source. Do not generalize or invent citations.\n"
-                " - If you use any content from CONTEXT, append [CTX] on that line.\n"
-                f"{inline_rule}\n"
-                " - If CONTEXT is insufficient, say so explicitly before generalizing.\n"
-                " - For each cited reference, briefly summarize the relevant finding and explain how it relates to aspect ratio and temperature.\n"
-                " - If no reference supports a statement, say so explicitly and do not cite it.\n"
-                f"{reasoning_rules}\n"
-                f"{acs_rule}\n"  
-                "Return exactly ONE block:\n"
-                "## Mechanistic reasoning\n"
-                "- bullet points with inline [n] and [CTX] where appropriate.\n\n"
-                f"CONTEXT:\n{context_joined}\n\n"
-                f"REFERENCES:\n{refs_prompt}\n\n"
-                f"User question: {q}"
+                "You are NanoChemGPT. Use the CONTEXT and numbered REFERENCES.\\n"
+                "Rules:\\n"
+                " - Prefer CONTEXT and REFERENCES over general knowledge when relevant.\\n"
+                " - For each bullet, quote or paraphrase a specific finding from CONTEXT or REFERENCES, and cite the source. Do not generalize or invent citations.\\n"
+                " - If you use any content from CONTEXT, append [CTX] on that line.\\n"
+                f"{inline_rule}\\n"
+                " - If CONTEXT is insufficient, say so explicitly before generalizing.\\n"
+                f"{reasoning_rules}\\n"
+                f"{acs_rule}\\n"
+                "Return exactly ONE block:\\n"
+                "## Mechanistic reasoning\\n"
+                "- bullet points with inline [n] and [CTX] where appropriate.\\n\\n"
+                f"CONTEXT:\\n{context_joined}\\n\\n"
+                f"REFERENCES:\\n{refs_prompt}\\n\\n"
+                f"User question: {question}"
             )
         else:
             prompt = (
-                "You are NanoChemGPT. Use the CONTEXT and the numbered REFERENCES to propose a synthesis.\n"
-                "Rules:\n"
-                " - Prefer CONTEXT and REFERENCES over general knowledge when relevant.\n"
-                " - For each step, quote or paraphrase a specific finding from CONTEXT or REFERENCES, and cite the source. Do not generalize or invent citations.\n"
-                " - If you use any content from CONTEXT, append [CTX] on that line.\n"
-                f"{inline_rule}\n"
-                " - If CONTEXT is insufficient, say so explicitly before generalizing.\n"
-                f"{robot_rules}\n"
-                f"{acs_rule}\n"  
-                "Return two blocks exactly in this order:\n"
-                "## Synthesis Protocol:\n"
-                "1. **Hardware & Glassware**:\n[]\n"
-                "2. **Materials**:\n[]\n"
-                "3. **Procedure**\n[]\n\n"
-                "```reason\n"
-                "For each key justification, add inline tags: [CTX] for uploaded/context hits, [DB] for Mongo Q&A, "
-                "[PARSED] for parsed protocols, [n] for numbered web REFERENCES, [GEN] if inferred.\n"
-                "Keep rationales terse.\n"
-                "Add NO other blocks of text.\n"
-                "```\n\n"
-                f"CONTEXT:\n{context_joined}\n\n"
-                f"REFERENCES:\n{refs_prompt}\n\n"
-                f"User question: {q}"
+                "You are NanoChemGPT. Use the CONTEXT and the numbered REFERENCES to propose a synthesis.\\n"
+                "Rules:\\n"
+                " - Prefer CONTEXT and REFERENCES over general knowledge when relevant.\\n"
+                " - For each step, quote or paraphrase a specific finding from CONTEXT or REFERENCES, and cite the source. Do not generalize or invent citations.\\n"
+                " - If you use any content from CONTEXT, append [CTX] on that line.\\n"
+                f"{inline_rule}\\n"
+                " - If CONTEXT is insufficient, say so explicitly before generalizing.\\n"
+                f"{robot_rules}\\n"
+                f"{acs_rule}\\n"
+                "Return two blocks exactly in this order:\\n"
+                "## Synthesis Protocol:\\n"
+                "1. **Hardware & Glassware**:\\n[]\\n"
+                "2. **Materials**:\\n[]\\n"
+                "3. **Procedure**\\n[]\\n\\n"
+                "```reason\\n"
+                "For each key justification, add inline tags: [CTX] uploaded/context hits, [PARSED] parsed protocols, [n] for numbered web REFERENCES, [GEN] if inferred.\\n"
+                "Keep rationales terse.\\n"
+                "Add NO other blocks of text.\\n"
+                "```\\n\\n"
+                f"CONTEXT:\\n{context_joined}\\n\\n"
+                f"REFERENCES:\\n{refs_prompt}\\n\\n"
+                f"User question: {question}"
             )
 
         raw = client.chat.completions.create(
@@ -499,133 +692,77 @@ def ask():
             temperature=0.2
         ).choices[0].message.content
 
-        # Split answer/rationale
+        # Split answer/rationale and strip any in-answer references block
         if mode == "reasoning":
-            answer = strip_references_block((raw or "").strip())
+            answer = strip_references_block(_s(raw))
             rationale = ""
         else:
-            answer, rationale = split_reasoning(strip_references_block(raw))
+            a, r = _split_reasoning(strip_references_block(_s(raw)))
+            answer, rationale = _s(a), _s(r)
 
-        # Rationale fallback if missing
-        if not (rationale or "").strip():
-            try:
-                rationale_only = (
-                    "You previously produced the SynthesisProtocol below.\n"
-                    "Write a short rationale (5–8 bullets max). For each key justification add inline tags:\n"
-                    "[CTX] uploaded/context hits, [PARSED] parsed protocols, [n] for numbered web REFERENCES, [GEN] for general.\n"
-                    "Return just the rationale text, no code fences, no extra headings."
-                )
-                rraw = client.chat.completions.create(
-                    model="gpt-4o",
-                    messages=[
-                        {"role": "user", "content": rationale_only},
-                        {"role": "user", "content": f"CONTEXT:\n{context_joined}"},
-                        {"role": "user", "content": f"REFERENCES:\n{refs_prompt}"},
-                        {"role": "user", "content": f"ANSWER:\n{(answer or '').strip()}"},
-                        {"role": "user", "content": f"QUESTION:\n{q}"},
-                    ],
-                    temperature=0.2,
-                ).choices[0].message.content
-                rationale = (rraw or "").strip()
-            except Exception as e:
-                print("[/ask] rationale fallback failed:", e)
-                rationale = rationale or ""
+        # ---- Build a REFERENCES block of only used items ----
+        used_idxs = _extract_used_ref_indexes(answer, rationale)
+        references_block = _format_references_block_from_used(used_idxs, refs)
 
-        # Post-pass: enforce citations & CTX usage if missing
+        # ---- Usage markers (refs + tags) ----
+        markers = _extract_used_markers(answer, rationale)
+
+        # ---- Sufficiency check + enqueue mining if thin ----
+        enqueued = False
         try:
-            used_summary = _extract_used_markers(answer or "", rationale or "")
-            if want_inline and not used_summary.get("refs"):
-                try:
-                    revise_refs = client.chat.completions.create(
-                        model="gpt-4o-mini",
-                        temperature=0,
-                        messages=[
-                            {"role": "system", "content": (
-                                "Add inline [n] citations wherever information was taken from the numbered REFERENCES list. "
-                                "Do NOT remove any existing [CTX] content. Only insert citations where appropriate."
-                            )},
-                            {"role": "user", "content": f"REFERENCES:\n{refs_prompt}"},
-                            {"role": "user", "content": f"ORIGINAL ANSWER:\n{answer}"}
-                        ]
-                    ).choices[0].message.content
-                    if revise_refs and len(revise_refs) >= 0.7 * len(answer):
-                        answer = revise_refs
-                        used_summary = _extract_used_markers(answer, rationale)
-                except Exception as e:
-                    print("[ask] ref-revise step failed:", e)
-        except Exception as _e:
-            print("[/ask] used extraction failed:", _e)
-            used_summary = {"refs": [], "tags": {}, "has_ctx": False}
-
-        if context_joined and not used_summary.get("has_ctx"):
             try:
-                revise = client.chat.completions.create(
-                    model="gpt-4o-mini",
-                    temperature=0,
-                    messages=[
-                        {"role": "system", "content": "Revise the answer to explicitly use CONTEXT where relevant. Insert [CTX] markers on lines that derive from CONTEXT, and prefer CONTEXT over general knowledge. Do not change structure."},
-                        {"role": "user", "content": f"CONTEXT:\n{context_joined}"},
-                        {"role": "user", "content": f"ORIGINAL ANSWER:\n{answer}"}
-                    ]
-                ).choices[0].message.content
-                if revise and len(revise) >= 0.7 * len(answer):
-                    answer = revise
-                    used_summary = _extract_used_markers(answer, rationale or "")
-            except Exception as e:
-                print("[ask] revise step skipped:", e)
+                sufficient = judge_sufficiency(question, context_joined, refs_count=len(refs))
+            except TypeError:
+                sufficient = judge_sufficiency(question, context_joined)
+            if not bool(sufficient):
+                try:
+                    enqueue_text_mining_job(question)
+                    enqueued = True
+                except Exception as e:
+                    print("[/ask] enqueue_text_mining_job failed:", e)
+        except Exception as e:
+            print("[/ask] judge/enqueue error:", e)
 
-        qa_id = None
+        # ---- Save best-effort to DB ----
         try:
             db = get_db()
-            ins = db.qa.insert_one({
-                "created_at": datetime.utcnow(),
-                "question": q,
+            db.qa.insert_one({
+                "question": question,
+                "intent": intent,
                 "mode": mode,
-                "answer": (answer or "").strip(),
+                "created_at": datetime.utcnow(),
+                "answer": answer,
                 "rationale": rationale,
-                "references": used_refs_list,
-                "refs_used": used_summary.get("refs", []),
-                "used_tags": used_summary.get("tags", {}),
-                "ctx_vs": vs_ctx,
-                "ctx_table": table_ctx,
+                "markers": markers,
+                "used_ref_indexes": used_idxs,
+                "references_block": references_block,
+                "refs": refs,
+                "kb_refs_count": len(kb_refs_raw),
+                "web_refs_count": len(web_refs),
+                "table_refs": table_refs,
+                "context_present": bool(context_joined),
+                "mining_enqueued": enqueued,
             })
-            qa_id = str(ins.inserted_id)
         except Exception as e:
-            print("[/ask] DB insert warn:", e)
-        # ---- Replace references block with ONLY the sources actually cited in the text ----
-        used_ref_idxs = _extract_used_ref_indexes(answer, rationale)
-        used_refs_block = _format_references_block_from_used(used_ref_idxs, refs)
-        if used_refs_block:
-            # Strip any existing trailing '## References' to avoid duplicates
-            answer = (answer or "").rstrip()
-            answer = re.sub(r"\n+##\s*References\s*\n[\s\S]*$", "", answer, flags=re.I)
-            answer = f"{answer}\n\n## References\n{used_refs_block}"
-        # Build the list of reference dicts that were actually cited
-        used_refs_list = [refs[i-1] for i in (used_ref_idxs or []) if 1 <= i <= len(refs)]
-        if not used_refs_list and refs:
-            # Fallback: if the model forgot to cite, keep original refs (so UI isn't empty)
-            used_refs_list = refs
+            print("[/ask] DB save warn:", e)
 
         return jsonify({
-            "references_used_indexes": used_ref_idxs,
-            "answer": (answer or "").strip(),
-            "rationale": rationale,
-            "references": used_refs_list,
-            "refs": used_refs_list,
-            "refs_used": used_summary.get("refs", []),
-            "used": used_summary,
+            "ok": True,
+            "question": question,
+            "intent": intent,
             "mode": mode,
-            "qa_id": qa_id,
-            "ctx_vs": (vs_ctx or "")[:8000],
-            "ctx_table": (table_ctx or "")[:4000],
+            "answer": answer,
+            "rationale": rationale,
+            "markers": markers,
+            "used_ref_indexes": used_idxs,
+            "references_block": references_block,
+            "refs": refs,
+            "context_present": bool(context_joined),
+            "mining_enqueued": enqueued,
         })
-
     except Exception as e:
-        print("[/ask] Unhandled error:", e)
         traceback.print_exc()
-        return jsonify({"error": f"/ask failed: {e}"}), 500
-
-# ---- Parse & Save ---- #
+        return jsonify({"ok": False, "error": f"/ask failed: {e}"}), 500
 @app.post("/parse")
 def parse_route():
     try:
@@ -777,126 +914,3 @@ if __name__ == "__main__":
         port=int(os.getenv("PORT", 8000)),
         debug=os.getenv("DEBUG", "0") == "1"
     )
-
-
-# =============================================================================
-# ACS-style reference formatter
-# =============================================================================
-def _format_acs_reference(r: dict) -> str:
-    # Format: Authors. Title. Journal Year, Volume(Issue), Pages. DOI/URL
-    def _s(x):
-        return str(x).strip() if x is not None else ""
-
-    # Authors
-    names = []
-    authors = r.get("authors") or r.get("authorships") or r.get("author") or []
-    if isinstance(authors, list):
-        for a in authors:
-            n = None
-            if isinstance(a, dict):
-                n = ((a.get("author") or {}).get("display_name")
-                     or a.get("display_name") or a.get("name") or a.get("full_name"))
-            else:
-                n = str(a)
-            if n:
-                names.append(_s(n))
-    elif isinstance(authors, dict):
-        n = authors.get("display_name") or authors.get("name")
-        if n:
-            names.append(_s(n))
-    elif isinstance(authors, str):
-        names.append(_s(authors))
-
-    if len(names) > 6:
-        names = names[:6] + ["et al."]
-    authors_str = "; ".join([n for n in names if n])
-
-    # Title
-    title = _s(r.get("title") or r.get("display_name") or r.get("paper_title") or "(no title)")
-
-    # Journal / venue
-    journal = r.get("journal") or r.get("venue") or r.get("host_venue") or r.get("container_title") or ""
-    if isinstance(journal, dict):
-        journal = journal.get("display_name") or journal.get("name") or journal.get("title") or ""
-    journal = _s(journal)
-
-    # Year
-    year = r.get("year") or r.get("published_year") or r.get("publication_year")
-    if not year:
-        pubdate = _s(r.get("publication_date") or r.get("published_date"))
-        if len(pubdate) >= 4 and pubdate[:4].isdigit():
-            year = pubdate[:4]
-    year = _s(year)
-
-    # Volume / Issue / Pages
-    biblio = r.get("biblio") or {}
-    volume = _s(r.get("volume") or biblio.get("volume"))
-    issue  = _s(r.get("issue")  or biblio.get("issue"))
-    fp     = _s(r.get("first_page") or biblio.get("first_page") or r.get("page_start"))
-    lp     = _s(r.get("last_page")  or biblio.get("last_page")  or r.get("page_end"))
-    pages  = ""
-    if fp and lp:
-        pages = f"{fp}-{lp}"
-    elif fp:
-        pages = fp
-    elif r.get("pages"):
-        pages = _s(r.get("pages"))
-
-    # DOI / URL
-    doi = _s(r.get("doi"))
-    url = _s(r.get("url") or r.get("pdf_url") or r.get("landing_page_url"))
-    tail = ""
-    if doi:
-        tail = f"https://doi.org/{doi}" if not doi.startswith("http") else doi
-    elif url:
-        tail = url
-
-    # Build string
-    parts = []
-    if authors_str: parts.append(f"{authors_str}.")
-    if title:       parts.append(f"{title}.")
-
-    trailer = []
-    if journal:     trailer.append(journal)
-    if year:        trailer.append(year)
-    vol_issue = volume if volume else ""
-    if issue:
-        vol_issue = f"{volume}({issue})" if volume else f"({issue})"
-    if vol_issue:   trailer.append(vol_issue)
-    if pages:       trailer.append(pages)
-
-    if trailer:
-        core = ", ".join([t for t in trailer if _s(t)])
-        parts.append(f"{core}.")
-    if tail:
-        parts.append(tail)
-
-    return " ".join([p for p in parts if _s(p)]).strip()
-# =============================================================================
-# Used-reference extraction helpers (build references from only what was cited)
-# =============================================================================
-_USED_NUM_CIT_RX = re.compile(r"\[(\d{1,3})\]")
-
-def _extract_used_ref_indexes(*texts: str) -> list[int]:
-    """Return sorted unique numeric citation indexes found like [1], [2], ..."""
-    used = set()
-    for t in texts:
-        if not t:
-            continue
-        for m in _USED_NUM_CIT_RX.finditer(t):
-            try:
-                used.add(int(m.group(1)))
-            except Exception:
-                pass
-    return sorted(used)
-
-def _format_references_block_from_used(used_idxs: list[int], refs: list[dict]) -> str:
-    """Build '## References' block containing ONLY cited items."""
-    if not used_idxs or not refs:
-        return ""
-    lines = []
-    for idx in used_idxs:
-        if 1 <= idx <= len(refs):
-            # Expect _format_acs_reference to exist in your app
-            lines.append(f"{idx}. " + _format_acs_reference(refs[idx-1]))
-    return "\n".join(lines)

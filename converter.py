@@ -552,32 +552,92 @@ def detect_transfer_explicit(line: str) -> Optional[Dict]:
     return None
 
 
+
 def detect_dissolve(line: str) -> Optional[Dict]:
     s = strip_tags(_clean_unicode(line.strip()))
     m = re.search(
-        r"\bdissolv\w*\s+(?P<amount>[\d\.]+)\s*(?P<unit>mg|g|µg|kg)\s+of\s+(?P<solute>.+?)\s+in\s+(?P<vol>[\d\.]+)\s*(?P<vunit>µ?u?L|mL|ml|l|L)\s+of\s+(?P<solvent>.+?)(?:\.|$)",
-        s,
-        re.I,
+        r"\bdissolv\w*\s+(?P<amount>[\d\.]+)\s*(?P<unit>mg|g|µg|kg)\s+of\s+(?P<solute>.+?)\s+in\s+(?P<vol>[\d\.]+)\s*(?P<vunit>µ?u?L|mL|ml|l|L)\s+of\s+(?P<solvent>[^.;,]+)",
+        s, re.I
     )
-    if m:
-        solvent_raw = m.group('solvent').strip()
-        solvent = _clean_solvent_tail(solvent_raw)
-        # Optional hardware hint: "in a 50 mL (glass) beaker/flask"
-        hint = None
-        mh = re.search(r"in\s+(?:a|the)\s+(\d+\s*(?:µ?u?L|mL|L)\s+(?:glass\s+)?(?:beaker|flask|round-?bottom\s+flask))", s, re.I)
-        if mh:
-            hint = mh.group(1)
-        return {
-            "action": "dissolve",
-            "solute": m.group("solute").strip(),
-            "amount": float(m.group("amount")),
-            "unit": m.group("unit"),
-            "solvent": solvent,
-            "volume": float(m.group("vol")),
-            "volume_units": m.group("vunit"),
-            "hardware_hint": hint,
-        }
-    return None
+    if not m:
+        return None
+
+    solute = m.group("solute").strip()
+    solvent_captured = _clean_solvent_tail(m.group("solvent").strip())
+    vol1 = float(m.group("vol"))
+    vunit1 = m.group("vunit")
+
+    extras = []
+    inline = solvent_captured
+    while True:
+        exm = re.search(r"(.*?)(?:,\s*)?(?:and\s+)([\d\.]+)\s*(µ?u?L|mL|ml|l|L)\s+of\s+([^,;]+)$", inline, re.I)
+        if not exm:
+            break
+        base = exm.group(1).strip()
+        vol2 = float(exm.group(2)); vunit2 = exm.group(3)
+        solv2 = _clean_solvent_tail(exm.group(4).strip())
+        extras.insert(0, {"name": solv2, "volume": vol2, "volume_units": vunit2})
+        inline = base
+    solvent1 = inline
+
+    hint = None
+    mh = re.search(r"in\s+(?:a|the)\s+(\d+\s*(?:µ?u?L|mL|L)\s+(?:glass\s+)?(?:beaker|flask|round-?bottom\s+flask))", s, re.I)
+    if mh:
+        hint = mh.group(1)
+
+    result = {
+        "action": "dissolve",
+        "solute": solute,
+        "amount": float(m.group("amount")),
+        "unit": m.group("unit"),
+        "solvent": solvent1 if not extras else solvent1 + " + " + " + ".join(e["name"] for e in extras),
+        "volume": vol1,
+        "volume_units": vunit1,
+        "hardware_hint": hint,
+    }
+    if extras:
+        result["solvents"] = [{"name": solvent1, "volume": vol1, "volume_units": vunit1}] + extras
+    return result
+
+    solute = m.group("solute").strip()
+    solvent1 = _clean_solvent_tail(m.group("solvent").strip())
+    # handle inline extra solvents like "ethylene glycol and 5 mL of water"
+    extras = []
+    inline = solvent1
+    # repeatedly peel off trailing ", and 5 mL of X" or "and 5 mL of X"
+    while True:
+        exm = re.search(r"(.*?)(?:,\s*)?(?:and\s+)([\d\.]+)\s*(µ?u?L|mL|ml|l|L)\s+of\s+([^,;]+)$", inline, re.I)
+        if not exm:
+            break
+        base = exm.group(1).strip()
+        vol2 = float(exm.group(2)); vunit2 = exm.group(3)
+        solv2 = _clean_solvent_tail(exm.group(4).strip())
+        extras.insert(0, {"name": solv2, "volume": vol2, "volume_units": vunit2})
+        inline = base
+    solvent1 = inline
+
+    vol1 = float(m.group("vol"))
+    vunit1 = m.group("vunit")
+
+    hint = None
+    mh = re.search(r"in\s+(?:a|the)\s+(\d+\s*(?:µ?u?L|mL|L)\s+(?:glass\s+)?(?:beaker|flask|round-?bottom\s+flask))", s, re.I)
+    if mh:
+        hint = mh.group(1)
+
+    result = {
+        "action": "dissolve",
+        "solute": solute,
+        "amount": float(m.group("amount")),
+        "unit": m.group("unit"),
+        "solvent": solvent1 if not extras else solvent1 + " + " + " + ".join(e["name"] for e in extras),
+        "volume": vol1,
+        "volume_units": vunit1,
+        "hardware_hint": hint,
+    }
+    if extras:
+        result["solvents"] = [{"name": solvent1, "volume": vol1, "volume_units": vunit1}] + extras
+    return result
+
 
 def detect_filter_isolate(line: str) -> Optional[Dict]:
     s = strip_tags(_clean_unicode(line.strip()))
@@ -717,16 +777,7 @@ def convert_text_to_robot_ops(text: str) -> Dict:
         # Dissolve
         dissolve = detect_dissolve(step)
         if dissolve:
-            # honor explicit hardware hint if present
-            prefer_ml = None
-            if dissolve.get('volume') is not None:
-                vunit = (dissolve.get('volume_units') or '').lower()
-                prefer_ml = dissolve['volume'] * (0.001 if vunit in ('µl','ul') else (1.0 if vunit=='ml' else 1000.0))
-            sep = re.search(r"\b(?:in\s+a\s+)?separate\s+(?:container|vessel|beaker|flask)\b", step, re.I)
-            base_label = dissolve.get('hardware_hint') or 'Beaker'
-            label = base_label if not sep else f"{base_label} (separate {len(vessels._label_to_vid)+1})"
-            target_vessel = (vessels.ensure_glassware(label, prefer_capacity_ml=prefer_ml, explicit_hardware_hint=dissolve.get('hardware_hint')) if sep else (vessels.primary_vessel or vessels.ensure_glassware(label, prefer_capacity_ml=prefer_ml, explicit_hardware_hint=dissolve.get('hardware_hint'))))
-            vessels.map_contents(target_vessel, f"{dissolve['solute']} solution in {dissolve['solvent']}")
+            target_vessel = vessels.primary_vessel or vessels.ensure_glassware("Beaker")
             record = {
                 "action": "dissolve",
                 "vessel": target_vessel,
@@ -738,55 +789,14 @@ def convert_text_to_robot_ops(text: str) -> Dict:
                 "volume_units": dissolve["volume_units"],
                 "ops": [
                     {"op": "add_solute", "vessel": target_vessel, "reagent": dissolve["solute"], "amount": dissolve["amount"], "unit": dissolve["unit"]},
-                    {"op": "add_solvent", "vessel": target_vessel, "solvent": dissolve["solvent"], "volume": dissolve["volume"], "volume_units": dissolve["volume_units"]},
+                    *([
+                        {"op": "add_solvent", "vessel": target_vessel, "reagent": comp["name"], "volume": comp["volume"], "volume_units": comp["volume_units"]}
+                        for comp in (dissolve.get("solvents") or [{"name": dissolve["solvent"], "volume": dissolve["volume"], "volume_units": dissolve["volume_units"]}])
+                    ]),
                     {"op": "stir", "vessel": target_vessel, "rpm": DEFAULTS["stir_rpm"], "minutes": 2}
                 ],
                 "raw": step,
-                "reagents": [dissolve["solute"], dissolve["solvent"]]
-            }
-            _normalize_reagents_inplace(record)
-            _add_structured_reagents_inplace(record)
-            records.append(record)
-            continue
-
-        # Isolate/filter
-        isolate = detect_filter_isolate(step)
-        if isolate:
-            target_vessel = vessels.primary_vessel or vessels.ensure_glassware("Beaker")
-            record = {
-                "action": "isolate",
-                "vessel": target_vessel,
-                "ops": [{"op": "filter", "vessel": target_vessel}, {"op": "collect", "vessel": target_vessel}],
-                "raw": step,
-                "reagents": []
-            }
-            _normalize_reagents_inplace(record)
-            _add_structured_reagents_inplace(record)
-            records.append(record)
-            continue
-
-        # Solution preparation
-        prep = detect_solution_prep(step)
-        if prep:
-            vol_ml = prep["volume"] * (0.001 if prep["volume_units"].lower() in ("µl","ul") else (1.0 if prep["volume_units"].lower()=="ml" else 1000.0))
-            explicit = prep.get("hardware_hint")
-            label = explicit if explicit else "Beaker"
-            vid = vessels.ensure_glassware(label, prefer_capacity_ml=vol_ml, explicit_hardware_hint=explicit)
-            vessels.map_contents(vid, f"{prep['solvent']} {prep['concentration']} {prep['concentration_units']} solution of {prep['solute']}")
-            hw_id = vessels.vessel_hardware(vid)
-            record = {
-                "action":"dispense",
-                "vessel": vid,
-                "hardware_id": hw_id,
-                "solute": prep["solute"],
-                "solvent": prep["solvent"],
-                "concentration": prep["concentration"],
-                "concentration_units": prep["concentration_units"],
-                "volume": prep["volume"],
-                "volume_units": prep["volume_units"],
-                "reagents": [prep["solute"], prep["solvent"]],
-                "ops": ops_for_dispense(vid, hw_id, prep["solute"], prep["solvent"], prep["volume"], prep["volume_units"]),
-                "raw": step,
+                "reagents": [dissolve["solute"]] + [comp["name"] for comp in (dissolve.get("solvents") or [{"name": dissolve["solvent"]}])]
             }
             _normalize_reagents_inplace(record)
             _add_structured_reagents_inplace(record)
@@ -861,20 +871,8 @@ def convert_text_to_robot_ops(text: str) -> Dict:
         if add:
             src_key = re.sub(r"^\bthe\b\s+","",add["source_name"], flags=re.I).strip()
             dst_key = re.sub(r"^\bthe\b\s+","",add["target_name"], flags=re.I).strip()
-            # Resolve by vessel contents first
-            src_vid = None
-            dst_vid = None
-            for vid, contents in getattr(vessels, "_vessel_contents", {}).items():
-                if src_vid is None and src_key.lower() in contents.lower():
-                    src_vid = vid
-                if dst_vid is None and dst_key.lower() in contents.lower():
-                    dst_vid = vid
-            # Fallbacks
-            if src_vid is None:
-                src_vid = vessels.primary_vessel or vessels.ensure_glassware("Beaker")
-            if dst_vid is None:
-                dst_vid = vessels.primary_vessel or vessels.ensure_glassware("Beaker")
-
+            src_vid = vessels.ensure_glassware(src_key) if "beaker" in src_key.lower() or "flask" in src_key.lower() else (vessels.primary_vessel or vessels.ensure_glassware("Beaker"))
+            dst_vid = vessels.ensure_glassware(dst_key) if "beaker" in dst_key.lower() or "flask" in dst_key.lower() else (vessels.primary_vessel or vessels.ensure_glassware("Beaker"))
             record = {
                 "action": "add",
                 "source_vessel": src_vid,
@@ -1082,12 +1080,15 @@ def convert_text_to_robot_ops(text: str) -> Dict:
                     "volume": dissolve["volume"],
                     "volume_units": dissolve["volume_units"],
                     "ops": [
-                        {"op": "add_solute", "vessel": target_vessel, "reagent": dissolve["solute"], "amount": dissolve["amount"], "unit": dissolve["unit"]},
-                        {"op": "add_solvent", "vessel": target_vessel, "solvent": dissolve["solvent"], "volume": dissolve["volume"], "volume_units": dissolve["volume_units"]},
-                        {"op": "stir", "vessel": target_vessel, "rpm": DEFAULTS["stir_rpm"], "minutes": 2}
-                    ],
+                    {"op": "add_solute", "vessel": target_vessel, "reagent": dissolve["solute"], "amount": dissolve["amount"], "unit": dissolve["unit"]},
+                    *([
+                        {"op": "add_solvent", "vessel": target_vessel, "reagent": comp["name"], "volume": comp["volume"], "volume_units": comp["volume_units"]}
+                        for comp in (dissolve.get("solvents") or [{"name": dissolve["solvent"], "volume": dissolve["volume"], "volume_units": dissolve["volume_units"]}])
+                    ]),
+                    {"op": "stir", "vessel": target_vessel, "rpm": DEFAULTS["stir_rpm"], "minutes": 2}
+                ],
                     "raw": sub,
-                    "reagents": [dissolve["solute"], dissolve["solvent"]]
+                    "reagents": [dissolve["solute"]] + [comp["name"] for comp in (dissolve.get("solvents") or [{"name": dissolve["solvent"]}])]
                 }
                 _normalize_reagents_inplace(record)
                 _add_structured_reagents_inplace(record)

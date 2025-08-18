@@ -1,0 +1,56 @@
+{
+  "micro": {
+    "precision": 0.0,
+    "recall": 0.0,
+    "f1": 0.0,
+    "tp": 0,
+    "fp": 0,
+    "fn": 4
+  },
+  "per_label": [
+    {
+      "label": "HAS_AMOUNT",
+      "support": 1,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0
+    },
+    {
+      "label": "MEASURED_IN",
+      "support": 3,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0
+    }
+  ],
+  "errors": [
+    {
+      "id": "ex1",
+      "type": "FN",
+      "label": "HAS_AMOUNT",
+      "head_surface": "FeCl3·6H2O",
+      "tail_surface": "10"
+    },
+    {
+      "id": "ex1",
+      "type": "FN",
+      "label": "MEASURED_IN",
+      "head_surface": "100",
+      "tail_surface": "mL"
+    },
+    {
+      "id": "ex1",
+      "type": "FN",
+      "label": "MEASURED_IN",
+      "head_surface": "162",
+      "tail_surface": "mg"
+    },
+    {
+      "id": "ex1",
+      "type": "FN",
+      "label": "MEASURED_IN",
+      "head_surface": "10",
+      "tail_surface": "mL"
+    }
+  ]
+}

@@ -1,0 +1,9 @@
+queries:
+  - '(nanoparticle) AND (synthesis) OR (nanoparticle) AND (characterization) OR (nanoparticle) AND (application) OR (nanoparticle) AND (properties) OR (nanocrystal) AND (synthesis) OR (nanocrystal) AND (characterization) OR (nanocrystal) AND (application) OR (nanocrystal) AND (properties) OR (nanotube) AND (synthesis) OR (nanotube) AND (characterization) OR (nanotube) AND (application) OR (nanotube) AND (properties)'
+since_year: 2018
+max_results_per_source: 200
+unpaywall_email: os.getenv("UNPAYWALL_EMAIL")
+grobid_url: "http://localhost:8070"
+spaCy_model_dir: "../NanoChemGPT/miner/ner_model/model-best"
+heuristic_linker_path: "../NanoChemGPT/miner/heuristic_linker.py"
+out_dir: "out"
