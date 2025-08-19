@@ -1,0 +1,429 @@
+{
+  "paper_id": "10.1039/d5ra01664a",
+  "title": "Low-temperature H&lt;sub&gt;2&lt;/sub&gt;S detection using Fe-doped SnO&lt;sub&gt;2&lt;/sub&gt;/rGO nanocomposite sensor.",
+  "authors": [],
+  "doi": "10.1039/d5ra01664a",
+  "source": "eupmc",
+  "urls": {
+    "pdf": null
+  },
+  "license": {
+    "type": "unknown"
+  },
+  "access_route": "oa",
+  "sections": [
+    {
+      "heading": "Experimental details",
+      "text": "2. Experimental details The analytical reagents listed below were employed without additional purification: tin chloride pentahydrate (SnCl 4 ·5H 2 O, Sigma-Aldrich), iron( iii ) nitrate nonahydrate (Fe (NO 3 ) 3 ·9H 2 O, Sigma-Aldrich), urea (CO(NH 2 ) 2 , Merck), ammonium hydroxide (NH 4 OH, Merck), and reduced graphene oxide (Ad Nano Technologies Pvt. Ltd, India). 2.1 Synthesis of SnO 2  (S1) and 3% Fe–SnO 2  (S2) The sol–gel combustion method was method was employed to produce pristine SnO 2  nanoparticles (NPs) and Fe-doped SnO 2  QDs. A uniform solution was obtained by dissolving tin chloride pentahydrate and urea in 200 mL of deionized water in a stoichiometric ratio, followed by stirring at room temperature for 1 hour. After stirring for 60 minutes, ammonium hydroxide (NH 4 OH) was gradually introduced into the solution until the pH reached 7. The mixture was continuously stirred and heated at 80 °C until the precursor solution transformed into a viscous gel. Then, the gel was completely dried by direct heating on the hot plate at 150 °C, resulting in the formation of a black-brown powder. The resultant powder was ground for 30 minutes using an agate mortar and pestle, then calcined in air at 500 °C for 5 hours and cooled naturally to yield crystalline pristine SnO 2 . To synthesize Fe-doped SnO 2  QDs (Sn 1− x Fe x O 2 ) with 3% Fe doping, a similar procedure was followed, incorporating 0.03 mol of Fe from ferric nitrate nonahydrate (Fe(NO 3 ) 3 ·9H 2 O) into the precursor solution before gel formation. This ensured homogeneous doping, ultimately yielding 3% Fe-doped SnO 2  QDs after calcination. 2.2 Synthesis of 3% Fe–SnO 2 /rGO (S3) To synthesize the 3% Fe–SnO 2 /rGO composite, 1 g of 3% Fe–SnO 2  and 4 mg of rGO were individually dispersed in 200 mL and 40 mL of deionized water, respectively. The solutions were then stirred and sonicated using a 400 W probe sonicator for 15 minutes to ensure uniform dispersion. The dispersed rGO was slowly introduced into the Fe–SnO 2  suspension while stirring vigorously, followed by an additional 15 minutes of sonication. The obtained mixture was placed in a drying oven at 100 °C for 24 hours. The final product was collected and ground for 30 minutes to obtain a fine powder. 2.3 Characterization A field emission scanning electron microscope (FE-SEM, Carl Zeiss Model Supra 55, Germany) and a high-resolution transmission electron microscope (HR-TEM, JEOL JEM 2100 PLUS) have been employed to examine the morphology of the produced composites. X-ray photoelectron spectroscopy (XPS, Omicron ESCA, Oxford Instruments, Germany) and energy dispersive spectroscopy (EDS) were used to assess the elemental composition. A Cu-Kα radiation source ( λ  = 0.15405 nm) and a Rigaku Miniflex-II (Japan) were used for X-ray diffraction (XRD) studies. Raman spectroscopy (XploRA PLUS, Horiba, Japan), Fourier transform infrared spectroscopy (FT-IR, Affinity-1S IR spectrometer, Shimadzu Corporation, Kyoto, Japan), ultraviolet-visible (UV-Vis) spectroscopy utilizing a UV-Vis NIR spectrophotometer (LAMBDA 750, PerkinElmer), and BET surface area measurements were performed using a Quantachrome NOVA 2200 series volumetric gas adsorption system. 2.4 Sensor fabrication Interdigitated silver electrodes were fabricated using a screen-printing process on ceramic substrates. 21,22  The ceramic substrates provide a durable, thermally stable, and electrically insulating surface for applying the sensor materials. High-temperature silver conductive paste (Techinstro, India) was screen-printed using a manual screen-printing machine and cured at 120 °C for 10 minutes. The fabricated interdigitated silver electrode consists of 16 digits, each measuring 10 mm in length and 0.4 mm in width, with an interdigit spacing of 0.4 mm between adjacent pairs. Ultrasonically dispersed solutions of the samples (in absolute alcohol) were drop-coated onto the prepared electrodes and allowed to dry in an oven at 100 °C for 24 hours to ensure a smooth surface free of cracks and bubbles before the sensing tests. 2.5 Gas sensing measurements The gas sensing abilities of the synthesized materials were assessed using a gas detection test system, which included a gas chamber, sample holder, Keithley 6487 Picoammeter/voltage source, temperature controller (Nippon NC 2638), and a gas injection system equipped with a mass flow controller (MFC). A steady voltage was applied to the sensor element, and the corresponding current was measured with the Keithley 6487 Picoammeter/voltage source. To create a baseline, the sensing chamber was first flushed with dry air for ten minutes. After that, the analyte gas was introduced to track the sensor response. The sensor was then restored by subjecting it to a dry air flow. The response of the sensor ( S ) is defined as  S  =  I g / I a , where  I g  and  I a  denote the sensor's electrical current in the presence of the target gas and in air, respectively. Response time refers to the time needed for a gas sensor to achieve 90% of its maximum signal change after exposure to the gas being monitored. Recovery time, on the other hand, is the time taken for the sensor to return to 90% of its baseline value after the target gas is removed."
+    },
+    {
+      "heading": "Synthesis of SnO",
+      "text": "2.1 Synthesis of SnO 2  (S1) and 3% Fe–SnO 2  (S2) The sol–gel combustion method was method was employed to produce pristine SnO 2  nanoparticles (NPs) and Fe-doped SnO 2  QDs. A uniform solution was obtained by dissolving tin chloride pentahydrate and urea in 200 mL of deionized water in a stoichiometric ratio, followed by stirring at room temperature for 1 hour. After stirring for 60 minutes, ammonium hydroxide (NH 4 OH) was gradually introduced into the solution until the pH reached 7. The mixture was continuously stirred and heated at 80 °C until the precursor solution transformed into a viscous gel. Then, the gel was completely dried by direct heating on the hot plate at 150 °C, resulting in the formation of a black-brown powder. The resultant powder was ground for 30 minutes using an agate mortar and pestle, then calcined in air at 500 °C for 5 hours and cooled naturally to yield crystalline pristine SnO 2 . To synthesize Fe-doped SnO 2  QDs (Sn 1− x Fe x O 2 ) with 3% Fe doping, a similar procedure was followed, incorporating 0.03 mol of Fe from ferric nitrate nonahydrate (Fe(NO 3 ) 3 ·9H 2 O) into the precursor solution before gel formation. This ensured homogeneous doping, ultimately yielding 3% Fe-doped SnO 2  QDs after calcination."
+    },
+    {
+      "heading": "Synthesis of 3% Fe–SnO",
+      "text": "2.2 Synthesis of 3% Fe–SnO 2 /rGO (S3) To synthesize the 3% Fe–SnO 2 /rGO composite, 1 g of 3% Fe–SnO 2  and 4 mg of rGO were individually dispersed in 200 mL and 40 mL of deionized water, respectively. The solutions were then stirred and sonicated using a 400 W probe sonicator for 15 minutes to ensure uniform dispersion. The dispersed rGO was slowly introduced into the Fe–SnO 2  suspension while stirring vigorously, followed by an additional 15 minutes of sonication. The obtained mixture was placed in a drying oven at 100 °C for 24 hours. The final product was collected and ground for 30 minutes to obtain a fine powder."
+    }
+  ],
+  "extractions": {
+    "methods_paragraphs": [
+      {
+        "text": "2. Experimental details The analytical reagents listed below were employed without additional purification: tin chloride pentahydrate (SnCl 4 ·5H 2 O, Sigma-Aldrich), iron( iii ) nitrate nonahydrate (Fe (NO 3 ) 3 ·9H 2 O, Sigma-Aldrich), urea (CO(NH 2 ) 2 , Merck), ammonium hydroxide (NH 4 OH, Merck), and reduced graphene oxide (Ad Nano Technologies Pvt. Ltd, India). 2.1 Synthesis of SnO 2  (S1) and 3% Fe–SnO 2  (S2) The sol–gel combustion method was method was employed to produce pristine SnO 2  nanoparticles (NPs) and Fe-doped SnO 2  QDs. A uniform solution was obtained by dissolving tin chloride pentahydrate and urea in 200 mL of deionized water in a stoichiometric ratio, followed by stirring at room temperature for 1 hour. After stirring for 60 minutes, ammonium hydroxide (NH 4 OH) was gradually introduced into the solution until the pH reached 7. The mixture was continuously stirred and heated at 80 °C until the precursor solution transformed into a viscous gel. Then, the gel was completely dried by direct heating on the hot plate at 150 °C, resulting in the formation of a black-brown powder. The resultant powder was ground for 30 minutes using an agate mortar and pestle, then calcined in air at 500 °C for 5 hours and cooled naturally to yield crystalline pristine SnO 2 . To synthesize Fe-doped SnO 2  QDs (Sn 1− x Fe x O 2 ) with 3% Fe doping, a similar procedure was followed, incorporating 0.03 mol of Fe from ferric nitrate nonahydrate (Fe(NO 3 ) 3 ·9H 2 O) into the precursor solution before gel formation. This ensured homogeneous doping, ultimately yielding 3% Fe-doped SnO 2  QDs after calcination. 2.2 Synthesis of 3% Fe–SnO 2 /rGO (S3) To synthesize the 3% Fe–SnO 2 /rGO composite, 1 g of 3% Fe–SnO 2  and 4 mg of rGO were individually dispersed in 200 mL and 40 mL of deionized water, respectively. The solutions were then stirred and sonicated using a 400 W probe sonicator for 15 minutes to ensure uniform dispersion. The dispersed rGO was slowly introduced into the Fe–SnO 2  suspension while stirring vigorously, followed by an additional 15 minutes of sonication. The obtained mixture was placed in a drying oven at 100 °C for 24 hours. The final product was collected and ground for 30 minutes to obtain a fine powder. 2.3 Characterization A field emission scanning electron microscope (FE-SEM, Carl Zeiss Model Supra 55, Germany) and a high-resolution transmission electron microscope (HR-TEM, JEOL JEM 2100 PLUS) have been employed to examine the morphology of the produced composites. X-ray photoelectron spectroscopy (XPS, Omicron ESCA, Oxford Instruments, Germany) and energy dispersive spectroscopy (EDS) were used to assess the elemental composition. A Cu-Kα radiation source ( λ  = 0.15405 nm) and a Rigaku Miniflex-II (Japan) were used for X-ray diffraction (XRD) studies. Raman spectroscopy (XploRA PLUS, Horiba, Japan), Fourier transform infrared spectroscopy (FT-IR, Affinity-1S IR spectrometer, Shimadzu Corporation, Kyoto, Japan), ultraviolet-visible (UV-Vis) spectroscopy utilizing a UV-Vis NIR spectrophotometer (LAMBDA 750, PerkinElmer), and BET surface area measurements were performed using a Quantachrome NOVA 2200 series volumetric gas adsorption system. 2.4 Sensor fabrication Interdigitated silver electrodes were fabricated using a screen-printing process on ceramic substrates. 21,22  The ceramic substrates provide a durable, thermally stable, and electrically insulating surface for applying the sensor materials. High-temperature silver conductive paste (Techinstro, India) was screen-printed using a manual screen-printing machine and cured at 120 °C for 10 minutes. The fabricated interdigitated silver electrode consists of 16 digits, each measuring 10 mm in length and 0.4 mm in width, with an interdigit spacing of 0.4 mm between adjacent pairs. Ultrasonically dispersed solutions of the samples (in absolute alcohol) were drop-coated onto the prepared electrodes and allowed to dry in an oven at 100 °C for 24 hours to ensure a smooth surface free of cracks and bubbles before the sensing tests. 2.5 Gas sensing measurements The gas sensing abilities of the synthesized materials were assessed using a gas detection test system, which included a gas chamber, sample holder, Keithley 6487 Picoammeter/voltage source, temperature controller (Nippon NC 2638), and a gas injection system equipped with a mass flow controller (MFC). A steady voltage was applied to the sensor element, and the corresponding current was measured with the Keithley 6487 Picoammeter/voltage source. To create a baseline, the sensing chamber was first flushed with dry air for ten minutes. After that, the analyte gas was introduced to track the sensor response. The sensor was then restored by subjecting it to a dry air flow. The response of the sensor ( S ) is defined as  S  =  I g / I a , where  I g  and  I a  denote the sensor's electrical current in the presence of the target gas and in air, respectively. Response time refers to the time needed for a gas sensor to achieve 90% of its maximum signal change after exposure to the gas being monitored. Recovery time, on the other hand, is the time taken for the sensor to return to 90% of its baseline value after the target gas is removed.",
+        "operations": [
+          {
+            "op_type": "stir",
+            "sentence": "A uniform solution was obtained by dissolving tin chloride pentahydrate and urea in 200 mL of deionized water in a stoichiometric ratio, followed by stirring at room temperature for 1 hour.",
+            "start_char": 547,
+            "end_char": 736,
+            "materials": [
+              "200 mL",
+              "1 hour"
+            ],
+            "params": {
+              "time": "1 hour",
+              "amounts": [
+                "200 mL"
+              ]
+            }
+          },
+          {
+            "op_type": "stir",
+            "sentence": "After stirring for 60 minutes, ammonium hydroxide (NH 4 OH) was gradually introduced into the solution until the pH reached 7.",
+            "start_char": 737,
+            "end_char": 863,
+            "materials": [
+              "60 minutes",
+              "NH 4 OH"
+            ],
+            "params": {
+              "time": "60 minutes"
+            }
+          },
+          {
+            "op_type": "stir",
+            "sentence": "The mixture was continuously stirred and heated at 80 °C until the precursor solution transformed into a viscous gel.",
+            "start_char": 864,
+            "end_char": 981,
+            "materials": [
+              "80 °C"
+            ],
+            "params": {
+              "temp": "80°C"
+            }
+          },
+          {
+            "op_type": "dry",
+            "sentence": "Then, the gel was completely dried by direct heating on the hot plate at 150 °C, resulting in the formation of a black-brown powder.",
+            "start_char": 982,
+            "end_char": 1114,
+            "materials": [
+              "150 °C"
+            ],
+            "params": {
+              "temp": "150°C"
+            }
+          },
+          {
+            "op_type": "stir",
+            "sentence": "The solutions were then stirred and sonicated using a 400 W probe sonicator for 15 minutes to ensure uniform dispersion.",
+            "start_char": 1836,
+            "end_char": 1956,
+            "materials": [
+              "a 400 W probe sonicator",
+              "15 minutes"
+            ],
+            "params": {
+              "time": "15 minutes"
+            }
+          },
+          {
+            "op_type": "add",
+            "sentence": "The dispersed rGO was slowly introduced into the Fe–SnO 2  suspension while stirring vigorously, followed by an additional 15 minutes of sonication.",
+            "start_char": 1957,
+            "end_char": 2105,
+            "materials": [
+              "SnO 2  suspension",
+              "an additional 15 minutes"
+            ],
+            "params": {
+              "time": "15 minutes"
+            }
+          },
+          {
+            "op_type": "dry",
+            "sentence": "The obtained mixture was placed in a drying oven at 100 °C for 24 hours.",
+            "start_char": 2106,
+            "end_char": 2178,
+            "materials": [
+              "100 °C",
+              "24 hours"
+            ],
+            "params": {
+              "temp": "100°C",
+              "time": "24 hours"
+            }
+          },
+          {
+            "op_type": "dry",
+            "sentence": "Ultrasonically dispersed solutions of the samples (in absolute alcohol) were drop-coated onto the prepared electrodes and allowed to dry in an oven at 100 °C for 24 hours to ensure a smooth surface free of cracks and bubbles before the sensing tests.",
+            "start_char": 3822,
+            "end_char": 4072,
+            "materials": [
+              "100 °C",
+              "24 hours"
+            ],
+            "params": {
+              "temp": "100°C",
+              "time": "24 hours"
+            }
+          },
+          {
+            "op_type": "inject",
+            "sentence": "2.5 Gas sensing measurements The gas sensing abilities of the synthesized materials were assessed using a gas detection test system, which included a gas chamber, sample holder, Keithley 6487 Picoammeter/voltage source, temperature controller (Nippon NC 2638), and a gas injection system equipped with a mass flow controller (MFC).",
+            "start_char": 4073,
+            "end_char": 4404,
+            "materials": [
+              "2.5 Gas sensing measurements",
+              "Keithley 6487 Picoammeter/voltage source"
+            ],
+            "params": {}
+          },
+          {
+            "op_type": "dry",
+            "sentence": "To create a baseline, the sensing chamber was first flushed with dry air for ten minutes.",
+            "start_char": 4551,
+            "end_char": 4640,
+            "materials": [
+              "ten minutes"
+            ],
+            "params": {}
+          },
+          {
+            "op_type": "add",
+            "sentence": "After that, the analyte gas was introduced to track the sensor response.",
+            "start_char": 4641,
+            "end_char": 4713,
+            "materials": [],
+            "params": {}
+          },
+          {
+            "op_type": "dry",
+            "sentence": "The sensor was then restored by subjecting it to a dry air flow.",
+            "start_char": 4714,
+            "end_char": 4778,
+            "materials": [],
+            "params": {}
+          }
+        ],
+        "expanded": [
+          {
+            "op_type": "stir",
+            "steps": [
+              "Place the reaction vessel on a stir plate.",
+              "Set the stirrer to an appropriate speed.",
+              "Stir for 1 hour."
+            ]
+          },
+          {
+            "op_type": "stir",
+            "steps": [
+              "Place the reaction vessel on a stir plate.",
+              "Set the stirrer to an appropriate speed.",
+              "Stir for 60 minutes."
+            ]
+          },
+          {
+            "op_type": "stir",
+            "steps": [
+              "Place the reaction vessel on a stir plate.",
+              "Set the stirrer to an appropriate speed.",
+              "Stir for the specified time."
+            ]
+          },
+          {
+            "op_type": "dry",
+            "steps": [
+              "Perform operation 'dry' as described: Then, the gel was completely dried by direct heating on the hot plate at 150 °C, resulting in the formation of a black-brown powder."
+            ]
+          },
+          {
+            "op_type": "stir",
+            "steps": [
+              "Place the reaction vessel on a stir plate.",
+              "Set the stirrer to an appropriate speed.",
+              "Stir for 15 minutes."
+            ]
+          },
+          {
+            "op_type": "add",
+            "steps": [
+              "Ensure reaction vessel is present and empty.",
+              "Place a clean stir bar in the vessel.",
+              "Measure the specified amount of SnO 2  suspension.",
+              "Transfer SnO 2  suspension into the vessel."
+            ]
+          },
+          {
+            "op_type": "dry",
+            "steps": [
+              "Perform operation 'dry' as described: The obtained mixture was placed in a drying oven at 100 °C for 24 hours."
+            ]
+          },
+          {
+            "op_type": "dry",
+            "steps": [
+              "Perform operation 'dry' as described: Ultrasonically dispersed solutions of the samples (in absolute alcohol) were drop-coated onto the prepared electrodes and allowed to dry in an oven at 100 °C for 24 hours to ensure a smooth surface free of cracks and bubbles before the sensing tests."
+            ]
+          },
+          {
+            "op_type": "inject",
+            "steps": [
+              "Perform operation 'inject' as described: 2.5 Gas sensing measurements The gas sensing abilities of the synthesized materials were assessed using a gas detection test system, which included a gas chamber, sample holder, Keithley 6487 Picoammeter/voltage source, temperature controller (Nippon NC 2638), and a gas injection system equipped with a mass flow controller (MFC)."
+            ]
+          },
+          {
+            "op_type": "dry",
+            "steps": [
+              "Perform operation 'dry' as described: To create a baseline, the sensing chamber was first flushed with dry air for ten minutes."
+            ]
+          },
+          {
+            "op_type": "add",
+            "steps": [
+              "Ensure reaction vessel is present and empty.",
+              "Place a clean stir bar in the vessel.",
+              "Measure the specified amount of reagent.",
+              "Transfer reagent into the vessel."
+            ]
+          },
+          {
+            "op_type": "dry",
+            "steps": [
+              "Perform operation 'dry' as described: The sensor was then restored by subjecting it to a dry air flow."
+            ]
+          }
+        ]
+      },
+      {
+        "text": "2.1 Synthesis of SnO 2  (S1) and 3% Fe–SnO 2  (S2) The sol–gel combustion method was method was employed to produce pristine SnO 2  nanoparticles (NPs) and Fe-doped SnO 2  QDs. A uniform solution was obtained by dissolving tin chloride pentahydrate and urea in 200 mL of deionized water in a stoichiometric ratio, followed by stirring at room temperature for 1 hour. After stirring for 60 minutes, ammonium hydroxide (NH 4 OH) was gradually introduced into the solution until the pH reached 7. The mixture was continuously stirred and heated at 80 °C until the precursor solution transformed into a viscous gel. Then, the gel was completely dried by direct heating on the hot plate at 150 °C, resulting in the formation of a black-brown powder. The resultant powder was ground for 30 minutes using an agate mortar and pestle, then calcined in air at 500 °C for 5 hours and cooled naturally to yield crystalline pristine SnO 2 . To synthesize Fe-doped SnO 2  QDs (Sn 1− x Fe x O 2 ) with 3% Fe doping, a similar procedure was followed, incorporating 0.03 mol of Fe from ferric nitrate nonahydrate (Fe(NO 3 ) 3 ·9H 2 O) into the precursor solution before gel formation. This ensured homogeneous doping, ultimately yielding 3% Fe-doped SnO 2  QDs after calcination.",
+        "operations": [
+          {
+            "op_type": "stir",
+            "sentence": "A uniform solution was obtained by dissolving tin chloride pentahydrate and urea in 200 mL of deionized water in a stoichiometric ratio, followed by stirring at room temperature for 1 hour.",
+            "start_char": 177,
+            "end_char": 366,
+            "materials": [
+              "200 mL",
+              "1 hour"
+            ],
+            "params": {
+              "time": "1 hour",
+              "amounts": [
+                "200 mL"
+              ]
+            }
+          },
+          {
+            "op_type": "stir",
+            "sentence": "After stirring for 60 minutes, ammonium hydroxide (NH 4 OH) was gradually introduced into the solution until the pH reached 7.",
+            "start_char": 367,
+            "end_char": 493,
+            "materials": [
+              "60 minutes",
+              "NH 4 OH"
+            ],
+            "params": {
+              "time": "60 minutes"
+            }
+          },
+          {
+            "op_type": "stir",
+            "sentence": "The mixture was continuously stirred and heated at 80 °C until the precursor solution transformed into a viscous gel.",
+            "start_char": 494,
+            "end_char": 611,
+            "materials": [
+              "80 °C"
+            ],
+            "params": {
+              "temp": "80°C"
+            }
+          },
+          {
+            "op_type": "dry",
+            "sentence": "Then, the gel was completely dried by direct heating on the hot plate at 150 °C, resulting in the formation of a black-brown powder.",
+            "start_char": 612,
+            "end_char": 744,
+            "materials": [
+              "150 °C"
+            ],
+            "params": {
+              "temp": "150°C"
+            }
+          }
+        ],
+        "expanded": [
+          {
+            "op_type": "stir",
+            "steps": [
+              "Place the reaction vessel on a stir plate.",
+              "Set the stirrer to an appropriate speed.",
+              "Stir for 1 hour."
+            ]
+          },
+          {
+            "op_type": "stir",
+            "steps": [
+              "Place the reaction vessel on a stir plate.",
+              "Set the stirrer to an appropriate speed.",
+              "Stir for 60 minutes."
+            ]
+          },
+          {
+            "op_type": "stir",
+            "steps": [
+              "Place the reaction vessel on a stir plate.",
+              "Set the stirrer to an appropriate speed.",
+              "Stir for the specified time."
+            ]
+          },
+          {
+            "op_type": "dry",
+            "steps": [
+              "Perform operation 'dry' as described: Then, the gel was completely dried by direct heating on the hot plate at 150 °C, resulting in the formation of a black-brown powder."
+            ]
+          }
+        ]
+      },
+      {
+        "text": "2.2 Synthesis of 3% Fe–SnO 2 /rGO (S3) To synthesize the 3% Fe–SnO 2 /rGO composite, 1 g of 3% Fe–SnO 2  and 4 mg of rGO were individually dispersed in 200 mL and 40 mL of deionized water, respectively. The solutions were then stirred and sonicated using a 400 W probe sonicator for 15 minutes to ensure uniform dispersion. The dispersed rGO was slowly introduced into the Fe–SnO 2  suspension while stirring vigorously, followed by an additional 15 minutes of sonication. The obtained mixture was placed in a drying oven at 100 °C for 24 hours. The final product was collected and ground for 30 minutes to obtain a fine powder.",
+        "operations": [
+          {
+            "op_type": "stir",
+            "sentence": "The solutions were then stirred and sonicated using a 400 W probe sonicator for 15 minutes to ensure uniform dispersion.",
+            "start_char": 203,
+            "end_char": 323,
+            "materials": [
+              "a 400 W probe sonicator",
+              "15 minutes"
+            ],
+            "params": {
+              "time": "15 minutes"
+            }
+          },
+          {
+            "op_type": "add",
+            "sentence": "The dispersed rGO was slowly introduced into the Fe–SnO 2  suspension while stirring vigorously, followed by an additional 15 minutes of sonication.",
+            "start_char": 324,
+            "end_char": 472,
+            "materials": [
+              "SnO 2  suspension",
+              "an additional 15 minutes"
+            ],
+            "params": {
+              "time": "15 minutes"
+            }
+          },
+          {
+            "op_type": "dry",
+            "sentence": "The obtained mixture was placed in a drying oven at 100 °C for 24 hours.",
+            "start_char": 473,
+            "end_char": 545,
+            "materials": [
+              "100 °C",
+              "24 hours"
+            ],
+            "params": {
+              "temp": "100°C",
+              "time": "24 hours"
+            }
+          }
+        ],
+        "expanded": [
+          {
+            "op_type": "stir",
+            "steps": [
+              "Place the reaction vessel on a stir plate.",
+              "Set the stirrer to an appropriate speed.",
+              "Stir for 15 minutes."
+            ]
+          },
+          {
+            "op_type": "add",
+            "steps": [
+              "Ensure reaction vessel is present and empty.",
+              "Place a clean stir bar in the vessel.",
+              "Measure the specified amount of SnO 2  suspension.",
+              "Transfer SnO 2  suspension into the vessel."
+            ]
+          },
+          {
+            "op_type": "dry",
+            "steps": [
+              "Perform operation 'dry' as described: The obtained mixture was placed in a drying oven at 100 °C for 24 hours."
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,29 @@
+{
+  "paper_id": "10.3390/ph18060767",
+  "title": "Quantum Drugs (Q-Drugs): A New Discovery and Taboo Breaking Approach; Producing Carbon Quantum Dots from Drug Molecules.",
+  "authors": [],
+  "doi": "10.3390/ph18060767",
+  "source": "eupmc",
+  "urls": {
+    "pdf": null
+  },
+  "license": {
+    "type": "unknown"
+  },
+  "access_route": "oa",
+  "sections": [
+    {
+      "heading": "4. Materials and Methods",
+      "text": "4. Materials and Methods 4.1. Materials Salicylic acid, sulfadiazine, caffeine, citric acid monohydrate (CAMH), urea, sodium borate (Na-Borat) boric acid, paracetamol, indomethacin and ethylenediamine (EDA), and α-lypolic acid were purchased from Sigma Aldrich (Sigma Aldrich Chemie GmbH, Taufkirchen, Germany). L-cysteine was purchased from Biobasic (20 Konrad Crescent, Markham, ON, Canada). Bupivacine and lidocaine were donated from Haver Pharma, Istanbul, Türkiye. Metformin and sertralin were donated from Sanovel, Istanbul, Türkiye. Enalapril, citicolin, and mesalazine were obtained from the market in Türkiye. GABA-Pentin was donated from Biofarma Drug Company, Istanbul, Türkiye. Favipiravir was donated from Atabay, Istanbul, Türkiye. Hyaluronic acid (HYA), citrulline, and bromelain were purchased from Life in, Proflex, and Solgar Drug Company, Istanbul, Türkiye, respectively. 4.2. One-Pot Production of Composite Q-Drugs A microwave reactor (Microwave 300, Anton Paar, St. Albans, UK) was used for Q-Drug synthesis. The contents and microwave settings for the Q-Drugs prepared are given in  Table 3 . 4.3. Characterization of Q-Drugs Particle size distribution and zeta potential measurements of Q-Drugs were performed using an Anton Paar LiteSizer 500 (Anton Paar, St. Albans, UK). The dilutions were made prior to determination as described in the literature [ 42 ]. 4.4. Stability The prepared formulation was subjected to stability (at 5 °C in refrigerator and 25 °C, 60% RH) testing to determine chemical and physical stability. 4.5. Statistical Evaluation Results were evaluated using the mean ± standard deviation of values obtained from the prepared formulations, with the number of replicates indicated. Statistical analysis employed a two-way ANOVA test."
+    }
+  ],
+  "extractions": {
+    "methods_paragraphs": [
+      {
+        "text": "4. Materials and Methods 4.1. Materials Salicylic acid, sulfadiazine, caffeine, citric acid monohydrate (CAMH), urea, sodium borate (Na-Borat) boric acid, paracetamol, indomethacin and ethylenediamine (EDA), and α-lypolic acid were purchased from Sigma Aldrich (Sigma Aldrich Chemie GmbH, Taufkirchen, Germany). L-cysteine was purchased from Biobasic (20 Konrad Crescent, Markham, ON, Canada). Bupivacine and lidocaine were donated from Haver Pharma, Istanbul, Türkiye. Metformin and sertralin were donated from Sanovel, Istanbul, Türkiye. Enalapril, citicolin, and mesalazine were obtained from the market in Türkiye. GABA-Pentin was donated from Biofarma Drug Company, Istanbul, Türkiye. Favipiravir was donated from Atabay, Istanbul, Türkiye. Hyaluronic acid (HYA), citrulline, and bromelain were purchased from Life in, Proflex, and Solgar Drug Company, Istanbul, Türkiye, respectively. 4.2. One-Pot Production of Composite Q-Drugs A microwave reactor (Microwave 300, Anton Paar, St. Albans, UK) was used for Q-Drug synthesis. The contents and microwave settings for the Q-Drugs prepared are given in  Table 3 . 4.3. Characterization of Q-Drugs Particle size distribution and zeta potential measurements of Q-Drugs were performed using an Anton Paar LiteSizer 500 (Anton Paar, St. Albans, UK). The dilutions were made prior to determination as described in the literature [ 42 ]. 4.4. Stability The prepared formulation was subjected to stability (at 5 °C in refrigerator and 25 °C, 60% RH) testing to determine chemical and physical stability. 4.5. Statistical Evaluation Results were evaluated using the mean ± standard deviation of values obtained from the prepared formulations, with the number of replicates indicated. Statistical analysis employed a two-way ANOVA test.",
+        "operations": [],
+        "expanded": []
+      }
+    ]
+  }
+}

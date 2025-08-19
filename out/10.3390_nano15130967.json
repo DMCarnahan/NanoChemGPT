@@ -1,0 +1,255 @@
+{
+  "paper_id": "10.3390/nano15130967",
+  "title": "Recent Advances on the Positively-Charged Nanofiltration Membranes for Mg&lt;sup&gt;2+&lt;/sup&gt;/Li&lt;sup&gt;+&lt;/sup&gt; Separation Through Interfacial Polymerization.",
+  "authors": [],
+  "doi": "10.3390/nano15130967",
+  "source": "eupmc",
+  "urls": {
+    "pdf": null
+  },
+  "license": {
+    "type": "unknown"
+  },
+  "access_route": "oa",
+  "sections": [
+    {
+      "heading": "1. Introduction",
+      "text": "1. Introduction Renowned as the “white petroleum” of the 21st century due to its low density and lightweight properties combined with high electrochemical activity, lithium has been extensively applied among various fields [ 1 , 2 , 3 , 4 ]. The rapid development of the battery industry has particularly driven a dramatic surge in global lithium demand [ 5 ].  Figure 1 a illustrates the global lithium production and consumption from 2007 to 2024, revealing a sharp increase in both metrics after 2017, with both exceeding 200,000 metric tons by 2024 [ 6 ]. However, as shown in  Figure 1 b, with the widespread promotion and use of new energy vehicles, global lithium resources are mainly applied in the field of lithium-ion batteries [ 7 , 8 ]. Compared with conventional ore extraction methods, lithium recovery from salt lakes has become the mainstream approach due to its generally lower operational costs [ 9 , 10 ]. Conventional lithium extraction technologies from salt lakes mainly include precipitation, adsorption, calcination leaching, and solvent extraction [ 11 ]. However, the application of these methods are limited by low efficiency, time-consuming processes, and environmental pollution concerns. Membrane separation has emerged as the most promising technology for selective lithium separation due to its environmental friendliness, high separation efficiency, simple processes, and absence of secondary pollution. Nevertheless, coexisting ions in salt lake brines such as Mg 2+ , Ca 2+ , Na + , K + , Cl − , SO 4 2− , and CO 3 2−  significantly hinder high-purity lithium extraction [ 7 , 12 ]. Particularly, magnesium ions constitute a major obstacle to efficient lithium recovery; they have similar chemical properties and ionic hydrated radii to lithium ions, being 0.428 nm and 0.340 nm, respectively [ 10 ]. To address this, especially the critical Li + /Mg 2+  separation, a membrane-based lithium recovery process typically involves three key stages, as illustrated in  Figure 2 : (1) brine pretreatment (settling, filtration, and softening) to obtain a lithium-enriched brine; (2) critical Mg 2+ /Li +  separation using nanofiltration (NF), often integrated with adsorption or electrodialysis; and (3) Concentration of the purified stream via forward osmosis (FO), reverse osmosis (RO), or evaporation, followed by Li 2 CO 3  precipitation. NF membranes, positioned between ultrafiltration (UF) and reverse osmosis (RO) in filtration precision, feature pore sizes of 0.5–2 nm [ 13 ]. Their separation mechanisms for ions rely on three synergistic effects: (i) size sieving, where solutes larger than membrane pores are retained; (ii) Donnan (electrostatic) exclusion, driven by charge interactions between the membrane surface and ions—repelling co-ions and attracting counter-ions; and (iii) dielectric exclusion, arising from Born energy barriers and image forces in low-dielectric pores [ 14 ]. For Mg 2+ /Li +  separation, the Donnan effect dominates due to the ions’ similar sizes but divergent charges [ 15 ]. Positively charged NF membranes enhance this effect: Their surface cations electrostatically repel Mg 2+  more strongly than Li + , while size sieving amplifies selectivity as hydrated Mg 2+  is marginally larger [ 16 , 17 ]. This dual mechanism—electrostatic repulsion combined with steric hindrance—enables high Mg 2+  rejection (>95%) while permitting Li +  permeation. Therefore, constructing positively charged membranes by modifying the surface charge characteristics of NF membrane provides a critical solution for lithium extraction from salt lakes with a high Mg 2+ /Li ratio [ 18 ]. Since J.M.M Peeters [ 19 ] proposed in 1998 that positively charged NF membranes could effectively separate monovalent and divalent cations, Li et al. [ 20 ] first applied this to lithium–magnesium ion separation scenarios in 2015. As the most widely used method for NF membrane fabrication, interfacial polymerization (IP)-based NF membranes have dominated the water industry market, and continuous research has been conducted to enhance their separation performance [ 21 ]. While recent years have witnessed multiple reviews on NF membranes for Mg 2+ /Li +  separation, a systematic summary specifically focusing on positively charged NF membranes remains lacking. Therefore, this review aims to provide a comprehensive and critical overview of recent advancements in positively charged NF membranes fabricated via IP for Mg 2+ /Li +  separation. It begins with an analysis of fundamental performance parameters of NF membranes for Mg 2+ /Li +  separation, followed by a detailed discussion of design and preparation strategies using IP to engineer positively charged NF membranes. Additionally, factors influencing the Mg 2+ /Li +  separation efficiency of these membranes are examined. Finally, the review summarizes current progress, identifies challenges, and proposes future research directions to achieve more significant breakthroughs in Mg 2+ /Li +  separation."
+    },
+    {
+      "heading": "2. Fundamental Evaluation Parameters for Mg",
+      "text": "2. Fundamental Evaluation Parameters for Mg 2+ /Li +  Separation Effectiveness In the Mg 2+ /Li +  separation scenario, we refer to the separation performance of NF membranes as two critical performance metrics, namely, Mg 2+ /Li +  separation factor ( S Mg ,Li ) and pure water permeance ( PWP ). In 2006, Wen and colleagues [ 22 ] pioneered the application of a negatively charged NF membrane (Desal-5 DL) for lithium–ion separation from lithium-bearing solutions, marking the inception of membrane-based lithium extraction technology. Although this initial attempt demonstrated a relatively low Mg 2+ /Li +  separation factor, it established critical proof-of-concept for subsequent advancements in selective membrane separation processes. Herein, the mentioned separation factor ( S Mg ,Li ) was defined as follows: (1) S M g , L i = C M g , p / C L i , p C M g , f / C L i , f \nwhere  C Mg,p ,  C Li,p ,  C Mg,f , and  C Li,f  represent the Mg 2+  and Li +  concentrations on the permeate and feed sides, respectively. The separation efficiency is directly proportional to the  S Mg ,Li  value, which means smaller  S Mg ,Li  corresponds to superior ion separation performance. Inversely, some scholars employ the opposite notation  S Li,Mg  to represent separation factor, as defined in Equation (2), where higher values ( S Li,Mg  >1) indicate better separation efficiency. (2) S L i , M g = C L i , p / C M g , p C L i , f / C M g , f The  PWP  can be calculated as below: (3) P W P = Δ V P A m × Δ t × Δ P \nwhere  ΔV p  is the permeate volume (L),  A m  is the effective area of the membrane (m 2 ),  Δt  corresponds to the permeation duration (h), and  ΔP  is the applied transmembrane pressure (bar). Previous studies have focused on optimizing reaction monomers and conditions to enhance membrane water permeability while maintaining high rejection rates for divalent cations. In this context, rejection selectivity was considered equivalent to permeation selectivity. However, with the growing recognition of the trade-off phenomenon, efforts have been directed toward overcoming the compromise between water permeability and divalent ion rejection in NF membranes [ 18 ]. Therefore, in addition to the two parameters mentioned above, the rejection rate ( R , %) is also an important parameter, representing the proportion of individual ions retained by the membrane. It is calculated using the following formula: (4) R = 1 − C p C f × 100 % \nwhere  C p  and  C f  represent the concentrations of the permeate and feed solutions (ppm), respectively."
+    }
+  ],
+  "extractions": {
+    "methods_paragraphs": [
+      {
+        "text": "1. Introduction Renowned as the “white petroleum” of the 21st century due to its low density and lightweight properties combined with high electrochemical activity, lithium has been extensively applied among various fields [ 1 , 2 , 3 , 4 ]. The rapid development of the battery industry has particularly driven a dramatic surge in global lithium demand [ 5 ].  Figure 1 a illustrates the global lithium production and consumption from 2007 to 2024, revealing a sharp increase in both metrics after 2017, with both exceeding 200,000 metric tons by 2024 [ 6 ]. However, as shown in  Figure 1 b, with the widespread promotion and use of new energy vehicles, global lithium resources are mainly applied in the field of lithium-ion batteries [ 7 , 8 ]. Compared with conventional ore extraction methods, lithium recovery from salt lakes has become the mainstream approach due to its generally lower operational costs [ 9 , 10 ]. Conventional lithium extraction technologies from salt lakes mainly include precipitation, adsorption, calcination leaching, and solvent extraction [ 11 ]. However, the application of these methods are limited by low efficiency, time-consuming processes, and environmental pollution concerns. Membrane separation has emerged as the most promising technology for selective lithium separation due to its environmental friendliness, high separation efficiency, simple processes, and absence of secondary pollution. Nevertheless, coexisting ions in salt lake brines such as Mg 2+ , Ca 2+ , Na + , K + , Cl − , SO 4 2− , and CO 3 2−  significantly hinder high-purity lithium extraction [ 7 , 12 ]. Particularly, magnesium ions constitute a major obstacle to efficient lithium recovery; they have similar chemical properties and ionic hydrated radii to lithium ions, being 0.428 nm and 0.340 nm, respectively [ 10 ]. To address this, especially the critical Li + /Mg 2+  separation, a membrane-based lithium recovery process typically involves three key stages, as illustrated in  Figure 2 : (1) brine pretreatment (settling, filtration, and softening) to obtain a lithium-enriched brine; (2) critical Mg 2+ /Li +  separation using nanofiltration (NF), often integrated with adsorption or electrodialysis; and (3) Concentration of the purified stream via forward osmosis (FO), reverse osmosis (RO), or evaporation, followed by Li 2 CO 3  precipitation. NF membranes, positioned between ultrafiltration (UF) and reverse osmosis (RO) in filtration precision, feature pore sizes of 0.5–2 nm [ 13 ]. Their separation mechanisms for ions rely on three synergistic effects: (i) size sieving, where solutes larger than membrane pores are retained; (ii) Donnan (electrostatic) exclusion, driven by charge interactions between the membrane surface and ions—repelling co-ions and attracting counter-ions; and (iii) dielectric exclusion, arising from Born energy barriers and image forces in low-dielectric pores [ 14 ]. For Mg 2+ /Li +  separation, the Donnan effect dominates due to the ions’ similar sizes but divergent charges [ 15 ]. Positively charged NF membranes enhance this effect: Their surface cations electrostatically repel Mg 2+  more strongly than Li + , while size sieving amplifies selectivity as hydrated Mg 2+  is marginally larger [ 16 , 17 ]. This dual mechanism—electrostatic repulsion combined with steric hindrance—enables high Mg 2+  rejection (>95%) while permitting Li +  permeation. Therefore, constructing positively charged membranes by modifying the surface charge characteristics of NF membrane provides a critical solution for lithium extraction from salt lakes with a high Mg 2+ /Li ratio [ 18 ]. Since J.M.M Peeters [ 19 ] proposed in 1998 that positively charged NF membranes could effectively separate monovalent and divalent cations, Li et al. [ 20 ] first applied this to lithium–magnesium ion separation scenarios in 2015. As the most widely used method for NF membrane fabrication, interfacial polymerization (IP)-based NF membranes have dominated the water industry market, and continuous research has been conducted to enhance their separation performance [ 21 ]. While recent years have witnessed multiple reviews on NF membranes for Mg 2+ /Li +  separation, a systematic summary specifically focusing on positively charged NF membranes remains lacking. Therefore, this review aims to provide a comprehensive and critical overview of recent advancements in positively charged NF membranes fabricated via IP for Mg 2+ /Li +  separation. It begins with an analysis of fundamental performance parameters of NF membranes for Mg 2+ /Li +  separation, followed by a detailed discussion of design and preparation strategies using IP to engineer positively charged NF membranes. Additionally, factors influencing the Mg 2+ /Li +  separation efficiency of these membranes are examined. Finally, the review summarizes current progress, identifies challenges, and proposes future research directions to achieve more significant breakthroughs in Mg 2+ /Li +  separation.",
+        "operations": [
+          {
+            "op_type": "filter",
+            "sentence": "To address this, especially the critical Li + /Mg 2+  separation, a membrane-based lithium recovery process typically involves three key stages, as illustrated in  Figure 2 : (1) brine pretreatment (settling, filtration, and softening) to obtain a lithium-enriched brine; (2) critical Mg 2+ /Li +  separation using nanofiltration (NF), often integrated with adsorption or electrodialysis; and (3) Concentration of the purified stream via forward osmosis (FO), reverse osmosis (RO), or evaporation, followed by Li 2 CO 3  precipitation.",
+            "start_char": 1836,
+            "end_char": 2371,
+            "materials": [
+              "/Mg 2+  separation",
+              "three key stages",
+              "(1) brine pretreatment",
+              "(2) critical Mg 2+ /Li +  separation"
+            ],
+            "params": {}
+          },
+          {
+            "op_type": "filter",
+            "sentence": "NF membranes, positioned between ultrafiltration (UF) and reverse osmosis (RO) in filtration precision, feature pore sizes of 0.5–2 nm [ 13 ].",
+            "start_char": 2372,
+            "end_char": 2514,
+            "materials": [],
+            "params": {}
+          },
+          {
+            "op_type": "add",
+            "sentence": "Their separation mechanisms for ions rely on three synergistic effects: (i) size sieving, where solutes larger than membrane pores are retained; (ii) Donnan (electrostatic) exclusion, driven by charge interactions between the membrane surface and ions—repelling co-ions and attracting counter-ions; and (iii) dielectric exclusion, arising from Born energy barriers and image forces in low-dielectric pores [ 14 ].",
+            "start_char": 2515,
+            "end_char": 2928,
+            "materials": [
+              "three synergistic effects",
+              "(i) size sieving",
+              "(ii) Donnan (electrostatic) exclusion",
+              "(iii) dielectric exclusion"
+            ],
+            "params": {}
+          },
+          {
+            "op_type": "add",
+            "sentence": "For Mg 2+ /Li +  separation, the Donnan effect dominates due to the ions’ similar sizes but divergent charges [ 15 ].",
+            "start_char": 2929,
+            "end_char": 3046,
+            "materials": [],
+            "params": {}
+          },
+          {
+            "op_type": "add",
+            "sentence": "Positively charged NF membranes enhance this effect: Their surface cations electrostatically repel Mg 2+  more strongly than Li + , while size sieving amplifies selectivity as hydrated Mg 2+  is marginally larger [ 16 , 17 ].",
+            "start_char": 3047,
+            "end_char": 3272,
+            "materials": [],
+            "params": {}
+          },
+          {
+            "op_type": "add",
+            "sentence": "Therefore, constructing positively charged membranes by modifying the surface charge characteristics of NF membrane provides a critical solution for lithium extraction from salt lakes with a high Mg 2+ /Li ratio [ 18 ].",
+            "start_char": 3420,
+            "end_char": 3639,
+            "materials": [
+              "a high Mg 2+ /Li ratio"
+            ],
+            "params": {}
+          },
+          {
+            "op_type": "add",
+            "sentence": "Since J.M.M Peeters [ 19 ] proposed in 1998 that positively charged NF membranes could effectively separate monovalent and divalent cations, Li et al.",
+            "start_char": 3640,
+            "end_char": 3790,
+            "materials": [],
+            "params": {}
+          },
+          {
+            "op_type": "add",
+            "sentence": "While recent years have witnessed multiple reviews on NF membranes for Mg 2+ /Li +  separation, a systematic summary specifically focusing on positively charged NF membranes remains lacking.",
+            "start_char": 4116,
+            "end_char": 4306,
+            "materials": [],
+            "params": {}
+          },
+          {
+            "op_type": "add",
+            "sentence": "Therefore, this review aims to provide a comprehensive and critical overview of recent advancements in positively charged NF membranes fabricated via IP for Mg 2+ /Li +  separation.",
+            "start_char": 4307,
+            "end_char": 4488,
+            "materials": [
+              "Mg 2+ /Li +  separation"
+            ],
+            "params": {}
+          },
+          {
+            "op_type": "add",
+            "sentence": "It begins with an analysis of fundamental performance parameters of NF membranes for Mg 2+ /Li +  separation, followed by a detailed discussion of design and preparation strategies using IP to engineer positively charged NF membranes.",
+            "start_char": 4489,
+            "end_char": 4723,
+            "materials": [
+              "Mg 2+ /Li +  separation"
+            ],
+            "params": {}
+          }
+        ],
+        "expanded": [
+          {
+            "op_type": "filter",
+            "steps": [
+              "Perform operation 'filter' as described: To address this, especially the critical Li + /Mg 2+  separation, a membrane-based lithium recovery process typically involves three key stages, as illustrated in  Figure 2 : (1) brine pretreatment (settling, filtration, and softening) to obtain a lithium-enriched brine; (2) critical Mg 2+ /Li +  separation using nanofiltration (NF), often integrated with adsorption or electrodialysis; and (3) Concentration of the purified stream via forward osmosis (FO), reverse osmosis (RO), or evaporation, followed by Li 2 CO 3  precipitation."
+            ]
+          },
+          {
+            "op_type": "filter",
+            "steps": [
+              "Perform operation 'filter' as described: NF membranes, positioned between ultrafiltration (UF) and reverse osmosis (RO) in filtration precision, feature pore sizes of 0.5–2 nm [ 13 ]."
+            ]
+          },
+          {
+            "op_type": "add",
+            "steps": [
+              "Ensure reaction vessel is present and empty.",
+              "Place a clean stir bar in the vessel.",
+              "Measure the specified amount of three synergistic effects.",
+              "Transfer three synergistic effects into the vessel."
+            ]
+          },
+          {
+            "op_type": "add",
+            "steps": [
+              "Ensure reaction vessel is present and empty.",
+              "Place a clean stir bar in the vessel.",
+              "Measure the specified amount of reagent.",
+              "Transfer reagent into the vessel."
+            ]
+          },
+          {
+            "op_type": "add",
+            "steps": [
+              "Ensure reaction vessel is present and empty.",
+              "Place a clean stir bar in the vessel.",
+              "Measure the specified amount of reagent.",
+              "Transfer reagent into the vessel."
+            ]
+          },
+          {
+            "op_type": "add",
+            "steps": [
+              "Ensure reaction vessel is present and empty.",
+              "Place a clean stir bar in the vessel.",
+              "Measure the specified amount of a high Mg 2+ /Li ratio.",
+              "Transfer a high Mg 2+ /Li ratio into the vessel."
+            ]
+          },
+          {
+            "op_type": "add",
+            "steps": [
+              "Ensure reaction vessel is present and empty.",
+              "Place a clean stir bar in the vessel.",
+              "Measure the specified amount of reagent.",
+              "Transfer reagent into the vessel."
+            ]
+          },
+          {
+            "op_type": "add",
+            "steps": [
+              "Ensure reaction vessel is present and empty.",
+              "Place a clean stir bar in the vessel.",
+              "Measure the specified amount of reagent.",
+              "Transfer reagent into the vessel."
+            ]
+          },
+          {
+            "op_type": "add",
+            "steps": [
+              "Ensure reaction vessel is present and empty.",
+              "Place a clean stir bar in the vessel.",
+              "Measure the specified amount of Mg 2+ /Li +  separation.",
+              "Transfer Mg 2+ /Li +  separation into the vessel."
+            ]
+          },
+          {
+            "op_type": "add",
+            "steps": [
+              "Ensure reaction vessel is present and empty.",
+              "Place a clean stir bar in the vessel.",
+              "Measure the specified amount of Mg 2+ /Li +  separation.",
+              "Transfer Mg 2+ /Li +  separation into the vessel."
+            ]
+          }
+        ]
+      },
+      {
+        "text": "2. Fundamental Evaluation Parameters for Mg 2+ /Li +  Separation Effectiveness In the Mg 2+ /Li +  separation scenario, we refer to the separation performance of NF membranes as two critical performance metrics, namely, Mg 2+ /Li +  separation factor ( S Mg ,Li ) and pure water permeance ( PWP ). In 2006, Wen and colleagues [ 22 ] pioneered the application of a negatively charged NF membrane (Desal-5 DL) for lithium–ion separation from lithium-bearing solutions, marking the inception of membrane-based lithium extraction technology. Although this initial attempt demonstrated a relatively low Mg 2+ /Li +  separation factor, it established critical proof-of-concept for subsequent advancements in selective membrane separation processes. Herein, the mentioned separation factor ( S Mg ,Li ) was defined as follows: (1) S M g , L i = C M g , p / C L i , p C M g , f / C L i , f \nwhere  C Mg,p ,  C Li,p ,  C Mg,f , and  C Li,f  represent the Mg 2+  and Li +  concentrations on the permeate and feed sides, respectively. The separation efficiency is directly proportional to the  S Mg ,Li  value, which means smaller  S Mg ,Li  corresponds to superior ion separation performance. Inversely, some scholars employ the opposite notation  S Li,Mg  to represent separation factor, as defined in Equation (2), where higher values ( S Li,Mg  >1) indicate better separation efficiency. (2) S L i , M g = C L i , p / C M g , p C L i , f / C M g , f The  PWP  can be calculated as below: (3) P W P = Δ V P A m × Δ t × Δ P \nwhere  ΔV p  is the permeate volume (L),  A m  is the effective area of the membrane (m 2 ),  Δt  corresponds to the permeation duration (h), and  ΔP  is the applied transmembrane pressure (bar). Previous studies have focused on optimizing reaction monomers and conditions to enhance membrane water permeability while maintaining high rejection rates for divalent cations. In this context, rejection selectivity was considered equivalent to permeation selectivity. However, with the growing recognition of the trade-off phenomenon, efforts have been directed toward overcoming the compromise between water permeability and divalent ion rejection in NF membranes [ 18 ]. Therefore, in addition to the two parameters mentioned above, the rejection rate ( R , %) is also an important parameter, representing the proportion of individual ions retained by the membrane. It is calculated using the following formula: (4) R = 1 − C p C f × 100 % \nwhere  C p  and  C f  represent the concentrations of the permeate and feed solutions (ppm), respectively.",
+        "operations": [
+          {
+            "op_type": "add",
+            "sentence": "In 2006, Wen and colleagues [ 22 ] pioneered the application of a negatively charged NF membrane (Desal-5 DL) for lithium–ion separation from lithium-bearing solutions, marking the inception of membrane-based lithium extraction technology.",
+            "start_char": 298,
+            "end_char": 537,
+            "materials": [],
+            "params": {}
+          },
+          {
+            "op_type": "heat",
+            "sentence": "Previous studies have focused on optimizing reaction monomers and conditions to enhance membrane water permeability while maintaining high rejection rates for divalent cations.",
+            "start_char": 1712,
+            "end_char": 1888,
+            "materials": [],
+            "params": {}
+          }
+        ],
+        "expanded": [
+          {
+            "op_type": "add",
+            "steps": [
+              "Ensure reaction vessel is present and empty.",
+              "Place a clean stir bar in the vessel.",
+              "Measure the specified amount of reagent.",
+              "Transfer reagent into the vessel."
+            ]
+          },
+          {
+            "op_type": "heat",
+            "steps": [
+              "Place the reaction vessel on a hotplate.",
+              "Ramp to the target temperature.",
+              "Maintain the target temperature for the specified time."
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

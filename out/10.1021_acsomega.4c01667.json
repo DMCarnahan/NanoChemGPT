@@ -1,0 +1,458 @@
+{
+  "paper_id": "10.1021/acsomega.4c01667",
+  "title": "Cobalt-Copper-Embedded Nitrogen-Doped Carbon Nanostructures Derived from Zeolite Imidazolate Frameworks as Electrocatalysts for the Oxygen Reduction Reaction.",
+  "authors": [],
+  "doi": "10.1021/acsomega.4c01667",
+  "source": "eupmc",
+  "urls": {
+    "pdf": null
+  },
+  "license": {
+    "type": "unknown"
+  },
+  "access_route": "oa",
+  "sections": [
+    {
+      "heading": "Experimental Section",
+      "text": "Experimental Section Materials and reagents Cobalt chloride hexahydrate\n(CoCl 2 ·6H 2 O), ethylene glycol, NaOH, and\nHCl were purchased from Duksan (reagent grade, South Korea). Copper(II)\nchloride dihydrate (CuCl 2 ·2H 2 O), 2-methylimidazole,\nand poly(vinylpyrrolidone) (PVP) were purchased from Sigma-Aldrich\n(analytical grade). Hydrazine monohydrate (N 2 H 4 ; 79%) was obtained from TCI (technical grade, Japan). The carbon\nsupport (Vulcan XC-72) and the commercial 20 wt % Pt/C catalyst were\nboth procured from Premetek. All solutions for this study were prepared\nusing purified water (Milli-Q, 18 MΩ·cm). Physicochemical Characterization The surface and morphological\nproperties of the synthesized catalysts were comprehensively characterized\nusing a suite of analytical techniques. Field emission scanning electron\nmicroscopy (FESEM, Hitachi S-4800) equipped with an energy-dispersive\nX-ray spectroscopy (EDS) attachment and high-resolution transmission\nelectron microscopy (HR-TEM, Hitachi HF-3300, and Titan G2) were employed\nto investigate the catalysts’ microscopic features. Additionally,\nhigh-angle annular dark-field scanning transmission electron microscopy\n(HAADF-STEM, Titan G2 ChemiSTEM Cs probe) provided detailed morphological\ninsights. The structural properties and crystalline phases of the\ncatalysts were determined using powder X-ray diffraction (XRD, Diatome\nMPD) with a standard Cu anode and Kα radiation (λ = 1.54\nÅ). Chemical compositions and surface characteristics were analyzed\nthrough X-ray photoelectron spectroscopy (XPS, Thermo Scientific K-Alpha)\nutilizing a monochromatic Al Kα source. To assess the surface\nareas and pore-size distributions of the catalysts, Brunauer–Emmett–Teller\n(BET) analysis was conducted using a BELSORP-mini II instrument (Microtrac-BEL).\nAdditional spectroscopic investigations included ultraviolet–visible\n(UV–vis) spectroscopy, performed with a Shimadzu UV-1900i spectrophotometer,\nRaman spectroscopy, utilizing an XploRA micro-Raman spectrophotometer\nwith a 532 nm laser, and Fourier-transform infrared (FTIR) spectroscopy,\nrecorded on a Thermo Fisher Scientific Nicolet iS5 FTIR spectrometer.\nThese comprehensive analyses provided a thorough understanding of\nthe physicochemical properties of the synthesized catalysts. Synthesis of CoCu-ZIF Nanocrystals The electrode catalyst\nfor the fuel cell cathode was prepared using a ZIF structure, as shown\nin  Figure  1 . The reflux\napparatus was connected to a three-neck round-bottom flask, and 100\nmL of ethylene glycol (EG) was added. CoCl 2 ·6H 2 O (37.5 mM), CuCl 2 ·2H 2 O (12.5 mM),\nand PVP (1.67 g) were added to the flask. Subsequently, 5 mL of N 2 H 4  and 4.105 g of 2-methylimidazole were sequentially\nadded to the solution. To adjust the pH, 5 mL of 5 M NaOH was carefully\nadded to the mixture while stirring at room temperature. After 5 min,\nthe solution was slowly heated to the boiling point and maintained\nat that temperature for 4 h. After the reaction, the mixture was thoroughly\nwashed with ethanol and distilled water and then freeze-dried. The\nfollowing CoCu-ZIF samples with varying Co/Cu molar ratios were prepared:\nCoCu(10:0)-ZIF, CoCu(7:3)-ZIF, CoCu(5:5)-ZIF, CoCu(3:7)-ZIF, and CoCu(0:10)-ZIF.\nTo compare the catalytic activities of the different types of metals,\nmetal precursors of Fe, Mn, and Ni were synthesized under the same\nconditions and denoted as CoM-ZIF (M = Fe, Mn, and Ni). The Co/Cu\nratio that exhibited the highest catalytic activity, i.e., CoCu(7:3)-ZIF,\nwas adopted for the Co:M molar ratio. Each dried sample was stored\nin a sealed container until further use. Figure 1 Schematic of the synthesis\nof CoCu@NC for applications in the electrochemical\nORR. Preparation of CoCu@NC Solid CoCu-ZIF (1.0 g) was subjected\nto pyrolysis for 2 h in a tube furnace with flowing N 2 .\nThe furnace temperature was gradually increased to 250, 500, 750,\nand 1000 °C at a rate of 5 °C per min to obtain the optimal\nfuel cell cathode sample. The resulting CoCu coated with the N-doped\ngraphitized structures was named CoCu@NC- t  (where  t  represents the pyrolysis temperature). The residual substances\nremaining on the surface of the ZIF structure after carbonization\nwere removed by stirring in 12 M HCl for 24 h. Finally, the obtained\nCoCu@NC was sequentially washed with ethanol and distilled water and\nthen freeze-dried. The CoM@NC samples (M = Fe, Mn, or Ni) were pyrolyzed\nunder the same optimized conditions used for the pyrolysis of CoCu@NC. Electrochemical Characterization All electrochemical\nexperiments were conducted using a three-electrode system, as in previous\nstudies. 41  A rotating disk electrode (RDE)\nwith an area of 0.071 cm 2  and a rotating-ring disk electrode\n(RRDE) with a disk area of 0.1256 cm 2  (disk) were used\nas the working electrode. A Hg/HgO electrode served as the reference\nelectrode, and a Pt wire was used as the counter electrode. The working\nelectrode was polished with alumina powder and rinsed with distilled\nwater via sonication to remove any remaining alumina powder. Each\ncatalyst sample was dispersed in distilled water to obtain a concentration\nof 2.0 mg mL –1 , and then 5 μL of the dispersed\nsolution was introduced onto the working electrode three times (total\nvolume = 15 μL) and dried in a vacuum desiccator. To prevent\nsample detachment, 5 μL of Nafion (0.05 wt %) was drop-coated\nonto the electrode surface. All electrochemical measurements for the\nORR were performed in a 0.1 M KOH electrolyte with O 2  or\nN 2  purging. The measured potentials were converted to the\nreversible hydrogen electrode (RHE) scale using the equation  E RHE  =  E Hg/HgO  +\n(0.05916 × pH) + 0.14. RRDE and cyclic voltammetry (CV) experiments\nwere conducted using a CH instrument (CHI705E), and all electrochemical\ndata were obtained within an appropriate potential range."
+    },
+    {
+      "heading": "Synthesis of CoCu-ZIF Nanocrystals",
+      "text": "Synthesis of CoCu-ZIF Nanocrystals The electrode catalyst\nfor the fuel cell cathode was prepared using a ZIF structure, as shown\nin  Figure  1 . The reflux\napparatus was connected to a three-neck round-bottom flask, and 100\nmL of ethylene glycol (EG) was added. CoCl 2 ·6H 2 O (37.5 mM), CuCl 2 ·2H 2 O (12.5 mM),\nand PVP (1.67 g) were added to the flask. Subsequently, 5 mL of N 2 H 4  and 4.105 g of 2-methylimidazole were sequentially\nadded to the solution. To adjust the pH, 5 mL of 5 M NaOH was carefully\nadded to the mixture while stirring at room temperature. After 5 min,\nthe solution was slowly heated to the boiling point and maintained\nat that temperature for 4 h. After the reaction, the mixture was thoroughly\nwashed with ethanol and distilled water and then freeze-dried. The\nfollowing CoCu-ZIF samples with varying Co/Cu molar ratios were prepared:\nCoCu(10:0)-ZIF, CoCu(7:3)-ZIF, CoCu(5:5)-ZIF, CoCu(3:7)-ZIF, and CoCu(0:10)-ZIF.\nTo compare the catalytic activities of the different types of metals,\nmetal precursors of Fe, Mn, and Ni were synthesized under the same\nconditions and denoted as CoM-ZIF (M = Fe, Mn, and Ni). The Co/Cu\nratio that exhibited the highest catalytic activity, i.e., CoCu(7:3)-ZIF,\nwas adopted for the Co:M molar ratio. Each dried sample was stored\nin a sealed container until further use. Figure 1 Schematic of the synthesis\nof CoCu@NC for applications in the electrochemical\nORR."
+    },
+    {
+      "heading": "Preparation of CoCu@NC",
+      "text": "Preparation of CoCu@NC Solid CoCu-ZIF (1.0 g) was subjected\nto pyrolysis for 2 h in a tube furnace with flowing N 2 .\nThe furnace temperature was gradually increased to 250, 500, 750,\nand 1000 °C at a rate of 5 °C per min to obtain the optimal\nfuel cell cathode sample. The resulting CoCu coated with the N-doped\ngraphitized structures was named CoCu@NC- t  (where  t  represents the pyrolysis temperature). The residual substances\nremaining on the surface of the ZIF structure after carbonization\nwere removed by stirring in 12 M HCl for 24 h. Finally, the obtained\nCoCu@NC was sequentially washed with ethanol and distilled water and\nthen freeze-dried. The CoM@NC samples (M = Fe, Mn, or Ni) were pyrolyzed\nunder the same optimized conditions used for the pyrolysis of CoCu@NC."
+    }
+  ],
+  "extractions": {
+    "methods_paragraphs": [
+      {
+        "text": "Experimental Section Materials and reagents Cobalt chloride hexahydrate\n(CoCl 2 ·6H 2 O), ethylene glycol, NaOH, and\nHCl were purchased from Duksan (reagent grade, South Korea). Copper(II)\nchloride dihydrate (CuCl 2 ·2H 2 O), 2-methylimidazole,\nand poly(vinylpyrrolidone) (PVP) were purchased from Sigma-Aldrich\n(analytical grade). Hydrazine monohydrate (N 2 H 4 ; 79%) was obtained from TCI (technical grade, Japan). The carbon\nsupport (Vulcan XC-72) and the commercial 20 wt % Pt/C catalyst were\nboth procured from Premetek. All solutions for this study were prepared\nusing purified water (Milli-Q, 18 MΩ·cm). Physicochemical Characterization The surface and morphological\nproperties of the synthesized catalysts were comprehensively characterized\nusing a suite of analytical techniques. Field emission scanning electron\nmicroscopy (FESEM, Hitachi S-4800) equipped with an energy-dispersive\nX-ray spectroscopy (EDS) attachment and high-resolution transmission\nelectron microscopy (HR-TEM, Hitachi HF-3300, and Titan G2) were employed\nto investigate the catalysts’ microscopic features. Additionally,\nhigh-angle annular dark-field scanning transmission electron microscopy\n(HAADF-STEM, Titan G2 ChemiSTEM Cs probe) provided detailed morphological\ninsights. The structural properties and crystalline phases of the\ncatalysts were determined using powder X-ray diffraction (XRD, Diatome\nMPD) with a standard Cu anode and Kα radiation (λ = 1.54\nÅ). Chemical compositions and surface characteristics were analyzed\nthrough X-ray photoelectron spectroscopy (XPS, Thermo Scientific K-Alpha)\nutilizing a monochromatic Al Kα source. To assess the surface\nareas and pore-size distributions of the catalysts, Brunauer–Emmett–Teller\n(BET) analysis was conducted using a BELSORP-mini II instrument (Microtrac-BEL).\nAdditional spectroscopic investigations included ultraviolet–visible\n(UV–vis) spectroscopy, performed with a Shimadzu UV-1900i spectrophotometer,\nRaman spectroscopy, utilizing an XploRA micro-Raman spectrophotometer\nwith a 532 nm laser, and Fourier-transform infrared (FTIR) spectroscopy,\nrecorded on a Thermo Fisher Scientific Nicolet iS5 FTIR spectrometer.\nThese comprehensive analyses provided a thorough understanding of\nthe physicochemical properties of the synthesized catalysts. Synthesis of CoCu-ZIF Nanocrystals The electrode catalyst\nfor the fuel cell cathode was prepared using a ZIF structure, as shown\nin  Figure  1 . The reflux\napparatus was connected to a three-neck round-bottom flask, and 100\nmL of ethylene glycol (EG) was added. CoCl 2 ·6H 2 O (37.5 mM), CuCl 2 ·2H 2 O (12.5 mM),\nand PVP (1.67 g) were added to the flask. Subsequently, 5 mL of N 2 H 4  and 4.105 g of 2-methylimidazole were sequentially\nadded to the solution. To adjust the pH, 5 mL of 5 M NaOH was carefully\nadded to the mixture while stirring at room temperature. After 5 min,\nthe solution was slowly heated to the boiling point and maintained\nat that temperature for 4 h. After the reaction, the mixture was thoroughly\nwashed with ethanol and distilled water and then freeze-dried. The\nfollowing CoCu-ZIF samples with varying Co/Cu molar ratios were prepared:\nCoCu(10:0)-ZIF, CoCu(7:3)-ZIF, CoCu(5:5)-ZIF, CoCu(3:7)-ZIF, and CoCu(0:10)-ZIF.\nTo compare the catalytic activities of the different types of metals,\nmetal precursors of Fe, Mn, and Ni were synthesized under the same\nconditions and denoted as CoM-ZIF (M = Fe, Mn, and Ni). The Co/Cu\nratio that exhibited the highest catalytic activity, i.e., CoCu(7:3)-ZIF,\nwas adopted for the Co:M molar ratio. Each dried sample was stored\nin a sealed container until further use. Figure 1 Schematic of the synthesis\nof CoCu@NC for applications in the electrochemical\nORR. Preparation of CoCu@NC Solid CoCu-ZIF (1.0 g) was subjected\nto pyrolysis for 2 h in a tube furnace with flowing N 2 .\nThe furnace temperature was gradually increased to 250, 500, 750,\nand 1000 °C at a rate of 5 °C per min to obtain the optimal\nfuel cell cathode sample. The resulting CoCu coated with the N-doped\ngraphitized structures was named CoCu@NC- t  (where  t  represents the pyrolysis temperature). The residual substances\nremaining on the surface of the ZIF structure after carbonization\nwere removed by stirring in 12 M HCl for 24 h. Finally, the obtained\nCoCu@NC was sequentially washed with ethanol and distilled water and\nthen freeze-dried. The CoM@NC samples (M = Fe, Mn, or Ni) were pyrolyzed\nunder the same optimized conditions used for the pyrolysis of CoCu@NC. Electrochemical Characterization All electrochemical\nexperiments were conducted using a three-electrode system, as in previous\nstudies. 41  A rotating disk electrode (RDE)\nwith an area of 0.071 cm 2  and a rotating-ring disk electrode\n(RRDE) with a disk area of 0.1256 cm 2  (disk) were used\nas the working electrode. A Hg/HgO electrode served as the reference\nelectrode, and a Pt wire was used as the counter electrode. The working\nelectrode was polished with alumina powder and rinsed with distilled\nwater via sonication to remove any remaining alumina powder. Each\ncatalyst sample was dispersed in distilled water to obtain a concentration\nof 2.0 mg mL –1 , and then 5 μL of the dispersed\nsolution was introduced onto the working electrode three times (total\nvolume = 15 μL) and dried in a vacuum desiccator. To prevent\nsample detachment, 5 μL of Nafion (0.05 wt %) was drop-coated\nonto the electrode surface. All electrochemical measurements for the\nORR were performed in a 0.1 M KOH electrolyte with O 2  or\nN 2  purging. The measured potentials were converted to the\nreversible hydrogen electrode (RHE) scale using the equation  E RHE  =  E Hg/HgO  +\n(0.05916 × pH) + 0.14. RRDE and cyclic voltammetry (CV) experiments\nwere conducted using a CH instrument (CHI705E), and all electrochemical\ndata were obtained within an appropriate potential range.",
+        "operations": [
+          {
+            "op_type": "heat",
+            "sentence": "The reflux\napparatus was connected to a three-neck round-bottom flask, and 100\nmL of ethylene glycol (EG) was added.",
+            "start_char": 2433,
+            "end_char": 2549,
+            "materials": [
+              "a three-neck round-bottom flask",
+              "100\nmL"
+            ],
+            "params": {
+              "amounts": [
+                "100\nmL"
+              ]
+            }
+          },
+          {
+            "op_type": "add",
+            "sentence": "CoCl 2 ·6H 2 O (37.5 mM), CuCl 2 ·2H 2 O (12.5 mM),\nand PVP (1.67 g) were added to the flask.",
+            "start_char": 2550,
+            "end_char": 2643,
+            "materials": [
+              "·6H 2 O",
+              "37.5 mM",
+              "2 O",
+              "12.5 mM"
+            ],
+            "params": {
+              "time": "6H",
+              "amounts": [
+                "1.67 g"
+              ],
+              "concs": [
+                "37.5 mM",
+                "12.5 mM"
+              ]
+            }
+          },
+          {
+            "op_type": "add",
+            "sentence": "Subsequently, 5 mL of N 2 H 4  and 4.105 g of 2-methylimidazole were sequentially\nadded to the solution.",
+            "start_char": 2644,
+            "end_char": 2748,
+            "materials": [
+              "Subsequently, 5 mL of N 2 H",
+              "2-methylimidazole"
+            ],
+            "params": {
+              "time": "2 H",
+              "amounts": [
+                "5 mL",
+                "4.105 g"
+              ]
+            }
+          },
+          {
+            "op_type": "add",
+            "sentence": "To adjust the pH, 5 mL of 5 M NaOH was carefully\nadded to the mixture while stirring at room temperature.",
+            "start_char": 2749,
+            "end_char": 2854,
+            "materials": [
+              "5 M NaOH"
+            ],
+            "params": {
+              "amounts": [
+                "5 mL",
+                "5 M"
+              ],
+              "concs": [
+                "5 M"
+              ]
+            }
+          },
+          {
+            "op_type": "heat",
+            "sentence": "After 5 min,\nthe solution was slowly heated to the boiling point and maintained\nat that temperature for 4 h. After the reaction, the mixture was thoroughly\nwashed with ethanol and distilled water and then freeze-dried.",
+            "start_char": 2855,
+            "end_char": 3073,
+            "materials": [
+              "5 min"
+            ],
+            "params": {
+              "time": "5 min"
+            }
+          },
+          {
+            "op_type": "dry",
+            "sentence": "Each dried sample was stored\nin a sealed container until further use.",
+            "start_char": 3548,
+            "end_char": 3617,
+            "materials": [],
+            "params": {}
+          },
+          {
+            "op_type": "stir",
+            "sentence": "The residual substances\nremaining on the surface of the ZIF structure after carbonization\nwere removed by stirring in 12 M HCl for 24 h.",
+            "start_char": 4118,
+            "end_char": 4254,
+            "materials": [
+              "the ZIF structure",
+              "12 M HCl"
+            ],
+            "params": {
+              "time": "24 h",
+              "amounts": [
+                "12 M"
+              ],
+              "concs": [
+                "12 M"
+              ]
+            }
+          },
+          {
+            "op_type": "wash",
+            "sentence": "Finally, the obtained\nCoCu@NC was sequentially washed with ethanol and distilled water and\nthen freeze-dried.",
+            "start_char": 4255,
+            "end_char": 4364,
+            "materials": [],
+            "params": {}
+          },
+          {
+            "op_type": "wash",
+            "sentence": "The working\nelectrode was polished with alumina powder and rinsed with distilled\nwater via sonication to remove any remaining alumina powder.",
+            "start_char": 4911,
+            "end_char": 5052,
+            "materials": [],
+            "params": {}
+          },
+          {
+            "op_type": "add",
+            "sentence": "Each\ncatalyst sample was dispersed in distilled water to obtain a concentration\nof 2.0 mg mL –1 , and then 5 μL of the dispersed\nsolution was introduced onto the working electrode three times (total\nvolume = 15 μL) and dried in a vacuum desiccator.",
+            "start_char": 5053,
+            "end_char": 5301,
+            "materials": [
+              "2.0 mg",
+              "5 μL",
+              "three times"
+            ],
+            "params": {
+              "amounts": [
+                "2.0 mg",
+                "5 μL",
+                "15 μL"
+              ]
+            }
+          }
+        ],
+        "expanded": [
+          {
+            "op_type": "heat",
+            "steps": [
+              "Place the reaction vessel on a hotplate.",
+              "Ramp to the target temperature.",
+              "Maintain the target temperature for the specified time."
+            ]
+          },
+          {
+            "op_type": "add",
+            "steps": [
+              "Ensure reaction vessel is present and empty.",
+              "Place a clean stir bar in the vessel.",
+              "Measure 1.67 g of ·6H 2 O.",
+              "Transfer ·6H 2 O into the vessel."
+            ]
+          },
+          {
+            "op_type": "add",
+            "steps": [
+              "Ensure reaction vessel is present and empty.",
+              "Place a clean stir bar in the vessel.",
+              "Measure 5 mL of Subsequently, 5 mL of N 2 H.",
+              "Transfer Subsequently, 5 mL of N 2 H into the vessel."
+            ]
+          },
+          {
+            "op_type": "add",
+            "steps": [
+              "Ensure reaction vessel is present and empty.",
+              "Place a clean stir bar in the vessel.",
+              "Measure 5 mL of 5 M NaOH.",
+              "Transfer 5 M NaOH into the vessel."
+            ]
+          },
+          {
+            "op_type": "heat",
+            "steps": [
+              "Place the reaction vessel on a hotplate.",
+              "Ramp to the target temperature.",
+              "Maintain the target temperature for 5 min."
+            ]
+          },
+          {
+            "op_type": "dry",
+            "steps": [
+              "Perform operation 'dry' as described: Each dried sample was stored\nin a sealed container until further use."
+            ]
+          },
+          {
+            "op_type": "stir",
+            "steps": [
+              "Place the reaction vessel on a stir plate.",
+              "Set the stirrer to an appropriate speed.",
+              "Stir for 24 h."
+            ]
+          },
+          {
+            "op_type": "wash",
+            "steps": [
+              "Perform operation 'wash' as described: Finally, the obtained\nCoCu@NC was sequentially washed with ethanol and distilled water and\nthen freeze-dried."
+            ]
+          },
+          {
+            "op_type": "wash",
+            "steps": [
+              "Perform operation 'wash' as described: The working\nelectrode was polished with alumina powder and rinsed with distilled\nwater via sonication to remove any remaining alumina powder."
+            ]
+          },
+          {
+            "op_type": "add",
+            "steps": [
+              "Ensure reaction vessel is present and empty.",
+              "Place a clean stir bar in the vessel.",
+              "Measure 2.0 mg of 2.0 mg.",
+              "Transfer 2.0 mg into the vessel."
+            ]
+          }
+        ]
+      },
+      {
+        "text": "Synthesis of CoCu-ZIF Nanocrystals The electrode catalyst\nfor the fuel cell cathode was prepared using a ZIF structure, as shown\nin  Figure  1 . The reflux\napparatus was connected to a three-neck round-bottom flask, and 100\nmL of ethylene glycol (EG) was added. CoCl 2 ·6H 2 O (37.5 mM), CuCl 2 ·2H 2 O (12.5 mM),\nand PVP (1.67 g) were added to the flask. Subsequently, 5 mL of N 2 H 4  and 4.105 g of 2-methylimidazole were sequentially\nadded to the solution. To adjust the pH, 5 mL of 5 M NaOH was carefully\nadded to the mixture while stirring at room temperature. After 5 min,\nthe solution was slowly heated to the boiling point and maintained\nat that temperature for 4 h. After the reaction, the mixture was thoroughly\nwashed with ethanol and distilled water and then freeze-dried. The\nfollowing CoCu-ZIF samples with varying Co/Cu molar ratios were prepared:\nCoCu(10:0)-ZIF, CoCu(7:3)-ZIF, CoCu(5:5)-ZIF, CoCu(3:7)-ZIF, and CoCu(0:10)-ZIF.\nTo compare the catalytic activities of the different types of metals,\nmetal precursors of Fe, Mn, and Ni were synthesized under the same\nconditions and denoted as CoM-ZIF (M = Fe, Mn, and Ni). The Co/Cu\nratio that exhibited the highest catalytic activity, i.e., CoCu(7:3)-ZIF,\nwas adopted for the Co:M molar ratio. Each dried sample was stored\nin a sealed container until further use. Figure 1 Schematic of the synthesis\nof CoCu@NC for applications in the electrochemical\nORR.",
+        "operations": [
+          {
+            "op_type": "heat",
+            "sentence": "The reflux\napparatus was connected to a three-neck round-bottom flask, and 100\nmL of ethylene glycol (EG) was added.",
+            "start_char": 145,
+            "end_char": 261,
+            "materials": [
+              "a three-neck round-bottom flask",
+              "100\nmL"
+            ],
+            "params": {
+              "amounts": [
+                "100\nmL"
+              ]
+            }
+          },
+          {
+            "op_type": "add",
+            "sentence": "CoCl 2 ·6H 2 O (37.5 mM), CuCl 2 ·2H 2 O (12.5 mM),\nand PVP (1.67 g) were added to the flask.",
+            "start_char": 262,
+            "end_char": 355,
+            "materials": [
+              "·6H 2 O",
+              "37.5 mM",
+              "2 O",
+              "12.5 mM"
+            ],
+            "params": {
+              "time": "6H",
+              "amounts": [
+                "1.67 g"
+              ],
+              "concs": [
+                "37.5 mM",
+                "12.5 mM"
+              ]
+            }
+          },
+          {
+            "op_type": "add",
+            "sentence": "Subsequently, 5 mL of N 2 H 4  and 4.105 g of 2-methylimidazole were sequentially\nadded to the solution.",
+            "start_char": 356,
+            "end_char": 460,
+            "materials": [
+              "Subsequently, 5 mL of N 2 H",
+              "2-methylimidazole"
+            ],
+            "params": {
+              "time": "2 H",
+              "amounts": [
+                "5 mL",
+                "4.105 g"
+              ]
+            }
+          },
+          {
+            "op_type": "add",
+            "sentence": "To adjust the pH, 5 mL of 5 M NaOH was carefully\nadded to the mixture while stirring at room temperature.",
+            "start_char": 461,
+            "end_char": 566,
+            "materials": [
+              "5 M NaOH"
+            ],
+            "params": {
+              "amounts": [
+                "5 mL",
+                "5 M"
+              ],
+              "concs": [
+                "5 M"
+              ]
+            }
+          },
+          {
+            "op_type": "heat",
+            "sentence": "After 5 min,\nthe solution was slowly heated to the boiling point and maintained\nat that temperature for 4 h. After the reaction, the mixture was thoroughly\nwashed with ethanol and distilled water and then freeze-dried.",
+            "start_char": 567,
+            "end_char": 785,
+            "materials": [
+              "5 min"
+            ],
+            "params": {
+              "time": "5 min"
+            }
+          },
+          {
+            "op_type": "dry",
+            "sentence": "Each dried sample was stored\nin a sealed container until further use.",
+            "start_char": 1260,
+            "end_char": 1329,
+            "materials": [],
+            "params": {}
+          }
+        ],
+        "expanded": [
+          {
+            "op_type": "heat",
+            "steps": [
+              "Place the reaction vessel on a hotplate.",
+              "Ramp to the target temperature.",
+              "Maintain the target temperature for the specified time."
+            ]
+          },
+          {
+            "op_type": "add",
+            "steps": [
+              "Ensure reaction vessel is present and empty.",
+              "Place a clean stir bar in the vessel.",
+              "Measure 1.67 g of ·6H 2 O.",
+              "Transfer ·6H 2 O into the vessel."
+            ]
+          },
+          {
+            "op_type": "add",
+            "steps": [
+              "Ensure reaction vessel is present and empty.",
+              "Place a clean stir bar in the vessel.",
+              "Measure 5 mL of Subsequently, 5 mL of N 2 H.",
+              "Transfer Subsequently, 5 mL of N 2 H into the vessel."
+            ]
+          },
+          {
+            "op_type": "add",
+            "steps": [
+              "Ensure reaction vessel is present and empty.",
+              "Place a clean stir bar in the vessel.",
+              "Measure 5 mL of 5 M NaOH.",
+              "Transfer 5 M NaOH into the vessel."
+            ]
+          },
+          {
+            "op_type": "heat",
+            "steps": [
+              "Place the reaction vessel on a hotplate.",
+              "Ramp to the target temperature.",
+              "Maintain the target temperature for 5 min."
+            ]
+          },
+          {
+            "op_type": "dry",
+            "steps": [
+              "Perform operation 'dry' as described: Each dried sample was stored\nin a sealed container until further use."
+            ]
+          }
+        ]
+      },
+      {
+        "text": "Preparation of CoCu@NC Solid CoCu-ZIF (1.0 g) was subjected\nto pyrolysis for 2 h in a tube furnace with flowing N 2 .\nThe furnace temperature was gradually increased to 250, 500, 750,\nand 1000 °C at a rate of 5 °C per min to obtain the optimal\nfuel cell cathode sample. The resulting CoCu coated with the N-doped\ngraphitized structures was named CoCu@NC- t  (where  t  represents the pyrolysis temperature). The residual substances\nremaining on the surface of the ZIF structure after carbonization\nwere removed by stirring in 12 M HCl for 24 h. Finally, the obtained\nCoCu@NC was sequentially washed with ethanol and distilled water and\nthen freeze-dried. The CoM@NC samples (M = Fe, Mn, or Ni) were pyrolyzed\nunder the same optimized conditions used for the pyrolysis of CoCu@NC.",
+        "operations": [
+          {
+            "op_type": "stir",
+            "sentence": "The residual substances\nremaining on the surface of the ZIF structure after carbonization\nwere removed by stirring in 12 M HCl for 24 h.",
+            "start_char": 408,
+            "end_char": 544,
+            "materials": [
+              "the ZIF structure",
+              "12 M HCl"
+            ],
+            "params": {
+              "time": "24 h",
+              "amounts": [
+                "12 M"
+              ],
+              "concs": [
+                "12 M"
+              ]
+            }
+          },
+          {
+            "op_type": "wash",
+            "sentence": "Finally, the obtained\nCoCu@NC was sequentially washed with ethanol and distilled water and\nthen freeze-dried.",
+            "start_char": 545,
+            "end_char": 654,
+            "materials": [],
+            "params": {}
+          }
+        ],
+        "expanded": [
+          {
+            "op_type": "stir",
+            "steps": [
+              "Place the reaction vessel on a stir plate.",
+              "Set the stirrer to an appropriate speed.",
+              "Stir for 24 h."
+            ]
+          },
+          {
+            "op_type": "wash",
+            "steps": [
+              "Perform operation 'wash' as described: Finally, the obtained\nCoCu@NC was sequentially washed with ethanol and distilled water and\nthen freeze-dried."
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

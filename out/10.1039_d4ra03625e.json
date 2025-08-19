@@ -1,0 +1,408 @@
+{
+  "paper_id": "10.1039/d4ra03625e",
+  "title": "Recent trends and future perspectives of thermoelectric materials and their applications.",
+  "authors": [],
+  "doi": "10.1039/d4ra03625e",
+  "source": "eupmc",
+  "urls": {
+    "pdf": null
+  },
+  "license": {
+    "type": "unknown"
+  },
+  "access_route": "oa",
+  "sections": [
+    {
+      "heading": "Introduction",
+      "text": "1. Introduction Recent years have witnessed a surge of interest in thermoelectric devices and their applications, driven by the pressing need for sustainable energy solutions and efficient thermal management systems. 1  Thermoelectric materials have become more attractive as potential solutions to these problems because of their exceptional capacity to transform waste heat into useful electrical power. This paper aims to provide a comprehensive overview of the recent trends in thermoelectric devices and their diverse applications across various industries, while also delving into the future prospects and potential impact of these advancements. The field of thermoelectric materials and devices has undergone significant evolution, marked by a growing emphasis on enhancing performance, scalability, and applicability. 2–5  Recent advancements in materials science have led to the development of novel thermoelectric materials, including nanostructured materials, organic and hybrid materials, and the utilization of advanced manufacturing techniques. These innovations have opened new avenues for improving the efficiency and cost-effectiveness of thermoelectric devices, thereby expanding their potential applications. 6–8 One of the key future prospects in the realm of thermoelectric devices lies in the continued refinement of materials and manufacturing processes to achieve higher thermoelectric conversion efficiencies. The pursuit of materials with enhanced thermoelectric properties, such as high thermoelectric figure of merit ( ZT ), remains a focal point for researchers and industry stakeholders. Additionally, the exploration of scalable and cost-effective manufacturing methods holds promise for enabling the widespread adoption of thermoelectric technology in diverse settings. 9–11  The potential applications of thermoelectric devices span a wide spectrum of industries, each presenting unique opportunities for leveraging waste heat recovery and efficient thermal management. In the automotive sector, thermoelectric generators offer the prospect of harnessing waste heat from exhaust systems to power vehicle electronics and reduce fuel consumption. Similarly, in aerospace applications, thermoelectric devices hold the potential to enhance energy efficiency and provide reliable power sources for critical systems. The integration of thermoelectric modules in wearable electronics presents an intriguing avenue for self-powered, energy-autonomous wearable devices, catering to the burgeoning demand for portable and sustainable technologies. Furthermore, in industrial settings, thermoelectric systems offer the prospect of recovering waste heat from various processes, thereby improving overall energy efficiency and reducing environmental impact. 12 The future prospects of thermoelectric devices extend beyond their immediate applications, encompassing broader implications for sustainable energy solutions and environmental conservation. As the global focus on renewable energy and energy efficiency intensifies, thermoelectric technology stands poised to play a pivotal role in realizing these objectives. 13–15  By enabling the conversion of waste heat into useable electrical power, thermoelectric devices have the potential to contribute significantly to the reduction of greenhouse gas emissions and the overall sustainability of energy systems. Moreover, the integration of thermoelectric devices into existing infrastructure and energy systems holds promise for enhancing overall energy efficiency and reducing reliance on traditional energy sources. 16  The prospect of utilizing thermoelectric technology (1) in conjunction with solar panels or other renewable energy sources to create hybrid energy systems represents an exciting avenue for achieving greater energy autonomy and resilience ( Fig. 1 ). Fig. 1 Schematic representation of thermoelectrical materials and applications. In the context of thermal management, the future prospects of thermoelectric devices are equally compelling. The ability of thermoelectric modules to provide precise and localized cooling or heating presents opportunities for improving the efficiency and reliability of thermal control systems in various applications, ranging from electronics cooling to temperature regulation in medical devices. 17–20  The potential impact of thermoelectric technology on sustainable energy solutions and thermal management systems is underscored by the growing interest and investment in research and development in this field. As governments, industries, and research institutions increasingly recognize the significance of addressing energy sustainability and efficiency, the momentum behind thermoelectric technology continues to build."
+    },
+    {
+      "heading": "Ceramic based thermoelectric devices",
+      "text": "2. Ceramic based thermoelectric devices Researchers are increasingly focusing on processing technologies to enhance thermoelectric generator (TEG) production. A quick and scalable method for producing TEGs involves spray coating and laser structuring, which offers flexibility. The process combines both additive and subtractive technologies to create a versatile ceramic-based TEG suitable for high temperatures with significant potential for optimization. A prototype of a TEG based on Ca 3 Co 4 O (CCO) and Ag on a ceramic substrate (2) was fabricated. The microstructural and thermoelectric analyses demonstrate achievement of up to 1.65 μW cm 2  at 673 K with a Δ T  of 100 K. Additionally, the developed process offers high controllability facilitating adaptation for various thermoelectric materials ( Fig. 2a ). 21  Furthermore, plate-like microcrystal particles of Ca 3 Co 4 O 9  (3) were synthesized using molten salt synthesis. Morphologically optimized particles were used as template seeds to fabricate denser Ca 3 Co 4 O 9  thermoelectric ceramics. The effects of Ca 3 Co 4 O 9  template seeds on the ceramics microstructure and thermoelectric performance were studied. The findings demonstrated that varying the weight ratios of salt to oxides (s/o) significantly influenced the composition, microstructure, and grain size of the template seeds. When the s/o ratio reached a certain level, the particles exhibited desirable morphology and uniform grain size, with an average diameter of 7.92 μm and a thickness of 1.13 μm. Incorporating 40 wt% of the template seed resulted in a bulk density of 92.5% for Ca 3 Co 4 O 9  ceramics. Thermoelectric properties were assessed within a temperature range spanning from 50 °C to 800 °C. The findings revealed an electrical resistivity of 20.3 mΩ cm a Seebeck coefficient of 179 μV K −1 , and a power factor of 0.16 mW m −1  K −2  ( Fig. 2b ). 22 Fig. 2 (a) Spray-coating of ceramic-based thermoelectric generator (2). (b) Thermoelectric study of Ca 3 Co 4 O 9  ceramics (3). A highly densified CCO-based ceramics (4) were prepared utilizing Bi 2 O 3  additive  via  liquid-phase sintering processing. With increasing Bi 2 O 3  additive the bulk densities of the samples rose from 92.1% to 95.5%. A band gap of 2.21 eV was observed for the sample containing 6 wt% Bi 2 O 3  additive. Furthermore, the concentration and mobility of charge carriers showed temperature-dependent behavior at 723 K, reaching values of 22.26 × 10 20  cm −3  and 103.2 cm 2  V −1  s −1  respectively. These results were utilized to estimate the charge carrier transport characteristics. The electrical resistance would inevitably drop and the Seebeck coefficient would rise as the Bi 2 O 3  addition increased. Moreover, a maximum power factor of 0.23 mW m −1  K −2  was achievable at 1073 K. With a lower thermal conductivity of 0.92 W m −1  K −1  the sample containing 6 wt% Bi 2 O 3  additive exhibited a high  ZT  value of 0.25. Bi 2 O 3  additive effectively enhanced both the sintering characteristics and thermoelectric properties of CCO ceramics ( Fig. 3a ). 23  Thermal heat recovered from electrical power components installed on ceramic substrates is possible with an ideal design. The thick-film/low-temperature co-fired ceramic (LTCC)-based multilayer thermoelectric micro-generators (TEGs) (5) were built upon in terms of the fabrication methods and characterization. Thus, two separate TEGs were fabricated based on the Seebeck effect each utilizing different thermocouple materials (Ag/Ni and Ag/PdAg) followed by simulation, analytical examination, and comparative analysis. Each generator design incorporates 104 thermocouples, each with a width and spacing of 300 μm. A meander-shaped planar heater was employed to generate the necessary heating, simulating the conditions of an electronic power device. Furthermore, a comparison was conducted between two heaters constructed from Ni and PdAg. Each heater was tested with and without cylindrical grooves added to the back side of the LTCC substrate. The addition of grooves surrounding the hot element has demonstrated an average improvement of 160% in the temperature difference along the generator. In terms of TEGs, the Ag/PdAg-based variation was able to produce an output power that was greater than the Ag/Ni-based TEG, which was able to obtain an output power of 4.6 μW at Δ T  = 62 °C. This variant reached an output power of 81 μW with a temperature difference of 114 °C. The Ag/PdAg-based TEG exhibited a conversion efficiency of 0.5%, while the Ag/Ni-based TEG showed a conversion efficiency of 0.08% ( Fig. 3b ). 24 Fig. 3 (a) Liquid-phase sintering study of Ca 3 Co 4 O 9 –Bi 2 O 3  based ceramics (4). (b) LTCC technology of Ag/PdAg-based ceramic-based thermoelectric generator (5). The thermoelectric properties of SiC/AlN ceramic composites (6) were analyzed across a broad temperature range. Simulation and analysis were conducted to evaluate the thermal stress durability of the composites. SiC/AlN composites containing 0–30 wt% of AlN were manufactured using the pressure-less sintering method. The obtained composites underwent inspection for phase analysis, densification, and microstructure characterization. The porous structure of the SiC/AlN ceramics was observed with porosity levels varying between 23.77% and 31.74%. A 2Hss SiC/AlN solid solution was produced in its entirety with the content growing in step with the increase in the percentage of AlN weight. The incorporation of AlN into SiC ceramics resulted in a structured composition with elongated grain morphology. The electrical resistivity and thermoelectric properties of the examined ceramics were assessed across a temperature range from 25 to 1000 K. The outcomes were primarily influenced by the AlN content, microstructure, and temperature. Moreover, SiC/AlN composites exhibited consistent behavior as p-type semiconductors showcasing exceptional thermoelectric properties, particularly at elevated temperatures. At 1000 K, the 30% AlN composite displayed the lowest electrical resistivity of 1.5 × 10 5  μΩ × cm and the highest Seebeck coefficient of 370 μV K −1 . The figure of merit ( ZT ) exhibited a remarkable increase with the augmentation of AlN content. The 30% AlN composites attained a  ZT  value 130 times greater than that of the 0% AlN composite. Increasing the weight percentage of AlN significantly improved the thermoelectric power factor. A finite element technique simulation was used to analyze the thermal stress of different ceramics up to 1773 K in temperature. The homogeneous transition and dispersion of heat in SiC/AlN composites demonstrated exceptional thermal stress resilience. They are highly recommended for effective utilization in thermoelectric power generation and high-temperature applications ( Fig. 4a ). 25  Additionally, the fabrication of thermoelectric generators automatically is made possible by ceramic multilayer technology, which is advantageous for energy harvesting in sensor applications. In such multilayer thermoelectric generators, the electrical insulation material plays a critical role in enhancing device performance. It needs to be carefully matched to the thermoelectric material in terms of its coefficient of thermal expansion α and its sintering temperature while maintaining a high resistivity to optimize overall efficiency. A glass-ceramic composite material (7) was developed for use in multilayer thermoelectric generators, starting from theoretical calculations. This composite material was synthesized from a combination of calcium manganate and calcium cobaltite. The optimization process focused on achieving a coefficient of thermal expansion ( α ) of 11 × 10 −6  K −1  over a temperature range of 20–500 °C, a sintering temperature of 900 °C, and maintaining high resistivity up to 800 °C. The calculated and measured coefficients of thermal expansion ( α ) exhibit strong agreement validating the accuracy of the theoretical predictions in the development of the glass-ceramic composite material for multilayer thermoelectric generators. The selected glass-ceramic composite, containing 45 vol% quartz demonstrates a resistivity of 1 × 10 7  Ω cm and maintains an open porosity of less than 3%. The sintered multilayer samples, consisting of tape-cast thermoelectric oxides and screen-printed insulation, exhibit minimal reaction layers. This suggests that glass-ceramic composites are highly suitable for insulation layers in such applications. Moreover, the physical properties of these composites can be precisely adjusted by modifying glass composition or introducing dispersion phases highlighting their versatility and effectiveness in optimizing device performance ( Fig. 4b ). 26 Fig. 4 (a) SiC/AlN ceramic composites (6). (b) Thermoelectric study of glass-ceramic composites (7). Furthermore, Oscillatory Pressure Sintering (OPS) has proven to be a beneficial manufacturing method for achieving precise control over the fine and uniform distribution of grains across different ceramic systems. This capability facilitates improved densification, thereby enhancing the physical and mechanical properties of the materials involved. This study utilized Oscillatory Pressure Sintering (OPS) to fabricate pure Ca 3 Co 4 O 9  thermoelectric material (8). The findings reveal that the electrical and thermoelectric properties of Ca 3 Co 4 O 9  prepared  via  OPS outperform those of samples sintered using conventional hot pressing (HP) without oscillation. The improved performance of the OPS samples can be attributed to several factors. Firstly, OPS facilitates better alignment of plate-like grains, leading to enhanced electrical conductivity. Additionally, OPS results in higher grain boundary density, which effectively increases phonon scattering, thereby reducing thermal conductivity. This study suggests that employing a simple oscillatory pressure sintering approach can yield high-quality and high-performance thermoelectric materials, eliminating the necessity for doping, templating, or high-temperature sintering methods ( Fig. 5a ). 27  The first attempt at thermoelectric module design was based on oxide materials fabricated using the laser floating zone technique. Two modules with four-leg thermoelectric configurations were constructed, incorporating Bi 2 Ba 2 Co 2 O y  fibers as the p-type legs, and Ca 0.9 La 0.1 MnO 3  and CaMn 0.95 Nb 0.05 O 3  fibers (9) as the n-type legs. Structural and electrical characterization of the individual fibers was conducted. The evolution of open-circuit voltage during heating and cooling up to 723 K followed the expected trends based on the Seebeck coefficient of the individual fibers. This observation suggests the excellent reliability of the modules during temperature cycling. The power generation performance was assessed across a temperature difference of up to 500 K under various electric loads. The maximum measured power output reached approximately 2.2 mW with a module volume of approximately 39 mm 3  ( Fig. 5b ). 28 Fig. 5 (a) Thermoelectric study of Ca 3 Co 4 O 9  based ceramics (8). (b) Ceramic legs-based thermoelectric modules (9). The precise and adaptable technique combining spray-coating and laser structuring is employed to engineer ceramic layers on a versatile substrate, suitable for various applications. A thermoelectric material Ca 3 Co 4 O 9  (10), was employed in the process and affixed onto a flexible ceramic substrate. The resultant structures exhibit highly controllable shapes and possess favorable thermoelectric properties. They are suitable for fabricating a printable thermoelectric generator (TEG). Employing a flexible ceramic substrate and benefiting from the high feasibility of the process, this approach offers a universally applicable procedure for processing ceramics with distinctive structures and designs ( Fig. 6a ). 29  Pyroelectric energy harvesting has garnered significant interest for its capacity to transform low-grade waste heat into electrical energy. Despite the limitations posed by low-grade temperature the practical applications of pyroelectric energy harvesting have been expanded with the introduction of a high-performance hybrid BNT-BZT- x GaN pyroelectric ceramic (11). This system incorporates an environmentally friendly lead-free BNT-BZT pyroelectric matrix, complemented by high thermal conductivity GaN as a dopant. Theoretical analysis of BNT-BZT and BNT-BZT- x GaN with  x  = 0.1 wt% indicates that incorporating GaN promotes resonance vibration between Ga and Ti, O atoms. This phenomenon not only enhances lattice heat conduction but also improves the vibration of TiO 6  octahedra. Accordingly, there is a simultaneous improvement in both thermal conductivity and pyroelectric coefficient. Therefore, BNT-BZT- x GaN ceramics with  x  = 0.1 wt% have achieved an enhanced energy harvesting density of 80 μJ cm −3  through thermoelectric coupling. This performance is achieved under a temperature variation of 2 °C and an optical load resistance of 600 MΩ ( Fig. 6b ). 30 Fig. 6 (a) Laser structuring of thermoelectric ceramics (10). (b) BNT-BZT- x GaN pyroelectric ceramics-based thermoelectric properties (11). Ceramics are known for their high thermal stability and electrical insulation properties. Optimizing thermoelectric performance in ceramics involves enhancing their electrical conductivity while maintaining low thermal conductivity. This can be achieved through doping, which introduces charge carriers, and by creating nanostructured ceramics that scatter phonons effectively, thereby reducing thermal conductivity. The balance between electrical and thermal properties is key to improving the figure of merit ( ZT )."
+    }
+  ],
+  "extractions": {
+    "methods_paragraphs": [
+      {
+        "text": "1. Introduction Recent years have witnessed a surge of interest in thermoelectric devices and their applications, driven by the pressing need for sustainable energy solutions and efficient thermal management systems. 1  Thermoelectric materials have become more attractive as potential solutions to these problems because of their exceptional capacity to transform waste heat into useful electrical power. This paper aims to provide a comprehensive overview of the recent trends in thermoelectric devices and their diverse applications across various industries, while also delving into the future prospects and potential impact of these advancements. The field of thermoelectric materials and devices has undergone significant evolution, marked by a growing emphasis on enhancing performance, scalability, and applicability. 2–5  Recent advancements in materials science have led to the development of novel thermoelectric materials, including nanostructured materials, organic and hybrid materials, and the utilization of advanced manufacturing techniques. These innovations have opened new avenues for improving the efficiency and cost-effectiveness of thermoelectric devices, thereby expanding their potential applications. 6–8 One of the key future prospects in the realm of thermoelectric devices lies in the continued refinement of materials and manufacturing processes to achieve higher thermoelectric conversion efficiencies. The pursuit of materials with enhanced thermoelectric properties, such as high thermoelectric figure of merit ( ZT ), remains a focal point for researchers and industry stakeholders. Additionally, the exploration of scalable and cost-effective manufacturing methods holds promise for enabling the widespread adoption of thermoelectric technology in diverse settings. 9–11  The potential applications of thermoelectric devices span a wide spectrum of industries, each presenting unique opportunities for leveraging waste heat recovery and efficient thermal management. In the automotive sector, thermoelectric generators offer the prospect of harnessing waste heat from exhaust systems to power vehicle electronics and reduce fuel consumption. Similarly, in aerospace applications, thermoelectric devices hold the potential to enhance energy efficiency and provide reliable power sources for critical systems. The integration of thermoelectric modules in wearable electronics presents an intriguing avenue for self-powered, energy-autonomous wearable devices, catering to the burgeoning demand for portable and sustainable technologies. Furthermore, in industrial settings, thermoelectric systems offer the prospect of recovering waste heat from various processes, thereby improving overall energy efficiency and reducing environmental impact. 12 The future prospects of thermoelectric devices extend beyond their immediate applications, encompassing broader implications for sustainable energy solutions and environmental conservation. As the global focus on renewable energy and energy efficiency intensifies, thermoelectric technology stands poised to play a pivotal role in realizing these objectives. 13–15  By enabling the conversion of waste heat into useable electrical power, thermoelectric devices have the potential to contribute significantly to the reduction of greenhouse gas emissions and the overall sustainability of energy systems. Moreover, the integration of thermoelectric devices into existing infrastructure and energy systems holds promise for enhancing overall energy efficiency and reducing reliance on traditional energy sources. 16  The prospect of utilizing thermoelectric technology (1) in conjunction with solar panels or other renewable energy sources to create hybrid energy systems represents an exciting avenue for achieving greater energy autonomy and resilience ( Fig. 1 ). Fig. 1 Schematic representation of thermoelectrical materials and applications. In the context of thermal management, the future prospects of thermoelectric devices are equally compelling. The ability of thermoelectric modules to provide precise and localized cooling or heating presents opportunities for improving the efficiency and reliability of thermal control systems in various applications, ranging from electronics cooling to temperature regulation in medical devices. 17–20  The potential impact of thermoelectric technology on sustainable energy solutions and thermal management systems is underscored by the growing interest and investment in research and development in this field. As governments, industries, and research institutions increasingly recognize the significance of addressing energy sustainability and efficiency, the momentum behind thermoelectric technology continues to build.",
+        "operations": [
+          {
+            "op_type": "heat",
+            "sentence": "1  Thermoelectric materials have become more attractive as potential solutions to these problems because of their exceptional capacity to transform waste heat into useful electrical power.",
+            "start_char": 217,
+            "end_char": 405,
+            "materials": [
+              "1  Thermoelectric materials"
+            ],
+            "params": {}
+          },
+          {
+            "op_type": "heat",
+            "sentence": "9–11  The potential applications of thermoelectric devices span a wide spectrum of industries, each presenting unique opportunities for leveraging waste heat recovery and efficient thermal management.",
+            "start_char": 1802,
+            "end_char": 2002,
+            "materials": [],
+            "params": {}
+          },
+          {
+            "op_type": "heat",
+            "sentence": "In the automotive sector, thermoelectric generators offer the prospect of harnessing waste heat from exhaust systems to power vehicle electronics and reduce fuel consumption.",
+            "start_char": 2003,
+            "end_char": 2177,
+            "materials": [],
+            "params": {}
+          },
+          {
+            "op_type": "heat",
+            "sentence": "Furthermore, in industrial settings, thermoelectric systems offer the prospect of recovering waste heat from various processes, thereby improving overall energy efficiency and reducing environmental impact.",
+            "start_char": 2571,
+            "end_char": 2777,
+            "materials": [],
+            "params": {}
+          },
+          {
+            "op_type": "heat",
+            "sentence": "13–15  By enabling the conversion of waste heat into useable electrical power, thermoelectric devices have the potential to contribute significantly to the reduction of greenhouse gas emissions and the overall sustainability of energy systems.",
+            "start_char": 3140,
+            "end_char": 3383,
+            "materials": [],
+            "params": {}
+          },
+          {
+            "op_type": "heat",
+            "sentence": "The ability of thermoelectric modules to provide precise and localized cooling or heating presents opportunities for improving the efficiency and reliability of thermal control systems in various applications, ranging from electronics cooling to temperature regulation in medical devices.",
+            "start_char": 4034,
+            "end_char": 4322,
+            "materials": [],
+            "params": {}
+          }
+        ],
+        "expanded": [
+          {
+            "op_type": "heat",
+            "steps": [
+              "Place the reaction vessel on a hotplate.",
+              "Ramp to the target temperature.",
+              "Maintain the target temperature for the specified time."
+            ]
+          },
+          {
+            "op_type": "heat",
+            "steps": [
+              "Place the reaction vessel on a hotplate.",
+              "Ramp to the target temperature.",
+              "Maintain the target temperature for the specified time."
+            ]
+          },
+          {
+            "op_type": "heat",
+            "steps": [
+              "Place the reaction vessel on a hotplate.",
+              "Ramp to the target temperature.",
+              "Maintain the target temperature for the specified time."
+            ]
+          },
+          {
+            "op_type": "heat",
+            "steps": [
+              "Place the reaction vessel on a hotplate.",
+              "Ramp to the target temperature.",
+              "Maintain the target temperature for the specified time."
+            ]
+          },
+          {
+            "op_type": "heat",
+            "steps": [
+              "Place the reaction vessel on a hotplate.",
+              "Ramp to the target temperature.",
+              "Maintain the target temperature for the specified time."
+            ]
+          },
+          {
+            "op_type": "heat",
+            "steps": [
+              "Place the reaction vessel on a hotplate.",
+              "Ramp to the target temperature.",
+              "Maintain the target temperature for the specified time."
+            ]
+          }
+        ]
+      },
+      {
+        "text": "2. Ceramic based thermoelectric devices Researchers are increasingly focusing on processing technologies to enhance thermoelectric generator (TEG) production. A quick and scalable method for producing TEGs involves spray coating and laser structuring, which offers flexibility. The process combines both additive and subtractive technologies to create a versatile ceramic-based TEG suitable for high temperatures with significant potential for optimization. A prototype of a TEG based on Ca 3 Co 4 O (CCO) and Ag on a ceramic substrate (2) was fabricated. The microstructural and thermoelectric analyses demonstrate achievement of up to 1.65 μW cm 2  at 673 K with a Δ T  of 100 K. Additionally, the developed process offers high controllability facilitating adaptation for various thermoelectric materials ( Fig. 2a ). 21  Furthermore, plate-like microcrystal particles of Ca 3 Co 4 O 9  (3) were synthesized using molten salt synthesis. Morphologically optimized particles were used as template seeds to fabricate denser Ca 3 Co 4 O 9  thermoelectric ceramics. The effects of Ca 3 Co 4 O 9  template seeds on the ceramics microstructure and thermoelectric performance were studied. The findings demonstrated that varying the weight ratios of salt to oxides (s/o) significantly influenced the composition, microstructure, and grain size of the template seeds. When the s/o ratio reached a certain level, the particles exhibited desirable morphology and uniform grain size, with an average diameter of 7.92 μm and a thickness of 1.13 μm. Incorporating 40 wt% of the template seed resulted in a bulk density of 92.5% for Ca 3 Co 4 O 9  ceramics. Thermoelectric properties were assessed within a temperature range spanning from 50 °C to 800 °C. The findings revealed an electrical resistivity of 20.3 mΩ cm a Seebeck coefficient of 179 μV K −1 , and a power factor of 0.16 mW m −1  K −2  ( Fig. 2b ). 22 Fig. 2 (a) Spray-coating of ceramic-based thermoelectric generator (2). (b) Thermoelectric study of Ca 3 Co 4 O 9  ceramics (3). A highly densified CCO-based ceramics (4) were prepared utilizing Bi 2 O 3  additive  via  liquid-phase sintering processing. With increasing Bi 2 O 3  additive the bulk densities of the samples rose from 92.1% to 95.5%. A band gap of 2.21 eV was observed for the sample containing 6 wt% Bi 2 O 3  additive. Furthermore, the concentration and mobility of charge carriers showed temperature-dependent behavior at 723 K, reaching values of 22.26 × 10 20  cm −3  and 103.2 cm 2  V −1  s −1  respectively. These results were utilized to estimate the charge carrier transport characteristics. The electrical resistance would inevitably drop and the Seebeck coefficient would rise as the Bi 2 O 3  addition increased. Moreover, a maximum power factor of 0.23 mW m −1  K −2  was achievable at 1073 K. With a lower thermal conductivity of 0.92 W m −1  K −1  the sample containing 6 wt% Bi 2 O 3  additive exhibited a high  ZT  value of 0.25. Bi 2 O 3  additive effectively enhanced both the sintering characteristics and thermoelectric properties of CCO ceramics ( Fig. 3a ). 23  Thermal heat recovered from electrical power components installed on ceramic substrates is possible with an ideal design. The thick-film/low-temperature co-fired ceramic (LTCC)-based multilayer thermoelectric micro-generators (TEGs) (5) were built upon in terms of the fabrication methods and characterization. Thus, two separate TEGs were fabricated based on the Seebeck effect each utilizing different thermocouple materials (Ag/Ni and Ag/PdAg) followed by simulation, analytical examination, and comparative analysis. Each generator design incorporates 104 thermocouples, each with a width and spacing of 300 μm. A meander-shaped planar heater was employed to generate the necessary heating, simulating the conditions of an electronic power device. Furthermore, a comparison was conducted between two heaters constructed from Ni and PdAg. Each heater was tested with and without cylindrical grooves added to the back side of the LTCC substrate. The addition of grooves surrounding the hot element has demonstrated an average improvement of 160% in the temperature difference along the generator. In terms of TEGs, the Ag/PdAg-based variation was able to produce an output power that was greater than the Ag/Ni-based TEG, which was able to obtain an output power of 4.6 μW at Δ T  = 62 °C. This variant reached an output power of 81 μW with a temperature difference of 114 °C. The Ag/PdAg-based TEG exhibited a conversion efficiency of 0.5%, while the Ag/Ni-based TEG showed a conversion efficiency of 0.08% ( Fig. 3b ). 24 Fig. 3 (a) Liquid-phase sintering study of Ca 3 Co 4 O 9 –Bi 2 O 3  based ceramics (4). (b) LTCC technology of Ag/PdAg-based ceramic-based thermoelectric generator (5). The thermoelectric properties of SiC/AlN ceramic composites (6) were analyzed across a broad temperature range. Simulation and analysis were conducted to evaluate the thermal stress durability of the composites. SiC/AlN composites containing 0–30 wt% of AlN were manufactured using the pressure-less sintering method. The obtained composites underwent inspection for phase analysis, densification, and microstructure characterization. The porous structure of the SiC/AlN ceramics was observed with porosity levels varying between 23.77% and 31.74%. A 2Hss SiC/AlN solid solution was produced in its entirety with the content growing in step with the increase in the percentage of AlN weight. The incorporation of AlN into SiC ceramics resulted in a structured composition with elongated grain morphology. The electrical resistivity and thermoelectric properties of the examined ceramics were assessed across a temperature range from 25 to 1000 K. The outcomes were primarily influenced by the AlN content, microstructure, and temperature. Moreover, SiC/AlN composites exhibited consistent behavior as p-type semiconductors showcasing exceptional thermoelectric properties, particularly at elevated temperatures. At 1000 K, the 30% AlN composite displayed the lowest electrical resistivity of 1.5 × 10 5  μΩ × cm and the highest Seebeck coefficient of 370 μV K −1 . The figure of merit ( ZT ) exhibited a remarkable increase with the augmentation of AlN content. The 30% AlN composites attained a  ZT  value 130 times greater than that of the 0% AlN composite. Increasing the weight percentage of AlN significantly improved the thermoelectric power factor. A finite element technique simulation was used to analyze the thermal stress of different ceramics up to 1773 K in temperature. The homogeneous transition and dispersion of heat in SiC/AlN composites demonstrated exceptional thermal stress resilience. They are highly recommended for effective utilization in thermoelectric power generation and high-temperature applications ( Fig. 4a ). 25  Additionally, the fabrication of thermoelectric generators automatically is made possible by ceramic multilayer technology, which is advantageous for energy harvesting in sensor applications. In such multilayer thermoelectric generators, the electrical insulation material plays a critical role in enhancing device performance. It needs to be carefully matched to the thermoelectric material in terms of its coefficient of thermal expansion α and its sintering temperature while maintaining a high resistivity to optimize overall efficiency. A glass-ceramic composite material (7) was developed for use in multilayer thermoelectric generators, starting from theoretical calculations. This composite material was synthesized from a combination of calcium manganate and calcium cobaltite. The optimization process focused on achieving a coefficient of thermal expansion ( α ) of 11 × 10 −6  K −1  over a temperature range of 20–500 °C, a sintering temperature of 900 °C, and maintaining high resistivity up to 800 °C. The calculated and measured coefficients of thermal expansion ( α ) exhibit strong agreement validating the accuracy of the theoretical predictions in the development of the glass-ceramic composite material for multilayer thermoelectric generators. The selected glass-ceramic composite, containing 45 vol% quartz demonstrates a resistivity of 1 × 10 7  Ω cm and maintains an open porosity of less than 3%. The sintered multilayer samples, consisting of tape-cast thermoelectric oxides and screen-printed insulation, exhibit minimal reaction layers. This suggests that glass-ceramic composites are highly suitable for insulation layers in such applications. Moreover, the physical properties of these composites can be precisely adjusted by modifying glass composition or introducing dispersion phases highlighting their versatility and effectiveness in optimizing device performance ( Fig. 4b ). 26 Fig. 4 (a) SiC/AlN ceramic composites (6). (b) Thermoelectric study of glass-ceramic composites (7). Furthermore, Oscillatory Pressure Sintering (OPS) has proven to be a beneficial manufacturing method for achieving precise control over the fine and uniform distribution of grains across different ceramic systems. This capability facilitates improved densification, thereby enhancing the physical and mechanical properties of the materials involved. This study utilized Oscillatory Pressure Sintering (OPS) to fabricate pure Ca 3 Co 4 O 9  thermoelectric material (8). The findings reveal that the electrical and thermoelectric properties of Ca 3 Co 4 O 9  prepared  via  OPS outperform those of samples sintered using conventional hot pressing (HP) without oscillation. The improved performance of the OPS samples can be attributed to several factors. Firstly, OPS facilitates better alignment of plate-like grains, leading to enhanced electrical conductivity. Additionally, OPS results in higher grain boundary density, which effectively increases phonon scattering, thereby reducing thermal conductivity. This study suggests that employing a simple oscillatory pressure sintering approach can yield high-quality and high-performance thermoelectric materials, eliminating the necessity for doping, templating, or high-temperature sintering methods ( Fig. 5a ). 27  The first attempt at thermoelectric module design was based on oxide materials fabricated using the laser floating zone technique. Two modules with four-leg thermoelectric configurations were constructed, incorporating Bi 2 Ba 2 Co 2 O y  fibers as the p-type legs, and Ca 0.9 La 0.1 MnO 3  and CaMn 0.95 Nb 0.05 O 3  fibers (9) as the n-type legs. Structural and electrical characterization of the individual fibers was conducted. The evolution of open-circuit voltage during heating and cooling up to 723 K followed the expected trends based on the Seebeck coefficient of the individual fibers. This observation suggests the excellent reliability of the modules during temperature cycling. The power generation performance was assessed across a temperature difference of up to 500 K under various electric loads. The maximum measured power output reached approximately 2.2 mW with a module volume of approximately 39 mm 3  ( Fig. 5b ). 28 Fig. 5 (a) Thermoelectric study of Ca 3 Co 4 O 9  based ceramics (8). (b) Ceramic legs-based thermoelectric modules (9). The precise and adaptable technique combining spray-coating and laser structuring is employed to engineer ceramic layers on a versatile substrate, suitable for various applications. A thermoelectric material Ca 3 Co 4 O 9  (10), was employed in the process and affixed onto a flexible ceramic substrate. The resultant structures exhibit highly controllable shapes and possess favorable thermoelectric properties. They are suitable for fabricating a printable thermoelectric generator (TEG). Employing a flexible ceramic substrate and benefiting from the high feasibility of the process, this approach offers a universally applicable procedure for processing ceramics with distinctive structures and designs ( Fig. 6a ). 29  Pyroelectric energy harvesting has garnered significant interest for its capacity to transform low-grade waste heat into electrical energy. Despite the limitations posed by low-grade temperature the practical applications of pyroelectric energy harvesting have been expanded with the introduction of a high-performance hybrid BNT-BZT- x GaN pyroelectric ceramic (11). This system incorporates an environmentally friendly lead-free BNT-BZT pyroelectric matrix, complemented by high thermal conductivity GaN as a dopant. Theoretical analysis of BNT-BZT and BNT-BZT- x GaN with  x  = 0.1 wt% indicates that incorporating GaN promotes resonance vibration between Ga and Ti, O atoms. This phenomenon not only enhances lattice heat conduction but also improves the vibration of TiO 6  octahedra. Accordingly, there is a simultaneous improvement in both thermal conductivity and pyroelectric coefficient. Therefore, BNT-BZT- x GaN ceramics with  x  = 0.1 wt% have achieved an enhanced energy harvesting density of 80 μJ cm −3  through thermoelectric coupling. This performance is achieved under a temperature variation of 2 °C and an optical load resistance of 600 MΩ ( Fig. 6b ). 30 Fig. 6 (a) Laser structuring of thermoelectric ceramics (10). (b) BNT-BZT- x GaN pyroelectric ceramics-based thermoelectric properties (11). Ceramics are known for their high thermal stability and electrical insulation properties. Optimizing thermoelectric performance in ceramics involves enhancing their electrical conductivity while maintaining low thermal conductivity. This can be achieved through doping, which introduces charge carriers, and by creating nanostructured ceramics that scatter phonons effectively, thereby reducing thermal conductivity. The balance between electrical and thermal properties is key to improving the figure of merit ( ZT ).",
+        "operations": [
+          {
+            "op_type": "add",
+            "sentence": "Furthermore, the concentration and mobility of charge carriers showed temperature-dependent behavior at 723 K, reaching values of 22.26 × 10 20  cm −3  and 103.2 cm 2  V −1  s −1  respectively.",
+            "start_char": 2339,
+            "end_char": 2532,
+            "materials": [
+              "723 K",
+              "2  V −1"
+            ],
+            "params": {
+              "temp": "723K",
+              "time": "1  s"
+            }
+          },
+          {
+            "op_type": "add",
+            "sentence": "These results were utilized to estimate the charge carrier transport characteristics.",
+            "start_char": 2533,
+            "end_char": 2618,
+            "materials": [],
+            "params": {}
+          },
+          {
+            "op_type": "heat",
+            "sentence": "23  Thermal heat recovered from electrical power components installed on ceramic substrates is possible with an ideal design.",
+            "start_char": 3099,
+            "end_char": 3224,
+            "materials": [
+              "23  Thermal heat"
+            ],
+            "params": {}
+          },
+          {
+            "op_type": "heat",
+            "sentence": "A meander-shaped planar heater was employed to generate the necessary heating, simulating the conditions of an electronic power device.",
+            "start_char": 3719,
+            "end_char": 3854,
+            "materials": [],
+            "params": {}
+          },
+          {
+            "op_type": "add",
+            "sentence": "Each heater was tested with and without cylindrical grooves added to the back side of the LTCC substrate.",
+            "start_char": 3945,
+            "end_char": 4050,
+            "materials": [],
+            "params": {}
+          },
+          {
+            "op_type": "heat",
+            "sentence": "The homogeneous transition and dispersion of heat in SiC/AlN composites demonstrated exceptional thermal stress resilience.",
+            "start_char": 6582,
+            "end_char": 6705,
+            "materials": [],
+            "params": {}
+          },
+          {
+            "op_type": "heat",
+            "sentence": "It needs to be carefully matched to the thermoelectric material in terms of its coefficient of thermal expansion α and its sintering temperature while maintaining a high resistivity to optimize overall efficiency.",
+            "start_char": 7174,
+            "end_char": 7387,
+            "materials": [],
+            "params": {}
+          },
+          {
+            "op_type": "heat",
+            "sentence": "The optimization process focused on achieving a coefficient of thermal expansion ( α ) of 11 × 10 −6  K −1  over a temperature range of 20–500 °C, a sintering temperature of 900 °C, and maintaining high resistivity up to 800 °C.",
+            "start_char": 7633,
+            "end_char": 7861,
+            "materials": [
+              "( α",
+              "11 × 10 −6  K −1",
+              "900 °C"
+            ],
+            "params": {
+              "temp": "6K"
+            }
+          },
+          {
+            "op_type": "heat",
+            "sentence": "The selected glass-ceramic composite, containing 45 vol% quartz demonstrates a resistivity of 1 × 10 7  Ω cm and maintains an open porosity of less than 3%.",
+            "start_char": 8111,
+            "end_char": 8267,
+            "materials": [
+              "45 vol% quartz",
+              "less than 3%"
+            ],
+            "params": {}
+          },
+          {
+            "op_type": "add",
+            "sentence": "Moreover, the physical properties of these composites can be precisely adjusted by modifying glass composition or introducing dispersion phases highlighting their versatility and effectiveness in optimizing device performance ( Fig. 4b ).",
+            "start_char": 8519,
+            "end_char": 8757,
+            "materials": [],
+            "params": {}
+          },
+          {
+            "op_type": "heat",
+            "sentence": "The evolution of open-circuit voltage during heating and cooling up to 723 K followed the expected trends based on the Seebeck coefficient of the individual fibers.",
+            "start_char": 10561,
+            "end_char": 10725,
+            "materials": [
+              "to 723 K"
+            ],
+            "params": {
+              "temp": "723K"
+            }
+          },
+          {
+            "op_type": "heat",
+            "sentence": "Pyroelectric energy harvesting has garnered significant interest for its capacity to transform low-grade waste heat into electrical energy.",
+            "start_char": 11915,
+            "end_char": 12054,
+            "materials": [],
+            "params": {}
+          },
+          {
+            "op_type": "heat",
+            "sentence": "This phenomenon not only enhances lattice heat conduction but also improves the vibration of TiO 6  octahedra.",
+            "start_char": 12594,
+            "end_char": 12704,
+            "materials": [
+              "6  octahedra"
+            ],
+            "params": {}
+          },
+          {
+            "op_type": "heat",
+            "sentence": "Optimizing thermoelectric performance in ceramics involves enhancing their electrical conductivity while maintaining low thermal conductivity.",
+            "start_char": 13323,
+            "end_char": 13465,
+            "materials": [],
+            "params": {}
+          },
+          {
+            "op_type": "add",
+            "sentence": "This can be achieved through doping, which introduces charge carriers, and by creating nanostructured ceramics that scatter phonons effectively, thereby reducing thermal conductivity.",
+            "start_char": 13466,
+            "end_char": 13649,
+            "materials": [],
+            "params": {}
+          }
+        ],
+        "expanded": [
+          {
+            "op_type": "add",
+            "steps": [
+              "Ensure reaction vessel is present and empty.",
+              "Place a clean stir bar in the vessel.",
+              "Measure the specified amount of 723 K.",
+              "Transfer 723 K into the vessel."
+            ]
+          },
+          {
+            "op_type": "add",
+            "steps": [
+              "Ensure reaction vessel is present and empty.",
+              "Place a clean stir bar in the vessel.",
+              "Measure the specified amount of reagent.",
+              "Transfer reagent into the vessel."
+            ]
+          },
+          {
+            "op_type": "heat",
+            "steps": [
+              "Place the reaction vessel on a hotplate.",
+              "Ramp to the target temperature.",
+              "Maintain the target temperature for the specified time."
+            ]
+          },
+          {
+            "op_type": "heat",
+            "steps": [
+              "Place the reaction vessel on a hotplate.",
+              "Ramp to the target temperature.",
+              "Maintain the target temperature for the specified time."
+            ]
+          },
+          {
+            "op_type": "add",
+            "steps": [
+              "Ensure reaction vessel is present and empty.",
+              "Place a clean stir bar in the vessel.",
+              "Measure the specified amount of reagent.",
+              "Transfer reagent into the vessel."
+            ]
+          },
+          {
+            "op_type": "heat",
+            "steps": [
+              "Place the reaction vessel on a hotplate.",
+              "Ramp to the target temperature.",
+              "Maintain the target temperature for the specified time."
+            ]
+          },
+          {
+            "op_type": "heat",
+            "steps": [
+              "Place the reaction vessel on a hotplate.",
+              "Ramp to the target temperature.",
+              "Maintain the target temperature for the specified time."
+            ]
+          },
+          {
+            "op_type": "heat",
+            "steps": [
+              "Place the reaction vessel on a hotplate.",
+              "Ramp to 6K.",
+              "Maintain 6K for the specified time."
+            ]
+          },
+          {
+            "op_type": "heat",
+            "steps": [
+              "Place the reaction vessel on a hotplate.",
+              "Ramp to the target temperature.",
+              "Maintain the target temperature for the specified time."
+            ]
+          },
+          {
+            "op_type": "add",
+            "steps": [
+              "Ensure reaction vessel is present and empty.",
+              "Place a clean stir bar in the vessel.",
+              "Measure the specified amount of reagent.",
+              "Transfer reagent into the vessel."
+            ]
+          },
+          {
+            "op_type": "heat",
+            "steps": [
+              "Place the reaction vessel on a hotplate.",
+              "Ramp to 723K.",
+              "Maintain 723K for the specified time."
+            ]
+          },
+          {
+            "op_type": "heat",
+            "steps": [
+              "Place the reaction vessel on a hotplate.",
+              "Ramp to the target temperature.",
+              "Maintain the target temperature for the specified time."
+            ]
+          },
+          {
+            "op_type": "heat",
+            "steps": [
+              "Place the reaction vessel on a hotplate.",
+              "Ramp to the target temperature.",
+              "Maintain the target temperature for the specified time."
+            ]
+          },
+          {
+            "op_type": "heat",
+            "steps": [
+              "Place the reaction vessel on a hotplate.",
+              "Ramp to the target temperature.",
+              "Maintain the target temperature for the specified time."
+            ]
+          },
+          {
+            "op_type": "add",
+            "steps": [
+              "Ensure reaction vessel is present and empty.",
+              "Place a clean stir bar in the vessel.",
+              "Measure the specified amount of reagent.",
+              "Transfer reagent into the vessel."
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

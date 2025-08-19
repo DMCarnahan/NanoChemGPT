@@ -1,0 +1,243 @@
+{
+  "paper_id": "10.1021/acsnano.4c15300",
+  "title": "Discovery and Characterization of a Metastable Cubic Interstitial Nickel-Carbon System with an Expanded Lattice.",
+  "authors": [],
+  "doi": "10.1021/acsnano.4c15300",
+  "source": "eupmc",
+  "urls": {
+    "pdf": null
+  },
+  "license": {
+    "type": "unknown"
+  },
+  "access_route": "oa",
+  "sections": [
+    {
+      "heading": "Methods",
+      "text": "Methods 5% Ni/MnO\nSynthesis A procedure previously reported\nin ref ( 6 ) was followed.\nBriefly, the NiO/MnO x  catalyst precursor\nwas synthesized using the coprecipitation method. An aqueous solution\ncontaining the proper amounts of nickel acetate tetrahydrate (Ni(OCOCH 3 ) 2 ·2H 2 O) and manganese nitrate\ntetrahydrate (Mn(NO 3 ) 2 ·4H 2 O)\nwas mixed under stirring with an aqueous solution of NaHCO 3  and NaOH with a pH ≥ 10 to induce precipitation. The resulting\nsolid was dried at 80 °C and subsequently calcined for 4 h at\n750 °C. To achieve the catalyst during the in situ XRD analysis,\na flow of pure H 2  (GHSV = 54,000 L h –1  kg cat –1 ) was applied at 500 °C.\nThe reduction of the MnO x  support results\nin the exsolution of metallic nickel nanoparticles which decorate\nthe surface of the MnO support. The reasons for the use of MnO as\na support are (i) to produce exsoluted Ni nanoparticles with controlled\nsize and (ii) due to the previous application of the catalyst to the\ndry reforming of methane, 6 , 7  studies which initiated\nthe present work. MnO is inert for CH 4  decomposition. Characterization In situ XRD experiments were performed\non beamline 12.2.2 of the Advanced Light Source (ALS) synchrotron\nfacility in Berkeley, CA, USA. The setup and technique details have\nbeen previously described in refs ( 29 − 31 ). Shortly, a set of mass flow controllers allow controlling the flow\nrate and composition of the gas stream. Around 1 mg of the powder\nsample is contained inside a quartz capillary and assembled into the\nsetup. Gas delivery occurs by using a tungsten carbide filament. The\nreaction temperature is controlled with an S-type thermocouple and\nusing two IR lamps connected to a PID controller  via  Labview software. A 2D PerkinElmer detector allows for acquiring\nhigh-quality patterns using short acquisition times. A typical experiment\nconsists of (i) heating steps (N 2  flow, 1 °C·s –1 ), (ii) the reduction step to reduce the NiO/Mn 2 O 3  solid solution to produce Ni/MnO (1 N mL·min –1  flow of H 2 , see  Figure S4  for structural information: Ni is in metallic form at the\nbeginning of the experiment, no NiO could be detected), the CH 4  decomposition (800 °C, reactant mixture of CH 4 :N 2  = 1:4 and GHSV of 60,000 L h –1  kg cat –1 , time 0:00 belongs to the injection\nof CH 4  in the gas feed) using 5% Ni/MnO as a material precursor\nto yield the NiC x /MnO compound, and (iv)\nthe final quenching. In order to quench the sample and immobilize\nthe carbon content, short acquisition times of 20 s pattern –1  were used to observe changes in the position of the nickel (111)\nand (200) reflections while analyzing the data “on-the-fly”\nusing Dioptas software. When the reflection shift was observed, the\noven power supply was interrupted (set to 0), and the reactant flow\nrate was stopped while continuously acquiring patterns. Applying this\nmethodology and for the experiments reported, the cooling rate was\napproximately −6.5 °C s –1  between 800\nand 100 °C. The cooling rate was nonlinear due to the difficulty\nin removing heat from the setup at lower temperatures due to the decreased\ntemperature gradient between the SiC tube and the air. At room temperature,\npure N 2  was flushed through the sample, and the sample\nwas recovered in an inert gas for later microscopy characterization.\nRietveld refinement of the XRD data was performed using FullProf Suite\nsoftware 32  and fitting using a Thompson–Cox–Hastings\npseudo-Voigt function 33  with an axial divergence\nasymmetry function 34  (Function 7). The\nsample-to-detector distance for integration and the instrument resolution\nfunction for refining were obtained by using a LaB 6  NIST\n660c standard. Ex situ  TEM was performed by\nusing two different microscopes. First, a JEOL microscope (JEM-ARM200\nCF) operating at 200 kV and equipped with a cold field emission gun\n(CFEG) and a double Cs corrector for TEM and STEM imaging modes was\nused. STEM images were acquired using a Gatan high-angle annular dark-field\n(HAADF) and bright field (BF) detectors, with a probe size of 1.5\nnm and a current of 1 nA. STEM-EELS data were acquired using a Gatan\nimaging filter (GIF) spectrometer (model quantum) with a beam convergence\nsemiangle of 22.8 mrad, a collection semiangle of 54.5 mrad, and a\ndispersion energy of 0.5 eV per channel. The current was set between\n2 × 10 7  and 9 × 10 7  e/s, which was\nverified by using a Faraday cup holder. Second, an image Cs-corrected\nHR-TEM (FEI Titan 80–300 Berlin Holography Special) microscope\nwith XFEG operated at 300 kV was used. Under the conditions applied\nin  Figure S9 , the calculated electron dose\nrate was 3.3 × 10 9  electron·s –1 , with the overall dosage on the very particle between both images\nbeing 1.4 × 10 13 . DFT Calculations First-principles calculations have\nbeen performed using the Vienna Ab initio Simulation Package (VASP). 35 , 36  The projector augmented wave (PAW) method 37  in the implementation of Kresse and Joubert 35  was applied for an accurate and efficient calculation of the system’s\nelectronic structure. Exchange correlation effects were described\nby the Bayesian error estimation functional with van der Waals (BEEF-vdW) 38  in the framework of the generalized gradient\napproximation (GGA). According to the scheme of Monkhorst and Pack,\na  k -point mesh density of 0.15 Å –1  was used to sample the Brillouin zone (BZ). For an accurate expansion\nof the one-particle electron wave functions into a plane-wave basis\nset, a cutoff energy of 750 eV was chosen. The calculations were considered\nto be converged once the total energy difference was less than 1 ×\n10 –7  eV and the norms of all the forces were smaller\nthan 1 × 10 –4  eV Å –1 . After intensive testing, the reactive force field (ReaxFF) of Mueller\net al. 39  was used to determine the entropic\ncontributions. All ReaxFF 40 , 41  calculations were performed\nwithin the ReaxFF implementation of the Amsterdam Modeling Suite 2019. 42  The contributions for the respective systems\nwere calculated within the ASE Phonon module framework. 43 , 44  Each cell was repeated three times in all spatial directions to\nminimize the influence of the periodic images, and a displacement\nvalue of 0.01 Å for the small displacement method was applied. The formation energies per formula unit (f.u.) and atom (atm) were\ncalculated by 1 and 2 where  E Ni x C y  is the\ntotal energy of the Ni–C bulk system,  E Ni bulk  is the\ntotal energy per atom of  fcc -Ni, and  E C Graphite  is\nthe energy of a single C atom in graphite. Internal energy components  U  at  T  = 1073 K have been calculated from\nthe sum of the system’s potential energy  E pot , zero-point energy  E ZPE , and phonon energy contribution  E Phonon  using the following equation: 3 The Helmholtz free energy\nat  T  = 1073 K was then determined by 4 where  S  is\nthe entropy contribution. All studied structures are provided\nas POSCAR files in the  Supporting Information ."
+    },
+    {
+      "heading": "5% Ni/MnO\nSynthesis",
+      "text": "5% Ni/MnO\nSynthesis A procedure previously reported\nin ref ( 6 ) was followed.\nBriefly, the NiO/MnO x  catalyst precursor\nwas synthesized using the coprecipitation method. An aqueous solution\ncontaining the proper amounts of nickel acetate tetrahydrate (Ni(OCOCH 3 ) 2 ·2H 2 O) and manganese nitrate\ntetrahydrate (Mn(NO 3 ) 2 ·4H 2 O)\nwas mixed under stirring with an aqueous solution of NaHCO 3  and NaOH with a pH ≥ 10 to induce precipitation. The resulting\nsolid was dried at 80 °C and subsequently calcined for 4 h at\n750 °C. To achieve the catalyst during the in situ XRD analysis,\na flow of pure H 2  (GHSV = 54,000 L h –1  kg cat –1 ) was applied at 500 °C.\nThe reduction of the MnO x  support results\nin the exsolution of metallic nickel nanoparticles which decorate\nthe surface of the MnO support. The reasons for the use of MnO as\na support are (i) to produce exsoluted Ni nanoparticles with controlled\nsize and (ii) due to the previous application of the catalyst to the\ndry reforming of methane, 6 , 7  studies which initiated\nthe present work. MnO is inert for CH 4  decomposition."
+    }
+  ],
+  "extractions": {
+    "methods_paragraphs": [
+      {
+        "text": "Methods 5% Ni/MnO\nSynthesis A procedure previously reported\nin ref ( 6 ) was followed.\nBriefly, the NiO/MnO x  catalyst precursor\nwas synthesized using the coprecipitation method. An aqueous solution\ncontaining the proper amounts of nickel acetate tetrahydrate (Ni(OCOCH 3 ) 2 ·2H 2 O) and manganese nitrate\ntetrahydrate (Mn(NO 3 ) 2 ·4H 2 O)\nwas mixed under stirring with an aqueous solution of NaHCO 3  and NaOH with a pH ≥ 10 to induce precipitation. The resulting\nsolid was dried at 80 °C and subsequently calcined for 4 h at\n750 °C. To achieve the catalyst during the in situ XRD analysis,\na flow of pure H 2  (GHSV = 54,000 L h –1  kg cat –1 ) was applied at 500 °C.\nThe reduction of the MnO x  support results\nin the exsolution of metallic nickel nanoparticles which decorate\nthe surface of the MnO support. The reasons for the use of MnO as\na support are (i) to produce exsoluted Ni nanoparticles with controlled\nsize and (ii) due to the previous application of the catalyst to the\ndry reforming of methane, 6 , 7  studies which initiated\nthe present work. MnO is inert for CH 4  decomposition. Characterization In situ XRD experiments were performed\non beamline 12.2.2 of the Advanced Light Source (ALS) synchrotron\nfacility in Berkeley, CA, USA. The setup and technique details have\nbeen previously described in refs ( 29 − 31 ). Shortly, a set of mass flow controllers allow controlling the flow\nrate and composition of the gas stream. Around 1 mg of the powder\nsample is contained inside a quartz capillary and assembled into the\nsetup. Gas delivery occurs by using a tungsten carbide filament. The\nreaction temperature is controlled with an S-type thermocouple and\nusing two IR lamps connected to a PID controller  via  Labview software. A 2D PerkinElmer detector allows for acquiring\nhigh-quality patterns using short acquisition times. A typical experiment\nconsists of (i) heating steps (N 2  flow, 1 °C·s –1 ), (ii) the reduction step to reduce the NiO/Mn 2 O 3  solid solution to produce Ni/MnO (1 N mL·min –1  flow of H 2 , see  Figure S4  for structural information: Ni is in metallic form at the\nbeginning of the experiment, no NiO could be detected), the CH 4  decomposition (800 °C, reactant mixture of CH 4 :N 2  = 1:4 and GHSV of 60,000 L h –1  kg cat –1 , time 0:00 belongs to the injection\nof CH 4  in the gas feed) using 5% Ni/MnO as a material precursor\nto yield the NiC x /MnO compound, and (iv)\nthe final quenching. In order to quench the sample and immobilize\nthe carbon content, short acquisition times of 20 s pattern –1  were used to observe changes in the position of the nickel (111)\nand (200) reflections while analyzing the data “on-the-fly”\nusing Dioptas software. When the reflection shift was observed, the\noven power supply was interrupted (set to 0), and the reactant flow\nrate was stopped while continuously acquiring patterns. Applying this\nmethodology and for the experiments reported, the cooling rate was\napproximately −6.5 °C s –1  between 800\nand 100 °C. The cooling rate was nonlinear due to the difficulty\nin removing heat from the setup at lower temperatures due to the decreased\ntemperature gradient between the SiC tube and the air. At room temperature,\npure N 2  was flushed through the sample, and the sample\nwas recovered in an inert gas for later microscopy characterization.\nRietveld refinement of the XRD data was performed using FullProf Suite\nsoftware 32  and fitting using a Thompson–Cox–Hastings\npseudo-Voigt function 33  with an axial divergence\nasymmetry function 34  (Function 7). The\nsample-to-detector distance for integration and the instrument resolution\nfunction for refining were obtained by using a LaB 6  NIST\n660c standard. Ex situ  TEM was performed by\nusing two different microscopes. First, a JEOL microscope (JEM-ARM200\nCF) operating at 200 kV and equipped with a cold field emission gun\n(CFEG) and a double Cs corrector for TEM and STEM imaging modes was\nused. STEM images were acquired using a Gatan high-angle annular dark-field\n(HAADF) and bright field (BF) detectors, with a probe size of 1.5\nnm and a current of 1 nA. STEM-EELS data were acquired using a Gatan\nimaging filter (GIF) spectrometer (model quantum) with a beam convergence\nsemiangle of 22.8 mrad, a collection semiangle of 54.5 mrad, and a\ndispersion energy of 0.5 eV per channel. The current was set between\n2 × 10 7  and 9 × 10 7  e/s, which was\nverified by using a Faraday cup holder. Second, an image Cs-corrected\nHR-TEM (FEI Titan 80–300 Berlin Holography Special) microscope\nwith XFEG operated at 300 kV was used. Under the conditions applied\nin  Figure S9 , the calculated electron dose\nrate was 3.3 × 10 9  electron·s –1 , with the overall dosage on the very particle between both images\nbeing 1.4 × 10 13 . DFT Calculations First-principles calculations have\nbeen performed using the Vienna Ab initio Simulation Package (VASP). 35 , 36  The projector augmented wave (PAW) method 37  in the implementation of Kresse and Joubert 35  was applied for an accurate and efficient calculation of the system’s\nelectronic structure. Exchange correlation effects were described\nby the Bayesian error estimation functional with van der Waals (BEEF-vdW) 38  in the framework of the generalized gradient\napproximation (GGA). According to the scheme of Monkhorst and Pack,\na  k -point mesh density of 0.15 Å –1  was used to sample the Brillouin zone (BZ). For an accurate expansion\nof the one-particle electron wave functions into a plane-wave basis\nset, a cutoff energy of 750 eV was chosen. The calculations were considered\nto be converged once the total energy difference was less than 1 ×\n10 –7  eV and the norms of all the forces were smaller\nthan 1 × 10 –4  eV Å –1 . After intensive testing, the reactive force field (ReaxFF) of Mueller\net al. 39  was used to determine the entropic\ncontributions. All ReaxFF 40 , 41  calculations were performed\nwithin the ReaxFF implementation of the Amsterdam Modeling Suite 2019. 42  The contributions for the respective systems\nwere calculated within the ASE Phonon module framework. 43 , 44  Each cell was repeated three times in all spatial directions to\nminimize the influence of the periodic images, and a displacement\nvalue of 0.01 Å for the small displacement method was applied. The formation energies per formula unit (f.u.) and atom (atm) were\ncalculated by 1 and 2 where  E Ni x C y  is the\ntotal energy of the Ni–C bulk system,  E Ni bulk  is the\ntotal energy per atom of  fcc -Ni, and  E C Graphite  is\nthe energy of a single C atom in graphite. Internal energy components  U  at  T  = 1073 K have been calculated from\nthe sum of the system’s potential energy  E pot , zero-point energy  E ZPE , and phonon energy contribution  E Phonon  using the following equation: 3 The Helmholtz free energy\nat  T  = 1073 K was then determined by 4 where  S  is\nthe entropy contribution. All studied structures are provided\nas POSCAR files in the  Supporting Information .",
+        "operations": [
+          {
+            "op_type": "stir",
+            "sentence": "An aqueous solution\ncontaining the proper amounts of nickel acetate tetrahydrate (Ni(OCOCH 3 ) 2 ·2H 2 O) and manganese nitrate\ntetrahydrate (Mn(NO 3 ) 2 ·4H 2 O)\nwas mixed under stirring with an aqueous solution of NaHCO 3  and NaOH with a pH ≥ 10 to induce precipitation.",
+            "start_char": 180,
+            "end_char": 453,
+            "materials": [
+              "Ni(OCOCH",
+              "4H 2 O"
+            ],
+            "params": {
+              "time": "2H"
+            }
+          },
+          {
+            "op_type": "dry",
+            "sentence": "The resulting\nsolid was dried at 80 °C and subsequently calcined for 4 h at\n750 °C.",
+            "start_char": 454,
+            "end_char": 537,
+            "materials": [
+              "80 °C",
+              "4 h",
+              "750 °"
+            ],
+            "params": {
+              "temp": "80°C",
+              "time": "4 h"
+            }
+          },
+          {
+            "op_type": "dry",
+            "sentence": "The reasons for the use of MnO as\na support are (i) to produce exsoluted Ni nanoparticles with controlled\nsize and (ii) due to the previous application of the catalyst to the\ndry reforming of methane, 6 , 7  studies which initiated\nthe present work.",
+            "start_char": 815,
+            "end_char": 1064,
+            "materials": [
+              "(ii",
+              "6 , 7  studies"
+            ],
+            "params": {}
+          },
+          {
+            "op_type": "heat",
+            "sentence": "A typical experiment\nconsists of (i) heating steps (N 2  flow, 1 °C·s –1 ), (ii) the reduction step to reduce the NiO/",
+            "start_char": 1851,
+            "end_char": 1969,
+            "materials": [
+              "(i) heating steps",
+              "N 2  flow",
+              "1 °",
+              "C·s"
+            ],
+            "params": {
+              "temp": "1°C"
+            }
+          },
+          {
+            "op_type": "inject",
+            "sentence": "Mn 2 O 3  solid solution to produce Ni/MnO (1 N mL·min –1  flow of H 2 , see  Figure S4  for structural information: Ni is in metallic form at the\nbeginning of the experiment, no NiO could be detected), the CH 4  decomposition (800 °C, reactant mixture of CH 4 :N 2  = 1:4 and GHSV of 60,000 L h –1  kg cat –1 , time 0:00 belongs to the injection\nof CH 4  in the gas feed) using 5% Ni/MnO as a material precursor\nto yield the NiC x /MnO compound, and (iv)\nthe final quenching.",
+            "start_char": 1969,
+            "end_char": 2445,
+            "materials": [
+              "Mn 2 O 3  solid solution",
+              "Ni/MnO (1 N mL·min",
+              "1  flow",
+              "Figure S4"
+            ],
+            "params": {
+              "temp": "800°C",
+              "amounts": [
+                "000 L",
+                "1  kg"
+              ]
+            }
+          },
+          {
+            "op_type": "heat",
+            "sentence": "The cooling rate was nonlinear due to the difficulty\nin removing heat from the setup at lower temperatures due to the decreased\ntemperature gradient between the SiC tube and the air.",
+            "start_char": 3005,
+            "end_char": 3187,
+            "materials": [],
+            "params": {}
+          },
+          {
+            "op_type": "filter",
+            "sentence": "STEM images were acquired using a Gatan high-angle annular dark-field\n(HAADF) and bright field (BF) detectors, with a probe size of 1.5\nnm and a current of 1 nA. STEM-EELS data were acquired using a Gatan\nimaging filter (GIF) spectrometer (model quantum) with a beam convergence\nsemiangle of 22.8 mrad, a collection semiangle of 54.5 mrad, and a\ndispersion energy of 0.5 eV per channel.",
+            "start_char": 3943,
+            "end_char": 4329,
+            "materials": [
+              "1.5\nnm",
+              "1 nA. STEM-EELS data",
+              "a Gatan\nimaging filter (GIF) spectrometer (model quantum",
+              "22.8 mrad"
+            ],
+            "params": {}
+          }
+        ],
+        "expanded": [
+          {
+            "op_type": "stir",
+            "steps": [
+              "Place the reaction vessel on a stir plate.",
+              "Set the stirrer to an appropriate speed.",
+              "Stir for 2H."
+            ]
+          },
+          {
+            "op_type": "dry",
+            "steps": [
+              "Perform operation 'dry' as described: The resulting\nsolid was dried at 80 °C and subsequently calcined for 4 h at\n750 °C."
+            ]
+          },
+          {
+            "op_type": "dry",
+            "steps": [
+              "Perform operation 'dry' as described: The reasons for the use of MnO as\na support are (i) to produce exsoluted Ni nanoparticles with controlled\nsize and (ii) due to the previous application of the catalyst to the\ndry reforming of methane, 6 , 7  studies which initiated\nthe present work."
+            ]
+          },
+          {
+            "op_type": "heat",
+            "steps": [
+              "Place the reaction vessel on a hotplate.",
+              "Ramp to 1°C.",
+              "Maintain 1°C for the specified time."
+            ]
+          },
+          {
+            "op_type": "inject",
+            "steps": [
+              "Perform operation 'inject' as described: Mn 2 O 3  solid solution to produce Ni/MnO (1 N mL·min –1  flow of H 2 , see  Figure S4  for structural information: Ni is in metallic form at the\nbeginning of the experiment, no NiO could be detected), the CH 4  decomposition (800 °C, reactant mixture of CH 4 :N 2  = 1:4 and GHSV of 60,000 L h –1  kg cat –1 , time 0:00 belongs to the injection\nof CH 4  in the gas feed) using 5% Ni/MnO as a material precursor\nto yield the NiC x /MnO compound, and (iv)\nthe final quenching."
+            ]
+          },
+          {
+            "op_type": "heat",
+            "steps": [
+              "Place the reaction vessel on a hotplate.",
+              "Ramp to the target temperature.",
+              "Maintain the target temperature for the specified time."
+            ]
+          },
+          {
+            "op_type": "filter",
+            "steps": [
+              "Perform operation 'filter' as described: STEM images were acquired using a Gatan high-angle annular dark-field\n(HAADF) and bright field (BF) detectors, with a probe size of 1.5\nnm and a current of 1 nA. STEM-EELS data were acquired using a Gatan\nimaging filter (GIF) spectrometer (model quantum) with a beam convergence\nsemiangle of 22.8 mrad, a collection semiangle of 54.5 mrad, and a\ndispersion energy of 0.5 eV per channel."
+            ]
+          }
+        ]
+      },
+      {
+        "text": "5% Ni/MnO\nSynthesis A procedure previously reported\nin ref ( 6 ) was followed.\nBriefly, the NiO/MnO x  catalyst precursor\nwas synthesized using the coprecipitation method. An aqueous solution\ncontaining the proper amounts of nickel acetate tetrahydrate (Ni(OCOCH 3 ) 2 ·2H 2 O) and manganese nitrate\ntetrahydrate (Mn(NO 3 ) 2 ·4H 2 O)\nwas mixed under stirring with an aqueous solution of NaHCO 3  and NaOH with a pH ≥ 10 to induce precipitation. The resulting\nsolid was dried at 80 °C and subsequently calcined for 4 h at\n750 °C. To achieve the catalyst during the in situ XRD analysis,\na flow of pure H 2  (GHSV = 54,000 L h –1  kg cat –1 ) was applied at 500 °C.\nThe reduction of the MnO x  support results\nin the exsolution of metallic nickel nanoparticles which decorate\nthe surface of the MnO support. The reasons for the use of MnO as\na support are (i) to produce exsoluted Ni nanoparticles with controlled\nsize and (ii) due to the previous application of the catalyst to the\ndry reforming of methane, 6 , 7  studies which initiated\nthe present work. MnO is inert for CH 4  decomposition.",
+        "operations": [
+          {
+            "op_type": "stir",
+            "sentence": "An aqueous solution\ncontaining the proper amounts of nickel acetate tetrahydrate (Ni(OCOCH 3 ) 2 ·2H 2 O) and manganese nitrate\ntetrahydrate (Mn(NO 3 ) 2 ·4H 2 O)\nwas mixed under stirring with an aqueous solution of NaHCO 3  and NaOH with a pH ≥ 10 to induce precipitation.",
+            "start_char": 172,
+            "end_char": 445,
+            "materials": [
+              "Ni(OCOCH",
+              "4H 2 O"
+            ],
+            "params": {
+              "time": "2H"
+            }
+          },
+          {
+            "op_type": "dry",
+            "sentence": "The resulting\nsolid was dried at 80 °C and subsequently calcined for 4 h at\n750 °C.",
+            "start_char": 446,
+            "end_char": 529,
+            "materials": [
+              "80 °C",
+              "4 h",
+              "750 °"
+            ],
+            "params": {
+              "temp": "80°C",
+              "time": "4 h"
+            }
+          },
+          {
+            "op_type": "dry",
+            "sentence": "The reasons for the use of MnO as\na support are (i) to produce exsoluted Ni nanoparticles with controlled\nsize and (ii) due to the previous application of the catalyst to the\ndry reforming of methane, 6 , 7  studies which initiated\nthe present work.",
+            "start_char": 807,
+            "end_char": 1056,
+            "materials": [
+              "(ii",
+              "6 , 7  studies"
+            ],
+            "params": {}
+          }
+        ],
+        "expanded": [
+          {
+            "op_type": "stir",
+            "steps": [
+              "Place the reaction vessel on a stir plate.",
+              "Set the stirrer to an appropriate speed.",
+              "Stir for 2H."
+            ]
+          },
+          {
+            "op_type": "dry",
+            "steps": [
+              "Perform operation 'dry' as described: The resulting\nsolid was dried at 80 °C and subsequently calcined for 4 h at\n750 °C."
+            ]
+          },
+          {
+            "op_type": "dry",
+            "steps": [
+              "Perform operation 'dry' as described: The reasons for the use of MnO as\na support are (i) to produce exsoluted Ni nanoparticles with controlled\nsize and (ii) due to the previous application of the catalyst to the\ndry reforming of methane, 6 , 7  studies which initiated\nthe present work."
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

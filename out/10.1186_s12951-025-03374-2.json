@@ -1,0 +1,158 @@
+{
+  "paper_id": "10.1186/s12951-025-03374-2",
+  "title": "The nucleic acid reactions on the nanomaterials surface for biomedicine.",
+  "authors": [],
+  "doi": "10.1186/s12951-025-03374-2",
+  "source": "eupmc",
+  "urls": {
+    "pdf": null
+  },
+  "license": {
+    "type": "unknown"
+  },
+  "access_route": "oa",
+  "sections": [
+    {
+      "heading": "Chemical methods",
+      "text": "Chemical methods Chemical methods for detaching NAs from nanomaterial surfaces typically involve agents that disrupt the interactions between NAs and nanomaterials (Fig.  1 c)[ 135 ,  138 ]. For instance, urea or dimethyl sulfoxide (DMSO) can denature NAs by forming hydrogen bonds with nucleotide bases, causing ssDNA to detach from nanomaterials (Fig.  5 a)[ 136 ,  153 ]. Magnetic beads modified with silanol or carboxyl groups create\"salt\"or\"electrostatic bridges\"with NAs. Tris–EDTA or phosphate buffers disrupt these interactions by lowering the salt concentration or increasing pH, which induces repulsion between the negatively charged NAs and the beads (Fig.  5 b)[ 137 ,  154 ,  155 ]. For metallic nanomaterials, such as AuNPs, chemical destabilizers like dithiothreitol (DTT) can cleave Au–S bonds, effectively detaching conjugated NAs (Fig.  5 c)[ 139 ]. Additionally, potassium cyanide (KCN) can solubilize metallic nanomaterials directly, facilitating complete release of bound NAs (Fig.  5 d)[ 141 ]. Fig. 5 Chemical strategies for the detachment of NAs from the surface of nanomaterials.  a  Urea and dimethyl sulfoxide inhibit DNA adsorption on the surface of Hydrogel nanoparticle. Reprinted with permission from [ 136 ].  b  Schematic diagram of MNPs-based NA separation. Reprinted with permission from [ 154 ].  c  Oligonucleotides were dissociated from the AuNPs surface by using DTT. Reprinted with permission from [ 139 ].  d  KCN was added to dissolve the AuNPs and fully release the DNA. Reprinted with permission from [ 141 ].  e  The schematic illustrating the CNPs-based fluorescent nucleic acid detection. Reprinted with permission from [ 156 ].  f  Detecting ssDNA and dsDNA via fluorescence quenching of fluorophore-labeled DNA probes by AuNPs. Reprinted with permission from [ 143 ].  g  A few possible mechanisms of cDNA-induced probe DNA detachement from GO surface. Reprinted with permission from [ 144 ].  h  pH-responsive regulation of the nanoswitch and NAs release. Reprinted with permission from [ 145 ].  i  A schematic representation depicting the release of DNA from the photocleavable nanoparticles–DNA complex following exposure to UV irradiation. Reprinted with permission from [ 147 ] The use of complementary DNA (cDNA) to detach NAs from nanomaterial surfaces is classified as a chemical method. Since ssDNA and dsDNA have different affinities for nanomaterial surfaces, cDNA-mediated displacement reactions can promote the release of fluorescently labeled NAs [ 141 ,  142 ]. In this process, single-stranded fluorescent probes initially adsorbed onto nanomaterial surfaces are quenched due to their proximity. cDNA, complementary to the single-stranded probes, forms double- or triple-stranded DNA structures away from the surface, restoring fluorescence. Based on this principle, many interesting nanomaterial-based direct nucleic acid detection platforms have been developed (Fig.  5 e-f) [ 143 ,  156 ]. Further systematic investigation of cDNA-induced detachment of probe DNA from GO surfaces proposed several mechanisms (Fig.  5 g): (1) Langmuir–Hinshelwood model: cDNA adsorbs, diffuses, hybridizes with probe DNA, and desorbs in two phases. (2) Eley–Rideal model: cDNA hybridizes directly with probe DNA without adsorbing. (3) Displacement model: cDNA replaces probe DNA in the solution and hybridizes with another cDNA. (4) Surface Heterogeneity: Probe DNA adsorbed to GO with varying affinities may follow one or both of the above mechanisms [ 144 ,  157 ]. Despite these insights, the mechanisms underlying DNA desorption via strand displacement remain complex and subject to ongoing debate. Experimental evidence suggests that no single model fully accounts for all observed detachment phenomena. Further research is required to quantitatively elucidate these processes and improve our understanding of DNA desorption mechanisms. Stimuli-responsive NA detachment strategies enable controlled release of nucleic acids from nanomaterials under specific external stimuli like pH and UV light, through designed surface chemistry. In pH-responsive systems (Fig.  5 h), DNA release is achieved by using pH-sensitive sequences ( e.g.,  i-motif, triplex) [ 145 ,  158 ,  159 ], or by breaking acid-labile bonds ( e.g.,  hydrazone, ketal)/protonating surface groups ( e.g.,  amines, carboxyls) on nanomaterials [ 146 ,  160 ,  161 ]. In UV-responsive systems (Fig.  5 i), DNA release relies on photolabile linkers or photoisomerization. For example, DNA linked to positively charged AuNPs via photolabile nitrobenzyl ester bonds is released upon UV irradiation (> 350 nm) [ 147 ]. Similarly, Ortho-nitrobenzyl (ONB)-functionalized nucleic acids can partially release from nanomaterials under UV light [ 148 ]. Additionally, azobenzene-modified DNA on nanoparticles is released when UV converts azobenzene to its cis form, facilitating its detachment from the cyclodextrin cavity [ 162 ,  163 ]."
+    },
+    {
+      "heading": "Physical methods",
+      "text": "Physical methods Physical methods for detaching NAs from nanomaterial surfaces primarily involve altering the surface temperature of the nanomaterial to disrupt NA-nanomaterial interactions (Fig.  1 d) [ 140 ]. Increased temperature enhances nanomaterial motion, weakening interactions with NAs and promoting detachment. It also facilitates the thermal diffusion of NAs, further aiding their release [ 149 ]. Common approaches include direct heating and photothermal conversion. Research on these mechanisms has primarily focused on AuNPs. One study examined the kinetics of DNA detachment from AuNP surfaces at temperatures from 40 to 95 °C [ 164 ]. Another study investigated the thermal stability of DNA-AuNP conjugates with various organosulfur anchor groups from 25 to 85 °C, finding that bidentate Au–S bonds with cyclic disulfides were less thermally stable than those with thiol or acyclic disulfides (Fig.  6 a) [ 150 ]. Fig. 6 Thermal-induced detachment of NAs from the surface of nanomaterials.  a  Schematic illustrating the fluorescence-based measurement of the released FAM-labeled DNA from DNA-AuNP at different temperatures. Reprinted with permission from [ 150 ].  b  Near-IR light-induced DNA release. Reprinted with permission from [ 151 ].  c  DNA release profiles and corresponding fits of the 25, 35, 55, and 70 nm AuNP. Reprinted with permission from [ 165 ].  d  The siRNA release efficiency of three gold nanoparticles (HGNS, HGNC, and AuNR) at different laser irradiation powers. Reprinted with permission from [ 152 ] The excellent photothermal conversion efficiency of AuNPs has enabled advanced methods for light-stimulated detachment of NAs. Research has shown that near-infrared (NIR) light can detach DNA from AuNRs by generating'hot electrons'that cleave Au–S bonds [ 166 ]. Similarly, AuNRs absorb light, causing localized heating that unwinds and releases DNA without significantly raising the solution's temperature, indicating a non-thermodynamic mechanism [ 167 ,  168 ]. Additionally, the effects of continuous wave (CW) and femtosecond pulse lasers on DNA release from gold nanoparticle complexes were different. CW lasers caused photothermal release of dehybridized ssDNA while the complementary strand stayed bound. Femtosecond pulse lasers generated non-equilibrium hot electrons, breaking Au–S bonds and releasing intact dsDNA (Fig.  6 b)[ 151 ]. Another study with different conclusions noted that silicon core/Au nanoshells irradiated with near-infrared pulsed laser and continuous laser released single- and double-stranded NAs, but pulsed irradiation resulted in higher dsNA release [ 169 ]. The size and shape of nanomaterials significantly affect the release process. Smaller AuNPs release ssDNA more rapidly than larger particles (Fig.  6 c) [ 165 ]. AuNRs demonstrate more efficient siRNA release than Hollow gold nanoshells (HGNS) or Hollow gold nanocages (HGNC) when subjected to 800 nm pulsed laser excitation (Fig.  6 d)[ 152 ]. In summary, light-stimulated NA detachment using the plasmonic properties of metal nanoparticles offers precise control over release by tuning the wavelength, intensity, and irradiation mode of light. Additionally, the inherent characteristics of nanomaterials and the type of NA conjugation significantly influence detachment outcomes [ 170 ]. Detaching NAs from nanomaterial surfaces is complex, influenced by factors like nanomaterial size, shape, surface features, and environmental conditions. Advances in light-responsive and strand displacement nanomaterials enable precise NAs release. Hybrid structures and environmental triggers also enhance responsiveness to biological or external stimuli, boosting nanomaterial applications in biomedicine. Ongoing research aims to create more efficient, targeted, and biocompatible systems for gene therapy and biosensing."
+    },
+    {
+      "heading": "NAs-guided nanomaterial synthesis and assembly",
+      "text": "NAs-guided nanomaterial synthesis and assembly Nucleic acid-based conjugation with nanomaterials has greatly advanced precision assembly of nanomaterials. NAs act as templates for controlled synthesis, allowing precise regulation of nanoparticle size and shape, and imparting unique properties. Thiol-modified ssDNA or poly A/C/G/T chains have been used to shape metal nanocrystals. Specifically, ssDNA with 30 cytosine (C30) or adenine (A30) units turned spherical AuNP seeds into stable, spiky nanoflowers, while thymine-based DNA (T30) formed spherical nanoparticles (Fig.  8 a)[ 228 ]. Similarly, Different DNA sequences affect the shape and fluorescence of AgNPs made from nanoseeds. Poly-oligo-A10 and -T10 convert nanocubic seeds into stellate octahedral AgNPs with different truncations. Poly-oligo-C10 produces truncated tetrahedral AgNPs, while oligo-G10 maintains the cubic shape and size of the AgNPs (Fig.  8 b)[ 229 ]. Fig. 8 NAs-guided nanomaterial synthesis and assemble.  a  The effects of different DNA molecules of the same length on the morphology of gold nanoparticles during synthesis. Reprinted with permission from [ 228 ].  b  The effects of different DNA sequences on the morphologies of AgNPs grown from Ag nanocube seeds. Reprinted with permission from [ 229 ].  c  Parallel CNT arrays were constructed by arranging DNA-coated CNTs via DNA hybridization using DNA brick crystal-based nanogrooves. Reprinted with permission from [ 230 ].  d  Schematic illustration of colloidal crystals assembled from cube NCs functionalized with different lengths of DNA. Reprinted with permission from [ 231 ] Beyond synthesis, NAs serve as\"glue\"for organizing nanoparticles, allowing imperfect shapes to form ordered structures. Flexible DNA enhances assembly, enabling complex crystals with improved symmetry. For instance, ssDNA can wrap CNTs and integrate them with DNA origami via hybridization, resulting in parallel CNT arrays with uniform spacing of 10.4 nm (Fig.  8 c)[ 230 ]. Mirkin and his team have made significant contributions in this field [ 232 – 234 ]. They developed space-filling nanocrystals by pairing DNA-guided, shape-complementary polyhedra, expanding the possibilities for designing metamaterials (Fig.  8 d)[ 231 ]."
+    }
+  ],
+  "extractions": {
+    "methods_paragraphs": [
+      {
+        "text": "Chemical methods Chemical methods for detaching NAs from nanomaterial surfaces typically involve agents that disrupt the interactions between NAs and nanomaterials (Fig.  1 c)[ 135 ,  138 ]. For instance, urea or dimethyl sulfoxide (DMSO) can denature NAs by forming hydrogen bonds with nucleotide bases, causing ssDNA to detach from nanomaterials (Fig.  5 a)[ 136 ,  153 ]. Magnetic beads modified with silanol or carboxyl groups create\"salt\"or\"electrostatic bridges\"with NAs. Tris–EDTA or phosphate buffers disrupt these interactions by lowering the salt concentration or increasing pH, which induces repulsion between the negatively charged NAs and the beads (Fig.  5 b)[ 137 ,  154 ,  155 ]. For metallic nanomaterials, such as AuNPs, chemical destabilizers like dithiothreitol (DTT) can cleave Au–S bonds, effectively detaching conjugated NAs (Fig.  5 c)[ 139 ]. Additionally, potassium cyanide (KCN) can solubilize metallic nanomaterials directly, facilitating complete release of bound NAs (Fig.  5 d)[ 141 ]. Fig. 5 Chemical strategies for the detachment of NAs from the surface of nanomaterials.  a  Urea and dimethyl sulfoxide inhibit DNA adsorption on the surface of Hydrogel nanoparticle. Reprinted with permission from [ 136 ].  b  Schematic diagram of MNPs-based NA separation. Reprinted with permission from [ 154 ].  c  Oligonucleotides were dissociated from the AuNPs surface by using DTT. Reprinted with permission from [ 139 ].  d  KCN was added to dissolve the AuNPs and fully release the DNA. Reprinted with permission from [ 141 ].  e  The schematic illustrating the CNPs-based fluorescent nucleic acid detection. Reprinted with permission from [ 156 ].  f  Detecting ssDNA and dsDNA via fluorescence quenching of fluorophore-labeled DNA probes by AuNPs. Reprinted with permission from [ 143 ].  g  A few possible mechanisms of cDNA-induced probe DNA detachement from GO surface. Reprinted with permission from [ 144 ].  h  pH-responsive regulation of the nanoswitch and NAs release. Reprinted with permission from [ 145 ].  i  A schematic representation depicting the release of DNA from the photocleavable nanoparticles–DNA complex following exposure to UV irradiation. Reprinted with permission from [ 147 ] The use of complementary DNA (cDNA) to detach NAs from nanomaterial surfaces is classified as a chemical method. Since ssDNA and dsDNA have different affinities for nanomaterial surfaces, cDNA-mediated displacement reactions can promote the release of fluorescently labeled NAs [ 141 ,  142 ]. In this process, single-stranded fluorescent probes initially adsorbed onto nanomaterial surfaces are quenched due to their proximity. cDNA, complementary to the single-stranded probes, forms double- or triple-stranded DNA structures away from the surface, restoring fluorescence. Based on this principle, many interesting nanomaterial-based direct nucleic acid detection platforms have been developed (Fig.  5 e-f) [ 143 ,  156 ]. Further systematic investigation of cDNA-induced detachment of probe DNA from GO surfaces proposed several mechanisms (Fig.  5 g): (1) Langmuir–Hinshelwood model: cDNA adsorbs, diffuses, hybridizes with probe DNA, and desorbs in two phases. (2) Eley–Rideal model: cDNA hybridizes directly with probe DNA without adsorbing. (3) Displacement model: cDNA replaces probe DNA in the solution and hybridizes with another cDNA. (4) Surface Heterogeneity: Probe DNA adsorbed to GO with varying affinities may follow one or both of the above mechanisms [ 144 ,  157 ]. Despite these insights, the mechanisms underlying DNA desorption via strand displacement remain complex and subject to ongoing debate. Experimental evidence suggests that no single model fully accounts for all observed detachment phenomena. Further research is required to quantitatively elucidate these processes and improve our understanding of DNA desorption mechanisms. Stimuli-responsive NA detachment strategies enable controlled release of nucleic acids from nanomaterials under specific external stimuli like pH and UV light, through designed surface chemistry. In pH-responsive systems (Fig.  5 h), DNA release is achieved by using pH-sensitive sequences ( e.g.,  i-motif, triplex) [ 145 ,  158 ,  159 ], or by breaking acid-labile bonds ( e.g.,  hydrazone, ketal)/protonating surface groups ( e.g.,  amines, carboxyls) on nanomaterials [ 146 ,  160 ,  161 ]. In UV-responsive systems (Fig.  5 i), DNA release relies on photolabile linkers or photoisomerization. For example, DNA linked to positively charged AuNPs via photolabile nitrobenzyl ester bonds is released upon UV irradiation (> 350 nm) [ 147 ]. Similarly, Ortho-nitrobenzyl (ONB)-functionalized nucleic acids can partially release from nanomaterials under UV light [ 148 ]. Additionally, azobenzene-modified DNA on nanoparticles is released when UV converts azobenzene to its cis form, facilitating its detachment from the cyclodextrin cavity [ 162 ,  163 ].",
+        "operations": [
+          {
+            "op_type": "add",
+            "sentence": "Tris–EDTA or phosphate buffers disrupt these interactions by lowering the salt concentration or increasing pH, which induces repulsion between the negatively charged NAs and the beads (Fig.  5 b)[ 137 ,  154 ,  155 ].",
+            "start_char": 478,
+            "end_char": 695,
+            "materials": [],
+            "params": {}
+          },
+          {
+            "op_type": "add",
+            "sentence": "d  KCN was added to dissolve the AuNPs and fully release the DNA.",
+            "start_char": 1448,
+            "end_char": 1513,
+            "materials": [],
+            "params": {}
+          },
+          {
+            "op_type": "add",
+            "sentence": "For example, DNA linked to positively charged AuNPs via photolabile nitrobenzyl ester bonds is released upon UV irradiation (> 350 nm) [ 147 ].",
+            "start_char": 4491,
+            "end_char": 4634,
+            "materials": [
+              "UV irradiation",
+              "350 nm"
+            ],
+            "params": {}
+          }
+        ],
+        "expanded": [
+          {
+            "op_type": "add",
+            "steps": [
+              "Ensure reaction vessel is present and empty.",
+              "Place a clean stir bar in the vessel.",
+              "Measure the specified amount of reagent.",
+              "Transfer reagent into the vessel."
+            ]
+          },
+          {
+            "op_type": "add",
+            "steps": [
+              "Ensure reaction vessel is present and empty.",
+              "Place a clean stir bar in the vessel.",
+              "Measure the specified amount of reagent.",
+              "Transfer reagent into the vessel."
+            ]
+          },
+          {
+            "op_type": "add",
+            "steps": [
+              "Ensure reaction vessel is present and empty.",
+              "Place a clean stir bar in the vessel.",
+              "Measure the specified amount of UV irradiation.",
+              "Transfer UV irradiation into the vessel."
+            ]
+          }
+        ]
+      },
+      {
+        "text": "Physical methods Physical methods for detaching NAs from nanomaterial surfaces primarily involve altering the surface temperature of the nanomaterial to disrupt NA-nanomaterial interactions (Fig.  1 d) [ 140 ]. Increased temperature enhances nanomaterial motion, weakening interactions with NAs and promoting detachment. It also facilitates the thermal diffusion of NAs, further aiding their release [ 149 ]. Common approaches include direct heating and photothermal conversion. Research on these mechanisms has primarily focused on AuNPs. One study examined the kinetics of DNA detachment from AuNP surfaces at temperatures from 40 to 95 °C [ 164 ]. Another study investigated the thermal stability of DNA-AuNP conjugates with various organosulfur anchor groups from 25 to 85 °C, finding that bidentate Au–S bonds with cyclic disulfides were less thermally stable than those with thiol or acyclic disulfides (Fig.  6 a) [ 150 ]. Fig. 6 Thermal-induced detachment of NAs from the surface of nanomaterials.  a  Schematic illustrating the fluorescence-based measurement of the released FAM-labeled DNA from DNA-AuNP at different temperatures. Reprinted with permission from [ 150 ].  b  Near-IR light-induced DNA release. Reprinted with permission from [ 151 ].  c  DNA release profiles and corresponding fits of the 25, 35, 55, and 70 nm AuNP. Reprinted with permission from [ 165 ].  d  The siRNA release efficiency of three gold nanoparticles (HGNS, HGNC, and AuNR) at different laser irradiation powers. Reprinted with permission from [ 152 ] The excellent photothermal conversion efficiency of AuNPs has enabled advanced methods for light-stimulated detachment of NAs. Research has shown that near-infrared (NIR) light can detach DNA from AuNRs by generating'hot electrons'that cleave Au–S bonds [ 166 ]. Similarly, AuNRs absorb light, causing localized heating that unwinds and releases DNA without significantly raising the solution's temperature, indicating a non-thermodynamic mechanism [ 167 ,  168 ]. Additionally, the effects of continuous wave (CW) and femtosecond pulse lasers on DNA release from gold nanoparticle complexes were different. CW lasers caused photothermal release of dehybridized ssDNA while the complementary strand stayed bound. Femtosecond pulse lasers generated non-equilibrium hot electrons, breaking Au–S bonds and releasing intact dsDNA (Fig.  6 b)[ 151 ]. Another study with different conclusions noted that silicon core/Au nanoshells irradiated with near-infrared pulsed laser and continuous laser released single- and double-stranded NAs, but pulsed irradiation resulted in higher dsNA release [ 169 ]. The size and shape of nanomaterials significantly affect the release process. Smaller AuNPs release ssDNA more rapidly than larger particles (Fig.  6 c) [ 165 ]. AuNRs demonstrate more efficient siRNA release than Hollow gold nanoshells (HGNS) or Hollow gold nanocages (HGNC) when subjected to 800 nm pulsed laser excitation (Fig.  6 d)[ 152 ]. In summary, light-stimulated NA detachment using the plasmonic properties of metal nanoparticles offers precise control over release by tuning the wavelength, intensity, and irradiation mode of light. Additionally, the inherent characteristics of nanomaterials and the type of NA conjugation significantly influence detachment outcomes [ 170 ]. Detaching NAs from nanomaterial surfaces is complex, influenced by factors like nanomaterial size, shape, surface features, and environmental conditions. Advances in light-responsive and strand displacement nanomaterials enable precise NAs release. Hybrid structures and environmental triggers also enhance responsiveness to biological or external stimuli, boosting nanomaterial applications in biomedicine. Ongoing research aims to create more efficient, targeted, and biocompatible systems for gene therapy and biosensing.",
+        "operations": [
+          {
+            "op_type": "heat",
+            "sentence": "Common approaches include direct heating and photothermal conversion.",
+            "start_char": 409,
+            "end_char": 478,
+            "materials": [],
+            "params": {}
+          },
+          {
+            "op_type": "heat",
+            "sentence": "Similarly, AuNRs absorb light, causing localized heating that unwinds and releases DNA without significantly raising the solution's temperature, indicating a non-thermodynamic mechanism [ 167 ,  168 ].",
+            "start_char": 1808,
+            "end_char": 2009,
+            "materials": [],
+            "params": {}
+          }
+        ],
+        "expanded": [
+          {
+            "op_type": "heat",
+            "steps": [
+              "Place the reaction vessel on a hotplate.",
+              "Ramp to the target temperature.",
+              "Maintain the target temperature for the specified time."
+            ]
+          },
+          {
+            "op_type": "heat",
+            "steps": [
+              "Place the reaction vessel on a hotplate.",
+              "Ramp to the target temperature.",
+              "Maintain the target temperature for the specified time."
+            ]
+          }
+        ]
+      },
+      {
+        "text": "NAs-guided nanomaterial synthesis and assembly Nucleic acid-based conjugation with nanomaterials has greatly advanced precision assembly of nanomaterials. NAs act as templates for controlled synthesis, allowing precise regulation of nanoparticle size and shape, and imparting unique properties. Thiol-modified ssDNA or poly A/C/G/T chains have been used to shape metal nanocrystals. Specifically, ssDNA with 30 cytosine (C30) or adenine (A30) units turned spherical AuNP seeds into stable, spiky nanoflowers, while thymine-based DNA (T30) formed spherical nanoparticles (Fig.  8 a)[ 228 ]. Similarly, Different DNA sequences affect the shape and fluorescence of AgNPs made from nanoseeds. Poly-oligo-A10 and -T10 convert nanocubic seeds into stellate octahedral AgNPs with different truncations. Poly-oligo-C10 produces truncated tetrahedral AgNPs, while oligo-G10 maintains the cubic shape and size of the AgNPs (Fig.  8 b)[ 229 ]. Fig. 8 NAs-guided nanomaterial synthesis and assemble.  a  The effects of different DNA molecules of the same length on the morphology of gold nanoparticles during synthesis. Reprinted with permission from [ 228 ].  b  The effects of different DNA sequences on the morphologies of AgNPs grown from Ag nanocube seeds. Reprinted with permission from [ 229 ].  c  Parallel CNT arrays were constructed by arranging DNA-coated CNTs via DNA hybridization using DNA brick crystal-based nanogrooves. Reprinted with permission from [ 230 ].  d  Schematic illustration of colloidal crystals assembled from cube NCs functionalized with different lengths of DNA. Reprinted with permission from [ 231 ] Beyond synthesis, NAs serve as\"glue\"for organizing nanoparticles, allowing imperfect shapes to form ordered structures. Flexible DNA enhances assembly, enabling complex crystals with improved symmetry. For instance, ssDNA can wrap CNTs and integrate them with DNA origami via hybridization, resulting in parallel CNT arrays with uniform spacing of 10.4 nm (Fig.  8 c)[ 230 ]. Mirkin and his team have made significant contributions in this field [ 232 – 234 ]. They developed space-filling nanocrystals by pairing DNA-guided, shape-complementary polyhedra, expanding the possibilities for designing metamaterials (Fig.  8 d)[ 231 ].",
+        "operations": [
+          {
+            "op_type": "heat",
+            "sentence": "Poly-oligo-C10 produces truncated tetrahedral AgNPs, while oligo-G10 maintains the cubic shape and size of the AgNPs (Fig.  8 b)[ 229 ].",
+            "start_char": 796,
+            "end_char": 932,
+            "materials": [
+              "Poly-oligo-C10",
+              "oligo-G10"
+            ],
+            "params": {}
+          }
+        ],
+        "expanded": [
+          {
+            "op_type": "heat",
+            "steps": [
+              "Place the reaction vessel on a hotplate.",
+              "Ramp to the target temperature.",
+              "Maintain the target temperature for the specified time."
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

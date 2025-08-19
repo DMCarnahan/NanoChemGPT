@@ -1,0 +1,286 @@
+{
+  "paper_id": "10.3390/polym17020154",
+  "title": "Ultrasonic Deposition of Cellulose Nanocrystals on Substrates for Enhanced Eradication Activity on Multidrug-Resistant Pathogens.",
+  "authors": [],
+  "doi": "10.3390/polym17020154",
+  "source": "eupmc",
+  "urls": {
+    "pdf": null
+  },
+  "license": {
+    "type": "unknown"
+  },
+  "access_route": "oa",
+  "sections": [
+    {
+      "heading": "2. Experimental",
+      "text": "2. Experimental 2.1. Materials and Chemicals Microcrystalline cellulose (MCC- particle size between 50 and 60 µm), Nylon 66 (polyamide), and sulfuric acid (H 2 SO 4 , 98%) were purchased from Sigma Aldrich, Jerusalem Israel. The commercial cellulose nanocrystals (CNCs) were purchased from Nanografi Nano Technology, Turkey ( https://nanografi.com/ ). These nanocrystals are 10–20 nm in diameter and 300–900 nm in length. Deionized water was used in all the experiments. The cotton was purchased from a textile company, Klopman Int. Frosinone, Italy ( https://www.klopman.com/ ). All the acquired chemicals and solvents were utilized without any purification. 2.2. Preparation of CNCs MCC was subjected to acid hydrolysis treatment using sulfuric acid under the influence of ultrasonic radiation. The hydrolysis was carried out by introducing 0.5 g of MCC into 10% ( w / w ) of sulfuric acid to form a suspension. This suspension was held at 60 °C under sonication for 60 min (Ultrasonic Disruptor, 20 kHz, 675 W, 35% amplitude, power density of 0.37 W·cm −3 ) to allow hydrolysis to take place. Immediately, following the hydrolysis, the suspension was transferred into centrifuge bottles, centrifuged at 12,000 rpm for 10 min, and decanted to separate the crystals. The residual materials were washed with distilled water and the mixture was centrifuged again to remove traces of sulfate salts [ 27 ]. 2.3. Coating Method The CNC-coated membrane and cotton were prepared by ultrasonic method. The media membrane 2 cm 2  was dipped in 0.1% (wt.) of CNCs, and undergoing sonication for 30 min, 30% amplitude allowed the cellulose NPs to adhere to the whole surface and create a uniform film [ 28 , 29 ]. In the case of the CNC-coated cotton sample, 1% (wt.) of CNCs were used to deposit on the cotton surface (2 cm 2 ). The CNC-coated samples were immersed in water and ethanol to remove the unbonded CNC particles from the substrate surface and dried in air overnight at 60 °C. The schematic illustration of CNC sysnthesis and coating process shown in  Scheme 1 . 2.4. Characterization Methods The surface morphology and the size of the CNC coating on the surface of the fabrics were characterized by high-resolution scanning electron microscopy (HR-SEM) using a Magellan 400 L (FEI-Thermo fisher scientific), USA device at 5 kV. The crystalline nature of the microcrystalline cellulose and the synthesized cellulose nanocrystals were assessed using an X-ray diffraction (XRD) technique measured using a Bruker Inc. Germany AXS D8 Advance diffractometer. ROS generation was measured using electron paramagnetic resonance (EPR) spectroscopy. The particle size and morphology of CNCs were probed with a transmission electron microscope with the model number TEM-JEOL-2100 (Peabody, MA, USA). The CNC powder was deposited on the copper grid and dried overnight at 60 °C. For contact angle measurement at 25 °C, the coated substrate was placed in a contact angle goniometer, and water droplets were deposited on each surface."
+    },
+    {
+      "heading": "2.2. Preparation of CNCs",
+      "text": "2.2. Preparation of CNCs MCC was subjected to acid hydrolysis treatment using sulfuric acid under the influence of ultrasonic radiation. The hydrolysis was carried out by introducing 0.5 g of MCC into 10% ( w / w ) of sulfuric acid to form a suspension. This suspension was held at 60 °C under sonication for 60 min (Ultrasonic Disruptor, 20 kHz, 675 W, 35% amplitude, power density of 0.37 W·cm −3 ) to allow hydrolysis to take place. Immediately, following the hydrolysis, the suspension was transferred into centrifuge bottles, centrifuged at 12,000 rpm for 10 min, and decanted to separate the crystals. The residual materials were washed with distilled water and the mixture was centrifuged again to remove traces of sulfate salts [ 27 ]."
+    },
+    {
+      "heading": "2.4. Characterization Methods",
+      "text": "2.4. Characterization Methods The surface morphology and the size of the CNC coating on the surface of the fabrics were characterized by high-resolution scanning electron microscopy (HR-SEM) using a Magellan 400 L (FEI-Thermo fisher scientific), USA device at 5 kV. The crystalline nature of the microcrystalline cellulose and the synthesized cellulose nanocrystals were assessed using an X-ray diffraction (XRD) technique measured using a Bruker Inc. Germany AXS D8 Advance diffractometer. ROS generation was measured using electron paramagnetic resonance (EPR) spectroscopy. The particle size and morphology of CNCs were probed with a transmission electron microscope with the model number TEM-JEOL-2100 (Peabody, MA, USA). The CNC powder was deposited on the copper grid and dried overnight at 60 °C. For contact angle measurement at 25 °C, the coated substrate was placed in a contact angle goniometer, and water droplets were deposited on each surface."
+    }
+  ],
+  "extractions": {
+    "methods_paragraphs": [
+      {
+        "text": "2. Experimental 2.1. Materials and Chemicals Microcrystalline cellulose (MCC- particle size between 50 and 60 µm), Nylon 66 (polyamide), and sulfuric acid (H 2 SO 4 , 98%) were purchased from Sigma Aldrich, Jerusalem Israel. The commercial cellulose nanocrystals (CNCs) were purchased from Nanografi Nano Technology, Turkey ( https://nanografi.com/ ). These nanocrystals are 10–20 nm in diameter and 300–900 nm in length. Deionized water was used in all the experiments. The cotton was purchased from a textile company, Klopman Int. Frosinone, Italy ( https://www.klopman.com/ ). All the acquired chemicals and solvents were utilized without any purification. 2.2. Preparation of CNCs MCC was subjected to acid hydrolysis treatment using sulfuric acid under the influence of ultrasonic radiation. The hydrolysis was carried out by introducing 0.5 g of MCC into 10% ( w / w ) of sulfuric acid to form a suspension. This suspension was held at 60 °C under sonication for 60 min (Ultrasonic Disruptor, 20 kHz, 675 W, 35% amplitude, power density of 0.37 W·cm −3 ) to allow hydrolysis to take place. Immediately, following the hydrolysis, the suspension was transferred into centrifuge bottles, centrifuged at 12,000 rpm for 10 min, and decanted to separate the crystals. The residual materials were washed with distilled water and the mixture was centrifuged again to remove traces of sulfate salts [ 27 ]. 2.3. Coating Method The CNC-coated membrane and cotton were prepared by ultrasonic method. The media membrane 2 cm 2  was dipped in 0.1% (wt.) of CNCs, and undergoing sonication for 30 min, 30% amplitude allowed the cellulose NPs to adhere to the whole surface and create a uniform film [ 28 , 29 ]. In the case of the CNC-coated cotton sample, 1% (wt.) of CNCs were used to deposit on the cotton surface (2 cm 2 ). The CNC-coated samples were immersed in water and ethanol to remove the unbonded CNC particles from the substrate surface and dried in air overnight at 60 °C. The schematic illustration of CNC sysnthesis and coating process shown in  Scheme 1 . 2.4. Characterization Methods The surface morphology and the size of the CNC coating on the surface of the fabrics were characterized by high-resolution scanning electron microscopy (HR-SEM) using a Magellan 400 L (FEI-Thermo fisher scientific), USA device at 5 kV. The crystalline nature of the microcrystalline cellulose and the synthesized cellulose nanocrystals were assessed using an X-ray diffraction (XRD) technique measured using a Bruker Inc. Germany AXS D8 Advance diffractometer. ROS generation was measured using electron paramagnetic resonance (EPR) spectroscopy. The particle size and morphology of CNCs were probed with a transmission electron microscope with the model number TEM-JEOL-2100 (Peabody, MA, USA). The CNC powder was deposited on the copper grid and dried overnight at 60 °C. For contact angle measurement at 25 °C, the coated substrate was placed in a contact angle goniometer, and water droplets were deposited on each surface.",
+        "operations": [
+          {
+            "op_type": "add",
+            "sentence": "The hydrolysis was carried out by introducing 0.5 g of MCC into 10% ( w / w ) of sulfuric acid to form a suspension.",
+            "start_char": 797,
+            "end_char": 913,
+            "materials": [
+              "0.5 g",
+              "10%",
+              "( w / w"
+            ],
+            "params": {
+              "amounts": [
+                "0.5 g"
+              ]
+            }
+          },
+          {
+            "op_type": "sonicate",
+            "sentence": "This suspension was held at 60 °C under sonication for 60 min (Ultrasonic Disruptor, 20 kHz, 675 W, 35% amplitude, power density of 0.37 W·cm −3 ) to allow hydrolysis to take place.",
+            "start_char": 914,
+            "end_char": 1095,
+            "materials": [
+              "60 °C",
+              "60 min (Ultrasonic Disruptor",
+              "20 kHz",
+              "675 W"
+            ],
+            "params": {
+              "temp": "60°C",
+              "time": "60 min"
+            }
+          },
+          {
+            "op_type": "centrifuge",
+            "sentence": "Immediately, following the hydrolysis, the suspension was transferred into centrifuge bottles, centrifuged at 12,000 rpm for 10 min, and decanted to separate the crystals.",
+            "start_char": 1096,
+            "end_char": 1267,
+            "materials": [
+              "12,000 rpm",
+              "10 min"
+            ],
+            "params": {
+              "time": "10 min",
+              "speed": "000 rpm"
+            }
+          },
+          {
+            "op_type": "wash",
+            "sentence": "The residual materials were washed with distilled water and the mixture was centrifuged again to remove traces of sulfate salts [ 27 ].",
+            "start_char": 1268,
+            "end_char": 1403,
+            "materials": [],
+            "params": {}
+          },
+          {
+            "op_type": "sonicate",
+            "sentence": "The media membrane 2 cm 2  was dipped in 0.1% (wt.) of CNCs, and undergoing sonication for 30 min, 30% amplitude allowed the cellulose NPs to adhere to the whole surface and create a uniform film [ 28 , 29 ].",
+            "start_char": 1495,
+            "end_char": 1703,
+            "materials": [
+              "2 cm",
+              "0.1%",
+              "30 min",
+              ", 30% amplitude"
+            ],
+            "params": {
+              "time": "30 min"
+            }
+          },
+          {
+            "op_type": "dry",
+            "sentence": "The CNC-coated samples were immersed in water and ethanol to remove the unbonded CNC particles from the substrate surface and dried in air overnight at 60 °C.",
+            "start_char": 1820,
+            "end_char": 1978,
+            "materials": [
+              "60 °C"
+            ],
+            "params": {
+              "temp": "60°C"
+            }
+          },
+          {
+            "op_type": "dry",
+            "sentence": "The CNC powder was deposited on the copper grid and dried overnight at 60 °C.",
+            "start_char": 2791,
+            "end_char": 2868,
+            "materials": [],
+            "params": {
+              "temp": "60°C"
+            }
+          }
+        ],
+        "expanded": [
+          {
+            "op_type": "add",
+            "steps": [
+              "Ensure reaction vessel is present and empty.",
+              "Place a clean stir bar in the vessel.",
+              "Measure 0.5 g of 0.5 g.",
+              "Transfer 0.5 g into the vessel."
+            ]
+          },
+          {
+            "op_type": "sonicate",
+            "steps": [
+              "Perform operation 'sonicate' as described: This suspension was held at 60 °C under sonication for 60 min (Ultrasonic Disruptor, 20 kHz, 675 W, 35% amplitude, power density of 0.37 W·cm −3 ) to allow hydrolysis to take place."
+            ]
+          },
+          {
+            "op_type": "centrifuge",
+            "steps": [
+              "Perform operation 'centrifuge' as described: Immediately, following the hydrolysis, the suspension was transferred into centrifuge bottles, centrifuged at 12,000 rpm for 10 min, and decanted to separate the crystals."
+            ]
+          },
+          {
+            "op_type": "wash",
+            "steps": [
+              "Perform operation 'wash' as described: The residual materials were washed with distilled water and the mixture was centrifuged again to remove traces of sulfate salts [ 27 ]."
+            ]
+          },
+          {
+            "op_type": "sonicate",
+            "steps": [
+              "Perform operation 'sonicate' as described: The media membrane 2 cm 2  was dipped in 0.1% (wt.) of CNCs, and undergoing sonication for 30 min, 30% amplitude allowed the cellulose NPs to adhere to the whole surface and create a uniform film [ 28 , 29 ]."
+            ]
+          },
+          {
+            "op_type": "dry",
+            "steps": [
+              "Perform operation 'dry' as described: The CNC-coated samples were immersed in water and ethanol to remove the unbonded CNC particles from the substrate surface and dried in air overnight at 60 °C."
+            ]
+          },
+          {
+            "op_type": "dry",
+            "steps": [
+              "Perform operation 'dry' as described: The CNC powder was deposited on the copper grid and dried overnight at 60 °C."
+            ]
+          }
+        ]
+      },
+      {
+        "text": "2.2. Preparation of CNCs MCC was subjected to acid hydrolysis treatment using sulfuric acid under the influence of ultrasonic radiation. The hydrolysis was carried out by introducing 0.5 g of MCC into 10% ( w / w ) of sulfuric acid to form a suspension. This suspension was held at 60 °C under sonication for 60 min (Ultrasonic Disruptor, 20 kHz, 675 W, 35% amplitude, power density of 0.37 W·cm −3 ) to allow hydrolysis to take place. Immediately, following the hydrolysis, the suspension was transferred into centrifuge bottles, centrifuged at 12,000 rpm for 10 min, and decanted to separate the crystals. The residual materials were washed with distilled water and the mixture was centrifuged again to remove traces of sulfate salts [ 27 ].",
+        "operations": [
+          {
+            "op_type": "add",
+            "sentence": "The hydrolysis was carried out by introducing 0.5 g of MCC into 10% ( w / w ) of sulfuric acid to form a suspension.",
+            "start_char": 137,
+            "end_char": 253,
+            "materials": [
+              "0.5 g",
+              "10%",
+              "( w / w"
+            ],
+            "params": {
+              "amounts": [
+                "0.5 g"
+              ]
+            }
+          },
+          {
+            "op_type": "sonicate",
+            "sentence": "This suspension was held at 60 °C under sonication for 60 min (Ultrasonic Disruptor, 20 kHz, 675 W, 35% amplitude, power density of 0.37 W·cm −3 ) to allow hydrolysis to take place.",
+            "start_char": 254,
+            "end_char": 435,
+            "materials": [
+              "60 °C",
+              "60 min (Ultrasonic Disruptor",
+              "20 kHz",
+              "675 W"
+            ],
+            "params": {
+              "temp": "60°C",
+              "time": "60 min"
+            }
+          },
+          {
+            "op_type": "centrifuge",
+            "sentence": "Immediately, following the hydrolysis, the suspension was transferred into centrifuge bottles, centrifuged at 12,000 rpm for 10 min, and decanted to separate the crystals.",
+            "start_char": 436,
+            "end_char": 607,
+            "materials": [
+              "12,000 rpm",
+              "10 min"
+            ],
+            "params": {
+              "time": "10 min",
+              "speed": "000 rpm"
+            }
+          },
+          {
+            "op_type": "wash",
+            "sentence": "The residual materials were washed with distilled water and the mixture was centrifuged again to remove traces of sulfate salts [ 27 ].",
+            "start_char": 608,
+            "end_char": 743,
+            "materials": [],
+            "params": {}
+          }
+        ],
+        "expanded": [
+          {
+            "op_type": "add",
+            "steps": [
+              "Ensure reaction vessel is present and empty.",
+              "Place a clean stir bar in the vessel.",
+              "Measure 0.5 g of 0.5 g.",
+              "Transfer 0.5 g into the vessel."
+            ]
+          },
+          {
+            "op_type": "sonicate",
+            "steps": [
+              "Perform operation 'sonicate' as described: This suspension was held at 60 °C under sonication for 60 min (Ultrasonic Disruptor, 20 kHz, 675 W, 35% amplitude, power density of 0.37 W·cm −3 ) to allow hydrolysis to take place."
+            ]
+          },
+          {
+            "op_type": "centrifuge",
+            "steps": [
+              "Perform operation 'centrifuge' as described: Immediately, following the hydrolysis, the suspension was transferred into centrifuge bottles, centrifuged at 12,000 rpm for 10 min, and decanted to separate the crystals."
+            ]
+          },
+          {
+            "op_type": "wash",
+            "steps": [
+              "Perform operation 'wash' as described: The residual materials were washed with distilled water and the mixture was centrifuged again to remove traces of sulfate salts [ 27 ]."
+            ]
+          }
+        ]
+      },
+      {
+        "text": "2.4. Characterization Methods The surface morphology and the size of the CNC coating on the surface of the fabrics were characterized by high-resolution scanning electron microscopy (HR-SEM) using a Magellan 400 L (FEI-Thermo fisher scientific), USA device at 5 kV. The crystalline nature of the microcrystalline cellulose and the synthesized cellulose nanocrystals were assessed using an X-ray diffraction (XRD) technique measured using a Bruker Inc. Germany AXS D8 Advance diffractometer. ROS generation was measured using electron paramagnetic resonance (EPR) spectroscopy. The particle size and morphology of CNCs were probed with a transmission electron microscope with the model number TEM-JEOL-2100 (Peabody, MA, USA). The CNC powder was deposited on the copper grid and dried overnight at 60 °C. For contact angle measurement at 25 °C, the coated substrate was placed in a contact angle goniometer, and water droplets were deposited on each surface.",
+        "operations": [
+          {
+            "op_type": "dry",
+            "sentence": "The CNC powder was deposited on the copper grid and dried overnight at 60 °C.",
+            "start_char": 726,
+            "end_char": 803,
+            "materials": [],
+            "params": {
+              "temp": "60°C"
+            }
+          }
+        ],
+        "expanded": [
+          {
+            "op_type": "dry",
+            "steps": [
+              "Perform operation 'dry' as described: The CNC powder was deposited on the copper grid and dried overnight at 60 °C."
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

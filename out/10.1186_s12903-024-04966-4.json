@@ -1,0 +1,54 @@
+{
+  "paper_id": "10.1186/s12903-024-04966-4",
+  "title": "Application of nanoparticles as surface modifiers of dental implants for revascularization/regeneration of bone.",
+  "authors": [],
+  "doi": "10.1186/s12903-024-04966-4",
+  "source": "eupmc",
+  "urls": {
+    "pdf": null
+  },
+  "license": {
+    "type": "unknown"
+  },
+  "access_route": "oa",
+  "sections": [
+    {
+      "heading": "Methods",
+      "text": "Methods A systematic electronic search was conducted in SCOPUS, PubMed and Google Scholar aiming to identify in vivo, in situ, or in vitro studies published between 2014 and 2024. Inclusion and exclusion criteria were determined and were described in the methods section."
+    },
+    {
+      "heading": "Methods",
+      "text": "Methods Search strategy and eligibility criteria To collect the literature for this scoping review, the Preferred Reporting Items for Systematic Reviews and Meta-Analyses Extension for Scoping Reviews (PRISMA-ScR) guidelines were applied [ 16 ]. Figure  2  depicts the flow of information via the various phases required in selecting the papers for this review. Fig. 2 Flow chart illustrating the article selection Inclusion and exclusion criteria Inclusion criteria All investigations on NPs, surface modification of dental implants, bone vascularization, bone regeneration and the in vivo, in situ, or in vitro connection of osteogenesis and angiogenesis met the inclusion criteria. English-language full-text publications from 2014 − 2024 were included. To search for other research, we used Google Scholar and the primary studies' reference lists. Exclusion criteria Investigations were excluded that did not emphasize the impact of nanoparticles on angiogenesis, bone regeneration, dental implants or vascularization coupling. Studies were also excluded that did not address bone remodelling in the presence of NPs. Additional exclusion criteria were (1) master's and doctorate theses, (2) case studies, (3) editorials and (4) letters to the editor. Information sources and search Two registered databases, PubMed and Scopus, as well as a freely accessible web search, Google Scholar, were used for this review. The search included the keywords: nanomaterials, dental implants, surface modification, and bone angiogenesis/vascularization. The mesh terms (nanoparticles AND dental implants), (bone angiogenesis OR bone vascularization) and (nanoparticles AND dental implant AND bone angiogenesis OR bone vascularization) were applied. The search phrases used were keywords from the general (all fields) category. The following filters were used on these terms: Full text, academic literature and English language. The published period of the reference papers was limited from 2014 − 2024. Data extraction The selection of papers from the three databases was completed as follows: (1) duplicate papers were removed manually after selecting the papers from the database search; (2) following reading the paper's abstract, the selection was based on the inclusion and exclusion criteria; (3) finally, the full-text paper was read. The included studies were mainly divided into two main groups: (1) in vitro/ in vivo tissue or cellular response of implants with various kinds of nanocomposite surfaces and (2) controlled release of biological molecules from nano scaffolds of dental implants and their effects."
+    }
+  ],
+  "extractions": {
+    "methods_paragraphs": [
+      {
+        "text": "Methods A systematic electronic search was conducted in SCOPUS, PubMed and Google Scholar aiming to identify in vivo, in situ, or in vitro studies published between 2014 and 2024. Inclusion and exclusion criteria were determined and were described in the methods section.",
+        "operations": [],
+        "expanded": []
+      },
+      {
+        "text": "Methods Search strategy and eligibility criteria To collect the literature for this scoping review, the Preferred Reporting Items for Systematic Reviews and Meta-Analyses Extension for Scoping Reviews (PRISMA-ScR) guidelines were applied [ 16 ]. Figure  2  depicts the flow of information via the various phases required in selecting the papers for this review. Fig. 2 Flow chart illustrating the article selection Inclusion and exclusion criteria Inclusion criteria All investigations on NPs, surface modification of dental implants, bone vascularization, bone regeneration and the in vivo, in situ, or in vitro connection of osteogenesis and angiogenesis met the inclusion criteria. English-language full-text publications from 2014 − 2024 were included. To search for other research, we used Google Scholar and the primary studies' reference lists. Exclusion criteria Investigations were excluded that did not emphasize the impact of nanoparticles on angiogenesis, bone regeneration, dental implants or vascularization coupling. Studies were also excluded that did not address bone remodelling in the presence of NPs. Additional exclusion criteria were (1) master's and doctorate theses, (2) case studies, (3) editorials and (4) letters to the editor. Information sources and search Two registered databases, PubMed and Scopus, as well as a freely accessible web search, Google Scholar, were used for this review. The search included the keywords: nanomaterials, dental implants, surface modification, and bone angiogenesis/vascularization. The mesh terms (nanoparticles AND dental implants), (bone angiogenesis OR bone vascularization) and (nanoparticles AND dental implant AND bone angiogenesis OR bone vascularization) were applied. The search phrases used were keywords from the general (all fields) category. The following filters were used on these terms: Full text, academic literature and English language. The published period of the reference papers was limited from 2014 − 2024. Data extraction The selection of papers from the three databases was completed as follows: (1) duplicate papers were removed manually after selecting the papers from the database search; (2) following reading the paper's abstract, the selection was based on the inclusion and exclusion criteria; (3) finally, the full-text paper was read. The included studies were mainly divided into two main groups: (1) in vitro/ in vivo tissue or cellular response of implants with various kinds of nanocomposite surfaces and (2) controlled release of biological molecules from nano scaffolds of dental implants and their effects.",
+        "operations": [
+          {
+            "op_type": "filter",
+            "sentence": "The following filters were used on these terms: Full text, academic literature and English language.",
+            "start_char": 1817,
+            "end_char": 1917,
+            "materials": [],
+            "params": {}
+          }
+        ],
+        "expanded": [
+          {
+            "op_type": "filter",
+            "steps": [
+              "Perform operation 'filter' as described: The following filters were used on these terms: Full text, academic literature and English language."
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

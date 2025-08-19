@@ -1,0 +1,114 @@
+{
+  "paper_id": "10.3390/molecules29214990",
+  "title": "Applications of Ferric Oxide in Water Splitting by Electrolysis: A Comprehensive Review.",
+  "authors": [],
+  "doi": "10.3390/molecules29214990",
+  "source": "eupmc",
+  "urls": {
+    "pdf": null
+  },
+  "license": {
+    "type": "unknown"
+  },
+  "access_route": "oa",
+  "sections": [
+    {
+      "heading": "1. Introduction",
+      "text": "1. Introduction The energy derived from fossil fuels was the main driving force for the industrial and economic growth of the 19th century [ 1 ]. At present, roughly 60 to 80 percent of the total energy produced and consumed in developed countries is derived from fossil fuels such as coal, oil, and natural gas, supporting infrastructure systems such as electricity generation and transportation, as well as industry [ 2 ]. The past century shows the importance of fossil fuels and energy sources regarding the navigation of human advancement through industrialization and economic growth. However, the extensive usage of fossil fuels poses serious concerns in terms of greenhouse gases (GHG) and pollution, which cause an imbalance in nature, leading to environmental calamities [ 3 ]. Moreover, fossil fuels are non-renewable and geopolitically controlled natural resources which pose challenges in terms of constant extraction and controlled supply chains; thus, their replacement is inevitable [ 4 ]. Importantly, a profound shift toward carbon-free, renewable, and sustainable energy resources is essential in terms of safeguarding the environment and supporting economic stability along with industrial growth. Hence, the current focus of research presents an unprecedented opportunity to regulate global warming via the development of carbon-neutral technologies. Among the currently available green (or renewable) energy contenders, hydrogen has been found to be the ideal option to replace fossil fuels [ 5 ]. The abundance of atomic and molecular hydrogen on Earth in a wide range of naturally available molecules such as water, fossil fuels, etc. makes it a potential candidate as a future renewable energy source [ 6 ]. The superiority of hydrogen as a source of energy compared with other sources is due to its extensive utilization in wider applications that provide energy (heat/electricity) with a high specific energy density [ 7 ] and to the fact that it releases carbon-free water as a byproduct, e.g., when used in fuel cells [ 8 , 9 , 10 ]. Hence, the demand for hydrogen is significantly increasing and is expected to continue to rise in the coming decades owing to industrial applications in addition to applications in energy infrastructure. The availability and green production of hydrogen in all parts of the globe (water), combined with sustainable routes of extraction, make it an ideal energy source for energy independence, regardless of geopolitical situations. Given its advantages and demand, the extensive research advancements in hydrogen-driven energy and industrial utilization could experience exponential growth due to the commitment of major economic players to shift toward carbon-free technologies. Advancement toward a hydrogen infrastructure has gained significant attention and funding recently, as it plays an important role in achieving the Paris Agreement target set for the reduction in emissions by 2050 [ 11 ]. To achieve this target, reducing the cost of hydrogen is crucial; this depends on hydrogen production technologies, storage, transportation, and utilization. Recent developments reveal that the rapid and onsite/remote availability of hydrogen from a wide range of production technologies is capable of significantly reducing storage and transportation expenses. However, the choice of suitable hydrogen production technologies is a vital factor that influences the overall cost of hydrogen (LCOH—levelized cost of hydrogen).  Figure 1  represents the various types of hydrogen produced around the globe, along with their sources of production and the amount of carbon emissions associated with these production technologies. Note that, except for green hydrogen, other methods of hydrogen production (black, blue, brown, and grey) use fossil fuels as a source of hydrogen; only green hydrogen uses water as a source (if renewables and water electrolysis are used). Moreover, except for blue and green hydrogen technologies, all other methodologies emit enormous amounts of GHG and are thus not recommended as sources of energy in the future. Notably, the reduction in carbon emissions (such as carbon dioxide, CO 2 ) for blue hydrogen is due to the carbon capture and sequestration (CCS) processes linked to those hydrogen production systems. Among large-scale hydrogen production technologies, the steam methane reforming (SMR) method dominates as the most cost-effective production technology (>99%) [ 12 ]. However, the utilization of fossil fuels in SMR leads to enormous carbon emissions. Even though SMR technology could be converted to blue hydrogen by combining it with CCS, its dependence on fossil fuels makes it a geopolitical challenge and expensive (due to carbon capture processing) compared to the other technologies. Therefore, the use of carbon-free sources and methods, along with the use of renewable energy, is essential for achieving cost-effective, pilot-scale hydrogen production in order to fulfil the emission target and achieve cost reductions. In particular, rigorous research and development are essential to explore, develop, and exploit greener hydrogen production technologies that could meet future demands and are cost effective."
+    },
+    {
+      "heading": "2. Overview of Electrochemical Water Splitting",
+      "text": "2. Overview of Electrochemical Water Splitting Electrochemical water splitting is a process of water oxidation and reduction to produce O 2  and H 2  under an applied potential bias/electricity, as shown in Equation (1). The phenomenon of the decomposition of molecules using an applied current was first observed in 1789 and was later applied to in water electrolysis in 1800 by Nicholson and Carlisle [ 13 ]. Later, water electrolysis methodology was optimized and further developed into a mature technology for increased efficiency and practicality. Recently, the importance of water electrolysis has gained significant attention, given that it is carbon-free approach to hydrogen production utilizing renewable and sustainable resources. For electrolysis, the water required for H 2  and O 2  production could be sourced from the sea or any water body, and electricity generated using green and inexpensive renewable sources, such as solar and wind, could provide the required electrical energy to split the water molecules. Thermodynamically, the energy required to split water into H 2  and O 2  is shown in the below equation.\n H 2 O + Electricity (237.2 kJ mol −1 ) + Heat (48.6 kJ mol −1 ) → H 2  + ½ O 2 (1) The above equation represents an ideal condition required in terms of the energy, electrodes, and charge dynamics required to split water into H 2  and O 2 . Electrochemically (thermodynamic cell voltage), a minimum bias voltage of 1.229 V vs. a standard hydrogen electrode (SHE) is required to oxidize water at the anode to produce O 2  and to produce H 2  gas at the cathode surface. However, under normal experimental conditions, the required voltage has been found to be higher than the theoretical values (>1.229 V vs. SHE) to overcome the ohmic resistance of the electrolyte and the reaction kinetics in the electrochemical cell. The process of water electrolysis in an electrochemical cell is shown in  Figure 2 . To split water, the electrode materials are connected to the anode and cathode supply of the power output and are immersed in a suitable electrolyte. Under the applied electricity, the water molecules are split into O 2  via oxygen evolution reaction (OER) and H 2  through hydrogen evolution reaction (HER) at the anode and cathode surfaces, respectively. Generally, the anode and cathode compartments are separated using a separator/diaphragm/membrane to avoid the mixing of H 2  and O 2  gases and to maintain the flow of ions between the compartments. Water electrolysis can be achieved in a wide range of electrolytes of different pH values with the utilization of efficient and stable electrodes. In acidic electrolytes, the water is oxidized at the anode surface, which gives two electrons, whereas the H +  ions are diffused through the separator/membrane toward the cathode to combine with electrons to yield H 2  gas. In neutral and alkaline electrolytes, OH −  ions are consumed to produce O 2  gas along with two electrons and a water molecule, which are reduced to H 2  at the cathode surface with the release of OH −  ions. The constant production of H 2  and O 2  is balanced by the production and diffusion of the relevant ions toward the respective electrode surface ( Figure 2 ). In water electrolysis, the use of electrolytes is essential to provide significant conductivity between the electrodes, i.e., to decrease the ohmic resistance and create a feasible ionic environment at the electrode surface for effective OER and HER activity. Hence, the utilization of electrolytes with high ionic mobility is essential to decrease the thermodynamic barrier and energy requirement to oxidize and reduce water molecules. Generally, potassium hydroxide (KOH), sulfuric acid (H 2 SO 4 ), sodium sulfate (Na 2 SO 4 ), phosphate buffers, etc. are used as electrolytes in the water electrolysis systems."
+    }
+  ],
+  "extractions": {
+    "methods_paragraphs": [
+      {
+        "text": "1. Introduction The energy derived from fossil fuels was the main driving force for the industrial and economic growth of the 19th century [ 1 ]. At present, roughly 60 to 80 percent of the total energy produced and consumed in developed countries is derived from fossil fuels such as coal, oil, and natural gas, supporting infrastructure systems such as electricity generation and transportation, as well as industry [ 2 ]. The past century shows the importance of fossil fuels and energy sources regarding the navigation of human advancement through industrialization and economic growth. However, the extensive usage of fossil fuels poses serious concerns in terms of greenhouse gases (GHG) and pollution, which cause an imbalance in nature, leading to environmental calamities [ 3 ]. Moreover, fossil fuels are non-renewable and geopolitically controlled natural resources which pose challenges in terms of constant extraction and controlled supply chains; thus, their replacement is inevitable [ 4 ]. Importantly, a profound shift toward carbon-free, renewable, and sustainable energy resources is essential in terms of safeguarding the environment and supporting economic stability along with industrial growth. Hence, the current focus of research presents an unprecedented opportunity to regulate global warming via the development of carbon-neutral technologies. Among the currently available green (or renewable) energy contenders, hydrogen has been found to be the ideal option to replace fossil fuels [ 5 ]. The abundance of atomic and molecular hydrogen on Earth in a wide range of naturally available molecules such as water, fossil fuels, etc. makes it a potential candidate as a future renewable energy source [ 6 ]. The superiority of hydrogen as a source of energy compared with other sources is due to its extensive utilization in wider applications that provide energy (heat/electricity) with a high specific energy density [ 7 ] and to the fact that it releases carbon-free water as a byproduct, e.g., when used in fuel cells [ 8 , 9 , 10 ]. Hence, the demand for hydrogen is significantly increasing and is expected to continue to rise in the coming decades owing to industrial applications in addition to applications in energy infrastructure. The availability and green production of hydrogen in all parts of the globe (water), combined with sustainable routes of extraction, make it an ideal energy source for energy independence, regardless of geopolitical situations. Given its advantages and demand, the extensive research advancements in hydrogen-driven energy and industrial utilization could experience exponential growth due to the commitment of major economic players to shift toward carbon-free technologies. Advancement toward a hydrogen infrastructure has gained significant attention and funding recently, as it plays an important role in achieving the Paris Agreement target set for the reduction in emissions by 2050 [ 11 ]. To achieve this target, reducing the cost of hydrogen is crucial; this depends on hydrogen production technologies, storage, transportation, and utilization. Recent developments reveal that the rapid and onsite/remote availability of hydrogen from a wide range of production technologies is capable of significantly reducing storage and transportation expenses. However, the choice of suitable hydrogen production technologies is a vital factor that influences the overall cost of hydrogen (LCOH—levelized cost of hydrogen).  Figure 1  represents the various types of hydrogen produced around the globe, along with their sources of production and the amount of carbon emissions associated with these production technologies. Note that, except for green hydrogen, other methods of hydrogen production (black, blue, brown, and grey) use fossil fuels as a source of hydrogen; only green hydrogen uses water as a source (if renewables and water electrolysis are used). Moreover, except for blue and green hydrogen technologies, all other methodologies emit enormous amounts of GHG and are thus not recommended as sources of energy in the future. Notably, the reduction in carbon emissions (such as carbon dioxide, CO 2 ) for blue hydrogen is due to the carbon capture and sequestration (CCS) processes linked to those hydrogen production systems. Among large-scale hydrogen production technologies, the steam methane reforming (SMR) method dominates as the most cost-effective production technology (>99%) [ 12 ]. However, the utilization of fossil fuels in SMR leads to enormous carbon emissions. Even though SMR technology could be converted to blue hydrogen by combining it with CCS, its dependence on fossil fuels makes it a geopolitical challenge and expensive (due to carbon capture processing) compared to the other technologies. Therefore, the use of carbon-free sources and methods, along with the use of renewable energy, is essential for achieving cost-effective, pilot-scale hydrogen production in order to fulfil the emission target and achieve cost reductions. In particular, rigorous research and development are essential to explore, develop, and exploit greener hydrogen production technologies that could meet future demands and are cost effective.",
+        "operations": [
+          {
+            "op_type": "heat",
+            "sentence": "The superiority of hydrogen as a source of energy compared with other sources is due to its extensive utilization in wider applications that provide energy (heat/electricity) with a high specific energy density [ 7 ] and to the fact that it releases carbon-free water as a byproduct, e.g., when used in fuel cells [ 8 , 9 , 10 ].",
+            "start_char": 1733,
+            "end_char": 2062,
+            "materials": [
+              "energy (heat/electricity"
+            ],
+            "params": {}
+          }
+        ],
+        "expanded": [
+          {
+            "op_type": "heat",
+            "steps": [
+              "Place the reaction vessel on a hotplate.",
+              "Ramp to the target temperature.",
+              "Maintain the target temperature for the specified time."
+            ]
+          }
+        ]
+      },
+      {
+        "text": "2. Overview of Electrochemical Water Splitting Electrochemical water splitting is a process of water oxidation and reduction to produce O 2  and H 2  under an applied potential bias/electricity, as shown in Equation (1). The phenomenon of the decomposition of molecules using an applied current was first observed in 1789 and was later applied to in water electrolysis in 1800 by Nicholson and Carlisle [ 13 ]. Later, water electrolysis methodology was optimized and further developed into a mature technology for increased efficiency and practicality. Recently, the importance of water electrolysis has gained significant attention, given that it is carbon-free approach to hydrogen production utilizing renewable and sustainable resources. For electrolysis, the water required for H 2  and O 2  production could be sourced from the sea or any water body, and electricity generated using green and inexpensive renewable sources, such as solar and wind, could provide the required electrical energy to split the water molecules. Thermodynamically, the energy required to split water into H 2  and O 2  is shown in the below equation.\n H 2 O + Electricity (237.2 kJ mol −1 ) + Heat (48.6 kJ mol −1 ) → H 2  + ½ O 2 (1) The above equation represents an ideal condition required in terms of the energy, electrodes, and charge dynamics required to split water into H 2  and O 2 . Electrochemically (thermodynamic cell voltage), a minimum bias voltage of 1.229 V vs. a standard hydrogen electrode (SHE) is required to oxidize water at the anode to produce O 2  and to produce H 2  gas at the cathode surface. However, under normal experimental conditions, the required voltage has been found to be higher than the theoretical values (>1.229 V vs. SHE) to overcome the ohmic resistance of the electrolyte and the reaction kinetics in the electrochemical cell. The process of water electrolysis in an electrochemical cell is shown in  Figure 2 . To split water, the electrode materials are connected to the anode and cathode supply of the power output and are immersed in a suitable electrolyte. Under the applied electricity, the water molecules are split into O 2  via oxygen evolution reaction (OER) and H 2  through hydrogen evolution reaction (HER) at the anode and cathode surfaces, respectively. Generally, the anode and cathode compartments are separated using a separator/diaphragm/membrane to avoid the mixing of H 2  and O 2  gases and to maintain the flow of ions between the compartments. Water electrolysis can be achieved in a wide range of electrolytes of different pH values with the utilization of efficient and stable electrodes. In acidic electrolytes, the water is oxidized at the anode surface, which gives two electrons, whereas the H +  ions are diffused through the separator/membrane toward the cathode to combine with electrons to yield H 2  gas. In neutral and alkaline electrolytes, OH −  ions are consumed to produce O 2  gas along with two electrons and a water molecule, which are reduced to H 2  at the cathode surface with the release of OH −  ions. The constant production of H 2  and O 2  is balanced by the production and diffusion of the relevant ions toward the respective electrode surface ( Figure 2 ). In water electrolysis, the use of electrolytes is essential to provide significant conductivity between the electrodes, i.e., to decrease the ohmic resistance and create a feasible ionic environment at the electrode surface for effective OER and HER activity. Hence, the utilization of electrolytes with high ionic mobility is essential to decrease the thermodynamic barrier and energy requirement to oxidize and reduce water molecules. Generally, potassium hydroxide (KOH), sulfuric acid (H 2 SO 4 ), sodium sulfate (Na 2 SO 4 ), phosphate buffers, etc. are used as electrolytes in the water electrolysis systems.",
+        "operations": [
+          {
+            "op_type": "heat",
+            "sentence": "H 2 O + Electricity (237.2 kJ mol −1 ) + Heat (48.6 kJ mol −1 )",
+            "start_char": 1135,
+            "end_char": 1198,
+            "materials": [
+              "(237.2 kJ mol",
+              "48.6 kJ mol"
+            ],
+            "params": {}
+          },
+          {
+            "op_type": "add",
+            "sentence": "→ H 2  + ½ O 2 (1) The above equation represents an ideal condition required in terms of the energy, electrodes, and charge dynamics required to split water into H 2  and O 2 .",
+            "start_char": 1199,
+            "end_char": 1375,
+            "materials": [],
+            "params": {}
+          },
+          {
+            "op_type": "heat",
+            "sentence": "Generally, the anode and cathode compartments are separated using a separator/diaphragm/membrane to avoid the mixing of H 2  and O 2  gases and to maintain the flow of ions between the compartments.",
+            "start_char": 2296,
+            "end_char": 2494,
+            "materials": [
+              "O 2  gases"
+            ],
+            "params": {}
+          }
+        ],
+        "expanded": [
+          {
+            "op_type": "heat",
+            "steps": [
+              "Place the reaction vessel on a hotplate.",
+              "Ramp to the target temperature.",
+              "Maintain the target temperature for the specified time."
+            ]
+          },
+          {
+            "op_type": "add",
+            "steps": [
+              "Ensure reaction vessel is present and empty.",
+              "Place a clean stir bar in the vessel.",
+              "Measure the specified amount of reagent.",
+              "Transfer reagent into the vessel."
+            ]
+          },
+          {
+            "op_type": "heat",
+            "steps": [
+              "Place the reaction vessel on a hotplate.",
+              "Ramp to the target temperature.",
+              "Maintain the target temperature for the specified time."
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

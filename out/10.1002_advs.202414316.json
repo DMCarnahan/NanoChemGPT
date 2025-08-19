@@ -1,0 +1,579 @@
+{
+  "paper_id": "10.1002/advs.202414316",
+  "title": "Polarized Color Filters Using Colloidal Quantum Rod Nanocrystals for Advanced High-Performance Displays.",
+  "authors": [],
+  "doi": "10.1002/advs.202414316",
+  "source": "eupmc",
+  "urls": {
+    "pdf": null
+  },
+  "license": {
+    "type": "unknown"
+  },
+  "access_route": "oa",
+  "sections": [
+    {
+      "heading": "Experimental Section",
+      "text": "2 Experimental Section 2.1 Synthesis of Green (≈520 nm) Emitting QRs CdSe/CdS QRs (λ max  = 578 nm, FWHM = 31 nm) were synthesized according to the seeded growth approach. [ \n \n 42 \n \n ]  To the prepared CdSe/CdS QR reaction mixture (4.0 mL, ≈0.42 mmole of Cd), without an isolation and purification of the QRs, a mixture of 140 µL of silver nitrate solution in trialkylphosphine oxide (11 m m , contains also ≈30 m m  of oleic acid) and 5.7 mL of zinc oleate solution in 1‐octadecene (0.32  m ) was added dropwise during 2 h at 330 °C. The reaction mixture was stirred at 330 °C for 1 h more and then cooled down to room temperature to stop the reaction. The resulting QRs were isolated by deposition with isopropanol and centrifugation and washed three times by reprecipitation using toluene‐ethanol solvents combination. The final product was dissolved in chlorobenzene in concentration 25 g L⁻ 1 . Red emitting rod‐in‐rod QRs were prepared according to the procedure from ref. [ 28b ]. 2.2 Ligand Exchange Procedure The synthesis of T‐shape ligand (T‐ligand,  Figure \n \n 2 A ; Figure  S9 , Supporting Information) is described in ref. [ 40 ]. For the ligand exchange, the QRs solution (≈40 mg of QRs) was evaporated under nitrogen purging, and 3.0 mL of trioctylphosphine was added to dissolve the QRs. A total of 150 nmol of T‐ligand (TL) and hexylphosphonic acid (HPA) were added to each sample at a molar ratio of TL:HPA = 1:9. The mixture was thoroughly degassed by vacuuming for 1 h at room temperature, followed by five cycles of vacuuming and nitrogen filling. The solution was then heated to 160 °C and stirred for 2 h. Afterward, the reaction mixture was cooled to room temperature and diluted with ≈2 mL of toluene. The ligand‐exchanged nanorods were precipitated using ≈3 mL of ethanol, and the centrifuged precipitate was washed twice by dissolving in toluene and reprecipitating with ethanol. The purified ligand‐exchanged QRs were dissolved in chlorobenzene, centrifuged, and filtered through a 0.2‐micron PTFE microfilter to produce a final QR solution with a concentration of 25 g L⁻ 1 . These solutions were further diluted with 1,2‐dichlorobenzene as needed for QR ink preparation, as described below. Figure 2 Schematic illustrations of A) Quantum rod (QR) with T‐shape and HPA ligand combination; B) The photoaligned QRs; C) PLCFs with polarized emission; D) PLCF fabrication process; E) CF layers structure and LCM molecular composition. 2.3 Ink Preparation The inkjet printing used a mixture of QRs and LCM as ink, with chlorobenzene and 1,2‐dichlorobenzenes as solvents (mixed 1:1 by volume). The LCM was a mixture of two homologues of 4‐(2‐((4‐(3‐(acryloyloxy)alkoxy)benzoyl)oxy)ethyl)phenyl 4‐(3‐(acryloyloxy)alkoxy)benzoate possessing smectic C mesophase in the individual form (Figure  2E ). The QR solution was prepared at a concentration of 20 mg mL⁻ 1  in chlorobenzene (CB). In the ink, the mass fraction of QR is 0.5%, while the mass fraction of LCM is 10%. To achieve a homogeneous mixture, the components were combined and subjected to 15 min of ultrasound treatment. These specific compositions and concentrations were optimized to ensure the desired performance and functionality of the ink for the specific application. Photolithography used the same blend of QR and LCM, but the solvent was individual chlorobenzene. 2.4 SD1 Film Coating and Photoalignment A sulfonic azo dye molecule (provided by Dainippon Ink and Chemicals Ltd., Japan (DIC)) was used as the light‐orientation layer by first dissolving SD1 in dimethylformamide (DMF) to obtain a solution with 1 wt.% concentration. The solution was then drop‐coated onto a glass substrate by spin‐coating, and then the substrate was placed on a heating table at 100 °C for 10 min to evaporate the excess solvent. Finally, the substrates were exposed to polarized UV LED (370 nm; 5.63 mW cm⁻ 2 ) irradiation for 200 s at room temperature and humidity ≈60% to obtain SD1 photoaligned film (Figure  2D ). 2.5 Mask Fabrication The mask plate used for lithography was a contact mask plate fabricated by chromium plating on a transparent glass substrate, and the pattern consisted of a square matrix with a pitch of 500 microns and a side length of 300 microns. 2.6 Lithography Pixelated CF Fabrication The red QR‐LCM blend solution was spin‐coated on the substrate, and the liquid crystal grid was cured using polarized UV light for 300 s; while curing, the film was exposed using a pixelated metal mask, and the exposed substrate was soaked in a chlorobenzene solution for 5 h (Figure  2D ). The soaked substrate was cleaned using a chlorobenzene solution on a spin‐coating device. Then the same substrate was spin‐coated with green QR‐LCM solution, and the same steps were repeated to control the pattern of the final CF pixels by controlling the relative position of the masks. 2.7 Material Characterization Transmission electron microscope (TEM) images were observed by the JEM 100CXII (JEOL) instrument. QRs PLQY, absorption, excitation anisotropy and PL spectra were measured by FS5 spectrofluorometer (Edinburg instruments). The structure and composition of gradient alloy QRs were analyzed by elemental mapping using energy dispersive X‐ray spectroscopy (EDS) combined with a TEM operating in scanning transmission electron microscope (STEM) mode. The distribution of elements along the diameter of the QRs was plotted, and they were fitted with a normal distribution curve. A comparison of the distributions of zinc, cadmium, and sulfur was done by comparison of  σ  parameter from the normal distribution equation (variance) reflecting the curvature of the distribution. Silver‐catalyzed QRs showed lower variance (steeper transition) for Cd and higher variance (shallower transition) for zinc at the scanning along the QR diameter. Conversely, the copper‐doped QRs exhibited higher cadmium element concentration near the core. 2.8 Optical Setup and DOP Measurement Fluorescence photographs of the samples were observed and taken using a fluorescence microscope (Murzider MSD‐S280). To accurately measure the DOP of a single pixel filter, a laser source was used with a wavelength of 405 nm, a lens to focus the spot into a pixel under a microscope, and an Ocean Optics USB4000 spectrometer was used to record the emitted light (Figure  5D ). A line polarizer was placed before the detector, and the line polarization was rotated to obtain the luminous intensity at different pinch angles, and the value of DOP was obtained by calculation. DOP is defined as:\n \n (2) \n D O P = I m a x − I m i n I m a x + I m i n \n where  I max \n  and  I min \n  are the maximum and minimum values measured by the data captured during the analyzer rotation process. 2.9 Device Fabrication A blue (450 nm) LED backlight was used as the excitation light source to manufacture the full‐color display demo. A PLCF pattern that is 1.5 cm long, 300 µm wide, with a pixel pitch of 100 µm, was printed. ITO electrodes with the same resolution were also printed to manufacture the liquid crystal cell. For the ACR test device, the same process was followed to manufacture a 5 × 5 mm 2  pattern and printed ITO glass of the same area to manufacture the liquid crystal cell. 2.10 Device Measurement The device was placed on a stable optical bench, and the spectroradiometer (Konica Minolta CS‐2000) was pointed at the display; the measurement area was aligned on the pixels, the pixels were switched on and off by controlling the drive of the LCD cell, and the luminous flux was measured. 2.11 Simulation The simulation of light distribution and device ACR was done using a combination of Matlab and Ansys Lumerical software. For the ACR simulation of the CF, the model is shown in Figure  1F . The emission spectrum data and absorption spectrum data are from the actual fluorescence spectra measurements using spectrometer (FS5 Edinburgh Instruments). Ansys Lumerical was used for Finite‐Difference Time‐Domain (FDTD) simulation. The reflectivity settings and model structure of the material are shown in Figures  SI‐4  and  5  (Supporting Information)."
+    },
+    {
+      "heading": "Synthesis of Green (≈520 nm) Emitting QRs",
+      "text": "2.1 Synthesis of Green (≈520 nm) Emitting QRs CdSe/CdS QRs (λ max  = 578 nm, FWHM = 31 nm) were synthesized according to the seeded growth approach. [ \n \n 42 \n \n ]  To the prepared CdSe/CdS QR reaction mixture (4.0 mL, ≈0.42 mmole of Cd), without an isolation and purification of the QRs, a mixture of 140 µL of silver nitrate solution in trialkylphosphine oxide (11 m m , contains also ≈30 m m  of oleic acid) and 5.7 mL of zinc oleate solution in 1‐octadecene (0.32  m ) was added dropwise during 2 h at 330 °C. The reaction mixture was stirred at 330 °C for 1 h more and then cooled down to room temperature to stop the reaction. The resulting QRs were isolated by deposition with isopropanol and centrifugation and washed three times by reprecipitation using toluene‐ethanol solvents combination. The final product was dissolved in chlorobenzene in concentration 25 g L⁻ 1 . Red emitting rod‐in‐rod QRs were prepared according to the procedure from ref. [ 28b ]."
+    },
+    {
+      "heading": "Ligand Exchange Procedure",
+      "text": "2.2 Ligand Exchange Procedure The synthesis of T‐shape ligand (T‐ligand,  Figure \n \n 2 A ; Figure  S9 , Supporting Information) is described in ref. [ 40 ]. For the ligand exchange, the QRs solution (≈40 mg of QRs) was evaporated under nitrogen purging, and 3.0 mL of trioctylphosphine was added to dissolve the QRs. A total of 150 nmol of T‐ligand (TL) and hexylphosphonic acid (HPA) were added to each sample at a molar ratio of TL:HPA = 1:9. The mixture was thoroughly degassed by vacuuming for 1 h at room temperature, followed by five cycles of vacuuming and nitrogen filling. The solution was then heated to 160 °C and stirred for 2 h. Afterward, the reaction mixture was cooled to room temperature and diluted with ≈2 mL of toluene. The ligand‐exchanged nanorods were precipitated using ≈3 mL of ethanol, and the centrifuged precipitate was washed twice by dissolving in toluene and reprecipitating with ethanol. The purified ligand‐exchanged QRs were dissolved in chlorobenzene, centrifuged, and filtered through a 0.2‐micron PTFE microfilter to produce a final QR solution with a concentration of 25 g L⁻ 1 . These solutions were further diluted with 1,2‐dichlorobenzene as needed for QR ink preparation, as described below. Figure 2 Schematic illustrations of A) Quantum rod (QR) with T‐shape and HPA ligand combination; B) The photoaligned QRs; C) PLCFs with polarized emission; D) PLCF fabrication process; E) CF layers structure and LCM molecular composition."
+    },
+    {
+      "heading": "Ink Preparation",
+      "text": "2.3 Ink Preparation The inkjet printing used a mixture of QRs and LCM as ink, with chlorobenzene and 1,2‐dichlorobenzenes as solvents (mixed 1:1 by volume). The LCM was a mixture of two homologues of 4‐(2‐((4‐(3‐(acryloyloxy)alkoxy)benzoyl)oxy)ethyl)phenyl 4‐(3‐(acryloyloxy)alkoxy)benzoate possessing smectic C mesophase in the individual form (Figure  2E ). The QR solution was prepared at a concentration of 20 mg mL⁻ 1  in chlorobenzene (CB). In the ink, the mass fraction of QR is 0.5%, while the mass fraction of LCM is 10%. To achieve a homogeneous mixture, the components were combined and subjected to 15 min of ultrasound treatment. These specific compositions and concentrations were optimized to ensure the desired performance and functionality of the ink for the specific application. Photolithography used the same blend of QR and LCM, but the solvent was individual chlorobenzene."
+    },
+    {
+      "heading": "Material Synthesis",
+      "text": "3.1 Material Synthesis There are two key parameters we consider for improving PLCF performance in displays: ambient light excitation and polarized PL emission. Considering the requirement for the optical density (> 1) [ \n \n 43 \n \n ]  at the wavelength of excitation ( λ ex \n ), the first parameter primarily depends on the difference in material absorption at the  λ ex \n  ( µ 450 \n , based on typical commercial blue LEDs) and in the visible wavelength range ( µ vis \n ). When normalized to 450 nm absorption, QRs show relatively lower absorption in the visible range, compared to commercially available QDs and perovskite nanocrystals (see Figure  1C  and ref. [ 28b ]). While the absorption properties of QDs can be enhanced through compositional modifications, such as increasing the relative amount of wider‐bandgap semiconductor (e.g., CdS, ZnSe) or synthesizing giant‐shell QDs, the PL emission of QDs still lacks polarization, which is important for improving LCD optical performance, particularly in in‐cell PLCF configuration. In this context, 1D semiconductor nanorods (QRs), nanowires (NWs) or 2D nanoplatelets (NPLs) are potential candidates, with QRs being the preferred choice due to their superior colloidal stability, easier large‐scale alignment, and patterning processability. [ \n \n 27 \n ,  \n 40 \n ,  \n 44 \n \n ] \n In this work, we utilized rod‐in‐rod CdSe/CdS/ZnS QRs, leveraging their higher stability due to the ZnS shell. [ \n \n 45 \n \n ]  These QRs were prepared following the previously proposed method. [ \n \n 28b \n \n ]  Using rod‐shaped CdSe nanoparticle seeds enhances optical anisotropy, thereby increasing the polarization degree of the final QRs. [ \n \n 46 \n \n ]  For green emitting CdSe/Zn x Cd 1‐x S QRs, we first conducted the seeded growth of dot‐in‐rod CdSe/CdS QRs followed by Cd to Zn exchange in the presence of Ag +  catalyst to facilitate the cation exchange process. Previously, Cu +  cation was shown to effectively catalyze the Cd to Zn exchange process in CdSe/CdS QDs, resulting in alloyed CdZnSe/CdZnS core/shell nanoparticles, though with a moderate quantum yield for the final product. [ \n \n 47 \n \n ]  It is known that even a small amount of Cu impurities in QDs drastically reduces their quantum efficiency. [ \n \n 48 \n \n ]  We systematically studied the role of different soft metal cations in the Cd 2+  to Zn 2+  cation exchange process. We found that by using Ag +  catalysts, one can achieve the final QRs with great optical properties in terms of PLQY, FWHM and anisotropy. Furthermore, we also studied various protocols for adding catalysts and Zn‐precursor, including sequential Ag +  and Zn‐precursor injections, both forward and backward sequences, slow addition of either catalyzer or Zn‐source, and mixing of these two in a single injection solution. Finally, we elaborated an optimized protocol in which a catalytic amount of inorganic silver salt (silver acetate or nitrate) is mixed with Zn precursor (solution of zinc oleate in 1‐octadecene). This mixture is slowly added to the preformed CdSe/CdS QR in the reaction mixture one‐pot, resulting in a smooth blue shift of PL peak, narrow emission bandwidth ( Figure \n \n 3 B ) and high PLQY, particularly for the green emitting QRs. We found that no subsequent removal of residual Ag +  is required as the PLQY of the resulting QRs is already approaching unity for green‐emitting samples. Figure 3 QR material characterization. A) Comparison of properties of CdSe/Zn x Cd 1‐x S QRs prepared through catalysis with Cu +  and Ag +  properties; B) PL emission trend in synthesis of CdSe/Zn x Cd 1‐x S QRs; C) Absorption and D) Excitation anisotropy trends in synthesis of green emitting CdSe/Zn x Cd 1‐x S QRs through Cd 2+  to Zn 2+  cation exchange using Cu +  and Ag +  catalysis; E) Radial EDS elemental mapping results for single CdSe/Zn x Cd 1‐x S QRs prepared using Ag +  catalyzer; F) Powder X‐ray analysis results for CdSe/Zn x Cd 1‐x S QRs; G) Schematic of Cd 2+  to Zn 2+  cation exchange process using different catalyzers. It is noteworthy that although the evolution of the PL spectra exhibited similar trends for Cu +  and Ag +  catalyzed cation exchange processes, there was a clear distinction in other properties of the resulting products (Figure  3 ). For comparison, we synthesized green‐emitting (522 nm) CdSe/Zn x Cd 1‐x S QRs using two different catalysts starting from the same reaction mixture of CdSe/CdS QRs. Both the UV–vis absorption spectra (Figure  3C ) and EDS elemental analysis revealed a higher Cd‐to‐Zn conversion in the Cu + ‐catalyzed process with a Zn‐to‐Cd ratio of 3, compared to Zn/Cd = 2.3 in the case of the Ag +  catalyst, despite the same emission wavelength for these two samples. X‐Ray crystallographic analysis revealed a shift of the characteristic reflections from  w ‐CdS to  w ‐ZnS angles for both samples (Figure  3F ). We studied the elemental distribution within the CdSe/Zn x Cd 1‐x S QRs through a combination of STEM and EDS elemental mapping. Comparing the Cd and Zn distribution in the Ag + ‐catalyzed QRs clearly indicates a gradient alloy structure (see Figure  3E ) with a sharp transition from CdS to ZnS from the center to the shell of the rod. In contrast, for Cu + ‐catalyzed QRs, a more homogeneous alloy is formed with a shallower CdS→ZnS transition (Figure  S8 , Supporting Information), which may explain a significant difference in the optical properties of the QRs (PLQY and anisotropy, Figure  3D ) despite the same emission wavelength. The replacement of Cd 2+  by a soft catalyst cation in the CdS crystal lattice is the driving force behind the entire process of exchange of Cd to Zn. In terms of HSAB (Hard Soft Acid Base) theory, Ag +  and Cu +  have very close hardness indices, [ \n \n 49 \n \n ]  being both soft acids in contrast to Cd 2+  and Zn 2+ , which are both much more harder bases. Thus, thermodynamically the reaction is driven by stronger binding of catalyst ions with a very soft base – sulfide (S 2− ) anion within the CdS crystal lattice. We assume that the reason for the different final distribution of Cd and Zn within the resulting Zn x Cd 1‐x S shell is the different ion mobility of Cu+ and Ag+ within the CdS crystal lattice. CdS shell has wurtzite crystal which has a unique crystallographic  C ‐axis. It was experimentally shown that mobilities of Cu +  and Ag +  ions are not equal in parallel and perpendicular to  C ‐axis directions in CdS and CdZnS wurtzite crystals. [ \n \n 50 \n \n ]  Thus, mobility of Cu +  is more than two orders of magnitude higher in direction perpendicular to  C ‐axis, while Ag +  shows several times higher mobility parallel to the  C ‐axis. As a result, one can expect more substitutional defects created by Cu +  ions toward the inner core of QRs, whereas in case of Ag + , these defects should be more distributed at the surface of QR slowly moving to the core during the cation exchange process. These Cu Cd  and Ag Cd  centers are further substituted by Zn 2+  ions, which are in large excess in the reaction mixture, thereby leading to more homogeneous, in case of Cu + , and more gradient‐like, in case of Ag + , Zn x Cd 1‐x S structures (Figure  3G ). We believe that the gradient alloyed shell structure in the case of Ag +  catalyzed green QRs and higher tolerance of QR optical properties to small amounts of the residual silver are responsible for higher PLQY of these rods, due to less crystal lattice mismatch and less amount of the residual crystal defects."
+    }
+  ],
+  "extractions": {
+    "methods_paragraphs": [
+      {
+        "text": "2 Experimental Section 2.1 Synthesis of Green (≈520 nm) Emitting QRs CdSe/CdS QRs (λ max  = 578 nm, FWHM = 31 nm) were synthesized according to the seeded growth approach. [ \n \n 42 \n \n ]  To the prepared CdSe/CdS QR reaction mixture (4.0 mL, ≈0.42 mmole of Cd), without an isolation and purification of the QRs, a mixture of 140 µL of silver nitrate solution in trialkylphosphine oxide (11 m m , contains also ≈30 m m  of oleic acid) and 5.7 mL of zinc oleate solution in 1‐octadecene (0.32  m ) was added dropwise during 2 h at 330 °C. The reaction mixture was stirred at 330 °C for 1 h more and then cooled down to room temperature to stop the reaction. The resulting QRs were isolated by deposition with isopropanol and centrifugation and washed three times by reprecipitation using toluene‐ethanol solvents combination. The final product was dissolved in chlorobenzene in concentration 25 g L⁻ 1 . Red emitting rod‐in‐rod QRs were prepared according to the procedure from ref. [ 28b ]. 2.2 Ligand Exchange Procedure The synthesis of T‐shape ligand (T‐ligand,  Figure \n \n 2 A ; Figure  S9 , Supporting Information) is described in ref. [ 40 ]. For the ligand exchange, the QRs solution (≈40 mg of QRs) was evaporated under nitrogen purging, and 3.0 mL of trioctylphosphine was added to dissolve the QRs. A total of 150 nmol of T‐ligand (TL) and hexylphosphonic acid (HPA) were added to each sample at a molar ratio of TL:HPA = 1:9. The mixture was thoroughly degassed by vacuuming for 1 h at room temperature, followed by five cycles of vacuuming and nitrogen filling. The solution was then heated to 160 °C and stirred for 2 h. Afterward, the reaction mixture was cooled to room temperature and diluted with ≈2 mL of toluene. The ligand‐exchanged nanorods were precipitated using ≈3 mL of ethanol, and the centrifuged precipitate was washed twice by dissolving in toluene and reprecipitating with ethanol. The purified ligand‐exchanged QRs were dissolved in chlorobenzene, centrifuged, and filtered through a 0.2‐micron PTFE microfilter to produce a final QR solution with a concentration of 25 g L⁻ 1 . These solutions were further diluted with 1,2‐dichlorobenzene as needed for QR ink preparation, as described below. Figure 2 Schematic illustrations of A) Quantum rod (QR) with T‐shape and HPA ligand combination; B) The photoaligned QRs; C) PLCFs with polarized emission; D) PLCF fabrication process; E) CF layers structure and LCM molecular composition. 2.3 Ink Preparation The inkjet printing used a mixture of QRs and LCM as ink, with chlorobenzene and 1,2‐dichlorobenzenes as solvents (mixed 1:1 by volume). The LCM was a mixture of two homologues of 4‐(2‐((4‐(3‐(acryloyloxy)alkoxy)benzoyl)oxy)ethyl)phenyl 4‐(3‐(acryloyloxy)alkoxy)benzoate possessing smectic C mesophase in the individual form (Figure  2E ). The QR solution was prepared at a concentration of 20 mg mL⁻ 1  in chlorobenzene (CB). In the ink, the mass fraction of QR is 0.5%, while the mass fraction of LCM is 10%. To achieve a homogeneous mixture, the components were combined and subjected to 15 min of ultrasound treatment. These specific compositions and concentrations were optimized to ensure the desired performance and functionality of the ink for the specific application. Photolithography used the same blend of QR and LCM, but the solvent was individual chlorobenzene. 2.4 SD1 Film Coating and Photoalignment A sulfonic azo dye molecule (provided by Dainippon Ink and Chemicals Ltd., Japan (DIC)) was used as the light‐orientation layer by first dissolving SD1 in dimethylformamide (DMF) to obtain a solution with 1 wt.% concentration. The solution was then drop‐coated onto a glass substrate by spin‐coating, and then the substrate was placed on a heating table at 100 °C for 10 min to evaporate the excess solvent. Finally, the substrates were exposed to polarized UV LED (370 nm; 5.63 mW cm⁻ 2 ) irradiation for 200 s at room temperature and humidity ≈60% to obtain SD1 photoaligned film (Figure  2D ). 2.5 Mask Fabrication The mask plate used for lithography was a contact mask plate fabricated by chromium plating on a transparent glass substrate, and the pattern consisted of a square matrix with a pitch of 500 microns and a side length of 300 microns. 2.6 Lithography Pixelated CF Fabrication The red QR‐LCM blend solution was spin‐coated on the substrate, and the liquid crystal grid was cured using polarized UV light for 300 s; while curing, the film was exposed using a pixelated metal mask, and the exposed substrate was soaked in a chlorobenzene solution for 5 h (Figure  2D ). The soaked substrate was cleaned using a chlorobenzene solution on a spin‐coating device. Then the same substrate was spin‐coated with green QR‐LCM solution, and the same steps were repeated to control the pattern of the final CF pixels by controlling the relative position of the masks. 2.7 Material Characterization Transmission electron microscope (TEM) images were observed by the JEM 100CXII (JEOL) instrument. QRs PLQY, absorption, excitation anisotropy and PL spectra were measured by FS5 spectrofluorometer (Edinburg instruments). The structure and composition of gradient alloy QRs were analyzed by elemental mapping using energy dispersive X‐ray spectroscopy (EDS) combined with a TEM operating in scanning transmission electron microscope (STEM) mode. The distribution of elements along the diameter of the QRs was plotted, and they were fitted with a normal distribution curve. A comparison of the distributions of zinc, cadmium, and sulfur was done by comparison of  σ  parameter from the normal distribution equation (variance) reflecting the curvature of the distribution. Silver‐catalyzed QRs showed lower variance (steeper transition) for Cd and higher variance (shallower transition) for zinc at the scanning along the QR diameter. Conversely, the copper‐doped QRs exhibited higher cadmium element concentration near the core. 2.8 Optical Setup and DOP Measurement Fluorescence photographs of the samples were observed and taken using a fluorescence microscope (Murzider MSD‐S280). To accurately measure the DOP of a single pixel filter, a laser source was used with a wavelength of 405 nm, a lens to focus the spot into a pixel under a microscope, and an Ocean Optics USB4000 spectrometer was used to record the emitted light (Figure  5D ). A line polarizer was placed before the detector, and the line polarization was rotated to obtain the luminous intensity at different pinch angles, and the value of DOP was obtained by calculation. DOP is defined as:\n \n (2) \n D O P = I m a x − I m i n I m a x + I m i n \n where  I max \n  and  I min \n  are the maximum and minimum values measured by the data captured during the analyzer rotation process. 2.9 Device Fabrication A blue (450 nm) LED backlight was used as the excitation light source to manufacture the full‐color display demo. A PLCF pattern that is 1.5 cm long, 300 µm wide, with a pixel pitch of 100 µm, was printed. ITO electrodes with the same resolution were also printed to manufacture the liquid crystal cell. For the ACR test device, the same process was followed to manufacture a 5 × 5 mm 2  pattern and printed ITO glass of the same area to manufacture the liquid crystal cell. 2.10 Device Measurement The device was placed on a stable optical bench, and the spectroradiometer (Konica Minolta CS‐2000) was pointed at the display; the measurement area was aligned on the pixels, the pixels were switched on and off by controlling the drive of the LCD cell, and the luminous flux was measured. 2.11 Simulation The simulation of light distribution and device ACR was done using a combination of Matlab and Ansys Lumerical software. For the ACR simulation of the CF, the model is shown in Figure  1F . The emission spectrum data and absorption spectrum data are from the actual fluorescence spectra measurements using spectrometer (FS5 Edinburgh Instruments). Ansys Lumerical was used for Finite‐Difference Time‐Domain (FDTD) simulation. The reflectivity settings and model structure of the material are shown in Figures  SI‐4  and  5  (Supporting Information).",
+        "operations": [
+          {
+            "op_type": "add",
+            "sentence": "[ \n \n 42 \n \n ]  To the prepared CdSe/CdS QR reaction mixture (4.0 mL, ≈0.42 mmole of Cd), without an isolation and purification of the QRs, a mixture of 140 µL of silver nitrate solution in trialkylphosphine oxide (11 m m , contains also ≈30 m m  of oleic acid) and 5.7 mL of zinc oleate solution in 1‐octadecene (0.32  m ) was added dropwise during 2 h at 330 °C.",
+            "start_char": 172,
+            "end_char": 536,
+            "materials": [
+              "4.0 mL",
+              "140 µL",
+              "11 m",
+              "5.7 mL"
+            ],
+            "params": {
+              "temp": "330°C",
+              "time": "2 h",
+              "amounts": [
+                "4.0 mL",
+                "140 µL",
+                "11 m",
+                "30 m",
+                "5.7 mL",
+                "0.32  m"
+              ],
+              "concs": [
+                "11 m",
+                "30 m",
+                "0.32  m"
+              ]
+            }
+          },
+          {
+            "op_type": "stir",
+            "sentence": "The reaction mixture was stirred at 330 °C for 1 h more and then cooled down to room temperature to stop the reaction.",
+            "start_char": 537,
+            "end_char": 655,
+            "materials": [
+              "1 h"
+            ],
+            "params": {
+              "temp": "330 °C",
+              "time": "1 h"
+            }
+          },
+          {
+            "op_type": "centrifuge",
+            "sentence": "The resulting QRs were isolated by deposition with isopropanol and centrifugation and washed three times by reprecipitation using toluene‐ethanol solvents combination.",
+            "start_char": 656,
+            "end_char": 823,
+            "materials": [],
+            "params": {}
+          },
+          {
+            "op_type": "dry",
+            "sentence": "For the ligand exchange, the QRs solution (≈40 mg of QRs) was evaporated under nitrogen purging, and 3.0 mL of trioctylphosphine was added to dissolve the QRs.",
+            "start_char": 1147,
+            "end_char": 1306,
+            "materials": [
+              "3.0 mL"
+            ],
+            "params": {
+              "amounts": [
+                "40 mg",
+                "3.0 mL"
+              ]
+            }
+          },
+          {
+            "op_type": "add",
+            "sentence": "A total of 150 nmol of T‐ligand (TL) and hexylphosphonic acid (HPA) were added to each sample at a molar ratio of TL:HPA = 1:9.",
+            "start_char": 1307,
+            "end_char": 1434,
+            "materials": [
+              "150 nmol"
+            ],
+            "params": {}
+          },
+          {
+            "op_type": "degas",
+            "sentence": "The mixture was thoroughly degassed by vacuuming for 1 h at room temperature, followed by five cycles of vacuuming and nitrogen filling.",
+            "start_char": 1435,
+            "end_char": 1571,
+            "materials": [
+              "1 h",
+              "five cycles"
+            ],
+            "params": {
+              "time": "1 h"
+            }
+          },
+          {
+            "op_type": "heat",
+            "sentence": "The solution was then heated to 160 °C and stirred for 2 h.",
+            "start_char": 1572,
+            "end_char": 1631,
+            "materials": [
+              "160 °C"
+            ],
+            "params": {
+              "temp": "160°C",
+              "time": "2 h"
+            }
+          },
+          {
+            "op_type": "centrifuge",
+            "sentence": "The ligand‐exchanged nanorods were precipitated using ≈3 mL of ethanol, and the centrifuged precipitate was washed twice by dissolving in toluene and reprecipitating with ethanol.",
+            "start_char": 1730,
+            "end_char": 1909,
+            "materials": [],
+            "params": {
+              "amounts": [
+                "3 mL"
+              ]
+            }
+          },
+          {
+            "op_type": "centrifuge",
+            "sentence": "The purified ligand‐exchanged QRs were dissolved in chlorobenzene, centrifuged, and filtered through a 0.2‐micron PTFE microfilter to produce a final QR solution with a concentration of 25 g L⁻ 1 .",
+            "start_char": 1910,
+            "end_char": 2107,
+            "materials": [
+              "25 g L⁻"
+            ],
+            "params": {
+              "amounts": [
+                "25 g"
+              ]
+            }
+          },
+          {
+            "op_type": "stir",
+            "sentence": "The inkjet printing used a mixture of QRs and LCM as ink, with chlorobenzene and 1,2‐dichlorobenzenes as solvents (mixed 1:1 by volume).",
+            "start_char": 2483,
+            "end_char": 2619,
+            "materials": [],
+            "params": {}
+          },
+          {
+            "op_type": "heat",
+            "sentence": "The solution was then drop‐coated onto a glass substrate by spin‐coating, and then the substrate was placed on a heating table at 100 °C for 10 min to evaporate the excess solvent.",
+            "start_char": 3626,
+            "end_char": 3806,
+            "materials": [
+              "100 °C"
+            ],
+            "params": {
+              "temp": "100°C",
+              "time": "10 min"
+            }
+          },
+          {
+            "op_type": "filter",
+            "sentence": "To accurately measure the DOP of a single pixel filter, a laser source was used with a wavelength of 405 nm, a lens to focus the spot into a pixel under a microscope, and an Ocean Optics USB4000 spectrometer was used to record the emitted light (Figure  5D ).",
+            "start_char": 6082,
+            "end_char": 6341,
+            "materials": [
+              "405 nm",
+              "an Ocean Optics USB4000 spectrometer"
+            ],
+            "params": {}
+          }
+        ],
+        "expanded": [
+          {
+            "op_type": "add",
+            "steps": [
+              "Ensure reaction vessel is present and empty.",
+              "Place a clean stir bar in the vessel.",
+              "Measure 4.0 mL of 4.0 mL.",
+              "Transfer 4.0 mL into the vessel."
+            ]
+          },
+          {
+            "op_type": "stir",
+            "steps": [
+              "Place the reaction vessel on a stir plate.",
+              "Set the stirrer to an appropriate speed.",
+              "Stir for 1 h."
+            ]
+          },
+          {
+            "op_type": "centrifuge",
+            "steps": [
+              "Perform operation 'centrifuge' as described: The resulting QRs were isolated by deposition with isopropanol and centrifugation and washed three times by reprecipitation using toluene‐ethanol solvents combination."
+            ]
+          },
+          {
+            "op_type": "dry",
+            "steps": [
+              "Perform operation 'dry' as described: For the ligand exchange, the QRs solution (≈40 mg of QRs) was evaporated under nitrogen purging, and 3.0 mL of trioctylphosphine was added to dissolve the QRs."
+            ]
+          },
+          {
+            "op_type": "add",
+            "steps": [
+              "Ensure reaction vessel is present and empty.",
+              "Place a clean stir bar in the vessel.",
+              "Measure the specified amount of 150 nmol.",
+              "Transfer 150 nmol into the vessel."
+            ]
+          },
+          {
+            "op_type": "degas",
+            "steps": [
+              "Perform operation 'degas' as described: The mixture was thoroughly degassed by vacuuming for 1 h at room temperature, followed by five cycles of vacuuming and nitrogen filling."
+            ]
+          },
+          {
+            "op_type": "heat",
+            "steps": [
+              "Place the reaction vessel on a hotplate.",
+              "Ramp to 160°C.",
+              "Maintain 160°C for 2 h."
+            ]
+          },
+          {
+            "op_type": "centrifuge",
+            "steps": [
+              "Perform operation 'centrifuge' as described: The ligand‐exchanged nanorods were precipitated using ≈3 mL of ethanol, and the centrifuged precipitate was washed twice by dissolving in toluene and reprecipitating with ethanol."
+            ]
+          },
+          {
+            "op_type": "centrifuge",
+            "steps": [
+              "Perform operation 'centrifuge' as described: The purified ligand‐exchanged QRs were dissolved in chlorobenzene, centrifuged, and filtered through a 0.2‐micron PTFE microfilter to produce a final QR solution with a concentration of 25 g L⁻ 1 ."
+            ]
+          },
+          {
+            "op_type": "stir",
+            "steps": [
+              "Place the reaction vessel on a stir plate.",
+              "Set the stirrer to an appropriate speed.",
+              "Stir for the specified time."
+            ]
+          },
+          {
+            "op_type": "heat",
+            "steps": [
+              "Place the reaction vessel on a hotplate.",
+              "Ramp to 100°C.",
+              "Maintain 100°C for 10 min."
+            ]
+          },
+          {
+            "op_type": "filter",
+            "steps": [
+              "Perform operation 'filter' as described: To accurately measure the DOP of a single pixel filter, a laser source was used with a wavelength of 405 nm, a lens to focus the spot into a pixel under a microscope, and an Ocean Optics USB4000 spectrometer was used to record the emitted light (Figure  5D )."
+            ]
+          }
+        ]
+      },
+      {
+        "text": "2.1 Synthesis of Green (≈520 nm) Emitting QRs CdSe/CdS QRs (λ max  = 578 nm, FWHM = 31 nm) were synthesized according to the seeded growth approach. [ \n \n 42 \n \n ]  To the prepared CdSe/CdS QR reaction mixture (4.0 mL, ≈0.42 mmole of Cd), without an isolation and purification of the QRs, a mixture of 140 µL of silver nitrate solution in trialkylphosphine oxide (11 m m , contains also ≈30 m m  of oleic acid) and 5.7 mL of zinc oleate solution in 1‐octadecene (0.32  m ) was added dropwise during 2 h at 330 °C. The reaction mixture was stirred at 330 °C for 1 h more and then cooled down to room temperature to stop the reaction. The resulting QRs were isolated by deposition with isopropanol and centrifugation and washed three times by reprecipitation using toluene‐ethanol solvents combination. The final product was dissolved in chlorobenzene in concentration 25 g L⁻ 1 . Red emitting rod‐in‐rod QRs were prepared according to the procedure from ref. [ 28b ].",
+        "operations": [
+          {
+            "op_type": "add",
+            "sentence": "[ \n \n 42 \n \n ]  To the prepared CdSe/CdS QR reaction mixture (4.0 mL, ≈0.42 mmole of Cd), without an isolation and purification of the QRs, a mixture of 140 µL of silver nitrate solution in trialkylphosphine oxide (11 m m , contains also ≈30 m m  of oleic acid) and 5.7 mL of zinc oleate solution in 1‐octadecene (0.32  m ) was added dropwise during 2 h at 330 °C.",
+            "start_char": 149,
+            "end_char": 513,
+            "materials": [
+              "4.0 mL",
+              "140 µL",
+              "11 m",
+              "5.7 mL"
+            ],
+            "params": {
+              "temp": "330°C",
+              "time": "2 h",
+              "amounts": [
+                "4.0 mL",
+                "140 µL",
+                "11 m",
+                "30 m",
+                "5.7 mL",
+                "0.32  m"
+              ],
+              "concs": [
+                "11 m",
+                "30 m",
+                "0.32  m"
+              ]
+            }
+          },
+          {
+            "op_type": "stir",
+            "sentence": "The reaction mixture was stirred at 330 °C for 1 h more and then cooled down to room temperature to stop the reaction.",
+            "start_char": 514,
+            "end_char": 632,
+            "materials": [
+              "1 h"
+            ],
+            "params": {
+              "temp": "330 °C",
+              "time": "1 h"
+            }
+          },
+          {
+            "op_type": "centrifuge",
+            "sentence": "The resulting QRs were isolated by deposition with isopropanol and centrifugation and washed three times by reprecipitation using toluene‐ethanol solvents combination.",
+            "start_char": 633,
+            "end_char": 800,
+            "materials": [],
+            "params": {}
+          }
+        ],
+        "expanded": [
+          {
+            "op_type": "add",
+            "steps": [
+              "Ensure reaction vessel is present and empty.",
+              "Place a clean stir bar in the vessel.",
+              "Measure 4.0 mL of 4.0 mL.",
+              "Transfer 4.0 mL into the vessel."
+            ]
+          },
+          {
+            "op_type": "stir",
+            "steps": [
+              "Place the reaction vessel on a stir plate.",
+              "Set the stirrer to an appropriate speed.",
+              "Stir for 1 h."
+            ]
+          },
+          {
+            "op_type": "centrifuge",
+            "steps": [
+              "Perform operation 'centrifuge' as described: The resulting QRs were isolated by deposition with isopropanol and centrifugation and washed three times by reprecipitation using toluene‐ethanol solvents combination."
+            ]
+          }
+        ]
+      },
+      {
+        "text": "2.2 Ligand Exchange Procedure The synthesis of T‐shape ligand (T‐ligand,  Figure \n \n 2 A ; Figure  S9 , Supporting Information) is described in ref. [ 40 ]. For the ligand exchange, the QRs solution (≈40 mg of QRs) was evaporated under nitrogen purging, and 3.0 mL of trioctylphosphine was added to dissolve the QRs. A total of 150 nmol of T‐ligand (TL) and hexylphosphonic acid (HPA) were added to each sample at a molar ratio of TL:HPA = 1:9. The mixture was thoroughly degassed by vacuuming for 1 h at room temperature, followed by five cycles of vacuuming and nitrogen filling. The solution was then heated to 160 °C and stirred for 2 h. Afterward, the reaction mixture was cooled to room temperature and diluted with ≈2 mL of toluene. The ligand‐exchanged nanorods were precipitated using ≈3 mL of ethanol, and the centrifuged precipitate was washed twice by dissolving in toluene and reprecipitating with ethanol. The purified ligand‐exchanged QRs were dissolved in chlorobenzene, centrifuged, and filtered through a 0.2‐micron PTFE microfilter to produce a final QR solution with a concentration of 25 g L⁻ 1 . These solutions were further diluted with 1,2‐dichlorobenzene as needed for QR ink preparation, as described below. Figure 2 Schematic illustrations of A) Quantum rod (QR) with T‐shape and HPA ligand combination; B) The photoaligned QRs; C) PLCFs with polarized emission; D) PLCF fabrication process; E) CF layers structure and LCM molecular composition.",
+        "operations": [
+          {
+            "op_type": "dry",
+            "sentence": "For the ligand exchange, the QRs solution (≈40 mg of QRs) was evaporated under nitrogen purging, and 3.0 mL of trioctylphosphine was added to dissolve the QRs.",
+            "start_char": 157,
+            "end_char": 316,
+            "materials": [
+              "3.0 mL"
+            ],
+            "params": {
+              "amounts": [
+                "40 mg",
+                "3.0 mL"
+              ]
+            }
+          },
+          {
+            "op_type": "add",
+            "sentence": "A total of 150 nmol of T‐ligand (TL) and hexylphosphonic acid (HPA) were added to each sample at a molar ratio of TL:HPA = 1:9.",
+            "start_char": 317,
+            "end_char": 444,
+            "materials": [
+              "150 nmol"
+            ],
+            "params": {}
+          },
+          {
+            "op_type": "degas",
+            "sentence": "The mixture was thoroughly degassed by vacuuming for 1 h at room temperature, followed by five cycles of vacuuming and nitrogen filling.",
+            "start_char": 445,
+            "end_char": 581,
+            "materials": [
+              "1 h",
+              "five cycles"
+            ],
+            "params": {
+              "time": "1 h"
+            }
+          },
+          {
+            "op_type": "heat",
+            "sentence": "The solution was then heated to 160 °C and stirred for 2 h.",
+            "start_char": 582,
+            "end_char": 641,
+            "materials": [
+              "160 °C"
+            ],
+            "params": {
+              "temp": "160°C",
+              "time": "2 h"
+            }
+          },
+          {
+            "op_type": "centrifuge",
+            "sentence": "The ligand‐exchanged nanorods were precipitated using ≈3 mL of ethanol, and the centrifuged precipitate was washed twice by dissolving in toluene and reprecipitating with ethanol.",
+            "start_char": 740,
+            "end_char": 919,
+            "materials": [],
+            "params": {
+              "amounts": [
+                "3 mL"
+              ]
+            }
+          },
+          {
+            "op_type": "centrifuge",
+            "sentence": "The purified ligand‐exchanged QRs were dissolved in chlorobenzene, centrifuged, and filtered through a 0.2‐micron PTFE microfilter to produce a final QR solution with a concentration of 25 g L⁻ 1 .",
+            "start_char": 920,
+            "end_char": 1117,
+            "materials": [
+              "25 g L⁻"
+            ],
+            "params": {
+              "amounts": [
+                "25 g"
+              ]
+            }
+          }
+        ],
+        "expanded": [
+          {
+            "op_type": "dry",
+            "steps": [
+              "Perform operation 'dry' as described: For the ligand exchange, the QRs solution (≈40 mg of QRs) was evaporated under nitrogen purging, and 3.0 mL of trioctylphosphine was added to dissolve the QRs."
+            ]
+          },
+          {
+            "op_type": "add",
+            "steps": [
+              "Ensure reaction vessel is present and empty.",
+              "Place a clean stir bar in the vessel.",
+              "Measure the specified amount of 150 nmol.",
+              "Transfer 150 nmol into the vessel."
+            ]
+          },
+          {
+            "op_type": "degas",
+            "steps": [
+              "Perform operation 'degas' as described: The mixture was thoroughly degassed by vacuuming for 1 h at room temperature, followed by five cycles of vacuuming and nitrogen filling."
+            ]
+          },
+          {
+            "op_type": "heat",
+            "steps": [
+              "Place the reaction vessel on a hotplate.",
+              "Ramp to 160°C.",
+              "Maintain 160°C for 2 h."
+            ]
+          },
+          {
+            "op_type": "centrifuge",
+            "steps": [
+              "Perform operation 'centrifuge' as described: The ligand‐exchanged nanorods were precipitated using ≈3 mL of ethanol, and the centrifuged precipitate was washed twice by dissolving in toluene and reprecipitating with ethanol."
+            ]
+          },
+          {
+            "op_type": "centrifuge",
+            "steps": [
+              "Perform operation 'centrifuge' as described: The purified ligand‐exchanged QRs were dissolved in chlorobenzene, centrifuged, and filtered through a 0.2‐micron PTFE microfilter to produce a final QR solution with a concentration of 25 g L⁻ 1 ."
+            ]
+          }
+        ]
+      },
+      {
+        "text": "2.3 Ink Preparation The inkjet printing used a mixture of QRs and LCM as ink, with chlorobenzene and 1,2‐dichlorobenzenes as solvents (mixed 1:1 by volume). The LCM was a mixture of two homologues of 4‐(2‐((4‐(3‐(acryloyloxy)alkoxy)benzoyl)oxy)ethyl)phenyl 4‐(3‐(acryloyloxy)alkoxy)benzoate possessing smectic C mesophase in the individual form (Figure  2E ). The QR solution was prepared at a concentration of 20 mg mL⁻ 1  in chlorobenzene (CB). In the ink, the mass fraction of QR is 0.5%, while the mass fraction of LCM is 10%. To achieve a homogeneous mixture, the components were combined and subjected to 15 min of ultrasound treatment. These specific compositions and concentrations were optimized to ensure the desired performance and functionality of the ink for the specific application. Photolithography used the same blend of QR and LCM, but the solvent was individual chlorobenzene.",
+        "operations": [
+          {
+            "op_type": "stir",
+            "sentence": "The inkjet printing used a mixture of QRs and LCM as ink, with chlorobenzene and 1,2‐dichlorobenzenes as solvents (mixed 1:1 by volume).",
+            "start_char": 20,
+            "end_char": 156,
+            "materials": [],
+            "params": {}
+          }
+        ],
+        "expanded": [
+          {
+            "op_type": "stir",
+            "steps": [
+              "Place the reaction vessel on a stir plate.",
+              "Set the stirrer to an appropriate speed.",
+              "Stir for the specified time."
+            ]
+          }
+        ]
+      },
+      {
+        "text": "3.1 Material Synthesis There are two key parameters we consider for improving PLCF performance in displays: ambient light excitation and polarized PL emission. Considering the requirement for the optical density (> 1) [ \n \n 43 \n \n ]  at the wavelength of excitation ( λ ex \n ), the first parameter primarily depends on the difference in material absorption at the  λ ex \n  ( µ 450 \n , based on typical commercial blue LEDs) and in the visible wavelength range ( µ vis \n ). When normalized to 450 nm absorption, QRs show relatively lower absorption in the visible range, compared to commercially available QDs and perovskite nanocrystals (see Figure  1C  and ref. [ 28b ]). While the absorption properties of QDs can be enhanced through compositional modifications, such as increasing the relative amount of wider‐bandgap semiconductor (e.g., CdS, ZnSe) or synthesizing giant‐shell QDs, the PL emission of QDs still lacks polarization, which is important for improving LCD optical performance, particularly in in‐cell PLCF configuration. In this context, 1D semiconductor nanorods (QRs), nanowires (NWs) or 2D nanoplatelets (NPLs) are potential candidates, with QRs being the preferred choice due to their superior colloidal stability, easier large‐scale alignment, and patterning processability. [ \n \n 27 \n ,  \n 40 \n ,  \n 44 \n \n ] \n In this work, we utilized rod‐in‐rod CdSe/CdS/ZnS QRs, leveraging their higher stability due to the ZnS shell. [ \n \n 45 \n \n ]  These QRs were prepared following the previously proposed method. [ \n \n 28b \n \n ]  Using rod‐shaped CdSe nanoparticle seeds enhances optical anisotropy, thereby increasing the polarization degree of the final QRs. [ \n \n 46 \n \n ]  For green emitting CdSe/Zn x Cd 1‐x S QRs, we first conducted the seeded growth of dot‐in‐rod CdSe/CdS QRs followed by Cd to Zn exchange in the presence of Ag +  catalyst to facilitate the cation exchange process. Previously, Cu +  cation was shown to effectively catalyze the Cd to Zn exchange process in CdSe/CdS QDs, resulting in alloyed CdZnSe/CdZnS core/shell nanoparticles, though with a moderate quantum yield for the final product. [ \n \n 47 \n \n ]  It is known that even a small amount of Cu impurities in QDs drastically reduces their quantum efficiency. [ \n \n 48 \n \n ]  We systematically studied the role of different soft metal cations in the Cd 2+  to Zn 2+  cation exchange process. We found that by using Ag +  catalysts, one can achieve the final QRs with great optical properties in terms of PLQY, FWHM and anisotropy. Furthermore, we also studied various protocols for adding catalysts and Zn‐precursor, including sequential Ag +  and Zn‐precursor injections, both forward and backward sequences, slow addition of either catalyzer or Zn‐source, and mixing of these two in a single injection solution. Finally, we elaborated an optimized protocol in which a catalytic amount of inorganic silver salt (silver acetate or nitrate) is mixed with Zn precursor (solution of zinc oleate in 1‐octadecene). This mixture is slowly added to the preformed CdSe/CdS QR in the reaction mixture one‐pot, resulting in a smooth blue shift of PL peak, narrow emission bandwidth ( Figure \n \n 3 B ) and high PLQY, particularly for the green emitting QRs. We found that no subsequent removal of residual Ag +  is required as the PLQY of the resulting QRs is already approaching unity for green‐emitting samples. Figure 3 QR material characterization. A) Comparison of properties of CdSe/Zn x Cd 1‐x S QRs prepared through catalysis with Cu +  and Ag +  properties; B) PL emission trend in synthesis of CdSe/Zn x Cd 1‐x S QRs; C) Absorption and D) Excitation anisotropy trends in synthesis of green emitting CdSe/Zn x Cd 1‐x S QRs through Cd 2+  to Zn 2+  cation exchange using Cu +  and Ag +  catalysis; E) Radial EDS elemental mapping results for single CdSe/Zn x Cd 1‐x S QRs prepared using Ag +  catalyzer; F) Powder X‐ray analysis results for CdSe/Zn x Cd 1‐x S QRs; G) Schematic of Cd 2+  to Zn 2+  cation exchange process using different catalyzers. It is noteworthy that although the evolution of the PL spectra exhibited similar trends for Cu +  and Ag +  catalyzed cation exchange processes, there was a clear distinction in other properties of the resulting products (Figure  3 ). For comparison, we synthesized green‐emitting (522 nm) CdSe/Zn x Cd 1‐x S QRs using two different catalysts starting from the same reaction mixture of CdSe/CdS QRs. Both the UV–vis absorption spectra (Figure  3C ) and EDS elemental analysis revealed a higher Cd‐to‐Zn conversion in the Cu + ‐catalyzed process with a Zn‐to‐Cd ratio of 3, compared to Zn/Cd = 2.3 in the case of the Ag +  catalyst, despite the same emission wavelength for these two samples. X‐Ray crystallographic analysis revealed a shift of the characteristic reflections from  w ‐CdS to  w ‐ZnS angles for both samples (Figure  3F ). We studied the elemental distribution within the CdSe/Zn x Cd 1‐x S QRs through a combination of STEM and EDS elemental mapping. Comparing the Cd and Zn distribution in the Ag + ‐catalyzed QRs clearly indicates a gradient alloy structure (see Figure  3E ) with a sharp transition from CdS to ZnS from the center to the shell of the rod. In contrast, for Cu + ‐catalyzed QRs, a more homogeneous alloy is formed with a shallower CdS→ZnS transition (Figure  S8 , Supporting Information), which may explain a significant difference in the optical properties of the QRs (PLQY and anisotropy, Figure  3D ) despite the same emission wavelength. The replacement of Cd 2+  by a soft catalyst cation in the CdS crystal lattice is the driving force behind the entire process of exchange of Cd to Zn. In terms of HSAB (Hard Soft Acid Base) theory, Ag +  and Cu +  have very close hardness indices, [ \n \n 49 \n \n ]  being both soft acids in contrast to Cd 2+  and Zn 2+ , which are both much more harder bases. Thus, thermodynamically the reaction is driven by stronger binding of catalyst ions with a very soft base – sulfide (S 2− ) anion within the CdS crystal lattice. We assume that the reason for the different final distribution of Cd and Zn within the resulting Zn x Cd 1‐x S shell is the different ion mobility of Cu+ and Ag+ within the CdS crystal lattice. CdS shell has wurtzite crystal which has a unique crystallographic  C ‐axis. It was experimentally shown that mobilities of Cu +  and Ag +  ions are not equal in parallel and perpendicular to  C ‐axis directions in CdS and CdZnS wurtzite crystals. [ \n \n 50 \n \n ]  Thus, mobility of Cu +  is more than two orders of magnitude higher in direction perpendicular to  C ‐axis, while Ag +  shows several times higher mobility parallel to the  C ‐axis. As a result, one can expect more substitutional defects created by Cu +  ions toward the inner core of QRs, whereas in case of Ag + , these defects should be more distributed at the surface of QR slowly moving to the core during the cation exchange process. These Cu Cd  and Ag Cd  centers are further substituted by Zn 2+  ions, which are in large excess in the reaction mixture, thereby leading to more homogeneous, in case of Cu + , and more gradient‐like, in case of Ag + , Zn x Cd 1‐x S structures (Figure  3G ). We believe that the gradient alloyed shell structure in the case of Ag +  catalyzed green QRs and higher tolerance of QR optical properties to small amounts of the residual silver are responsible for higher PLQY of these rods, due to less crystal lattice mismatch and less amount of the residual crystal defects.",
+        "operations": [
+          {
+            "op_type": "add",
+            "sentence": "Furthermore, we also studied various protocols for adding catalysts and Zn‐precursor, including sequential Ag +  and Zn‐precursor injections, both forward and backward sequences, slow addition of either catalyzer or Zn‐source, and mixing of these two in a single injection solution.",
+            "start_char": 2524,
+            "end_char": 2806,
+            "materials": [],
+            "params": {}
+          },
+          {
+            "op_type": "stir",
+            "sentence": "Finally, we elaborated an optimized protocol in which a catalytic amount of inorganic silver salt (silver acetate or nitrate) is mixed with Zn precursor (solution of zinc oleate in 1‐octadecene).",
+            "start_char": 2807,
+            "end_char": 3002,
+            "materials": [],
+            "params": {}
+          },
+          {
+            "op_type": "add",
+            "sentence": "This mixture is slowly added to the preformed CdSe/CdS QR in the reaction mixture one‐pot, resulting in a smooth blue shift of PL peak, narrow emission bandwidth ( Figure \n \n 3 B ) and high PLQY, particularly for the green emitting QRs.",
+            "start_char": 3003,
+            "end_char": 3239,
+            "materials": [
+              "3 B"
+            ],
+            "params": {}
+          }
+        ],
+        "expanded": [
+          {
+            "op_type": "add",
+            "steps": [
+              "Ensure reaction vessel is present and empty.",
+              "Place a clean stir bar in the vessel.",
+              "Measure the specified amount of reagent.",
+              "Transfer reagent into the vessel."
+            ]
+          },
+          {
+            "op_type": "stir",
+            "steps": [
+              "Place the reaction vessel on a stir plate.",
+              "Set the stirrer to an appropriate speed.",
+              "Stir for the specified time."
+            ]
+          },
+          {
+            "op_type": "add",
+            "steps": [
+              "Ensure reaction vessel is present and empty.",
+              "Place a clean stir bar in the vessel.",
+              "Measure the specified amount of 3 B.",
+              "Transfer 3 B into the vessel."
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

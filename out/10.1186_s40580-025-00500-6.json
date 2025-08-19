@@ -1,0 +1,202 @@
+{
+  "paper_id": "10.1186/s40580-025-00500-6",
+  "title": "Low-dimensional metal chalcogenides for wearable gas sensing.",
+  "authors": [],
+  "doi": "10.1186/s40580-025-00500-6",
+  "source": "eupmc",
+  "urls": {
+    "pdf": null
+  },
+  "license": {
+    "type": "unknown"
+  },
+  "access_route": "oa",
+  "sections": [
+    {
+      "heading": "Synthesis of metal chalcogenide QDs",
+      "text": "Synthesis of metal chalcogenide QDs In this review, we focus on colloidal QDs with their solution-based processing. For metal chalcogenide thin films grown by other methods, like liquid-phase epitaxy (LPE), metal-organic chemical vapor deposition (MOCVD), and molecular beam epitaxy (MBE), Galstyan et al. have systematically reviewed their synthesis and properties [ 57 ]. Colloidal metal chalcogenide QDs can be synthesized using a variety of chemical synthesis methods, including hot injection [ 58 ], solution precipitation [ 59 ], hydro/solvothermal [ 60 ], sol-gel [ 61 ], and thermal decomposition methods [ 62 ]. The hot injection, solution precipitation, and hydrothermal approaches are most widely adopted for preparing QD-based gas sensors, characterized by their simplicity, low reaction temperatures, and high tunability. The hot injection method involves the rapid injection of low-temperature precursor solutions into high-temperature reaction solutions, leveraging the instantaneous temperature and concentration change to achieve controlled nucleation and growth of QDs [ 63 ]. As described by the LaMer model, upon injection, the precursors or converted monomers reach a supersaturated state within a short period, inducing burst nucleation [ 64 ]. As the nucleation process depletes monomer concentration below the supersaturation threshold, the QD growth dominates and may be accompanied by the Ostwald ripening process after extended growth times. Typically, for the synthesis of metal chalcogenide QDs, such as CdX (X = S, Se, Te) [ 65 ], PbX (X = S, Se, Te) [ 66 ], ZnX (X = S, Se) [ 65 ], and Cu x S [ 65 ], the metal precursor is first dissolved in a solution of ligands and coordinating or non-coordinating solvents and heated to a specific temperature. At this temperature, cold chalcogen precursor solutions are rapidly injected into the flask to initiate rapid nucleation. After a certain growth time, the reaction is quenched by quickly cooling down the solution. The reaction crude is subsequently purified by precipitating and redispersing QDs with anti-solvents and good solvents, respectively, to achieve the QD product dispersed in non-polar organic solvents. It is important to note that long-chain organic ligands play a crucial role during chemical synthesis by modulating the reactivity of precursors, stabilizing the QD surfaces, and narrowing the size distribution [ 67 ]. Therefore, by varying the concentrations of precursors and ligands, as well as modifying the reaction temperature and time, it is possible to precisely control the size, shape, and composition of QDs. This, in turn, allows for the fine-tuning of their surface properties and band structures. The solution precipitation method has been reported to synthesize CdX (X = S, Se, Te), ZnX (X = S, Se), CuX (X = S, Se), and HgTe QDs [ 68 – 70 ]. The metal cation precursor solution is slowly injected into an aqueous or non-aqueous solution containing chalcogenide precursors under inert gas protection. QDs with controlled sizes are produced by tuning the reaction equilibrium between the nanocrystal growth and ion solvation. The reaction equilibrium is mainly affected by the precursor concentration, solvent type, pH, reaction temperature, and reaction time. The addition of capping agents can further modulate the particle size and dispersity of the QDs. QDs synthesized in the aqueous environment have poorer crystallinity than those synthesized in organometallic systems, due to the comparably low synthesis temperature [ 68 ]. Non-effective separation of nucleation and growth stages of precipitation approach leads to a broad size distribution of QDs [ 68 ]. The hydro/solvothermal method is a synthesis technique that utilizes water or organic solvents to host the reaction between precursors in a sealed high-pressure autoclave under elevated temperature and pressure [ 60 ,  71 ]. The high-temperature and pressured environment promotes the dissolution and conversion of precursors, forming a supersaturated solution that induces the nucleation and growth of QDs. Thanks to the uniform and enclosed reaction environment, QDs produced by the hydrothermal method typically exhibit high crystallinity. Similarly, the size and morphology of QDs can be controlled by adjusting the type of solvents, reaction temperature, reaction time, and the choice of surfactants. The hydrothermal method is more commonly adopted for preparing QDs in aqueous solutions, but their dispersibility is generally poor. Among the three synthesis routes above, hot-injection yields QDs with high crystallinity, narrow size distribution, and excellent dispersity, which are necessary properties for constructing gas sensor devices. Nanocrystalline QDs exhibit more predictable physical properties, including higher carrier mobility and surface-active sites on certain facets [ 72 ,  73 ]. Fine-tuning of QD sizes reduces sample-to-sample and batch-to-batch variation, improving the reliability and reproducibility of QD gas sensors. The colloidal stability of QDs enables solution-based processing to fabricate and modify QD thin films. For example, post-synthesis solution-phase and solid-state ligand exchange treatments can homogenously tailor the QD properties in the dispersion and in the thin films, respectively, through engineering the surface chemistry [ 74 ]. Large-area and homogeneous thin films can be formed by spin/dip coating, spraying, printing, and blading QD solutions on various substrates [ 75 ]."
+    },
+    {
+      "heading": "Synthesis of 2D metal chalcogenides",
+      "text": "Synthesis of 2D metal chalcogenides 2D metal chalcogenides can be synthesized using a variety of methods, including chemical vapor deposition (CVD) [ 99 ], chemical and mechanical exfoliation [ 100 ], atomic layer deposition (ALD) [ 101 ], and colloidal synthesis [ 102 ]. Among these, CVD and chemical exfoliation are most widely employed in the fabrication of 2D metal chalcogenide-based gas sensors, as they can produce high-quality and scalable layered materials with precisely tunable physical properties [ 103 ]. The CVD process involves introducing gaseous precursors into a reaction chamber, where they are thermally decomposed or react at the surface of a heated substrate to form solid products [ 104 ]. These precursors undergo heterogeneous reactions at the solid-gas interface, resulting in the nucleation and epitaxial growth of thin films. Critical parameters such as reaction temperature, pressure, precursor flow rates, and substrate type must be precisely controlled to ensure high crystallinity, layer uniformity, and compositional consistency. Following film deposition, post-processing steps such as wet etching or polymer-assisted transfer are typically performed to relocate the 2D films onto target substrates. The CVD technique supports wafer-scale synthesis, enables atomic-level thickness control, and allows for in situ doping and heterostructure integration [ 105 ]. Its compatibility with current semiconductor process flows further facilitates the direct synthesis of 2D materials on device substrates, thereby streamlining sensor fabrication workflows [ 103 ]. However, the need for high-temperature furnaces, toxic or unstable precursors, and stringent control over reaction environments presents challenges for widespread adoption and limits the versatility of CVD for certain material systems. Chemical exfoliation is a top-down synthesis approach that produces 2D flakes by chemically disrupting the interlayer van der Waals interactions in bulk layered crystals. Typically, the bulk precursor is exposed to reactive chemical agents, such as lithium intercalants or strong acids, that intercalate between layers, weakening interlayer bonding and enabling subsequent exfoliation via ultrasonication or solvent dispersion [ 106 ]. This method allows for scalable and low-cost production of 2D materials, such as MoS 2 , and is particularly attractive for industrial-scale applications due to its high throughput and ambient-condition operation. Liquid-phase exfoliation yields monolayer or few-layer flakes with a thickness typically reduced to a median size of ~ 80 nm after processing. Notably, the exfoliation process introduces intrinsic sulfur vacancies on the basal planes, which serve as active adsorption sites for gas molecules and can be further engineered through substitutional doping (e.g., nitrogen incorporation via N-methyl pyrrolidone degradation) to tailor the material’s gas-sensing selectivity and sensitivity [ 107 ]. Moreover, the room-temperature operation mitigates risks associated with high-temperature degradation, such as oxidation or structural distortion [ 108 ]. Despite these advantages, chemical exfoliation suffers from several limitations, including the difficulty in precisely tuning vacancy densities and spatial distributions, degradation of flake morphology during processing, and the necessity for rigorous reaction condition optimization. These factors, combined with the long recovery times observed in some sensing applications, can negatively impact sensor reproducibility and stability [ 108 ]."
+    }
+  ],
+  "extractions": {
+    "methods_paragraphs": [
+      {
+        "text": "Synthesis of metal chalcogenide QDs In this review, we focus on colloidal QDs with their solution-based processing. For metal chalcogenide thin films grown by other methods, like liquid-phase epitaxy (LPE), metal-organic chemical vapor deposition (MOCVD), and molecular beam epitaxy (MBE), Galstyan et al. have systematically reviewed their synthesis and properties [ 57 ]. Colloidal metal chalcogenide QDs can be synthesized using a variety of chemical synthesis methods, including hot injection [ 58 ], solution precipitation [ 59 ], hydro/solvothermal [ 60 ], sol-gel [ 61 ], and thermal decomposition methods [ 62 ]. The hot injection, solution precipitation, and hydrothermal approaches are most widely adopted for preparing QD-based gas sensors, characterized by their simplicity, low reaction temperatures, and high tunability. The hot injection method involves the rapid injection of low-temperature precursor solutions into high-temperature reaction solutions, leveraging the instantaneous temperature and concentration change to achieve controlled nucleation and growth of QDs [ 63 ]. As described by the LaMer model, upon injection, the precursors or converted monomers reach a supersaturated state within a short period, inducing burst nucleation [ 64 ]. As the nucleation process depletes monomer concentration below the supersaturation threshold, the QD growth dominates and may be accompanied by the Ostwald ripening process after extended growth times. Typically, for the synthesis of metal chalcogenide QDs, such as CdX (X = S, Se, Te) [ 65 ], PbX (X = S, Se, Te) [ 66 ], ZnX (X = S, Se) [ 65 ], and Cu x S [ 65 ], the metal precursor is first dissolved in a solution of ligands and coordinating or non-coordinating solvents and heated to a specific temperature. At this temperature, cold chalcogen precursor solutions are rapidly injected into the flask to initiate rapid nucleation. After a certain growth time, the reaction is quenched by quickly cooling down the solution. The reaction crude is subsequently purified by precipitating and redispersing QDs with anti-solvents and good solvents, respectively, to achieve the QD product dispersed in non-polar organic solvents. It is important to note that long-chain organic ligands play a crucial role during chemical synthesis by modulating the reactivity of precursors, stabilizing the QD surfaces, and narrowing the size distribution [ 67 ]. Therefore, by varying the concentrations of precursors and ligands, as well as modifying the reaction temperature and time, it is possible to precisely control the size, shape, and composition of QDs. This, in turn, allows for the fine-tuning of their surface properties and band structures. The solution precipitation method has been reported to synthesize CdX (X = S, Se, Te), ZnX (X = S, Se), CuX (X = S, Se), and HgTe QDs [ 68 – 70 ]. The metal cation precursor solution is slowly injected into an aqueous or non-aqueous solution containing chalcogenide precursors under inert gas protection. QDs with controlled sizes are produced by tuning the reaction equilibrium between the nanocrystal growth and ion solvation. The reaction equilibrium is mainly affected by the precursor concentration, solvent type, pH, reaction temperature, and reaction time. The addition of capping agents can further modulate the particle size and dispersity of the QDs. QDs synthesized in the aqueous environment have poorer crystallinity than those synthesized in organometallic systems, due to the comparably low synthesis temperature [ 68 ]. Non-effective separation of nucleation and growth stages of precipitation approach leads to a broad size distribution of QDs [ 68 ]. The hydro/solvothermal method is a synthesis technique that utilizes water or organic solvents to host the reaction between precursors in a sealed high-pressure autoclave under elevated temperature and pressure [ 60 ,  71 ]. The high-temperature and pressured environment promotes the dissolution and conversion of precursors, forming a supersaturated solution that induces the nucleation and growth of QDs. Thanks to the uniform and enclosed reaction environment, QDs produced by the hydrothermal method typically exhibit high crystallinity. Similarly, the size and morphology of QDs can be controlled by adjusting the type of solvents, reaction temperature, reaction time, and the choice of surfactants. The hydrothermal method is more commonly adopted for preparing QDs in aqueous solutions, but their dispersibility is generally poor. Among the three synthesis routes above, hot-injection yields QDs with high crystallinity, narrow size distribution, and excellent dispersity, which are necessary properties for constructing gas sensor devices. Nanocrystalline QDs exhibit more predictable physical properties, including higher carrier mobility and surface-active sites on certain facets [ 72 ,  73 ]. Fine-tuning of QD sizes reduces sample-to-sample and batch-to-batch variation, improving the reliability and reproducibility of QD gas sensors. The colloidal stability of QDs enables solution-based processing to fabricate and modify QD thin films. For example, post-synthesis solution-phase and solid-state ligand exchange treatments can homogenously tailor the QD properties in the dispersion and in the thin films, respectively, through engineering the surface chemistry [ 74 ]. Large-area and homogeneous thin films can be formed by spin/dip coating, spraying, printing, and blading QD solutions on various substrates [ 75 ].",
+        "operations": [
+          {
+            "op_type": "inject",
+            "sentence": "Colloidal metal chalcogenide QDs can be synthesized using a variety of chemical synthesis methods, including hot injection [ 58 ], solution precipitation [ 59 ], hydro/solvothermal [ 60 ], sol-gel [ 61 ], and thermal decomposition methods [ 62 ].",
+            "start_char": 374,
+            "end_char": 620,
+            "materials": [
+              "[ 60 ], sol-gel"
+            ],
+            "params": {}
+          },
+          {
+            "op_type": "inject",
+            "sentence": "The hot injection, solution precipitation, and hydrothermal approaches are most widely adopted for preparing QD-based gas sensors, characterized by their simplicity, low reaction temperatures, and high tunability.",
+            "start_char": 621,
+            "end_char": 834,
+            "materials": [],
+            "params": {}
+          },
+          {
+            "op_type": "inject",
+            "sentence": "The hot injection method involves the rapid injection of low-temperature precursor solutions into high-temperature reaction solutions, leveraging the instantaneous temperature and concentration change to achieve controlled nucleation and growth of QDs [ 63 ].",
+            "start_char": 835,
+            "end_char": 1094,
+            "materials": [],
+            "params": {}
+          },
+          {
+            "op_type": "inject",
+            "sentence": "As described by the LaMer model, upon injection, the precursors or converted monomers reach a supersaturated state within a short period, inducing burst nucleation [ 64 ].",
+            "start_char": 1095,
+            "end_char": 1266,
+            "materials": [],
+            "params": {}
+          },
+          {
+            "op_type": "heat",
+            "sentence": "Typically, for the synthesis of metal chalcogenide QDs, such as CdX (X = S, Se, Te) [ 65 ], PbX (X = S, Se, Te) [ 66 ], ZnX (X = S, Se) [ 65 ], and Cu x S [ 65 ], the metal precursor is first dissolved in a solution of ligands and coordinating or non-coordinating solvents and heated to a specific temperature.",
+            "start_char": 1469,
+            "end_char": 1779,
+            "materials": [
+              "CdX",
+              "X = S",
+              "[ 65 ], PbX (X = S"
+            ],
+            "params": {}
+          },
+          {
+            "op_type": "inject",
+            "sentence": "At this temperature, cold chalcogen precursor solutions are rapidly injected into the flask to initiate rapid nucleation.",
+            "start_char": 1780,
+            "end_char": 1901,
+            "materials": [],
+            "params": {}
+          },
+          {
+            "op_type": "inject",
+            "sentence": "The metal cation precursor solution is slowly injected into an aqueous or non-aqueous solution containing chalcogenide precursors under inert gas protection.",
+            "start_char": 2853,
+            "end_char": 3010,
+            "materials": [],
+            "params": {}
+          },
+          {
+            "op_type": "inject",
+            "sentence": "Among the three synthesis routes above, hot-injection yields QDs with high crystallinity, narrow size distribution, and excellent dispersity, which are necessary properties for constructing gas sensor devices.",
+            "start_char": 4514,
+            "end_char": 4723,
+            "materials": [
+              "the three synthesis routes"
+            ],
+            "params": {}
+          }
+        ],
+        "expanded": [
+          {
+            "op_type": "inject",
+            "steps": [
+              "Perform operation 'inject' as described: Colloidal metal chalcogenide QDs can be synthesized using a variety of chemical synthesis methods, including hot injection [ 58 ], solution precipitation [ 59 ], hydro/solvothermal [ 60 ], sol-gel [ 61 ], and thermal decomposition methods [ 62 ]."
+            ]
+          },
+          {
+            "op_type": "inject",
+            "steps": [
+              "Perform operation 'inject' as described: The hot injection, solution precipitation, and hydrothermal approaches are most widely adopted for preparing QD-based gas sensors, characterized by their simplicity, low reaction temperatures, and high tunability."
+            ]
+          },
+          {
+            "op_type": "inject",
+            "steps": [
+              "Perform operation 'inject' as described: The hot injection method involves the rapid injection of low-temperature precursor solutions into high-temperature reaction solutions, leveraging the instantaneous temperature and concentration change to achieve controlled nucleation and growth of QDs [ 63 ]."
+            ]
+          },
+          {
+            "op_type": "inject",
+            "steps": [
+              "Perform operation 'inject' as described: As described by the LaMer model, upon injection, the precursors or converted monomers reach a supersaturated state within a short period, inducing burst nucleation [ 64 ]."
+            ]
+          },
+          {
+            "op_type": "heat",
+            "steps": [
+              "Place the reaction vessel on a hotplate.",
+              "Ramp to the target temperature.",
+              "Maintain the target temperature for the specified time."
+            ]
+          },
+          {
+            "op_type": "inject",
+            "steps": [
+              "Perform operation 'inject' as described: At this temperature, cold chalcogen precursor solutions are rapidly injected into the flask to initiate rapid nucleation."
+            ]
+          },
+          {
+            "op_type": "inject",
+            "steps": [
+              "Perform operation 'inject' as described: The metal cation precursor solution is slowly injected into an aqueous or non-aqueous solution containing chalcogenide precursors under inert gas protection."
+            ]
+          },
+          {
+            "op_type": "inject",
+            "steps": [
+              "Perform operation 'inject' as described: Among the three synthesis routes above, hot-injection yields QDs with high crystallinity, narrow size distribution, and excellent dispersity, which are necessary properties for constructing gas sensor devices."
+            ]
+          }
+        ]
+      },
+      {
+        "text": "Synthesis of 2D metal chalcogenides 2D metal chalcogenides can be synthesized using a variety of methods, including chemical vapor deposition (CVD) [ 99 ], chemical and mechanical exfoliation [ 100 ], atomic layer deposition (ALD) [ 101 ], and colloidal synthesis [ 102 ]. Among these, CVD and chemical exfoliation are most widely employed in the fabrication of 2D metal chalcogenide-based gas sensors, as they can produce high-quality and scalable layered materials with precisely tunable physical properties [ 103 ]. The CVD process involves introducing gaseous precursors into a reaction chamber, where they are thermally decomposed or react at the surface of a heated substrate to form solid products [ 104 ]. These precursors undergo heterogeneous reactions at the solid-gas interface, resulting in the nucleation and epitaxial growth of thin films. Critical parameters such as reaction temperature, pressure, precursor flow rates, and substrate type must be precisely controlled to ensure high crystallinity, layer uniformity, and compositional consistency. Following film deposition, post-processing steps such as wet etching or polymer-assisted transfer are typically performed to relocate the 2D films onto target substrates. The CVD technique supports wafer-scale synthesis, enables atomic-level thickness control, and allows for in situ doping and heterostructure integration [ 105 ]. Its compatibility with current semiconductor process flows further facilitates the direct synthesis of 2D materials on device substrates, thereby streamlining sensor fabrication workflows [ 103 ]. However, the need for high-temperature furnaces, toxic or unstable precursors, and stringent control over reaction environments presents challenges for widespread adoption and limits the versatility of CVD for certain material systems. Chemical exfoliation is a top-down synthesis approach that produces 2D flakes by chemically disrupting the interlayer van der Waals interactions in bulk layered crystals. Typically, the bulk precursor is exposed to reactive chemical agents, such as lithium intercalants or strong acids, that intercalate between layers, weakening interlayer bonding and enabling subsequent exfoliation via ultrasonication or solvent dispersion [ 106 ]. This method allows for scalable and low-cost production of 2D materials, such as MoS 2 , and is particularly attractive for industrial-scale applications due to its high throughput and ambient-condition operation. Liquid-phase exfoliation yields monolayer or few-layer flakes with a thickness typically reduced to a median size of ~ 80 nm after processing. Notably, the exfoliation process introduces intrinsic sulfur vacancies on the basal planes, which serve as active adsorption sites for gas molecules and can be further engineered through substitutional doping (e.g., nitrogen incorporation via N-methyl pyrrolidone degradation) to tailor the material’s gas-sensing selectivity and sensitivity [ 107 ]. Moreover, the room-temperature operation mitigates risks associated with high-temperature degradation, such as oxidation or structural distortion [ 108 ]. Despite these advantages, chemical exfoliation suffers from several limitations, including the difficulty in precisely tuning vacancy densities and spatial distributions, degradation of flake morphology during processing, and the necessity for rigorous reaction condition optimization. These factors, combined with the long recovery times observed in some sensing applications, can negatively impact sensor reproducibility and stability [ 108 ].",
+        "operations": [
+          {
+            "op_type": "add",
+            "sentence": "The CVD process involves introducing gaseous precursors into a reaction chamber, where they are thermally decomposed or react at the surface of a heated substrate to form solid products [ 104 ].",
+            "start_char": 519,
+            "end_char": 713,
+            "materials": [
+              "The CVD process"
+            ],
+            "params": {}
+          },
+          {
+            "op_type": "add",
+            "sentence": "Notably, the exfoliation process introduces intrinsic sulfur vacancies on the basal planes, which serve as active adsorption sites for gas molecules and can be further engineered through substitutional doping (e.g., nitrogen incorporation via N-methyl pyrrolidone degradation) to tailor the material’s gas-sensing selectivity and sensitivity [ 107 ].",
+            "start_char": 2622,
+            "end_char": 2972,
+            "materials": [
+              "(e.g., nitrogen incorporation"
+            ],
+            "params": {}
+          }
+        ],
+        "expanded": [
+          {
+            "op_type": "add",
+            "steps": [
+              "Ensure reaction vessel is present and empty.",
+              "Place a clean stir bar in the vessel.",
+              "Measure the specified amount of The CVD process.",
+              "Transfer The CVD process into the vessel."
+            ]
+          },
+          {
+            "op_type": "add",
+            "steps": [
+              "Ensure reaction vessel is present and empty.",
+              "Place a clean stir bar in the vessel.",
+              "Measure the specified amount of (e.g., nitrogen incorporation.",
+              "Transfer (e.g., nitrogen incorporation into the vessel."
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

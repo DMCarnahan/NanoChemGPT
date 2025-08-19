@@ -1,0 +1,121 @@
+{
+  "paper_id": "10.3390/molecules30132755",
+  "title": "Recent Studies on the Construction of MOF-Based Composites and Their Applications in Photocatalytic Hydrogen Evolution.",
+  "authors": [],
+  "doi": "10.3390/molecules30132755",
+  "source": "eupmc",
+  "urls": {
+    "pdf": null
+  },
+  "license": {
+    "type": "unknown"
+  },
+  "access_route": "oa",
+  "sections": [
+    {
+      "heading": "4.2. Synthesis Method and Structure Control",
+      "text": "4.2. Synthesis Method and Structure Control In situ growth is a common method for constructing MOF-based ternary composites, where MOF frameworks grow around pre-synthesized nanoparticles to achieve uniform dispersion and close component contact. Researchers prepared a novel Au@PCN-222 catalyst via one-dimensional channel-confined growth of gold nanorods within MOFs [ 48 ]. This structure retains the high specific surface area and CO 2  adsorption capacity of MOFs while enhancing photocatalytic performance through the plasmonic effect of Au nanorods. In situ growth is particularly suitable for constructing core-shell structured ternary composites. For example, our team constructed a 3D/2D ZnIn 2 S 4 /Ni-MOLs heterojunction via an in situ hydrothermal method, tightly anchoring 3D ZnIn 2 S 4  nanoflowers onto 2D Ni-MOLs nanosheets [ 49 ]. The optimized composite exhibited an outstanding hydrogen evolution rate of 4.75 mmol·g −1 ·h −1  under visible light—8 times higher than that of pure ZnIn 2 S 4  and 95 times higher than pure Ni-MOLs—with an apparent quantum efficiency (AQE) of 23.3% and excellent stability over five cycles. The in situ formed a tight interface, confirmed via in situ XPS and DFT calculations, promotes efficient electron transfer from ZnIn 2 S 4  to Ni-MOLs, synergistically enhancing charge separation, visible-light absorption, and active site exposure. Post-synthesis modification involves the sequential introduction of other functional components onto as-synthesized MOFs. This method is operationally simple and allows for flexible control over component loading. While post-modification enables independent optimization of each component’s synthesis conditions, it may suffer from uneven component distribution [ 50 ]. For instance, amino-functionalizing MOF pores before loading noble metal nanoparticles allows precise tuning of active site density. Self-assembly utilizes intermolecular forces (such as electrostatic and coordination interactions) to spontaneously form ternary composite structures ( Figure 7 a). Multinuclear acids@MOFs composites are often prepared using this method, where POMs spontaneously penetrate into the pores of MOFs through impregnation [ 51 ]. The self-assembly process is mild and allows for the preservation of the intrinsic properties of each component, but it requires a high degree of compatibility between components [ 52 , 53 ]. The key to constructing an efficient MOF-based ternary photocatalyst lies in optimizing the interfacial characteristics and band matching between components. Strong interface contact facilitates charge transfer, while appropriate band alignment drives the directional separation of photogenerated carriers [ 56 ]. Heterojunction design is an effective strategy for optimizing interface characteristics [ 57 ]. Gálvez-Barbosa et al. report that the dual Z-scheme iron-based MOF ternary composite material (Fe-based MOF/silver-containing compound/silver-containing compound) further enhances redox reaction capability due to the increased number of transport channels. Compared to single Z-type heterojunctions, the dual Z-type structure offers significant advantages in light capture and charge transfer [ 58 ]. Designing MOF-based ternary composites requires a comprehensive consideration of component selection, synthesis methods, and interface engineering. By rationally designing component functions and synergistic effects and employing appropriate synthesis strategies to control material structure, efficient and stable photocatalytic hydrogen production systems can be developed [ 59 ]. With advancements in characterization techniques and theoretical calculations, the understanding of material structure–property relationships will deepen, guiding the design of superior ternary composites. For example, in the α-DMACoPc/TiO 2 /MIL-101 (Fe) ternary composite material, phthalocyanine molecules act as photosensitizers and coordinate with MOF [ 60 , 61 ] defect sites through carboxylic acid groups, forming stable interfacial connections. This chemical bonding not only enhances the stability of the composite material but also promotes electron transfer at the interface. MOF-based ternary composites exhibit outstanding performance in photocatalytic hydrogen production through carefully designed component combinations and structural configurations. This section analyzes typical cases including noble metal-modified systems, quantum dot composites, and polyoxometalate hybrid systems [ 62 ], exploring their compositional characteristics, performance advantages, and action mechanisms. The dual Z-scheme heterojunction enhances carrier separation efficiency through internal charge transport. MOF-based heterojunction is able to be constructed using the one-pot method ( Figure 7 b). Surface modification can also improve interfacial properties. By introducing bridging molecules or functional groups, the interaction between components can be enhanced, promoting charge transfer at the interface ( Figure 7 c)."
+    }
+  ],
+  "extractions": {
+    "methods_paragraphs": [
+      {
+        "text": "4.2. Synthesis Method and Structure Control In situ growth is a common method for constructing MOF-based ternary composites, where MOF frameworks grow around pre-synthesized nanoparticles to achieve uniform dispersion and close component contact. Researchers prepared a novel Au@PCN-222 catalyst via one-dimensional channel-confined growth of gold nanorods within MOFs [ 48 ]. This structure retains the high specific surface area and CO 2  adsorption capacity of MOFs while enhancing photocatalytic performance through the plasmonic effect of Au nanorods. In situ growth is particularly suitable for constructing core-shell structured ternary composites. For example, our team constructed a 3D/2D ZnIn 2 S 4 /Ni-MOLs heterojunction via an in situ hydrothermal method, tightly anchoring 3D ZnIn 2 S 4  nanoflowers onto 2D Ni-MOLs nanosheets [ 49 ]. The optimized composite exhibited an outstanding hydrogen evolution rate of 4.75 mmol·g −1 ·h −1  under visible light—8 times higher than that of pure ZnIn 2 S 4  and 95 times higher than pure Ni-MOLs—with an apparent quantum efficiency (AQE) of 23.3% and excellent stability over five cycles. The in situ formed a tight interface, confirmed via in situ XPS and DFT calculations, promotes efficient electron transfer from ZnIn 2 S 4  to Ni-MOLs, synergistically enhancing charge separation, visible-light absorption, and active site exposure. Post-synthesis modification involves the sequential introduction of other functional components onto as-synthesized MOFs. This method is operationally simple and allows for flexible control over component loading. While post-modification enables independent optimization of each component’s synthesis conditions, it may suffer from uneven component distribution [ 50 ]. For instance, amino-functionalizing MOF pores before loading noble metal nanoparticles allows precise tuning of active site density. Self-assembly utilizes intermolecular forces (such as electrostatic and coordination interactions) to spontaneously form ternary composite structures ( Figure 7 a). Multinuclear acids@MOFs composites are often prepared using this method, where POMs spontaneously penetrate into the pores of MOFs through impregnation [ 51 ]. The self-assembly process is mild and allows for the preservation of the intrinsic properties of each component, but it requires a high degree of compatibility between components [ 52 , 53 ]. The key to constructing an efficient MOF-based ternary photocatalyst lies in optimizing the interfacial characteristics and band matching between components. Strong interface contact facilitates charge transfer, while appropriate band alignment drives the directional separation of photogenerated carriers [ 56 ]. Heterojunction design is an effective strategy for optimizing interface characteristics [ 57 ]. Gálvez-Barbosa et al. report that the dual Z-scheme iron-based MOF ternary composite material (Fe-based MOF/silver-containing compound/silver-containing compound) further enhances redox reaction capability due to the increased number of transport channels. Compared to single Z-type heterojunctions, the dual Z-type structure offers significant advantages in light capture and charge transfer [ 58 ]. Designing MOF-based ternary composites requires a comprehensive consideration of component selection, synthesis methods, and interface engineering. By rationally designing component functions and synergistic effects and employing appropriate synthesis strategies to control material structure, efficient and stable photocatalytic hydrogen production systems can be developed [ 59 ]. With advancements in characterization techniques and theoretical calculations, the understanding of material structure–property relationships will deepen, guiding the design of superior ternary composites. For example, in the α-DMACoPc/TiO 2 /MIL-101 (Fe) ternary composite material, phthalocyanine molecules act as photosensitizers and coordinate with MOF [ 60 , 61 ] defect sites through carboxylic acid groups, forming stable interfacial connections. This chemical bonding not only enhances the stability of the composite material but also promotes electron transfer at the interface. MOF-based ternary composites exhibit outstanding performance in photocatalytic hydrogen production through carefully designed component combinations and structural configurations. This section analyzes typical cases including noble metal-modified systems, quantum dot composites, and polyoxometalate hybrid systems [ 62 ], exploring their compositional characteristics, performance advantages, and action mechanisms. The dual Z-scheme heterojunction enhances carrier separation efficiency through internal charge transport. MOF-based heterojunction is able to be constructed using the one-pot method ( Figure 7 b). Surface modification can also improve interfacial properties. By introducing bridging molecules or functional groups, the interaction between components can be enhanced, promoting charge transfer at the interface ( Figure 7 c).",
+        "operations": [
+          {
+            "op_type": "add",
+            "sentence": "The in situ formed a tight interface, confirmed via in situ XPS and DFT calculations, promotes efficient electron transfer from ZnIn 2 S 4  to Ni-MOLs, synergistically enhancing charge separation, visible-light absorption, and active site exposure.",
+            "start_char": 1143,
+            "end_char": 1391,
+            "materials": [
+              "situ XPS and DFT calculations",
+              "ZnIn 2 S"
+            ],
+            "params": {
+              "time": "2 S"
+            }
+          },
+          {
+            "op_type": "add",
+            "sentence": "Strong interface contact facilitates charge transfer, while appropriate band alignment drives the directional separation of photogenerated carriers [ 56 ].",
+            "start_char": 2570,
+            "end_char": 2725,
+            "materials": [],
+            "params": {}
+          },
+          {
+            "op_type": "add",
+            "sentence": "Compared to single Z-type heterojunctions, the dual Z-type structure offers significant advantages in light capture and charge transfer [ 58 ].",
+            "start_char": 3079,
+            "end_char": 3222,
+            "materials": [],
+            "params": {}
+          },
+          {
+            "op_type": "add",
+            "sentence": "The dual Z-scheme heterojunction enhances carrier separation efficiency through internal charge transport.",
+            "start_char": 4611,
+            "end_char": 4717,
+            "materials": [],
+            "params": {}
+          },
+          {
+            "op_type": "add",
+            "sentence": "By introducing bridging molecules or functional groups, the interaction between components can be enhanced, promoting charge transfer at the interface ( Figure 7 c).",
+            "start_char": 4871,
+            "end_char": 5036,
+            "materials": [],
+            "params": {}
+          }
+        ],
+        "expanded": [
+          {
+            "op_type": "add",
+            "steps": [
+              "Ensure reaction vessel is present and empty.",
+              "Place a clean stir bar in the vessel.",
+              "Measure the specified amount of situ XPS and DFT calculations.",
+              "Transfer situ XPS and DFT calculations into the vessel."
+            ]
+          },
+          {
+            "op_type": "add",
+            "steps": [
+              "Ensure reaction vessel is present and empty.",
+              "Place a clean stir bar in the vessel.",
+              "Measure the specified amount of reagent.",
+              "Transfer reagent into the vessel."
+            ]
+          },
+          {
+            "op_type": "add",
+            "steps": [
+              "Ensure reaction vessel is present and empty.",
+              "Place a clean stir bar in the vessel.",
+              "Measure the specified amount of reagent.",
+              "Transfer reagent into the vessel."
+            ]
+          },
+          {
+            "op_type": "add",
+            "steps": [
+              "Ensure reaction vessel is present and empty.",
+              "Place a clean stir bar in the vessel.",
+              "Measure the specified amount of reagent.",
+              "Transfer reagent into the vessel."
+            ]
+          },
+          {
+            "op_type": "add",
+            "steps": [
+              "Ensure reaction vessel is present and empty.",
+              "Place a clean stir bar in the vessel.",
+              "Measure the specified amount of reagent.",
+              "Transfer reagent into the vessel."
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

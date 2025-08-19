@@ -1,0 +1,200 @@
+{
+  "paper_id": "10.3390/polym17141976",
+  "title": "Smart and Biodegradable Polymers in Tissue Engineering and Interventional Devices: A Brief Review.",
+  "authors": [],
+  "doi": "10.3390/polym17141976",
+  "source": "eupmc",
+  "urls": {
+    "pdf": null
+  },
+  "license": {
+    "type": "unknown"
+  },
+  "access_route": "oa",
+  "sections": [
+    {
+      "heading": "5. Methods for Creating Polymer Scaffolds",
+      "text": "5. Methods for Creating Polymer Scaffolds An ideal bone scaffold must be biomimetic, biodegradable, and possess a porous structure that facilitates cell attachment, proliferation, and differentiation. Additionally, it must have sufficient mechanical strength to remain stable at the implantation site while minimizing immunogenic risk [ 247 ]. One simple method to fabricate such porous polymeric scaffolds is solvent casting. In this process, a chosen polymer is dissolved in an organic solvent, and a porogen such as sodium chloride (NaCl) is added to generate a polymer–porogen matrix. As the solvent evaporates, it leaves behind a solidified polymer structure with controlled porosity. While effective, this method is limited by its ability to control pore shape and interconnectivity [ 248 , 249 ]. Phase separation is another common technique used to create porous polymer scaffolds. This method utilizes thermal changes to drive the separation of a polymer such as poly(L-lactic acid) (PLLA) dissolved in two immiscible solvents. At lower temperatures, these polymer solutions become thermodynamically unstable. When heated, they become saturated, leading to a separation into a polymer-rich phase and a solvent-rich phase. Upon subsequent cooling, the polymer-rich phase solidifies into a high-porosity structure, while the solvent-rich phase is removed through extraction, sublimation, or evaporation [ 250 ]. Freeze-drying (lyophilization) is a versatile approach to producing porous polymer scaffolds without the use of porogens. In this technique, a water-based polymer solution is frozen, causing ice crystal formation. The polymer aggregates in the interstitial spaces between the ice crystals, and upon sublimation of the ice, a porous scaffold structure is obtained [ 251 ]. The directionality of freezing significantly impacts the morphology of the scaffold pores. Directed freezing refers to the alignment of ice crystals from a low to high temperature gradient, producing scaffolds with unidirectional, aligned pores. This method enables the fabrication of a wide range of porous structures using polymers in emulsions, solutions, or colloidal suspensions [ 252 ]. Emulsion-freezing is another scaffold fabrication technique that involves mixing polymer or ceramic materials dissolved in a solvent with water to form an emulsion. This emulsion is then cast into molds and frozen to induce phase separation. Subsequent freeze-drying removes the solvents and water, resulting in a porous structure [ 253 ]. Electrospinning is a highly adaptable and scalable technique for fabricating nanofibrous scaffolds that closely mimic the morphology of native extracellular matrix, making it ideal for tissue engineering applications. With a standard setup—comprising a high-voltage power supply, syringe pump, and various collector types—researchers can finely adjust fiber diameter and porosity by modulating solution properties (e.g., viscosity, conductivity), process parameters (e.g., voltage, flow rate), and ambient conditions (e.g., humidity, temperature) [ 254 , 255 ]. Electrospun scaffolds exhibit large surface-to-volume ratios and interconnected pore networks, promoting cell adhesion, proliferation, and controlled drug release, while advanced configurations like multi-fluid and multilayer electrospinning further enhance structural complexity and functionality [ 256 ]. Visual representation of traditional techniques used for scaffold fabrication is provided in  Figure 8 . Phase separation methods include nonsolvent-induced phase separation (NIPS) and thermally induced phase separation (TIPS). In NIPS, a polymer is dissolved in a solvent, cast, briefly exposed to air, and then immersed in a nonsolvent bath. Contact between the polymer solution and nonsolvent induces phase separation, resulting in polymer-rich and polymer-poor regions, with the solidified polymer-rich phase forming a porous structure [ 257 , 258 ]. TIPS involves preparing a homogeneous polymer solution at elevated temperatures, followed by cooling to initiate phase separation. Solidification of the polymer-rich phase forms the scaffold, while the solvent-rich phase is removed to create pores. TIPS can occur via solid–liquid (S-L) or liquid–liquid (L-L) mechanisms. In S-L separation, the solvent crystallizes upon cooling and is removed to leave pores. L-L separation results from phase coexistence at specific temperature and concentration conditions [ 259 , 260 ]. The TIPS method for fabricating porous high-performance polymers involved several controlled steps. In the study [ 261 ], a mixture of polymer and 4PPH powders was prepared and heated in a thermostatically controlled vessel until the 4PPH melted completely. The process is shown in  Figure 9 . Stirring was initiated to form a clear polymer solution, and the temperature was maintained for 30 min to ensure full dissolution. The mixture was then cooled gradually to 120 °C, followed by rapid cooling to room temperature to solidify the structure. Finally, the samples were purified via 48-h Soxhlet extraction in ethanol and dried at 60 °C for 24 h to achieve a stable weight. Gas foaming involves introducing gas bubbles into a polymer matrix, often using foaming agents such as water (H 2 O), fluoroform, nitrogen (N 2 ), or carbon dioxide (CO 2 ). The polymer is compressed and saturated under pressure until bubble formation occurs [ 262 , 263 ]. Gas bubbles ranging from 100 to 500 µm can be generated using this approach [ 264 , 265 ]. The pore size is controlled by adjusting the polymer-to-foaming agent ratio. Gas formation may also occur via chemical reactions that release gases like N 2 , resulting in highly porous foam networks [ 266 ]. Though this method uses non-toxic solvents, it suffers from poor pore interconnectivity and non-porous external surfaces, limiting its utility [ 267 ]. Table 2  contains information on the advantages and limitations/drawbacks of every aforementioned method."
+    }
+  ],
+  "extractions": {
+    "methods_paragraphs": [
+      {
+        "text": "5. Methods for Creating Polymer Scaffolds An ideal bone scaffold must be biomimetic, biodegradable, and possess a porous structure that facilitates cell attachment, proliferation, and differentiation. Additionally, it must have sufficient mechanical strength to remain stable at the implantation site while minimizing immunogenic risk [ 247 ]. One simple method to fabricate such porous polymeric scaffolds is solvent casting. In this process, a chosen polymer is dissolved in an organic solvent, and a porogen such as sodium chloride (NaCl) is added to generate a polymer–porogen matrix. As the solvent evaporates, it leaves behind a solidified polymer structure with controlled porosity. While effective, this method is limited by its ability to control pore shape and interconnectivity [ 248 , 249 ]. Phase separation is another common technique used to create porous polymer scaffolds. This method utilizes thermal changes to drive the separation of a polymer such as poly(L-lactic acid) (PLLA) dissolved in two immiscible solvents. At lower temperatures, these polymer solutions become thermodynamically unstable. When heated, they become saturated, leading to a separation into a polymer-rich phase and a solvent-rich phase. Upon subsequent cooling, the polymer-rich phase solidifies into a high-porosity structure, while the solvent-rich phase is removed through extraction, sublimation, or evaporation [ 250 ]. Freeze-drying (lyophilization) is a versatile approach to producing porous polymer scaffolds without the use of porogens. In this technique, a water-based polymer solution is frozen, causing ice crystal formation. The polymer aggregates in the interstitial spaces between the ice crystals, and upon sublimation of the ice, a porous scaffold structure is obtained [ 251 ]. The directionality of freezing significantly impacts the morphology of the scaffold pores. Directed freezing refers to the alignment of ice crystals from a low to high temperature gradient, producing scaffolds with unidirectional, aligned pores. This method enables the fabrication of a wide range of porous structures using polymers in emulsions, solutions, or colloidal suspensions [ 252 ]. Emulsion-freezing is another scaffold fabrication technique that involves mixing polymer or ceramic materials dissolved in a solvent with water to form an emulsion. This emulsion is then cast into molds and frozen to induce phase separation. Subsequent freeze-drying removes the solvents and water, resulting in a porous structure [ 253 ]. Electrospinning is a highly adaptable and scalable technique for fabricating nanofibrous scaffolds that closely mimic the morphology of native extracellular matrix, making it ideal for tissue engineering applications. With a standard setup—comprising a high-voltage power supply, syringe pump, and various collector types—researchers can finely adjust fiber diameter and porosity by modulating solution properties (e.g., viscosity, conductivity), process parameters (e.g., voltage, flow rate), and ambient conditions (e.g., humidity, temperature) [ 254 , 255 ]. Electrospun scaffolds exhibit large surface-to-volume ratios and interconnected pore networks, promoting cell adhesion, proliferation, and controlled drug release, while advanced configurations like multi-fluid and multilayer electrospinning further enhance structural complexity and functionality [ 256 ]. Visual representation of traditional techniques used for scaffold fabrication is provided in  Figure 8 . Phase separation methods include nonsolvent-induced phase separation (NIPS) and thermally induced phase separation (TIPS). In NIPS, a polymer is dissolved in a solvent, cast, briefly exposed to air, and then immersed in a nonsolvent bath. Contact between the polymer solution and nonsolvent induces phase separation, resulting in polymer-rich and polymer-poor regions, with the solidified polymer-rich phase forming a porous structure [ 257 , 258 ]. TIPS involves preparing a homogeneous polymer solution at elevated temperatures, followed by cooling to initiate phase separation. Solidification of the polymer-rich phase forms the scaffold, while the solvent-rich phase is removed to create pores. TIPS can occur via solid–liquid (S-L) or liquid–liquid (L-L) mechanisms. In S-L separation, the solvent crystallizes upon cooling and is removed to leave pores. L-L separation results from phase coexistence at specific temperature and concentration conditions [ 259 , 260 ]. The TIPS method for fabricating porous high-performance polymers involved several controlled steps. In the study [ 261 ], a mixture of polymer and 4PPH powders was prepared and heated in a thermostatically controlled vessel until the 4PPH melted completely. The process is shown in  Figure 9 . Stirring was initiated to form a clear polymer solution, and the temperature was maintained for 30 min to ensure full dissolution. The mixture was then cooled gradually to 120 °C, followed by rapid cooling to room temperature to solidify the structure. Finally, the samples were purified via 48-h Soxhlet extraction in ethanol and dried at 60 °C for 24 h to achieve a stable weight. Gas foaming involves introducing gas bubbles into a polymer matrix, often using foaming agents such as water (H 2 O), fluoroform, nitrogen (N 2 ), or carbon dioxide (CO 2 ). The polymer is compressed and saturated under pressure until bubble formation occurs [ 262 , 263 ]. Gas bubbles ranging from 100 to 500 µm can be generated using this approach [ 264 , 265 ]. The pore size is controlled by adjusting the polymer-to-foaming agent ratio. Gas formation may also occur via chemical reactions that release gases like N 2 , resulting in highly porous foam networks [ 266 ]. Though this method uses non-toxic solvents, it suffers from poor pore interconnectivity and non-porous external surfaces, limiting its utility [ 267 ]. Table 2  contains information on the advantages and limitations/drawbacks of every aforementioned method.",
+        "operations": [
+          {
+            "op_type": "add",
+            "sentence": "In this process, a chosen polymer is dissolved in an organic solvent, and a porogen such as sodium chloride (NaCl) is added to generate a polymer–porogen matrix.",
+            "start_char": 427,
+            "end_char": 588,
+            "materials": [],
+            "params": {}
+          },
+          {
+            "op_type": "dry",
+            "sentence": "As the solvent evaporates, it leaves behind a solidified polymer structure with controlled porosity.",
+            "start_char": 589,
+            "end_char": 689,
+            "materials": [],
+            "params": {}
+          },
+          {
+            "op_type": "heat",
+            "sentence": "When heated, they become saturated, leading to a separation into a polymer-rich phase and a solvent-rich phase.",
+            "start_char": 1119,
+            "end_char": 1230,
+            "materials": [],
+            "params": {}
+          },
+          {
+            "op_type": "dry",
+            "sentence": "Freeze-drying (lyophilization) is a versatile approach to producing porous polymer scaffolds without the use of porogens.",
+            "start_char": 1419,
+            "end_char": 1540,
+            "materials": [
+              "Freeze-drying (lyophilization"
+            ],
+            "params": {}
+          },
+          {
+            "op_type": "stir",
+            "sentence": "Emulsion-freezing is another scaffold fabrication technique that involves mixing polymer or ceramic materials dissolved in a solvent with water to form an emulsion.",
+            "start_char": 2184,
+            "end_char": 2348,
+            "materials": [],
+            "params": {}
+          },
+          {
+            "op_type": "dry",
+            "sentence": "Subsequent freeze-drying removes the solvents and water, resulting in a porous structure [ 253 ].",
+            "start_char": 2426,
+            "end_char": 2523,
+            "materials": [],
+            "params": {}
+          },
+          {
+            "op_type": "heat",
+            "sentence": "In the study [ 261 ], a mixture of polymer and 4PPH powders was prepared and heated in a thermostatically controlled vessel until the 4PPH melted completely.",
+            "start_char": 4572,
+            "end_char": 4729,
+            "materials": [],
+            "params": {}
+          },
+          {
+            "op_type": "heat",
+            "sentence": "Stirring was initiated to form a clear polymer solution, and the temperature was maintained for 30 min to ensure full dissolution.",
+            "start_char": 4766,
+            "end_char": 4896,
+            "materials": [
+              "30 min"
+            ],
+            "params": {
+              "time": "30 min"
+            }
+          },
+          {
+            "op_type": "dry",
+            "sentence": "Finally, the samples were purified via 48-h Soxhlet extraction in ethanol and dried at 60 °C for 24 h to achieve a stable weight.",
+            "start_char": 5019,
+            "end_char": 5148,
+            "materials": [
+              "48-h Soxhlet extraction",
+              "60 °C",
+              "24 h"
+            ],
+            "params": {
+              "temp": "60°C",
+              "time": "24 h"
+            }
+          },
+          {
+            "op_type": "add",
+            "sentence": "Gas foaming involves introducing gas bubbles into a polymer matrix, often using foaming agents such as water (H 2 O), fluoroform, nitrogen (N 2 ), or carbon dioxide (CO 2 ).",
+            "start_char": 5149,
+            "end_char": 5322,
+            "materials": [
+              "H 2 O"
+            ],
+            "params": {}
+          }
+        ],
+        "expanded": [
+          {
+            "op_type": "add",
+            "steps": [
+              "Ensure reaction vessel is present and empty.",
+              "Place a clean stir bar in the vessel.",
+              "Measure the specified amount of reagent.",
+              "Transfer reagent into the vessel."
+            ]
+          },
+          {
+            "op_type": "dry",
+            "steps": [
+              "Perform operation 'dry' as described: As the solvent evaporates, it leaves behind a solidified polymer structure with controlled porosity."
+            ]
+          },
+          {
+            "op_type": "heat",
+            "steps": [
+              "Place the reaction vessel on a hotplate.",
+              "Ramp to the target temperature.",
+              "Maintain the target temperature for the specified time."
+            ]
+          },
+          {
+            "op_type": "dry",
+            "steps": [
+              "Perform operation 'dry' as described: Freeze-drying (lyophilization) is a versatile approach to producing porous polymer scaffolds without the use of porogens."
+            ]
+          },
+          {
+            "op_type": "stir",
+            "steps": [
+              "Place the reaction vessel on a stir plate.",
+              "Set the stirrer to an appropriate speed.",
+              "Stir for the specified time."
+            ]
+          },
+          {
+            "op_type": "dry",
+            "steps": [
+              "Perform operation 'dry' as described: Subsequent freeze-drying removes the solvents and water, resulting in a porous structure [ 253 ]."
+            ]
+          },
+          {
+            "op_type": "heat",
+            "steps": [
+              "Place the reaction vessel on a hotplate.",
+              "Ramp to the target temperature.",
+              "Maintain the target temperature for the specified time."
+            ]
+          },
+          {
+            "op_type": "heat",
+            "steps": [
+              "Place the reaction vessel on a hotplate.",
+              "Ramp to the target temperature.",
+              "Maintain the target temperature for 30 min."
+            ]
+          },
+          {
+            "op_type": "dry",
+            "steps": [
+              "Perform operation 'dry' as described: Finally, the samples were purified via 48-h Soxhlet extraction in ethanol and dried at 60 °C for 24 h to achieve a stable weight."
+            ]
+          },
+          {
+            "op_type": "add",
+            "steps": [
+              "Ensure reaction vessel is present and empty.",
+              "Place a clean stir bar in the vessel.",
+              "Measure the specified amount of H 2 O.",
+              "Transfer H 2 O into the vessel."
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

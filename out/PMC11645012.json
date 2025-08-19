@@ -1,0 +1,157 @@
+{
+  "paper_id": "PMC11645012",
+  "title": "Modeling Carbon-Based Nanomaterials (CNMs) and Derived Composites and Devices",
+  "authors": [],
+  "doi": null,
+  "source": "eupmc",
+  "urls": {
+    "pdf": null
+  },
+  "license": {
+    "type": "unknown"
+  },
+  "access_route": "oa",
+  "sections": [
+    {
+      "heading": "1. Introduction",
+      "text": "1. Introduction Recent advances in analytical and computational modeling enable prediction and understanding of material properties and responses on scales ranging from the electronic/atomistic, through the microstructure or transitional, and up to the continuum ( Figure 1 ). Multiscale material modeling is based on a systematic reduction in the degrees of freedom at different length scales in which a material can be described. Connections between these scales are established either by parametrization, by grouping (i.e., coarse graining), or by homogenization procedures. These different scales in the description of materials have historically been associated with different disciplines, from physics to engineering, including chemistry and materials science ( Figure 1 ). Each scale can be studied by means of different types of models (electronic, atomistic, mesoscopic, and continuum), which employ distinct basic entities and usually work in different ranges of timescales and number of entities ( Figure 2 ). However, the scale and type of model do not have a one-to-one correspondence, since there are areas of overlap regarding the models that can be employed for a specific analysis. This article presents a review of different modeling strategies and methodologies used in the field of carbon-based nanoparticles (graphene, carbon nanotubes—CNTs, nanofibers, etc.), carbon-based nanomaterials (CNMs), and devices (such as sensors) that can be obtained from these materials. Within this framework, the variety of models, methods, and applications is extremely wide, and getting a full picture in a condensed report is hard to reach. This review, then, aims to cover some of the key modeling approaches usually employed at different length and time scales, ending with a discussion on a specific type of sensor, derived from these carbon-based materials, as an example of device-level modeling. This leads to the four main sections that constitute the present document. At the lower scale, the first type of model focuses on electronic calculations and theoretical studies of single-particle and collective excitations. These models are relevant for photonics, plasmonic, and nano-electronics applications. At the next level, molecular dynamics (MD) models enable the study of material properties/responses that are mainly dominated by interactions between atoms or molecules, defined through force fields. These models help in predicting mechanical, thermal, and surface properties, as well as other physical properties such as density, viscosity, or glass transition temperature; they are used transversally in the design of materials and nanocomposites for a wide range of applications. At the continuum level, modeling is typically employed to predict the macroscopic-homogenized properties of materials by considering the constituents as a continuous medium rather than as discrete particles. As in the previous case, these models can be used to predict different types of properties (mechanical, thermal, electrical, acoustic, and other physical properties). Finally, certain kinds of products and devices need to be modeled as systems instead, which might require a combination of different types of properties and physics. Each system has its own requirements, which can lead to the integration of different sub-models. At this scale, as an application example relevant to sensors, this review focuses on the modeling and simulation of graphene field effect transistors (GFET) devices and circuits."
+    },
+    {
+      "heading": "2. Theoretical Modeling of Interactions of Charged Particles with Graphene-Based Nanomaterials and Their Composites",
+      "text": "2. Theoretical Modeling of Interactions of Charged Particles with Graphene-Based Nanomaterials and Their Composites Graphene is the best-known and most explored two-dimensional (2D) material. It is the world’s thinnest and strongest material, with the highest electrical and thermal conductivity known. Due to its outstanding physical, chemical, electrical, and optical properties, graphene shows great potential in many fields, including sensors [ 2 , 3 , 4 , 5 , 6 ]. In nanoscale devices, graphene typically appears in stacks separated by insulating layers of finite thickness [ 7 , 8 , 9 ], which usually support strong Fuchs–Kliewer or optical surface phonon modes [ 10 ]. Those phonon modes are active in the terahertz (THz) to mid-infrared (mid-IR) frequency range and can dampen the Dirac plasmon in doped graphene, which operates in the same frequency range [ 11 ] or can hybridize with it [ 12 ]. As a prototype of layered nanostructures involving doped graphene sheets, a sandwich-like composite that consists of two layers of graphene separated by an insulating layer was studied, and it was found that the structure supports a variety of interesting plasmon-phonon hybrid modes in the THz to mid-IR frequency range [ 13 ]. An insulating layer of sapphire (aluminum oxide, Al 2 O 3 ) was chosen because it is often used as a dielectric spacer in experiments [ 14 , 15 , 16 , 17 , 18 , 19 ]. The effective dielectric function of the system was obtained by using a local dielectric function for the bulk Al 2 O 3  and by using two approaches within the random phase approximation for graphene’s electronic response: an ab initio method based on the time-dependent density functional theory calculations and a method based on the massless Dirac fermion approximation for graphene π bands. The most efficient way to probe the plasmon-phonon hybridization between graphene and the nearby insulator(s) is by means of an externally moving charged particle. Such hybridization influences the energy loss of an incident particle [ 20 ], as well as the resulting wake effect in the induced electrostatic potential [ 21 ]. The wake potential (the total potential in the plane of the upper graphene sheet) induced by an external charged particle moving parallel to the graphene-Al 2 O 3 -graphene composite system ( Figure 3 ) was investigated in Ref. [ 22 ]. Three velocity regimes of the incident particle were considered in relation to the threshold for excitations of the Dirac plasmon in graphene, given by its Fermi velocity. It was shown that in the low-velocity regime (below the Fermi velocity), only the transverse optical (TO) phonons in the Al 2 O 3  layer contribute to the wake potential, whereas for intermediate velocities (above the Fermi velocity), the dominant contribution to the wake potential comes from the hybridized Dirac plasmons in the two graphene layers. It was also shown that in the high-velocity regime (well above the Fermi velocity), the dominant contribution to the wake potential originates from the highest-lying hybridized Dirac plasmon. The distance of the charged particle from the top graphene, the thickness of the Al 2 O 3  layer, and the doping density (i.e., Fermi energy) of graphene were fixed at their respective typical values. The effects of variations of all those parameters were studied in Ref. [ 23 ]. It was shown that in the low-velocity regime (below the Fermi velocity), strong effects were observed due to variation of the particle distance, while for the velocity of the charged particle above the Fermi velocity, strong effects were observed due to varying the thickness of the Al 2 O 3  layer, as well as due to plasmon damping of graphene’s π electrons and graphene doping. The plasmon-phonon hybridization also has an impact on the stopping force (the dissipative force, which opposes the particle’s motion) and the image force (the perpendicularly oriented conservative force, which bends the particle’s trajectory towards the upper graphene sheet). A thorough analysis of the stopping and image forces on a charged particle moving parallel to the graphene-Al 2 O 3 -graphene composite was performed in Ref. [ 24 ], covering broad ranges of the particle speeds and distances, as well as the doping densities of the two graphene sheets. Special attention was paid to the regime of low-particle speeds, where it was found that both forces exhibit an interesting interplay between the hybrid modes of the phononic type and the continuum of the intraband electron–hole excitations in graphene and where the modeling was sensitive to the temperature effects and the treatment of the phenomenological damping. It should be noted that the stopping force is the negative of the usual stopping power, whereas the image force is related to the familiar image potential. Note that the wake effect and the stopping and image forces were previously investigated theoretically in free-standing and supported graphene [ 20 , 21 , 25 , 26 , 27 , 28 , 29 , 30 , 31 , 32 , 33 , 34 , 35 , 36 , 37 , 38 , 39 , 40 , 41 , 42 , 43 , 44 ]. In the last few years, van der Waals (vdW) heterostructures based on graphene and hexagonal boron nitride (hBN) layers with different stacking modes have attracted a great deal of interest because of their potential applications [ 45 , 46 , 47 , 48 , 49 , 50 , 51 , 52 , 53 ]. Graphene/hBN vdW heterostructures were studied very recently in Refs. [ 54 , 55 ]. In Ref. [ 54 ], the authors theoretically examined the 2D plasmon excitation efficiency in graphene/hBN composites via silver spherical nanoparticle, whereas in Ref. [ 55 ], the authors theoretically investigated the Bloch plasmon polaritons band structure in Al 2 O 3 /graphene/hBN/graphene nanoribbons assembly depending on the doping of graphene layers. Electron energy loss spectroscopy (EELS) is a commonly used experimental technique for investigating electronic and plasmonic properties of 2D materials and vdW heterostructures [ 56 , 57 , 58 ]. Theoretical modeling of the experimental EELS data for free-standing (single- and multilayer) graphene sheets obtained by (scanning) transmission electron microscope ((S)TEM) is presented in Refs. [ 59 , 60 , 61 , 62 ], whereas the theoretical modeling of the experimental EELS data for monolayer graphene supported by different substrates is given in Refs. [ 63 , 64 , 65 , 66 ]. In Refs. [ 59 , 61 ], the authors treated the multilayer graphene as a layered electron gas with the single-layer polarizability modeled by a 2D, two-fluid hydrodynamic (HD) model [ 59 ] and with ab initio calculations [ 61 ] and found good agreement with experimental EEL spectra. In Ref. [ 60 ], the authors presented momentum-resolved EEL measurements of free-standing, single-layer graphene and compared them with corresponding time-dependent density functional theory calculations. Good agreement with experiments was found for finite momentum transfers if crystal local-field effects were considered. An analytical modeling of the experimental EELS data for free-standing graphene obtained by STEM is presented in Ref. [ 62 ]. The authors used an optical approximation based on the conductivity of graphene given in the local, that is, frequency-dependent form derived by both a 2D, two-fluid extended HD model and an ab initio method and found very good agreement with the EEL spectra from three independent experiments. In Refs. [ 63 , 64 , 65 , 66 ], the authors used the 2D, two-fluid HD model for interband transitions of graphene’s π and σ electrons and an empirical Drude–Lorentz model in the local approximation for metal substrates to reproduce the experimental EELS data. A very good agreement was obtained for monolayer graphene supported by Pt(111) substrate [ 63 , 64 ] and Ru(0001) substrate [ 64 ] for high-quality graphene grown on peeled-off epitaxial Cu(111) foils [ 65 ] and for graphene contacted with a Pt skin [ 66 ]. The model failed for the case of monolayer graphene supported by the Ni(111) substrate [ 64 ], presumably due to the strong hybridization between the π states of graphene and the  d  bands of Ni, which was not accounted for in the model. Acoustic plasmon (AP) in graphene or in graphene-dielectric-metal structures has been studied very intensively in the last few years [ 67 , 68 ]. In Ref. [ 69 ], the authors focused on the AP in graphene doped by alkali metals and demonstrated that two isoelectronic systems, KC 8  and CsC 8 , support substantially different plasmonic spectra, that is, the KC 8  supports a sharp Dirac plasmon (DP) and a well-defined AP, while the CsC 8  supports a broad DP and does not support an AP at all. These findings could be very useful in the area of chemical or biological sensing [ 70 , 71 ]."
+    }
+  ],
+  "extractions": {
+    "methods_paragraphs": [
+      {
+        "text": "1. Introduction Recent advances in analytical and computational modeling enable prediction and understanding of material properties and responses on scales ranging from the electronic/atomistic, through the microstructure or transitional, and up to the continuum ( Figure 1 ). Multiscale material modeling is based on a systematic reduction in the degrees of freedom at different length scales in which a material can be described. Connections between these scales are established either by parametrization, by grouping (i.e., coarse graining), or by homogenization procedures. These different scales in the description of materials have historically been associated with different disciplines, from physics to engineering, including chemistry and materials science ( Figure 1 ). Each scale can be studied by means of different types of models (electronic, atomistic, mesoscopic, and continuum), which employ distinct basic entities and usually work in different ranges of timescales and number of entities ( Figure 2 ). However, the scale and type of model do not have a one-to-one correspondence, since there are areas of overlap regarding the models that can be employed for a specific analysis. This article presents a review of different modeling strategies and methodologies used in the field of carbon-based nanoparticles (graphene, carbon nanotubes—CNTs, nanofibers, etc.), carbon-based nanomaterials (CNMs), and devices (such as sensors) that can be obtained from these materials. Within this framework, the variety of models, methods, and applications is extremely wide, and getting a full picture in a condensed report is hard to reach. This review, then, aims to cover some of the key modeling approaches usually employed at different length and time scales, ending with a discussion on a specific type of sensor, derived from these carbon-based materials, as an example of device-level modeling. This leads to the four main sections that constitute the present document. At the lower scale, the first type of model focuses on electronic calculations and theoretical studies of single-particle and collective excitations. These models are relevant for photonics, plasmonic, and nano-electronics applications. At the next level, molecular dynamics (MD) models enable the study of material properties/responses that are mainly dominated by interactions between atoms or molecules, defined through force fields. These models help in predicting mechanical, thermal, and surface properties, as well as other physical properties such as density, viscosity, or glass transition temperature; they are used transversally in the design of materials and nanocomposites for a wide range of applications. At the continuum level, modeling is typically employed to predict the macroscopic-homogenized properties of materials by considering the constituents as a continuous medium rather than as discrete particles. As in the previous case, these models can be used to predict different types of properties (mechanical, thermal, electrical, acoustic, and other physical properties). Finally, certain kinds of products and devices need to be modeled as systems instead, which might require a combination of different types of properties and physics. Each system has its own requirements, which can lead to the integration of different sub-models. At this scale, as an application example relevant to sensors, this review focuses on the modeling and simulation of graphene field effect transistors (GFET) devices and circuits.",
+        "operations": [],
+        "expanded": []
+      },
+      {
+        "text": "2. Theoretical Modeling of Interactions of Charged Particles with Graphene-Based Nanomaterials and Their Composites Graphene is the best-known and most explored two-dimensional (2D) material. It is the world’s thinnest and strongest material, with the highest electrical and thermal conductivity known. Due to its outstanding physical, chemical, electrical, and optical properties, graphene shows great potential in many fields, including sensors [ 2 , 3 , 4 , 5 , 6 ]. In nanoscale devices, graphene typically appears in stacks separated by insulating layers of finite thickness [ 7 , 8 , 9 ], which usually support strong Fuchs–Kliewer or optical surface phonon modes [ 10 ]. Those phonon modes are active in the terahertz (THz) to mid-infrared (mid-IR) frequency range and can dampen the Dirac plasmon in doped graphene, which operates in the same frequency range [ 11 ] or can hybridize with it [ 12 ]. As a prototype of layered nanostructures involving doped graphene sheets, a sandwich-like composite that consists of two layers of graphene separated by an insulating layer was studied, and it was found that the structure supports a variety of interesting plasmon-phonon hybrid modes in the THz to mid-IR frequency range [ 13 ]. An insulating layer of sapphire (aluminum oxide, Al 2 O 3 ) was chosen because it is often used as a dielectric spacer in experiments [ 14 , 15 , 16 , 17 , 18 , 19 ]. The effective dielectric function of the system was obtained by using a local dielectric function for the bulk Al 2 O 3  and by using two approaches within the random phase approximation for graphene’s electronic response: an ab initio method based on the time-dependent density functional theory calculations and a method based on the massless Dirac fermion approximation for graphene π bands. The most efficient way to probe the plasmon-phonon hybridization between graphene and the nearby insulator(s) is by means of an externally moving charged particle. Such hybridization influences the energy loss of an incident particle [ 20 ], as well as the resulting wake effect in the induced electrostatic potential [ 21 ]. The wake potential (the total potential in the plane of the upper graphene sheet) induced by an external charged particle moving parallel to the graphene-Al 2 O 3 -graphene composite system ( Figure 3 ) was investigated in Ref. [ 22 ]. Three velocity regimes of the incident particle were considered in relation to the threshold for excitations of the Dirac plasmon in graphene, given by its Fermi velocity. It was shown that in the low-velocity regime (below the Fermi velocity), only the transverse optical (TO) phonons in the Al 2 O 3  layer contribute to the wake potential, whereas for intermediate velocities (above the Fermi velocity), the dominant contribution to the wake potential comes from the hybridized Dirac plasmons in the two graphene layers. It was also shown that in the high-velocity regime (well above the Fermi velocity), the dominant contribution to the wake potential originates from the highest-lying hybridized Dirac plasmon. The distance of the charged particle from the top graphene, the thickness of the Al 2 O 3  layer, and the doping density (i.e., Fermi energy) of graphene were fixed at their respective typical values. The effects of variations of all those parameters were studied in Ref. [ 23 ]. It was shown that in the low-velocity regime (below the Fermi velocity), strong effects were observed due to variation of the particle distance, while for the velocity of the charged particle above the Fermi velocity, strong effects were observed due to varying the thickness of the Al 2 O 3  layer, as well as due to plasmon damping of graphene’s π electrons and graphene doping. The plasmon-phonon hybridization also has an impact on the stopping force (the dissipative force, which opposes the particle’s motion) and the image force (the perpendicularly oriented conservative force, which bends the particle’s trajectory towards the upper graphene sheet). A thorough analysis of the stopping and image forces on a charged particle moving parallel to the graphene-Al 2 O 3 -graphene composite was performed in Ref. [ 24 ], covering broad ranges of the particle speeds and distances, as well as the doping densities of the two graphene sheets. Special attention was paid to the regime of low-particle speeds, where it was found that both forces exhibit an interesting interplay between the hybrid modes of the phononic type and the continuum of the intraband electron–hole excitations in graphene and where the modeling was sensitive to the temperature effects and the treatment of the phenomenological damping. It should be noted that the stopping force is the negative of the usual stopping power, whereas the image force is related to the familiar image potential. Note that the wake effect and the stopping and image forces were previously investigated theoretically in free-standing and supported graphene [ 20 , 21 , 25 , 26 , 27 , 28 , 29 , 30 , 31 , 32 , 33 , 34 , 35 , 36 , 37 , 38 , 39 , 40 , 41 , 42 , 43 , 44 ]. In the last few years, van der Waals (vdW) heterostructures based on graphene and hexagonal boron nitride (hBN) layers with different stacking modes have attracted a great deal of interest because of their potential applications [ 45 , 46 , 47 , 48 , 49 , 50 , 51 , 52 , 53 ]. Graphene/hBN vdW heterostructures were studied very recently in Refs. [ 54 , 55 ]. In Ref. [ 54 ], the authors theoretically examined the 2D plasmon excitation efficiency in graphene/hBN composites via silver spherical nanoparticle, whereas in Ref. [ 55 ], the authors theoretically investigated the Bloch plasmon polaritons band structure in Al 2 O 3 /graphene/hBN/graphene nanoribbons assembly depending on the doping of graphene layers. Electron energy loss spectroscopy (EELS) is a commonly used experimental technique for investigating electronic and plasmonic properties of 2D materials and vdW heterostructures [ 56 , 57 , 58 ]. Theoretical modeling of the experimental EELS data for free-standing (single- and multilayer) graphene sheets obtained by (scanning) transmission electron microscope ((S)TEM) is presented in Refs. [ 59 , 60 , 61 , 62 ], whereas the theoretical modeling of the experimental EELS data for monolayer graphene supported by different substrates is given in Refs. [ 63 , 64 , 65 , 66 ]. In Refs. [ 59 , 61 ], the authors treated the multilayer graphene as a layered electron gas with the single-layer polarizability modeled by a 2D, two-fluid hydrodynamic (HD) model [ 59 ] and with ab initio calculations [ 61 ] and found good agreement with experimental EEL spectra. In Ref. [ 60 ], the authors presented momentum-resolved EEL measurements of free-standing, single-layer graphene and compared them with corresponding time-dependent density functional theory calculations. Good agreement with experiments was found for finite momentum transfers if crystal local-field effects were considered. An analytical modeling of the experimental EELS data for free-standing graphene obtained by STEM is presented in Ref. [ 62 ]. The authors used an optical approximation based on the conductivity of graphene given in the local, that is, frequency-dependent form derived by both a 2D, two-fluid extended HD model and an ab initio method and found very good agreement with the EEL spectra from three independent experiments. In Refs. [ 63 , 64 , 65 , 66 ], the authors used the 2D, two-fluid HD model for interband transitions of graphene’s π and σ electrons and an empirical Drude–Lorentz model in the local approximation for metal substrates to reproduce the experimental EELS data. A very good agreement was obtained for monolayer graphene supported by Pt(111) substrate [ 63 , 64 ] and Ru(0001) substrate [ 64 ] for high-quality graphene grown on peeled-off epitaxial Cu(111) foils [ 65 ] and for graphene contacted with a Pt skin [ 66 ]. The model failed for the case of monolayer graphene supported by the Ni(111) substrate [ 64 ], presumably due to the strong hybridization between the π states of graphene and the  d  bands of Ni, which was not accounted for in the model. Acoustic plasmon (AP) in graphene or in graphene-dielectric-metal structures has been studied very intensively in the last few years [ 67 , 68 ]. In Ref. [ 69 ], the authors focused on the AP in graphene doped by alkali metals and demonstrated that two isoelectronic systems, KC 8  and CsC 8 , support substantially different plasmonic spectra, that is, the KC 8  supports a sharp Dirac plasmon (DP) and a well-defined AP, while the CsC 8  supports a broad DP and does not support an AP at all. These findings could be very useful in the area of chemical or biological sensing [ 70 , 71 ].",
+        "operations": [
+          {
+            "op_type": "add",
+            "sentence": "2. Theoretical Modeling of Interactions of Charged Particles with Graphene-Based Nanomaterials and Their Composites Graphene is the best-known and most explored two-dimensional (2D) material.",
+            "start_char": 0,
+            "end_char": 191,
+            "materials": [
+              "2. Theoretical Modeling",
+              "Interactions",
+              "the best-known and most explored two-dimensional (2D) material"
+            ],
+            "params": {}
+          },
+          {
+            "op_type": "add",
+            "sentence": "The most efficient way to probe the plasmon-phonon hybridization between graphene and the nearby insulator(s) is by means of an externally moving charged particle.",
+            "start_char": 1798,
+            "end_char": 1961,
+            "materials": [
+              "the nearby insulator(s"
+            ],
+            "params": {}
+          },
+          {
+            "op_type": "add",
+            "sentence": "The wake potential (the total potential in the plane of the upper graphene sheet) induced by an external charged particle moving parallel to the graphene-Al 2 O 3 -graphene composite system ( Figure 3 ) was investigated in Ref.",
+            "start_char": 2124,
+            "end_char": 2351,
+            "materials": [
+              "Al 2 O 3 -graphene composite system"
+            ],
+            "params": {}
+          },
+          {
+            "op_type": "add",
+            "sentence": "The distance of the charged particle from the top graphene, the thickness of the Al 2 O 3  layer, and the doping density (i.e., Fermi energy) of graphene were fixed at their respective typical values.",
+            "start_char": 3076,
+            "end_char": 3276,
+            "materials": [
+              "the Al 2 O 3  layer",
+              "(i.e., Fermi energy"
+            ],
+            "params": {}
+          },
+          {
+            "op_type": "add",
+            "sentence": "It was shown that in the low-velocity regime (below the Fermi velocity), strong effects were observed due to variation of the particle distance, while for the velocity of the charged particle above the Fermi velocity, strong effects were observed due to varying the thickness of the Al 2 O 3  layer, as well as due to plasmon damping of graphene’s π electrons and graphene doping.",
+            "start_char": 3356,
+            "end_char": 3736,
+            "materials": [
+              "the Al 2 O 3  layer"
+            ],
+            "params": {}
+          },
+          {
+            "op_type": "add",
+            "sentence": "A thorough analysis of the stopping and image forces on a charged particle moving parallel to the graphene-Al 2 O 3 -graphene composite was performed in Ref.",
+            "start_char": 4015,
+            "end_char": 4172,
+            "materials": [
+              "Al 2 O 3 -graphene"
+            ],
+            "params": {}
+          }
+        ],
+        "expanded": [
+          {
+            "op_type": "add",
+            "steps": [
+              "Ensure reaction vessel is present and empty.",
+              "Place a clean stir bar in the vessel.",
+              "Measure the specified amount of 2. Theoretical Modeling.",
+              "Transfer 2. Theoretical Modeling into the vessel."
+            ]
+          },
+          {
+            "op_type": "add",
+            "steps": [
+              "Ensure reaction vessel is present and empty.",
+              "Place a clean stir bar in the vessel.",
+              "Measure the specified amount of the nearby insulator(s.",
+              "Transfer the nearby insulator(s into the vessel."
+            ]
+          },
+          {
+            "op_type": "add",
+            "steps": [
+              "Ensure reaction vessel is present and empty.",
+              "Place a clean stir bar in the vessel.",
+              "Measure the specified amount of Al 2 O 3 -graphene composite system.",
+              "Transfer Al 2 O 3 -graphene composite system into the vessel."
+            ]
+          },
+          {
+            "op_type": "add",
+            "steps": [
+              "Ensure reaction vessel is present and empty.",
+              "Place a clean stir bar in the vessel.",
+              "Measure the specified amount of the Al 2 O 3  layer.",
+              "Transfer the Al 2 O 3  layer into the vessel."
+            ]
+          },
+          {
+            "op_type": "add",
+            "steps": [
+              "Ensure reaction vessel is present and empty.",
+              "Place a clean stir bar in the vessel.",
+              "Measure the specified amount of the Al 2 O 3  layer.",
+              "Transfer the Al 2 O 3  layer into the vessel."
+            ]
+          },
+          {
+            "op_type": "add",
+            "steps": [
+              "Ensure reaction vessel is present and empty.",
+              "Place a clean stir bar in the vessel.",
+              "Measure the specified amount of Al 2 O 3 -graphene.",
+              "Transfer Al 2 O 3 -graphene into the vessel."
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

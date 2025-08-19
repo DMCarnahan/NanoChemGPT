@@ -1,0 +1,924 @@
+{
+  "paper_id": "10.3390/nano13212861",
+  "title": "A Review of Nanofluids as Coolants for Thermal Management Systems in Fuel Cell Vehicles.",
+  "authors": [],
+  "doi": "10.3390/nano13212861",
+  "source": "eupmc",
+  "urls": {
+    "pdf": null
+  },
+  "license": {
+    "type": "unknown"
+  },
+  "access_route": "oa",
+  "sections": [
+    {
+      "heading": "1. Introduction",
+      "text": "1. Introduction 1.1. Nanofluid Overview Nanofluids were first proposed by Professor Choi at Aragon National Laboratory, the United States of America in the early 1990s. They are composed of nanoparticles, metal, or polymer particles of sizes ranging from 1 nm to 100 nm and the base liquid. This is shown in  Figure 1 . Nanofluids have a capacity to enhance the heat dissipation performance of the base fluid. They exhibit a variety of unique thermal, optical, electrical, magnetic, and other properties, and they have hence been innovatively utilized in heat transfer engineering and applied in different fields including aerospace, energy, electromechanics, and biomedicine [ 1 ]. The heat transfer enhancement mechanism of a nanofluid involves the addition of nanoparticles to the base fluid, increasing the thermal conductivity of the mixture and thereby improving the heat transfer capacity of the base fluid. In addition, particle-to-particle and wall-to-wall collisions and the mutual motion between the particles and liquid improve the heat transfer characteristics.  However, this is a complicated process in microchannels. Molecular dynamics have been used to analyze the heat transfer mechanism at solid–liquid interfaces. Frank [ 2 , 3 ] investigated the effects of surface irregularities and imperfections on thermal resistance using molecular dynamics (MD). The thermal resistance was reduced by increasing the strength of the solid–liquid interface. Ghorbanian [ 4 ] used nonequilibrium molecular dynamics to analyze the effects of the wall force field and scale. The results proved that wall effects lead to continuum solution deviations. Papanikoulaou [ 5 ] used molecular dynamics to analyze the effects of surface roughness on nanoflows. The results showed that the flow velocity near the wall was reduced with an increasing roughness depth. Liu [ 6 ] explored the transport and structural characteristics of water inside nanotubes using molecular dynamic simulations. The results indicated that thermal conductivity and shear viscosity increased as the pore size decreased. McGaughey [ 7 ] also used molecular dynamics simulations to analyze the heat transport mechanism of silica-based crystals. The simulation results showed that thermal conductivity is related to the scale and temperature of the atomic structure of silica-based crystals. Sun [ 8 ] used the colloidal probe technique to analyze the force profiles of nanoparticles and base fluids. The test results showed that the measured and calculated force curves exhibited an evident slip (10–14 nm). Nanofluids can be used as coolants in systems with high heat-dissipation requirements. For example, nanofluid applications have been investigated in food processing, solar energy collection, nuclear reactors, and oil recovery. In food processing, nanofluids can be used to increase heat exchanger efficiency and reduce energy consumption. Nanofluids can shorten the thermal processing time and improve the nutritional content of food [ 9 , 10 , 11 , 12 , 13 , 14 ]. In the solar energy collecting field, nanofluids have been proven to increase the collecting efficiency of solar energy collectors, including parabolic trough solar collectors, evacuated tube solar collectors, flat plate solar collectors, and solar cookers [ 15 , 16 , 17 , 18 , 19 , 20 , 21 , 22 ]. This is illustrated in  Figure 2 . In the nuclear reactor field, nanofluids as coolants could increase the cooling capacity and maintain safe operation of nuclear reactor cooling systems [ 23 , 24 , 25 , 26 , 27 , 28 , 29 , 30 , 31 , 32 , 33 , 34 , 35 ]. Nanofluids also can be used to improve oil recovery efficiency due to their excellent heat transfer performance [ 36 , 37 , 38 , 39 , 40 , 41 , 42 , 43 , 44 , 45 , 46 , 47 , 48 , 49 , 50 , 51 ]. For example, nanofluid applications in oil-fueled vehicles include their use in cooling, lubrication, air conditioners, and exhaust power generation systems, as shown in  Figure 2 . In 2004, the U.S. Department of Energy used nanofluids in fuel cells, and the heat dissipation capacity of cooling systems could be significantly improved [ 52 ]. Particularly, for fuel cell vehicles, nanofluids have the potential to replace existing coolants and improve the heat transfer capacity of thermal management systems. This paper will explore the challenges and future research directions of nanofluids as coolants in fuel cell vehicles. 1.2. Nanofluid Application in Different Types of Vehicles 1.2.1. Nanofluid Application in Oil-Fueled Vehicles Nanofluid application in oil-fueled vehicles’ cooling systems Nanofluids can be used to improve the heat-dissipation capacity of radiators in cooling systems. Many researchers have investigated the mechanism of heat transfer enhancement in radiator tubes using different nanofluids.  Table 1  presents a summary of the nanofluid applications in oil-fueled-vehicle cooling systems.  According to the literature content in  Table 1  above, nanoparticles including Al 2 O 3 , TiO 2 , CuO, SiO 2 , Fe 3 O 4 , Fe 2 O 3 , ZnO, SiC, GnP, CNC, MWCNT, CNT, and graphene have been analyzed in detail. In addition, the thermophysical properties and heat transfer performance of different types of nanofluids have been analyzed in the past. The influencing factors, including concentration, flow rate, temperature, and radiator dimensions, have been compared. Using a nanofluid instead of a conventional coolant has been demonstrated to improve the heat dissipation performance of thermal management systems [ 100 , 101 , 102 , 103 , 104 , 105 , 106 , 107 ]. Nanofluid applications in oil-fueled vehicles’ air conditioner systems Sharif [ 108 ] chose a nanofluid as a lubricant to enhance the compressor performance. A SiO 2 /PAG nanofluid was selected as the nano-lubricant. A vehicle air conditioner test rig was used to measure the heat absorption and coefficient of performance (COP). The test results indicated that the maximum increase in the COP was 24% when using the SiO 2 /PAG nanofluid. Redhwan [ 109 ] prepared Al 2 O 3 -SiO 2 /PAG nanofluids and compared the heat transfer performance and tribology enhancement. Zawawi [ 110 ] used an Al 2 O 3 -SiO 2 /PAG nano-lubricant and analyzed its effect on the performance improvement of vehicle air conditioner systems through experimental tests. The test bench is illustrated in  Figure 3 . It was composed of a power analyzer, frequency inverter, electric motor, water bath, compressor, data logger, water heater, and condenser. Nanofluid applications in oil-fueled vehicles’ lubrication systems The main reason for the failure of lubricating oils at high temperatures is thermal degradation. Nanofluids can delay the oxidation and burnout of the lubricating oil, which results in a wider temperature range and higher fuel economy. Ali [ 111 ] used a thermal analyzer (TGA/DTG/DSC) to investigate the thermal degradation of lubricating oil. An AVL dynamometer was used to test the engine thermal efficiency with the Al 2 O 3 -TiO 2 /lube nanofluid. Lue [ 112 ] used a two-step method to prepare four different weight fractions of an Al 2 O 3 /lube nanofluid. The densities and viscosities of the nano-lubricant were measured at various temperatures. The test results indicated that the 1.5 wt % Al 2 O 3 /lube nanofluid was the optimal choice for future research. Esfe [ 113 ] proposed a type of MWCNT-ZnO nano-lubricant for light-duty vehicles that can be used to reduce viscosity and effectively improve the engine’s efficiency. Nanofluid applications in oil-fueled vehicles’ exhaust power generation systems Researchers have investigated the possible utilization of waste heat in exhaust pipes because of the large amount of waste heat produced during engine operation. Based on the thermoelectric conversion unit, waste heat can be converted into electricity. For example, Hilmin [ 114 ] prepared a TiO 2 /water nanofluid using a two-step method to increase the efficiency of conversion units in thermoelectric generators (TEGs). The experimental results demonstrated that the TiO 2 /water nanofluid effectively enhanced the conversion efficiency and output power of the TEG. Karana [ 115 ] prepared ZnO/WEG and MgO/WEG nanofluids that were used to improve the efficiency of waste heat recovery for a TEG. The influencing factors included the Reynolds number, total TEG area, nanofluid concentration, and inlet temperature. According to the analysis results, the total TEG area was reduced by 33% with a 1% MgO/WEG nanofluid. 1.2.2. Nanofluid Application in Electric Vehicles Batteries are the most important power source for electric vehicles. However, maintaining an ordinary operating temperature using a thermal management system is crucial. Nanofluids have been used as a coolant to replace existing coolants, and their performance in improving heat-dissipation capacity has been analyzed. For example, Chen [ 116 ] constructed a battery heating module with a pipe and selected a TiO 2 -CLPHP nanofluid as the coolant. The heating performances of different strategies were investigated. The test results indicated that the 2% TiO 2 /CLPHP nanofluid exhibited the best heat transfer performance. Wu [ 117 ] used a Cu/H 2 O nanofluid with a lattice Boltzmann (LB) model to simulate natural convection in a battery. The problem of a uniformly distributed heat boundary was validated to ensure the accuracy of the model. The results proved that the Cu/H 2 O nanofluid could improve the cooling performance and reduce the temperature difference in a battery thermal management system. Abdelkareem [ 118 ] compared different heat-dissipation capacity-enhancement methods for batteries, including air cooling, liquid cooling, heat pipes, and phase change material and found that the nanofluid effectively enhanced the heat-dissipation capacity. Guo [ 119 ] proposed a type of battery cooling system with a liquid cold plate and analyzed the different factors influencing the heat-dissipation performance. The simulation results showed that the maximum temperature and temperature differences were separately reduced. Adding nanoparticles (Al, Cu, and Ag) to the base fluid could effectively improve the heat transfer performance. Kiani [ 120 ] designed a hybrid cooling system with nanofluid as the coolant. The results indicated that the nanofluid ensured battery safety under stressful conditions. Moreover, many researchers have analyzed the heat-dissipation improvement in battery thermal management systems using nanofluids as coolant [ 121 , 122 , 123 , 124 , 125 , 126 , 127 , 128 , 129 , 130 ]. 1.2.3. Nanofluid Application in Fuel Cell Vehicles In 2004, the U.S. Department of Energy first selected nanofluids as coolants for thermal management systems in fuel cell vehicles. The preparation cost of the nanofluid can be reduced and is close to that of the traditional coolants used in oil-fueled vehicles. Nanofluids can be used as coolants to reduce the radiator dimensions. They can also effectively improve the heat-dissipation capacity of cooling systems [ 52 ]. Many researchers have conducted preliminary studies on the application of nanofluids in fuel cell vehicles. For example, Bargal [ 131 ] analyzed the research progress on nanofluids in a PEMFC and compared different cooling methods for thermal management systems in fuel cell vehicles. Islam [ 132 ] discussed the application of nanofluids as coolants to improve the heat-dissipation capacity of thermal management systems. The results proved that nanofluids can reduce the radiator dimensions and enhance the heat-dissipation capacity. Islam [ 133 ] analyzed a 0.5% ZnO/WEG nanofluid as a coolant to improve the heat-dissipation capacity of thermal management systems. The results showed that the frontal area of the radiator could be reduced by 27% compared to when EG/water was used as a coolant. Islam [ 134 ] investigated the electrical conductivity and heat transfer coefficient of TiO 2 /WEG nanofluid at 0.05–0.5%. The experimental results indicated that the thermal conductivity coefficient increased by 10% with the 0.5% TiO 2 /WEG nanofluid. Zakaria [ 135 ] investigated the heat-dissipation performance of 0.1% and 0.5% Al 2 O 3 /WEG nanofluids in PEMFCs. The experimental results showed that the heat-dissipation power increased by 13.87% with a 0.5% Al 2 O 3 /WEG nanofluid. Zakaria [ 136 ] analyzed the heat transfer performance of 0.1% and 0.5% Al 2 O 3 /WEG nanofluids with different base fluid ratios. The test results indicated that the heat transfer performance of the 0.1% Al 2 O 3 /WEG nanofluid at a 60:40 ratio was better than that at a 50:50 ratio. Zakaria [ 137 ] also analyzed the ratio of thermal conductivities and electrical conductivities of 0.1%, 0.3%, and 0.5% Al 2 O 3  nanofluids. The testing results showed that the thermal conductivity was reduced when the ethylene glycol proportion was increased. They also showed that the electrical conductivity was reduced when the ethylene glycol proportion was increased. In order to assess the significance of Al 2 O 3  nanofluids in an electrically active thermal device, the thermoelectrical conductivity (TEC) ratio was established. The aforementioned research studies were mainly based on metallic nanoparticles. Boron nitride (BN) is an insulating ceramic with high stability, high thermal conductivity, and good chemical inertness. For example, Ilhan [ 138 ] prepared a nanofluid from boron nitride (BN) and analyzed its heat transfer performance. The test results proved that BN nanofluid has considerable potential for use as a coolant in fuel cell vehicles."
+    },
+    {
+      "heading": "1.1. Nanofluid Overview",
+      "text": "1.1. Nanofluid Overview Nanofluids were first proposed by Professor Choi at Aragon National Laboratory, the United States of America in the early 1990s. They are composed of nanoparticles, metal, or polymer particles of sizes ranging from 1 nm to 100 nm and the base liquid. This is shown in  Figure 1 . Nanofluids have a capacity to enhance the heat dissipation performance of the base fluid. They exhibit a variety of unique thermal, optical, electrical, magnetic, and other properties, and they have hence been innovatively utilized in heat transfer engineering and applied in different fields including aerospace, energy, electromechanics, and biomedicine [ 1 ]. The heat transfer enhancement mechanism of a nanofluid involves the addition of nanoparticles to the base fluid, increasing the thermal conductivity of the mixture and thereby improving the heat transfer capacity of the base fluid. In addition, particle-to-particle and wall-to-wall collisions and the mutual motion between the particles and liquid improve the heat transfer characteristics.  However, this is a complicated process in microchannels. Molecular dynamics have been used to analyze the heat transfer mechanism at solid–liquid interfaces. Frank [ 2 , 3 ] investigated the effects of surface irregularities and imperfections on thermal resistance using molecular dynamics (MD). The thermal resistance was reduced by increasing the strength of the solid–liquid interface. Ghorbanian [ 4 ] used nonequilibrium molecular dynamics to analyze the effects of the wall force field and scale. The results proved that wall effects lead to continuum solution deviations. Papanikoulaou [ 5 ] used molecular dynamics to analyze the effects of surface roughness on nanoflows. The results showed that the flow velocity near the wall was reduced with an increasing roughness depth. Liu [ 6 ] explored the transport and structural characteristics of water inside nanotubes using molecular dynamic simulations. The results indicated that thermal conductivity and shear viscosity increased as the pore size decreased. McGaughey [ 7 ] also used molecular dynamics simulations to analyze the heat transport mechanism of silica-based crystals. The simulation results showed that thermal conductivity is related to the scale and temperature of the atomic structure of silica-based crystals. Sun [ 8 ] used the colloidal probe technique to analyze the force profiles of nanoparticles and base fluids. The test results showed that the measured and calculated force curves exhibited an evident slip (10–14 nm). Nanofluids can be used as coolants in systems with high heat-dissipation requirements. For example, nanofluid applications have been investigated in food processing, solar energy collection, nuclear reactors, and oil recovery. In food processing, nanofluids can be used to increase heat exchanger efficiency and reduce energy consumption. Nanofluids can shorten the thermal processing time and improve the nutritional content of food [ 9 , 10 , 11 , 12 , 13 , 14 ]. In the solar energy collecting field, nanofluids have been proven to increase the collecting efficiency of solar energy collectors, including parabolic trough solar collectors, evacuated tube solar collectors, flat plate solar collectors, and solar cookers [ 15 , 16 , 17 , 18 , 19 , 20 , 21 , 22 ]. This is illustrated in  Figure 2 . In the nuclear reactor field, nanofluids as coolants could increase the cooling capacity and maintain safe operation of nuclear reactor cooling systems [ 23 , 24 , 25 , 26 , 27 , 28 , 29 , 30 , 31 , 32 , 33 , 34 , 35 ]. Nanofluids also can be used to improve oil recovery efficiency due to their excellent heat transfer performance [ 36 , 37 , 38 , 39 , 40 , 41 , 42 , 43 , 44 , 45 , 46 , 47 , 48 , 49 , 50 , 51 ]. For example, nanofluid applications in oil-fueled vehicles include their use in cooling, lubrication, air conditioners, and exhaust power generation systems, as shown in  Figure 2 . In 2004, the U.S. Department of Energy used nanofluids in fuel cells, and the heat dissipation capacity of cooling systems could be significantly improved [ 52 ]. Particularly, for fuel cell vehicles, nanofluids have the potential to replace existing coolants and improve the heat transfer capacity of thermal management systems. This paper will explore the challenges and future research directions of nanofluids as coolants in fuel cell vehicles."
+    }
+  ],
+  "extractions": {
+    "methods_paragraphs": [
+      {
+        "text": "1. Introduction 1.1. Nanofluid Overview Nanofluids were first proposed by Professor Choi at Aragon National Laboratory, the United States of America in the early 1990s. They are composed of nanoparticles, metal, or polymer particles of sizes ranging from 1 nm to 100 nm and the base liquid. This is shown in  Figure 1 . Nanofluids have a capacity to enhance the heat dissipation performance of the base fluid. They exhibit a variety of unique thermal, optical, electrical, magnetic, and other properties, and they have hence been innovatively utilized in heat transfer engineering and applied in different fields including aerospace, energy, electromechanics, and biomedicine [ 1 ]. The heat transfer enhancement mechanism of a nanofluid involves the addition of nanoparticles to the base fluid, increasing the thermal conductivity of the mixture and thereby improving the heat transfer capacity of the base fluid. In addition, particle-to-particle and wall-to-wall collisions and the mutual motion between the particles and liquid improve the heat transfer characteristics.  However, this is a complicated process in microchannels. Molecular dynamics have been used to analyze the heat transfer mechanism at solid–liquid interfaces. Frank [ 2 , 3 ] investigated the effects of surface irregularities and imperfections on thermal resistance using molecular dynamics (MD). The thermal resistance was reduced by increasing the strength of the solid–liquid interface. Ghorbanian [ 4 ] used nonequilibrium molecular dynamics to analyze the effects of the wall force field and scale. The results proved that wall effects lead to continuum solution deviations. Papanikoulaou [ 5 ] used molecular dynamics to analyze the effects of surface roughness on nanoflows. The results showed that the flow velocity near the wall was reduced with an increasing roughness depth. Liu [ 6 ] explored the transport and structural characteristics of water inside nanotubes using molecular dynamic simulations. The results indicated that thermal conductivity and shear viscosity increased as the pore size decreased. McGaughey [ 7 ] also used molecular dynamics simulations to analyze the heat transport mechanism of silica-based crystals. The simulation results showed that thermal conductivity is related to the scale and temperature of the atomic structure of silica-based crystals. Sun [ 8 ] used the colloidal probe technique to analyze the force profiles of nanoparticles and base fluids. The test results showed that the measured and calculated force curves exhibited an evident slip (10–14 nm). Nanofluids can be used as coolants in systems with high heat-dissipation requirements. For example, nanofluid applications have been investigated in food processing, solar energy collection, nuclear reactors, and oil recovery. In food processing, nanofluids can be used to increase heat exchanger efficiency and reduce energy consumption. Nanofluids can shorten the thermal processing time and improve the nutritional content of food [ 9 , 10 , 11 , 12 , 13 , 14 ]. In the solar energy collecting field, nanofluids have been proven to increase the collecting efficiency of solar energy collectors, including parabolic trough solar collectors, evacuated tube solar collectors, flat plate solar collectors, and solar cookers [ 15 , 16 , 17 , 18 , 19 , 20 , 21 , 22 ]. This is illustrated in  Figure 2 . In the nuclear reactor field, nanofluids as coolants could increase the cooling capacity and maintain safe operation of nuclear reactor cooling systems [ 23 , 24 , 25 , 26 , 27 , 28 , 29 , 30 , 31 , 32 , 33 , 34 , 35 ]. Nanofluids also can be used to improve oil recovery efficiency due to their excellent heat transfer performance [ 36 , 37 , 38 , 39 , 40 , 41 , 42 , 43 , 44 , 45 , 46 , 47 , 48 , 49 , 50 , 51 ]. For example, nanofluid applications in oil-fueled vehicles include their use in cooling, lubrication, air conditioners, and exhaust power generation systems, as shown in  Figure 2 . In 2004, the U.S. Department of Energy used nanofluids in fuel cells, and the heat dissipation capacity of cooling systems could be significantly improved [ 52 ]. Particularly, for fuel cell vehicles, nanofluids have the potential to replace existing coolants and improve the heat transfer capacity of thermal management systems. This paper will explore the challenges and future research directions of nanofluids as coolants in fuel cell vehicles. 1.2. Nanofluid Application in Different Types of Vehicles 1.2.1. Nanofluid Application in Oil-Fueled Vehicles Nanofluid application in oil-fueled vehicles’ cooling systems Nanofluids can be used to improve the heat-dissipation capacity of radiators in cooling systems. Many researchers have investigated the mechanism of heat transfer enhancement in radiator tubes using different nanofluids.  Table 1  presents a summary of the nanofluid applications in oil-fueled-vehicle cooling systems.  According to the literature content in  Table 1  above, nanoparticles including Al 2 O 3 , TiO 2 , CuO, SiO 2 , Fe 3 O 4 , Fe 2 O 3 , ZnO, SiC, GnP, CNC, MWCNT, CNT, and graphene have been analyzed in detail. In addition, the thermophysical properties and heat transfer performance of different types of nanofluids have been analyzed in the past. The influencing factors, including concentration, flow rate, temperature, and radiator dimensions, have been compared. Using a nanofluid instead of a conventional coolant has been demonstrated to improve the heat dissipation performance of thermal management systems [ 100 , 101 , 102 , 103 , 104 , 105 , 106 , 107 ]. Nanofluid applications in oil-fueled vehicles’ air conditioner systems Sharif [ 108 ] chose a nanofluid as a lubricant to enhance the compressor performance. A SiO 2 /PAG nanofluid was selected as the nano-lubricant. A vehicle air conditioner test rig was used to measure the heat absorption and coefficient of performance (COP). The test results indicated that the maximum increase in the COP was 24% when using the SiO 2 /PAG nanofluid. Redhwan [ 109 ] prepared Al 2 O 3 -SiO 2 /PAG nanofluids and compared the heat transfer performance and tribology enhancement. Zawawi [ 110 ] used an Al 2 O 3 -SiO 2 /PAG nano-lubricant and analyzed its effect on the performance improvement of vehicle air conditioner systems through experimental tests. The test bench is illustrated in  Figure 3 . It was composed of a power analyzer, frequency inverter, electric motor, water bath, compressor, data logger, water heater, and condenser. Nanofluid applications in oil-fueled vehicles’ lubrication systems The main reason for the failure of lubricating oils at high temperatures is thermal degradation. Nanofluids can delay the oxidation and burnout of the lubricating oil, which results in a wider temperature range and higher fuel economy. Ali [ 111 ] used a thermal analyzer (TGA/DTG/DSC) to investigate the thermal degradation of lubricating oil. An AVL dynamometer was used to test the engine thermal efficiency with the Al 2 O 3 -TiO 2 /lube nanofluid. Lue [ 112 ] used a two-step method to prepare four different weight fractions of an Al 2 O 3 /lube nanofluid. The densities and viscosities of the nano-lubricant were measured at various temperatures. The test results indicated that the 1.5 wt % Al 2 O 3 /lube nanofluid was the optimal choice for future research. Esfe [ 113 ] proposed a type of MWCNT-ZnO nano-lubricant for light-duty vehicles that can be used to reduce viscosity and effectively improve the engine’s efficiency. Nanofluid applications in oil-fueled vehicles’ exhaust power generation systems Researchers have investigated the possible utilization of waste heat in exhaust pipes because of the large amount of waste heat produced during engine operation. Based on the thermoelectric conversion unit, waste heat can be converted into electricity. For example, Hilmin [ 114 ] prepared a TiO 2 /water nanofluid using a two-step method to increase the efficiency of conversion units in thermoelectric generators (TEGs). The experimental results demonstrated that the TiO 2 /water nanofluid effectively enhanced the conversion efficiency and output power of the TEG. Karana [ 115 ] prepared ZnO/WEG and MgO/WEG nanofluids that were used to improve the efficiency of waste heat recovery for a TEG. The influencing factors included the Reynolds number, total TEG area, nanofluid concentration, and inlet temperature. According to the analysis results, the total TEG area was reduced by 33% with a 1% MgO/WEG nanofluid. 1.2.2. Nanofluid Application in Electric Vehicles Batteries are the most important power source for electric vehicles. However, maintaining an ordinary operating temperature using a thermal management system is crucial. Nanofluids have been used as a coolant to replace existing coolants, and their performance in improving heat-dissipation capacity has been analyzed. For example, Chen [ 116 ] constructed a battery heating module with a pipe and selected a TiO 2 -CLPHP nanofluid as the coolant. The heating performances of different strategies were investigated. The test results indicated that the 2% TiO 2 /CLPHP nanofluid exhibited the best heat transfer performance. Wu [ 117 ] used a Cu/H 2 O nanofluid with a lattice Boltzmann (LB) model to simulate natural convection in a battery. The problem of a uniformly distributed heat boundary was validated to ensure the accuracy of the model. The results proved that the Cu/H 2 O nanofluid could improve the cooling performance and reduce the temperature difference in a battery thermal management system. Abdelkareem [ 118 ] compared different heat-dissipation capacity-enhancement methods for batteries, including air cooling, liquid cooling, heat pipes, and phase change material and found that the nanofluid effectively enhanced the heat-dissipation capacity. Guo [ 119 ] proposed a type of battery cooling system with a liquid cold plate and analyzed the different factors influencing the heat-dissipation performance. The simulation results showed that the maximum temperature and temperature differences were separately reduced. Adding nanoparticles (Al, Cu, and Ag) to the base fluid could effectively improve the heat transfer performance. Kiani [ 120 ] designed a hybrid cooling system with nanofluid as the coolant. The results indicated that the nanofluid ensured battery safety under stressful conditions. Moreover, many researchers have analyzed the heat-dissipation improvement in battery thermal management systems using nanofluids as coolant [ 121 , 122 , 123 , 124 , 125 , 126 , 127 , 128 , 129 , 130 ]. 1.2.3. Nanofluid Application in Fuel Cell Vehicles In 2004, the U.S. Department of Energy first selected nanofluids as coolants for thermal management systems in fuel cell vehicles. The preparation cost of the nanofluid can be reduced and is close to that of the traditional coolants used in oil-fueled vehicles. Nanofluids can be used as coolants to reduce the radiator dimensions. They can also effectively improve the heat-dissipation capacity of cooling systems [ 52 ]. Many researchers have conducted preliminary studies on the application of nanofluids in fuel cell vehicles. For example, Bargal [ 131 ] analyzed the research progress on nanofluids in a PEMFC and compared different cooling methods for thermal management systems in fuel cell vehicles. Islam [ 132 ] discussed the application of nanofluids as coolants to improve the heat-dissipation capacity of thermal management systems. The results proved that nanofluids can reduce the radiator dimensions and enhance the heat-dissipation capacity. Islam [ 133 ] analyzed a 0.5% ZnO/WEG nanofluid as a coolant to improve the heat-dissipation capacity of thermal management systems. The results showed that the frontal area of the radiator could be reduced by 27% compared to when EG/water was used as a coolant. Islam [ 134 ] investigated the electrical conductivity and heat transfer coefficient of TiO 2 /WEG nanofluid at 0.05–0.5%. The experimental results indicated that the thermal conductivity coefficient increased by 10% with the 0.5% TiO 2 /WEG nanofluid. Zakaria [ 135 ] investigated the heat-dissipation performance of 0.1% and 0.5% Al 2 O 3 /WEG nanofluids in PEMFCs. The experimental results showed that the heat-dissipation power increased by 13.87% with a 0.5% Al 2 O 3 /WEG nanofluid. Zakaria [ 136 ] analyzed the heat transfer performance of 0.1% and 0.5% Al 2 O 3 /WEG nanofluids with different base fluid ratios. The test results indicated that the heat transfer performance of the 0.1% Al 2 O 3 /WEG nanofluid at a 60:40 ratio was better than that at a 50:50 ratio. Zakaria [ 137 ] also analyzed the ratio of thermal conductivities and electrical conductivities of 0.1%, 0.3%, and 0.5% Al 2 O 3  nanofluids. The testing results showed that the thermal conductivity was reduced when the ethylene glycol proportion was increased. They also showed that the electrical conductivity was reduced when the ethylene glycol proportion was increased. In order to assess the significance of Al 2 O 3  nanofluids in an electrically active thermal device, the thermoelectrical conductivity (TEC) ratio was established. The aforementioned research studies were mainly based on metallic nanoparticles. Boron nitride (BN) is an insulating ceramic with high stability, high thermal conductivity, and good chemical inertness. For example, Ilhan [ 138 ] prepared a nanofluid from boron nitride (BN) and analyzed its heat transfer performance. The test results proved that BN nanofluid has considerable potential for use as a coolant in fuel cell vehicles.",
+        "operations": [
+          {
+            "op_type": "heat",
+            "sentence": "Nanofluids have a capacity to enhance the heat dissipation performance of the base fluid.",
+            "start_char": 320,
+            "end_char": 409,
+            "materials": [],
+            "params": {}
+          },
+          {
+            "op_type": "heat",
+            "sentence": "They exhibit a variety of unique thermal, optical, electrical, magnetic, and other properties, and they have hence been innovatively utilized in heat transfer engineering and applied in different fields including aerospace, energy, electromechanics, and biomedicine [ 1 ].",
+            "start_char": 410,
+            "end_char": 682,
+            "materials": [],
+            "params": {}
+          },
+          {
+            "op_type": "heat",
+            "sentence": "The heat transfer enhancement mechanism of a nanofluid involves the addition of nanoparticles to the base fluid, increasing the thermal conductivity of the mixture and thereby improving the heat transfer capacity of the base fluid.",
+            "start_char": 683,
+            "end_char": 914,
+            "materials": [],
+            "params": {}
+          },
+          {
+            "op_type": "heat",
+            "sentence": "In addition, particle-to-particle and wall-to-wall collisions and the mutual motion between the particles and liquid improve the heat transfer characteristics.  ",
+            "start_char": 915,
+            "end_char": 1076,
+            "materials": [],
+            "params": {}
+          },
+          {
+            "op_type": "heat",
+            "sentence": "Molecular dynamics have been used to analyze the heat transfer mechanism at solid–liquid interfaces.",
+            "start_char": 1133,
+            "end_char": 1233,
+            "materials": [],
+            "params": {}
+          },
+          {
+            "op_type": "heat",
+            "sentence": "McGaughey [ 7 ] also used molecular dynamics simulations to analyze the heat transport mechanism of silica-based crystals.",
+            "start_char": 2094,
+            "end_char": 2216,
+            "materials": [],
+            "params": {}
+          },
+          {
+            "op_type": "heat",
+            "sentence": "Nanofluids can be used as coolants in systems with high heat-dissipation requirements.",
+            "start_char": 2580,
+            "end_char": 2666,
+            "materials": [],
+            "params": {}
+          },
+          {
+            "op_type": "heat",
+            "sentence": "In food processing, nanofluids can be used to increase heat exchanger efficiency and reduce energy consumption.",
+            "start_char": 2807,
+            "end_char": 2918,
+            "materials": [],
+            "params": {}
+          },
+          {
+            "op_type": "heat",
+            "sentence": "In the nuclear reactor field, nanofluids as coolants could increase the cooling capacity and maintain safe operation of nuclear reactor cooling systems [ 23 , 24 , 25 , 26 , 27 , 28 , 29 , 30 , 31 , 32 , 33 , 34 , 35 ].",
+            "start_char": 3381,
+            "end_char": 3600,
+            "materials": [],
+            "params": {}
+          },
+          {
+            "op_type": "heat",
+            "sentence": "Nanofluids also can be used to improve oil recovery efficiency due to their excellent heat transfer performance [ 36 , 37 , 38 , 39 , 40 , 41 , 42 , 43 , 44 , 45 , 46 , 47 , 48 , 49 , 50 , 51 ].",
+            "start_char": 3601,
+            "end_char": 3795,
+            "materials": [],
+            "params": {}
+          },
+          {
+            "op_type": "heat",
+            "sentence": "In 2004, the U.S. Department of Energy used nanofluids in fuel cells, and the heat dissipation capacity of cooling systems could be significantly improved [ 52 ].",
+            "start_char": 3978,
+            "end_char": 4140,
+            "materials": [],
+            "params": {}
+          },
+          {
+            "op_type": "heat",
+            "sentence": "Particularly, for fuel cell vehicles, nanofluids have the potential to replace existing coolants and improve the heat transfer capacity of thermal management systems.",
+            "start_char": 4141,
+            "end_char": 4307,
+            "materials": [],
+            "params": {}
+          },
+          {
+            "op_type": "heat",
+            "sentence": "Nanofluid Application in Oil-Fueled Vehicles Nanofluid application in oil-fueled vehicles’ cooling systems Nanofluids can be used to improve the heat-dissipation capacity of radiators in cooling systems.",
+            "start_char": 4492,
+            "end_char": 4695,
+            "materials": [
+              "Oil-Fueled Vehicles Nanofluid application"
+            ],
+            "params": {}
+          },
+          {
+            "op_type": "heat",
+            "sentence": "Many researchers have investigated the mechanism of heat transfer enhancement in radiator tubes using different nanofluids.  ",
+            "start_char": 4696,
+            "end_char": 4821,
+            "materials": [],
+            "params": {}
+          },
+          {
+            "op_type": "heat",
+            "sentence": "In addition, the thermophysical properties and heat transfer performance of different types of nanofluids have been analyzed in the past.",
+            "start_char": 5128,
+            "end_char": 5265,
+            "materials": [],
+            "params": {}
+          },
+          {
+            "op_type": "heat",
+            "sentence": "Using a nanofluid instead of a conventional coolant has been demonstrated to improve the heat dissipation performance of thermal management systems [ 100 , 101 , 102 , 103 , 104 , 105 , 106 , 107 ].",
+            "start_char": 5385,
+            "end_char": 5583,
+            "materials": [],
+            "params": {}
+          },
+          {
+            "op_type": "heat",
+            "sentence": "A vehicle air conditioner test rig was used to measure the heat absorption and coefficient of performance (COP).",
+            "start_char": 5801,
+            "end_char": 5913,
+            "materials": [],
+            "params": {}
+          },
+          {
+            "op_type": "heat",
+            "sentence": "Redhwan [ 109 ] prepared Al 2 O 3 -SiO 2 /PAG nanofluids and compared the heat transfer performance and tribology enhancement.",
+            "start_char": 6023,
+            "end_char": 6149,
+            "materials": [
+              "Al 2 O 3 -SiO 2 /PAG nanofluids"
+            ],
+            "params": {}
+          },
+          {
+            "op_type": "heat",
+            "sentence": "Nanofluid applications in oil-fueled vehicles’ exhaust power generation systems Researchers have investigated the possible utilization of waste heat in exhaust pipes because of the large amount of waste heat produced during engine operation.",
+            "start_char": 7513,
+            "end_char": 7754,
+            "materials": [],
+            "params": {}
+          },
+          {
+            "op_type": "heat",
+            "sentence": "Based on the thermoelectric conversion unit, waste heat can be converted into electricity.",
+            "start_char": 7755,
+            "end_char": 7845,
+            "materials": [],
+            "params": {}
+          },
+          {
+            "op_type": "heat",
+            "sentence": "Karana [ 115 ] prepared ZnO/WEG and MgO/WEG nanofluids that were used to improve the efficiency of waste heat recovery for a TEG.",
+            "start_char": 8162,
+            "end_char": 8291,
+            "materials": [],
+            "params": {}
+          },
+          {
+            "op_type": "heat",
+            "sentence": "However, maintaining an ordinary operating temperature using a thermal management system is crucial.",
+            "start_char": 8631,
+            "end_char": 8731,
+            "materials": [],
+            "params": {}
+          },
+          {
+            "op_type": "heat",
+            "sentence": "Nanofluids have been used as a coolant to replace existing coolants, and their performance in improving heat-dissipation capacity has been analyzed.",
+            "start_char": 8732,
+            "end_char": 8880,
+            "materials": [],
+            "params": {}
+          },
+          {
+            "op_type": "heat",
+            "sentence": "For example, Chen [ 116 ] constructed a battery heating module with a pipe and selected a TiO 2 -CLPHP nanofluid as the coolant.",
+            "start_char": 8881,
+            "end_char": 9009,
+            "materials": [
+              "a TiO 2 -CLPHP nanofluid"
+            ],
+            "params": {}
+          },
+          {
+            "op_type": "heat",
+            "sentence": "The heating performances of different strategies were investigated.",
+            "start_char": 9010,
+            "end_char": 9077,
+            "materials": [],
+            "params": {}
+          },
+          {
+            "op_type": "heat",
+            "sentence": "The test results indicated that the 2% TiO 2 /CLPHP nanofluid exhibited the best heat transfer performance.",
+            "start_char": 9078,
+            "end_char": 9185,
+            "materials": [
+              "the 2% TiO",
+              "2 /CLPHP"
+            ],
+            "params": {}
+          },
+          {
+            "op_type": "heat",
+            "sentence": "The problem of a uniformly distributed heat boundary was validated to ensure the accuracy of the model.",
+            "start_char": 9304,
+            "end_char": 9407,
+            "materials": [],
+            "params": {}
+          },
+          {
+            "op_type": "heat",
+            "sentence": "Abdelkareem [ 118 ] compared different heat-dissipation capacity-enhancement methods for batteries, including air cooling, liquid cooling, heat pipes, and phase change material and found that the nanofluid effectively enhanced the heat-dissipation capacity.",
+            "start_char": 9571,
+            "end_char": 9828,
+            "materials": [],
+            "params": {}
+          },
+          {
+            "op_type": "heat",
+            "sentence": "Guo [ 119 ] proposed a type of battery cooling system with a liquid cold plate and analyzed the different factors influencing the heat-dissipation performance.",
+            "start_char": 9829,
+            "end_char": 9988,
+            "materials": [],
+            "params": {}
+          },
+          {
+            "op_type": "add",
+            "sentence": "Adding nanoparticles (Al, Cu, and Ag) to the base fluid could effectively improve the heat transfer performance.",
+            "start_char": 10101,
+            "end_char": 10213,
+            "materials": [],
+            "params": {}
+          },
+          {
+            "op_type": "heat",
+            "sentence": "Moreover, many researchers have analyzed the heat-dissipation improvement in battery thermal management systems using nanofluids as coolant [ 121 , 122 , 123 , 124 , 125 , 126 , 127 , 128 , 129 , 130 ].",
+            "start_char": 10384,
+            "end_char": 10586,
+            "materials": [],
+            "params": {}
+          },
+          {
+            "op_type": "heat",
+            "sentence": "They can also effectively improve the heat-dissipation capacity of cooling systems [ 52 ].",
+            "start_char": 10970,
+            "end_char": 11060,
+            "materials": [],
+            "params": {}
+          },
+          {
+            "op_type": "heat",
+            "sentence": "Islam [ 132 ] discussed the application of nanofluids as coolants to improve the heat-dissipation capacity of thermal management systems.",
+            "start_char": 11346,
+            "end_char": 11483,
+            "materials": [
+              "Islam"
+            ],
+            "params": {}
+          },
+          {
+            "op_type": "heat",
+            "sentence": "The results proved that nanofluids can reduce the radiator dimensions and enhance the heat-dissipation capacity.",
+            "start_char": 11484,
+            "end_char": 11596,
+            "materials": [],
+            "params": {}
+          },
+          {
+            "op_type": "heat",
+            "sentence": "Islam [ 133 ] analyzed a 0.5% ZnO/WEG nanofluid as a coolant to improve the heat-dissipation capacity of thermal management systems.",
+            "start_char": 11597,
+            "end_char": 11729,
+            "materials": [
+              "Islam",
+              "a 0.5% ZnO/WEG nanofluid"
+            ],
+            "params": {}
+          },
+          {
+            "op_type": "heat",
+            "sentence": "Islam [ 134 ] investigated the electrical conductivity and heat transfer coefficient of TiO 2 /WEG nanofluid at 0.05–0.5%.",
+            "start_char": 11860,
+            "end_char": 11982,
+            "materials": [
+              "Islam",
+              "2 /WEG"
+            ],
+            "params": {}
+          },
+          {
+            "op_type": "heat",
+            "sentence": "Zakaria [ 135 ] investigated the heat-dissipation performance of 0.1% and 0.5% Al 2 O 3 /WEG nanofluids in PEMFCs.",
+            "start_char": 12113,
+            "end_char": 12227,
+            "materials": [
+              "0.1%",
+              "0.5%",
+              "Al 2 O 3 /WEG nanofluids"
+            ],
+            "params": {}
+          },
+          {
+            "op_type": "heat",
+            "sentence": "The experimental results showed that the heat-dissipation power increased by 13.87% with a 0.5% Al 2 O 3 /WEG nanofluid.",
+            "start_char": 12228,
+            "end_char": 12348,
+            "materials": [
+              "13.87%",
+              "a 0.5%",
+              "Al 2 O 3 /WEG nanofluid"
+            ],
+            "params": {}
+          },
+          {
+            "op_type": "heat",
+            "sentence": "Zakaria [ 136 ] analyzed the heat transfer performance of 0.1% and 0.5% Al 2 O 3 /WEG nanofluids with different base fluid ratios.",
+            "start_char": 12349,
+            "end_char": 12479,
+            "materials": [
+              "0.1%",
+              "0.5%",
+              "Al 2 O 3 /WEG nanofluids"
+            ],
+            "params": {}
+          },
+          {
+            "op_type": "heat",
+            "sentence": "The test results indicated that the heat transfer performance of the 0.1% Al 2 O 3 /WEG nanofluid at a 60:40 ratio was better than that at a 50:50 ratio.",
+            "start_char": 12480,
+            "end_char": 12633,
+            "materials": [
+              "3 /WEG"
+            ],
+            "params": {}
+          },
+          {
+            "op_type": "heat",
+            "sentence": "For example, Ilhan [ 138 ] prepared a nanofluid from boron nitride (BN) and analyzed its heat transfer performance.",
+            "start_char": 13376,
+            "end_char": 13491,
+            "materials": [
+              "Ilhan"
+            ],
+            "params": {}
+          }
+        ],
+        "expanded": [
+          {
+            "op_type": "heat",
+            "steps": [
+              "Place the reaction vessel on a hotplate.",
+              "Ramp to the target temperature.",
+              "Maintain the target temperature for the specified time."
+            ]
+          },
+          {
+            "op_type": "heat",
+            "steps": [
+              "Place the reaction vessel on a hotplate.",
+              "Ramp to the target temperature.",
+              "Maintain the target temperature for the specified time."
+            ]
+          },
+          {
+            "op_type": "heat",
+            "steps": [
+              "Place the reaction vessel on a hotplate.",
+              "Ramp to the target temperature.",
+              "Maintain the target temperature for the specified time."
+            ]
+          },
+          {
+            "op_type": "heat",
+            "steps": [
+              "Place the reaction vessel on a hotplate.",
+              "Ramp to the target temperature.",
+              "Maintain the target temperature for the specified time."
+            ]
+          },
+          {
+            "op_type": "heat",
+            "steps": [
+              "Place the reaction vessel on a hotplate.",
+              "Ramp to the target temperature.",
+              "Maintain the target temperature for the specified time."
+            ]
+          },
+          {
+            "op_type": "heat",
+            "steps": [
+              "Place the reaction vessel on a hotplate.",
+              "Ramp to the target temperature.",
+              "Maintain the target temperature for the specified time."
+            ]
+          },
+          {
+            "op_type": "heat",
+            "steps": [
+              "Place the reaction vessel on a hotplate.",
+              "Ramp to the target temperature.",
+              "Maintain the target temperature for the specified time."
+            ]
+          },
+          {
+            "op_type": "heat",
+            "steps": [
+              "Place the reaction vessel on a hotplate.",
+              "Ramp to the target temperature.",
+              "Maintain the target temperature for the specified time."
+            ]
+          },
+          {
+            "op_type": "heat",
+            "steps": [
+              "Place the reaction vessel on a hotplate.",
+              "Ramp to the target temperature.",
+              "Maintain the target temperature for the specified time."
+            ]
+          },
+          {
+            "op_type": "heat",
+            "steps": [
+              "Place the reaction vessel on a hotplate.",
+              "Ramp to the target temperature.",
+              "Maintain the target temperature for the specified time."
+            ]
+          },
+          {
+            "op_type": "heat",
+            "steps": [
+              "Place the reaction vessel on a hotplate.",
+              "Ramp to the target temperature.",
+              "Maintain the target temperature for the specified time."
+            ]
+          },
+          {
+            "op_type": "heat",
+            "steps": [
+              "Place the reaction vessel on a hotplate.",
+              "Ramp to the target temperature.",
+              "Maintain the target temperature for the specified time."
+            ]
+          },
+          {
+            "op_type": "heat",
+            "steps": [
+              "Place the reaction vessel on a hotplate.",
+              "Ramp to the target temperature.",
+              "Maintain the target temperature for the specified time."
+            ]
+          },
+          {
+            "op_type": "heat",
+            "steps": [
+              "Place the reaction vessel on a hotplate.",
+              "Ramp to the target temperature.",
+              "Maintain the target temperature for the specified time."
+            ]
+          },
+          {
+            "op_type": "heat",
+            "steps": [
+              "Place the reaction vessel on a hotplate.",
+              "Ramp to the target temperature.",
+              "Maintain the target temperature for the specified time."
+            ]
+          },
+          {
+            "op_type": "heat",
+            "steps": [
+              "Place the reaction vessel on a hotplate.",
+              "Ramp to the target temperature.",
+              "Maintain the target temperature for the specified time."
+            ]
+          },
+          {
+            "op_type": "heat",
+            "steps": [
+              "Place the reaction vessel on a hotplate.",
+              "Ramp to the target temperature.",
+              "Maintain the target temperature for the specified time."
+            ]
+          },
+          {
+            "op_type": "heat",
+            "steps": [
+              "Place the reaction vessel on a hotplate.",
+              "Ramp to the target temperature.",
+              "Maintain the target temperature for the specified time."
+            ]
+          },
+          {
+            "op_type": "heat",
+            "steps": [
+              "Place the reaction vessel on a hotplate.",
+              "Ramp to the target temperature.",
+              "Maintain the target temperature for the specified time."
+            ]
+          },
+          {
+            "op_type": "heat",
+            "steps": [
+              "Place the reaction vessel on a hotplate.",
+              "Ramp to the target temperature.",
+              "Maintain the target temperature for the specified time."
+            ]
+          },
+          {
+            "op_type": "heat",
+            "steps": [
+              "Place the reaction vessel on a hotplate.",
+              "Ramp to the target temperature.",
+              "Maintain the target temperature for the specified time."
+            ]
+          },
+          {
+            "op_type": "heat",
+            "steps": [
+              "Place the reaction vessel on a hotplate.",
+              "Ramp to the target temperature.",
+              "Maintain the target temperature for the specified time."
+            ]
+          },
+          {
+            "op_type": "heat",
+            "steps": [
+              "Place the reaction vessel on a hotplate.",
+              "Ramp to the target temperature.",
+              "Maintain the target temperature for the specified time."
+            ]
+          },
+          {
+            "op_type": "heat",
+            "steps": [
+              "Place the reaction vessel on a hotplate.",
+              "Ramp to the target temperature.",
+              "Maintain the target temperature for the specified time."
+            ]
+          },
+          {
+            "op_type": "heat",
+            "steps": [
+              "Place the reaction vessel on a hotplate.",
+              "Ramp to the target temperature.",
+              "Maintain the target temperature for the specified time."
+            ]
+          },
+          {
+            "op_type": "heat",
+            "steps": [
+              "Place the reaction vessel on a hotplate.",
+              "Ramp to the target temperature.",
+              "Maintain the target temperature for the specified time."
+            ]
+          },
+          {
+            "op_type": "heat",
+            "steps": [
+              "Place the reaction vessel on a hotplate.",
+              "Ramp to the target temperature.",
+              "Maintain the target temperature for the specified time."
+            ]
+          },
+          {
+            "op_type": "heat",
+            "steps": [
+              "Place the reaction vessel on a hotplate.",
+              "Ramp to the target temperature.",
+              "Maintain the target temperature for the specified time."
+            ]
+          },
+          {
+            "op_type": "heat",
+            "steps": [
+              "Place the reaction vessel on a hotplate.",
+              "Ramp to the target temperature.",
+              "Maintain the target temperature for the specified time."
+            ]
+          },
+          {
+            "op_type": "add",
+            "steps": [
+              "Ensure reaction vessel is present and empty.",
+              "Place a clean stir bar in the vessel.",
+              "Measure the specified amount of reagent.",
+              "Transfer reagent into the vessel."
+            ]
+          },
+          {
+            "op_type": "heat",
+            "steps": [
+              "Place the reaction vessel on a hotplate.",
+              "Ramp to the target temperature.",
+              "Maintain the target temperature for the specified time."
+            ]
+          },
+          {
+            "op_type": "heat",
+            "steps": [
+              "Place the reaction vessel on a hotplate.",
+              "Ramp to the target temperature.",
+              "Maintain the target temperature for the specified time."
+            ]
+          },
+          {
+            "op_type": "heat",
+            "steps": [
+              "Place the reaction vessel on a hotplate.",
+              "Ramp to the target temperature.",
+              "Maintain the target temperature for the specified time."
+            ]
+          },
+          {
+            "op_type": "heat",
+            "steps": [
+              "Place the reaction vessel on a hotplate.",
+              "Ramp to the target temperature.",
+              "Maintain the target temperature for the specified time."
+            ]
+          },
+          {
+            "op_type": "heat",
+            "steps": [
+              "Place the reaction vessel on a hotplate.",
+              "Ramp to the target temperature.",
+              "Maintain the target temperature for the specified time."
+            ]
+          },
+          {
+            "op_type": "heat",
+            "steps": [
+              "Place the reaction vessel on a hotplate.",
+              "Ramp to the target temperature.",
+              "Maintain the target temperature for the specified time."
+            ]
+          },
+          {
+            "op_type": "heat",
+            "steps": [
+              "Place the reaction vessel on a hotplate.",
+              "Ramp to the target temperature.",
+              "Maintain the target temperature for the specified time."
+            ]
+          },
+          {
+            "op_type": "heat",
+            "steps": [
+              "Place the reaction vessel on a hotplate.",
+              "Ramp to the target temperature.",
+              "Maintain the target temperature for the specified time."
+            ]
+          },
+          {
+            "op_type": "heat",
+            "steps": [
+              "Place the reaction vessel on a hotplate.",
+              "Ramp to the target temperature.",
+              "Maintain the target temperature for the specified time."
+            ]
+          },
+          {
+            "op_type": "heat",
+            "steps": [
+              "Place the reaction vessel on a hotplate.",
+              "Ramp to the target temperature.",
+              "Maintain the target temperature for the specified time."
+            ]
+          },
+          {
+            "op_type": "heat",
+            "steps": [
+              "Place the reaction vessel on a hotplate.",
+              "Ramp to the target temperature.",
+              "Maintain the target temperature for the specified time."
+            ]
+          }
+        ]
+      },
+      {
+        "text": "1.1. Nanofluid Overview Nanofluids were first proposed by Professor Choi at Aragon National Laboratory, the United States of America in the early 1990s. They are composed of nanoparticles, metal, or polymer particles of sizes ranging from 1 nm to 100 nm and the base liquid. This is shown in  Figure 1 . Nanofluids have a capacity to enhance the heat dissipation performance of the base fluid. They exhibit a variety of unique thermal, optical, electrical, magnetic, and other properties, and they have hence been innovatively utilized in heat transfer engineering and applied in different fields including aerospace, energy, electromechanics, and biomedicine [ 1 ]. The heat transfer enhancement mechanism of a nanofluid involves the addition of nanoparticles to the base fluid, increasing the thermal conductivity of the mixture and thereby improving the heat transfer capacity of the base fluid. In addition, particle-to-particle and wall-to-wall collisions and the mutual motion between the particles and liquid improve the heat transfer characteristics.  However, this is a complicated process in microchannels. Molecular dynamics have been used to analyze the heat transfer mechanism at solid–liquid interfaces. Frank [ 2 , 3 ] investigated the effects of surface irregularities and imperfections on thermal resistance using molecular dynamics (MD). The thermal resistance was reduced by increasing the strength of the solid–liquid interface. Ghorbanian [ 4 ] used nonequilibrium molecular dynamics to analyze the effects of the wall force field and scale. The results proved that wall effects lead to continuum solution deviations. Papanikoulaou [ 5 ] used molecular dynamics to analyze the effects of surface roughness on nanoflows. The results showed that the flow velocity near the wall was reduced with an increasing roughness depth. Liu [ 6 ] explored the transport and structural characteristics of water inside nanotubes using molecular dynamic simulations. The results indicated that thermal conductivity and shear viscosity increased as the pore size decreased. McGaughey [ 7 ] also used molecular dynamics simulations to analyze the heat transport mechanism of silica-based crystals. The simulation results showed that thermal conductivity is related to the scale and temperature of the atomic structure of silica-based crystals. Sun [ 8 ] used the colloidal probe technique to analyze the force profiles of nanoparticles and base fluids. The test results showed that the measured and calculated force curves exhibited an evident slip (10–14 nm). Nanofluids can be used as coolants in systems with high heat-dissipation requirements. For example, nanofluid applications have been investigated in food processing, solar energy collection, nuclear reactors, and oil recovery. In food processing, nanofluids can be used to increase heat exchanger efficiency and reduce energy consumption. Nanofluids can shorten the thermal processing time and improve the nutritional content of food [ 9 , 10 , 11 , 12 , 13 , 14 ]. In the solar energy collecting field, nanofluids have been proven to increase the collecting efficiency of solar energy collectors, including parabolic trough solar collectors, evacuated tube solar collectors, flat plate solar collectors, and solar cookers [ 15 , 16 , 17 , 18 , 19 , 20 , 21 , 22 ]. This is illustrated in  Figure 2 . In the nuclear reactor field, nanofluids as coolants could increase the cooling capacity and maintain safe operation of nuclear reactor cooling systems [ 23 , 24 , 25 , 26 , 27 , 28 , 29 , 30 , 31 , 32 , 33 , 34 , 35 ]. Nanofluids also can be used to improve oil recovery efficiency due to their excellent heat transfer performance [ 36 , 37 , 38 , 39 , 40 , 41 , 42 , 43 , 44 , 45 , 46 , 47 , 48 , 49 , 50 , 51 ]. For example, nanofluid applications in oil-fueled vehicles include their use in cooling, lubrication, air conditioners, and exhaust power generation systems, as shown in  Figure 2 . In 2004, the U.S. Department of Energy used nanofluids in fuel cells, and the heat dissipation capacity of cooling systems could be significantly improved [ 52 ]. Particularly, for fuel cell vehicles, nanofluids have the potential to replace existing coolants and improve the heat transfer capacity of thermal management systems. This paper will explore the challenges and future research directions of nanofluids as coolants in fuel cell vehicles.",
+        "operations": [
+          {
+            "op_type": "heat",
+            "sentence": "Nanofluids have a capacity to enhance the heat dissipation performance of the base fluid.",
+            "start_char": 304,
+            "end_char": 393,
+            "materials": [],
+            "params": {}
+          },
+          {
+            "op_type": "heat",
+            "sentence": "They exhibit a variety of unique thermal, optical, electrical, magnetic, and other properties, and they have hence been innovatively utilized in heat transfer engineering and applied in different fields including aerospace, energy, electromechanics, and biomedicine [ 1 ].",
+            "start_char": 394,
+            "end_char": 666,
+            "materials": [],
+            "params": {}
+          },
+          {
+            "op_type": "heat",
+            "sentence": "The heat transfer enhancement mechanism of a nanofluid involves the addition of nanoparticles to the base fluid, increasing the thermal conductivity of the mixture and thereby improving the heat transfer capacity of the base fluid.",
+            "start_char": 667,
+            "end_char": 898,
+            "materials": [],
+            "params": {}
+          },
+          {
+            "op_type": "heat",
+            "sentence": "In addition, particle-to-particle and wall-to-wall collisions and the mutual motion between the particles and liquid improve the heat transfer characteristics.  ",
+            "start_char": 899,
+            "end_char": 1060,
+            "materials": [],
+            "params": {}
+          },
+          {
+            "op_type": "heat",
+            "sentence": "Molecular dynamics have been used to analyze the heat transfer mechanism at solid–liquid interfaces.",
+            "start_char": 1117,
+            "end_char": 1217,
+            "materials": [],
+            "params": {}
+          },
+          {
+            "op_type": "heat",
+            "sentence": "McGaughey [ 7 ] also used molecular dynamics simulations to analyze the heat transport mechanism of silica-based crystals.",
+            "start_char": 2078,
+            "end_char": 2200,
+            "materials": [],
+            "params": {}
+          },
+          {
+            "op_type": "heat",
+            "sentence": "Nanofluids can be used as coolants in systems with high heat-dissipation requirements.",
+            "start_char": 2564,
+            "end_char": 2650,
+            "materials": [],
+            "params": {}
+          },
+          {
+            "op_type": "heat",
+            "sentence": "In food processing, nanofluids can be used to increase heat exchanger efficiency and reduce energy consumption.",
+            "start_char": 2791,
+            "end_char": 2902,
+            "materials": [],
+            "params": {}
+          },
+          {
+            "op_type": "heat",
+            "sentence": "In the nuclear reactor field, nanofluids as coolants could increase the cooling capacity and maintain safe operation of nuclear reactor cooling systems [ 23 , 24 , 25 , 26 , 27 , 28 , 29 , 30 , 31 , 32 , 33 , 34 , 35 ].",
+            "start_char": 3365,
+            "end_char": 3584,
+            "materials": [],
+            "params": {}
+          },
+          {
+            "op_type": "heat",
+            "sentence": "Nanofluids also can be used to improve oil recovery efficiency due to their excellent heat transfer performance [ 36 , 37 , 38 , 39 , 40 , 41 , 42 , 43 , 44 , 45 , 46 , 47 , 48 , 49 , 50 , 51 ].",
+            "start_char": 3585,
+            "end_char": 3779,
+            "materials": [],
+            "params": {}
+          },
+          {
+            "op_type": "heat",
+            "sentence": "In 2004, the U.S. Department of Energy used nanofluids in fuel cells, and the heat dissipation capacity of cooling systems could be significantly improved [ 52 ].",
+            "start_char": 3962,
+            "end_char": 4124,
+            "materials": [],
+            "params": {}
+          },
+          {
+            "op_type": "heat",
+            "sentence": "Particularly, for fuel cell vehicles, nanofluids have the potential to replace existing coolants and improve the heat transfer capacity of thermal management systems.",
+            "start_char": 4125,
+            "end_char": 4291,
+            "materials": [],
+            "params": {}
+          }
+        ],
+        "expanded": [
+          {
+            "op_type": "heat",
+            "steps": [
+              "Place the reaction vessel on a hotplate.",
+              "Ramp to the target temperature.",
+              "Maintain the target temperature for the specified time."
+            ]
+          },
+          {
+            "op_type": "heat",
+            "steps": [
+              "Place the reaction vessel on a hotplate.",
+              "Ramp to the target temperature.",
+              "Maintain the target temperature for the specified time."
+            ]
+          },
+          {
+            "op_type": "heat",
+            "steps": [
+              "Place the reaction vessel on a hotplate.",
+              "Ramp to the target temperature.",
+              "Maintain the target temperature for the specified time."
+            ]
+          },
+          {
+            "op_type": "heat",
+            "steps": [
+              "Place the reaction vessel on a hotplate.",
+              "Ramp to the target temperature.",
+              "Maintain the target temperature for the specified time."
+            ]
+          },
+          {
+            "op_type": "heat",
+            "steps": [
+              "Place the reaction vessel on a hotplate.",
+              "Ramp to the target temperature.",
+              "Maintain the target temperature for the specified time."
+            ]
+          },
+          {
+            "op_type": "heat",
+            "steps": [
+              "Place the reaction vessel on a hotplate.",
+              "Ramp to the target temperature.",
+              "Maintain the target temperature for the specified time."
+            ]
+          },
+          {
+            "op_type": "heat",
+            "steps": [
+              "Place the reaction vessel on a hotplate.",
+              "Ramp to the target temperature.",
+              "Maintain the target temperature for the specified time."
+            ]
+          },
+          {
+            "op_type": "heat",
+            "steps": [
+              "Place the reaction vessel on a hotplate.",
+              "Ramp to the target temperature.",
+              "Maintain the target temperature for the specified time."
+            ]
+          },
+          {
+            "op_type": "heat",
+            "steps": [
+              "Place the reaction vessel on a hotplate.",
+              "Ramp to the target temperature.",
+              "Maintain the target temperature for the specified time."
+            ]
+          },
+          {
+            "op_type": "heat",
+            "steps": [
+              "Place the reaction vessel on a hotplate.",
+              "Ramp to the target temperature.",
+              "Maintain the target temperature for the specified time."
+            ]
+          },
+          {
+            "op_type": "heat",
+            "steps": [
+              "Place the reaction vessel on a hotplate.",
+              "Ramp to the target temperature.",
+              "Maintain the target temperature for the specified time."
+            ]
+          },
+          {
+            "op_type": "heat",
+            "steps": [
+              "Place the reaction vessel on a hotplate.",
+              "Ramp to the target temperature.",
+              "Maintain the target temperature for the specified time."
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

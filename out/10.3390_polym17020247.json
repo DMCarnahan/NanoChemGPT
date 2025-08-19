@@ -1,0 +1,196 @@
+{
+  "paper_id": "10.3390/polym17020247",
+  "title": "Nanoparticle-Doped Antibacterial and Antifungal Coatings.",
+  "authors": [],
+  "doi": "10.3390/polym17020247",
+  "source": "eupmc",
+  "urls": {
+    "pdf": null
+  },
+  "license": {
+    "type": "unknown"
+  },
+  "access_route": "oa",
+  "sections": [
+    {
+      "heading": "1. Introduction",
+      "text": "1. Introduction It is crucial to apply antimicrobial polymeric coatings to the surfaces of equipment and devices that do not have an interaction between food and the environment. The objective of this antimicrobial packaging is to preserve food quality, ensure safety, and increase shelf life [ 1 ]. Varied methods of creating biodegradable and secure antimicrobial packaging have been explored. These include the use of polymers harboring antimicrobial activity within their structure and the addition of selected antimicrobials. Antimicrobial polymeric coatings offer another major benefit: they provide durable defense, suited to situations where it is difficult to wash and sanitize material on a routine basis [ 2 ]. Some antimicrobial NPs have effects against fungi as well as bacteria; that is to say, they restrain or kill fungal species. Nanotechnology in polymer enhancement improves product shelf life, antibacterials added, and the advantage of sniffing out the incipient changes leading to decay. Thus, with nanotechnology packaging, extended product shelf life in addition to the presence of antibacterial agents and degradation symptoms can all be anticipated [ 3 , 4 ]. The phrase “nanotechnology” was coined by Richard Feynman in 1959 [ 5 ]. Due to their higher aspect ratio and larger surface area, nanocomposites—which contain at least one phase with nanometer-scale dimensions—offer better characteristics [ 6 ]. Nanocomposite films can improve functional qualities by adding NPs to the polymer matrix. NPs can act as both reinforcement for the films and active substances [ 7 ]. The entire behavior of these NPs depends on their uniform dispersion inside the polymer matrix. Abrasion resistance, corrosion and chemical resistance, wear resistance, optical performance, antireflection, flame retardancy, electrical properties, mechanical properties, barrier properties, permeability, and antibacterial and antifungal ability are just a few of the properties that can be improved by adding nanomaterials to polymer matrices [ 8 , 9 , 10 ]. Silver is used in consumer antimicrobial goods in the building, textile, cosmetic, appliance, health, and environmental industries. Numerous items that contain AgNPs have received approval from the U.S. Food and Drug Administration (FDA) [ 11 ]. The FDA has approved the commercial release of several gold nanoparticle-based diagnostic tools, and testing of other formulations is still ongoing [ 12 ]. NPs play a crucial role in enhancing the antimicrobial properties of polymeric coatings through mechanisms such as ion release, reactive oxygen species (ROS) generation, physical disruption, and surface modification. Nanoproducts can be made from metal NPs, metal oxide NPs, carbon-based nanomaterials, and organic micro and nanomaterials. All these differences among and within different classes of nanoparticles affect their suitability for specific antimicrobial applications. In addition, in this review, the effect of nanoparticle characteristics, such as size, bricks content, and shape, on the overall antibacterial efficiency of coatings has been analyzed. New coating materials and their applications in construction, textiles, food packaging, and healthcare were highlighted in this review. The review concludes with a discussion of the problems now facing this field of study, its prospects for the future, and possible future directions."
+    },
+    {
+      "heading": "2. Types of Nanoparticles",
+      "text": "2. Types of Nanoparticles There are four types of NPs: clay, organic, inorganic, and carbon-based NPs [ 7 ].  Table 1  comprehensively compares various NPs, detailing their key properties, antimicrobial mechanisms, synthesis methods, applications, advantages, and limitations. 2.1. Clay and Organic NPs In sheets or cylindrical nanotubes, natural clays like montmorillonite and halloysite are frequently employed as nanoclays [ 32 ]. They have minerals that are fine-grained and have high mechanical characteristics. Due to their biocompatibility, biodegradability, and distinctive mechanical properties, biopolymer nanofibrils like cellulose, collagen, and chitin are also frequently used [ 33 , 34 ]. Nanocrystalline cellulose, also known as cellulose nanocrystals, nano-fibrillated cellulose, and bacterial nanocellulose are the three main types of nanocellulose [ 35 , 36 ]. Due to their substantial surface area, biocompatibility, lack of toxicity, and capacity for forming films, chitosan and chitin NPs are desirable NPs. Chitosan NPs, however, encounter stability and solubility issues that structural alterations and optimization can resolve [ 37 , 38 , 39 ]. These organic NPs encapsulate hydrophobic medicines in various biopolymer films. 2.2. Inorganic NPs There are two types of inorganic NPs: metal-based and metal oxide-based. 2.2.1. Metal-Based NPs CuNPs possess antimicrobial properties due to their ability to release copper ions, which have a high redox potential capable of damaging microbial cell components. These NPs can be utilized for antimicrobial activity [ 40 , 41 ]. AgNPs are widely used for potent antimicrobial applications. Typically synthesized through chemical reduction or green synthesis methods, AgNPs release silver ions that interact with microbial cell membranes, causing structural damage and disrupting vital enzymatic functions [ 16 ]. They are commonly incorporated into medical device coatings to prevent biofilm formation and in textiles for durable antimicrobial treatments [ 15 ]. A study by Rai et al. demonstrated their effective use in wound dressings, significantly reducing infection rates [ 14 ]. AgNPs have garnered attention in wound healing applications due to their favorable physicochemical and biological properties [ 42 ]. They are also used in food packaging and medical applications [ 43 , 44 , 45 ]. Selenium NPs offer reduced toxicity compared to elemental selenium. They can serve as a drug delivery platform, targeting specific destinations within the body [ 46 , 47 , 48 ]. Gold NPs (AuNPs) have been used in various applications, including treating gum disorders, dental caries, tissue engineering, dental implantology, and cancer diagnostics. These applications are possible due to the unique nanostructures, high surface area, and biocompatibility of AuNPs [ 49 ]. 2.2.2. Metal Oxide NPs Metal oxide NPs [ 50 ], including ZnO [ 51 , 52 , 53 , 54 ], TiO 2  [ 55 , 56 , 57 ], silica [ 58 , 59 ], aluminum oxide [ 60 , 61 ], iron oxide [ 62 ], and copper oxide [ 63 ], are incorporated into polymer films as active NPs. Fe 3 O 4  NPs exhibited strong antibacterial activity against Gram-positive and Gram-negative bacteria [ 64 ]. These metal-based NPs demonstrate diverse properties and find applications in antimicrobial activity, wound healing, drug delivery, and diagnostics. TiO 2  and ZnO NPs exhibit photocatalytic antibacterial properties. When exposed to UV light, they generate reactive oxygen species (ROS) that have antibacterial effects [ 7 ]. NPs of CuO not only have antimicrobial, antibacterial, and antioxidant activity but also serve as a UV blocker [ 65 ]. Indeed, metal oxide NPs offer a variety of applications, including being able to enhance polymer film characteristics and add antibacterial, microbial enemy-smashing functions and UV light-blocking capability. These metal oxide NPs are utilized in polymer films to improve their properties and provide additional functionalities such as antibacterial and UV-blocking effects. ZnO NPs are known for their photocatalytic properties, which facilitate the generation of ROS under UV light, leading to microbial inactivation through oxidative stress. These are synthesized via methods like sol–gel, hydrothermal, and vapor-phase techniques. ZnO-NPs are used in coatings for medical instruments and food packaging to enhance antimicrobial protection [ 21 , 22 ]. For instance, Raghupathi et al. highlighted their efficacy in antimicrobial coatings for surgical masks, providing enhanced protection against pathogens [ 20 ]. 2.3. Carbon NPs The distinctive characteristics of carbon dots (CDs), including their low cost, high water solubility, bioactivity, minimal danger, and light absorption, have made them a viable nanomaterial for antimicrobial food packaging [ 66 ]. CDs break down and condense genomic DNA through cytoplasmic leakage, the disintegration of cell structures, and generating ROS [ 67 ]. Alas et al. [ 68 ] used solvent casting to embed CDs in PVA, resulting in flexible films with potent fluorescence and UV-blocking properties. Together with notable antibacterial activity against both Gram-positive and Gram-negative bacteria, enhanced thermal characteristics and modest antioxidant and metal-chelating properties were all displayed by the CD/PVA films. Ezati et al. [ 69 ] synthesized pectin/gelatin-based bioactive food packaging films using sulfur-functionalized turmeric-derived CDs. The CD-added coatings enhanced mechanical qualities, water vapor permeability, and hydrophobicity while offering strong UV protection without noticeably changing transparency. Sulfur functionalized turmeric-derived -CD-containing films showed strong antibacterial activity against  L. monocytogenes  and  E. coli , indicating their suitability for active food packaging to improve food safety and prolong shelf life. In order to enhance the preservation quality and suppress microbes in freshly chopped cucumber, Fan et al. [ 70 ] added CDs derived from kelp to a chitosan coating solution at different CD concentrations (0%, 1.5%, 3%, and 4.5%). The findings demonstrated that CD/CH coatings improved the inhibitory zones against  E. coli  and  S. aureus  as CD concentrations increased. During storage, the cucumbers with the 4.5% CDs/CH coating had less water mobility, lessened weight loss, less firmness loss, and less ascorbic acid and flavor degradation. Graphene-based materials, including graphene and graphene oxide (GO), have gained attention for their excellent mechanical properties, substantial electron mobility, and larger surface area than carbon-based nanomaterials [ 71 , 72 ]. GO is a promising nanoparticle due to its reduced tendency to agglomerate [ 73 ]. Monolayer graphene’s remarkable properties, such as its high Young’s modulus (~1000 GPa), high fracture strength (~125 GPa), excellent electrical and thermal conductivity (~100 S/cm and ~5000 W/mK, respectively), rapid charge carrier mobility (~200,000 cm 2 /Vs), and large specific surface area (theoretically calculated value, 2630 m 2 /g), are due to its distinctive structure and geometry [ 71 ]. GO exhibits antimicrobial activity primarily through physical disruption of microbial membranes and oxidative stress [ 28 ]. Synthesized using methods like the Hummers method and thermal exfoliation, GO has applications in water treatment and electronic coatings. Its large surface area and high conductivity make it suitable for diverse antimicrobial applications [ 74 ]. Research by Akhavan and Ghaderi demonstrated its effectiveness in antimicrobial coatings for water purification systems [ 27 ]."
+    }
+  ],
+  "extractions": {
+    "methods_paragraphs": [
+      {
+        "text": "1. Introduction It is crucial to apply antimicrobial polymeric coatings to the surfaces of equipment and devices that do not have an interaction between food and the environment. The objective of this antimicrobial packaging is to preserve food quality, ensure safety, and increase shelf life [ 1 ]. Varied methods of creating biodegradable and secure antimicrobial packaging have been explored. These include the use of polymers harboring antimicrobial activity within their structure and the addition of selected antimicrobials. Antimicrobial polymeric coatings offer another major benefit: they provide durable defense, suited to situations where it is difficult to wash and sanitize material on a routine basis [ 2 ]. Some antimicrobial NPs have effects against fungi as well as bacteria; that is to say, they restrain or kill fungal species. Nanotechnology in polymer enhancement improves product shelf life, antibacterials added, and the advantage of sniffing out the incipient changes leading to decay. Thus, with nanotechnology packaging, extended product shelf life in addition to the presence of antibacterial agents and degradation symptoms can all be anticipated [ 3 , 4 ]. The phrase “nanotechnology” was coined by Richard Feynman in 1959 [ 5 ]. Due to their higher aspect ratio and larger surface area, nanocomposites—which contain at least one phase with nanometer-scale dimensions—offer better characteristics [ 6 ]. Nanocomposite films can improve functional qualities by adding NPs to the polymer matrix. NPs can act as both reinforcement for the films and active substances [ 7 ]. The entire behavior of these NPs depends on their uniform dispersion inside the polymer matrix. Abrasion resistance, corrosion and chemical resistance, wear resistance, optical performance, antireflection, flame retardancy, electrical properties, mechanical properties, barrier properties, permeability, and antibacterial and antifungal ability are just a few of the properties that can be improved by adding nanomaterials to polymer matrices [ 8 , 9 , 10 ]. Silver is used in consumer antimicrobial goods in the building, textile, cosmetic, appliance, health, and environmental industries. Numerous items that contain AgNPs have received approval from the U.S. Food and Drug Administration (FDA) [ 11 ]. The FDA has approved the commercial release of several gold nanoparticle-based diagnostic tools, and testing of other formulations is still ongoing [ 12 ]. NPs play a crucial role in enhancing the antimicrobial properties of polymeric coatings through mechanisms such as ion release, reactive oxygen species (ROS) generation, physical disruption, and surface modification. Nanoproducts can be made from metal NPs, metal oxide NPs, carbon-based nanomaterials, and organic micro and nanomaterials. All these differences among and within different classes of nanoparticles affect their suitability for specific antimicrobial applications. In addition, in this review, the effect of nanoparticle characteristics, such as size, bricks content, and shape, on the overall antibacterial efficiency of coatings has been analyzed. New coating materials and their applications in construction, textiles, food packaging, and healthcare were highlighted in this review. The review concludes with a discussion of the problems now facing this field of study, its prospects for the future, and possible future directions.",
+        "operations": [
+          {
+            "op_type": "wash",
+            "sentence": "Antimicrobial polymeric coatings offer another major benefit: they provide durable defense, suited to situations where it is difficult to wash and sanitize material on a routine basis [ 2 ].",
+            "start_char": 531,
+            "end_char": 721,
+            "materials": [],
+            "params": {}
+          },
+          {
+            "op_type": "add",
+            "sentence": "Nanotechnology in polymer enhancement improves product shelf life, antibacterials added, and the advantage of sniffing out the incipient changes leading to decay.",
+            "start_char": 847,
+            "end_char": 1009,
+            "materials": [],
+            "params": {}
+          },
+          {
+            "op_type": "add",
+            "sentence": "Nanocomposite films can improve functional qualities by adding NPs to the polymer matrix.",
+            "start_char": 1433,
+            "end_char": 1522,
+            "materials": [],
+            "params": {}
+          },
+          {
+            "op_type": "add",
+            "sentence": "Abrasion resistance, corrosion and chemical resistance, wear resistance, optical performance, antireflection, flame retardancy, electrical properties, mechanical properties, barrier properties, permeability, and antibacterial and antifungal ability are just a few of the properties that can be improved by adding nanomaterials to polymer matrices [ 8 , 9 , 10 ].",
+            "start_char": 1696,
+            "end_char": 2058,
+            "materials": [],
+            "params": {}
+          }
+        ],
+        "expanded": [
+          {
+            "op_type": "wash",
+            "steps": [
+              "Perform operation 'wash' as described: Antimicrobial polymeric coatings offer another major benefit: they provide durable defense, suited to situations where it is difficult to wash and sanitize material on a routine basis [ 2 ]."
+            ]
+          },
+          {
+            "op_type": "add",
+            "steps": [
+              "Ensure reaction vessel is present and empty.",
+              "Place a clean stir bar in the vessel.",
+              "Measure the specified amount of reagent.",
+              "Transfer reagent into the vessel."
+            ]
+          },
+          {
+            "op_type": "add",
+            "steps": [
+              "Ensure reaction vessel is present and empty.",
+              "Place a clean stir bar in the vessel.",
+              "Measure the specified amount of reagent.",
+              "Transfer reagent into the vessel."
+            ]
+          },
+          {
+            "op_type": "add",
+            "steps": [
+              "Ensure reaction vessel is present and empty.",
+              "Place a clean stir bar in the vessel.",
+              "Measure the specified amount of reagent.",
+              "Transfer reagent into the vessel."
+            ]
+          }
+        ]
+      },
+      {
+        "text": "2. Types of Nanoparticles There are four types of NPs: clay, organic, inorganic, and carbon-based NPs [ 7 ].  Table 1  comprehensively compares various NPs, detailing their key properties, antimicrobial mechanisms, synthesis methods, applications, advantages, and limitations. 2.1. Clay and Organic NPs In sheets or cylindrical nanotubes, natural clays like montmorillonite and halloysite are frequently employed as nanoclays [ 32 ]. They have minerals that are fine-grained and have high mechanical characteristics. Due to their biocompatibility, biodegradability, and distinctive mechanical properties, biopolymer nanofibrils like cellulose, collagen, and chitin are also frequently used [ 33 , 34 ]. Nanocrystalline cellulose, also known as cellulose nanocrystals, nano-fibrillated cellulose, and bacterial nanocellulose are the three main types of nanocellulose [ 35 , 36 ]. Due to their substantial surface area, biocompatibility, lack of toxicity, and capacity for forming films, chitosan and chitin NPs are desirable NPs. Chitosan NPs, however, encounter stability and solubility issues that structural alterations and optimization can resolve [ 37 , 38 , 39 ]. These organic NPs encapsulate hydrophobic medicines in various biopolymer films. 2.2. Inorganic NPs There are two types of inorganic NPs: metal-based and metal oxide-based. 2.2.1. Metal-Based NPs CuNPs possess antimicrobial properties due to their ability to release copper ions, which have a high redox potential capable of damaging microbial cell components. These NPs can be utilized for antimicrobial activity [ 40 , 41 ]. AgNPs are widely used for potent antimicrobial applications. Typically synthesized through chemical reduction or green synthesis methods, AgNPs release silver ions that interact with microbial cell membranes, causing structural damage and disrupting vital enzymatic functions [ 16 ]. They are commonly incorporated into medical device coatings to prevent biofilm formation and in textiles for durable antimicrobial treatments [ 15 ]. A study by Rai et al. demonstrated their effective use in wound dressings, significantly reducing infection rates [ 14 ]. AgNPs have garnered attention in wound healing applications due to their favorable physicochemical and biological properties [ 42 ]. They are also used in food packaging and medical applications [ 43 , 44 , 45 ]. Selenium NPs offer reduced toxicity compared to elemental selenium. They can serve as a drug delivery platform, targeting specific destinations within the body [ 46 , 47 , 48 ]. Gold NPs (AuNPs) have been used in various applications, including treating gum disorders, dental caries, tissue engineering, dental implantology, and cancer diagnostics. These applications are possible due to the unique nanostructures, high surface area, and biocompatibility of AuNPs [ 49 ]. 2.2.2. Metal Oxide NPs Metal oxide NPs [ 50 ], including ZnO [ 51 , 52 , 53 , 54 ], TiO 2  [ 55 , 56 , 57 ], silica [ 58 , 59 ], aluminum oxide [ 60 , 61 ], iron oxide [ 62 ], and copper oxide [ 63 ], are incorporated into polymer films as active NPs. Fe 3 O 4  NPs exhibited strong antibacterial activity against Gram-positive and Gram-negative bacteria [ 64 ]. These metal-based NPs demonstrate diverse properties and find applications in antimicrobial activity, wound healing, drug delivery, and diagnostics. TiO 2  and ZnO NPs exhibit photocatalytic antibacterial properties. When exposed to UV light, they generate reactive oxygen species (ROS) that have antibacterial effects [ 7 ]. NPs of CuO not only have antimicrobial, antibacterial, and antioxidant activity but also serve as a UV blocker [ 65 ]. Indeed, metal oxide NPs offer a variety of applications, including being able to enhance polymer film characteristics and add antibacterial, microbial enemy-smashing functions and UV light-blocking capability. These metal oxide NPs are utilized in polymer films to improve their properties and provide additional functionalities such as antibacterial and UV-blocking effects. ZnO NPs are known for their photocatalytic properties, which facilitate the generation of ROS under UV light, leading to microbial inactivation through oxidative stress. These are synthesized via methods like sol–gel, hydrothermal, and vapor-phase techniques. ZnO-NPs are used in coatings for medical instruments and food packaging to enhance antimicrobial protection [ 21 , 22 ]. For instance, Raghupathi et al. highlighted their efficacy in antimicrobial coatings for surgical masks, providing enhanced protection against pathogens [ 20 ]. 2.3. Carbon NPs The distinctive characteristics of carbon dots (CDs), including their low cost, high water solubility, bioactivity, minimal danger, and light absorption, have made them a viable nanomaterial for antimicrobial food packaging [ 66 ]. CDs break down and condense genomic DNA through cytoplasmic leakage, the disintegration of cell structures, and generating ROS [ 67 ]. Alas et al. [ 68 ] used solvent casting to embed CDs in PVA, resulting in flexible films with potent fluorescence and UV-blocking properties. Together with notable antibacterial activity against both Gram-positive and Gram-negative bacteria, enhanced thermal characteristics and modest antioxidant and metal-chelating properties were all displayed by the CD/PVA films. Ezati et al. [ 69 ] synthesized pectin/gelatin-based bioactive food packaging films using sulfur-functionalized turmeric-derived CDs. The CD-added coatings enhanced mechanical qualities, water vapor permeability, and hydrophobicity while offering strong UV protection without noticeably changing transparency. Sulfur functionalized turmeric-derived -CD-containing films showed strong antibacterial activity against  L. monocytogenes  and  E. coli , indicating their suitability for active food packaging to improve food safety and prolong shelf life. In order to enhance the preservation quality and suppress microbes in freshly chopped cucumber, Fan et al. [ 70 ] added CDs derived from kelp to a chitosan coating solution at different CD concentrations (0%, 1.5%, 3%, and 4.5%). The findings demonstrated that CD/CH coatings improved the inhibitory zones against  E. coli  and  S. aureus  as CD concentrations increased. During storage, the cucumbers with the 4.5% CDs/CH coating had less water mobility, lessened weight loss, less firmness loss, and less ascorbic acid and flavor degradation. Graphene-based materials, including graphene and graphene oxide (GO), have gained attention for their excellent mechanical properties, substantial electron mobility, and larger surface area than carbon-based nanomaterials [ 71 , 72 ]. GO is a promising nanoparticle due to its reduced tendency to agglomerate [ 73 ]. Monolayer graphene’s remarkable properties, such as its high Young’s modulus (~1000 GPa), high fracture strength (~125 GPa), excellent electrical and thermal conductivity (~100 S/cm and ~5000 W/mK, respectively), rapid charge carrier mobility (~200,000 cm 2 /Vs), and large specific surface area (theoretically calculated value, 2630 m 2 /g), are due to its distinctive structure and geometry [ 71 ]. GO exhibits antimicrobial activity primarily through physical disruption of microbial membranes and oxidative stress [ 28 ]. Synthesized using methods like the Hummers method and thermal exfoliation, GO has applications in water treatment and electronic coatings. Its large surface area and high conductivity make it suitable for diverse antimicrobial applications [ 74 ]. Research by Akhavan and Ghaderi demonstrated its effectiveness in antimicrobial coatings for water purification systems [ 27 ].",
+        "operations": [
+          {
+            "op_type": "add",
+            "sentence": "Indeed, metal oxide NPs offer a variety of applications, including being able to enhance polymer film characteristics and add antibacterial, microbial enemy-smashing functions and UV light-blocking capability.",
+            "start_char": 3645,
+            "end_char": 3854,
+            "materials": [
+              "UV light-blocking capability"
+            ],
+            "params": {}
+          },
+          {
+            "op_type": "add",
+            "sentence": "The CD-added coatings enhanced mechanical qualities, water vapor permeability, and hydrophobicity while offering strong UV protection without noticeably changing transparency.",
+            "start_char": 5449,
+            "end_char": 5624,
+            "materials": [
+              "strong UV protection"
+            ],
+            "params": {}
+          },
+          {
+            "op_type": "add",
+            "sentence": "In order to enhance the preservation quality and suppress microbes in freshly chopped cucumber, Fan et al. [ 70 ] added CDs derived from kelp to a chitosan coating solution at different CD concentrations (0%, 1.5%, 3%, and 4.5%).",
+            "start_char": 5866,
+            "end_char": 6095,
+            "materials": [
+              "[ 70 ] added CDs",
+              "1.5%",
+              "4.5%"
+            ],
+            "params": {}
+          },
+          {
+            "op_type": "add",
+            "sentence": "Monolayer graphene’s remarkable properties, such as its high Young’s modulus (~1000 GPa), high fracture strength (~125 GPa), excellent electrical and thermal conductivity (~100 S/cm and ~5000 W/mK, respectively), rapid charge carrier mobility (~200,000 cm 2 /Vs), and large specific surface area (theoretically calculated value, 2630 m 2 /g), are due to its distinctive structure and geometry [ 71 ].",
+            "start_char": 6728,
+            "end_char": 7128,
+            "materials": [
+              "its high Young’s modulus (~1000 GPa",
+              "~125 GPa",
+              "~100 S/cm",
+              "~5000 W/mK"
+            ],
+            "params": {
+              "time": "100 S",
+              "amounts": [
+                "2630 m"
+              ],
+              "concs": [
+                "2630 m"
+              ]
+            }
+          }
+        ],
+        "expanded": [
+          {
+            "op_type": "add",
+            "steps": [
+              "Ensure reaction vessel is present and empty.",
+              "Place a clean stir bar in the vessel.",
+              "Measure the specified amount of UV light-blocking capability.",
+              "Transfer UV light-blocking capability into the vessel."
+            ]
+          },
+          {
+            "op_type": "add",
+            "steps": [
+              "Ensure reaction vessel is present and empty.",
+              "Place a clean stir bar in the vessel.",
+              "Measure the specified amount of strong UV protection.",
+              "Transfer strong UV protection into the vessel."
+            ]
+          },
+          {
+            "op_type": "add",
+            "steps": [
+              "Ensure reaction vessel is present and empty.",
+              "Place a clean stir bar in the vessel.",
+              "Measure the specified amount of [ 70 ] added CDs.",
+              "Transfer [ 70 ] added CDs into the vessel."
+            ]
+          },
+          {
+            "op_type": "add",
+            "steps": [
+              "Ensure reaction vessel is present and empty.",
+              "Place a clean stir bar in the vessel.",
+              "Measure 2630 m of its high Young’s modulus (~1000 GPa.",
+              "Transfer its high Young’s modulus (~1000 GPa into the vessel."
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,134 @@
+{
+  "paper_id": "10.1021/acsbiomaterials.4c02190",
+  "title": "Real-Time &lt;i&gt;in Vivo&lt;/i&gt; Bacterial Imaging by Computed Tomography and Fluorescence Using Phage-Gold Nanorod Bioconjugates as Contrast Agents.",
+  "authors": [],
+  "doi": "10.1021/acsbiomaterials.4c02190",
+  "source": "eupmc",
+  "urls": {
+    "pdf": null
+  },
+  "license": {
+    "type": "unknown"
+  },
+  "access_route": "oa",
+  "sections": [
+    {
+      "heading": "Step 1: Synthesis of Phanorod-ICG",
+      "text": "Step 1: Synthesis of Phanorod-ICG 1-1. Resuspend the\nphanorods (3.3 μM Au) in PBS buffer (pH 7.5). Add 5 mM ICG-NH 2  along with 5 mM NHS and 10 mM EDC into the buffer solution.\nAdd 10 mM EDC every 30 min twice and stir overnight. Critical Step EDC is rapidly hydrolyzed in water. Adding\nEDC in this stepwise manner can improve the loading efficiency of\nICG onto the phanorods. 1-2. Purify the phanorod-ICG by dialysis\nfor 48 h in the dark. Collect the phanorod-ICG sample by centrifugation\n(2000 rcf × 15 min). Critical Step Avoid excessive speed or duration of\ncentrifugation to prevent aggregation. If needed, the particles may\nbe concentrated by ultrafiltration."
+    }
+  ],
+  "extractions": {
+    "methods_paragraphs": [
+      {
+        "text": "Step 1: Synthesis of Phanorod-ICG 1-1. Resuspend the\nphanorods (3.3 μM Au) in PBS buffer (pH 7.5). Add 5 mM ICG-NH 2  along with 5 mM NHS and 10 mM EDC into the buffer solution.\nAdd 10 mM EDC every 30 min twice and stir overnight. Critical Step EDC is rapidly hydrolyzed in water. Adding\nEDC in this stepwise manner can improve the loading efficiency of\nICG onto the phanorods. 1-2. Purify the phanorod-ICG by dialysis\nfor 48 h in the dark. Collect the phanorod-ICG sample by centrifugation\n(2000 rcf × 15 min). Critical Step Avoid excessive speed or duration of\ncentrifugation to prevent aggregation. If needed, the particles may\nbe concentrated by ultrafiltration.",
+        "operations": [
+          {
+            "op_type": "add",
+            "sentence": "Add 5 mM ICG-NH 2  along with 5 mM NHS and 10 mM EDC into the buffer solution.\n",
+            "start_char": 99,
+            "end_char": 178,
+            "materials": [
+              "5 mM NHS",
+              "10 mM EDC"
+            ],
+            "params": {
+              "concs": [
+                "5 mM",
+                "5 mM",
+                "10 mM"
+              ]
+            }
+          },
+          {
+            "op_type": "add",
+            "sentence": "Add 10 mM EDC every 30 min twice and stir overnight.",
+            "start_char": 178,
+            "end_char": 230,
+            "materials": [
+              "10 mM EDC",
+              "every 30 min"
+            ],
+            "params": {
+              "time": "30 min",
+              "concs": [
+                "10 mM"
+              ]
+            }
+          },
+          {
+            "op_type": "add",
+            "sentence": "Adding\nEDC in this stepwise manner can improve the loading efficiency of\nICG onto the phanorods.",
+            "start_char": 281,
+            "end_char": 377,
+            "materials": [
+              "ICG"
+            ],
+            "params": {}
+          },
+          {
+            "op_type": "centrifuge",
+            "sentence": "Collect the phanorod-ICG sample by centrifugation\n(2000 rcf × 15 min).",
+            "start_char": 441,
+            "end_char": 511,
+            "materials": [
+              "the phanorod-ICG sample",
+              "15 min"
+            ],
+            "params": {
+              "time": "15 min"
+            }
+          },
+          {
+            "op_type": "centrifuge",
+            "sentence": "Critical Step Avoid excessive speed or duration of\ncentrifugation to prevent aggregation.",
+            "start_char": 512,
+            "end_char": 601,
+            "materials": [],
+            "params": {}
+          }
+        ],
+        "expanded": [
+          {
+            "op_type": "add",
+            "steps": [
+              "Ensure reaction vessel is present and empty.",
+              "Place a clean stir bar in the vessel.",
+              "Measure the specified amount of 5 mM NHS.",
+              "Transfer 5 mM NHS into the vessel."
+            ]
+          },
+          {
+            "op_type": "add",
+            "steps": [
+              "Ensure reaction vessel is present and empty.",
+              "Place a clean stir bar in the vessel.",
+              "Measure the specified amount of 10 mM EDC.",
+              "Transfer 10 mM EDC into the vessel."
+            ]
+          },
+          {
+            "op_type": "add",
+            "steps": [
+              "Ensure reaction vessel is present and empty.",
+              "Place a clean stir bar in the vessel.",
+              "Measure the specified amount of ICG.",
+              "Transfer ICG into the vessel."
+            ]
+          },
+          {
+            "op_type": "centrifuge",
+            "steps": [
+              "Perform operation 'centrifuge' as described: Collect the phanorod-ICG sample by centrifugation\n(2000 rcf × 15 min)."
+            ]
+          },
+          {
+            "op_type": "centrifuge",
+            "steps": [
+              "Perform operation 'centrifuge' as described: Critical Step Avoid excessive speed or duration of\ncentrifugation to prevent aggregation."
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

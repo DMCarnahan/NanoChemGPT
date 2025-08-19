@@ -1,0 +1,210 @@
+{
+  "paper_id": "10.1002/jex2.70072",
+  "title": "Quantum Dot-Based Immunolabelling of Extracellular Vesicles and Detection Using Fluorescence-Based Nanoparticle Tracking Analysis.",
+  "authors": [],
+  "doi": "10.1002/jex2.70072",
+  "source": "eupmc",
+  "urls": {
+    "pdf": null
+  },
+  "license": {
+    "type": "unknown"
+  },
+  "access_route": "oa",
+  "sections": [
+    {
+      "heading": "Materials and Methods",
+      "text": "2 Materials and Methods 2.1 Cell Culture and EV Enrichment A549, THP‐1 and EA.hy926 cell lines were obtained from the American Type Culture Collection (ATCC). A549 and THP‐1 cells were cultured in complete media consisting of 89% Roswell Park Memorial Institute (RPMI)‐1640, 10% foetal bovine serum (FBS, Ref#: 16000–044, Gibco) and 1% antibiotic‐antimycotic. EA.hy926 cells were cultured in Dulbecco's Modified Eagle Medium (DMEM) under the same conditions. All cells were cultured under standard conditions at 37°C with 5% CO 2 . When cell confluency reached ∼80%, the cells were washed three times with Dulbecco's phosphate‐buffered saline (DPBS, Cat#: LB 001–02, Welgene) to remove FBS‐derived EVs. Afterward, the medium was replaced with one containing Exosome‐Depleted FBS (Ref#: A27208‐03, Gibco) and the cells were incubated for an additional 24 h as a part of the EV enrichment process. To confirm the absence of contaminating particles, Exosome‐depleted FBS was analysed by NTA prior to use. The resulting particle distribution is shown in  Figure \n \n S6 \n , confirming minimal background signal. These cell lines were selected to represent lung epithelial (A549), monocytic (THP‐1) and endothelial (EA.hy926) components of the pulmonary microenvironment, reflecting the structure of a 3D lung model in our laboratory. 2.2 EV Isolation EV isolation was performed using a polyethylene glycol (PEG)‐based precipitation method (Total Exosome Isolation, Cat#: 4478359, Invitrogen). The detailed workflow followed the manufacturer's protocol. In brief, EV enriched media from adherent cells (A549, EA.hy926) and suspension cells (THP‐1) were centrifuged at 800 ×  g  for 5 min to remove cells, followed by centrifugation at 2000 ×  g  for 30 min to remove cell debris. Supernatant was carefully taken and then mixed with PEG reagent at a 2:1 ratio and then incubated at 4°C overnight. After incubation, the samples were centrifuged at 10,000 ×  g  for 1 h at 4°C. The supernatant was aspirated, leaving the EVs in the pellet at the bottom of the tube. The pellet was resuspended in sterile‐filtered DPBS for subsequent experiments. 2.3 Quantum Dot Conjugation to Antibodies Monoclonal mouse anti‐human CD63 antibody (IgG1, clone#: 460305, Cat#: MAB5048, R&D Systems) and monoclonal mouse anti‐human CD9 antibody (IgG2B, clone#: 209306, Cat#: MAB1880‐100, R&D Systems) were used for immunolabelling. Antibodies were conjugated to QD625 nanocrystals (SiteClick Antibody Labelling Kit, Cat#: S10452, Thermo Fisher Scientific). Briefly, the process of antibody conjugation was carried out using SiteClick coupling procedure, which involved the attachment of a dibenzocyclooctyne (DIBO) modified QD625 with an azide modified anti‐CD9 and anti‐CD63 antibodies. The procedure followed the standardised manufacturer's protocol. The core size of QDs was determined using TEM (JEM 2100F; JEOL), as shown in Figure  S1 . The hydrodynamic size of QD‐conjugated antibodies was measured using dynamic light scattering (DLS, Zetasizer Nano, ZS90; Malvern Panalytical). The concentration of the QD conjugated antibodies was measured using UV/Vis spectrometer (NanoDrop One; Thermo Fisher Scientific). To compare between QD and organic dyes, Alexa Fluor 488‐conjugated monoclonal mouse anti‐human CD63 antibody (IgG1, clone#: H5C6, Cat#: 353037, BioLegend) and Alexa Fluor 488‐conjugated monoclonal mouse anti‐human CD9 antibody (IgG2B, clone#: 209306, Cat#: FAB1880G, R&D Systems) were also used. 2.4 EV Immunolabelling The concentration of unlabelled EVs was first measured using NTA, and the samples were diluted to 2 × 10⁹ particles for labelling. This particle number was chosen to ensure that sufficient EVs would remain after the subsequent washing steps for accurate Fl‐NTA analysis. To optimise the immunolabelling conditions, experiments were conducted by varying the concentration of QD conjugated antibodies (0.01, 0.1, 0.5, 1 and 2 µL), staining volumes (20, 100 and 1000 µL) and staining times (1, 6, 12 and 24 h). The antibody concentrations were 0.90 ± 0.02 µM for anti‐CD9 and 1.90 ± 0.20 µM for anti‐CD63, as determined by Nanodrop spectrophotometer (Thermo Fisher Scientific). Following staining, unbound antibody‐QDs were removed using PEG precipitation: labelled EV were diluted in PBS (600–1000 µL), mixed with PEG at 1:2 (PEG:sample) volume ratio, and incubated at 4°C for 24 h. The EVs were pelleted at 10,000 ×  g  and resuspended in 1 mL of DPBS for analysis. 2.5 NTA Setting All particle tracking analyses were performed using a NTA (NS300; Malvern Panalytical) equipped with long‐pass filter. EV concentrations were measured using sc‐NTA, and the samples were diluted to between 1 × 10 8  and 1 × 10 9  particles/mL, based on instrument guidelines. In the fluorescence mode, a 430 nm long‐pass filter was used for QD625 (excitation: 405 nm; emission: 625 nm), and a 500 nm long‐pass filter was used for Alexa 488 (excitation: 488 nm, emission: 520 nm). A syringe pump was used in both modes, at a flow rate of 50. Each analysis was carried out in triplicate, with 90 s videos. Each video required a minimum of 500 valid particle tracks, yielding at least 1500 tracks per sample. Data were processed using NanoSight software (version 3.4) with default settings. The camera levels were manually fine‐tuned between 15 and 16 to enhance the visibility of particles by optimising light scattering. The detection threshold was set to 4–5 to increase sensitivity while minimising background noise. To ensure consistency, these settings were kept constant across samples from the same source. The accuracy of particle size measurement by the NS300 system was validated using 50 and 100 nm Fluoresbrite Yellow Green polystyrene beads (Cat# 17149‐10 and 17150‐10, respectively; PolyScience) ( Figure \n \n S2 \n ). 2.6 EV Characterisation Using Western Blot and SEM EV proteins from A549 cells were extracted using RIPA buffer (Rockland, Lot#: 49818), denatured at 98°C for 5 min, and loaded at 30 µg per well. The proteins were separated by 4%–10% SDS‐PAGE and transferred to membranes (20 min at 60 mA, followed by 60 min at 100 mA). The membranes were then blocked with 5% skim milk and 0.05% Tween‐20 in tris buffered saline (TBS, BioRad) for 1 h at room temperature, and incubated overnight at 4°C with rabbit primary antibodies (CD9, CD63, HSP70, Cat#: ab275018, Abcam), diluted to 1:1000. After washing with 0.01% Tween‐20 in TBS, the membranes were exposed to secondary antibodies conjugated to horseradish peroxidase diluted to 1:10,000 for 1 h at room temperature. The reaction products were visualised using a ChemiDoc (Fusion SL, Viber Lourmat). For scanning electron microscope (SEM) analysis, 1 × 10 9  EVs were deposited onto silicon wafers, dried for 24 h, and sputter‐coated with gold for 3 min. SEM imaging was conducted using a Carl Zeiss Sigma 300 equipped with an EDS system (AZtecLive Lite/Ultim Max 40), using: 3.00 kV accelerating voltage, 4.5 mm working distance, and InLens detector mode. 2.7 Statistical Analysis NTA results are shown as mean ± standard error (SE) to reflect the precision of the average from replicate measurements, while all other data are presented as mean ± standard deviation (SD). Statistical significance was determined using an unpaired  t ‐test with GraphPad Prism Version 10.3.1. Statistical significance is indicated by **** ( p  < 0.0001) and *** ( p  < 0.001)."
+    }
+  ],
+  "extractions": {
+    "methods_paragraphs": [
+      {
+        "text": "2 Materials and Methods 2.1 Cell Culture and EV Enrichment A549, THP‐1 and EA.hy926 cell lines were obtained from the American Type Culture Collection (ATCC). A549 and THP‐1 cells were cultured in complete media consisting of 89% Roswell Park Memorial Institute (RPMI)‐1640, 10% foetal bovine serum (FBS, Ref#: 16000–044, Gibco) and 1% antibiotic‐antimycotic. EA.hy926 cells were cultured in Dulbecco's Modified Eagle Medium (DMEM) under the same conditions. All cells were cultured under standard conditions at 37°C with 5% CO 2 . When cell confluency reached ∼80%, the cells were washed three times with Dulbecco's phosphate‐buffered saline (DPBS, Cat#: LB 001–02, Welgene) to remove FBS‐derived EVs. Afterward, the medium was replaced with one containing Exosome‐Depleted FBS (Ref#: A27208‐03, Gibco) and the cells were incubated for an additional 24 h as a part of the EV enrichment process. To confirm the absence of contaminating particles, Exosome‐depleted FBS was analysed by NTA prior to use. The resulting particle distribution is shown in  Figure \n \n S6 \n , confirming minimal background signal. These cell lines were selected to represent lung epithelial (A549), monocytic (THP‐1) and endothelial (EA.hy926) components of the pulmonary microenvironment, reflecting the structure of a 3D lung model in our laboratory. 2.2 EV Isolation EV isolation was performed using a polyethylene glycol (PEG)‐based precipitation method (Total Exosome Isolation, Cat#: 4478359, Invitrogen). The detailed workflow followed the manufacturer's protocol. In brief, EV enriched media from adherent cells (A549, EA.hy926) and suspension cells (THP‐1) were centrifuged at 800 ×  g  for 5 min to remove cells, followed by centrifugation at 2000 ×  g  for 30 min to remove cell debris. Supernatant was carefully taken and then mixed with PEG reagent at a 2:1 ratio and then incubated at 4°C overnight. After incubation, the samples were centrifuged at 10,000 ×  g  for 1 h at 4°C. The supernatant was aspirated, leaving the EVs in the pellet at the bottom of the tube. The pellet was resuspended in sterile‐filtered DPBS for subsequent experiments. 2.3 Quantum Dot Conjugation to Antibodies Monoclonal mouse anti‐human CD63 antibody (IgG1, clone#: 460305, Cat#: MAB5048, R&D Systems) and monoclonal mouse anti‐human CD9 antibody (IgG2B, clone#: 209306, Cat#: MAB1880‐100, R&D Systems) were used for immunolabelling. Antibodies were conjugated to QD625 nanocrystals (SiteClick Antibody Labelling Kit, Cat#: S10452, Thermo Fisher Scientific). Briefly, the process of antibody conjugation was carried out using SiteClick coupling procedure, which involved the attachment of a dibenzocyclooctyne (DIBO) modified QD625 with an azide modified anti‐CD9 and anti‐CD63 antibodies. The procedure followed the standardised manufacturer's protocol. The core size of QDs was determined using TEM (JEM 2100F; JEOL), as shown in Figure  S1 . The hydrodynamic size of QD‐conjugated antibodies was measured using dynamic light scattering (DLS, Zetasizer Nano, ZS90; Malvern Panalytical). The concentration of the QD conjugated antibodies was measured using UV/Vis spectrometer (NanoDrop One; Thermo Fisher Scientific). To compare between QD and organic dyes, Alexa Fluor 488‐conjugated monoclonal mouse anti‐human CD63 antibody (IgG1, clone#: H5C6, Cat#: 353037, BioLegend) and Alexa Fluor 488‐conjugated monoclonal mouse anti‐human CD9 antibody (IgG2B, clone#: 209306, Cat#: FAB1880G, R&D Systems) were also used. 2.4 EV Immunolabelling The concentration of unlabelled EVs was first measured using NTA, and the samples were diluted to 2 × 10⁹ particles for labelling. This particle number was chosen to ensure that sufficient EVs would remain after the subsequent washing steps for accurate Fl‐NTA analysis. To optimise the immunolabelling conditions, experiments were conducted by varying the concentration of QD conjugated antibodies (0.01, 0.1, 0.5, 1 and 2 µL), staining volumes (20, 100 and 1000 µL) and staining times (1, 6, 12 and 24 h). The antibody concentrations were 0.90 ± 0.02 µM for anti‐CD9 and 1.90 ± 0.20 µM for anti‐CD63, as determined by Nanodrop spectrophotometer (Thermo Fisher Scientific). Following staining, unbound antibody‐QDs were removed using PEG precipitation: labelled EV were diluted in PBS (600–1000 µL), mixed with PEG at 1:2 (PEG:sample) volume ratio, and incubated at 4°C for 24 h. The EVs were pelleted at 10,000 ×  g  and resuspended in 1 mL of DPBS for analysis. 2.5 NTA Setting All particle tracking analyses were performed using a NTA (NS300; Malvern Panalytical) equipped with long‐pass filter. EV concentrations were measured using sc‐NTA, and the samples were diluted to between 1 × 10 8  and 1 × 10 9  particles/mL, based on instrument guidelines. In the fluorescence mode, a 430 nm long‐pass filter was used for QD625 (excitation: 405 nm; emission: 625 nm), and a 500 nm long‐pass filter was used for Alexa 488 (excitation: 488 nm, emission: 520 nm). A syringe pump was used in both modes, at a flow rate of 50. Each analysis was carried out in triplicate, with 90 s videos. Each video required a minimum of 500 valid particle tracks, yielding at least 1500 tracks per sample. Data were processed using NanoSight software (version 3.4) with default settings. The camera levels were manually fine‐tuned between 15 and 16 to enhance the visibility of particles by optimising light scattering. The detection threshold was set to 4–5 to increase sensitivity while minimising background noise. To ensure consistency, these settings were kept constant across samples from the same source. The accuracy of particle size measurement by the NS300 system was validated using 50 and 100 nm Fluoresbrite Yellow Green polystyrene beads (Cat# 17149‐10 and 17150‐10, respectively; PolyScience) ( Figure \n \n S2 \n ). 2.6 EV Characterisation Using Western Blot and SEM EV proteins from A549 cells were extracted using RIPA buffer (Rockland, Lot#: 49818), denatured at 98°C for 5 min, and loaded at 30 µg per well. The proteins were separated by 4%–10% SDS‐PAGE and transferred to membranes (20 min at 60 mA, followed by 60 min at 100 mA). The membranes were then blocked with 5% skim milk and 0.05% Tween‐20 in tris buffered saline (TBS, BioRad) for 1 h at room temperature, and incubated overnight at 4°C with rabbit primary antibodies (CD9, CD63, HSP70, Cat#: ab275018, Abcam), diluted to 1:1000. After washing with 0.01% Tween‐20 in TBS, the membranes were exposed to secondary antibodies conjugated to horseradish peroxidase diluted to 1:10,000 for 1 h at room temperature. The reaction products were visualised using a ChemiDoc (Fusion SL, Viber Lourmat). For scanning electron microscope (SEM) analysis, 1 × 10 9  EVs were deposited onto silicon wafers, dried for 24 h, and sputter‐coated with gold for 3 min. SEM imaging was conducted using a Carl Zeiss Sigma 300 equipped with an EDS system (AZtecLive Lite/Ultim Max 40), using: 3.00 kV accelerating voltage, 4.5 mm working distance, and InLens detector mode. 2.7 Statistical Analysis NTA results are shown as mean ± standard error (SE) to reflect the precision of the average from replicate measurements, while all other data are presented as mean ± standard deviation (SD). Statistical significance was determined using an unpaired  t ‐test with GraphPad Prism Version 10.3.1. Statistical significance is indicated by **** ( p  < 0.0001) and *** ( p  < 0.001).",
+        "operations": [
+          {
+            "op_type": "wash",
+            "sentence": "When cell confluency reached ∼80%, the cells were washed three times with Dulbecco's phosphate‐buffered saline (DPBS, Cat#: LB 001–02, Welgene) to remove FBS‐derived EVs.",
+            "start_char": 532,
+            "end_char": 702,
+            "materials": [
+              "FBS‐derived EVs"
+            ],
+            "params": {}
+          },
+          {
+            "op_type": "centrifuge",
+            "sentence": "In brief, EV enriched media from adherent cells (A549, EA.hy926) and suspension cells (THP‐1) were centrifuged at 800 ×  g  for 5 min to remove cells, followed by centrifugation at 2000 ×  g  for 30 min to remove cell debris.",
+            "start_char": 1548,
+            "end_char": 1773,
+            "materials": [
+              "EV enriched media",
+              "A549",
+              "EA.hy926",
+              "800 ×  g"
+            ],
+            "params": {
+              "time": "5 min"
+            }
+          },
+          {
+            "op_type": "stir",
+            "sentence": "Supernatant was carefully taken and then mixed with PEG reagent at a 2:1 ratio and then incubated at 4°C overnight.",
+            "start_char": 1774,
+            "end_char": 1889,
+            "materials": [],
+            "params": {
+              "temp": "4°C"
+            }
+          },
+          {
+            "op_type": "centrifuge",
+            "sentence": "After incubation, the samples were centrifuged at 10,000 ×  g  for 1 h at 4°C.",
+            "start_char": 1890,
+            "end_char": 1968,
+            "materials": [
+              "10,000 ×  g",
+              "1 h",
+              "4°C"
+            ],
+            "params": {
+              "temp": "4°C",
+              "time": "1 h"
+            }
+          },
+          {
+            "op_type": "stir",
+            "sentence": "Following staining, unbound antibody‐QDs were removed using PEG precipitation: labelled EV were diluted in PBS (600–1000 µL), mixed with PEG at 1:2 (PEG:sample) volume ratio, and incubated at 4°C for 24 h.",
+            "start_char": 4184,
+            "end_char": 4389,
+            "materials": [
+              "(PEG:sample"
+            ],
+            "params": {
+              "temp": "4°C",
+              "time": "24 h",
+              "amounts": [
+                "1000 µL"
+              ]
+            }
+          },
+          {
+            "op_type": "filter",
+            "sentence": "2.5 NTA Setting All particle tracking analyses were performed using a NTA (NS300; Malvern Panalytical) equipped with long‐pass filter.",
+            "start_char": 4474,
+            "end_char": 4608,
+            "materials": [
+              "2.5 NTA",
+              "(NS300"
+            ],
+            "params": {}
+          },
+          {
+            "op_type": "filter",
+            "sentence": "In the fluorescence mode, a 430 nm long‐pass filter was used for QD625 (excitation: 405 nm; emission: 625 nm), and a 500 nm long‐pass filter was used for Alexa 488 (excitation: 488 nm, emission: 520 nm).",
+            "start_char": 4765,
+            "end_char": 4968,
+            "materials": [
+              "a 430 nm long‐pass filter",
+              "QD625",
+              "(excitation",
+              "405 nm"
+            ],
+            "params": {}
+          },
+          {
+            "op_type": "wash",
+            "sentence": "After washing with 0.01% Tween‐20 in TBS, the membranes were exposed to secondary antibodies conjugated to horseradish peroxidase diluted to 1:10,000 for 1 h at room temperature.",
+            "start_char": 6399,
+            "end_char": 6577,
+            "materials": [
+              "0.01% Tween‐20",
+              "1 h"
+            ],
+            "params": {
+              "time": "1 h"
+            }
+          },
+          {
+            "op_type": "dry",
+            "sentence": "For scanning electron microscope (SEM) analysis, 1 × 10 9  EVs were deposited onto silicon wafers, dried for 24 h, and sputter‐coated with gold for 3 min. SEM imaging was conducted using a Carl Zeiss Sigma 300 equipped with an EDS system (AZtecLive Lite/Ultim Max 40), using: 3.00 kV accelerating voltage, 4.5 mm working distance, and InLens detector mode.",
+            "start_char": 6661,
+            "end_char": 7017,
+            "materials": [
+              "electron microscope (SEM) analysis",
+              "1 × 10 9  EVs",
+              "24 h",
+              "3 min. SEM imaging"
+            ],
+            "params": {
+              "time": "24 h",
+              "concs": [
+                "4.5 mm"
+              ]
+            }
+          }
+        ],
+        "expanded": [
+          {
+            "op_type": "wash",
+            "steps": [
+              "Perform operation 'wash' as described: When cell confluency reached ∼80%, the cells were washed three times with Dulbecco's phosphate‐buffered saline (DPBS, Cat#: LB 001–02, Welgene) to remove FBS‐derived EVs."
+            ]
+          },
+          {
+            "op_type": "centrifuge",
+            "steps": [
+              "Perform operation 'centrifuge' as described: In brief, EV enriched media from adherent cells (A549, EA.hy926) and suspension cells (THP‐1) were centrifuged at 800 ×  g  for 5 min to remove cells, followed by centrifugation at 2000 ×  g  for 30 min to remove cell debris."
+            ]
+          },
+          {
+            "op_type": "stir",
+            "steps": [
+              "Place the reaction vessel on a stir plate.",
+              "Set the stirrer to an appropriate speed.",
+              "Stir for the specified time."
+            ]
+          },
+          {
+            "op_type": "centrifuge",
+            "steps": [
+              "Perform operation 'centrifuge' as described: After incubation, the samples were centrifuged at 10,000 ×  g  for 1 h at 4°C."
+            ]
+          },
+          {
+            "op_type": "stir",
+            "steps": [
+              "Place the reaction vessel on a stir plate.",
+              "Set the stirrer to an appropriate speed.",
+              "Stir for 24 h."
+            ]
+          },
+          {
+            "op_type": "filter",
+            "steps": [
+              "Perform operation 'filter' as described: 2.5 NTA Setting All particle tracking analyses were performed using a NTA (NS300; Malvern Panalytical) equipped with long‐pass filter."
+            ]
+          },
+          {
+            "op_type": "filter",
+            "steps": [
+              "Perform operation 'filter' as described: In the fluorescence mode, a 430 nm long‐pass filter was used for QD625 (excitation: 405 nm; emission: 625 nm), and a 500 nm long‐pass filter was used for Alexa 488 (excitation: 488 nm, emission: 520 nm)."
+            ]
+          },
+          {
+            "op_type": "wash",
+            "steps": [
+              "Perform operation 'wash' as described: After washing with 0.01% Tween‐20 in TBS, the membranes were exposed to secondary antibodies conjugated to horseradish peroxidase diluted to 1:10,000 for 1 h at room temperature."
+            ]
+          },
+          {
+            "op_type": "dry",
+            "steps": [
+              "Perform operation 'dry' as described: For scanning electron microscope (SEM) analysis, 1 × 10 9  EVs were deposited onto silicon wafers, dried for 24 h, and sputter‐coated with gold for 3 min. SEM imaging was conducted using a Carl Zeiss Sigma 300 equipped with an EDS system (AZtecLive Lite/Ultim Max 40), using: 3.00 kV accelerating voltage, 4.5 mm working distance, and InLens detector mode."
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,146 @@
+{
+  "paper_id": "10.1038/s41598-025-11858-2",
+  "title": "Toxicity of fluorescent silica nanoparticles in brine shrimp and their implications as food ingestion markers.",
+  "authors": [],
+  "doi": "10.1038/s41598-025-11858-2",
+  "source": "eupmc",
+  "urls": {
+    "pdf": null
+  },
+  "license": {
+    "type": "unknown"
+  },
+  "access_route": "oa",
+  "sections": [
+    {
+      "heading": "Materials and methods",
+      "text": "Materials and methods Nanoparticle characterization FSNPs were synthesized according to the method outlined by Songvorawit, et al. 15  using the water-in-oil reverse microemulsion technique, and Rubpy dye (tris [2,2′-bipyridyl]ruthenium[II] chloride) as a fluorophore. The NPs were examined under a JEM-1400 transmission electron microscope (TEM; JEOL, Tokyo, Japan), and their size was measured from the TEM images employing the ImageJ software version 1.53o (NIH, USA;  https://imagej.nih.gov/ij ). Since this study used FSNPs suspended in saline water, their dispersion stability was examined in artificial seawater (ASTM D1141-98, pH 8.2) utilizing a Nano ZSP zeta-sizer (Malvern Panalytical, Great Malvern, England). Emission spectra were examined employing a Duetta ™  fluorometer (Horiba Scientific, Kyoto, Japan) at excitation bands of 365 and 460 nm, which corresponded to the UV light wavelength used to track animal behavior in this study and the maximal excitation wavelength of Rubpy dye, respectively 14 . The maximal emission wavelength of the FSNPs was calculated using a moving average based on five data points. Test animals and handling Commercial brine shrimp ( Artemia franciscana ) cysts (American Eagle, USA) imported from the Great Salt Lake, USA were purchased from a local supplier in Bangkok, Thailand. They were hatched in artificial seawater at 25–26 °C under continuous aeration and illumination. For rearing adult shrimp, nauplii (shrimp larvae) were transferred into an 8 L tank and raised in filtered natural seawater (3% salinity) at 25–26 °C under continuous aeration and a light intensity of 1,600 lx (fluorescent lamp) under a 12/12 h illumination cycle. Artificial food (composition unknown, branded as N.P. Guppy, Thailand) purchased from a local seller in Bangkok, Thailand, was provided every other day, and the adults were obtained 3 weeks after hatching. Euthanasia was performed utilizing the two-step method (immersion in 5% ethanol for 5 min and then 10% formalin) per the AVMA guidelines 41 . The experimental protocol was approved by the Animal Care and Use Committee of the Faculty of Science, Chulalongkorn University (Protocol Review No. 2423018). Acute toxicity test Nauplii, 18–24 h post-hatching, were transferred into 24-well plates containing 1–1,024 mg/L of FSNP suspension in artificial seawater (2 mL of suspension and 10–20 nauplii per well) and cultured at 25–26 °C under a light intensity of 1,600 lx (fluorescent lamp) with a 12/12 h light/dark cycle. Brine shrimp grown in artificial seawater without FSNPs were used as a control. Mortality and immobility were checked at 24 and 48 h after exposure. A nauplius was considered dead if its appendages stopped moving within 10 s. Immobility was identified when a nauplius remained with moving appendages in situ for 10 s and was calculated by dividing the number of immobile (but still alive) individuals by the total number of living individuals. A mortality rate in the 24-h period of less than 10% was considered valid for the control group. Each treatment was conducted in eight replications. Test for the appropriate FSNP concentration for tracking To ensure that all tested brine shrimp were ready to eat the food provided, 15–30 nauplii, 24–36 h after hatching were used. They were incubated in 2 mL of FSNP suspension in 24-well plates for 1 h at 25–26 °C in the dark under two conditions: food presence (1 × 10 6  cells/mL of baker’s yeast) or food absence. They were then euthanized. The fluorescence due to FSNP intake, which was visible through the body wall, was inspected under a stereo microscope coupled with a UV lamp set to 365 nm. To minimize observer bias, the same examiner conducted all observations throughout the experiment. The fluorescence brightness was scored on a scale ranging from 0 to 2: 0 = no, 1 = slight, and 2 = bright fluorescence (Fig.  2 ). The marking efficiency was calculated following the formula described previously 15 , 42 , as shown in Eq. ( 1 ): 1 \\documentclass[12pt]{minimal}\n\t\t\t\t\\usepackage{amsmath}\n\t\t\t\t\\usepackage{wasysym} \n\t\t\t\t\\usepackage{amsfonts} \n\t\t\t\t\\usepackage{amssymb} \n\t\t\t\t\\usepackage{amsbsy}\n\t\t\t\t\\usepackage{mathrsfs}\n\t\t\t\t\\usepackage{upgreek}\n\t\t\t\t\\setlength{\\oddsidemargin}{-69pt}\n\t\t\t\t\\begin{document}$${Marking\\,efficiency\\,(\\% )} {{ = \\;100\\; \\times }}\\frac{{\\sum {\\text{(}}{n_b}{{ \\times \\;b)}}}}{{{{(B\\; \\times \\;}}{N_b}{\\text{)}}}}$$\\end{document} where  n b  is the number of brine shrimp with each score value,  b  is the brightness score,  B  is the highest possible score (here: 2), and  N b  is the total number of scored brine shrimp. However, some brine shrimp possibly did not exhibit feeding behavior during the testing period, resulting in no fluorescence (score 0) and a low marking efficiency. Therefore, further analysis based on the fluorescence brightness of the marked individuals (score 1 or 2 only) was calculated by applying Eq. ( 2 ):  2 \\documentclass[12pt]{minimal}\n\t\t\t\t\\usepackage{amsmath}\n\t\t\t\t\\usepackage{wasysym} \n\t\t\t\t\\usepackage{amsfonts} \n\t\t\t\t\\usepackage{amssymb} \n\t\t\t\t\\usepackage{amsbsy}\n\t\t\t\t\\usepackage{mathrsfs}\n\t\t\t\t\\usepackage{upgreek}\n\t\t\t\t\\setlength{\\oddsidemargin}{-69pt}\n\t\t\t\t\\begin{document}$${Fluorescence\\,brightness}\\,{score}{(\\%)\\,= 100\\times}\\frac{{N2}}{{(}{N1}{+}N2\\text{)}}$$\\end{document} where  N1  is the number of brine shrimp with a fluorescence brightness score of 1 and  N2  is the number of brine shrimp with a fluorescence brightness score of 2. Every treatment was conducted in five replications. Effects on locomotion Nauplii, 18–24 h old after hatching ( n  = 46), were incubated in 24-well plates containing 16 mg/L FSNP suspended in artificial seawater (0.5 mL of suspension and 1 nauplius/well) at 25–26 °C under a 12/12 h light/dark cycle for 24 h. The locomotion of each individual was recorded for 30 s using a TG-4 digital camera (Olympus, Tokyo, Japan) at a frame rate of 30 fps. The traveled distance and average speed were analyzed employing AnimalTA version 2.3.4, an animal tracking software 43 . Nauplii in artificial seawater without FSNPs were used as a control ( n  = 42). Effects on the feeding rate Nauplii, 18–24 h after hatching, were transferred into glass vials (50 nauplii per vial) containing 10 mL of a suspension mixture of dead baker’s yeast (~ 2 × 10 5  cells/mL, heat-killed at 70 °C for 5 min) with or without 16 mg/L FSNPs. The vials were dark incubated at 25–26 °C. A 0.1 mL aliquot was taken from each vial at the beginning and after incubation for 12 h to count the number of yeast cells on a hemacytometer. A suspension of yeast without FSNPs and nauplii was utilized as a control to estimate the rate of yeast autolysis. The feeding rate was calculated by following Li, et al. 3 , as shown in Eq. ( 3 ):  3 \\documentclass[12pt]{minimal}\n\t\t\t\t\\usepackage{amsmath}\n\t\t\t\t\\usepackage{wasysym} \n\t\t\t\t\\usepackage{amsfonts} \n\t\t\t\t\\usepackage{amssymb} \n\t\t\t\t\\usepackage{amsbsy}\n\t\t\t\t\\usepackage{mathrsfs}\n\t\t\t\t\\usepackage{upgreek}\n\t\t\t\t\\setlength{\\oddsidemargin}{-69pt}\n\t\t\t\t\\begin{document}$$\\text{Feeding}\\,\\text{rate}={100}\\times\\frac{{C}{0}-{C}{t}}{({t}\\times{N})}$$\\end{document} where  C 0  and  C t  are the density of yeast (cells/mL) at the beginning and end of the experiment, respectively,  t  is the incubation period (h), and  N  is the number of brine shrimp in the vial. Each treatment was conducted in seven replications. Persistence of FSNPs in brine shrimp A depuration experiment was conducted under food presence or absence. Baker’s yeast powder was used as food. Nauplii, 18–24 h after hatching, were dark-incubated in a suspension mixture of 16 mg/L FSNPs and 1 × 10 6  cells/mL of baker’s yeast for 1 h. Then, the nauplii were washed with seawater and passed through a 110 μm net. Next, 5–10 nauplii were transferred into each well of a 24-well plate containing 2 mL of seawater and 1 × 10 6  cells/mL baker’s yeast. After euthanasia, the fluorescence of FSNPs consumed by the nauplii was observed under a stereo microscope equipped with a UV lamp and an Axioscope 5 fluorescence microscope (ZEISS, Oberkochen, Germany) at 0, 15, 30, 45, and 60 min, as well as 2, 4, 8, 12, and 24 h. The number of nauplii with observable FSNPs was counted irrespective of the fluorescence brightness. Under food absence, the entire experiment was conducted with the same procedure, but without yeast. Each treatment was conducted in eight replications. To examine whether FSNPs moved along with the ingested food, another experiment similar to the depuration described above was conducted by providing brine shrimp nauplii with DAPI-stained baker’s yeast as food and FSNPs simultaneously. The nauplii were then examined under a fluorescence microscope. Chronic toxicity test Based on the results of the appropriate FSNP concentration experiment, a concentration of 16 mg/L FSNPs was used for the chronic toxicity test. Brine shrimp nauplii (18–24 h post-hatching) were transferred to 250 mL Erlenmeyer flasks containing 150 mL of artificial seawater under continuous aeration, with 10 nauplii per flask. They were fed with artificial food, and both seawater and food were renewed every 48 h. Three treatment groups were performed: (1) continuous exposure to FSNPs, (2) 3-hour exposure to FSNPs every 48 h, and (3) 6-hour exposure to FSNPs every 48 h. In treatments (2) and (3), nauplii were exposed to FSNPs prior to the renewal of seawater and food. The experiment was conducted over a period of 14 days. A control group was maintained in artificial seawater without FSNPs. Rearing conditions and mortality assessment criteria were consistent with those used in the acute toxicity test. Each treatment was conducted in nine replications. Test with adult brine shrimp Adult brine shrimp, 25 males and 24 females, were used to evaluate whether FSNPs could be applied to developed stages. The sexes were determined by the presence of a clasping organ (male) and brood sac (female). The shrimp were randomly selected from an aquarium and transferred into 24-well plates filled with 2 mL of baker’s yeast suspension (1 × 10 6  cells/mL), one individual per well. They were dark-acclimatized for 30 min. The FSNP suspension was then added to each well to reach a final NP concentration of 16 mg/L. Observations were made every 5 min under UV light to detect the appearance of abdominal fluorescence, followed by further monitoring until luminescent feces were detected, indicating complete gut passage of the ingested FSNPs. Statistical analyses Because our data did not meet the assumption for parametric statistics, nonparametric statistical analyses were used in all tests. The effects of FSNP concentration on mortality and immobility were ascertained by applying the Kruskal–Wallis test; Dunn’s test was used for pairwise comparison. The effects of FSNP concentration, the presence or absence of food, and their interaction with the marking efficiency or fluorescence brightness of the marked individuals were analyzed employing the aligned rank test. Feeding rates in the presence and absence of FSNPs were corrected for the rate of yeast autolysis in the control group and then compared by the Wilcoxon rank-sum test. The effects of depuration time, the presence or absence of food, and their interactions were analyzed using the aligned rank and Dunn’s tests. Locomotion data for shrimp treated with FSNPs were compared with the control utilizing the Wilcoxon rank-sum test. The number of times that the abdomen of adult brine shrimp exhibited luminescence and the number of times that the fluorescent feces appeared due to the excretion of FSNPs were compared between sexes using the Wilcoxon rank-sum test. LT 50  was analyzed using probit analysis in SPSS version 28.0 44 . All other statistical analyses were performed using the base, ARTool, combinate, dplyr, survival, survminer, and tidyverse packages in R, version 4.3.0 45 ."
+    }
+  ],
+  "extractions": {
+    "methods_paragraphs": [
+      {
+        "text": "Materials and methods Nanoparticle characterization FSNPs were synthesized according to the method outlined by Songvorawit, et al. 15  using the water-in-oil reverse microemulsion technique, and Rubpy dye (tris [2,2′-bipyridyl]ruthenium[II] chloride) as a fluorophore. The NPs were examined under a JEM-1400 transmission electron microscope (TEM; JEOL, Tokyo, Japan), and their size was measured from the TEM images employing the ImageJ software version 1.53o (NIH, USA;  https://imagej.nih.gov/ij ). Since this study used FSNPs suspended in saline water, their dispersion stability was examined in artificial seawater (ASTM D1141-98, pH 8.2) utilizing a Nano ZSP zeta-sizer (Malvern Panalytical, Great Malvern, England). Emission spectra were examined employing a Duetta ™  fluorometer (Horiba Scientific, Kyoto, Japan) at excitation bands of 365 and 460 nm, which corresponded to the UV light wavelength used to track animal behavior in this study and the maximal excitation wavelength of Rubpy dye, respectively 14 . The maximal emission wavelength of the FSNPs was calculated using a moving average based on five data points. Test animals and handling Commercial brine shrimp ( Artemia franciscana ) cysts (American Eagle, USA) imported from the Great Salt Lake, USA were purchased from a local supplier in Bangkok, Thailand. They were hatched in artificial seawater at 25–26 °C under continuous aeration and illumination. For rearing adult shrimp, nauplii (shrimp larvae) were transferred into an 8 L tank and raised in filtered natural seawater (3% salinity) at 25–26 °C under continuous aeration and a light intensity of 1,600 lx (fluorescent lamp) under a 12/12 h illumination cycle. Artificial food (composition unknown, branded as N.P. Guppy, Thailand) purchased from a local seller in Bangkok, Thailand, was provided every other day, and the adults were obtained 3 weeks after hatching. Euthanasia was performed utilizing the two-step method (immersion in 5% ethanol for 5 min and then 10% formalin) per the AVMA guidelines 41 . The experimental protocol was approved by the Animal Care and Use Committee of the Faculty of Science, Chulalongkorn University (Protocol Review No. 2423018). Acute toxicity test Nauplii, 18–24 h post-hatching, were transferred into 24-well plates containing 1–1,024 mg/L of FSNP suspension in artificial seawater (2 mL of suspension and 10–20 nauplii per well) and cultured at 25–26 °C under a light intensity of 1,600 lx (fluorescent lamp) with a 12/12 h light/dark cycle. Brine shrimp grown in artificial seawater without FSNPs were used as a control. Mortality and immobility were checked at 24 and 48 h after exposure. A nauplius was considered dead if its appendages stopped moving within 10 s. Immobility was identified when a nauplius remained with moving appendages in situ for 10 s and was calculated by dividing the number of immobile (but still alive) individuals by the total number of living individuals. A mortality rate in the 24-h period of less than 10% was considered valid for the control group. Each treatment was conducted in eight replications. Test for the appropriate FSNP concentration for tracking To ensure that all tested brine shrimp were ready to eat the food provided, 15–30 nauplii, 24–36 h after hatching were used. They were incubated in 2 mL of FSNP suspension in 24-well plates for 1 h at 25–26 °C in the dark under two conditions: food presence (1 × 10 6  cells/mL of baker’s yeast) or food absence. They were then euthanized. The fluorescence due to FSNP intake, which was visible through the body wall, was inspected under a stereo microscope coupled with a UV lamp set to 365 nm. To minimize observer bias, the same examiner conducted all observations throughout the experiment. The fluorescence brightness was scored on a scale ranging from 0 to 2: 0 = no, 1 = slight, and 2 = bright fluorescence (Fig.  2 ). The marking efficiency was calculated following the formula described previously 15 , 42 , as shown in Eq. ( 1 ): 1 \\documentclass[12pt]{minimal}\n\t\t\t\t\\usepackage{amsmath}\n\t\t\t\t\\usepackage{wasysym} \n\t\t\t\t\\usepackage{amsfonts} \n\t\t\t\t\\usepackage{amssymb} \n\t\t\t\t\\usepackage{amsbsy}\n\t\t\t\t\\usepackage{mathrsfs}\n\t\t\t\t\\usepackage{upgreek}\n\t\t\t\t\\setlength{\\oddsidemargin}{-69pt}\n\t\t\t\t\\begin{document}$${Marking\\,efficiency\\,(\\% )} {{ = \\;100\\; \\times }}\\frac{{\\sum {\\text{(}}{n_b}{{ \\times \\;b)}}}}{{{{(B\\; \\times \\;}}{N_b}{\\text{)}}}}$$\\end{document} where  n b  is the number of brine shrimp with each score value,  b  is the brightness score,  B  is the highest possible score (here: 2), and  N b  is the total number of scored brine shrimp. However, some brine shrimp possibly did not exhibit feeding behavior during the testing period, resulting in no fluorescence (score 0) and a low marking efficiency. Therefore, further analysis based on the fluorescence brightness of the marked individuals (score 1 or 2 only) was calculated by applying Eq. ( 2 ):  2 \\documentclass[12pt]{minimal}\n\t\t\t\t\\usepackage{amsmath}\n\t\t\t\t\\usepackage{wasysym} \n\t\t\t\t\\usepackage{amsfonts} \n\t\t\t\t\\usepackage{amssymb} \n\t\t\t\t\\usepackage{amsbsy}\n\t\t\t\t\\usepackage{mathrsfs}\n\t\t\t\t\\usepackage{upgreek}\n\t\t\t\t\\setlength{\\oddsidemargin}{-69pt}\n\t\t\t\t\\begin{document}$${Fluorescence\\,brightness}\\,{score}{(\\%)\\,= 100\\times}\\frac{{N2}}{{(}{N1}{+}N2\\text{)}}$$\\end{document} where  N1  is the number of brine shrimp with a fluorescence brightness score of 1 and  N2  is the number of brine shrimp with a fluorescence brightness score of 2. Every treatment was conducted in five replications. Effects on locomotion Nauplii, 18–24 h old after hatching ( n  = 46), were incubated in 24-well plates containing 16 mg/L FSNP suspended in artificial seawater (0.5 mL of suspension and 1 nauplius/well) at 25–26 °C under a 12/12 h light/dark cycle for 24 h. The locomotion of each individual was recorded for 30 s using a TG-4 digital camera (Olympus, Tokyo, Japan) at a frame rate of 30 fps. The traveled distance and average speed were analyzed employing AnimalTA version 2.3.4, an animal tracking software 43 . Nauplii in artificial seawater without FSNPs were used as a control ( n  = 42). Effects on the feeding rate Nauplii, 18–24 h after hatching, were transferred into glass vials (50 nauplii per vial) containing 10 mL of a suspension mixture of dead baker’s yeast (~ 2 × 10 5  cells/mL, heat-killed at 70 °C for 5 min) with or without 16 mg/L FSNPs. The vials were dark incubated at 25–26 °C. A 0.1 mL aliquot was taken from each vial at the beginning and after incubation for 12 h to count the number of yeast cells on a hemacytometer. A suspension of yeast without FSNPs and nauplii was utilized as a control to estimate the rate of yeast autolysis. The feeding rate was calculated by following Li, et al. 3 , as shown in Eq. ( 3 ):  3 \\documentclass[12pt]{minimal}\n\t\t\t\t\\usepackage{amsmath}\n\t\t\t\t\\usepackage{wasysym} \n\t\t\t\t\\usepackage{amsfonts} \n\t\t\t\t\\usepackage{amssymb} \n\t\t\t\t\\usepackage{amsbsy}\n\t\t\t\t\\usepackage{mathrsfs}\n\t\t\t\t\\usepackage{upgreek}\n\t\t\t\t\\setlength{\\oddsidemargin}{-69pt}\n\t\t\t\t\\begin{document}$$\\text{Feeding}\\,\\text{rate}={100}\\times\\frac{{C}{0}-{C}{t}}{({t}\\times{N})}$$\\end{document} where  C 0  and  C t  are the density of yeast (cells/mL) at the beginning and end of the experiment, respectively,  t  is the incubation period (h), and  N  is the number of brine shrimp in the vial. Each treatment was conducted in seven replications. Persistence of FSNPs in brine shrimp A depuration experiment was conducted under food presence or absence. Baker’s yeast powder was used as food. Nauplii, 18–24 h after hatching, were dark-incubated in a suspension mixture of 16 mg/L FSNPs and 1 × 10 6  cells/mL of baker’s yeast for 1 h. Then, the nauplii were washed with seawater and passed through a 110 μm net. Next, 5–10 nauplii were transferred into each well of a 24-well plate containing 2 mL of seawater and 1 × 10 6  cells/mL baker’s yeast. After euthanasia, the fluorescence of FSNPs consumed by the nauplii was observed under a stereo microscope equipped with a UV lamp and an Axioscope 5 fluorescence microscope (ZEISS, Oberkochen, Germany) at 0, 15, 30, 45, and 60 min, as well as 2, 4, 8, 12, and 24 h. The number of nauplii with observable FSNPs was counted irrespective of the fluorescence brightness. Under food absence, the entire experiment was conducted with the same procedure, but without yeast. Each treatment was conducted in eight replications. To examine whether FSNPs moved along with the ingested food, another experiment similar to the depuration described above was conducted by providing brine shrimp nauplii with DAPI-stained baker’s yeast as food and FSNPs simultaneously. The nauplii were then examined under a fluorescence microscope. Chronic toxicity test Based on the results of the appropriate FSNP concentration experiment, a concentration of 16 mg/L FSNPs was used for the chronic toxicity test. Brine shrimp nauplii (18–24 h post-hatching) were transferred to 250 mL Erlenmeyer flasks containing 150 mL of artificial seawater under continuous aeration, with 10 nauplii per flask. They were fed with artificial food, and both seawater and food were renewed every 48 h. Three treatment groups were performed: (1) continuous exposure to FSNPs, (2) 3-hour exposure to FSNPs every 48 h, and (3) 6-hour exposure to FSNPs every 48 h. In treatments (2) and (3), nauplii were exposed to FSNPs prior to the renewal of seawater and food. The experiment was conducted over a period of 14 days. A control group was maintained in artificial seawater without FSNPs. Rearing conditions and mortality assessment criteria were consistent with those used in the acute toxicity test. Each treatment was conducted in nine replications. Test with adult brine shrimp Adult brine shrimp, 25 males and 24 females, were used to evaluate whether FSNPs could be applied to developed stages. The sexes were determined by the presence of a clasping organ (male) and brood sac (female). The shrimp were randomly selected from an aquarium and transferred into 24-well plates filled with 2 mL of baker’s yeast suspension (1 × 10 6  cells/mL), one individual per well. They were dark-acclimatized for 30 min. The FSNP suspension was then added to each well to reach a final NP concentration of 16 mg/L. Observations were made every 5 min under UV light to detect the appearance of abdominal fluorescence, followed by further monitoring until luminescent feces were detected, indicating complete gut passage of the ingested FSNPs. Statistical analyses Because our data did not meet the assumption for parametric statistics, nonparametric statistical analyses were used in all tests. The effects of FSNP concentration on mortality and immobility were ascertained by applying the Kruskal–Wallis test; Dunn’s test was used for pairwise comparison. The effects of FSNP concentration, the presence or absence of food, and their interaction with the marking efficiency or fluorescence brightness of the marked individuals were analyzed employing the aligned rank test. Feeding rates in the presence and absence of FSNPs were corrected for the rate of yeast autolysis in the control group and then compared by the Wilcoxon rank-sum test. The effects of depuration time, the presence or absence of food, and their interactions were analyzed using the aligned rank and Dunn’s tests. Locomotion data for shrimp treated with FSNPs were compared with the control utilizing the Wilcoxon rank-sum test. The number of times that the abdomen of adult brine shrimp exhibited luminescence and the number of times that the fluorescent feces appeared due to the excretion of FSNPs were compared between sexes using the Wilcoxon rank-sum test. LT 50  was analyzed using probit analysis in SPSS version 28.0 44 . All other statistical analyses were performed using the base, ARTool, combinate, dplyr, survival, survminer, and tidyverse packages in R, version 4.3.0 45 .",
+        "operations": [
+          {
+            "op_type": "filter",
+            "sentence": "For rearing adult shrimp, nauplii (shrimp larvae) were transferred into an 8 L tank and raised in filtered natural seawater (3% salinity) at 25–26 °C under continuous aeration and a light intensity of 1,600 lx (fluorescent lamp) under a 12/12 h illumination cycle.",
+            "start_char": 1427,
+            "end_char": 1691,
+            "materials": [
+              "an 8 L tank",
+              "3% salinity",
+              "1,600 lx",
+              "(fluorescent lamp"
+            ],
+            "params": {
+              "temp": "26 °C",
+              "time": "12 h",
+              "amounts": [
+                "8 L"
+              ]
+            }
+          },
+          {
+            "op_type": "heat",
+            "sentence": "Effects on the feeding rate Nauplii, 18–24 h after hatching, were transferred into glass vials (50 nauplii per vial) containing 10 mL of a suspension mixture of dead baker’s yeast (~ 2 × 10 5  cells/mL, heat-killed at 70 °C for 5 min) with or without 16 mg/L FSNPs.",
+            "start_char": 6120,
+            "end_char": 6385,
+            "materials": [
+              "50 nauplii",
+              "10 mL",
+              "2 ×",
+              "10 5  cells"
+            ],
+            "params": {
+              "temp": "70 °C",
+              "time": "24 h",
+              "amounts": [
+                "10 mL",
+                "16 mg"
+              ]
+            }
+          },
+          {
+            "op_type": "wash",
+            "sentence": "Then, the nauplii were washed with seawater and passed through a 110 μm net.",
+            "start_char": 7677,
+            "end_char": 7753,
+            "materials": [
+              "a 110 μm net"
+            ],
+            "params": {
+              "concs": [
+                "110 μm"
+              ]
+            }
+          },
+          {
+            "op_type": "heat",
+            "sentence": "A control group was maintained in artificial seawater without FSNPs.",
+            "start_char": 9463,
+            "end_char": 9531,
+            "materials": [],
+            "params": {}
+          },
+          {
+            "op_type": "add",
+            "sentence": "The FSNP suspension was then added to each well to reach a final NP concentration of 16 mg/L. Observations were made every 5 min under UV light to detect the appearance of abdominal fluorescence, followed by further monitoring until luminescent feces were detected, indicating complete gut passage of the ingested FSNPs.",
+            "start_char": 10156,
+            "end_char": 10476,
+            "materials": [
+              "16 mg/L. Observations",
+              "every 5 min",
+              "UV light"
+            ],
+            "params": {
+              "time": "5 min",
+              "amounts": [
+                "16 mg"
+              ]
+            }
+          }
+        ],
+        "expanded": [
+          {
+            "op_type": "filter",
+            "steps": [
+              "Perform operation 'filter' as described: For rearing adult shrimp, nauplii (shrimp larvae) were transferred into an 8 L tank and raised in filtered natural seawater (3% salinity) at 25–26 °C under continuous aeration and a light intensity of 1,600 lx (fluorescent lamp) under a 12/12 h illumination cycle."
+            ]
+          },
+          {
+            "op_type": "heat",
+            "steps": [
+              "Place the reaction vessel on a hotplate.",
+              "Ramp to 70 °C.",
+              "Maintain 70 °C for 24 h."
+            ]
+          },
+          {
+            "op_type": "wash",
+            "steps": [
+              "Perform operation 'wash' as described: Then, the nauplii were washed with seawater and passed through a 110 μm net."
+            ]
+          },
+          {
+            "op_type": "heat",
+            "steps": [
+              "Place the reaction vessel on a hotplate.",
+              "Ramp to the target temperature.",
+              "Maintain the target temperature for the specified time."
+            ]
+          },
+          {
+            "op_type": "add",
+            "steps": [
+              "Ensure reaction vessel is present and empty.",
+              "Place a clean stir bar in the vessel.",
+              "Measure 16 mg of 16 mg/L. Observations.",
+              "Transfer 16 mg/L. Observations into the vessel."
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

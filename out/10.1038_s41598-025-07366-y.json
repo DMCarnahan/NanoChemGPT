@@ -1,0 +1,120 @@
+{
+  "paper_id": "10.1038/s41598-025-07366-y",
+  "title": "Computational investigation of Belzutifan drug delivery mechanisms using SiC nanocrystals via combined DFT and molecular dynamics approaches.",
+  "authors": [],
+  "doi": "10.1038/s41598-025-07366-y",
+  "source": "eupmc",
+  "urls": {
+    "pdf": null
+  },
+  "license": {
+    "type": "unknown"
+  },
+  "access_route": "oa",
+  "sections": [
+    {
+      "heading": "Introduction",
+      "text": "Introduction Belzutifan, also known as MK-6482, is a novel hypoxia-inducible factor (HIF) inhibitor that has garnered significant attention in the field of oncology 1 . By targeting the HIF pathway, Belzutifan disrupts the tumor microenvironment, thereby inhibiting the growth of various solid tumors. It has shown promise particularly in the treatment of renal cell carcinoma (RCC), a cancer known for its resistance to conventional therapies 2 . While clinical trials have demonstrated Belzutifan’s efficacy, its poor aqueous solubility (0.12 mg/mL at pH 7.4) and rapid clearance (t₁/₂ = 4.2 h) remain major pharmacological challenges 3 , 4 . Recent advancements in nanotechnology offer exciting possibilities for improving drug delivery mechanisms 5 . Nanocarrier systems have shown particular promise for HIF inhibitors. Liposomal formulations of HIF-1α siRNA demonstrated 3.2-fold increased tumor accumulation compared to free drugs in murine RCC models 6 , while polymeric nanoparticles improved the bioavailability of semaxanib (another HIF inhibitor) by 78% 7 . However, these systems face limitations in controlled release and targeting specificity. Carbon-based nanomaterials like graphene oxide, while showing high drug loading capacity (up to 320% w/w for doxorubicin 8 ), raise concerns about long-term biocompatibility and batch-to-batch variability 9 . Recent computational studies have demonstrated the promise of nanostructured materials—including carbon and boron nitride nanotubes 10 , ZnO nanoparticles 11 , and graphyne derivatives 12 —as drug carriers, yet silicon carbide (SiC) nanocrystals remain underexplored despite their superior mechanical stability and tunable surface chemistry for targeted delivery applications. Silicon carbide (SiC) nanoparticles have emerged as a compelling alternative for drug delivery, thanks to their unique physical and chemical properties 13 – 15 . Compared to other ceramic nanoparticles (e.g., silica or titania), SiC exhibits superior chemical stability in physiological environments (less than 5% degradation after 72 h in PBS 16 ) and exceptional mechanical strength (Young’s modulus ≈ 440 GPa 17 ). Recent studies have demonstrated SiC’s potential in drug delivery: PEGylated SiC nanoparticles showed 92% loading efficiency for paclitaxel with sustained release over 72 h 18 , while amino-functionalized SiC enhanced cellular uptake in MCF-7 cells by 2.3-fold compared to non-functionalized particles 19 . Despite these advances, critical gaps remain in understanding SiC’s interactions with HIF inhibitors like Belzutifan. While molecular dynamics studies have examined SiC’s behavior with conventional chemotherapeutics 20 , no work has addressed its potential for targeted HIF inhibitor delivery. Furthermore, the role of surface functionalization (-H, -OH, -COOH, -NH₂) in modulating drug-nanocrystal electronic interactions remains unexplored—a knowledge gap with significant implications for controlled release systems. The application of SiC nanoparticles in drug delivery systems is further bolstered by their ability to facilitate controlled release. By modifying the surface properties of SiC, researchers can tailor the release kinetics of encapsulated drugs 21 . This is particularly relevant for Belzutifan, where maintaining therapeutic concentrations above 50 ng/mL for > 12 h is crucial for HIF pathway suppression 22 . Moreover, SiC nanoparticles can be functionalized to enhance their interaction with specific biological targets 23 – 25 . Our work uniquely correlates electronic structure modifications with practical delivery metrics like adsorption stability and optical detection, providing a roadmap for experimental validation. Computational methods, such as density functional theory (DFT) and molecular dynamics (MD), have become invaluable tools in understanding drug-nanoparticle interactions at the molecular level. DFT allows for the exploration of electronic properties and binding affinities between Belzutifan and SiC nanoparticles, while MD simulations can provide insights into the dynamic behavior of these systems in biological environments. These computational studies can guide the design of more effective drug delivery systems."
+    },
+    {
+      "heading": "Computational details",
+      "text": "Computational details The computational investigation of Belzutifan adsorption on silicon carbide (SiC) nanoparticles integrated density functional theory (DFT) and molecular dynamics (MD) simulations to elucidate both electronic and dynamic interactions. DFT calculations were performed using the OpenMX package 23 , which employs optimized pseudopotentials and localized basis sets for efficient large-scale simulations of hybrid organic-inorganic systems. The PBE-D3 exchange-correlation functional 24 – 27  was selected for its validated accuracy in modeling drug-nanomaterial interactions, combining the generalized gradient approximation (PBE) with Grimme’s D3 dispersion correction 28  including Becke-Johnson damping 29 . This approach is particularly suited for physisorption studies, as it accurately captures van der Waals forces that dominate drug-surface binding, with benchmark studies demonstrating mean absolute errors < 0.1 eV for adsorption energies of organic molecules on semiconductors 30 . The LCPAO-s2p2d2 basis set 25 , 31  was chosen for its optimized radial functions that provide superior convergence for SiC systems compared to standard Gaussian-type orbitals, while maintaining computational efficiency – tests show < 0.01 Å differences in bond lengths versus larger s3p3d3 sets for similar systems 32 . To model the nanoparticle environment, a hexagonal 4 H-SiC unit cell (64 atoms) was constructed with lattice parameters (a = 3.073 Å, c = 10.053 Å) matching experimental crystallographic data 33 , and surface termination followed the most stable (110) orientation as determined by previous DFT-MD studies 33 , 34 . The adsorption energy (E ads ) was calculated as: 1 \\documentclass[12pt]{minimal}\n\t\t\t\t\\usepackage{amsmath}\n\t\t\t\t\\usepackage{wasysym} \n\t\t\t\t\\usepackage{amsfonts} \n\t\t\t\t\\usepackage{amssymb} \n\t\t\t\t\\usepackage{amsbsy}\n\t\t\t\t\\usepackage{mathrsfs}\n\t\t\t\t\\usepackage{upgreek}\n\t\t\t\t\\setlength{\\oddsidemargin}{-69pt}\n\t\t\t\t\\begin{document}$${{\\text{E}}_{{\\text{ads}}}}{\\text{= }}{{\\text{E}}_{{\\text{Belzutifan@SiC}}}}\\:-\\:\\left( {{\\text{ }}{{\\text{E}}_{{\\text{Belzutifan}}}}{\\text{+ }}{{\\text{E}}_{{\\text{SiC}}}}} \\right)$$\\end{document} with basis set superposition error (BSSE) corrected via the counterpoise method 26  to account for artificial energy lowering from incomplete basis sets – a critical adjustment that typically reduces overestimation of adsorption energies by 15–20% in such systems 34 – 36 . Geometry optimization and frequency analysis ensured the system reached a true local minimum on the potential energy surface, with convergence criteria of 10⁻⁶ Ha/atom for energy and 0.01 eV/Å for forces. The reliability of our DFT approach was validated by excellent agreement with experimental data: calculated SiC bulk modulus (220 GPa) deviates by < 2% from measured values (224 ± 5 GPa) 37 , while Belzutifan vibrational frequencies show < 5% deviation from experimental IR spectra. Complementary MD simulations were conducted using OpenMX’s which reproduces DFT-level accuracy for bond formation/breaking while including explicit polarization effects essential for modeling drug-surface interactions. Simulations employed an NVT ensemble at 310 K (Langevin thermostat, γ = 1 ps⁻¹) to approximate physiological conditions, with a 1 fs time step verified by energy conservation tests and 5 ps duration sufficient for system equilibration as evidenced by RMSD plateauing after 2 ps. Trajectory analysis incorporated root mean square deviation (RMSD) calculations using backbone atoms, hydrogen bond identification (distance < 3.5 Å, angle > 150°), and charge transfer evaluation via Mulliken population analysis. Key assumptions include rigid nanocrystal surfaces and neutral pH conditions. Future work will incorporate surface defects and pH-dependent charge effects to better approximate biological environments."
+    }
+  ],
+  "extractions": {
+    "methods_paragraphs": [
+      {
+        "text": "Introduction Belzutifan, also known as MK-6482, is a novel hypoxia-inducible factor (HIF) inhibitor that has garnered significant attention in the field of oncology 1 . By targeting the HIF pathway, Belzutifan disrupts the tumor microenvironment, thereby inhibiting the growth of various solid tumors. It has shown promise particularly in the treatment of renal cell carcinoma (RCC), a cancer known for its resistance to conventional therapies 2 . While clinical trials have demonstrated Belzutifan’s efficacy, its poor aqueous solubility (0.12 mg/mL at pH 7.4) and rapid clearance (t₁/₂ = 4.2 h) remain major pharmacological challenges 3 , 4 . Recent advancements in nanotechnology offer exciting possibilities for improving drug delivery mechanisms 5 . Nanocarrier systems have shown particular promise for HIF inhibitors. Liposomal formulations of HIF-1α siRNA demonstrated 3.2-fold increased tumor accumulation compared to free drugs in murine RCC models 6 , while polymeric nanoparticles improved the bioavailability of semaxanib (another HIF inhibitor) by 78% 7 . However, these systems face limitations in controlled release and targeting specificity. Carbon-based nanomaterials like graphene oxide, while showing high drug loading capacity (up to 320% w/w for doxorubicin 8 ), raise concerns about long-term biocompatibility and batch-to-batch variability 9 . Recent computational studies have demonstrated the promise of nanostructured materials—including carbon and boron nitride nanotubes 10 , ZnO nanoparticles 11 , and graphyne derivatives 12 —as drug carriers, yet silicon carbide (SiC) nanocrystals remain underexplored despite their superior mechanical stability and tunable surface chemistry for targeted delivery applications. Silicon carbide (SiC) nanoparticles have emerged as a compelling alternative for drug delivery, thanks to their unique physical and chemical properties 13 – 15 . Compared to other ceramic nanoparticles (e.g., silica or titania), SiC exhibits superior chemical stability in physiological environments (less than 5% degradation after 72 h in PBS 16 ) and exceptional mechanical strength (Young’s modulus ≈ 440 GPa 17 ). Recent studies have demonstrated SiC’s potential in drug delivery: PEGylated SiC nanoparticles showed 92% loading efficiency for paclitaxel with sustained release over 72 h 18 , while amino-functionalized SiC enhanced cellular uptake in MCF-7 cells by 2.3-fold compared to non-functionalized particles 19 . Despite these advances, critical gaps remain in understanding SiC’s interactions with HIF inhibitors like Belzutifan. While molecular dynamics studies have examined SiC’s behavior with conventional chemotherapeutics 20 , no work has addressed its potential for targeted HIF inhibitor delivery. Furthermore, the role of surface functionalization (-H, -OH, -COOH, -NH₂) in modulating drug-nanocrystal electronic interactions remains unexplored—a knowledge gap with significant implications for controlled release systems. The application of SiC nanoparticles in drug delivery systems is further bolstered by their ability to facilitate controlled release. By modifying the surface properties of SiC, researchers can tailor the release kinetics of encapsulated drugs 21 . This is particularly relevant for Belzutifan, where maintaining therapeutic concentrations above 50 ng/mL for > 12 h is crucial for HIF pathway suppression 22 . Moreover, SiC nanoparticles can be functionalized to enhance their interaction with specific biological targets 23 – 25 . Our work uniquely correlates electronic structure modifications with practical delivery metrics like adsorption stability and optical detection, providing a roadmap for experimental validation. Computational methods, such as density functional theory (DFT) and molecular dynamics (MD), have become invaluable tools in understanding drug-nanoparticle interactions at the molecular level. DFT allows for the exploration of electronic properties and binding affinities between Belzutifan and SiC nanoparticles, while MD simulations can provide insights into the dynamic behavior of these systems in biological environments. These computational studies can guide the design of more effective drug delivery systems.",
+        "operations": [
+          {
+            "op_type": "heat",
+            "sentence": "This is particularly relevant for Belzutifan, where maintaining therapeutic concentrations above 50 ng/mL for > 12 h is crucial for HIF pathway suppression 22 .",
+            "start_char": 3239,
+            "end_char": 3399,
+            "materials": [
+              "50 ng",
+              "> 12 h",
+              "HIF pathway suppression"
+            ],
+            "params": {
+              "time": "12 h"
+            }
+          }
+        ],
+        "expanded": [
+          {
+            "op_type": "heat",
+            "steps": [
+              "Place the reaction vessel on a hotplate.",
+              "Ramp to the target temperature.",
+              "Maintain the target temperature for 12 h."
+            ]
+          }
+        ]
+      },
+      {
+        "text": "Computational details The computational investigation of Belzutifan adsorption on silicon carbide (SiC) nanoparticles integrated density functional theory (DFT) and molecular dynamics (MD) simulations to elucidate both electronic and dynamic interactions. DFT calculations were performed using the OpenMX package 23 , which employs optimized pseudopotentials and localized basis sets for efficient large-scale simulations of hybrid organic-inorganic systems. The PBE-D3 exchange-correlation functional 24 – 27  was selected for its validated accuracy in modeling drug-nanomaterial interactions, combining the generalized gradient approximation (PBE) with Grimme’s D3 dispersion correction 28  including Becke-Johnson damping 29 . This approach is particularly suited for physisorption studies, as it accurately captures van der Waals forces that dominate drug-surface binding, with benchmark studies demonstrating mean absolute errors < 0.1 eV for adsorption energies of organic molecules on semiconductors 30 . The LCPAO-s2p2d2 basis set 25 , 31  was chosen for its optimized radial functions that provide superior convergence for SiC systems compared to standard Gaussian-type orbitals, while maintaining computational efficiency – tests show < 0.01 Å differences in bond lengths versus larger s3p3d3 sets for similar systems 32 . To model the nanoparticle environment, a hexagonal 4 H-SiC unit cell (64 atoms) was constructed with lattice parameters (a = 3.073 Å, c = 10.053 Å) matching experimental crystallographic data 33 , and surface termination followed the most stable (110) orientation as determined by previous DFT-MD studies 33 , 34 . The adsorption energy (E ads ) was calculated as: 1 \\documentclass[12pt]{minimal}\n\t\t\t\t\\usepackage{amsmath}\n\t\t\t\t\\usepackage{wasysym} \n\t\t\t\t\\usepackage{amsfonts} \n\t\t\t\t\\usepackage{amssymb} \n\t\t\t\t\\usepackage{amsbsy}\n\t\t\t\t\\usepackage{mathrsfs}\n\t\t\t\t\\usepackage{upgreek}\n\t\t\t\t\\setlength{\\oddsidemargin}{-69pt}\n\t\t\t\t\\begin{document}$${{\\text{E}}_{{\\text{ads}}}}{\\text{= }}{{\\text{E}}_{{\\text{Belzutifan@SiC}}}}\\:-\\:\\left( {{\\text{ }}{{\\text{E}}_{{\\text{Belzutifan}}}}{\\text{+ }}{{\\text{E}}_{{\\text{SiC}}}}} \\right)$$\\end{document} with basis set superposition error (BSSE) corrected via the counterpoise method 26  to account for artificial energy lowering from incomplete basis sets – a critical adjustment that typically reduces overestimation of adsorption energies by 15–20% in such systems 34 – 36 . Geometry optimization and frequency analysis ensured the system reached a true local minimum on the potential energy surface, with convergence criteria of 10⁻⁶ Ha/atom for energy and 0.01 eV/Å for forces. The reliability of our DFT approach was validated by excellent agreement with experimental data: calculated SiC bulk modulus (220 GPa) deviates by < 2% from measured values (224 ± 5 GPa) 37 , while Belzutifan vibrational frequencies show < 5% deviation from experimental IR spectra. Complementary MD simulations were conducted using OpenMX’s which reproduces DFT-level accuracy for bond formation/breaking while including explicit polarization effects essential for modeling drug-surface interactions. Simulations employed an NVT ensemble at 310 K (Langevin thermostat, γ = 1 ps⁻¹) to approximate physiological conditions, with a 1 fs time step verified by energy conservation tests and 5 ps duration sufficient for system equilibration as evidenced by RMSD plateauing after 2 ps. Trajectory analysis incorporated root mean square deviation (RMSD) calculations using backbone atoms, hydrogen bond identification (distance < 3.5 Å, angle > 150°), and charge transfer evaluation via Mulliken population analysis. Key assumptions include rigid nanocrystal surfaces and neutral pH conditions. Future work will incorporate surface defects and pH-dependent charge effects to better approximate biological environments.",
+        "operations": [
+          {
+            "op_type": "heat",
+            "sentence": "The LCPAO-s2p2d2 basis set 25 , 31  was chosen for its optimized radial functions that provide superior convergence for SiC systems compared to standard Gaussian-type orbitals, while maintaining computational efficiency – tests show < 0.01 Å differences in bond lengths versus larger s3p3d3 sets for similar systems 32 .",
+            "start_char": 1012,
+            "end_char": 1332,
+            "materials": [
+              "The LCPAO-s2p2d2 basis",
+              "0.01 Å differences",
+              "larger s3p3d3 sets"
+            ],
+            "params": {}
+          },
+          {
+            "op_type": "add",
+            "sentence": "Trajectory analysis incorporated root mean square deviation (RMSD) calculations using backbone atoms, hydrogen bond identification (distance < 3.5 Å, angle > 150°), and charge transfer evaluation via Mulliken population analysis.",
+            "start_char": 3426,
+            "end_char": 3655,
+            "materials": [
+              "3.5 Å"
+            ],
+            "params": {}
+          },
+          {
+            "op_type": "add",
+            "sentence": "Future work will incorporate surface defects and pH-dependent charge effects to better approximate biological environments.",
+            "start_char": 3734,
+            "end_char": 3857,
+            "materials": [],
+            "params": {}
+          }
+        ],
+        "expanded": [
+          {
+            "op_type": "heat",
+            "steps": [
+              "Place the reaction vessel on a hotplate.",
+              "Ramp to the target temperature.",
+              "Maintain the target temperature for the specified time."
+            ]
+          },
+          {
+            "op_type": "add",
+            "steps": [
+              "Ensure reaction vessel is present and empty.",
+              "Place a clean stir bar in the vessel.",
+              "Measure the specified amount of 3.5 Å.",
+              "Transfer 3.5 Å into the vessel."
+            ]
+          },
+          {
+            "op_type": "add",
+            "steps": [
+              "Ensure reaction vessel is present and empty.",
+              "Place a clean stir bar in the vessel.",
+              "Measure the specified amount of reagent.",
+              "Transfer reagent into the vessel."
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

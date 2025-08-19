@@ -1,0 +1,431 @@
+{
+  "paper_id": "10.1038/s41598-025-13057-5",
+  "title": "Improvement of anti-swelling property and anticorrosion performance of epoxy coatings by the introduction of nanocrystalline cellulose composite.",
+  "authors": [],
+  "doi": "10.1038/s41598-025-13057-5",
+  "source": "eupmc",
+  "urls": {
+    "pdf": null
+  },
+  "license": {
+    "type": "unknown"
+  },
+  "access_route": "oa",
+  "sections": [
+    {
+      "heading": "Materials and methods",
+      "text": "Materials and methods Materials Sodium chloride, DMF, ethyl acetate, anhydrous ethanol, 3-aminopropyltrimethoxysilane (APTMS), hexadecyltrimethoxysilane (HDTMS), aqueous ammonia (28%), epoxy resin (E-44) and curing agent were purchased from Aladdin. Q235 carbon steel was purchased from Xincheng Senke Specimen Processing Center. NCC was purchased from Northern Century (Jiangsu) Cellulose Material Co., Ltd. Preparation of M-NCC epoxy solution 1.25 g, 2.5 g, 7.5 g and 12.5 g of NCC solution (with a 2% NCC content) were separately weighed, corresponding to absolute dry masses of NCC at 0.025 g, 0.05 g, 0.15 g and 0.25 g, respectively. These were then dispersed in anhydrous ethanol. The NCC-ethanol solutions with varying contents were centrifuged at 9000 rpm for 15 min. The resulting precipitates were collected and transferred to 30 mL of anhydrous ethanol, and 0.1 g of HDTMS, 0.05 g of 3 APTMS and 1 mL of ammonia water were added. The NCC was modified under magnetic stirring for 1 h. Subsequently, 5 g of epoxy resin E-44 was added and stirred for 15 min to yield NCC epoxy solutions with mass fractions of 0.5%, 1%, 3% and 5%, respectively (where 0.5%, 1%, 3% and 5% represent the mass ratios of the absolute dry NCC to the epoxy resin). Preparation of M-NCC epoxy coating The epoxy resin with a mass ratio of epoxy resin E-44 to curing agent of 4 :1 was prepared, and 30 mL ethyl acetate was added and stirred evenly. Ethyl acetate was used as a solvent. The epoxy coating primer was prepared on pre-polished Q235 carbon steel by the dip-coating method. The thickness of the epoxy coating was 10 ± 2 μm. Different content of M-NCC epoxy solution was added to the air compressor sprayer and sprayed on Q235 carbon steel with epoxy coating primer, and cured at 90 °C for 6 h in an oven to prepare epoxy composite coatings doped with 0.5%, 1%, 3%, and 5% alkoxysilane coupling agent M-NCC, namely M-0.5% NCC/EP, M-1% NCC/EP, M-3% NCC/EP, and M-5% NCC/EP coatings. The coating thickness was 75 ± 5 μm. Preparation of pure epoxy coating An epoxy-ethyl acetate solution consisting of 5 g epoxy resin E-44 and 30 mL ethyl acetate was sprayed on Q235 carbon steel with a 10 ± 2 μm epoxy coating and cured at 90 °C for 6 h in an oven to prepare a pure epoxy coating with a coating thickness of 75 ± 5 μm. Electrochemical measurements A three-electrode system was employed, including a saturated calomel electrode as the reference electrode, a platinum black electrode as the counter electrode, and a Q235 carbon steel electrode with a coating as the working electrode. EIS measurements were conducted using a Princeton VersaSTAT 3 F electrochemical workstation with an applied amplitude of 20 mV, a frequency range of 10 4  ~10 − 2 , and 10 points per frequency doubling. The corrosion process was analyzed by establishing an equivalent circuit diagram and fitting the data using the ZView software. Characterizations The differences in chemical bonds of the samples were characterized using Fourier Transform Infrared Reflection (FTIR, IRPrestige-21) spectroscopy. The TGA and DTG measurements were obtained using a thermogravimetric analyzer (TGA8000) at a heating rate of 10 °C min-1 under a nitrogen atmosphere (50 mL/min). FESEM (Quanta FEG 250, FEI, USA) was employed to characterize the sample morphology, element content and distribution analysis (EDS and element mapping). X-ray photoelectron spectra (XPS) were acquired using an X-ray photoelectron spectrometer (AXIS Ultra DLD, Kratos Co., England), employing monochromatic Al Kα radiation (1486.6 eV) as the excitation source. The binding energy was calibrated to 284.6 eV for the C 1s peak. The water contact angle (WCA) was measured and calculated on a contact angle measuring instrument (ZJ-7000, Zhijia Instruments, China) using the dynamic mode, where a drop of 5 µL water was dispensed onto the thin film surface by an automatic piston syringe and immediately photographed. The 3D optical topography of the samples was measured using a 3D optical profiler (Up S-Dual, RTEC, USA) and visualized using Gwyddion software (version 2.44). The optical images of the samples were captured using an optical electronic microscope ( AO-HD208C, AOSVI, China)."
+    },
+    {
+      "heading": "Preparation of M-NCC epoxy solution",
+      "text": "Preparation of M-NCC epoxy solution 1.25 g, 2.5 g, 7.5 g and 12.5 g of NCC solution (with a 2% NCC content) were separately weighed, corresponding to absolute dry masses of NCC at 0.025 g, 0.05 g, 0.15 g and 0.25 g, respectively. These were then dispersed in anhydrous ethanol. The NCC-ethanol solutions with varying contents were centrifuged at 9000 rpm for 15 min. The resulting precipitates were collected and transferred to 30 mL of anhydrous ethanol, and 0.1 g of HDTMS, 0.05 g of 3 APTMS and 1 mL of ammonia water were added. The NCC was modified under magnetic stirring for 1 h. Subsequently, 5 g of epoxy resin E-44 was added and stirred for 15 min to yield NCC epoxy solutions with mass fractions of 0.5%, 1%, 3% and 5%, respectively (where 0.5%, 1%, 3% and 5% represent the mass ratios of the absolute dry NCC to the epoxy resin)."
+    },
+    {
+      "heading": "Preparation of M-NCC epoxy coating",
+      "text": "Preparation of M-NCC epoxy coating The epoxy resin with a mass ratio of epoxy resin E-44 to curing agent of 4 :1 was prepared, and 30 mL ethyl acetate was added and stirred evenly. Ethyl acetate was used as a solvent. The epoxy coating primer was prepared on pre-polished Q235 carbon steel by the dip-coating method. The thickness of the epoxy coating was 10 ± 2 μm. Different content of M-NCC epoxy solution was added to the air compressor sprayer and sprayed on Q235 carbon steel with epoxy coating primer, and cured at 90 °C for 6 h in an oven to prepare epoxy composite coatings doped with 0.5%, 1%, 3%, and 5% alkoxysilane coupling agent M-NCC, namely M-0.5% NCC/EP, M-1% NCC/EP, M-3% NCC/EP, and M-5% NCC/EP coatings. The coating thickness was 75 ± 5 μm."
+    },
+    {
+      "heading": "Preparation of pure epoxy coating",
+      "text": "Preparation of pure epoxy coating An epoxy-ethyl acetate solution consisting of 5 g epoxy resin E-44 and 30 mL ethyl acetate was sprayed on Q235 carbon steel with a 10 ± 2 μm epoxy coating and cured at 90 °C for 6 h in an oven to prepare a pure epoxy coating with a coating thickness of 75 ± 5 μm."
+    }
+  ],
+  "extractions": {
+    "methods_paragraphs": [
+      {
+        "text": "Materials and methods Materials Sodium chloride, DMF, ethyl acetate, anhydrous ethanol, 3-aminopropyltrimethoxysilane (APTMS), hexadecyltrimethoxysilane (HDTMS), aqueous ammonia (28%), epoxy resin (E-44) and curing agent were purchased from Aladdin. Q235 carbon steel was purchased from Xincheng Senke Specimen Processing Center. NCC was purchased from Northern Century (Jiangsu) Cellulose Material Co., Ltd. Preparation of M-NCC epoxy solution 1.25 g, 2.5 g, 7.5 g and 12.5 g of NCC solution (with a 2% NCC content) were separately weighed, corresponding to absolute dry masses of NCC at 0.025 g, 0.05 g, 0.15 g and 0.25 g, respectively. These were then dispersed in anhydrous ethanol. The NCC-ethanol solutions with varying contents were centrifuged at 9000 rpm for 15 min. The resulting precipitates were collected and transferred to 30 mL of anhydrous ethanol, and 0.1 g of HDTMS, 0.05 g of 3 APTMS and 1 mL of ammonia water were added. The NCC was modified under magnetic stirring for 1 h. Subsequently, 5 g of epoxy resin E-44 was added and stirred for 15 min to yield NCC epoxy solutions with mass fractions of 0.5%, 1%, 3% and 5%, respectively (where 0.5%, 1%, 3% and 5% represent the mass ratios of the absolute dry NCC to the epoxy resin). Preparation of M-NCC epoxy coating The epoxy resin with a mass ratio of epoxy resin E-44 to curing agent of 4 :1 was prepared, and 30 mL ethyl acetate was added and stirred evenly. Ethyl acetate was used as a solvent. The epoxy coating primer was prepared on pre-polished Q235 carbon steel by the dip-coating method. The thickness of the epoxy coating was 10 ± 2 μm. Different content of M-NCC epoxy solution was added to the air compressor sprayer and sprayed on Q235 carbon steel with epoxy coating primer, and cured at 90 °C for 6 h in an oven to prepare epoxy composite coatings doped with 0.5%, 1%, 3%, and 5% alkoxysilane coupling agent M-NCC, namely M-0.5% NCC/EP, M-1% NCC/EP, M-3% NCC/EP, and M-5% NCC/EP coatings. The coating thickness was 75 ± 5 μm. Preparation of pure epoxy coating An epoxy-ethyl acetate solution consisting of 5 g epoxy resin E-44 and 30 mL ethyl acetate was sprayed on Q235 carbon steel with a 10 ± 2 μm epoxy coating and cured at 90 °C for 6 h in an oven to prepare a pure epoxy coating with a coating thickness of 75 ± 5 μm. Electrochemical measurements A three-electrode system was employed, including a saturated calomel electrode as the reference electrode, a platinum black electrode as the counter electrode, and a Q235 carbon steel electrode with a coating as the working electrode. EIS measurements were conducted using a Princeton VersaSTAT 3 F electrochemical workstation with an applied amplitude of 20 mV, a frequency range of 10 4  ~10 − 2 , and 10 points per frequency doubling. The corrosion process was analyzed by establishing an equivalent circuit diagram and fitting the data using the ZView software. Characterizations The differences in chemical bonds of the samples were characterized using Fourier Transform Infrared Reflection (FTIR, IRPrestige-21) spectroscopy. The TGA and DTG measurements were obtained using a thermogravimetric analyzer (TGA8000) at a heating rate of 10 °C min-1 under a nitrogen atmosphere (50 mL/min). FESEM (Quanta FEG 250, FEI, USA) was employed to characterize the sample morphology, element content and distribution analysis (EDS and element mapping). X-ray photoelectron spectra (XPS) were acquired using an X-ray photoelectron spectrometer (AXIS Ultra DLD, Kratos Co., England), employing monochromatic Al Kα radiation (1486.6 eV) as the excitation source. The binding energy was calibrated to 284.6 eV for the C 1s peak. The water contact angle (WCA) was measured and calculated on a contact angle measuring instrument (ZJ-7000, Zhijia Instruments, China) using the dynamic mode, where a drop of 5 µL water was dispensed onto the thin film surface by an automatic piston syringe and immediately photographed. The 3D optical topography of the samples was measured using a 3D optical profiler (Up S-Dual, RTEC, USA) and visualized using Gwyddion software (version 2.44). The optical images of the samples were captured using an optical electronic microscope ( AO-HD208C, AOSVI, China).",
+        "operations": [
+          {
+            "op_type": "dry",
+            "sentence": "Preparation of M-NCC epoxy solution 1.25 g, 2.5 g, 7.5 g and 12.5 g of NCC solution (with a 2% NCC content) were separately weighed, corresponding to absolute dry masses of NCC at 0.025 g, 0.05 g, 0.15 g and 0.25 g, respectively.",
+            "start_char": 409,
+            "end_char": 638,
+            "materials": [
+              "1.25 g",
+              "2.5 g",
+              "7.5 g",
+              "12.5 g"
+            ],
+            "params": {
+              "amounts": [
+                "1.25 g",
+                "2.5 g",
+                "7.5 g",
+                "12.5 g",
+                "0.025 g",
+                "0.05 g",
+                "0.15 g",
+                "0.25 g"
+              ]
+            }
+          },
+          {
+            "op_type": "centrifuge",
+            "sentence": "The NCC-ethanol solutions with varying contents were centrifuged at 9000 rpm for 15 min.",
+            "start_char": 687,
+            "end_char": 775,
+            "materials": [
+              "9000 rpm",
+              "15 min"
+            ],
+            "params": {
+              "time": "15 min",
+              "speed": "9000 rpm"
+            }
+          },
+          {
+            "op_type": "add",
+            "sentence": "The resulting precipitates were collected and transferred to 30 mL of anhydrous ethanol, and 0.1 g of HDTMS, 0.05 g of 3 APTMS and 1 mL of ammonia water were added.",
+            "start_char": 776,
+            "end_char": 940,
+            "materials": [
+              "0.1 g",
+              "0.05 g",
+              "3 APTMS",
+              "1 mL"
+            ],
+            "params": {
+              "amounts": [
+                "30 mL",
+                "0.1 g",
+                "0.05 g",
+                "1 mL"
+              ]
+            }
+          },
+          {
+            "op_type": "stir",
+            "sentence": "The NCC was modified under magnetic stirring for 1 h.",
+            "start_char": 941,
+            "end_char": 994,
+            "materials": [],
+            "params": {
+              "time": "1 h"
+            }
+          },
+          {
+            "op_type": "add",
+            "sentence": "Subsequently, 5 g of epoxy resin E-44 was added and stirred for 15 min to yield NCC epoxy solutions with mass fractions of 0.5%, 1%, 3% and 5%, respectively (where 0.5%, 1%, 3% and 5% represent the mass ratios of the absolute dry NCC to the epoxy resin).",
+            "start_char": 995,
+            "end_char": 1249,
+            "materials": [
+              "5 g",
+              "15 min",
+              "0.5%",
+              "where 0.5%"
+            ],
+            "params": {
+              "time": "15 min",
+              "amounts": [
+                "5 g"
+              ]
+            }
+          },
+          {
+            "op_type": "add",
+            "sentence": "Preparation of M-NCC epoxy coating The epoxy resin with a mass ratio of epoxy resin E-44 to curing agent of 4 :1 was prepared, and 30 mL ethyl acetate was added and stirred evenly.",
+            "start_char": 1250,
+            "end_char": 1430,
+            "materials": [
+              "30 mL ethyl acetate"
+            ],
+            "params": {
+              "amounts": [
+                "30 mL"
+              ]
+            }
+          },
+          {
+            "op_type": "add",
+            "sentence": "Different content of M-NCC epoxy solution was added to the air compressor sprayer and sprayed on Q235 carbon steel with epoxy coating primer, and cured at 90 °C for 6 h in an oven to prepare epoxy composite coatings doped with 0.5%, 1%, 3%, and 5% alkoxysilane coupling agent M-NCC, namely M-0.5% NCC/EP,",
+            "start_char": 1617,
+            "end_char": 1921,
+            "materials": [
+              "Q235 carbon steel",
+              "90 °C",
+              "6 h",
+              "0.5%"
+            ],
+            "params": {
+              "temp": "90°C",
+              "time": "6 h"
+            }
+          },
+          {
+            "op_type": "heat",
+            "sentence": "The TGA and DTG measurements were obtained using a thermogravimetric analyzer (TGA8000) at a heating rate of 10 °C min-1 under a nitrogen atmosphere (50 mL/min).",
+            "start_char": 3070,
+            "end_char": 3231,
+            "materials": [
+              "TGA8000",
+              "10 °C",
+              "50 mL/min"
+            ],
+            "params": {
+              "temp": "10 °C",
+              "amounts": [
+                "50 mL"
+              ]
+            }
+          }
+        ],
+        "expanded": [
+          {
+            "op_type": "dry",
+            "steps": [
+              "Perform operation 'dry' as described: Preparation of M-NCC epoxy solution 1.25 g, 2.5 g, 7.5 g and 12.5 g of NCC solution (with a 2% NCC content) were separately weighed, corresponding to absolute dry masses of NCC at 0.025 g, 0.05 g, 0.15 g and 0.25 g, respectively."
+            ]
+          },
+          {
+            "op_type": "centrifuge",
+            "steps": [
+              "Perform operation 'centrifuge' as described: The NCC-ethanol solutions with varying contents were centrifuged at 9000 rpm for 15 min."
+            ]
+          },
+          {
+            "op_type": "add",
+            "steps": [
+              "Ensure reaction vessel is present and empty.",
+              "Place a clean stir bar in the vessel.",
+              "Measure 30 mL of 0.1 g.",
+              "Transfer 0.1 g into the vessel."
+            ]
+          },
+          {
+            "op_type": "stir",
+            "steps": [
+              "Place the reaction vessel on a stir plate.",
+              "Set the stirrer to an appropriate speed.",
+              "Stir for 1 h."
+            ]
+          },
+          {
+            "op_type": "add",
+            "steps": [
+              "Ensure reaction vessel is present and empty.",
+              "Place a clean stir bar in the vessel.",
+              "Measure 5 g of 5 g.",
+              "Transfer 5 g into the vessel."
+            ]
+          },
+          {
+            "op_type": "add",
+            "steps": [
+              "Ensure reaction vessel is present and empty.",
+              "Place a clean stir bar in the vessel.",
+              "Measure 30 mL of 30 mL ethyl acetate.",
+              "Transfer 30 mL ethyl acetate into the vessel."
+            ]
+          },
+          {
+            "op_type": "add",
+            "steps": [
+              "Ensure reaction vessel is present and empty.",
+              "Place a clean stir bar in the vessel.",
+              "Measure the specified amount of Q235 carbon steel.",
+              "Transfer Q235 carbon steel into the vessel."
+            ]
+          },
+          {
+            "op_type": "heat",
+            "steps": [
+              "Place the reaction vessel on a hotplate.",
+              "Ramp to 10 °C.",
+              "Maintain 10 °C for the specified time."
+            ]
+          }
+        ]
+      },
+      {
+        "text": "Preparation of M-NCC epoxy solution 1.25 g, 2.5 g, 7.5 g and 12.5 g of NCC solution (with a 2% NCC content) were separately weighed, corresponding to absolute dry masses of NCC at 0.025 g, 0.05 g, 0.15 g and 0.25 g, respectively. These were then dispersed in anhydrous ethanol. The NCC-ethanol solutions with varying contents were centrifuged at 9000 rpm for 15 min. The resulting precipitates were collected and transferred to 30 mL of anhydrous ethanol, and 0.1 g of HDTMS, 0.05 g of 3 APTMS and 1 mL of ammonia water were added. The NCC was modified under magnetic stirring for 1 h. Subsequently, 5 g of epoxy resin E-44 was added and stirred for 15 min to yield NCC epoxy solutions with mass fractions of 0.5%, 1%, 3% and 5%, respectively (where 0.5%, 1%, 3% and 5% represent the mass ratios of the absolute dry NCC to the epoxy resin).",
+        "operations": [
+          {
+            "op_type": "dry",
+            "sentence": "Preparation of M-NCC epoxy solution 1.25 g, 2.5 g, 7.5 g and 12.5 g of NCC solution (with a 2% NCC content) were separately weighed, corresponding to absolute dry masses of NCC at 0.025 g, 0.05 g, 0.15 g and 0.25 g, respectively.",
+            "start_char": 0,
+            "end_char": 229,
+            "materials": [
+              "1.25 g",
+              "2.5 g",
+              "7.5 g",
+              "12.5 g"
+            ],
+            "params": {
+              "amounts": [
+                "1.25 g",
+                "2.5 g",
+                "7.5 g",
+                "12.5 g",
+                "0.025 g",
+                "0.05 g",
+                "0.15 g",
+                "0.25 g"
+              ]
+            }
+          },
+          {
+            "op_type": "centrifuge",
+            "sentence": "The NCC-ethanol solutions with varying contents were centrifuged at 9000 rpm for 15 min.",
+            "start_char": 278,
+            "end_char": 366,
+            "materials": [
+              "9000 rpm",
+              "15 min"
+            ],
+            "params": {
+              "time": "15 min",
+              "speed": "9000 rpm"
+            }
+          },
+          {
+            "op_type": "add",
+            "sentence": "The resulting precipitates were collected and transferred to 30 mL of anhydrous ethanol, and 0.1 g of HDTMS, 0.05 g of 3 APTMS and 1 mL of ammonia water were added.",
+            "start_char": 367,
+            "end_char": 531,
+            "materials": [
+              "0.1 g",
+              "0.05 g",
+              "3 APTMS",
+              "1 mL"
+            ],
+            "params": {
+              "amounts": [
+                "30 mL",
+                "0.1 g",
+                "0.05 g",
+                "1 mL"
+              ]
+            }
+          },
+          {
+            "op_type": "stir",
+            "sentence": "The NCC was modified under magnetic stirring for 1 h.",
+            "start_char": 532,
+            "end_char": 585,
+            "materials": [],
+            "params": {
+              "time": "1 h"
+            }
+          },
+          {
+            "op_type": "add",
+            "sentence": "Subsequently, 5 g of epoxy resin E-44 was added and stirred for 15 min to yield NCC epoxy solutions with mass fractions of 0.5%, 1%, 3% and 5%, respectively (where 0.5%, 1%, 3% and 5% represent the mass ratios of the absolute dry NCC to the epoxy resin).",
+            "start_char": 586,
+            "end_char": 840,
+            "materials": [
+              "5 g",
+              "15 min",
+              "0.5%",
+              "where 0.5%"
+            ],
+            "params": {
+              "time": "15 min",
+              "amounts": [
+                "5 g"
+              ]
+            }
+          }
+        ],
+        "expanded": [
+          {
+            "op_type": "dry",
+            "steps": [
+              "Perform operation 'dry' as described: Preparation of M-NCC epoxy solution 1.25 g, 2.5 g, 7.5 g and 12.5 g of NCC solution (with a 2% NCC content) were separately weighed, corresponding to absolute dry masses of NCC at 0.025 g, 0.05 g, 0.15 g and 0.25 g, respectively."
+            ]
+          },
+          {
+            "op_type": "centrifuge",
+            "steps": [
+              "Perform operation 'centrifuge' as described: The NCC-ethanol solutions with varying contents were centrifuged at 9000 rpm for 15 min."
+            ]
+          },
+          {
+            "op_type": "add",
+            "steps": [
+              "Ensure reaction vessel is present and empty.",
+              "Place a clean stir bar in the vessel.",
+              "Measure 30 mL of 0.1 g.",
+              "Transfer 0.1 g into the vessel."
+            ]
+          },
+          {
+            "op_type": "stir",
+            "steps": [
+              "Place the reaction vessel on a stir plate.",
+              "Set the stirrer to an appropriate speed.",
+              "Stir for 1 h."
+            ]
+          },
+          {
+            "op_type": "add",
+            "steps": [
+              "Ensure reaction vessel is present and empty.",
+              "Place a clean stir bar in the vessel.",
+              "Measure 5 g of 5 g.",
+              "Transfer 5 g into the vessel."
+            ]
+          }
+        ]
+      },
+      {
+        "text": "Preparation of M-NCC epoxy coating The epoxy resin with a mass ratio of epoxy resin E-44 to curing agent of 4 :1 was prepared, and 30 mL ethyl acetate was added and stirred evenly. Ethyl acetate was used as a solvent. The epoxy coating primer was prepared on pre-polished Q235 carbon steel by the dip-coating method. The thickness of the epoxy coating was 10 ± 2 μm. Different content of M-NCC epoxy solution was added to the air compressor sprayer and sprayed on Q235 carbon steel with epoxy coating primer, and cured at 90 °C for 6 h in an oven to prepare epoxy composite coatings doped with 0.5%, 1%, 3%, and 5% alkoxysilane coupling agent M-NCC, namely M-0.5% NCC/EP, M-1% NCC/EP, M-3% NCC/EP, and M-5% NCC/EP coatings. The coating thickness was 75 ± 5 μm.",
+        "operations": [
+          {
+            "op_type": "add",
+            "sentence": "Preparation of M-NCC epoxy coating The epoxy resin with a mass ratio of epoxy resin E-44 to curing agent of 4 :1 was prepared, and 30 mL ethyl acetate was added and stirred evenly.",
+            "start_char": 0,
+            "end_char": 180,
+            "materials": [
+              "30 mL ethyl acetate"
+            ],
+            "params": {
+              "amounts": [
+                "30 mL"
+              ]
+            }
+          },
+          {
+            "op_type": "add",
+            "sentence": "Different content of M-NCC epoxy solution was added to the air compressor sprayer and sprayed on Q235 carbon steel with epoxy coating primer, and cured at 90 °C for 6 h in an oven to prepare epoxy composite coatings doped with 0.5%, 1%, 3%, and 5% alkoxysilane coupling agent M-NCC, namely M-0.5% NCC/EP,",
+            "start_char": 367,
+            "end_char": 671,
+            "materials": [
+              "Q235 carbon steel",
+              "90 °C",
+              "6 h",
+              "0.5%"
+            ],
+            "params": {
+              "temp": "90°C",
+              "time": "6 h"
+            }
+          }
+        ],
+        "expanded": [
+          {
+            "op_type": "add",
+            "steps": [
+              "Ensure reaction vessel is present and empty.",
+              "Place a clean stir bar in the vessel.",
+              "Measure 30 mL of 30 mL ethyl acetate.",
+              "Transfer 30 mL ethyl acetate into the vessel."
+            ]
+          },
+          {
+            "op_type": "add",
+            "steps": [
+              "Ensure reaction vessel is present and empty.",
+              "Place a clean stir bar in the vessel.",
+              "Measure the specified amount of Q235 carbon steel.",
+              "Transfer Q235 carbon steel into the vessel."
+            ]
+          }
+        ]
+      },
+      {
+        "text": "Preparation of pure epoxy coating An epoxy-ethyl acetate solution consisting of 5 g epoxy resin E-44 and 30 mL ethyl acetate was sprayed on Q235 carbon steel with a 10 ± 2 μm epoxy coating and cured at 90 °C for 6 h in an oven to prepare a pure epoxy coating with a coating thickness of 75 ± 5 μm.",
+        "operations": [],
+        "expanded": []
+      }
+    ]
+  }
+}

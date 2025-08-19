@@ -1,0 +1,590 @@
+{
+  "paper_id": "10.3762/bjnano.16.61",
+  "title": "Supramolecular hydration structure of graphene-based hydrogels: density functional theory, green chemistry and interface application.",
+  "authors": [],
+  "doi": "10.3762/bjnano.16.61",
+  "source": "eupmc",
+  "urls": {
+    "pdf": null
+  },
+  "license": {
+    "type": "unknown"
+  },
+  "access_route": "oa",
+  "sections": [
+    {
+      "heading": "Methods",
+      "text": "Methods \n \n Computation method of density functional theory \n First-principles calculations based on DFT were conducted using the Vienna ab initio simulation software (VASP) and a high-performance computing system (HPC). The projector-augmented wave method (PAW) was implemented in electronic structure calculations. Generalized gradient approximation of Perdew–Burke–Ernzerhof (GGA-PBE) was used for describing exchange-correlation energy of electron–electron interactions. The correction of van der Waals dispersion energy was applied using the DFT-D3 method proposed by Grimme [ 22 – 24 ]. The modeling of infinite graphene sheets was extrapolated from periodic supercells. The supercell of bilayer graphene structure includes 16 carbon atoms (two graphene sheets with eight carbon atoms per sheet). The modeling of water-intercalated bilayer graphene structure used the supercell of 16 carbon atoms, one oxygen atom, and two hydrogen atoms (two graphene sheets and one water molecule). \n \n Preparation of graphene oxide from natural graphite \n The improved cascade-design synthesis of graphite oxide (GrO) was reported in our previous papers [ 15 – 16 ]. Briefly, 5 g of raw material of natural graphite (Shanghai Zhanyun Chemical) was soaked and agitated in 50 mL of 98% sulfuric acid. The solution of Mn(VII) compound was prepared by dissolving 10 g of potassium permanganate in 100 mL of 98% sulfuric acid. The graphite/H 2 SO 4  suspension was slowly poured into the Mn(VII) solution. A cooling water bath and an infrared thermometer were used for controlling the reactor temperature below 55 °C (the peak of the reactor temperature is about 50 °C). After agitation in room-temperature conditions for 4 h, the graphite/Mn(VII)/H 2 SO 4  suspension was slowly poured into 360 mL of water (the exothermic heat increased the reactor temperature to above 90 °C). After 2 h of agitation, the reaction was mixed with 150 mL of a 5% H 2 O 2  solution and kept stirring for one day. After washing to neutral pH, the material was dried and ground to produce a GrO powder (moisture ≈20%). Next, the GrO powder was dispersed in water and sonicated for 1 h. After natural sedimentation overnight, the suspension was decanted to collect the supernatant dispersion of GO nanosheets. \n \n \n Preparation of nanosilica from rice husk ash waste \n Rice husk ash that was discarded from industrial boilers was collected for recycling experiments. Our method of nanosilica synthesis using potassium hydroxide and acetic acid was mentioned in a recent paper [ 21 ]. Raw material from rice husk ash waste was dispersed in a 7% potassium hydroxide solution. The suspension was agitated for 1 h at a temperature range of 80–90 °C. After careful filtration, a clear yellow solution of potassium silicate was obtained and neutralized with a 15% acetic acid solution. After that, the suspension of precipitated nanosilica was incubated overnight and then thoroughly washed with water. The obtained product of silica gel (SG) was used for subsequent synthesis and brush coating experiments. \n \n \n Synthesis of graphene oxide–nanosilica–zinc hydroxide hydrogel \n The suspension of 0.625 g GrO and 250 mL of water was agitated and then sonicated for 1 h. The suspension was decanted to collect about 250 mL of GO dispersion. An amount of 4.4 g of Zn(CH 3 COO) 2 ·2H 2 O was dissolved in 250 mL of water to prepare a 250 mL Zn 2+  solution. The Zn 2+  solution was slowly dropped into the GO solution under stirring. The obtained GO/Zn 2+  dispersion was sonicated for 30 min. Besides, 20 g of the SG material (moisture ≈95%) was mechanically dispersed in 480 mL of water for 15 min and then sonicated for 15 min. A volume of 500 mL of the as-prepared GO/Zn 2+  dispersion was dropped into the 500 mL SG dispersion. The mixture was agitated for 15 min and sonicated for 15 min. Then, the reaction was adjusted to pH 10 using ammonia solution for Zn(OH) 2  precipitation and kept stirring for 1 h. After sedimentation, the material was filtered and thoroughly washed with water. A hydrogel of graphene oxide–nanosilica–zinc hydroxide (GO-SG-ZH hydrogel) was collected and analyzed. \n To produce a GO-SG-ZH product in powder form, the GO-SG-ZH hydrogel was dried at 80 °C and ground to obtain the GO-SG-ZH powder. The graphene-based nanocomposites in hydrogel form and in powder form were comparatively characterized using moisture analysis, scanning electron microscopy (SEM), energy-dispersive X-ray spectroscopy (EDS), and aqueous dispersibility. \n \n \n Brush coating of graphene oxide–nanosilica–zinc hydroxide hydrogel on polylactide film \n At first, commercial polylactide granules (PLA Luminy LX175, TotalEnergies Corbion) was put in a steel mold for thermal compression at 190 °C to produce a PLA plate. A piece of the PLA plate was put in a thin plastic mold (polyethylene terephthalate) for thermal compression at 190 °C. As a result, thin and transparent PLA films were made with the average thickness of 0.2 mm. \n In the next stage, the GO-SG-ZH nanocomposite in hydrogel form (≈95% water) was used as an aqueous paint for brush coating on PLA thin films. After brush coating, the coated films were left to air dry for 3 h and were mildly dried using a hair dryer. The obtained coated films were denoted as GO-SG-ZH/PLA. Besides, the as-synthesized SG hydrogel (≈95% water) was also suitable for direct brush coating on PLA films. A similar procedure of brush coating was applied to produce PLA thin films coated with nanosilica. The nanosilica-coated films were denoted as SG/PLA. \n \n \n Materials characterization \n Materials weight and moisture values were measured using a laboratory balance (Ohaus Pioneer, 220 g/0.0001 g) and a moisture analyzer (A&D Weighing MX-50, 51 g/0.001 g), respectively. Scanning electron microscopy and energy-dispersive X-ray spectroscopy were performed using a JSM-IT200 system (JEOL). Samples were coated with Pt before the SEM-EDS analysis. X-ray diffraction was performed on a D8 Advance instrument (Bruker). Fourier-transform infrared spectroscopy (FTIR) was characterized with a FT/IR-6600 instrument (Jasco). Ultraviolet–visible absorption spectroscopy (UV–vis) and light transmittance spectroscopy were recorded using a V-670 spectrophotometer (Jasco). Microscopic texture and imaging were observed by a stereo zoom microscope (Optika SZM). Agar diffusion assays were used for testing antibacterial activity against  E. coli  and  S. aureus  (the positive control was the antibiotic penicillin). Inhibition zone assays were used to evaluate antibiofilm properties of uncoated and coated plastic films [ 14 , 25 ]. Coating stability of plastic films in an environment simulating aqueous food was tested using the method reported in our previous paper [ 14 , 26 ]. Measurement of tensile properties was conducted using a universal tensile testing machine (Yang Yi Technology, 500-N load cell) and the ASTM D882-18 standard [ 14 , 27 ]."
+    },
+    {
+      "heading": "Preparation of graphene oxide from natural graphite",
+      "text": "Preparation of graphene oxide from natural graphite \n The improved cascade-design synthesis of graphite oxide (GrO) was reported in our previous papers [ 15 – 16 ]. Briefly, 5 g of raw material of natural graphite (Shanghai Zhanyun Chemical) was soaked and agitated in 50 mL of 98% sulfuric acid. The solution of Mn(VII) compound was prepared by dissolving 10 g of potassium permanganate in 100 mL of 98% sulfuric acid. The graphite/H 2 SO 4  suspension was slowly poured into the Mn(VII) solution. A cooling water bath and an infrared thermometer were used for controlling the reactor temperature below 55 °C (the peak of the reactor temperature is about 50 °C). After agitation in room-temperature conditions for 4 h, the graphite/Mn(VII)/H 2 SO 4  suspension was slowly poured into 360 mL of water (the exothermic heat increased the reactor temperature to above 90 °C). After 2 h of agitation, the reaction was mixed with 150 mL of a 5% H 2 O 2  solution and kept stirring for one day. After washing to neutral pH, the material was dried and ground to produce a GrO powder (moisture ≈20%). Next, the GrO powder was dispersed in water and sonicated for 1 h. After natural sedimentation overnight, the suspension was decanted to collect the supernatant dispersion of GO nanosheets."
+    },
+    {
+      "heading": "Preparation of nanosilica from rice husk ash waste",
+      "text": "Preparation of nanosilica from rice husk ash waste \n Rice husk ash that was discarded from industrial boilers was collected for recycling experiments. Our method of nanosilica synthesis using potassium hydroxide and acetic acid was mentioned in a recent paper [ 21 ]. Raw material from rice husk ash waste was dispersed in a 7% potassium hydroxide solution. The suspension was agitated for 1 h at a temperature range of 80–90 °C. After careful filtration, a clear yellow solution of potassium silicate was obtained and neutralized with a 15% acetic acid solution. After that, the suspension of precipitated nanosilica was incubated overnight and then thoroughly washed with water. The obtained product of silica gel (SG) was used for subsequent synthesis and brush coating experiments."
+    },
+    {
+      "heading": "Synthesis of graphene oxide–nanosilica–zinc hydroxide hydrogel",
+      "text": "Synthesis of graphene oxide–nanosilica–zinc hydroxide hydrogel \n The suspension of 0.625 g GrO and 250 mL of water was agitated and then sonicated for 1 h. The suspension was decanted to collect about 250 mL of GO dispersion. An amount of 4.4 g of Zn(CH 3 COO) 2 ·2H 2 O was dissolved in 250 mL of water to prepare a 250 mL Zn 2+  solution. The Zn 2+  solution was slowly dropped into the GO solution under stirring. The obtained GO/Zn 2+  dispersion was sonicated for 30 min. Besides, 20 g of the SG material (moisture ≈95%) was mechanically dispersed in 480 mL of water for 15 min and then sonicated for 15 min. A volume of 500 mL of the as-prepared GO/Zn 2+  dispersion was dropped into the 500 mL SG dispersion. The mixture was agitated for 15 min and sonicated for 15 min. Then, the reaction was adjusted to pH 10 using ammonia solution for Zn(OH) 2  precipitation and kept stirring for 1 h. After sedimentation, the material was filtered and thoroughly washed with water. A hydrogel of graphene oxide–nanosilica–zinc hydroxide (GO-SG-ZH hydrogel) was collected and analyzed. \n To produce a GO-SG-ZH product in powder form, the GO-SG-ZH hydrogel was dried at 80 °C and ground to obtain the GO-SG-ZH powder. The graphene-based nanocomposites in hydrogel form and in powder form were comparatively characterized using moisture analysis, scanning electron microscopy (SEM), energy-dispersive X-ray spectroscopy (EDS), and aqueous dispersibility."
+    }
+  ],
+  "extractions": {
+    "methods_paragraphs": [
+      {
+        "text": "Methods \n \n Computation method of density functional theory \n First-principles calculations based on DFT were conducted using the Vienna ab initio simulation software (VASP) and a high-performance computing system (HPC). The projector-augmented wave method (PAW) was implemented in electronic structure calculations. Generalized gradient approximation of Perdew–Burke–Ernzerhof (GGA-PBE) was used for describing exchange-correlation energy of electron–electron interactions. The correction of van der Waals dispersion energy was applied using the DFT-D3 method proposed by Grimme [ 22 – 24 ]. The modeling of infinite graphene sheets was extrapolated from periodic supercells. The supercell of bilayer graphene structure includes 16 carbon atoms (two graphene sheets with eight carbon atoms per sheet). The modeling of water-intercalated bilayer graphene structure used the supercell of 16 carbon atoms, one oxygen atom, and two hydrogen atoms (two graphene sheets and one water molecule). \n \n Preparation of graphene oxide from natural graphite \n The improved cascade-design synthesis of graphite oxide (GrO) was reported in our previous papers [ 15 – 16 ]. Briefly, 5 g of raw material of natural graphite (Shanghai Zhanyun Chemical) was soaked and agitated in 50 mL of 98% sulfuric acid. The solution of Mn(VII) compound was prepared by dissolving 10 g of potassium permanganate in 100 mL of 98% sulfuric acid. The graphite/H 2 SO 4  suspension was slowly poured into the Mn(VII) solution. A cooling water bath and an infrared thermometer were used for controlling the reactor temperature below 55 °C (the peak of the reactor temperature is about 50 °C). After agitation in room-temperature conditions for 4 h, the graphite/Mn(VII)/H 2 SO 4  suspension was slowly poured into 360 mL of water (the exothermic heat increased the reactor temperature to above 90 °C). After 2 h of agitation, the reaction was mixed with 150 mL of a 5% H 2 O 2  solution and kept stirring for one day. After washing to neutral pH, the material was dried and ground to produce a GrO powder (moisture ≈20%). Next, the GrO powder was dispersed in water and sonicated for 1 h. After natural sedimentation overnight, the suspension was decanted to collect the supernatant dispersion of GO nanosheets. \n \n \n Preparation of nanosilica from rice husk ash waste \n Rice husk ash that was discarded from industrial boilers was collected for recycling experiments. Our method of nanosilica synthesis using potassium hydroxide and acetic acid was mentioned in a recent paper [ 21 ]. Raw material from rice husk ash waste was dispersed in a 7% potassium hydroxide solution. The suspension was agitated for 1 h at a temperature range of 80–90 °C. After careful filtration, a clear yellow solution of potassium silicate was obtained and neutralized with a 15% acetic acid solution. After that, the suspension of precipitated nanosilica was incubated overnight and then thoroughly washed with water. The obtained product of silica gel (SG) was used for subsequent synthesis and brush coating experiments. \n \n \n Synthesis of graphene oxide–nanosilica–zinc hydroxide hydrogel \n The suspension of 0.625 g GrO and 250 mL of water was agitated and then sonicated for 1 h. The suspension was decanted to collect about 250 mL of GO dispersion. An amount of 4.4 g of Zn(CH 3 COO) 2 ·2H 2 O was dissolved in 250 mL of water to prepare a 250 mL Zn 2+  solution. The Zn 2+  solution was slowly dropped into the GO solution under stirring. The obtained GO/Zn 2+  dispersion was sonicated for 30 min. Besides, 20 g of the SG material (moisture ≈95%) was mechanically dispersed in 480 mL of water for 15 min and then sonicated for 15 min. A volume of 500 mL of the as-prepared GO/Zn 2+  dispersion was dropped into the 500 mL SG dispersion. The mixture was agitated for 15 min and sonicated for 15 min. Then, the reaction was adjusted to pH 10 using ammonia solution for Zn(OH) 2  precipitation and kept stirring for 1 h. After sedimentation, the material was filtered and thoroughly washed with water. A hydrogel of graphene oxide–nanosilica–zinc hydroxide (GO-SG-ZH hydrogel) was collected and analyzed. \n To produce a GO-SG-ZH product in powder form, the GO-SG-ZH hydrogel was dried at 80 °C and ground to obtain the GO-SG-ZH powder. The graphene-based nanocomposites in hydrogel form and in powder form were comparatively characterized using moisture analysis, scanning electron microscopy (SEM), energy-dispersive X-ray spectroscopy (EDS), and aqueous dispersibility. \n \n \n Brush coating of graphene oxide–nanosilica–zinc hydroxide hydrogel on polylactide film \n At first, commercial polylactide granules (PLA Luminy LX175, TotalEnergies Corbion) was put in a steel mold for thermal compression at 190 °C to produce a PLA plate. A piece of the PLA plate was put in a thin plastic mold (polyethylene terephthalate) for thermal compression at 190 °C. As a result, thin and transparent PLA films were made with the average thickness of 0.2 mm. \n In the next stage, the GO-SG-ZH nanocomposite in hydrogel form (≈95% water) was used as an aqueous paint for brush coating on PLA thin films. After brush coating, the coated films were left to air dry for 3 h and were mildly dried using a hair dryer. The obtained coated films were denoted as GO-SG-ZH/PLA. Besides, the as-synthesized SG hydrogel (≈95% water) was also suitable for direct brush coating on PLA films. A similar procedure of brush coating was applied to produce PLA thin films coated with nanosilica. The nanosilica-coated films were denoted as SG/PLA. \n \n \n Materials characterization \n Materials weight and moisture values were measured using a laboratory balance (Ohaus Pioneer, 220 g/0.0001 g) and a moisture analyzer (A&D Weighing MX-50, 51 g/0.001 g), respectively. Scanning electron microscopy and energy-dispersive X-ray spectroscopy were performed using a JSM-IT200 system (JEOL). Samples were coated with Pt before the SEM-EDS analysis. X-ray diffraction was performed on a D8 Advance instrument (Bruker). Fourier-transform infrared spectroscopy (FTIR) was characterized with a FT/IR-6600 instrument (Jasco). Ultraviolet–visible absorption spectroscopy (UV–vis) and light transmittance spectroscopy were recorded using a V-670 spectrophotometer (Jasco). Microscopic texture and imaging were observed by a stereo zoom microscope (Optika SZM). Agar diffusion assays were used for testing antibacterial activity against  E. coli  and  S. aureus  (the positive control was the antibiotic penicillin). Inhibition zone assays were used to evaluate antibiofilm properties of uncoated and coated plastic films [ 14 , 25 ]. Coating stability of plastic films in an environment simulating aqueous food was tested using the method reported in our previous paper [ 14 , 26 ]. Measurement of tensile properties was conducted using a universal tensile testing machine (Yang Yi Technology, 500-N load cell) and the ASTM D882-18 standard [ 14 , 27 ].",
+        "operations": [
+          {
+            "op_type": "heat",
+            "sentence": "After agitation in room-temperature conditions for 4 h, the graphite/Mn(VII)/H 2 SO 4  suspension was slowly poured into 360 mL of water (the exothermic heat increased the reactor temperature to above 90 °C).",
+            "start_char": 1658,
+            "end_char": 1866,
+            "materials": [
+              "4 h",
+              "the graphite/Mn(VII)/H",
+              "SO 4  suspension",
+              "360 mL"
+            ],
+            "params": {
+              "temp": "90°C",
+              "time": "4 h",
+              "amounts": [
+                "360 mL"
+              ]
+            }
+          },
+          {
+            "op_type": "stir",
+            "sentence": "After 2 h of agitation, the reaction was mixed with 150 mL of a 5% H 2 O 2  solution and kept stirring for one day.",
+            "start_char": 1867,
+            "end_char": 1982,
+            "materials": [
+              "2 h",
+              "150 mL",
+              "a 5% H 2 O 2  solution",
+              "one day"
+            ],
+            "params": {
+              "time": "2 h",
+              "amounts": [
+                "150 mL"
+              ]
+            }
+          },
+          {
+            "op_type": "wash",
+            "sentence": "After washing to neutral pH, the material was dried and ground to produce a GrO powder (moisture ≈20%).",
+            "start_char": 1983,
+            "end_char": 2086,
+            "materials": [],
+            "params": {}
+          },
+          {
+            "op_type": "sonicate",
+            "sentence": "Next, the GrO powder was dispersed in water and sonicated for 1 h. After natural sedimentation overnight, the suspension was decanted to collect the supernatant dispersion of GO nanosheets. \n \n \n ",
+            "start_char": 2087,
+            "end_char": 2283,
+            "materials": [
+              "1 h."
+            ],
+            "params": {
+              "time": "1 h"
+            }
+          },
+          {
+            "op_type": "filter",
+            "sentence": "After careful filtration, a clear yellow solution of potassium silicate was obtained and neutralized with a 15% acetic acid solution.",
+            "start_char": 2713,
+            "end_char": 2846,
+            "materials": [
+              "a 15% acetic acid solution"
+            ],
+            "params": {}
+          },
+          {
+            "op_type": "wash",
+            "sentence": "After that, the suspension of precipitated nanosilica was incubated overnight and then thoroughly washed with water.",
+            "start_char": 2847,
+            "end_char": 2963,
+            "materials": [],
+            "params": {}
+          },
+          {
+            "op_type": "stir",
+            "sentence": "Synthesis of graphene oxide–nanosilica–zinc hydroxide hydrogel \n The suspension of 0.625 g GrO and 250 mL of water was agitated and then sonicated for 1 h.",
+            "start_char": 3075,
+            "end_char": 3230,
+            "materials": [
+              "0.625 g GrO",
+              "250 mL"
+            ],
+            "params": {
+              "time": "1 h",
+              "amounts": [
+                "0.625 g",
+                "250 mL"
+              ]
+            }
+          },
+          {
+            "op_type": "stir",
+            "sentence": "The Zn 2+  solution was slowly dropped into the GO solution under stirring.",
+            "start_char": 3416,
+            "end_char": 3491,
+            "materials": [
+              "The Zn 2+  solution"
+            ],
+            "params": {}
+          },
+          {
+            "op_type": "sonicate",
+            "sentence": "The obtained GO/Zn 2+  dispersion was sonicated for 30 min. Besides, 20 g of the SG material (moisture ≈95%) was mechanically dispersed in 480 mL of water for 15 min and then sonicated for 15 min.",
+            "start_char": 3492,
+            "end_char": 3688,
+            "materials": [
+              "The obtained GO/Zn 2+  dispersion",
+              "30 min",
+              "20 g",
+              "480 mL"
+            ],
+            "params": {
+              "time": "30 min",
+              "amounts": [
+                "20 g",
+                "480 mL"
+              ]
+            }
+          },
+          {
+            "op_type": "stir",
+            "sentence": "The mixture was agitated for 15 min and sonicated for 15 min.",
+            "start_char": 3791,
+            "end_char": 3852,
+            "materials": [
+              "15 min"
+            ],
+            "params": {
+              "time": "15 min"
+            }
+          },
+          {
+            "op_type": "stir",
+            "sentence": "Then, the reaction was adjusted to pH 10 using ammonia solution for Zn(OH) 2  precipitation and kept stirring for 1 h.",
+            "start_char": 3853,
+            "end_char": 3971,
+            "materials": [
+              "Zn(OH",
+              "2  precipitation"
+            ],
+            "params": {
+              "time": "1 h"
+            }
+          },
+          {
+            "op_type": "filter",
+            "sentence": "After sedimentation, the material was filtered and thoroughly washed with water.",
+            "start_char": 3972,
+            "end_char": 4052,
+            "materials": [],
+            "params": {}
+          },
+          {
+            "op_type": "dry",
+            "sentence": "To produce a GO-SG-ZH product in powder form, the GO-SG-ZH hydrogel was dried at 80 °C and ground to obtain the GO-SG-ZH powder.",
+            "start_char": 4158,
+            "end_char": 4286,
+            "materials": [],
+            "params": {
+              "temp": "80°C"
+            }
+          },
+          {
+            "op_type": "dry",
+            "sentence": "After brush coating, the coated films were left to air dry for 3 h and were mildly dried using a hair dryer.",
+            "start_char": 5140,
+            "end_char": 5248,
+            "materials": [
+              "3 h"
+            ],
+            "params": {
+              "time": "3 h"
+            }
+          }
+        ],
+        "expanded": [
+          {
+            "op_type": "heat",
+            "steps": [
+              "Place the reaction vessel on a hotplate.",
+              "Ramp to 90°C.",
+              "Maintain 90°C for 4 h."
+            ]
+          },
+          {
+            "op_type": "stir",
+            "steps": [
+              "Place the reaction vessel on a stir plate.",
+              "Set the stirrer to an appropriate speed.",
+              "Stir for 2 h."
+            ]
+          },
+          {
+            "op_type": "wash",
+            "steps": [
+              "Perform operation 'wash' as described: After washing to neutral pH, the material was dried and ground to produce a GrO powder (moisture ≈20%)."
+            ]
+          },
+          {
+            "op_type": "sonicate",
+            "steps": [
+              "Perform operation 'sonicate' as described: Next, the GrO powder was dispersed in water and sonicated for 1 h. After natural sedimentation overnight, the suspension was decanted to collect the supernatant dispersion of GO nanosheets. \n \n \n "
+            ]
+          },
+          {
+            "op_type": "filter",
+            "steps": [
+              "Perform operation 'filter' as described: After careful filtration, a clear yellow solution of potassium silicate was obtained and neutralized with a 15% acetic acid solution."
+            ]
+          },
+          {
+            "op_type": "wash",
+            "steps": [
+              "Perform operation 'wash' as described: After that, the suspension of precipitated nanosilica was incubated overnight and then thoroughly washed with water."
+            ]
+          },
+          {
+            "op_type": "stir",
+            "steps": [
+              "Place the reaction vessel on a stir plate.",
+              "Set the stirrer to an appropriate speed.",
+              "Stir for 1 h."
+            ]
+          },
+          {
+            "op_type": "stir",
+            "steps": [
+              "Place the reaction vessel on a stir plate.",
+              "Set the stirrer to an appropriate speed.",
+              "Stir for the specified time."
+            ]
+          },
+          {
+            "op_type": "sonicate",
+            "steps": [
+              "Perform operation 'sonicate' as described: The obtained GO/Zn 2+  dispersion was sonicated for 30 min. Besides, 20 g of the SG material (moisture ≈95%) was mechanically dispersed in 480 mL of water for 15 min and then sonicated for 15 min."
+            ]
+          },
+          {
+            "op_type": "stir",
+            "steps": [
+              "Place the reaction vessel on a stir plate.",
+              "Set the stirrer to an appropriate speed.",
+              "Stir for 15 min."
+            ]
+          },
+          {
+            "op_type": "stir",
+            "steps": [
+              "Place the reaction vessel on a stir plate.",
+              "Set the stirrer to an appropriate speed.",
+              "Stir for 1 h."
+            ]
+          },
+          {
+            "op_type": "filter",
+            "steps": [
+              "Perform operation 'filter' as described: After sedimentation, the material was filtered and thoroughly washed with water."
+            ]
+          },
+          {
+            "op_type": "dry",
+            "steps": [
+              "Perform operation 'dry' as described: To produce a GO-SG-ZH product in powder form, the GO-SG-ZH hydrogel was dried at 80 °C and ground to obtain the GO-SG-ZH powder."
+            ]
+          },
+          {
+            "op_type": "dry",
+            "steps": [
+              "Perform operation 'dry' as described: After brush coating, the coated films were left to air dry for 3 h and were mildly dried using a hair dryer."
+            ]
+          }
+        ]
+      },
+      {
+        "text": "Preparation of graphene oxide from natural graphite \n The improved cascade-design synthesis of graphite oxide (GrO) was reported in our previous papers [ 15 – 16 ]. Briefly, 5 g of raw material of natural graphite (Shanghai Zhanyun Chemical) was soaked and agitated in 50 mL of 98% sulfuric acid. The solution of Mn(VII) compound was prepared by dissolving 10 g of potassium permanganate in 100 mL of 98% sulfuric acid. The graphite/H 2 SO 4  suspension was slowly poured into the Mn(VII) solution. A cooling water bath and an infrared thermometer were used for controlling the reactor temperature below 55 °C (the peak of the reactor temperature is about 50 °C). After agitation in room-temperature conditions for 4 h, the graphite/Mn(VII)/H 2 SO 4  suspension was slowly poured into 360 mL of water (the exothermic heat increased the reactor temperature to above 90 °C). After 2 h of agitation, the reaction was mixed with 150 mL of a 5% H 2 O 2  solution and kept stirring for one day. After washing to neutral pH, the material was dried and ground to produce a GrO powder (moisture ≈20%). Next, the GrO powder was dispersed in water and sonicated for 1 h. After natural sedimentation overnight, the suspension was decanted to collect the supernatant dispersion of GO nanosheets.",
+        "operations": [
+          {
+            "op_type": "heat",
+            "sentence": "After agitation in room-temperature conditions for 4 h, the graphite/Mn(VII)/H 2 SO 4  suspension was slowly poured into 360 mL of water (the exothermic heat increased the reactor temperature to above 90 °C).",
+            "start_char": 664,
+            "end_char": 872,
+            "materials": [
+              "4 h",
+              "the graphite/Mn(VII)/H",
+              "SO 4  suspension",
+              "360 mL"
+            ],
+            "params": {
+              "temp": "90°C",
+              "time": "4 h",
+              "amounts": [
+                "360 mL"
+              ]
+            }
+          },
+          {
+            "op_type": "stir",
+            "sentence": "After 2 h of agitation, the reaction was mixed with 150 mL of a 5% H 2 O 2  solution and kept stirring for one day.",
+            "start_char": 873,
+            "end_char": 988,
+            "materials": [
+              "2 h",
+              "150 mL",
+              "a 5% H 2 O 2  solution",
+              "one day"
+            ],
+            "params": {
+              "time": "2 h",
+              "amounts": [
+                "150 mL"
+              ]
+            }
+          },
+          {
+            "op_type": "wash",
+            "sentence": "After washing to neutral pH, the material was dried and ground to produce a GrO powder (moisture ≈20%).",
+            "start_char": 989,
+            "end_char": 1092,
+            "materials": [],
+            "params": {}
+          },
+          {
+            "op_type": "sonicate",
+            "sentence": "Next, the GrO powder was dispersed in water and sonicated for 1 h. After natural sedimentation overnight, the suspension was decanted to collect the supernatant dispersion of GO nanosheets.",
+            "start_char": 1093,
+            "end_char": 1282,
+            "materials": [
+              "1 h."
+            ],
+            "params": {
+              "time": "1 h"
+            }
+          }
+        ],
+        "expanded": [
+          {
+            "op_type": "heat",
+            "steps": [
+              "Place the reaction vessel on a hotplate.",
+              "Ramp to 90°C.",
+              "Maintain 90°C for 4 h."
+            ]
+          },
+          {
+            "op_type": "stir",
+            "steps": [
+              "Place the reaction vessel on a stir plate.",
+              "Set the stirrer to an appropriate speed.",
+              "Stir for 2 h."
+            ]
+          },
+          {
+            "op_type": "wash",
+            "steps": [
+              "Perform operation 'wash' as described: After washing to neutral pH, the material was dried and ground to produce a GrO powder (moisture ≈20%)."
+            ]
+          },
+          {
+            "op_type": "sonicate",
+            "steps": [
+              "Perform operation 'sonicate' as described: Next, the GrO powder was dispersed in water and sonicated for 1 h. After natural sedimentation overnight, the suspension was decanted to collect the supernatant dispersion of GO nanosheets."
+            ]
+          }
+        ]
+      },
+      {
+        "text": "Preparation of nanosilica from rice husk ash waste \n Rice husk ash that was discarded from industrial boilers was collected for recycling experiments. Our method of nanosilica synthesis using potassium hydroxide and acetic acid was mentioned in a recent paper [ 21 ]. Raw material from rice husk ash waste was dispersed in a 7% potassium hydroxide solution. The suspension was agitated for 1 h at a temperature range of 80–90 °C. After careful filtration, a clear yellow solution of potassium silicate was obtained and neutralized with a 15% acetic acid solution. After that, the suspension of precipitated nanosilica was incubated overnight and then thoroughly washed with water. The obtained product of silica gel (SG) was used for subsequent synthesis and brush coating experiments.",
+        "operations": [
+          {
+            "op_type": "filter",
+            "sentence": "After careful filtration, a clear yellow solution of potassium silicate was obtained and neutralized with a 15% acetic acid solution.",
+            "start_char": 430,
+            "end_char": 563,
+            "materials": [
+              "a 15% acetic acid solution"
+            ],
+            "params": {}
+          },
+          {
+            "op_type": "wash",
+            "sentence": "After that, the suspension of precipitated nanosilica was incubated overnight and then thoroughly washed with water.",
+            "start_char": 564,
+            "end_char": 680,
+            "materials": [],
+            "params": {}
+          }
+        ],
+        "expanded": [
+          {
+            "op_type": "filter",
+            "steps": [
+              "Perform operation 'filter' as described: After careful filtration, a clear yellow solution of potassium silicate was obtained and neutralized with a 15% acetic acid solution."
+            ]
+          },
+          {
+            "op_type": "wash",
+            "steps": [
+              "Perform operation 'wash' as described: After that, the suspension of precipitated nanosilica was incubated overnight and then thoroughly washed with water."
+            ]
+          }
+        ]
+      },
+      {
+        "text": "Synthesis of graphene oxide–nanosilica–zinc hydroxide hydrogel \n The suspension of 0.625 g GrO and 250 mL of water was agitated and then sonicated for 1 h. The suspension was decanted to collect about 250 mL of GO dispersion. An amount of 4.4 g of Zn(CH 3 COO) 2 ·2H 2 O was dissolved in 250 mL of water to prepare a 250 mL Zn 2+  solution. The Zn 2+  solution was slowly dropped into the GO solution under stirring. The obtained GO/Zn 2+  dispersion was sonicated for 30 min. Besides, 20 g of the SG material (moisture ≈95%) was mechanically dispersed in 480 mL of water for 15 min and then sonicated for 15 min. A volume of 500 mL of the as-prepared GO/Zn 2+  dispersion was dropped into the 500 mL SG dispersion. The mixture was agitated for 15 min and sonicated for 15 min. Then, the reaction was adjusted to pH 10 using ammonia solution for Zn(OH) 2  precipitation and kept stirring for 1 h. After sedimentation, the material was filtered and thoroughly washed with water. A hydrogel of graphene oxide–nanosilica–zinc hydroxide (GO-SG-ZH hydrogel) was collected and analyzed. \n To produce a GO-SG-ZH product in powder form, the GO-SG-ZH hydrogel was dried at 80 °C and ground to obtain the GO-SG-ZH powder. The graphene-based nanocomposites in hydrogel form and in powder form were comparatively characterized using moisture analysis, scanning electron microscopy (SEM), energy-dispersive X-ray spectroscopy (EDS), and aqueous dispersibility.",
+        "operations": [
+          {
+            "op_type": "stir",
+            "sentence": "Synthesis of graphene oxide–nanosilica–zinc hydroxide hydrogel \n The suspension of 0.625 g GrO and 250 mL of water was agitated and then sonicated for 1 h.",
+            "start_char": 0,
+            "end_char": 155,
+            "materials": [
+              "0.625 g GrO",
+              "250 mL"
+            ],
+            "params": {
+              "time": "1 h",
+              "amounts": [
+                "0.625 g",
+                "250 mL"
+              ]
+            }
+          },
+          {
+            "op_type": "stir",
+            "sentence": "The Zn 2+  solution was slowly dropped into the GO solution under stirring.",
+            "start_char": 341,
+            "end_char": 416,
+            "materials": [
+              "The Zn 2+  solution"
+            ],
+            "params": {}
+          },
+          {
+            "op_type": "sonicate",
+            "sentence": "The obtained GO/Zn 2+  dispersion was sonicated for 30 min. Besides, 20 g of the SG material (moisture ≈95%) was mechanically dispersed in 480 mL of water for 15 min and then sonicated for 15 min.",
+            "start_char": 417,
+            "end_char": 613,
+            "materials": [
+              "The obtained GO/Zn 2+  dispersion",
+              "30 min",
+              "20 g",
+              "480 mL"
+            ],
+            "params": {
+              "time": "30 min",
+              "amounts": [
+                "20 g",
+                "480 mL"
+              ]
+            }
+          },
+          {
+            "op_type": "stir",
+            "sentence": "The mixture was agitated for 15 min and sonicated for 15 min.",
+            "start_char": 716,
+            "end_char": 777,
+            "materials": [
+              "15 min"
+            ],
+            "params": {
+              "time": "15 min"
+            }
+          },
+          {
+            "op_type": "stir",
+            "sentence": "Then, the reaction was adjusted to pH 10 using ammonia solution for Zn(OH) 2  precipitation and kept stirring for 1 h.",
+            "start_char": 778,
+            "end_char": 896,
+            "materials": [
+              "Zn(OH",
+              "2  precipitation"
+            ],
+            "params": {
+              "time": "1 h"
+            }
+          },
+          {
+            "op_type": "filter",
+            "sentence": "After sedimentation, the material was filtered and thoroughly washed with water.",
+            "start_char": 897,
+            "end_char": 977,
+            "materials": [],
+            "params": {}
+          },
+          {
+            "op_type": "dry",
+            "sentence": "To produce a GO-SG-ZH product in powder form, the GO-SG-ZH hydrogel was dried at 80 °C and ground to obtain the GO-SG-ZH powder.",
+            "start_char": 1083,
+            "end_char": 1211,
+            "materials": [],
+            "params": {
+              "temp": "80°C"
+            }
+          }
+        ],
+        "expanded": [
+          {
+            "op_type": "stir",
+            "steps": [
+              "Place the reaction vessel on a stir plate.",
+              "Set the stirrer to an appropriate speed.",
+              "Stir for 1 h."
+            ]
+          },
+          {
+            "op_type": "stir",
+            "steps": [
+              "Place the reaction vessel on a stir plate.",
+              "Set the stirrer to an appropriate speed.",
+              "Stir for the specified time."
+            ]
+          },
+          {
+            "op_type": "sonicate",
+            "steps": [
+              "Perform operation 'sonicate' as described: The obtained GO/Zn 2+  dispersion was sonicated for 30 min. Besides, 20 g of the SG material (moisture ≈95%) was mechanically dispersed in 480 mL of water for 15 min and then sonicated for 15 min."
+            ]
+          },
+          {
+            "op_type": "stir",
+            "steps": [
+              "Place the reaction vessel on a stir plate.",
+              "Set the stirrer to an appropriate speed.",
+              "Stir for 15 min."
+            ]
+          },
+          {
+            "op_type": "stir",
+            "steps": [
+              "Place the reaction vessel on a stir plate.",
+              "Set the stirrer to an appropriate speed.",
+              "Stir for 1 h."
+            ]
+          },
+          {
+            "op_type": "filter",
+            "steps": [
+              "Perform operation 'filter' as described: After sedimentation, the material was filtered and thoroughly washed with water."
+            ]
+          },
+          {
+            "op_type": "dry",
+            "steps": [
+              "Perform operation 'dry' as described: To produce a GO-SG-ZH product in powder form, the GO-SG-ZH hydrogel was dried at 80 °C and ground to obtain the GO-SG-ZH powder."
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

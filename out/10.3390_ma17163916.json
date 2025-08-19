@@ -1,0 +1,49 @@
+{
+  "paper_id": "10.3390/ma17163916",
+  "title": "Polydopamine Applications in Biomedicine and Environmental Science.",
+  "authors": [],
+  "doi": "10.3390/ma17163916",
+  "source": "eupmc",
+  "urls": {
+    "pdf": null
+  },
+  "license": {
+    "type": "unknown"
+  },
+  "access_route": "oa",
+  "sections": [
+    {
+      "heading": "1.1. Polydopamine Structure and Synthesis",
+      "text": "1.1. Polydopamine Structure and Synthesis The synthesis of polydopamine is inspired by the natural process of melanin formation in mussels, which utilize dopamine to create strong, adhesive coatings [ 1 , 2 , 3 , 4 ]. The pathway for synthesizing polydopamine can be broadly categorized into two main mechanisms: covalent oxidative polymerization and physical self-assembly pathways. In the covalent oxidative polymerization pathway, dopamine undergoes an initial oxidation step to form dopaminequinone [ 5 , 6 , 7 ]. This intermediate then undergoes a series of nucleophilic reactions to produce leucodopaminechrome and subsequently dopaminechrome [ 7 , 8 ]. The further oxidation and intramolecular cyclization of dopaminechrome lead to the formation of 5,6-dihydroxyindole (DHI). DHI molecules can then polymerize through covalent bonds to form DHI-DHI dimers and dopamine-DHI-DHI trimeric conjugates, ultimately leading to the formation of polydopamine [ 9 ]. The physical self-assembly pathway involves non-covalent interactions among dopamine and its oxidized derivatives. During this process, dopamine and DHI can interact through hydrogen bonding, π-π stacking, and other non-covalent interactions to form supramolecular assemblies. These assemblies further aggregate to form polydopamine structures without the need for covalent bonding ( Figure 1 ) [ 7 ]. The uncontrolled self-polymerization of PDA can lead to severe interparticle aggregation, which impacts both application performance and the environment. Controlled synthesis methods, such as using sodium borohydride (NaBH4) as a reductant, effectively control PDA polymerization. This method was shown to form a thin PDA coating on mixed cellulose ester (MCE) membranes, improving water transport performance and organic foulant removal while exhibiting excellent chemical stability and antimicrobial activity. This approach reduces environmental impact by optimizing resource use and minimizing waste. The controlled synthesis of PDA using NaBH4 demonstrated significant potential in water purification, achieving approximately 90% bovine serum albumin rejection, thus contributing to environmental protection by enhancing water purification systems [ 10 ]. PDA’s properties enable the development of functional metal-containing PDA (MPDA) nanomaterials used in various applications, like catalysis and medical imaging. The proper synthesis and coordination of MPDA can reduce waste and energy consumption in industrial processes, lowering their environmental footprint. Research has focused on improving synthesis processes to enhance functionality and reduce environmental impact. Future directions include exploring new reductants and oxidants, developing greener synthesis methods, and expanding the applications of PDA-based materials in environmental protection [ 11 ]. By adopting controlled synthesis strategies and environmentally beneficial applications can significantly reduce the potential negative impact of polydopamine. These considerations are integrated into our manuscript."
+    }
+  ],
+  "extractions": {
+    "methods_paragraphs": [
+      {
+        "text": "1.1. Polydopamine Structure and Synthesis The synthesis of polydopamine is inspired by the natural process of melanin formation in mussels, which utilize dopamine to create strong, adhesive coatings [ 1 , 2 , 3 , 4 ]. The pathway for synthesizing polydopamine can be broadly categorized into two main mechanisms: covalent oxidative polymerization and physical self-assembly pathways. In the covalent oxidative polymerization pathway, dopamine undergoes an initial oxidation step to form dopaminequinone [ 5 , 6 , 7 ]. This intermediate then undergoes a series of nucleophilic reactions to produce leucodopaminechrome and subsequently dopaminechrome [ 7 , 8 ]. The further oxidation and intramolecular cyclization of dopaminechrome lead to the formation of 5,6-dihydroxyindole (DHI). DHI molecules can then polymerize through covalent bonds to form DHI-DHI dimers and dopamine-DHI-DHI trimeric conjugates, ultimately leading to the formation of polydopamine [ 9 ]. The physical self-assembly pathway involves non-covalent interactions among dopamine and its oxidized derivatives. During this process, dopamine and DHI can interact through hydrogen bonding, π-π stacking, and other non-covalent interactions to form supramolecular assemblies. These assemblies further aggregate to form polydopamine structures without the need for covalent bonding ( Figure 1 ) [ 7 ]. The uncontrolled self-polymerization of PDA can lead to severe interparticle aggregation, which impacts both application performance and the environment. Controlled synthesis methods, such as using sodium borohydride (NaBH4) as a reductant, effectively control PDA polymerization. This method was shown to form a thin PDA coating on mixed cellulose ester (MCE) membranes, improving water transport performance and organic foulant removal while exhibiting excellent chemical stability and antimicrobial activity. This approach reduces environmental impact by optimizing resource use and minimizing waste. The controlled synthesis of PDA using NaBH4 demonstrated significant potential in water purification, achieving approximately 90% bovine serum albumin rejection, thus contributing to environmental protection by enhancing water purification systems [ 10 ]. PDA’s properties enable the development of functional metal-containing PDA (MPDA) nanomaterials used in various applications, like catalysis and medical imaging. The proper synthesis and coordination of MPDA can reduce waste and energy consumption in industrial processes, lowering their environmental footprint. Research has focused on improving synthesis processes to enhance functionality and reduce environmental impact. Future directions include exploring new reductants and oxidants, developing greener synthesis methods, and expanding the applications of PDA-based materials in environmental protection [ 11 ]. By adopting controlled synthesis strategies and environmentally beneficial applications can significantly reduce the potential negative impact of polydopamine. These considerations are integrated into our manuscript.",
+        "operations": [
+          {
+            "op_type": "stir",
+            "sentence": "This method was shown to form a thin PDA coating on mixed cellulose ester (MCE) membranes, improving water transport performance and organic foulant removal while exhibiting excellent chemical stability and antimicrobial activity.",
+            "start_char": 1647,
+            "end_char": 1877,
+            "materials": [
+              "mixed cellulose ester (MCE) membranes"
+            ],
+            "params": {}
+          }
+        ],
+        "expanded": [
+          {
+            "op_type": "stir",
+            "steps": [
+              "Place the reaction vessel on a stir plate.",
+              "Set the stirrer to an appropriate speed.",
+              "Stir for the specified time."
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

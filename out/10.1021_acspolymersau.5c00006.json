@@ -1,0 +1,493 @@
+{
+  "paper_id": "10.1021/acspolymersau.5c00006",
+  "title": "Carbon Nanoparticle Effects on PAN Crystallization for Higher-Performance Composite Fibers.",
+  "authors": [],
+  "doi": "10.1021/acspolymersau.5c00006",
+  "source": "eupmc",
+  "urls": {
+    "pdf": null
+  },
+  "license": {
+    "type": "unknown"
+  },
+  "access_route": "oa",
+  "sections": [
+    {
+      "heading": "Materials and Methods",
+      "text": "2 Materials and Methods 2.1 Materials The poly­(acrylonitrile- co -methacrylic acid) (PAN) used here is a random copolymer\nwith a methacrylic acid content of 0.5 wt % and a molecular weight\nof approximately 230 kg/mol/a density of 1.18 g/cm 3 , from\nGoodfellow Co. The solvent used in this study is dimethylformamide\n(DMF), from Fisher Chemical (certified ACS, 99.9%) and used without\nfurther purification. The mixed CNTs used in this study consisted\nof a combination of single-walled and double-walled carbon nanotubes\n(MWNTs) obtained from Cheaptubes Co. (i.e., MWNT content >5 wt\n% with\nan outer diameter 1–4 nm, an inner diameter of 0.8–1.6\nnm, and a length of 5–30 μm, as well as a density of\n1.8 g/cm 3 ). Deionized water (DI) is employed as nonsolvent. 2.2 Characterization A Hitachi S-4800\nscanning electron microscope (SEM) was used to observe the surfaces\nof the fibers. Wide-angle X-ray diffraction (WAXD) patterns were obtained\nusing a Rigaku RAPID II equipped with a curved detector from Rigaku\nAmericas Corp.  The operating conditions\nincluded a tube voltage of 40 kV and a tube current of 30 mA, using\nCu Kα radiation with a wavelength of 0.1541 nm. Data conversion\nand analysis were performed using Jade software. Static tensile tests\nwere conducted via a dynamic mechanical analyzer (DMA) tester with\na loading gap of 15 mm (RSA-G2, TA Instruments), and data from these\ntests were collected with TRIOS software (TA Instruments). \n − \n \n  Differential scanning calorimetry (DSC) was carried out on various\npaste film samples using a DSC25 (TA Instruments) with a T-Zero pan\nand lid. Samples were equilibrated at 25 °C, then ramped to 400\n°C at a rate of 10 °C min –1 . To determine\nthe fiber weight percentage, thermogravimetric analysis (TGA) was\nperformed using an simultaneous thermal analysis (SDT) 650 system\n(TA Instruments), heating the samples to 1000 °C at 10 °C/min\nunder a nitrogen atmosphere. 2.3 Dope Preparation (Control PAN Fibers) For the control PAN fibers, 2.8, 3.15, and 3.5 g of PAN powders were\nseparately dissolved in 30 mL of DMF solvent at targeted dissolution\ntemperatures (i.e., a solution temperature of 90 °C) to form\n9, 10, and 11 wt % PAN-DMF spinning dopes, respectively. To ensure\ncomplete dissolution, the solution was stirred using an overhead mechanical\nstirrer at 350 rpm for 1 h. The solution was then poured into a 30\nmL syringe and placed in a 90 °C vacuum oven for 5 min to remove\nany potential bubbles. The details of the calculations for different\npolymer concentrations are provided in the  Supporting Information  (SI). 2.4 Dope Preparation (PAN-CNTs Composite Fibers) First, 55 mg of PAN powder was dissolved in 220 mL of DMF at 90\n°C. An equal amount of 55 mg CNTs was then dispersed into the\npolymer solution and sonicated for 24 h using a bath sonicator (Fisher\nFS30, frequency 43 kHz, power 150 W). The same amounts of PAN and\nCNTs were chosen because strong interfacial interaction between the\npolymer and CNTs is critical for achieving high mechanical reinforcement\nand performance. Following sonication, the PAN-CNTs dispersion underwent\nsolution crystallization by shearing the dispersion at 90 °C\nat a constant speed of 350 rpm.  Vacuum\ndistillation was then employed to remove half the solvent volume under\ncontrolled time and temperature conditions. Subsequently, the system\nwas cooled to 60 °C, and nonsolvent water (also at 60 °C)\nwas added to the dispersion at a solvent/nonsolvent ratio of 1/2,\nfollowed by stirring for 24 h on a hot plate. After equilibrating\nat 60 °C, the system was cooled to room temperature and filtered\nthrough a 0.45 μm nylon membrane (Millipore) under controlled\nvacuum. The filtration process is shown in  Figure S1 . The ink-like paste obtained from filtration was then added\nto 9, 10, and 11 wt % PAN-DMF solutions to form PAN-CNT composite\ndopes. The average CNT content in the paste solution after filtration\nis 51.75 mg. For a polymer concentration of 9 wt %, the CNT content\nis 1.8 wt %; for 10 wt %, it is 1.6 wt %; and for 11 wt %, it is 1.5\nwt %. The details for calculating the CNT-to-polymer ratio are provided\nin the  SI . To ensure complete dissolution,\nthe mixture was stirred with an overhead mechanical stirrer at 350\nrpm for 1 h. This process produced composite fibers with varying PAN\nand CNT ratios. \n , \n \n 2.5 Dynamic Mechanical Analysis (DMA) Test (11\nwt % PAN-CNTs Composite Fibers) Dynamic mechanical analysis\n(DMA) was performed on an RSA-GA to evaluate the stability of PAN-CNT\n(11 wt %) fibers under water immersion conditions. The experiments\nwere conducted at 1 Hz with a heating rate of 3 °C/min, ranging\nfrom 25 to 100 °C, on ten fiber bundle samples using a gauge\nlength of 15 mm. 2.6 Rheological Measurements of 5, 9, 10, 11,\nand 15 wt % PAN/DMF Solutions Rheological measurements\nwere performed on a Discover Hybrid Rheometer HR2 (TA Instruments)\nusing a cone-and-plate geometry. A 2 mL sample was placed on\na 40 mm, 2° Peltier cone steel plate. Viscosity values were recorded\nover a shear rate range of 0.01–1000 s –1  at both 25 and 50 °C, with a 100 μm truncation\ngap and a 50 μm trim gap offset. To prevent edge fracture, the\nsample was slightly overfilled, and any excess solution was carefully\nremoved before testing. Each sample was measured twice to minimize\nsystematic errors."
+    },
+    {
+      "heading": "Dope Preparation (Control PAN Fibers)",
+      "text": "2.3 Dope Preparation (Control PAN Fibers) For the control PAN fibers, 2.8, 3.15, and 3.5 g of PAN powders were\nseparately dissolved in 30 mL of DMF solvent at targeted dissolution\ntemperatures (i.e., a solution temperature of 90 °C) to form\n9, 10, and 11 wt % PAN-DMF spinning dopes, respectively. To ensure\ncomplete dissolution, the solution was stirred using an overhead mechanical\nstirrer at 350 rpm for 1 h. The solution was then poured into a 30\nmL syringe and placed in a 90 °C vacuum oven for 5 min to remove\nany potential bubbles. The details of the calculations for different\npolymer concentrations are provided in the  Supporting Information  (SI)."
+    },
+    {
+      "heading": "Dope Preparation (PAN-CNTs Composite Fibers)",
+      "text": "2.4 Dope Preparation (PAN-CNTs Composite Fibers) First, 55 mg of PAN powder was dissolved in 220 mL of DMF at 90\n°C. An equal amount of 55 mg CNTs was then dispersed into the\npolymer solution and sonicated for 24 h using a bath sonicator (Fisher\nFS30, frequency 43 kHz, power 150 W). The same amounts of PAN and\nCNTs were chosen because strong interfacial interaction between the\npolymer and CNTs is critical for achieving high mechanical reinforcement\nand performance. Following sonication, the PAN-CNTs dispersion underwent\nsolution crystallization by shearing the dispersion at 90 °C\nat a constant speed of 350 rpm.  Vacuum\ndistillation was then employed to remove half the solvent volume under\ncontrolled time and temperature conditions. Subsequently, the system\nwas cooled to 60 °C, and nonsolvent water (also at 60 °C)\nwas added to the dispersion at a solvent/nonsolvent ratio of 1/2,\nfollowed by stirring for 24 h on a hot plate. After equilibrating\nat 60 °C, the system was cooled to room temperature and filtered\nthrough a 0.45 μm nylon membrane (Millipore) under controlled\nvacuum. The filtration process is shown in  Figure S1 . The ink-like paste obtained from filtration was then added\nto 9, 10, and 11 wt % PAN-DMF solutions to form PAN-CNT composite\ndopes. The average CNT content in the paste solution after filtration\nis 51.75 mg. For a polymer concentration of 9 wt %, the CNT content\nis 1.8 wt %; for 10 wt %, it is 1.6 wt %; and for 11 wt %, it is 1.5\nwt %. The details for calculating the CNT-to-polymer ratio are provided\nin the  SI . To ensure complete dissolution,\nthe mixture was stirred with an overhead mechanical stirrer at 350\nrpm for 1 h. This process produced composite fibers with varying PAN\nand CNT ratios. \n ,"
+    }
+  ],
+  "extractions": {
+    "methods_paragraphs": [
+      {
+        "text": "2 Materials and Methods 2.1 Materials The poly­(acrylonitrile- co -methacrylic acid) (PAN) used here is a random copolymer\nwith a methacrylic acid content of 0.5 wt % and a molecular weight\nof approximately 230 kg/mol/a density of 1.18 g/cm 3 , from\nGoodfellow Co. The solvent used in this study is dimethylformamide\n(DMF), from Fisher Chemical (certified ACS, 99.9%) and used without\nfurther purification. The mixed CNTs used in this study consisted\nof a combination of single-walled and double-walled carbon nanotubes\n(MWNTs) obtained from Cheaptubes Co. (i.e., MWNT content >5 wt\n% with\nan outer diameter 1–4 nm, an inner diameter of 0.8–1.6\nnm, and a length of 5–30 μm, as well as a density of\n1.8 g/cm 3 ). Deionized water (DI) is employed as nonsolvent. 2.2 Characterization A Hitachi S-4800\nscanning electron microscope (SEM) was used to observe the surfaces\nof the fibers. Wide-angle X-ray diffraction (WAXD) patterns were obtained\nusing a Rigaku RAPID II equipped with a curved detector from Rigaku\nAmericas Corp.  The operating conditions\nincluded a tube voltage of 40 kV and a tube current of 30 mA, using\nCu Kα radiation with a wavelength of 0.1541 nm. Data conversion\nand analysis were performed using Jade software. Static tensile tests\nwere conducted via a dynamic mechanical analyzer (DMA) tester with\na loading gap of 15 mm (RSA-G2, TA Instruments), and data from these\ntests were collected with TRIOS software (TA Instruments). \n − \n \n  Differential scanning calorimetry (DSC) was carried out on various\npaste film samples using a DSC25 (TA Instruments) with a T-Zero pan\nand lid. Samples were equilibrated at 25 °C, then ramped to 400\n°C at a rate of 10 °C min –1 . To determine\nthe fiber weight percentage, thermogravimetric analysis (TGA) was\nperformed using an simultaneous thermal analysis (SDT) 650 system\n(TA Instruments), heating the samples to 1000 °C at 10 °C/min\nunder a nitrogen atmosphere. 2.3 Dope Preparation (Control PAN Fibers) For the control PAN fibers, 2.8, 3.15, and 3.5 g of PAN powders were\nseparately dissolved in 30 mL of DMF solvent at targeted dissolution\ntemperatures (i.e., a solution temperature of 90 °C) to form\n9, 10, and 11 wt % PAN-DMF spinning dopes, respectively. To ensure\ncomplete dissolution, the solution was stirred using an overhead mechanical\nstirrer at 350 rpm for 1 h. The solution was then poured into a 30\nmL syringe and placed in a 90 °C vacuum oven for 5 min to remove\nany potential bubbles. The details of the calculations for different\npolymer concentrations are provided in the  Supporting Information  (SI). 2.4 Dope Preparation (PAN-CNTs Composite Fibers) First, 55 mg of PAN powder was dissolved in 220 mL of DMF at 90\n°C. An equal amount of 55 mg CNTs was then dispersed into the\npolymer solution and sonicated for 24 h using a bath sonicator (Fisher\nFS30, frequency 43 kHz, power 150 W). The same amounts of PAN and\nCNTs were chosen because strong interfacial interaction between the\npolymer and CNTs is critical for achieving high mechanical reinforcement\nand performance. Following sonication, the PAN-CNTs dispersion underwent\nsolution crystallization by shearing the dispersion at 90 °C\nat a constant speed of 350 rpm.  Vacuum\ndistillation was then employed to remove half the solvent volume under\ncontrolled time and temperature conditions. Subsequently, the system\nwas cooled to 60 °C, and nonsolvent water (also at 60 °C)\nwas added to the dispersion at a solvent/nonsolvent ratio of 1/2,\nfollowed by stirring for 24 h on a hot plate. After equilibrating\nat 60 °C, the system was cooled to room temperature and filtered\nthrough a 0.45 μm nylon membrane (Millipore) under controlled\nvacuum. The filtration process is shown in  Figure S1 . The ink-like paste obtained from filtration was then added\nto 9, 10, and 11 wt % PAN-DMF solutions to form PAN-CNT composite\ndopes. The average CNT content in the paste solution after filtration\nis 51.75 mg. For a polymer concentration of 9 wt %, the CNT content\nis 1.8 wt %; for 10 wt %, it is 1.6 wt %; and for 11 wt %, it is 1.5\nwt %. The details for calculating the CNT-to-polymer ratio are provided\nin the  SI . To ensure complete dissolution,\nthe mixture was stirred with an overhead mechanical stirrer at 350\nrpm for 1 h. This process produced composite fibers with varying PAN\nand CNT ratios. \n , \n \n 2.5 Dynamic Mechanical Analysis (DMA) Test (11\nwt % PAN-CNTs Composite Fibers) Dynamic mechanical analysis\n(DMA) was performed on an RSA-GA to evaluate the stability of PAN-CNT\n(11 wt %) fibers under water immersion conditions. The experiments\nwere conducted at 1 Hz with a heating rate of 3 °C/min, ranging\nfrom 25 to 100 °C, on ten fiber bundle samples using a gauge\nlength of 15 mm. 2.6 Rheological Measurements of 5, 9, 10, 11,\nand 15 wt % PAN/DMF Solutions Rheological measurements\nwere performed on a Discover Hybrid Rheometer HR2 (TA Instruments)\nusing a cone-and-plate geometry. A 2 mL sample was placed on\na 40 mm, 2° Peltier cone steel plate. Viscosity values were recorded\nover a shear rate range of 0.01–1000 s –1  at both 25 and 50 °C, with a 100 μm truncation\ngap and a 50 μm trim gap offset. To prevent edge fracture, the\nsample was slightly overfilled, and any excess solution was carefully\nremoved before testing. Each sample was measured twice to minimize\nsystematic errors.",
+        "operations": [
+          {
+            "op_type": "stir",
+            "sentence": "The mixed CNTs used in this study consisted\nof a combination of single-walled and double-walled carbon nanotubes\n(MWNTs) obtained from Cheaptubes Co. (i.e., MWNT content >5 wt\n% with\nan outer diameter 1–4 nm, an inner diameter of 0.8–1.6\nnm, and a length of 5–30 μm, as well as a density of\n1.8 g/cm 3 ).",
+            "start_char": 407,
+            "end_char": 711,
+            "materials": [
+              "(MWNTs"
+            ],
+            "params": {
+              "amounts": [
+                "1.8 g"
+              ],
+              "concs": [
+                "30 μm"
+              ]
+            }
+          },
+          {
+            "op_type": "heat",
+            "sentence": "To determine\nthe fiber weight percentage, thermogravimetric analysis (TGA) was\nperformed using an simultaneous thermal analysis (SDT) 650 system\n(TA Instruments), heating the samples to 1000 °C at 10 °C/min\nunder a nitrogen atmosphere.",
+            "start_char": 1685,
+            "end_char": 1920,
+            "materials": [
+              "(SDT) 650 system",
+              "TA Instruments",
+              "1000 °C",
+              "10 °C/min"
+            ],
+            "params": {
+              "temp": "1000°C"
+            }
+          },
+          {
+            "op_type": "stir",
+            "sentence": "To ensure\ncomplete dissolution, the solution was stirred using an overhead mechanical\nstirrer at 350 rpm for 1 h.",
+            "start_char": 2219,
+            "end_char": 2332,
+            "materials": [
+              "350 rpm"
+            ],
+            "params": {
+              "time": "1 h",
+              "speed": "350 rpm"
+            }
+          },
+          {
+            "op_type": "sonicate",
+            "sentence": "An equal amount of 55 mg CNTs was then dispersed into the\npolymer solution and sonicated for 24 h using a bath sonicator (Fisher\nFS30, frequency 43 kHz, power 150 W).",
+            "start_char": 2697,
+            "end_char": 2863,
+            "materials": [
+              "55 mg CNTs",
+              "24 h",
+              "Fisher\nFS30",
+              "frequency 43 kHz"
+            ],
+            "params": {
+              "time": "24 h",
+              "amounts": [
+                "55 mg"
+              ]
+            }
+          },
+          {
+            "op_type": "sonicate",
+            "sentence": "Following sonication, the PAN-CNTs dispersion underwent\nsolution crystallization by shearing the dispersion at 90 °C\nat a constant speed of 350 rpm.  ",
+            "start_char": 3050,
+            "end_char": 3200,
+            "materials": [
+              "90 °C",
+              "350 rpm"
+            ],
+            "params": {
+              "temp": "90°C",
+              "speed": "350 rpm"
+            }
+          },
+          {
+            "op_type": "add",
+            "sentence": "Subsequently, the system\nwas cooled to 60 °C, and nonsolvent water (also at 60 °C)\nwas added to the dispersion at a solvent/nonsolvent ratio of 1/2,\nfollowed by stirring for 24 h on a hot plate.",
+            "start_char": 3322,
+            "end_char": 3516,
+            "materials": [
+              "60 °C",
+              "24 h"
+            ],
+            "params": {
+              "temp": "60°C",
+              "time": "24 h"
+            }
+          },
+          {
+            "op_type": "filter",
+            "sentence": "After equilibrating\nat 60 °C, the system was cooled to room temperature and filtered\nthrough a 0.45 μm nylon membrane (Millipore) under controlled\nvacuum.",
+            "start_char": 3517,
+            "end_char": 3671,
+            "materials": [
+              "60 °C",
+              "a 0.45 μm nylon membrane"
+            ],
+            "params": {
+              "temp": "60°C",
+              "concs": [
+                "0.45 μm"
+              ]
+            }
+          },
+          {
+            "op_type": "filter",
+            "sentence": "The filtration process is shown in  Figure S1 .",
+            "start_char": 3672,
+            "end_char": 3719,
+            "materials": [
+              "Figure S1"
+            ],
+            "params": {}
+          },
+          {
+            "op_type": "filter",
+            "sentence": "The ink-like paste obtained from filtration was then added\nto 9, 10, and 11 wt % PAN-DMF solutions to form PAN-CNT composite\ndopes.",
+            "start_char": 3720,
+            "end_char": 3851,
+            "materials": [
+              "11 wt % PAN-DMF solutions"
+            ],
+            "params": {}
+          },
+          {
+            "op_type": "filter",
+            "sentence": "The average CNT content in the paste solution after filtration\nis 51.75 mg.",
+            "start_char": 3852,
+            "end_char": 3927,
+            "materials": [
+              "51.75 mg"
+            ],
+            "params": {
+              "amounts": [
+                "51.75 mg"
+              ]
+            }
+          },
+          {
+            "op_type": "stir",
+            "sentence": "To ensure complete dissolution,\nthe mixture was stirred with an overhead mechanical stirrer at 350\nrpm for 1 h.",
+            "start_char": 4137,
+            "end_char": 4248,
+            "materials": [
+              "350\nrpm"
+            ],
+            "params": {
+              "time": "1 h",
+              "speed": "350\nrpm"
+            }
+          },
+          {
+            "op_type": "heat",
+            "sentence": "The experiments\nwere conducted at 1 Hz with a heating rate of 3 °C/min, ranging\nfrom 25 to 100 °C, on ten fiber bundle samples using a gauge\nlength of 15 mm. 2.6 Rheological Measurements of 5, 9, 10, 11,\nand 15 wt % PAN/DMF Solutions Rheological measurements\nwere performed on a Discover Hybrid Rheometer HR2 (TA Instruments)\nusing a cone-and-plate geometry.",
+            "start_char": 4557,
+            "end_char": 4915,
+            "materials": [
+              "1 Hz",
+              "3 °C/min",
+              "25 to 100 °",
+              "ten fiber bundle samples"
+            ],
+            "params": {
+              "temp": "3°C",
+              "concs": [
+                "15 mm"
+              ]
+            }
+          }
+        ],
+        "expanded": [
+          {
+            "op_type": "stir",
+            "steps": [
+              "Place the reaction vessel on a stir plate.",
+              "Set the stirrer to an appropriate speed.",
+              "Stir for the specified time."
+            ]
+          },
+          {
+            "op_type": "heat",
+            "steps": [
+              "Place the reaction vessel on a hotplate.",
+              "Ramp to 1000°C.",
+              "Maintain 1000°C for the specified time."
+            ]
+          },
+          {
+            "op_type": "stir",
+            "steps": [
+              "Place the reaction vessel on a stir plate.",
+              "Set the stirrer to 350 rpm.",
+              "Stir for 1 h."
+            ]
+          },
+          {
+            "op_type": "sonicate",
+            "steps": [
+              "Perform operation 'sonicate' as described: An equal amount of 55 mg CNTs was then dispersed into the\npolymer solution and sonicated for 24 h using a bath sonicator (Fisher\nFS30, frequency 43 kHz, power 150 W)."
+            ]
+          },
+          {
+            "op_type": "sonicate",
+            "steps": [
+              "Perform operation 'sonicate' as described: Following sonication, the PAN-CNTs dispersion underwent\nsolution crystallization by shearing the dispersion at 90 °C\nat a constant speed of 350 rpm.  "
+            ]
+          },
+          {
+            "op_type": "add",
+            "steps": [
+              "Ensure reaction vessel is present and empty.",
+              "Place a clean stir bar in the vessel.",
+              "Measure the specified amount of 60 °C.",
+              "Transfer 60 °C into the vessel."
+            ]
+          },
+          {
+            "op_type": "filter",
+            "steps": [
+              "Perform operation 'filter' as described: After equilibrating\nat 60 °C, the system was cooled to room temperature and filtered\nthrough a 0.45 μm nylon membrane (Millipore) under controlled\nvacuum."
+            ]
+          },
+          {
+            "op_type": "filter",
+            "steps": [
+              "Perform operation 'filter' as described: The filtration process is shown in  Figure S1 ."
+            ]
+          },
+          {
+            "op_type": "filter",
+            "steps": [
+              "Perform operation 'filter' as described: The ink-like paste obtained from filtration was then added\nto 9, 10, and 11 wt % PAN-DMF solutions to form PAN-CNT composite\ndopes."
+            ]
+          },
+          {
+            "op_type": "filter",
+            "steps": [
+              "Perform operation 'filter' as described: The average CNT content in the paste solution after filtration\nis 51.75 mg."
+            ]
+          },
+          {
+            "op_type": "stir",
+            "steps": [
+              "Place the reaction vessel on a stir plate.",
+              "Set the stirrer to 350\nrpm.",
+              "Stir for 1 h."
+            ]
+          },
+          {
+            "op_type": "heat",
+            "steps": [
+              "Place the reaction vessel on a hotplate.",
+              "Ramp to 3°C.",
+              "Maintain 3°C for the specified time."
+            ]
+          }
+        ]
+      },
+      {
+        "text": "2.3 Dope Preparation (Control PAN Fibers) For the control PAN fibers, 2.8, 3.15, and 3.5 g of PAN powders were\nseparately dissolved in 30 mL of DMF solvent at targeted dissolution\ntemperatures (i.e., a solution temperature of 90 °C) to form\n9, 10, and 11 wt % PAN-DMF spinning dopes, respectively. To ensure\ncomplete dissolution, the solution was stirred using an overhead mechanical\nstirrer at 350 rpm for 1 h. The solution was then poured into a 30\nmL syringe and placed in a 90 °C vacuum oven for 5 min to remove\nany potential bubbles. The details of the calculations for different\npolymer concentrations are provided in the  Supporting Information  (SI).",
+        "operations": [
+          {
+            "op_type": "stir",
+            "sentence": "To ensure\ncomplete dissolution, the solution was stirred using an overhead mechanical\nstirrer at 350 rpm for 1 h.",
+            "start_char": 298,
+            "end_char": 411,
+            "materials": [
+              "350 rpm"
+            ],
+            "params": {
+              "time": "1 h",
+              "speed": "350 rpm"
+            }
+          }
+        ],
+        "expanded": [
+          {
+            "op_type": "stir",
+            "steps": [
+              "Place the reaction vessel on a stir plate.",
+              "Set the stirrer to 350 rpm.",
+              "Stir for 1 h."
+            ]
+          }
+        ]
+      },
+      {
+        "text": "2.4 Dope Preparation (PAN-CNTs Composite Fibers) First, 55 mg of PAN powder was dissolved in 220 mL of DMF at 90\n°C. An equal amount of 55 mg CNTs was then dispersed into the\npolymer solution and sonicated for 24 h using a bath sonicator (Fisher\nFS30, frequency 43 kHz, power 150 W). The same amounts of PAN and\nCNTs were chosen because strong interfacial interaction between the\npolymer and CNTs is critical for achieving high mechanical reinforcement\nand performance. Following sonication, the PAN-CNTs dispersion underwent\nsolution crystallization by shearing the dispersion at 90 °C\nat a constant speed of 350 rpm.  Vacuum\ndistillation was then employed to remove half the solvent volume under\ncontrolled time and temperature conditions. Subsequently, the system\nwas cooled to 60 °C, and nonsolvent water (also at 60 °C)\nwas added to the dispersion at a solvent/nonsolvent ratio of 1/2,\nfollowed by stirring for 24 h on a hot plate. After equilibrating\nat 60 °C, the system was cooled to room temperature and filtered\nthrough a 0.45 μm nylon membrane (Millipore) under controlled\nvacuum. The filtration process is shown in  Figure S1 . The ink-like paste obtained from filtration was then added\nto 9, 10, and 11 wt % PAN-DMF solutions to form PAN-CNT composite\ndopes. The average CNT content in the paste solution after filtration\nis 51.75 mg. For a polymer concentration of 9 wt %, the CNT content\nis 1.8 wt %; for 10 wt %, it is 1.6 wt %; and for 11 wt %, it is 1.5\nwt %. The details for calculating the CNT-to-polymer ratio are provided\nin the  SI . To ensure complete dissolution,\nthe mixture was stirred with an overhead mechanical stirrer at 350\nrpm for 1 h. This process produced composite fibers with varying PAN\nand CNT ratios. \n ,",
+        "operations": [
+          {
+            "op_type": "sonicate",
+            "sentence": "An equal amount of 55 mg CNTs was then dispersed into the\npolymer solution and sonicated for 24 h using a bath sonicator (Fisher\nFS30, frequency 43 kHz, power 150 W).",
+            "start_char": 117,
+            "end_char": 283,
+            "materials": [
+              "55 mg CNTs",
+              "24 h",
+              "Fisher\nFS30",
+              "frequency 43 kHz"
+            ],
+            "params": {
+              "time": "24 h",
+              "amounts": [
+                "55 mg"
+              ]
+            }
+          },
+          {
+            "op_type": "sonicate",
+            "sentence": "Following sonication, the PAN-CNTs dispersion underwent\nsolution crystallization by shearing the dispersion at 90 °C\nat a constant speed of 350 rpm.  ",
+            "start_char": 470,
+            "end_char": 620,
+            "materials": [
+              "90 °C",
+              "350 rpm"
+            ],
+            "params": {
+              "temp": "90°C",
+              "speed": "350 rpm"
+            }
+          },
+          {
+            "op_type": "add",
+            "sentence": "Subsequently, the system\nwas cooled to 60 °C, and nonsolvent water (also at 60 °C)\nwas added to the dispersion at a solvent/nonsolvent ratio of 1/2,\nfollowed by stirring for 24 h on a hot plate.",
+            "start_char": 742,
+            "end_char": 936,
+            "materials": [
+              "60 °C",
+              "24 h"
+            ],
+            "params": {
+              "temp": "60°C",
+              "time": "24 h"
+            }
+          },
+          {
+            "op_type": "filter",
+            "sentence": "After equilibrating\nat 60 °C, the system was cooled to room temperature and filtered\nthrough a 0.45 μm nylon membrane (Millipore) under controlled\nvacuum.",
+            "start_char": 937,
+            "end_char": 1091,
+            "materials": [
+              "60 °C",
+              "a 0.45 μm nylon membrane"
+            ],
+            "params": {
+              "temp": "60°C",
+              "concs": [
+                "0.45 μm"
+              ]
+            }
+          },
+          {
+            "op_type": "filter",
+            "sentence": "The filtration process is shown in  Figure S1 .",
+            "start_char": 1092,
+            "end_char": 1139,
+            "materials": [
+              "Figure S1"
+            ],
+            "params": {}
+          },
+          {
+            "op_type": "filter",
+            "sentence": "The ink-like paste obtained from filtration was then added\nto 9, 10, and 11 wt % PAN-DMF solutions to form PAN-CNT composite\ndopes.",
+            "start_char": 1140,
+            "end_char": 1271,
+            "materials": [
+              "11 wt % PAN-DMF solutions"
+            ],
+            "params": {}
+          },
+          {
+            "op_type": "filter",
+            "sentence": "The average CNT content in the paste solution after filtration\nis 51.75 mg.",
+            "start_char": 1272,
+            "end_char": 1347,
+            "materials": [
+              "51.75 mg"
+            ],
+            "params": {
+              "amounts": [
+                "51.75 mg"
+              ]
+            }
+          },
+          {
+            "op_type": "stir",
+            "sentence": "To ensure complete dissolution,\nthe mixture was stirred with an overhead mechanical stirrer at 350\nrpm for 1 h.",
+            "start_char": 1557,
+            "end_char": 1668,
+            "materials": [
+              "350\nrpm"
+            ],
+            "params": {
+              "time": "1 h",
+              "speed": "350\nrpm"
+            }
+          }
+        ],
+        "expanded": [
+          {
+            "op_type": "sonicate",
+            "steps": [
+              "Perform operation 'sonicate' as described: An equal amount of 55 mg CNTs was then dispersed into the\npolymer solution and sonicated for 24 h using a bath sonicator (Fisher\nFS30, frequency 43 kHz, power 150 W)."
+            ]
+          },
+          {
+            "op_type": "sonicate",
+            "steps": [
+              "Perform operation 'sonicate' as described: Following sonication, the PAN-CNTs dispersion underwent\nsolution crystallization by shearing the dispersion at 90 °C\nat a constant speed of 350 rpm.  "
+            ]
+          },
+          {
+            "op_type": "add",
+            "steps": [
+              "Ensure reaction vessel is present and empty.",
+              "Place a clean stir bar in the vessel.",
+              "Measure the specified amount of 60 °C.",
+              "Transfer 60 °C into the vessel."
+            ]
+          },
+          {
+            "op_type": "filter",
+            "steps": [
+              "Perform operation 'filter' as described: After equilibrating\nat 60 °C, the system was cooled to room temperature and filtered\nthrough a 0.45 μm nylon membrane (Millipore) under controlled\nvacuum."
+            ]
+          },
+          {
+            "op_type": "filter",
+            "steps": [
+              "Perform operation 'filter' as described: The filtration process is shown in  Figure S1 ."
+            ]
+          },
+          {
+            "op_type": "filter",
+            "steps": [
+              "Perform operation 'filter' as described: The ink-like paste obtained from filtration was then added\nto 9, 10, and 11 wt % PAN-DMF solutions to form PAN-CNT composite\ndopes."
+            ]
+          },
+          {
+            "op_type": "filter",
+            "steps": [
+              "Perform operation 'filter' as described: The average CNT content in the paste solution after filtration\nis 51.75 mg."
+            ]
+          },
+          {
+            "op_type": "stir",
+            "steps": [
+              "Place the reaction vessel on a stir plate.",
+              "Set the stirrer to 350\nrpm.",
+              "Stir for 1 h."
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

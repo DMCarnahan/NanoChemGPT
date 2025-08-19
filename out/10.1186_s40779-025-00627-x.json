@@ -1,0 +1,698 @@
+{
+  "paper_id": "10.1186/s40779-025-00627-x",
+  "title": "Metal-based nanomedicines for cancer theranostics.",
+  "authors": [],
+  "doi": "10.1186/s40779-025-00627-x",
+  "source": "eupmc",
+  "urls": {
+    "pdf": null
+  },
+  "license": {
+    "type": "unknown"
+  },
+  "access_route": "oa",
+  "sections": [
+    {
+      "heading": "Synthesis, modification, and biosafety of metal-based nanomaterials",
+      "text": "Synthesis, modification, and biosafety of metal-based nanomaterials Synthesis strategies for metal-based nanomaterials To date, various metal-based nanomaterials with distinct structures, sizes, morphologies, and chemical compositions have been designed for use in nanomedicine. These fundamental parameters, which are closely related to the physicochemical properties of metal-based nanomaterials, have laid the foundation for the use of metal-based nanomaterials as cancer imaging or therapeutic agents. As the size decreases, metal-based nanomaterials tend to exhibit an increased ability to extravasate from tumor blood vessels and penetrate deeper into tumor tissues [ 27 ]. Rod-shaped metal-based nanomaterials are more likely to accumulate in the tumor parenchyma compared to their spherical or other geometrically shaped counterparts [ 28 ]. Therefore, appropriate synthesis strategies should be selected with precise control over reaction conditions to modulate the basic parameters of metal-based nanomaterials and meet the requirements for cancer diagnosis and treatment. In general, the main strategies for synthesizing metal-based nanomaterials can be divided into two categories: physical and chemical methods. Physical preparation approaches, such as grinding and sputtering, are simple to operate and are commonly used for synthesizing metal-based nanomaterials [ 29 ,  30 ]. Nevertheless, the undesired shape and size of the obtained nanomaterials restrict their direct in vivo applications. In contrast, metal-based nanomaterials prepared by chemical methods have the advantages of uniform size distribution, controllable morphology, and facile surface functionalization. Conventional chemical preparation methods include precipitation, hydrothermal synthesis [ 31 ], solvothermal synthesis [ 32 ], thermal decomposition [ 33 ], and the sol-gel method [ 34 ] (Fig.  3 ). Here, we introduce the mechanisms and several typical examples of these methods. The advantages and disadvantages of metal-based nanomaterial synthesis strategies are summarized in Table  2 . Fig. 3 Schematic of synthesis methods for metal-based nanomaterials. The common methods for synthesizing these materials include precipitation, hydrothermal synthesis, solvothermal synthesis, thermal decomposition, and the sol-gel method. It was created in BioRender Table 2 Summary of the advantages and disadvantages of synthesis strategies for metal-based nanomaterials Synthesis strategies Advantages Disadvantages Precipitation method Simple process, convenient operation, rapid reaction, low cost, easy to industrialize Difficult to control crystal shape and separate products, low product purity Hydrothermal method Facile operation, high product purity, high crystallinity of nanocrystals, low melting point, low energy consumption, controllable product shape and size, low pollution levels Inability to directly observe crystal growth, expensive autoclaves, long production time Solvothermal method High product purity, good product dispersion, controllable nanostructure morphology Unobservable synthesis process, high cost, low product yield, potential safety hazards Thermal decomposition method High product purity, controllable product shape and size, narrow product size distribution High equipment cost, high energy consumption, complex operation, small output Sol-gel method Low cost, high product purity, controllable product shape and size Long preparation time, unstable product structure, product is prone to agglomeration Precipitation method The precipitation method typically involves the addition of a precipitant to a mixture of solutions containing different chemicals. Hydroxides [ 35 ], carbonates [ 36 ], and oxalates [ 37 ,  38 ] are typical precipitants. When the concentration product of ions in a solution exceeds the solubility product, cations and anions bind together to form crystal nuclei [ 39 ]. Subsequently, the crystal size increases as the solute continuously deposits, leading to the formation of an insoluble precursor precipitate [ 39 ]. On this basis, impurities mixed in the precursor products can be removed through processes such as filtration and washing. Ultimately, metal-based nanomaterials with the desired structures, morphologies, and dimensions can be obtained through processes such as drying or calcination [ 40 ,  41 ]. For example, Liu et al. [ 42 ] successfully synthesized hollow MnO 2  nanoshells via the redox deposition method for efficient loading of chemotherapeutic drugs, thereby facilitating enhanced treatment of colorectal cancer. Moreover, Zhang et al. [ 43 ] prepared CaO 2  nanomaterials by adding H 2 O 2  to a mixed solution containing ammonia, CaCl 2 , and polyethylene glycol (PEG), followed by adjusting the pH to 11.5 using NaOH. Notably, the use of capping agents or surfactants is beneficial to synthesize metal-based nanomaterials with a controlled particle size and uniform distribution. Specifically, during the crystal growth phase, agglomeration or Ostwald ripening is likely to occur to reduce surface energy, which may lead to an excessive increase in the size of metal-based nanomaterials. In this case, by adding capping agents or surfactants, the electrostatic repulsion between metal-based nanomaterials can be enhanced, thereby achieving steric stabilization and preventing coagulation [ 44 ]. For instance, Bleier et al. [ 45 ] employed alkylated pentanediones as surfactants to reduce magnetic nanomaterial agglomeration. Co-precipitation has been recognized as a facile approach for the fabrication of metal-based nanomaterials. By introducing a precipitant into a homogeneous metallic salt solution prepared in specific proportions, the co-precipitation method enables the complete precipitation of all metal cations from the solution. In this way, various metal-based nanostructures such as pure metal nanomaterials, metal alloy nanomaterials, metal compounds, MOFs, and metal complexes with uniform size distributions can be easily obtained [ 46 – 48 ]. For example, Darwish et al. [ 49 ] used NH 4 OH as a precipitant and added it to a solution containing Fe 3+  and Fe 2+  to obtain precursor precipitates at 70°C. Subsequently, polyvinyl alcohol was introduced as a surfactant to fabricate monodisperse, stable magnetite nanomaterials with good hyperthermia properties. Similarly, Chin et al. [ 50 ] synthesized highly dispersed Fe 3 O 4 @Chl/Fe nanoclusters using the co-precipitation method by adding NH 4 OH to a solution containing FeCl 3 , FeCl 2 , and iron chlorophyll at room temperature. Hydrothermal method Hydrothermal synthesis is a widely employed approach for fabricating diverse metal-based nanomaterials, such as metal nanomaterials, metal alloy nanomaterials, metal compounds, MOFs, and metal-based COFs [ 51 – 55 ]. The hydrothermal process is conducted in a sealed autoclave at high temperatures, where metal precursors are used as raw materials, and supercritical water is used as the solvent. The metal-based nanomaterials are characterized by their small size and narrow size distribution. Mineralizers are often introduced into the reaction system to further enhance the solubility of the precursor. Certain reaction parameters, including the reaction time, temperature, pH, and precursor concentration, affect the structure, size, and morphology of nanomaterials [ 31 ,  56 ]. Furthermore, surface modification is an alternative approach to effectively modulate the morphology of metal-based nanomaterials [ 57 ]. In one typical example, Liu et al. [ 31 ] investigated the influence of different reaction conditions on the physical properties of ZrO 2  nanomaterials by altering process variables during hydrothermal synthesis. As a result, the size of ZrO 2  nanomaterials exhibited a steady increase with prolonged reaction time or increased precursor concentration, while altering the pH value of the reaction system resulted in diverse crystal structures. Compared to other chemical preparation methods, hydrothermal treatment has the advantages of facile operation, rapid reaction, and high product purity, which have attracted considerable attention among researchers. For example, Wang et al. [ 58 ] successfully prepared iron-based nanosheets by a hydrothermal method using sodium salicylate, NaOH, and Fe(NO 3 ) 3  in an autoclave at 120°C. They found that these nanosheets exhibited high purity and excellent photothermal conversion performance, as well as drug-loading capability. In another study, PEG-coated yttrium-doped ZnO nanomaterials with a narrow size distribution were conveniently synthesized via a low-cost one-step hydrothermal process, which displayed photoluminescence and X-ray attenuation properties, along with PDT performance [ 59 ]. Homogeneous and stable LDH nanomaterials can be synthesized with high repeatability through co-precipitation and hydrothermal synthesis. For example, Xu et al. [ 60 ] precipitated MgAl-LDH by introducing a mixed solution containing MgCl 2  and AlCl 3  into NaOH solution via the co-precipitation method. Subsequently, stable and homogeneous Mg 2 Al-Cl-LDH suspensions were successfully synthesized via a hydrothermal method in an autoclave at 100°C using the MgAl-LDH solution. This facile and reproducible synthesis method provides a new approach for the large-scale production of LDH nanomaterials. Solvothermal method Based on the hydrothermal process, the solvothermal method employs organic solvents, such as ethanol, ethylene glycol, and butanediol, instead of water as the reaction medium to realize the controllable synthesis of metal-based nanomaterials with various structures, sizes, and morphologies by adjusting the composition and amount of solvents [ 61 – 64 ]. For example, Asakura et al. [ 65 ] synthesized a range of metal oxyfluorides with diverse morphologies through solvothermal reactions of precursors (MoO 3  and WO 3 ) with NaF in different organic solvent systems. The products synthesized using acetonitrile as the solvent exhibited a rod-like shape, whereas those prepared using ethanol as the solvent displayed a polyhedral shape. Differences in the solubility of reactants in different organic solvents can also affect particle size. The solvothermal reactions of MoO 3 , WO 3 , and NaF in organic solvents with higher solubility facilitated the synthesis of smaller particles. In addition to altering the solvent type, suitable organic ligands are commonly used to regulate the size and morphology of solvothermal products [ 66 ]. In one representative example, Duong et al. [ 66 ,  67 ] utilized oleic acid as a surfactant to prepare a series of cobalt iron oxide nanomaterials through the solvothermal method. Compared to the bare large-sized cubic nanomaterials, the oleic acid-coated nanomaterials were spherical, with smaller sizes and a more homogeneous size distribution. The observed outcomes could be attributed to the improved stabilization of nucleation and crystal growth by oleic acid. Thermal decomposition method The typical thermal decomposition method involves dissolving a precursor in an organic solvent with a high boiling point, followed by a high-temperature decomposition reaction. The obtained monomers undergo burst nucleation and slow growth, resulting in the formation of monodisperse metal-based nanomaterials in the presence of surface ligands. In general, this synthesis process represents an irreversible material decomposition process devoid of oxygen involvement, which has been extensively used in the production of many pure metal nanomaterials, metal oxide nanomaterials (especially magnetic nanomaterials), bimetallic alloy nanomaterials, and metal semiconductor compounds [ 51 ]. The most common surface ligands, including oleic acid, oleylamine, oleyl alcohol, and triphenylphosphine, can affect the size and shape of metal-based nanomaterials by restricting the space and rate of crystal growth [ 68 – 70 ]. Singapati et al. [ 71 ] synthesized iron oxide nanomaterials using iron oleate complexes as the precursor, with oleic acid and oleylamine as ligands, and octadecene as the solvent at a high temperature of 320°C. The nanomaterials generated when using oleyl alcohol as a ligand exhibited a smaller and more irregular morphology compared to those obtained when using oleic acid. In another study, superparamagnetic iron oxide nanoparticles (SPIONs) were synthesized using oleic acid and trioctylphosphine as ligands [ 72 ]. The use of trioctylphosphine as a ligand resulted in the formation of larger-sized SPIONs compared to those obtained using oleic acid as the ligand. Liu et al. [ 73 ] successfully prepared monodisperse sea urchin-like Co-P nanomaterials by adding cobalt acetate and triphenylphosphine to an oleylamine solvent at a temperature of 290°C. In addition to the ligand type, variables such as temperature, heating rate, inert gas flow rate, and precursor concentration used in the thermal decomposition process substantially affect the physical characteristics of the final products. Recent research has found that nucleation rates accelerate with increasing heating rates, resulting in the production of smaller metal-based nanomaterials. Additionally, a lower precursor concentration decreases the growth rate of crystals, leading to smaller metal-based nanomaterials [ 72 ,  74 ]. Demessie et al. [ 75 ] observed that as the nitrogen flow rate increased during the thermal decomposition reaction, iron oxide-based nanomaterials exhibited a lack of core–shell structure, decreased crystallinity, smaller sizes, and reduced magnetic heating performance. The physicochemical properties of metal-based nanomaterials inevitably vary among different production batches. The large-scale synthesis of uniformly sized nanomaterials is necessary to minimize these differences and optimize production costs. Feld et al. [ 76 ] prepared uniform-sized SPIONs through thermal decomposition of iron oleate precursor. Iron oleate was synthesized via a simple reaction of iron carbonate with oleic acid. Iron carbonate was more stable than most iron salts, which contributed to the high uniformity of the synthesized iron oleates and SPIONs. The size and shape of SPIONs could be precisely controlled by adjusting the reaction time and the oleic acid-to-Fe ratio. Owing to the reproducibility and high flexibility of the synthesis pathway, up to 20 g of SPIONs could be produced per batch. Dong et al. [ 74 ] presented a general approach for synthesizing uniform magnetite nanomaterials by thermally decomposing iron acetylacetonate. By simply adjusting the aging temperature, precursor concentration, and amounts of surface ligands and reducing agents, the particle size can be precisely controlled. In short, due to the good biocompatibility and relatively low cost of precursors such as metal oleate complexes and metal acetylpyruvate, coupled with the high efficiency of the synthesis method and the precise control over size and morphology, metal-based nanomaterials can be produced on a large scale via thermal decomposition for clinical and biological applications. Sol-gel method The sol-gel method is widely regarded as a versatile approach for the synthesis of various nanostructures, including metal compounds (metal oxides, fluorides, sulfides, nitrides, borides, chlorides), MOFs, and metal ion-chelate complexes [ 77 – 81 ]. In general, the sol-gel process involves dissolving inorganic metallic salts, such as nitrates or oxalates, in water or mixing metal alkoxides with an appropriate amount of alcohol to induce the hydrolysis process and subsequent polycondensation reaction, leading to the formation of a sol-gel system with a porous structure. The subsequent interconnections among the particles in the system contribute to gel formation. Finally, the metal-based nanomaterials can be obtained with excellent purity and uniform distribution via drying and heat treatment [ 82 ]. In contrast to conventional methods, the sol-gel synthesis process does not require high-temperature treatment, offering a distinct advantage in the efficient and economic production of high-quality materials. Properly setting working parameters, such as the precursor concentration, pH, aging time, drying speed, and calcination temperature, for the reaction is crucial because these variables affect the structure, porosity, shape, and size of the products [ 83 – 85 ]. In a previous study, Lal et al. [ 84 ] reported the influence of calcination temperature on the synthesis of TiO 2  nanomaterials using the sol-gel method. The sol-gel reaction was performed using titanium tetraisopropoxide, isopropanol, and deionized water, and the obtained products were calcined at temperatures ranging from 300 to 800°C. The authors highlighted that the increase in calcination temperature led to a gradual enlargement of the crystalline size, a transformation of the crystalline phase from anatase to rutile, and a progressive reduction in the bandgap. In another study, Rodríguez-Barajas’ group evaluated the effect of variations in solution pH and precursor concentration on the size and morphology of metal-oxide nanomaterials prepared by the sol-gel method [ 85 ]. In this study, TiO 2  nanomaterials, ZnO nanomaterials, and various mixed metal oxide nanomaterials (with TiO 2 -ZnO molar ratios of 3:1, 1:1, and 1:3) were synthesized using different concentrations of titanium (IV) butoxide and zinc nitrate as precursors, ethanol and distilled water as solvents, and adjusting the solution pH using HNO 3  and NH 3 ·H 2 O. As a result, all products synthesized under basic pH conditions were larger than those generated in the acidic process. Moreover, TiO 2 -ZnO binary oxides prepared with varying precursor concentrations displayed diverse morphologies, as evidenced by semi-globular shapes in TiO 2 -ZnO molar ratios of 3:1 and 1:1 compared to tubular rounded shapes in a molar ratio of 1:3. Also, Sheikhi et al. [ 86 ] synthesized ZnO nanomaterials using the hydrolysis and condensation reactions of a zinc acetate precursor and investigated the effects of solution pH on the final products by adjusting the pH with NaOH. As the pH of the solution increased, morphological changes were observed in the ZnO nanomaterials, with a decrease in their average diameter and an increase in their aspect ratio. The rod-like product was obtained during the aging process from 6 to 12 h, and the average diameter and length of the product increased with increasing aging time. However, the product transformed into nanoplates at an aging time of 18 h, resulting in a decrease in both average diameter and length. Table  3  summarizes the scalability, reproducibility, and cost-effectiveness of the above synthesis strategies. In addition to the common synthesis methods for metal-based nanomaterials mentioned above, there are other noteworthy synthesis approaches, such as the prechelation-polymerization method, which represents a prevalent strategy employed in the synthesis of polydopamine-chelated metal ions. This method involves the chelation of metal ions and the oxidative polymerization of dopamine monomers in an aerobic, weakly alkaline environment at room temperature and atmospheric pressure [ 87 ]. In summary, the synthesis process is intricate and rigorous. Metal-based nanomaterials with different sizes, morphologies, excellent crystallinity, and high purity can be prepared by carefully selecting a synthesis scheme and precisely adjusting the reaction parameters. These synthetic approaches confer unique physicochemical properties to metal-based nanomaterials, enabling their use in cancer theranostics. Table 3 Summary of the scalability, reproducibility, and cost-effectiveness of synthesis strategies for metal-based nanomaterials Synthesis strategies Scalability Reproducibility Cost-effectiveness Precipitation method Good scalability; Suitable for large-scale production Good reproducibility; Through precise control over reaction conditions Relatively low cost Hydrothermal method Fair scalability; A certain degree of scalability can be achieved by adjusting the reaction system Good reproducibility; Through strict control over temperature and pressure Relatively high cost; Require autoclave and specific reaction conditions Solvothermal method Fair scalability; Similar to hydrothermal method Good reproducibility; Through strict control over reaction conditions, especially solvent type and temperature Depend on the solvent used; Higher than precipitation method Thermal decomposition method Good scalability; Suitable for industrial-scale production Good reproducibility; Through control over precursors and temperature Good cost-effectiveness; Depend on the precursors and reaction conditions Sol-gel method Good scalability; Can be scaled up by adjusting solution composition and concentration Good reproducibility; Through precise control over solution pH, temperature, and reaction time Good cost-effectiveness; Require specific organic solvents Modification of metal-based nanomaterials Proper surface modifications are essential for enhancing the stability, biocompatibility, tumor-targeting capability, and circulation longevity of metal-based nanomaterials for their effective application in tumor theranostics. Unmodified metal-based nanomaterials readily adsorb opsonins onto their surfaces, which makes them easily recognizable and rapidly cleared by the reticuloendothelial system (RES) [ 88 ]. Surface modification using hydrophilic polymers is the most common approach to improve biocompatibility and overcome the short half-life of blood circulation [ 89 ]. PEG possesses hydrophilic and electrically neutral properties, making it one of the most significant surface modifiers for metal-based nanomaterials. As the molecular weight of PEG increases, the length of PEG chains increases, leading to enhanced distance and spatial repulsion between the nanomaterials, resulting in improved stability [ 90 ]. In addition, the increased PEG chain length and surface density prolong the circulation time of nanomaterials in vivo. This is ascribed to the fact that the long-chain or high-density brush conformation of the PEG coating is more capable of bringing the zeta potential of the nanomaterials closer to neutrality, which can reduce opsonin adsorption onto the nanomaterials and further inhibit macrophage uptake [ 91 ,  92 ]. Furthermore, the dispersity of the PEG coating influences the circulation time and biodistribution of the nanomaterials. Tian et al. [ 93 ] demonstrated that, compared to polydisperse PEG-modified Au nanomaterials, monodisperse PEG-modified Au nanomaterials exhibited reduced protein adsorption, prolonged blood circulation time, and enhanced tumor accumulation. Recently, Wan et al. [ 94 ] investigated the pharmacokinetics and biodistribution of a series of  68  Ga-labeled NOTA-chelated bicyclic peptides, which were modified with PEG chains of varying lengths ( n  = 2, 4, 6, 12, 24). These PEGylated nanoprobes demonstrated good hydrophilicity and stability and were primarily distributed in the salivary glands, lungs, and pancreas, with renal excretion. The tumor uptake and retention of all 5 PEGylated nanoprobes were significantly enhanced compared to those of the unmodified nanoprobes. The nanoprobes coated with longer PEG chains ( n  = 12) showed greater accumulation in the tumor than those coated with shorter PEG chains ( n  = 2, 4, 6). In addition to PEG, metal-based nanomaterials functionalized with other polymers, such as polyvinylpyrrolidone (PVP), polylactide, and polyacrylic acid (PAA), also exhibit good stability and biocompatibility, as well as prolonged circulation time [ 95 ,  96 ]. Targeted modification is a necessary strategy to enable the accumulation of metal-based nanomaterials in large quantities at the tumor site and to exert effective imaging or therapeutic effects. Targeting methods for metal-based nanomaterials mainly include passive targeting through the enhanced permeability and retention (EPR) effect and active targeting through endocytosis, with active targeting being more effective [ 97 ]. Nanomaterials functionalized with appropriate ligands can actively target tumor cells by specifically binding to receptors that are overexpressed on the surface of these cells, thereby achieving precise and efficient tumor diagnosis and treatment. Notably, the utilization of cell membranes for surface modification has yielded significant results, not only in terms of their high biocompatibility and degradability, but also due to their “stealth” ability to avoid removal by the RES system and their homologous targeting effect that allows accumulation in tumor cells. These advantages make cell membranes highly suitable for surface modification. In summary, appropriate modification approaches can be freely selected based on the specific purposes of metal-based nanomaterials in tumor theranostics. Biosafety The preceding paragraphs have primarily focused on the synthesis of metal-based nanomaterials, but their biosafety and toxicity remain significant hurdles in their transition from synthesis to clinical translation. The biosafety of metal-based nanomaterials is inextricably associated with multiple factors, including degradation kinetics, biodistribution, tissue enrichment, and excretion behavior. Many metal-based nanomaterials have relatively stable structures, leading to slow and incomplete degradation in vivo, which makes it difficult to completely remove them through hepatic or renal metabolism. The prolonged presence of metal-based nanomaterial residues within the body can interact with biochemical systems, raising toxicity concerns [ 98 ]. Nanomaterials should remain stable during the cycle and degrade naturally once they have fulfilled their functions. The design of TME-responsive degradation types is a feasible approach to achieve this goal. For example, a nanocomposite comprising zeolitic imidazolate framework-8 (ZIF-8) loaded with MnO 2  and luminol-Au nanoclusters remained stable in physiological environments but could degrade and exert chemodynamic therapy (CDT), PTT, and immunotherapeutic effects in a weakly acidic and glutathione (GSH)-rich TME. The degraded zinc, manganese, and gold could be readily excreted from the liver and kidneys without causing harm to the major organs [ 99 ]. Additionally, to optimize the in vivo performance of metal-based nanomaterials, it is feasible to link the materials to targeting moieties such as proteins, peptides, biotins, nucleic acid aptamers, and antibodies through rational surface modifications, thereby enhancing the uptake of these materials by tumor cells and reducing their toxicity to normal tissues. For example, Pt-based drugs, which are first-line chemotherapeutic agents for the treatment of many cancer types, have poor tumor accumulation and biodistribution, as well as the potential to cause serious toxic side effects. To solve these issues, biotin-modified iodine-conjugated Pt(IV) nanomaterials (Bio-Pt-I) were synthesized to specifically bind to cancer cells overexpressing biotin receptors, leading to a striking increase in the uptake of Pt(IV) and I 3 −  [ 100 ]. The systemic toxicity of Pt(IV) in the circulation was very low, whereas in the TME, Pt(IV) was reduced to Pt(II), exhibiting remarkably potent anticancer cytotoxicity. Concurrently, the introduction of iodine into cancer cells not only augmented the CT imaging signal but also reversed cisplatin resistance by effectively inhibiting Bcl-2 expression. The target-modified nanomaterials exhibited a unique biodistribution and antitumor toxicity, significantly enhancing the biosafety of Pt-containing drugs. Moreover, the design of metal-based nanomaterials into ultrasmall nanostructures can optimize their metabolic behavior in biological systems. Ultrasmall nanostructures can be rapidly excreted by the kidneys after sufficient enrichment and retention at the tumor site, thereby reducing adverse effects on normal tissues. For instance, ultrasmall folate-modified AuPd alloy nanozymes (below 6 nm) were developed to catalyze ROS generation and augment tumor-specific cytotoxicity [ 101 ]. After 7 d, these ultrasmall nanozymes were efficiently cleared from the body through urine, which prevented their prolonged enrichment in vivo and enhanced their overall safety for biological applications. In short, the use of metal-based nanomaterials in tumor theranostics inevitably leads to the introduction of toxic metals into the body, which has long been a key obstacle to their clinical translation. Although the short-term biosafety of metal-based nanomaterials can be enhanced to a certain degree through rational structural modulation and surface modification, research into their long-term chronic toxicity to organisms remains in an exploratory stage. Future investigations into the degradation mechanisms, metabolic behavior, and long-term in vivo effects of metal-based nanomaterials will help to facilitate their translation to clinical settings."
+    },
+    {
+      "heading": "Synthesis strategies for metal-based nanomaterials",
+      "text": "Synthesis strategies for metal-based nanomaterials To date, various metal-based nanomaterials with distinct structures, sizes, morphologies, and chemical compositions have been designed for use in nanomedicine. These fundamental parameters, which are closely related to the physicochemical properties of metal-based nanomaterials, have laid the foundation for the use of metal-based nanomaterials as cancer imaging or therapeutic agents. As the size decreases, metal-based nanomaterials tend to exhibit an increased ability to extravasate from tumor blood vessels and penetrate deeper into tumor tissues [ 27 ]. Rod-shaped metal-based nanomaterials are more likely to accumulate in the tumor parenchyma compared to their spherical or other geometrically shaped counterparts [ 28 ]. Therefore, appropriate synthesis strategies should be selected with precise control over reaction conditions to modulate the basic parameters of metal-based nanomaterials and meet the requirements for cancer diagnosis and treatment. In general, the main strategies for synthesizing metal-based nanomaterials can be divided into two categories: physical and chemical methods. Physical preparation approaches, such as grinding and sputtering, are simple to operate and are commonly used for synthesizing metal-based nanomaterials [ 29 ,  30 ]. Nevertheless, the undesired shape and size of the obtained nanomaterials restrict their direct in vivo applications. In contrast, metal-based nanomaterials prepared by chemical methods have the advantages of uniform size distribution, controllable morphology, and facile surface functionalization. Conventional chemical preparation methods include precipitation, hydrothermal synthesis [ 31 ], solvothermal synthesis [ 32 ], thermal decomposition [ 33 ], and the sol-gel method [ 34 ] (Fig.  3 ). Here, we introduce the mechanisms and several typical examples of these methods. The advantages and disadvantages of metal-based nanomaterial synthesis strategies are summarized in Table  2 . Fig. 3 Schematic of synthesis methods for metal-based nanomaterials. The common methods for synthesizing these materials include precipitation, hydrothermal synthesis, solvothermal synthesis, thermal decomposition, and the sol-gel method. It was created in BioRender Table 2 Summary of the advantages and disadvantages of synthesis strategies for metal-based nanomaterials Synthesis strategies Advantages Disadvantages Precipitation method Simple process, convenient operation, rapid reaction, low cost, easy to industrialize Difficult to control crystal shape and separate products, low product purity Hydrothermal method Facile operation, high product purity, high crystallinity of nanocrystals, low melting point, low energy consumption, controllable product shape and size, low pollution levels Inability to directly observe crystal growth, expensive autoclaves, long production time Solvothermal method High product purity, good product dispersion, controllable nanostructure morphology Unobservable synthesis process, high cost, low product yield, potential safety hazards Thermal decomposition method High product purity, controllable product shape and size, narrow product size distribution High equipment cost, high energy consumption, complex operation, small output Sol-gel method Low cost, high product purity, controllable product shape and size Long preparation time, unstable product structure, product is prone to agglomeration Precipitation method The precipitation method typically involves the addition of a precipitant to a mixture of solutions containing different chemicals. Hydroxides [ 35 ], carbonates [ 36 ], and oxalates [ 37 ,  38 ] are typical precipitants. When the concentration product of ions in a solution exceeds the solubility product, cations and anions bind together to form crystal nuclei [ 39 ]. Subsequently, the crystal size increases as the solute continuously deposits, leading to the formation of an insoluble precursor precipitate [ 39 ]. On this basis, impurities mixed in the precursor products can be removed through processes such as filtration and washing. Ultimately, metal-based nanomaterials with the desired structures, morphologies, and dimensions can be obtained through processes such as drying or calcination [ 40 ,  41 ]. For example, Liu et al. [ 42 ] successfully synthesized hollow MnO 2  nanoshells via the redox deposition method for efficient loading of chemotherapeutic drugs, thereby facilitating enhanced treatment of colorectal cancer. Moreover, Zhang et al. [ 43 ] prepared CaO 2  nanomaterials by adding H 2 O 2  to a mixed solution containing ammonia, CaCl 2 , and polyethylene glycol (PEG), followed by adjusting the pH to 11.5 using NaOH. Notably, the use of capping agents or surfactants is beneficial to synthesize metal-based nanomaterials with a controlled particle size and uniform distribution. Specifically, during the crystal growth phase, agglomeration or Ostwald ripening is likely to occur to reduce surface energy, which may lead to an excessive increase in the size of metal-based nanomaterials. In this case, by adding capping agents or surfactants, the electrostatic repulsion between metal-based nanomaterials can be enhanced, thereby achieving steric stabilization and preventing coagulation [ 44 ]. For instance, Bleier et al. [ 45 ] employed alkylated pentanediones as surfactants to reduce magnetic nanomaterial agglomeration. Co-precipitation has been recognized as a facile approach for the fabrication of metal-based nanomaterials. By introducing a precipitant into a homogeneous metallic salt solution prepared in specific proportions, the co-precipitation method enables the complete precipitation of all metal cations from the solution. In this way, various metal-based nanostructures such as pure metal nanomaterials, metal alloy nanomaterials, metal compounds, MOFs, and metal complexes with uniform size distributions can be easily obtained [ 46 – 48 ]. For example, Darwish et al. [ 49 ] used NH 4 OH as a precipitant and added it to a solution containing Fe 3+  and Fe 2+  to obtain precursor precipitates at 70°C. Subsequently, polyvinyl alcohol was introduced as a surfactant to fabricate monodisperse, stable magnetite nanomaterials with good hyperthermia properties. Similarly, Chin et al. [ 50 ] synthesized highly dispersed Fe 3 O 4 @Chl/Fe nanoclusters using the co-precipitation method by adding NH 4 OH to a solution containing FeCl 3 , FeCl 2 , and iron chlorophyll at room temperature. Hydrothermal method Hydrothermal synthesis is a widely employed approach for fabricating diverse metal-based nanomaterials, such as metal nanomaterials, metal alloy nanomaterials, metal compounds, MOFs, and metal-based COFs [ 51 – 55 ]. The hydrothermal process is conducted in a sealed autoclave at high temperatures, where metal precursors are used as raw materials, and supercritical water is used as the solvent. The metal-based nanomaterials are characterized by their small size and narrow size distribution. Mineralizers are often introduced into the reaction system to further enhance the solubility of the precursor. Certain reaction parameters, including the reaction time, temperature, pH, and precursor concentration, affect the structure, size, and morphology of nanomaterials [ 31 ,  56 ]. Furthermore, surface modification is an alternative approach to effectively modulate the morphology of metal-based nanomaterials [ 57 ]. In one typical example, Liu et al. [ 31 ] investigated the influence of different reaction conditions on the physical properties of ZrO 2  nanomaterials by altering process variables during hydrothermal synthesis. As a result, the size of ZrO 2  nanomaterials exhibited a steady increase with prolonged reaction time or increased precursor concentration, while altering the pH value of the reaction system resulted in diverse crystal structures. Compared to other chemical preparation methods, hydrothermal treatment has the advantages of facile operation, rapid reaction, and high product purity, which have attracted considerable attention among researchers. For example, Wang et al. [ 58 ] successfully prepared iron-based nanosheets by a hydrothermal method using sodium salicylate, NaOH, and Fe(NO 3 ) 3  in an autoclave at 120°C. They found that these nanosheets exhibited high purity and excellent photothermal conversion performance, as well as drug-loading capability. In another study, PEG-coated yttrium-doped ZnO nanomaterials with a narrow size distribution were conveniently synthesized via a low-cost one-step hydrothermal process, which displayed photoluminescence and X-ray attenuation properties, along with PDT performance [ 59 ]. Homogeneous and stable LDH nanomaterials can be synthesized with high repeatability through co-precipitation and hydrothermal synthesis. For example, Xu et al. [ 60 ] precipitated MgAl-LDH by introducing a mixed solution containing MgCl 2  and AlCl 3  into NaOH solution via the co-precipitation method. Subsequently, stable and homogeneous Mg 2 Al-Cl-LDH suspensions were successfully synthesized via a hydrothermal method in an autoclave at 100°C using the MgAl-LDH solution. This facile and reproducible synthesis method provides a new approach for the large-scale production of LDH nanomaterials. Solvothermal method Based on the hydrothermal process, the solvothermal method employs organic solvents, such as ethanol, ethylene glycol, and butanediol, instead of water as the reaction medium to realize the controllable synthesis of metal-based nanomaterials with various structures, sizes, and morphologies by adjusting the composition and amount of solvents [ 61 – 64 ]. For example, Asakura et al. [ 65 ] synthesized a range of metal oxyfluorides with diverse morphologies through solvothermal reactions of precursors (MoO 3  and WO 3 ) with NaF in different organic solvent systems. The products synthesized using acetonitrile as the solvent exhibited a rod-like shape, whereas those prepared using ethanol as the solvent displayed a polyhedral shape. Differences in the solubility of reactants in different organic solvents can also affect particle size. The solvothermal reactions of MoO 3 , WO 3 , and NaF in organic solvents with higher solubility facilitated the synthesis of smaller particles. In addition to altering the solvent type, suitable organic ligands are commonly used to regulate the size and morphology of solvothermal products [ 66 ]. In one representative example, Duong et al. [ 66 ,  67 ] utilized oleic acid as a surfactant to prepare a series of cobalt iron oxide nanomaterials through the solvothermal method. Compared to the bare large-sized cubic nanomaterials, the oleic acid-coated nanomaterials were spherical, with smaller sizes and a more homogeneous size distribution. The observed outcomes could be attributed to the improved stabilization of nucleation and crystal growth by oleic acid. Thermal decomposition method The typical thermal decomposition method involves dissolving a precursor in an organic solvent with a high boiling point, followed by a high-temperature decomposition reaction. The obtained monomers undergo burst nucleation and slow growth, resulting in the formation of monodisperse metal-based nanomaterials in the presence of surface ligands. In general, this synthesis process represents an irreversible material decomposition process devoid of oxygen involvement, which has been extensively used in the production of many pure metal nanomaterials, metal oxide nanomaterials (especially magnetic nanomaterials), bimetallic alloy nanomaterials, and metal semiconductor compounds [ 51 ]. The most common surface ligands, including oleic acid, oleylamine, oleyl alcohol, and triphenylphosphine, can affect the size and shape of metal-based nanomaterials by restricting the space and rate of crystal growth [ 68 – 70 ]. Singapati et al. [ 71 ] synthesized iron oxide nanomaterials using iron oleate complexes as the precursor, with oleic acid and oleylamine as ligands, and octadecene as the solvent at a high temperature of 320°C. The nanomaterials generated when using oleyl alcohol as a ligand exhibited a smaller and more irregular morphology compared to those obtained when using oleic acid. In another study, superparamagnetic iron oxide nanoparticles (SPIONs) were synthesized using oleic acid and trioctylphosphine as ligands [ 72 ]. The use of trioctylphosphine as a ligand resulted in the formation of larger-sized SPIONs compared to those obtained using oleic acid as the ligand. Liu et al. [ 73 ] successfully prepared monodisperse sea urchin-like Co-P nanomaterials by adding cobalt acetate and triphenylphosphine to an oleylamine solvent at a temperature of 290°C. In addition to the ligand type, variables such as temperature, heating rate, inert gas flow rate, and precursor concentration used in the thermal decomposition process substantially affect the physical characteristics of the final products. Recent research has found that nucleation rates accelerate with increasing heating rates, resulting in the production of smaller metal-based nanomaterials. Additionally, a lower precursor concentration decreases the growth rate of crystals, leading to smaller metal-based nanomaterials [ 72 ,  74 ]. Demessie et al. [ 75 ] observed that as the nitrogen flow rate increased during the thermal decomposition reaction, iron oxide-based nanomaterials exhibited a lack of core–shell structure, decreased crystallinity, smaller sizes, and reduced magnetic heating performance. The physicochemical properties of metal-based nanomaterials inevitably vary among different production batches. The large-scale synthesis of uniformly sized nanomaterials is necessary to minimize these differences and optimize production costs. Feld et al. [ 76 ] prepared uniform-sized SPIONs through thermal decomposition of iron oleate precursor. Iron oleate was synthesized via a simple reaction of iron carbonate with oleic acid. Iron carbonate was more stable than most iron salts, which contributed to the high uniformity of the synthesized iron oleates and SPIONs. The size and shape of SPIONs could be precisely controlled by adjusting the reaction time and the oleic acid-to-Fe ratio. Owing to the reproducibility and high flexibility of the synthesis pathway, up to 20 g of SPIONs could be produced per batch. Dong et al. [ 74 ] presented a general approach for synthesizing uniform magnetite nanomaterials by thermally decomposing iron acetylacetonate. By simply adjusting the aging temperature, precursor concentration, and amounts of surface ligands and reducing agents, the particle size can be precisely controlled. In short, due to the good biocompatibility and relatively low cost of precursors such as metal oleate complexes and metal acetylpyruvate, coupled with the high efficiency of the synthesis method and the precise control over size and morphology, metal-based nanomaterials can be produced on a large scale via thermal decomposition for clinical and biological applications. Sol-gel method The sol-gel method is widely regarded as a versatile approach for the synthesis of various nanostructures, including metal compounds (metal oxides, fluorides, sulfides, nitrides, borides, chlorides), MOFs, and metal ion-chelate complexes [ 77 – 81 ]. In general, the sol-gel process involves dissolving inorganic metallic salts, such as nitrates or oxalates, in water or mixing metal alkoxides with an appropriate amount of alcohol to induce the hydrolysis process and subsequent polycondensation reaction, leading to the formation of a sol-gel system with a porous structure. The subsequent interconnections among the particles in the system contribute to gel formation. Finally, the metal-based nanomaterials can be obtained with excellent purity and uniform distribution via drying and heat treatment [ 82 ]. In contrast to conventional methods, the sol-gel synthesis process does not require high-temperature treatment, offering a distinct advantage in the efficient and economic production of high-quality materials. Properly setting working parameters, such as the precursor concentration, pH, aging time, drying speed, and calcination temperature, for the reaction is crucial because these variables affect the structure, porosity, shape, and size of the products [ 83 – 85 ]. In a previous study, Lal et al. [ 84 ] reported the influence of calcination temperature on the synthesis of TiO 2  nanomaterials using the sol-gel method. The sol-gel reaction was performed using titanium tetraisopropoxide, isopropanol, and deionized water, and the obtained products were calcined at temperatures ranging from 300 to 800°C. The authors highlighted that the increase in calcination temperature led to a gradual enlargement of the crystalline size, a transformation of the crystalline phase from anatase to rutile, and a progressive reduction in the bandgap. In another study, Rodríguez-Barajas’ group evaluated the effect of variations in solution pH and precursor concentration on the size and morphology of metal-oxide nanomaterials prepared by the sol-gel method [ 85 ]. In this study, TiO 2  nanomaterials, ZnO nanomaterials, and various mixed metal oxide nanomaterials (with TiO 2 -ZnO molar ratios of 3:1, 1:1, and 1:3) were synthesized using different concentrations of titanium (IV) butoxide and zinc nitrate as precursors, ethanol and distilled water as solvents, and adjusting the solution pH using HNO 3  and NH 3 ·H 2 O. As a result, all products synthesized under basic pH conditions were larger than those generated in the acidic process. Moreover, TiO 2 -ZnO binary oxides prepared with varying precursor concentrations displayed diverse morphologies, as evidenced by semi-globular shapes in TiO 2 -ZnO molar ratios of 3:1 and 1:1 compared to tubular rounded shapes in a molar ratio of 1:3. Also, Sheikhi et al. [ 86 ] synthesized ZnO nanomaterials using the hydrolysis and condensation reactions of a zinc acetate precursor and investigated the effects of solution pH on the final products by adjusting the pH with NaOH. As the pH of the solution increased, morphological changes were observed in the ZnO nanomaterials, with a decrease in their average diameter and an increase in their aspect ratio. The rod-like product was obtained during the aging process from 6 to 12 h, and the average diameter and length of the product increased with increasing aging time. However, the product transformed into nanoplates at an aging time of 18 h, resulting in a decrease in both average diameter and length. Table  3  summarizes the scalability, reproducibility, and cost-effectiveness of the above synthesis strategies. In addition to the common synthesis methods for metal-based nanomaterials mentioned above, there are other noteworthy synthesis approaches, such as the prechelation-polymerization method, which represents a prevalent strategy employed in the synthesis of polydopamine-chelated metal ions. This method involves the chelation of metal ions and the oxidative polymerization of dopamine monomers in an aerobic, weakly alkaline environment at room temperature and atmospheric pressure [ 87 ]. In summary, the synthesis process is intricate and rigorous. Metal-based nanomaterials with different sizes, morphologies, excellent crystallinity, and high purity can be prepared by carefully selecting a synthesis scheme and precisely adjusting the reaction parameters. These synthetic approaches confer unique physicochemical properties to metal-based nanomaterials, enabling their use in cancer theranostics. Table 3 Summary of the scalability, reproducibility, and cost-effectiveness of synthesis strategies for metal-based nanomaterials Synthesis strategies Scalability Reproducibility Cost-effectiveness Precipitation method Good scalability; Suitable for large-scale production Good reproducibility; Through precise control over reaction conditions Relatively low cost Hydrothermal method Fair scalability; A certain degree of scalability can be achieved by adjusting the reaction system Good reproducibility; Through strict control over temperature and pressure Relatively high cost; Require autoclave and specific reaction conditions Solvothermal method Fair scalability; Similar to hydrothermal method Good reproducibility; Through strict control over reaction conditions, especially solvent type and temperature Depend on the solvent used; Higher than precipitation method Thermal decomposition method Good scalability; Suitable for industrial-scale production Good reproducibility; Through control over precursors and temperature Good cost-effectiveness; Depend on the precursors and reaction conditions Sol-gel method Good scalability; Can be scaled up by adjusting solution composition and concentration Good reproducibility; Through precise control over solution pH, temperature, and reaction time Good cost-effectiveness; Require specific organic solvents"
+    }
+  ],
+  "extractions": {
+    "methods_paragraphs": [
+      {
+        "text": "Synthesis, modification, and biosafety of metal-based nanomaterials Synthesis strategies for metal-based nanomaterials To date, various metal-based nanomaterials with distinct structures, sizes, morphologies, and chemical compositions have been designed for use in nanomedicine. These fundamental parameters, which are closely related to the physicochemical properties of metal-based nanomaterials, have laid the foundation for the use of metal-based nanomaterials as cancer imaging or therapeutic agents. As the size decreases, metal-based nanomaterials tend to exhibit an increased ability to extravasate from tumor blood vessels and penetrate deeper into tumor tissues [ 27 ]. Rod-shaped metal-based nanomaterials are more likely to accumulate in the tumor parenchyma compared to their spherical or other geometrically shaped counterparts [ 28 ]. Therefore, appropriate synthesis strategies should be selected with precise control over reaction conditions to modulate the basic parameters of metal-based nanomaterials and meet the requirements for cancer diagnosis and treatment. In general, the main strategies for synthesizing metal-based nanomaterials can be divided into two categories: physical and chemical methods. Physical preparation approaches, such as grinding and sputtering, are simple to operate and are commonly used for synthesizing metal-based nanomaterials [ 29 ,  30 ]. Nevertheless, the undesired shape and size of the obtained nanomaterials restrict their direct in vivo applications. In contrast, metal-based nanomaterials prepared by chemical methods have the advantages of uniform size distribution, controllable morphology, and facile surface functionalization. Conventional chemical preparation methods include precipitation, hydrothermal synthesis [ 31 ], solvothermal synthesis [ 32 ], thermal decomposition [ 33 ], and the sol-gel method [ 34 ] (Fig.  3 ). Here, we introduce the mechanisms and several typical examples of these methods. The advantages and disadvantages of metal-based nanomaterial synthesis strategies are summarized in Table  2 . Fig. 3 Schematic of synthesis methods for metal-based nanomaterials. The common methods for synthesizing these materials include precipitation, hydrothermal synthesis, solvothermal synthesis, thermal decomposition, and the sol-gel method. It was created in BioRender Table 2 Summary of the advantages and disadvantages of synthesis strategies for metal-based nanomaterials Synthesis strategies Advantages Disadvantages Precipitation method Simple process, convenient operation, rapid reaction, low cost, easy to industrialize Difficult to control crystal shape and separate products, low product purity Hydrothermal method Facile operation, high product purity, high crystallinity of nanocrystals, low melting point, low energy consumption, controllable product shape and size, low pollution levels Inability to directly observe crystal growth, expensive autoclaves, long production time Solvothermal method High product purity, good product dispersion, controllable nanostructure morphology Unobservable synthesis process, high cost, low product yield, potential safety hazards Thermal decomposition method High product purity, controllable product shape and size, narrow product size distribution High equipment cost, high energy consumption, complex operation, small output Sol-gel method Low cost, high product purity, controllable product shape and size Long preparation time, unstable product structure, product is prone to agglomeration Precipitation method The precipitation method typically involves the addition of a precipitant to a mixture of solutions containing different chemicals. Hydroxides [ 35 ], carbonates [ 36 ], and oxalates [ 37 ,  38 ] are typical precipitants. When the concentration product of ions in a solution exceeds the solubility product, cations and anions bind together to form crystal nuclei [ 39 ]. Subsequently, the crystal size increases as the solute continuously deposits, leading to the formation of an insoluble precursor precipitate [ 39 ]. On this basis, impurities mixed in the precursor products can be removed through processes such as filtration and washing. Ultimately, metal-based nanomaterials with the desired structures, morphologies, and dimensions can be obtained through processes such as drying or calcination [ 40 ,  41 ]. For example, Liu et al. [ 42 ] successfully synthesized hollow MnO 2  nanoshells via the redox deposition method for efficient loading of chemotherapeutic drugs, thereby facilitating enhanced treatment of colorectal cancer. Moreover, Zhang et al. [ 43 ] prepared CaO 2  nanomaterials by adding H 2 O 2  to a mixed solution containing ammonia, CaCl 2 , and polyethylene glycol (PEG), followed by adjusting the pH to 11.5 using NaOH. Notably, the use of capping agents or surfactants is beneficial to synthesize metal-based nanomaterials with a controlled particle size and uniform distribution. Specifically, during the crystal growth phase, agglomeration or Ostwald ripening is likely to occur to reduce surface energy, which may lead to an excessive increase in the size of metal-based nanomaterials. In this case, by adding capping agents or surfactants, the electrostatic repulsion between metal-based nanomaterials can be enhanced, thereby achieving steric stabilization and preventing coagulation [ 44 ]. For instance, Bleier et al. [ 45 ] employed alkylated pentanediones as surfactants to reduce magnetic nanomaterial agglomeration. Co-precipitation has been recognized as a facile approach for the fabrication of metal-based nanomaterials. By introducing a precipitant into a homogeneous metallic salt solution prepared in specific proportions, the co-precipitation method enables the complete precipitation of all metal cations from the solution. In this way, various metal-based nanostructures such as pure metal nanomaterials, metal alloy nanomaterials, metal compounds, MOFs, and metal complexes with uniform size distributions can be easily obtained [ 46 – 48 ]. For example, Darwish et al. [ 49 ] used NH 4 OH as a precipitant and added it to a solution containing Fe 3+  and Fe 2+  to obtain precursor precipitates at 70°C. Subsequently, polyvinyl alcohol was introduced as a surfactant to fabricate monodisperse, stable magnetite nanomaterials with good hyperthermia properties. Similarly, Chin et al. [ 50 ] synthesized highly dispersed Fe 3 O 4 @Chl/Fe nanoclusters using the co-precipitation method by adding NH 4 OH to a solution containing FeCl 3 , FeCl 2 , and iron chlorophyll at room temperature. Hydrothermal method Hydrothermal synthesis is a widely employed approach for fabricating diverse metal-based nanomaterials, such as metal nanomaterials, metal alloy nanomaterials, metal compounds, MOFs, and metal-based COFs [ 51 – 55 ]. The hydrothermal process is conducted in a sealed autoclave at high temperatures, where metal precursors are used as raw materials, and supercritical water is used as the solvent. The metal-based nanomaterials are characterized by their small size and narrow size distribution. Mineralizers are often introduced into the reaction system to further enhance the solubility of the precursor. Certain reaction parameters, including the reaction time, temperature, pH, and precursor concentration, affect the structure, size, and morphology of nanomaterials [ 31 ,  56 ]. Furthermore, surface modification is an alternative approach to effectively modulate the morphology of metal-based nanomaterials [ 57 ]. In one typical example, Liu et al. [ 31 ] investigated the influence of different reaction conditions on the physical properties of ZrO 2  nanomaterials by altering process variables during hydrothermal synthesis. As a result, the size of ZrO 2  nanomaterials exhibited a steady increase with prolonged reaction time or increased precursor concentration, while altering the pH value of the reaction system resulted in diverse crystal structures. Compared to other chemical preparation methods, hydrothermal treatment has the advantages of facile operation, rapid reaction, and high product purity, which have attracted considerable attention among researchers. For example, Wang et al. [ 58 ] successfully prepared iron-based nanosheets by a hydrothermal method using sodium salicylate, NaOH, and Fe(NO 3 ) 3  in an autoclave at 120°C. They found that these nanosheets exhibited high purity and excellent photothermal conversion performance, as well as drug-loading capability. In another study, PEG-coated yttrium-doped ZnO nanomaterials with a narrow size distribution were conveniently synthesized via a low-cost one-step hydrothermal process, which displayed photoluminescence and X-ray attenuation properties, along with PDT performance [ 59 ]. Homogeneous and stable LDH nanomaterials can be synthesized with high repeatability through co-precipitation and hydrothermal synthesis. For example, Xu et al. [ 60 ] precipitated MgAl-LDH by introducing a mixed solution containing MgCl 2  and AlCl 3  into NaOH solution via the co-precipitation method. Subsequently, stable and homogeneous Mg 2 Al-Cl-LDH suspensions were successfully synthesized via a hydrothermal method in an autoclave at 100°C using the MgAl-LDH solution. This facile and reproducible synthesis method provides a new approach for the large-scale production of LDH nanomaterials. Solvothermal method Based on the hydrothermal process, the solvothermal method employs organic solvents, such as ethanol, ethylene glycol, and butanediol, instead of water as the reaction medium to realize the controllable synthesis of metal-based nanomaterials with various structures, sizes, and morphologies by adjusting the composition and amount of solvents [ 61 – 64 ]. For example, Asakura et al. [ 65 ] synthesized a range of metal oxyfluorides with diverse morphologies through solvothermal reactions of precursors (MoO 3  and WO 3 ) with NaF in different organic solvent systems. The products synthesized using acetonitrile as the solvent exhibited a rod-like shape, whereas those prepared using ethanol as the solvent displayed a polyhedral shape. Differences in the solubility of reactants in different organic solvents can also affect particle size. The solvothermal reactions of MoO 3 , WO 3 , and NaF in organic solvents with higher solubility facilitated the synthesis of smaller particles. In addition to altering the solvent type, suitable organic ligands are commonly used to regulate the size and morphology of solvothermal products [ 66 ]. In one representative example, Duong et al. [ 66 ,  67 ] utilized oleic acid as a surfactant to prepare a series of cobalt iron oxide nanomaterials through the solvothermal method. Compared to the bare large-sized cubic nanomaterials, the oleic acid-coated nanomaterials were spherical, with smaller sizes and a more homogeneous size distribution. The observed outcomes could be attributed to the improved stabilization of nucleation and crystal growth by oleic acid. Thermal decomposition method The typical thermal decomposition method involves dissolving a precursor in an organic solvent with a high boiling point, followed by a high-temperature decomposition reaction. The obtained monomers undergo burst nucleation and slow growth, resulting in the formation of monodisperse metal-based nanomaterials in the presence of surface ligands. In general, this synthesis process represents an irreversible material decomposition process devoid of oxygen involvement, which has been extensively used in the production of many pure metal nanomaterials, metal oxide nanomaterials (especially magnetic nanomaterials), bimetallic alloy nanomaterials, and metal semiconductor compounds [ 51 ]. The most common surface ligands, including oleic acid, oleylamine, oleyl alcohol, and triphenylphosphine, can affect the size and shape of metal-based nanomaterials by restricting the space and rate of crystal growth [ 68 – 70 ]. Singapati et al. [ 71 ] synthesized iron oxide nanomaterials using iron oleate complexes as the precursor, with oleic acid and oleylamine as ligands, and octadecene as the solvent at a high temperature of 320°C. The nanomaterials generated when using oleyl alcohol as a ligand exhibited a smaller and more irregular morphology compared to those obtained when using oleic acid. In another study, superparamagnetic iron oxide nanoparticles (SPIONs) were synthesized using oleic acid and trioctylphosphine as ligands [ 72 ]. The use of trioctylphosphine as a ligand resulted in the formation of larger-sized SPIONs compared to those obtained using oleic acid as the ligand. Liu et al. [ 73 ] successfully prepared monodisperse sea urchin-like Co-P nanomaterials by adding cobalt acetate and triphenylphosphine to an oleylamine solvent at a temperature of 290°C. In addition to the ligand type, variables such as temperature, heating rate, inert gas flow rate, and precursor concentration used in the thermal decomposition process substantially affect the physical characteristics of the final products. Recent research has found that nucleation rates accelerate with increasing heating rates, resulting in the production of smaller metal-based nanomaterials. Additionally, a lower precursor concentration decreases the growth rate of crystals, leading to smaller metal-based nanomaterials [ 72 ,  74 ]. Demessie et al. [ 75 ] observed that as the nitrogen flow rate increased during the thermal decomposition reaction, iron oxide-based nanomaterials exhibited a lack of core–shell structure, decreased crystallinity, smaller sizes, and reduced magnetic heating performance. The physicochemical properties of metal-based nanomaterials inevitably vary among different production batches. The large-scale synthesis of uniformly sized nanomaterials is necessary to minimize these differences and optimize production costs. Feld et al. [ 76 ] prepared uniform-sized SPIONs through thermal decomposition of iron oleate precursor. Iron oleate was synthesized via a simple reaction of iron carbonate with oleic acid. Iron carbonate was more stable than most iron salts, which contributed to the high uniformity of the synthesized iron oleates and SPIONs. The size and shape of SPIONs could be precisely controlled by adjusting the reaction time and the oleic acid-to-Fe ratio. Owing to the reproducibility and high flexibility of the synthesis pathway, up to 20 g of SPIONs could be produced per batch. Dong et al. [ 74 ] presented a general approach for synthesizing uniform magnetite nanomaterials by thermally decomposing iron acetylacetonate. By simply adjusting the aging temperature, precursor concentration, and amounts of surface ligands and reducing agents, the particle size can be precisely controlled. In short, due to the good biocompatibility and relatively low cost of precursors such as metal oleate complexes and metal acetylpyruvate, coupled with the high efficiency of the synthesis method and the precise control over size and morphology, metal-based nanomaterials can be produced on a large scale via thermal decomposition for clinical and biological applications. Sol-gel method The sol-gel method is widely regarded as a versatile approach for the synthesis of various nanostructures, including metal compounds (metal oxides, fluorides, sulfides, nitrides, borides, chlorides), MOFs, and metal ion-chelate complexes [ 77 – 81 ]. In general, the sol-gel process involves dissolving inorganic metallic salts, such as nitrates or oxalates, in water or mixing metal alkoxides with an appropriate amount of alcohol to induce the hydrolysis process and subsequent polycondensation reaction, leading to the formation of a sol-gel system with a porous structure. The subsequent interconnections among the particles in the system contribute to gel formation. Finally, the metal-based nanomaterials can be obtained with excellent purity and uniform distribution via drying and heat treatment [ 82 ]. In contrast to conventional methods, the sol-gel synthesis process does not require high-temperature treatment, offering a distinct advantage in the efficient and economic production of high-quality materials. Properly setting working parameters, such as the precursor concentration, pH, aging time, drying speed, and calcination temperature, for the reaction is crucial because these variables affect the structure, porosity, shape, and size of the products [ 83 – 85 ]. In a previous study, Lal et al. [ 84 ] reported the influence of calcination temperature on the synthesis of TiO 2  nanomaterials using the sol-gel method. The sol-gel reaction was performed using titanium tetraisopropoxide, isopropanol, and deionized water, and the obtained products were calcined at temperatures ranging from 300 to 800°C. The authors highlighted that the increase in calcination temperature led to a gradual enlargement of the crystalline size, a transformation of the crystalline phase from anatase to rutile, and a progressive reduction in the bandgap. In another study, Rodríguez-Barajas’ group evaluated the effect of variations in solution pH and precursor concentration on the size and morphology of metal-oxide nanomaterials prepared by the sol-gel method [ 85 ]. In this study, TiO 2  nanomaterials, ZnO nanomaterials, and various mixed metal oxide nanomaterials (with TiO 2 -ZnO molar ratios of 3:1, 1:1, and 1:3) were synthesized using different concentrations of titanium (IV) butoxide and zinc nitrate as precursors, ethanol and distilled water as solvents, and adjusting the solution pH using HNO 3  and NH 3 ·H 2 O. As a result, all products synthesized under basic pH conditions were larger than those generated in the acidic process. Moreover, TiO 2 -ZnO binary oxides prepared with varying precursor concentrations displayed diverse morphologies, as evidenced by semi-globular shapes in TiO 2 -ZnO molar ratios of 3:1 and 1:1 compared to tubular rounded shapes in a molar ratio of 1:3. Also, Sheikhi et al. [ 86 ] synthesized ZnO nanomaterials using the hydrolysis and condensation reactions of a zinc acetate precursor and investigated the effects of solution pH on the final products by adjusting the pH with NaOH. As the pH of the solution increased, morphological changes were observed in the ZnO nanomaterials, with a decrease in their average diameter and an increase in their aspect ratio. The rod-like product was obtained during the aging process from 6 to 12 h, and the average diameter and length of the product increased with increasing aging time. However, the product transformed into nanoplates at an aging time of 18 h, resulting in a decrease in both average diameter and length. Table  3  summarizes the scalability, reproducibility, and cost-effectiveness of the above synthesis strategies. In addition to the common synthesis methods for metal-based nanomaterials mentioned above, there are other noteworthy synthesis approaches, such as the prechelation-polymerization method, which represents a prevalent strategy employed in the synthesis of polydopamine-chelated metal ions. This method involves the chelation of metal ions and the oxidative polymerization of dopamine monomers in an aerobic, weakly alkaline environment at room temperature and atmospheric pressure [ 87 ]. In summary, the synthesis process is intricate and rigorous. Metal-based nanomaterials with different sizes, morphologies, excellent crystallinity, and high purity can be prepared by carefully selecting a synthesis scheme and precisely adjusting the reaction parameters. These synthetic approaches confer unique physicochemical properties to metal-based nanomaterials, enabling their use in cancer theranostics. Table 3 Summary of the scalability, reproducibility, and cost-effectiveness of synthesis strategies for metal-based nanomaterials Synthesis strategies Scalability Reproducibility Cost-effectiveness Precipitation method Good scalability; Suitable for large-scale production Good reproducibility; Through precise control over reaction conditions Relatively low cost Hydrothermal method Fair scalability; A certain degree of scalability can be achieved by adjusting the reaction system Good reproducibility; Through strict control over temperature and pressure Relatively high cost; Require autoclave and specific reaction conditions Solvothermal method Fair scalability; Similar to hydrothermal method Good reproducibility; Through strict control over reaction conditions, especially solvent type and temperature Depend on the solvent used; Higher than precipitation method Thermal decomposition method Good scalability; Suitable for industrial-scale production Good reproducibility; Through control over precursors and temperature Good cost-effectiveness; Depend on the precursors and reaction conditions Sol-gel method Good scalability; Can be scaled up by adjusting solution composition and concentration Good reproducibility; Through precise control over solution pH, temperature, and reaction time Good cost-effectiveness; Require specific organic solvents Modification of metal-based nanomaterials Proper surface modifications are essential for enhancing the stability, biocompatibility, tumor-targeting capability, and circulation longevity of metal-based nanomaterials for their effective application in tumor theranostics. Unmodified metal-based nanomaterials readily adsorb opsonins onto their surfaces, which makes them easily recognizable and rapidly cleared by the reticuloendothelial system (RES) [ 88 ]. Surface modification using hydrophilic polymers is the most common approach to improve biocompatibility and overcome the short half-life of blood circulation [ 89 ]. PEG possesses hydrophilic and electrically neutral properties, making it one of the most significant surface modifiers for metal-based nanomaterials. As the molecular weight of PEG increases, the length of PEG chains increases, leading to enhanced distance and spatial repulsion between the nanomaterials, resulting in improved stability [ 90 ]. In addition, the increased PEG chain length and surface density prolong the circulation time of nanomaterials in vivo. This is ascribed to the fact that the long-chain or high-density brush conformation of the PEG coating is more capable of bringing the zeta potential of the nanomaterials closer to neutrality, which can reduce opsonin adsorption onto the nanomaterials and further inhibit macrophage uptake [ 91 ,  92 ]. Furthermore, the dispersity of the PEG coating influences the circulation time and biodistribution of the nanomaterials. Tian et al. [ 93 ] demonstrated that, compared to polydisperse PEG-modified Au nanomaterials, monodisperse PEG-modified Au nanomaterials exhibited reduced protein adsorption, prolonged blood circulation time, and enhanced tumor accumulation. Recently, Wan et al. [ 94 ] investigated the pharmacokinetics and biodistribution of a series of  68  Ga-labeled NOTA-chelated bicyclic peptides, which were modified with PEG chains of varying lengths ( n  = 2, 4, 6, 12, 24). These PEGylated nanoprobes demonstrated good hydrophilicity and stability and were primarily distributed in the salivary glands, lungs, and pancreas, with renal excretion. The tumor uptake and retention of all 5 PEGylated nanoprobes were significantly enhanced compared to those of the unmodified nanoprobes. The nanoprobes coated with longer PEG chains ( n  = 12) showed greater accumulation in the tumor than those coated with shorter PEG chains ( n  = 2, 4, 6). In addition to PEG, metal-based nanomaterials functionalized with other polymers, such as polyvinylpyrrolidone (PVP), polylactide, and polyacrylic acid (PAA), also exhibit good stability and biocompatibility, as well as prolonged circulation time [ 95 ,  96 ]. Targeted modification is a necessary strategy to enable the accumulation of metal-based nanomaterials in large quantities at the tumor site and to exert effective imaging or therapeutic effects. Targeting methods for metal-based nanomaterials mainly include passive targeting through the enhanced permeability and retention (EPR) effect and active targeting through endocytosis, with active targeting being more effective [ 97 ]. Nanomaterials functionalized with appropriate ligands can actively target tumor cells by specifically binding to receptors that are overexpressed on the surface of these cells, thereby achieving precise and efficient tumor diagnosis and treatment. Notably, the utilization of cell membranes for surface modification has yielded significant results, not only in terms of their high biocompatibility and degradability, but also due to their “stealth” ability to avoid removal by the RES system and their homologous targeting effect that allows accumulation in tumor cells. These advantages make cell membranes highly suitable for surface modification. In summary, appropriate modification approaches can be freely selected based on the specific purposes of metal-based nanomaterials in tumor theranostics. Biosafety The preceding paragraphs have primarily focused on the synthesis of metal-based nanomaterials, but their biosafety and toxicity remain significant hurdles in their transition from synthesis to clinical translation. The biosafety of metal-based nanomaterials is inextricably associated with multiple factors, including degradation kinetics, biodistribution, tissue enrichment, and excretion behavior. Many metal-based nanomaterials have relatively stable structures, leading to slow and incomplete degradation in vivo, which makes it difficult to completely remove them through hepatic or renal metabolism. The prolonged presence of metal-based nanomaterial residues within the body can interact with biochemical systems, raising toxicity concerns [ 98 ]. Nanomaterials should remain stable during the cycle and degrade naturally once they have fulfilled their functions. The design of TME-responsive degradation types is a feasible approach to achieve this goal. For example, a nanocomposite comprising zeolitic imidazolate framework-8 (ZIF-8) loaded with MnO 2  and luminol-Au nanoclusters remained stable in physiological environments but could degrade and exert chemodynamic therapy (CDT), PTT, and immunotherapeutic effects in a weakly acidic and glutathione (GSH)-rich TME. The degraded zinc, manganese, and gold could be readily excreted from the liver and kidneys without causing harm to the major organs [ 99 ]. Additionally, to optimize the in vivo performance of metal-based nanomaterials, it is feasible to link the materials to targeting moieties such as proteins, peptides, biotins, nucleic acid aptamers, and antibodies through rational surface modifications, thereby enhancing the uptake of these materials by tumor cells and reducing their toxicity to normal tissues. For example, Pt-based drugs, which are first-line chemotherapeutic agents for the treatment of many cancer types, have poor tumor accumulation and biodistribution, as well as the potential to cause serious toxic side effects. To solve these issues, biotin-modified iodine-conjugated Pt(IV) nanomaterials (Bio-Pt-I) were synthesized to specifically bind to cancer cells overexpressing biotin receptors, leading to a striking increase in the uptake of Pt(IV) and I 3 −  [ 100 ]. The systemic toxicity of Pt(IV) in the circulation was very low, whereas in the TME, Pt(IV) was reduced to Pt(II), exhibiting remarkably potent anticancer cytotoxicity. Concurrently, the introduction of iodine into cancer cells not only augmented the CT imaging signal but also reversed cisplatin resistance by effectively inhibiting Bcl-2 expression. The target-modified nanomaterials exhibited a unique biodistribution and antitumor toxicity, significantly enhancing the biosafety of Pt-containing drugs. Moreover, the design of metal-based nanomaterials into ultrasmall nanostructures can optimize their metabolic behavior in biological systems. Ultrasmall nanostructures can be rapidly excreted by the kidneys after sufficient enrichment and retention at the tumor site, thereby reducing adverse effects on normal tissues. For instance, ultrasmall folate-modified AuPd alloy nanozymes (below 6 nm) were developed to catalyze ROS generation and augment tumor-specific cytotoxicity [ 101 ]. After 7 d, these ultrasmall nanozymes were efficiently cleared from the body through urine, which prevented their prolonged enrichment in vivo and enhanced their overall safety for biological applications. In short, the use of metal-based nanomaterials in tumor theranostics inevitably leads to the introduction of toxic metals into the body, which has long been a key obstacle to their clinical translation. Although the short-term biosafety of metal-based nanomaterials can be enhanced to a certain degree through rational structural modulation and surface modification, research into their long-term chronic toxicity to organisms remains in an exploratory stage. Future investigations into the degradation mechanisms, metabolic behavior, and long-term in vivo effects of metal-based nanomaterials will help to facilitate their translation to clinical settings.",
+        "operations": [
+          {
+            "op_type": "add",
+            "sentence": "Here, we introduce the mechanisms and several typical examples of these methods.",
+            "start_char": 1889,
+            "end_char": 1969,
+            "materials": [],
+            "params": {}
+          },
+          {
+            "op_type": "stir",
+            "sentence": "On this basis, impurities mixed in the precursor products can be removed through processes such as filtration and washing.",
+            "start_char": 4066,
+            "end_char": 4188,
+            "materials": [],
+            "params": {}
+          },
+          {
+            "op_type": "dry",
+            "sentence": "Ultimately, metal-based nanomaterials with the desired structures, morphologies, and dimensions can be obtained through processes such as drying or calcination [ 40 ,  41 ].",
+            "start_char": 4189,
+            "end_char": 4362,
+            "materials": [],
+            "params": {}
+          },
+          {
+            "op_type": "add",
+            "sentence": "[ 43 ] prepared CaO 2  nanomaterials by adding H 2 O 2  to a mixed solution containing ammonia, CaCl 2 , and polyethylene glycol (PEG), followed by adjusting the pH to 11.5 using NaOH.",
+            "start_char": 4610,
+            "end_char": 4794,
+            "materials": [
+              "CaO 2  nanomaterials",
+              "2 O"
+            ],
+            "params": {}
+          },
+          {
+            "op_type": "add",
+            "sentence": "In this case, by adding capping agents or surfactants, the electrostatic repulsion between metal-based nanomaterials can be enhanced, thereby achieving steric stabilization and preventing coagulation [ 44 ].",
+            "start_char": 5165,
+            "end_char": 5372,
+            "materials": [],
+            "params": {}
+          },
+          {
+            "op_type": "add",
+            "sentence": "By introducing a precipitant into a homogeneous metallic salt solution prepared in specific proportions, the co-precipitation method enables the complete precipitation of all metal cations from the solution.",
+            "start_char": 5611,
+            "end_char": 5818,
+            "materials": [],
+            "params": {}
+          },
+          {
+            "op_type": "add",
+            "sentence": "For example, Darwish et al. [ 49 ] used NH 4 OH as a precipitant and added it to a solution containing Fe 3+  and Fe 2+  to obtain precursor precipitates at 70°C.",
+            "start_char": 6039,
+            "end_char": 6201,
+            "materials": [
+              "NH 4 OH"
+            ],
+            "params": {
+              "temp": "70°C"
+            }
+          },
+          {
+            "op_type": "add",
+            "sentence": "Subsequently, polyvinyl alcohol was introduced as a surfactant to fabricate monodisperse, stable magnetite nanomaterials with good hyperthermia properties.",
+            "start_char": 6202,
+            "end_char": 6357,
+            "materials": [],
+            "params": {}
+          },
+          {
+            "op_type": "add",
+            "sentence": "[ 50 ] synthesized highly dispersed Fe 3 O 4 @Chl/Fe nanoclusters using the co-precipitation method by adding NH 4 OH to a solution containing FeCl 3 , FeCl 2 , and iron chlorophyll at room temperature.",
+            "start_char": 6381,
+            "end_char": 6583,
+            "materials": [
+              "highly dispersed Fe 3 O 4 @Chl/Fe nanoclusters",
+              "NH 4 OH"
+            ],
+            "params": {}
+          },
+          {
+            "op_type": "add",
+            "sentence": "Mineralizers are often introduced into the reaction system to further enhance the solubility of the precursor.",
+            "start_char": 7099,
+            "end_char": 7209,
+            "materials": [],
+            "params": {}
+          },
+          {
+            "op_type": "add",
+            "sentence": "For example, Xu et al. [ 60 ] precipitated MgAl-LDH by introducing a mixed solution containing MgCl 2  and AlCl 3  into NaOH solution via the co-precipitation method.",
+            "start_char": 8912,
+            "end_char": 9078,
+            "materials": [
+              "Xu et al"
+            ],
+            "params": {}
+          },
+          {
+            "op_type": "add",
+            "sentence": "[ 73 ] successfully prepared monodisperse sea urchin-like Co-P nanomaterials by adding cobalt acetate and triphenylphosphine to an oleylamine solvent at a temperature of 290°C.",
+            "start_char": 12636,
+            "end_char": 12812,
+            "materials": [
+              "290°C"
+            ],
+            "params": {
+              "temp": "290°C"
+            }
+          },
+          {
+            "op_type": "heat",
+            "sentence": "In addition to the ligand type, variables such as temperature, heating rate, inert gas flow rate, and precursor concentration used in the thermal decomposition process substantially affect the physical characteristics of the final products.",
+            "start_char": 12813,
+            "end_char": 13053,
+            "materials": [],
+            "params": {}
+          },
+          {
+            "op_type": "heat",
+            "sentence": "Recent research has found that nucleation rates accelerate with increasing heating rates, resulting in the production of smaller metal-based nanomaterials.",
+            "start_char": 13054,
+            "end_char": 13209,
+            "materials": [],
+            "params": {}
+          },
+          {
+            "op_type": "heat",
+            "sentence": "[ 75 ] observed that as the nitrogen flow rate increased during the thermal decomposition reaction, iron oxide-based nanomaterials exhibited a lack of core–shell structure, decreased crystallinity, smaller sizes, and reduced magnetic heating performance.",
+            "start_char": 13370,
+            "end_char": 13624,
+            "materials": [],
+            "params": {}
+          },
+          {
+            "op_type": "stir",
+            "sentence": "In general, the sol-gel process involves dissolving inorganic metallic salts, such as nitrates or oxalates, in water or mixing metal alkoxides with an appropriate amount of alcohol to induce the hydrolysis process and subsequent polycondensation reaction, leading to the formation of a sol-gel system with a porous structure.",
+            "start_char": 15395,
+            "end_char": 15720,
+            "materials": [],
+            "params": {}
+          },
+          {
+            "op_type": "dry",
+            "sentence": "Finally, the metal-based nanomaterials can be obtained with excellent purity and uniform distribution via drying and heat treatment [ 82 ].",
+            "start_char": 15816,
+            "end_char": 15955,
+            "materials": [],
+            "params": {}
+          },
+          {
+            "op_type": "dry",
+            "sentence": "Properly setting working parameters, such as the precursor concentration, pH, aging time, drying speed, and calcination temperature, for the reaction is crucial because these variables affect the structure, porosity, shape, and size of the products [ 83 – 85 ].",
+            "start_char": 16166,
+            "end_char": 16427,
+            "materials": [],
+            "params": {}
+          },
+          {
+            "op_type": "stir",
+            "sentence": "In this study, TiO 2  nanomaterials, ZnO nanomaterials, and various mixed metal oxide nanomaterials (with TiO 2 -ZnO molar ratios of 3:1, 1:1, and 1:3) were synthesized using different concentrations of titanium (IV) butoxide and zinc nitrate as precursors, ethanol and distilled water as solvents, and adjusting the solution pH using HNO 3  and NH 3 ·H 2 O. As a result, all products synthesized under basic pH conditions were larger than those generated in the acidic process.",
+            "start_char": 17219,
+            "end_char": 17697,
+            "materials": [
+              "2  nanomaterials",
+              "TiO 2 -ZnO molar ratios",
+              "titanium (IV) butoxide"
+            ],
+            "params": {}
+          }
+        ],
+        "expanded": [
+          {
+            "op_type": "add",
+            "steps": [
+              "Ensure reaction vessel is present and empty.",
+              "Place a clean stir bar in the vessel.",
+              "Measure the specified amount of reagent.",
+              "Transfer reagent into the vessel."
+            ]
+          },
+          {
+            "op_type": "stir",
+            "steps": [
+              "Place the reaction vessel on a stir plate.",
+              "Set the stirrer to an appropriate speed.",
+              "Stir for the specified time."
+            ]
+          },
+          {
+            "op_type": "dry",
+            "steps": [
+              "Perform operation 'dry' as described: Ultimately, metal-based nanomaterials with the desired structures, morphologies, and dimensions can be obtained through processes such as drying or calcination [ 40 ,  41 ]."
+            ]
+          },
+          {
+            "op_type": "add",
+            "steps": [
+              "Ensure reaction vessel is present and empty.",
+              "Place a clean stir bar in the vessel.",
+              "Measure the specified amount of CaO 2  nanomaterials.",
+              "Transfer CaO 2  nanomaterials into the vessel."
+            ]
+          },
+          {
+            "op_type": "add",
+            "steps": [
+              "Ensure reaction vessel is present and empty.",
+              "Place a clean stir bar in the vessel.",
+              "Measure the specified amount of reagent.",
+              "Transfer reagent into the vessel."
+            ]
+          },
+          {
+            "op_type": "add",
+            "steps": [
+              "Ensure reaction vessel is present and empty.",
+              "Place a clean stir bar in the vessel.",
+              "Measure the specified amount of reagent.",
+              "Transfer reagent into the vessel."
+            ]
+          },
+          {
+            "op_type": "add",
+            "steps": [
+              "Ensure reaction vessel is present and empty.",
+              "Place a clean stir bar in the vessel.",
+              "Measure the specified amount of NH 4 OH.",
+              "Transfer NH 4 OH into the vessel."
+            ]
+          },
+          {
+            "op_type": "add",
+            "steps": [
+              "Ensure reaction vessel is present and empty.",
+              "Place a clean stir bar in the vessel.",
+              "Measure the specified amount of reagent.",
+              "Transfer reagent into the vessel."
+            ]
+          },
+          {
+            "op_type": "add",
+            "steps": [
+              "Ensure reaction vessel is present and empty.",
+              "Place a clean stir bar in the vessel.",
+              "Measure the specified amount of highly dispersed Fe 3 O 4 @Chl/Fe nanoclusters.",
+              "Transfer highly dispersed Fe 3 O 4 @Chl/Fe nanoclusters into the vessel."
+            ]
+          },
+          {
+            "op_type": "add",
+            "steps": [
+              "Ensure reaction vessel is present and empty.",
+              "Place a clean stir bar in the vessel.",
+              "Measure the specified amount of reagent.",
+              "Transfer reagent into the vessel."
+            ]
+          },
+          {
+            "op_type": "add",
+            "steps": [
+              "Ensure reaction vessel is present and empty.",
+              "Place a clean stir bar in the vessel.",
+              "Measure the specified amount of Xu et al.",
+              "Transfer Xu et al into the vessel."
+            ]
+          },
+          {
+            "op_type": "add",
+            "steps": [
+              "Ensure reaction vessel is present and empty.",
+              "Place a clean stir bar in the vessel.",
+              "Measure the specified amount of 290°C.",
+              "Transfer 290°C into the vessel."
+            ]
+          },
+          {
+            "op_type": "heat",
+            "steps": [
+              "Place the reaction vessel on a hotplate.",
+              "Ramp to the target temperature.",
+              "Maintain the target temperature for the specified time."
+            ]
+          },
+          {
+            "op_type": "heat",
+            "steps": [
+              "Place the reaction vessel on a hotplate.",
+              "Ramp to the target temperature.",
+              "Maintain the target temperature for the specified time."
+            ]
+          },
+          {
+            "op_type": "heat",
+            "steps": [
+              "Place the reaction vessel on a hotplate.",
+              "Ramp to the target temperature.",
+              "Maintain the target temperature for the specified time."
+            ]
+          },
+          {
+            "op_type": "stir",
+            "steps": [
+              "Place the reaction vessel on a stir plate.",
+              "Set the stirrer to an appropriate speed.",
+              "Stir for the specified time."
+            ]
+          },
+          {
+            "op_type": "dry",
+            "steps": [
+              "Perform operation 'dry' as described: Finally, the metal-based nanomaterials can be obtained with excellent purity and uniform distribution via drying and heat treatment [ 82 ]."
+            ]
+          },
+          {
+            "op_type": "dry",
+            "steps": [
+              "Perform operation 'dry' as described: Properly setting working parameters, such as the precursor concentration, pH, aging time, drying speed, and calcination temperature, for the reaction is crucial because these variables affect the structure, porosity, shape, and size of the products [ 83 – 85 ]."
+            ]
+          },
+          {
+            "op_type": "stir",
+            "steps": [
+              "Place the reaction vessel on a stir plate.",
+              "Set the stirrer to an appropriate speed.",
+              "Stir for the specified time."
+            ]
+          }
+        ]
+      },
+      {
+        "text": "Synthesis strategies for metal-based nanomaterials To date, various metal-based nanomaterials with distinct structures, sizes, morphologies, and chemical compositions have been designed for use in nanomedicine. These fundamental parameters, which are closely related to the physicochemical properties of metal-based nanomaterials, have laid the foundation for the use of metal-based nanomaterials as cancer imaging or therapeutic agents. As the size decreases, metal-based nanomaterials tend to exhibit an increased ability to extravasate from tumor blood vessels and penetrate deeper into tumor tissues [ 27 ]. Rod-shaped metal-based nanomaterials are more likely to accumulate in the tumor parenchyma compared to their spherical or other geometrically shaped counterparts [ 28 ]. Therefore, appropriate synthesis strategies should be selected with precise control over reaction conditions to modulate the basic parameters of metal-based nanomaterials and meet the requirements for cancer diagnosis and treatment. In general, the main strategies for synthesizing metal-based nanomaterials can be divided into two categories: physical and chemical methods. Physical preparation approaches, such as grinding and sputtering, are simple to operate and are commonly used for synthesizing metal-based nanomaterials [ 29 ,  30 ]. Nevertheless, the undesired shape and size of the obtained nanomaterials restrict their direct in vivo applications. In contrast, metal-based nanomaterials prepared by chemical methods have the advantages of uniform size distribution, controllable morphology, and facile surface functionalization. Conventional chemical preparation methods include precipitation, hydrothermal synthesis [ 31 ], solvothermal synthesis [ 32 ], thermal decomposition [ 33 ], and the sol-gel method [ 34 ] (Fig.  3 ). Here, we introduce the mechanisms and several typical examples of these methods. The advantages and disadvantages of metal-based nanomaterial synthesis strategies are summarized in Table  2 . Fig. 3 Schematic of synthesis methods for metal-based nanomaterials. The common methods for synthesizing these materials include precipitation, hydrothermal synthesis, solvothermal synthesis, thermal decomposition, and the sol-gel method. It was created in BioRender Table 2 Summary of the advantages and disadvantages of synthesis strategies for metal-based nanomaterials Synthesis strategies Advantages Disadvantages Precipitation method Simple process, convenient operation, rapid reaction, low cost, easy to industrialize Difficult to control crystal shape and separate products, low product purity Hydrothermal method Facile operation, high product purity, high crystallinity of nanocrystals, low melting point, low energy consumption, controllable product shape and size, low pollution levels Inability to directly observe crystal growth, expensive autoclaves, long production time Solvothermal method High product purity, good product dispersion, controllable nanostructure morphology Unobservable synthesis process, high cost, low product yield, potential safety hazards Thermal decomposition method High product purity, controllable product shape and size, narrow product size distribution High equipment cost, high energy consumption, complex operation, small output Sol-gel method Low cost, high product purity, controllable product shape and size Long preparation time, unstable product structure, product is prone to agglomeration Precipitation method The precipitation method typically involves the addition of a precipitant to a mixture of solutions containing different chemicals. Hydroxides [ 35 ], carbonates [ 36 ], and oxalates [ 37 ,  38 ] are typical precipitants. When the concentration product of ions in a solution exceeds the solubility product, cations and anions bind together to form crystal nuclei [ 39 ]. Subsequently, the crystal size increases as the solute continuously deposits, leading to the formation of an insoluble precursor precipitate [ 39 ]. On this basis, impurities mixed in the precursor products can be removed through processes such as filtration and washing. Ultimately, metal-based nanomaterials with the desired structures, morphologies, and dimensions can be obtained through processes such as drying or calcination [ 40 ,  41 ]. For example, Liu et al. [ 42 ] successfully synthesized hollow MnO 2  nanoshells via the redox deposition method for efficient loading of chemotherapeutic drugs, thereby facilitating enhanced treatment of colorectal cancer. Moreover, Zhang et al. [ 43 ] prepared CaO 2  nanomaterials by adding H 2 O 2  to a mixed solution containing ammonia, CaCl 2 , and polyethylene glycol (PEG), followed by adjusting the pH to 11.5 using NaOH. Notably, the use of capping agents or surfactants is beneficial to synthesize metal-based nanomaterials with a controlled particle size and uniform distribution. Specifically, during the crystal growth phase, agglomeration or Ostwald ripening is likely to occur to reduce surface energy, which may lead to an excessive increase in the size of metal-based nanomaterials. In this case, by adding capping agents or surfactants, the electrostatic repulsion between metal-based nanomaterials can be enhanced, thereby achieving steric stabilization and preventing coagulation [ 44 ]. For instance, Bleier et al. [ 45 ] employed alkylated pentanediones as surfactants to reduce magnetic nanomaterial agglomeration. Co-precipitation has been recognized as a facile approach for the fabrication of metal-based nanomaterials. By introducing a precipitant into a homogeneous metallic salt solution prepared in specific proportions, the co-precipitation method enables the complete precipitation of all metal cations from the solution. In this way, various metal-based nanostructures such as pure metal nanomaterials, metal alloy nanomaterials, metal compounds, MOFs, and metal complexes with uniform size distributions can be easily obtained [ 46 – 48 ]. For example, Darwish et al. [ 49 ] used NH 4 OH as a precipitant and added it to a solution containing Fe 3+  and Fe 2+  to obtain precursor precipitates at 70°C. Subsequently, polyvinyl alcohol was introduced as a surfactant to fabricate monodisperse, stable magnetite nanomaterials with good hyperthermia properties. Similarly, Chin et al. [ 50 ] synthesized highly dispersed Fe 3 O 4 @Chl/Fe nanoclusters using the co-precipitation method by adding NH 4 OH to a solution containing FeCl 3 , FeCl 2 , and iron chlorophyll at room temperature. Hydrothermal method Hydrothermal synthesis is a widely employed approach for fabricating diverse metal-based nanomaterials, such as metal nanomaterials, metal alloy nanomaterials, metal compounds, MOFs, and metal-based COFs [ 51 – 55 ]. The hydrothermal process is conducted in a sealed autoclave at high temperatures, where metal precursors are used as raw materials, and supercritical water is used as the solvent. The metal-based nanomaterials are characterized by their small size and narrow size distribution. Mineralizers are often introduced into the reaction system to further enhance the solubility of the precursor. Certain reaction parameters, including the reaction time, temperature, pH, and precursor concentration, affect the structure, size, and morphology of nanomaterials [ 31 ,  56 ]. Furthermore, surface modification is an alternative approach to effectively modulate the morphology of metal-based nanomaterials [ 57 ]. In one typical example, Liu et al. [ 31 ] investigated the influence of different reaction conditions on the physical properties of ZrO 2  nanomaterials by altering process variables during hydrothermal synthesis. As a result, the size of ZrO 2  nanomaterials exhibited a steady increase with prolonged reaction time or increased precursor concentration, while altering the pH value of the reaction system resulted in diverse crystal structures. Compared to other chemical preparation methods, hydrothermal treatment has the advantages of facile operation, rapid reaction, and high product purity, which have attracted considerable attention among researchers. For example, Wang et al. [ 58 ] successfully prepared iron-based nanosheets by a hydrothermal method using sodium salicylate, NaOH, and Fe(NO 3 ) 3  in an autoclave at 120°C. They found that these nanosheets exhibited high purity and excellent photothermal conversion performance, as well as drug-loading capability. In another study, PEG-coated yttrium-doped ZnO nanomaterials with a narrow size distribution were conveniently synthesized via a low-cost one-step hydrothermal process, which displayed photoluminescence and X-ray attenuation properties, along with PDT performance [ 59 ]. Homogeneous and stable LDH nanomaterials can be synthesized with high repeatability through co-precipitation and hydrothermal synthesis. For example, Xu et al. [ 60 ] precipitated MgAl-LDH by introducing a mixed solution containing MgCl 2  and AlCl 3  into NaOH solution via the co-precipitation method. Subsequently, stable and homogeneous Mg 2 Al-Cl-LDH suspensions were successfully synthesized via a hydrothermal method in an autoclave at 100°C using the MgAl-LDH solution. This facile and reproducible synthesis method provides a new approach for the large-scale production of LDH nanomaterials. Solvothermal method Based on the hydrothermal process, the solvothermal method employs organic solvents, such as ethanol, ethylene glycol, and butanediol, instead of water as the reaction medium to realize the controllable synthesis of metal-based nanomaterials with various structures, sizes, and morphologies by adjusting the composition and amount of solvents [ 61 – 64 ]. For example, Asakura et al. [ 65 ] synthesized a range of metal oxyfluorides with diverse morphologies through solvothermal reactions of precursors (MoO 3  and WO 3 ) with NaF in different organic solvent systems. The products synthesized using acetonitrile as the solvent exhibited a rod-like shape, whereas those prepared using ethanol as the solvent displayed a polyhedral shape. Differences in the solubility of reactants in different organic solvents can also affect particle size. The solvothermal reactions of MoO 3 , WO 3 , and NaF in organic solvents with higher solubility facilitated the synthesis of smaller particles. In addition to altering the solvent type, suitable organic ligands are commonly used to regulate the size and morphology of solvothermal products [ 66 ]. In one representative example, Duong et al. [ 66 ,  67 ] utilized oleic acid as a surfactant to prepare a series of cobalt iron oxide nanomaterials through the solvothermal method. Compared to the bare large-sized cubic nanomaterials, the oleic acid-coated nanomaterials were spherical, with smaller sizes and a more homogeneous size distribution. The observed outcomes could be attributed to the improved stabilization of nucleation and crystal growth by oleic acid. Thermal decomposition method The typical thermal decomposition method involves dissolving a precursor in an organic solvent with a high boiling point, followed by a high-temperature decomposition reaction. The obtained monomers undergo burst nucleation and slow growth, resulting in the formation of monodisperse metal-based nanomaterials in the presence of surface ligands. In general, this synthesis process represents an irreversible material decomposition process devoid of oxygen involvement, which has been extensively used in the production of many pure metal nanomaterials, metal oxide nanomaterials (especially magnetic nanomaterials), bimetallic alloy nanomaterials, and metal semiconductor compounds [ 51 ]. The most common surface ligands, including oleic acid, oleylamine, oleyl alcohol, and triphenylphosphine, can affect the size and shape of metal-based nanomaterials by restricting the space and rate of crystal growth [ 68 – 70 ]. Singapati et al. [ 71 ] synthesized iron oxide nanomaterials using iron oleate complexes as the precursor, with oleic acid and oleylamine as ligands, and octadecene as the solvent at a high temperature of 320°C. The nanomaterials generated when using oleyl alcohol as a ligand exhibited a smaller and more irregular morphology compared to those obtained when using oleic acid. In another study, superparamagnetic iron oxide nanoparticles (SPIONs) were synthesized using oleic acid and trioctylphosphine as ligands [ 72 ]. The use of trioctylphosphine as a ligand resulted in the formation of larger-sized SPIONs compared to those obtained using oleic acid as the ligand. Liu et al. [ 73 ] successfully prepared monodisperse sea urchin-like Co-P nanomaterials by adding cobalt acetate and triphenylphosphine to an oleylamine solvent at a temperature of 290°C. In addition to the ligand type, variables such as temperature, heating rate, inert gas flow rate, and precursor concentration used in the thermal decomposition process substantially affect the physical characteristics of the final products. Recent research has found that nucleation rates accelerate with increasing heating rates, resulting in the production of smaller metal-based nanomaterials. Additionally, a lower precursor concentration decreases the growth rate of crystals, leading to smaller metal-based nanomaterials [ 72 ,  74 ]. Demessie et al. [ 75 ] observed that as the nitrogen flow rate increased during the thermal decomposition reaction, iron oxide-based nanomaterials exhibited a lack of core–shell structure, decreased crystallinity, smaller sizes, and reduced magnetic heating performance. The physicochemical properties of metal-based nanomaterials inevitably vary among different production batches. The large-scale synthesis of uniformly sized nanomaterials is necessary to minimize these differences and optimize production costs. Feld et al. [ 76 ] prepared uniform-sized SPIONs through thermal decomposition of iron oleate precursor. Iron oleate was synthesized via a simple reaction of iron carbonate with oleic acid. Iron carbonate was more stable than most iron salts, which contributed to the high uniformity of the synthesized iron oleates and SPIONs. The size and shape of SPIONs could be precisely controlled by adjusting the reaction time and the oleic acid-to-Fe ratio. Owing to the reproducibility and high flexibility of the synthesis pathway, up to 20 g of SPIONs could be produced per batch. Dong et al. [ 74 ] presented a general approach for synthesizing uniform magnetite nanomaterials by thermally decomposing iron acetylacetonate. By simply adjusting the aging temperature, precursor concentration, and amounts of surface ligands and reducing agents, the particle size can be precisely controlled. In short, due to the good biocompatibility and relatively low cost of precursors such as metal oleate complexes and metal acetylpyruvate, coupled with the high efficiency of the synthesis method and the precise control over size and morphology, metal-based nanomaterials can be produced on a large scale via thermal decomposition for clinical and biological applications. Sol-gel method The sol-gel method is widely regarded as a versatile approach for the synthesis of various nanostructures, including metal compounds (metal oxides, fluorides, sulfides, nitrides, borides, chlorides), MOFs, and metal ion-chelate complexes [ 77 – 81 ]. In general, the sol-gel process involves dissolving inorganic metallic salts, such as nitrates or oxalates, in water or mixing metal alkoxides with an appropriate amount of alcohol to induce the hydrolysis process and subsequent polycondensation reaction, leading to the formation of a sol-gel system with a porous structure. The subsequent interconnections among the particles in the system contribute to gel formation. Finally, the metal-based nanomaterials can be obtained with excellent purity and uniform distribution via drying and heat treatment [ 82 ]. In contrast to conventional methods, the sol-gel synthesis process does not require high-temperature treatment, offering a distinct advantage in the efficient and economic production of high-quality materials. Properly setting working parameters, such as the precursor concentration, pH, aging time, drying speed, and calcination temperature, for the reaction is crucial because these variables affect the structure, porosity, shape, and size of the products [ 83 – 85 ]. In a previous study, Lal et al. [ 84 ] reported the influence of calcination temperature on the synthesis of TiO 2  nanomaterials using the sol-gel method. The sol-gel reaction was performed using titanium tetraisopropoxide, isopropanol, and deionized water, and the obtained products were calcined at temperatures ranging from 300 to 800°C. The authors highlighted that the increase in calcination temperature led to a gradual enlargement of the crystalline size, a transformation of the crystalline phase from anatase to rutile, and a progressive reduction in the bandgap. In another study, Rodríguez-Barajas’ group evaluated the effect of variations in solution pH and precursor concentration on the size and morphology of metal-oxide nanomaterials prepared by the sol-gel method [ 85 ]. In this study, TiO 2  nanomaterials, ZnO nanomaterials, and various mixed metal oxide nanomaterials (with TiO 2 -ZnO molar ratios of 3:1, 1:1, and 1:3) were synthesized using different concentrations of titanium (IV) butoxide and zinc nitrate as precursors, ethanol and distilled water as solvents, and adjusting the solution pH using HNO 3  and NH 3 ·H 2 O. As a result, all products synthesized under basic pH conditions were larger than those generated in the acidic process. Moreover, TiO 2 -ZnO binary oxides prepared with varying precursor concentrations displayed diverse morphologies, as evidenced by semi-globular shapes in TiO 2 -ZnO molar ratios of 3:1 and 1:1 compared to tubular rounded shapes in a molar ratio of 1:3. Also, Sheikhi et al. [ 86 ] synthesized ZnO nanomaterials using the hydrolysis and condensation reactions of a zinc acetate precursor and investigated the effects of solution pH on the final products by adjusting the pH with NaOH. As the pH of the solution increased, morphological changes were observed in the ZnO nanomaterials, with a decrease in their average diameter and an increase in their aspect ratio. The rod-like product was obtained during the aging process from 6 to 12 h, and the average diameter and length of the product increased with increasing aging time. However, the product transformed into nanoplates at an aging time of 18 h, resulting in a decrease in both average diameter and length. Table  3  summarizes the scalability, reproducibility, and cost-effectiveness of the above synthesis strategies. In addition to the common synthesis methods for metal-based nanomaterials mentioned above, there are other noteworthy synthesis approaches, such as the prechelation-polymerization method, which represents a prevalent strategy employed in the synthesis of polydopamine-chelated metal ions. This method involves the chelation of metal ions and the oxidative polymerization of dopamine monomers in an aerobic, weakly alkaline environment at room temperature and atmospheric pressure [ 87 ]. In summary, the synthesis process is intricate and rigorous. Metal-based nanomaterials with different sizes, morphologies, excellent crystallinity, and high purity can be prepared by carefully selecting a synthesis scheme and precisely adjusting the reaction parameters. These synthetic approaches confer unique physicochemical properties to metal-based nanomaterials, enabling their use in cancer theranostics. Table 3 Summary of the scalability, reproducibility, and cost-effectiveness of synthesis strategies for metal-based nanomaterials Synthesis strategies Scalability Reproducibility Cost-effectiveness Precipitation method Good scalability; Suitable for large-scale production Good reproducibility; Through precise control over reaction conditions Relatively low cost Hydrothermal method Fair scalability; A certain degree of scalability can be achieved by adjusting the reaction system Good reproducibility; Through strict control over temperature and pressure Relatively high cost; Require autoclave and specific reaction conditions Solvothermal method Fair scalability; Similar to hydrothermal method Good reproducibility; Through strict control over reaction conditions, especially solvent type and temperature Depend on the solvent used; Higher than precipitation method Thermal decomposition method Good scalability; Suitable for industrial-scale production Good reproducibility; Through control over precursors and temperature Good cost-effectiveness; Depend on the precursors and reaction conditions Sol-gel method Good scalability; Can be scaled up by adjusting solution composition and concentration Good reproducibility; Through precise control over solution pH, temperature, and reaction time Good cost-effectiveness; Require specific organic solvents",
+        "operations": [
+          {
+            "op_type": "add",
+            "sentence": "Here, we introduce the mechanisms and several typical examples of these methods.",
+            "start_char": 1821,
+            "end_char": 1901,
+            "materials": [],
+            "params": {}
+          },
+          {
+            "op_type": "stir",
+            "sentence": "On this basis, impurities mixed in the precursor products can be removed through processes such as filtration and washing.",
+            "start_char": 3998,
+            "end_char": 4120,
+            "materials": [],
+            "params": {}
+          },
+          {
+            "op_type": "dry",
+            "sentence": "Ultimately, metal-based nanomaterials with the desired structures, morphologies, and dimensions can be obtained through processes such as drying or calcination [ 40 ,  41 ].",
+            "start_char": 4121,
+            "end_char": 4294,
+            "materials": [],
+            "params": {}
+          },
+          {
+            "op_type": "add",
+            "sentence": "[ 43 ] prepared CaO 2  nanomaterials by adding H 2 O 2  to a mixed solution containing ammonia, CaCl 2 , and polyethylene glycol (PEG), followed by adjusting the pH to 11.5 using NaOH.",
+            "start_char": 4542,
+            "end_char": 4726,
+            "materials": [
+              "CaO 2  nanomaterials",
+              "2 O"
+            ],
+            "params": {}
+          },
+          {
+            "op_type": "add",
+            "sentence": "In this case, by adding capping agents or surfactants, the electrostatic repulsion between metal-based nanomaterials can be enhanced, thereby achieving steric stabilization and preventing coagulation [ 44 ].",
+            "start_char": 5097,
+            "end_char": 5304,
+            "materials": [],
+            "params": {}
+          },
+          {
+            "op_type": "add",
+            "sentence": "By introducing a precipitant into a homogeneous metallic salt solution prepared in specific proportions, the co-precipitation method enables the complete precipitation of all metal cations from the solution.",
+            "start_char": 5543,
+            "end_char": 5750,
+            "materials": [],
+            "params": {}
+          },
+          {
+            "op_type": "add",
+            "sentence": "For example, Darwish et al. [ 49 ] used NH 4 OH as a precipitant and added it to a solution containing Fe 3+  and Fe 2+  to obtain precursor precipitates at 70°C.",
+            "start_char": 5971,
+            "end_char": 6133,
+            "materials": [
+              "NH 4 OH"
+            ],
+            "params": {
+              "temp": "70°C"
+            }
+          },
+          {
+            "op_type": "add",
+            "sentence": "Subsequently, polyvinyl alcohol was introduced as a surfactant to fabricate monodisperse, stable magnetite nanomaterials with good hyperthermia properties.",
+            "start_char": 6134,
+            "end_char": 6289,
+            "materials": [],
+            "params": {}
+          },
+          {
+            "op_type": "add",
+            "sentence": "[ 50 ] synthesized highly dispersed Fe 3 O 4 @Chl/Fe nanoclusters using the co-precipitation method by adding NH 4 OH to a solution containing FeCl 3 , FeCl 2 , and iron chlorophyll at room temperature.",
+            "start_char": 6313,
+            "end_char": 6515,
+            "materials": [
+              "highly dispersed Fe 3 O 4 @Chl/Fe nanoclusters",
+              "NH 4 OH"
+            ],
+            "params": {}
+          },
+          {
+            "op_type": "add",
+            "sentence": "Mineralizers are often introduced into the reaction system to further enhance the solubility of the precursor.",
+            "start_char": 7031,
+            "end_char": 7141,
+            "materials": [],
+            "params": {}
+          },
+          {
+            "op_type": "add",
+            "sentence": "For example, Xu et al. [ 60 ] precipitated MgAl-LDH by introducing a mixed solution containing MgCl 2  and AlCl 3  into NaOH solution via the co-precipitation method.",
+            "start_char": 8844,
+            "end_char": 9010,
+            "materials": [
+              "Xu et al"
+            ],
+            "params": {}
+          },
+          {
+            "op_type": "add",
+            "sentence": "[ 73 ] successfully prepared monodisperse sea urchin-like Co-P nanomaterials by adding cobalt acetate and triphenylphosphine to an oleylamine solvent at a temperature of 290°C.",
+            "start_char": 12568,
+            "end_char": 12744,
+            "materials": [
+              "290°C"
+            ],
+            "params": {
+              "temp": "290°C"
+            }
+          },
+          {
+            "op_type": "heat",
+            "sentence": "In addition to the ligand type, variables such as temperature, heating rate, inert gas flow rate, and precursor concentration used in the thermal decomposition process substantially affect the physical characteristics of the final products.",
+            "start_char": 12745,
+            "end_char": 12985,
+            "materials": [],
+            "params": {}
+          },
+          {
+            "op_type": "heat",
+            "sentence": "Recent research has found that nucleation rates accelerate with increasing heating rates, resulting in the production of smaller metal-based nanomaterials.",
+            "start_char": 12986,
+            "end_char": 13141,
+            "materials": [],
+            "params": {}
+          },
+          {
+            "op_type": "heat",
+            "sentence": "[ 75 ] observed that as the nitrogen flow rate increased during the thermal decomposition reaction, iron oxide-based nanomaterials exhibited a lack of core–shell structure, decreased crystallinity, smaller sizes, and reduced magnetic heating performance.",
+            "start_char": 13302,
+            "end_char": 13556,
+            "materials": [],
+            "params": {}
+          },
+          {
+            "op_type": "stir",
+            "sentence": "In general, the sol-gel process involves dissolving inorganic metallic salts, such as nitrates or oxalates, in water or mixing metal alkoxides with an appropriate amount of alcohol to induce the hydrolysis process and subsequent polycondensation reaction, leading to the formation of a sol-gel system with a porous structure.",
+            "start_char": 15327,
+            "end_char": 15652,
+            "materials": [],
+            "params": {}
+          },
+          {
+            "op_type": "dry",
+            "sentence": "Finally, the metal-based nanomaterials can be obtained with excellent purity and uniform distribution via drying and heat treatment [ 82 ].",
+            "start_char": 15748,
+            "end_char": 15887,
+            "materials": [],
+            "params": {}
+          },
+          {
+            "op_type": "dry",
+            "sentence": "Properly setting working parameters, such as the precursor concentration, pH, aging time, drying speed, and calcination temperature, for the reaction is crucial because these variables affect the structure, porosity, shape, and size of the products [ 83 – 85 ].",
+            "start_char": 16098,
+            "end_char": 16359,
+            "materials": [],
+            "params": {}
+          },
+          {
+            "op_type": "stir",
+            "sentence": "In this study, TiO 2  nanomaterials, ZnO nanomaterials, and various mixed metal oxide nanomaterials (with TiO 2 -ZnO molar ratios of 3:1, 1:1, and 1:3) were synthesized using different concentrations of titanium (IV) butoxide and zinc nitrate as precursors, ethanol and distilled water as solvents, and adjusting the solution pH using HNO 3  and NH 3 ·H 2 O. As a result, all products synthesized under basic pH conditions were larger than those generated in the acidic process.",
+            "start_char": 17151,
+            "end_char": 17629,
+            "materials": [
+              "2  nanomaterials",
+              "TiO 2 -ZnO molar ratios",
+              "titanium (IV) butoxide"
+            ],
+            "params": {}
+          }
+        ],
+        "expanded": [
+          {
+            "op_type": "add",
+            "steps": [
+              "Ensure reaction vessel is present and empty.",
+              "Place a clean stir bar in the vessel.",
+              "Measure the specified amount of reagent.",
+              "Transfer reagent into the vessel."
+            ]
+          },
+          {
+            "op_type": "stir",
+            "steps": [
+              "Place the reaction vessel on a stir plate.",
+              "Set the stirrer to an appropriate speed.",
+              "Stir for the specified time."
+            ]
+          },
+          {
+            "op_type": "dry",
+            "steps": [
+              "Perform operation 'dry' as described: Ultimately, metal-based nanomaterials with the desired structures, morphologies, and dimensions can be obtained through processes such as drying or calcination [ 40 ,  41 ]."
+            ]
+          },
+          {
+            "op_type": "add",
+            "steps": [
+              "Ensure reaction vessel is present and empty.",
+              "Place a clean stir bar in the vessel.",
+              "Measure the specified amount of CaO 2  nanomaterials.",
+              "Transfer CaO 2  nanomaterials into the vessel."
+            ]
+          },
+          {
+            "op_type": "add",
+            "steps": [
+              "Ensure reaction vessel is present and empty.",
+              "Place a clean stir bar in the vessel.",
+              "Measure the specified amount of reagent.",
+              "Transfer reagent into the vessel."
+            ]
+          },
+          {
+            "op_type": "add",
+            "steps": [
+              "Ensure reaction vessel is present and empty.",
+              "Place a clean stir bar in the vessel.",
+              "Measure the specified amount of reagent.",
+              "Transfer reagent into the vessel."
+            ]
+          },
+          {
+            "op_type": "add",
+            "steps": [
+              "Ensure reaction vessel is present and empty.",
+              "Place a clean stir bar in the vessel.",
+              "Measure the specified amount of NH 4 OH.",
+              "Transfer NH 4 OH into the vessel."
+            ]
+          },
+          {
+            "op_type": "add",
+            "steps": [
+              "Ensure reaction vessel is present and empty.",
+              "Place a clean stir bar in the vessel.",
+              "Measure the specified amount of reagent.",
+              "Transfer reagent into the vessel."
+            ]
+          },
+          {
+            "op_type": "add",
+            "steps": [
+              "Ensure reaction vessel is present and empty.",
+              "Place a clean stir bar in the vessel.",
+              "Measure the specified amount of highly dispersed Fe 3 O 4 @Chl/Fe nanoclusters.",
+              "Transfer highly dispersed Fe 3 O 4 @Chl/Fe nanoclusters into the vessel."
+            ]
+          },
+          {
+            "op_type": "add",
+            "steps": [
+              "Ensure reaction vessel is present and empty.",
+              "Place a clean stir bar in the vessel.",
+              "Measure the specified amount of reagent.",
+              "Transfer reagent into the vessel."
+            ]
+          },
+          {
+            "op_type": "add",
+            "steps": [
+              "Ensure reaction vessel is present and empty.",
+              "Place a clean stir bar in the vessel.",
+              "Measure the specified amount of Xu et al.",
+              "Transfer Xu et al into the vessel."
+            ]
+          },
+          {
+            "op_type": "add",
+            "steps": [
+              "Ensure reaction vessel is present and empty.",
+              "Place a clean stir bar in the vessel.",
+              "Measure the specified amount of 290°C.",
+              "Transfer 290°C into the vessel."
+            ]
+          },
+          {
+            "op_type": "heat",
+            "steps": [
+              "Place the reaction vessel on a hotplate.",
+              "Ramp to the target temperature.",
+              "Maintain the target temperature for the specified time."
+            ]
+          },
+          {
+            "op_type": "heat",
+            "steps": [
+              "Place the reaction vessel on a hotplate.",
+              "Ramp to the target temperature.",
+              "Maintain the target temperature for the specified time."
+            ]
+          },
+          {
+            "op_type": "heat",
+            "steps": [
+              "Place the reaction vessel on a hotplate.",
+              "Ramp to the target temperature.",
+              "Maintain the target temperature for the specified time."
+            ]
+          },
+          {
+            "op_type": "stir",
+            "steps": [
+              "Place the reaction vessel on a stir plate.",
+              "Set the stirrer to an appropriate speed.",
+              "Stir for the specified time."
+            ]
+          },
+          {
+            "op_type": "dry",
+            "steps": [
+              "Perform operation 'dry' as described: Finally, the metal-based nanomaterials can be obtained with excellent purity and uniform distribution via drying and heat treatment [ 82 ]."
+            ]
+          },
+          {
+            "op_type": "dry",
+            "steps": [
+              "Perform operation 'dry' as described: Properly setting working parameters, such as the precursor concentration, pH, aging time, drying speed, and calcination temperature, for the reaction is crucial because these variables affect the structure, porosity, shape, and size of the products [ 83 – 85 ]."
+            ]
+          },
+          {
+            "op_type": "stir",
+            "steps": [
+              "Place the reaction vessel on a stir plate.",
+              "Set the stirrer to an appropriate speed.",
+              "Stir for the specified time."
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

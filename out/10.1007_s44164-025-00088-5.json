@@ -1,0 +1,29 @@
+{
+  "paper_id": "10.1007/s44164-025-00088-5",
+  "title": "Conductive biological materials for in vitro models: properties and sustainability implications.",
+  "authors": [],
+  "doi": "10.1007/s44164-025-00088-5",
+  "source": "eupmc",
+  "urls": {
+    "pdf": null
+  },
+  "license": {
+    "type": "unknown"
+  },
+  "access_route": "oa",
+  "sections": [
+    {
+      "heading": "Green synthesis approaches for conductive biomaterials",
+      "text": "Green synthesis approaches for conductive biomaterials Green chemistry strategies have also been increasingly applied to fabricate sustainable conductive biomaterials, focusing on the following: Bio-based graphene production : Graphene, a widely used highly conductive material, is traditionally produced using chemical vapor deposition (CVD) or Hummers’ method, both of which involve hazardous reagents. Newer techniques use plant-derived precursors and enzymatic methods to synthesize biocompatible and environmentally friendly graphene [ 106 ,  107 ]. Biotemplating for conductive scaffolds:  Natural templates such as algae, fungi, and bacterial biofilms are now used to fabricate hierarchically structured, conductive biomaterials with tunable properties, reducing the reliance on synthetic polymers [ 60 ]."
+    }
+  ],
+  "extractions": {
+    "methods_paragraphs": [
+      {
+        "text": "Green synthesis approaches for conductive biomaterials Green chemistry strategies have also been increasingly applied to fabricate sustainable conductive biomaterials, focusing on the following: Bio-based graphene production : Graphene, a widely used highly conductive material, is traditionally produced using chemical vapor deposition (CVD) or Hummers’ method, both of which involve hazardous reagents. Newer techniques use plant-derived precursors and enzymatic methods to synthesize biocompatible and environmentally friendly graphene [ 106 ,  107 ]. Biotemplating for conductive scaffolds:  Natural templates such as algae, fungi, and bacterial biofilms are now used to fabricate hierarchically structured, conductive biomaterials with tunable properties, reducing the reliance on synthetic polymers [ 60 ].",
+        "operations": [],
+        "expanded": []
+      }
+    ]
+  }
+}

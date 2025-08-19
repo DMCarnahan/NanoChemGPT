@@ -1,0 +1,669 @@
+{
+  "paper_id": "10.1186/s11671-025-04323-6",
+  "title": "Environmentally friendly synthesis of quantum dots and their applications in diverse fields from the perspective of environmental compliance: A review.",
+  "authors": [],
+  "doi": "10.1186/s11671-025-04323-6",
+  "source": "eupmc",
+  "urls": {
+    "pdf": null
+  },
+  "license": {
+    "type": "unknown"
+  },
+  "access_route": "oa",
+  "sections": [
+    {
+      "heading": "Solvothermal preparation of inp QDs",
+      "text": "Solvothermal preparation of inp QDs The solvothermal method represents an efficient and rapid approach for synthesizing highly crystalline and monodisperse InP QDs. This synthetic route involves the introduction of precursor mixtures into a solvent maintained at a specific temperature under an inert gas atmosphere, facilitating the instantaneous crystallization of InP monomers into core structures. This method offers precise control over QDs size, thereby enabling effective bandgap engineering. However, the method requires high temperature and Pressure confined system (usually > 300 °C, > 10 MPa), which increases the risk of explosion and the difficulty of safe operation. And its solvent and precursor toxicity will cause a certain burden on the environment. As demonstrated by Sarma et al., the solvothermal synthesis route successfully produced InP QDs with exceptional crystallinity and stability. These QDs exhibited small particle sizes, tunable within the range of 2.5–3.7 nm, achieved by adjusting the reaction temperature between 300 and 430 °C. This temperature modulation resulted in a bandgap tuning range of approximately 0.4 eV within the visible spectrum. The established methodology for InP QDs synthesis serves as a valuable reference for fabricating other III-V semiconductor QDs. Nozik et al. further employed the solvothermal method to synthesize InP QDs with an average particle size of 2.5 ± 0.19 nm [ 51 ]. Yang et al. advanced this technique by developing a stepwise solvothermal approach to synthesize highly fluorescent InP/ZnS core-shell QDs, achieving a remarkable fluorescence QY of 41–42%. Notably, the use of P(N(CH₃)₂)₃ as a precursor offers significant advantages over P(TMS)₃, being both less toxic and more cost-effective, aligning with the principles of green chemistry and sustainable material synthesis [ 52 ]. Kuo et al.further demonstrated the potential of this approach by utilizing safe, eco-friendly, and low-cost precursors to synthesize InP/ZnS core-shell QDs with tunable fluorescence properties through the green solvothermal method, achieving an impressive fluorescence QY of 60.1% [ 53 ].Thus, the solvothermal method shows potential in the controlled synthesis and green improvement of InP QDs, but its harsh synthesis conditions, inherent defect control problems and scale-up barriers are still the core barriers to industrialization. In the future, synergistic breakthroughs in performance and sustainability should be realized through reaction path innovation, precise structure regulation and green process iteration."
+    },
+    {
+      "heading": "Heating method for the preparation of inp QDs",
+      "text": "Heating method for the preparation of inp QDs The heating method is a reliable and scalable technique for colloidal nanocrystal synthesis, which enables controlled nucleation and crystal growth by dissolving precursors and ligands in solvents and initiating reactions by heating. By optimizing the precursors, stabilizers and heating rate, high quality nanocrystals comparable to thermal injection can be produced. However, the decomposition of ligands (e.g., oleylamine) at high temperatures releases amine gases that irritate the respiratory tract. These gases participate in photochemical reactions to form secondary pollutants such as ozone. Rapid nucleation is also prone to causing lattice distortion and high defect densities in QDs. To mitigate environmental impact, solvents (e.g., octadecene, oleylamine) can be recovered via distillation or adsorption techniques, enabling closed-loop production. Figure  4 a illustrates the fundamental process of nanocrystal formation in heated synthesis and its correlation with the reaction vessel temperature [ 54 ]. Pidluzhna et al. employed the heating method to prepare core-shell InP/ZnS hybrid QDs, as depicted in Fig.  4 b Their study focused on the applicability of these synthesized InP/ZnS core-shell QDs in the stepwise fabrication of inverted solar cells, utilizing a combination of thermal vacuum deposition and spin-coating techniques [ 55 ]. Wang et al. developed cadmium-free InP/ZnSeS/ZnS thick-shell QDs using the heating method. By varying the number of zinc sources, they controlled the emission wavelength of the InP core and optimized the thickness of the ZnS layer, thereby enhancing the quality of the QDs [ 56 ]. Kim et al. reported a simple one-pot heating method for synthesizing InP and InP/ZnS core-shell QDs. By precisely controlling the flow rate and crystal growth temperature, they successfully synthesized high-quality InP/ZnS QDs with tunable emission wavelengths ranging from blue-green to red [ 57 ].Summarizing, the heating method in the synthesis of InP-based QDs exhibits the advantages of controllable core-shell structure construction, precise emission wavelength tuning, and highly efficient synthesis in a one-pot method. However, the limitations such as unresolved environmental risks, insufficient defects control, and poor process scalability are generally present. In the future, further breakthroughs can be achieved by developing bio-based ligands to replace oleylamine and coupling distillation/adsorption to achieve closed-loop production, introducing gradient shell layers and post-processing passivation to reduce the defect density, as well as combining microfluidic continuous-flow synthesis with machine-learning optimization of parameters. \n Fig. 4 a  Preparation of nanocrystals by heating-up method [ 54 ].  b  Scheme of InP/ZnS QDs synthesis by heating-up method [ 55 ]"
+    },
+    {
+      "heading": "Hot injection method for the preparation of inp QDs",
+      "text": "Hot injection method for the preparation of inp QDs The hot-injection method achieves the separation of nucleation and growth phases by dissolving the precursor in organic solvents (e.g., octadecene, oleylamine, and trioctylphosphine) by heating and injecting another precursor several times at a specific temperature to trigger the transient supersaturation of the solution, which allows for the homogeneous nucleation and controlled growth of crystals, and the products are both monodispersed and homogeneous; the variety of the choice of the reaction solvents and active agents further expand the product system [ 34 – 58 ]. However, the volatilization/decomposition of solvents at high temperatures (> 300 °C) releases volatile organic compounds (VOCs) (amines, alkanes, etc.), which causes air pollution and health risks, and requires secondary treatment of the exhaust gases and waste liquids. For example, Jamshidi Zavaraki et al. employed a hot injection method to synthesize colloidal InP and ZnS-covered InP QDs, which were successfully applied for the first time as sensitizers in quantum dot-sensitized solar cells (QDSSCs) [ 59 ]. However, the stability of colloidal InP QDs was lower and the sensitivity to moisture is higher, so ZnS coating was used in this work to enhance the stability of InP and to protect InP QDs from moisture and interaction with electrolytes. Song et al. first introduced of high-quality InP QDs by the reaction of P(N(CH 3 ) 2 ) 3  hot injected at 220 °C with In and Zn chlorides dissolved in the relatively weakly coordinated solvent oleylamine, and achieved an unprecedented series of controlled synthesis of bandgap-tunable InP QDs, successfully achieving nucleation/growth of QDs (Fig.  5 ) [ 60 ]. Ramasamy et al. prepared InP/ZnS core-shell QDs using the hot injection method, and in this experiment, it was found that the presence of a small amount of water as an impurity not only significantly reduced the FWHM and increased the QY of InP/ZnS QDs [ 61 ]. InP/ZnS QDs obtained using In precursors and the presence of water in the solvent had a narrow FWHM of 46 nm and a high QY of 45%. In comparison, without water doping, the emission wavelength of the synthesized QDs was around 625 nm, with a FWHM of 66 nm and a QY of about 33% (its High Resolution Transmission Electron Microscope (HR-TEM) schematic of QDs synthesized with and without water was displayed in Fig.  6 ). Singh et al. successfully synthesized InP QDs and InP/ZnS core-shell structures using the hot injection technique. It was observed that the PL intensity increased gradually when the ZnS shell layer was increased, and the synthesized QDs were treated with HF to remove the defects on the surface of QDs and thus enhanced the luminescence intensity [ 62 ]. Hot injection method shows multiple breakthroughs in the synthesis of InP QDs. However, the method still suffers from limitations such as high-temperature decomposition of solvents, unidentified mechanism of water impurity enhancement, and strong corrosive waste liquid from strong acid treatment. In the future, we need to focus on the development of low-toxicity solvents to replace oleylamine, establish a quantitative model of water content and defect states to stabilize the process, and explore green defect passivation techniques such as photo/thermal annealing. \n Fig. 5 a  Normalized PL spectra,  b  photograph, and  c  variations of emission QY and FWHM of four InP/ZnS QD samples with different emission colors [ 60 ] \n \n Fig. 6 TEM images of InP core QDs synthesized ( a ) with and ( d ) without water. TEM and HR-TEM images of InP/ZnS core-shell QDs synthesized ( b ,  c ) with and ( e ,  f ) without water [ 61 ] \n In addition to the aforementioned common preparation methods, alternative approaches such as ion exchange and crystal growth techniques, have been developed. The ion exchange system (Fig.  7 ) addresses the limitations of conventional crystal preparation methods and has emerged as a superior alternative for fabricating semiconductor nanostructures with phases that are challenging to obtain through direct chemical synthesis [ 63 ]. In this method, guest ions in organic or aqueous solvents replace cations in the host material, facilitating rapid ion exchange among Group II-VI, I-VI, and IV-VI semiconductors while preserving the original nanoparticle size and morphology. Moreover, this preparation procedure does not require expensive experimental equipment or specialized laboratory conditions [ 64 – 65 ]. For instance, Friedfeld et al. investigated the cationic doping behavior of InP clusters with Zn²⁺ and Ga³⁺ [ 66 ]. They identified the mixed alkyl carboxylic acid cluster Zn₅(Et)₄(OAc)₆ as the most effective zinc precursor, while both Ga(OAc)₃ and [Ga(CH₃)₂(MA)]₂ exhibited comparable doping activity. Shan et al. synthesized monodisperse InP QDs with a substabilized feldspathic zincite structure through a cation exchange reaction between Cu₃P nanocrystals and In precursors in the presence of tri-n-octylphosphine [ 67 ]. By adjusting the size of Cu₃P nanocrystals, size-tunable fibrillated zincite InP QDs were obtained (as shown in Fig.  8 ), demonstrating excellent optical properties. The crystal growth process involves separating nucleation and crystal growth into two distinct steps [ 68 ]. In the first step, a homogeneous solution containing seed crystals is prepared. In the second step, the seed crystal solution is mixed with the quantum dot precursor solution at room temperature. Finally, the mixture undergoes segmented flow processing at a temperature lower than the initial seed crystal formation temperature to ensure controlled crystal growth. This approach represents a significant advancement in achieving controlled QD synthesis with a narrow size distribution. Enright et al. successfully synthesized InP nanoparticles with a particle size of 3.0 nm using this crystal growth method. Their work also demonstrated that the crystal seed growth technique can be employed to synthesize tetrahedral nanostructures, and nearly any seed crystal with an accessible (111) plane can be grown in the direction of tetrahedral prisms. This methodology not only encompasses cubic core structures but also extends to (111) planar distorted quadrilateral lattices [ 69 ]. \n Fig. 7 Process of preparing QDs by cation exchange method [ 63 ] \n \n Fig. 8 TEM images of Cu 3 P NCs (TOP) with tunable size by applying different Cu/TOP molar ratios and corresponding exchanged InP QDs (bottom):  a ,  b  Cu/ TOP, 1/1.75.  c ,  d  Cu/TOP, 1/2.0.  e ,  f  Cu/TOP, 1/2.5. The inset images show the relevant size histograms.  g  XRD patterns and  h  Absorption spectra of different-sized InP QDs [ 67 ]"
+    },
+    {
+      "heading": "Top-down method for the preparation of GQDs",
+      "text": "Top-down method for the preparation of GQDs The top-down approach allows direct physical or chemical access to large-area graphene arrays into GQDs with nanometer dimensions, controlling the shape, size, and growth direction of GQDs, and is suitable for large-scale production. However, the insufficient controllability of the size and shape of QDs prepared by this method, the serious surface defects and structural damages of QDs, the low efficiency of large-scale production, the high cost and energy consumption as well as the biocompatibility of nanoparticles limit their applications in medical fields. The top-down method presents diversified technological paths in the synthesis of GQDs, such as Samra et al. used coke as a raw material (with low impurities and high carbon content) to produce GQDs by a facile process (Fig.  9 a), and spectroscopic characterization verified the feasibility [ 77 ]. Xie et al. synthesized highly crystalline monodispersed bluish N-GQDs by nitrogen-containing 3D nanocarbon electrochemical cutting (Fig.  9 b), with a QY of 19.3% and nitrogen doping of 12.3%, combining both economic and green advantages [ 78 ]. Zhou’s team innovated acid vapor cutting of bulk nitrogen-doped carbon films (1 ml of nitric acid) and in situ filtration to obtain water-soluble blue-green photoresponsive N-GQDs (1.5–3.7 nm, Fig.  10 a), circumventing the tedious isolation step [ 79 ]. Tadyszak et al. demonstrated that the that the graphene oxide precursor preparation of GOQDs did not change the C/O ratio, and found 500 nm strong fluorescence dispersion and paramagnetism under 280–380 nm excitation (Fig.  10 b) [ 80 ]. Soriano et al. developed GQDs fluorescence for the detection of carbamates in water by using mixed-acid oxidation to modulate the reaction time (Fig.  10 c) [ 81 ].However, there are core limitations of this method, such as the strong corrosive waste liquid generated by the acid treatment method, the still low QY (< 20%) and the unclear mechanism of magnetic/optical property regulation. In the future, it could be attempted to develop green stripping technologies like laser/plasma to replace the strong acid process, construct doping-fluorescence-magnetism constitutive relationship models, and explore biomass carbon sources to reduce costs and increase efficiency. \n Fig. 9 a  Top-down method for the preparation of GQDs [ 77 ].  b  Schematic of the structure of N-doped GQDs [ 78 ] \n \n Fig. 10 a  Preparation schematic of water-soluble N-GQDs [ 79 ].  b  Fluorescence spectrogram at multiple excitation wavelengths [ 80 ].  c  Overall synthesis strategy for the formation of GQDs [ 81 ]"
+    },
+    {
+      "heading": "Bottom-up Preparation method for the Preparation of GQDs",
+      "text": "Bottom-up Preparation method for the Preparation of GQDs The bottom-up approach is to synthesize GQDs organically by the carbonization of organic molecules (e.g., citric acid, glucose, etc.) or polymers (the process is depicted in Fig.  11 ). The advantage of this method is that it is easy to control the shape and size of GQDs, which is an irreplaceable advantage in regulating the physical properties and molecular structure of substances. There are also certain disadvantages, such as the synthesis of large-size GQDs with many steps and cumbersome processes [ 82 ]. Prof. Chiang’s team investigated a bottom-up preparation method for the synthesis of colloidal QDs using an aqueous organosulfate solution treated with an atmospheric pressure argon (Ar) microplasma [ 83 ]. The average diameter of the fabricated colloidal GQDs was 4.9 nm, the QY was 1.5%, and the room temperature photoluminescence peak was 448 nm. Xu et al.used a top-down preparation method to synthesize GQDs with high solubility and excellent film-forming ability in common organic solvents. Significantly, this research not only solved the limitation of low solubility of GQDs prepared by traditional methods in organic solubility but also expected to successfully apply GQDs in other optoelectronic fields [ 84 ].Gao’s team applied a bottom-up synthesis method to prepare two water-soluble GQDs with different degrees of oxidation using graphene molecules, namely O-GQDs prepared by oxidation and R-QDs synthesized by reduction. The structural and compositional information of two GQDs, such as relevant functional groups, optical properties, structures, and molecular weights, was directly obtained through a series of characterizations, such as HR-TEM, Atomic Force Microscope (AFM), UV-vis spectroscopy, FL spectroscopy, and so on, to investigate their luminescence mechanisms [ 85 ]. Although the bottom-up method is novel and green, the current quantum efficiency is low; the top-down method is effective in solving the solubility problem, but has deficiencies in the complexity of the preparation process, etc. In the future, it is expected to optimize the preparation method to improve the quantum efficiency and further expand the applications in the field of optoelectronics. \n Fig. 11 A diagram of the process of preparing QDs by bottom-up method [ 82 ]"
+    }
+  ],
+  "extractions": {
+    "methods_paragraphs": [
+      {
+        "text": "Solvothermal preparation of inp QDs The solvothermal method represents an efficient and rapid approach for synthesizing highly crystalline and monodisperse InP QDs. This synthetic route involves the introduction of precursor mixtures into a solvent maintained at a specific temperature under an inert gas atmosphere, facilitating the instantaneous crystallization of InP monomers into core structures. This method offers precise control over QDs size, thereby enabling effective bandgap engineering. However, the method requires high temperature and Pressure confined system (usually > 300 °C, > 10 MPa), which increases the risk of explosion and the difficulty of safe operation. And its solvent and precursor toxicity will cause a certain burden on the environment. As demonstrated by Sarma et al., the solvothermal synthesis route successfully produced InP QDs with exceptional crystallinity and stability. These QDs exhibited small particle sizes, tunable within the range of 2.5–3.7 nm, achieved by adjusting the reaction temperature between 300 and 430 °C. This temperature modulation resulted in a bandgap tuning range of approximately 0.4 eV within the visible spectrum. The established methodology for InP QDs synthesis serves as a valuable reference for fabricating other III-V semiconductor QDs. Nozik et al. further employed the solvothermal method to synthesize InP QDs with an average particle size of 2.5 ± 0.19 nm [ 51 ]. Yang et al. advanced this technique by developing a stepwise solvothermal approach to synthesize highly fluorescent InP/ZnS core-shell QDs, achieving a remarkable fluorescence QY of 41–42%. Notably, the use of P(N(CH₃)₂)₃ as a precursor offers significant advantages over P(TMS)₃, being both less toxic and more cost-effective, aligning with the principles of green chemistry and sustainable material synthesis [ 52 ]. Kuo et al.further demonstrated the potential of this approach by utilizing safe, eco-friendly, and low-cost precursors to synthesize InP/ZnS core-shell QDs with tunable fluorescence properties through the green solvothermal method, achieving an impressive fluorescence QY of 60.1% [ 53 ].Thus, the solvothermal method shows potential in the controlled synthesis and green improvement of InP QDs, but its harsh synthesis conditions, inherent defect control problems and scale-up barriers are still the core barriers to industrialization. In the future, synergistic breakthroughs in performance and sustainability should be realized through reaction path innovation, precise structure regulation and green process iteration.",
+        "operations": [
+          {
+            "op_type": "heat",
+            "sentence": "This synthetic route involves the introduction of precursor mixtures into a solvent maintained at a specific temperature under an inert gas atmosphere, facilitating the instantaneous crystallization of InP monomers into core structures.",
+            "start_char": 165,
+            "end_char": 401,
+            "materials": [
+              "InP monomers"
+            ],
+            "params": {}
+          }
+        ],
+        "expanded": [
+          {
+            "op_type": "heat",
+            "steps": [
+              "Place the reaction vessel on a hotplate.",
+              "Ramp to the target temperature.",
+              "Maintain the target temperature for the specified time."
+            ]
+          }
+        ]
+      },
+      {
+        "text": "Heating method for the preparation of inp QDs The heating method is a reliable and scalable technique for colloidal nanocrystal synthesis, which enables controlled nucleation and crystal growth by dissolving precursors and ligands in solvents and initiating reactions by heating. By optimizing the precursors, stabilizers and heating rate, high quality nanocrystals comparable to thermal injection can be produced. However, the decomposition of ligands (e.g., oleylamine) at high temperatures releases amine gases that irritate the respiratory tract. These gases participate in photochemical reactions to form secondary pollutants such as ozone. Rapid nucleation is also prone to causing lattice distortion and high defect densities in QDs. To mitigate environmental impact, solvents (e.g., octadecene, oleylamine) can be recovered via distillation or adsorption techniques, enabling closed-loop production. Figure  4 a illustrates the fundamental process of nanocrystal formation in heated synthesis and its correlation with the reaction vessel temperature [ 54 ]. Pidluzhna et al. employed the heating method to prepare core-shell InP/ZnS hybrid QDs, as depicted in Fig.  4 b Their study focused on the applicability of these synthesized InP/ZnS core-shell QDs in the stepwise fabrication of inverted solar cells, utilizing a combination of thermal vacuum deposition and spin-coating techniques [ 55 ]. Wang et al. developed cadmium-free InP/ZnSeS/ZnS thick-shell QDs using the heating method. By varying the number of zinc sources, they controlled the emission wavelength of the InP core and optimized the thickness of the ZnS layer, thereby enhancing the quality of the QDs [ 56 ]. Kim et al. reported a simple one-pot heating method for synthesizing InP and InP/ZnS core-shell QDs. By precisely controlling the flow rate and crystal growth temperature, they successfully synthesized high-quality InP/ZnS QDs with tunable emission wavelengths ranging from blue-green to red [ 57 ].Summarizing, the heating method in the synthesis of InP-based QDs exhibits the advantages of controllable core-shell structure construction, precise emission wavelength tuning, and highly efficient synthesis in a one-pot method. However, the limitations such as unresolved environmental risks, insufficient defects control, and poor process scalability are generally present. In the future, further breakthroughs can be achieved by developing bio-based ligands to replace oleylamine and coupling distillation/adsorption to achieve closed-loop production, introducing gradient shell layers and post-processing passivation to reduce the defect density, as well as combining microfluidic continuous-flow synthesis with machine-learning optimization of parameters. \n Fig. 4 a  Preparation of nanocrystals by heating-up method [ 54 ].  b  Scheme of InP/ZnS QDs synthesis by heating-up method [ 55 ]",
+        "operations": [
+          {
+            "op_type": "heat",
+            "sentence": "Heating method for the preparation of inp QDs",
+            "start_char": 0,
+            "end_char": 45,
+            "materials": [],
+            "params": {}
+          },
+          {
+            "op_type": "heat",
+            "sentence": "The heating method is a reliable and scalable technique for colloidal nanocrystal synthesis, which enables controlled nucleation and crystal growth by dissolving precursors and ligands in solvents and initiating reactions by heating.",
+            "start_char": 46,
+            "end_char": 279,
+            "materials": [],
+            "params": {}
+          },
+          {
+            "op_type": "heat",
+            "sentence": "By optimizing the precursors, stabilizers and heating rate, high quality nanocrystals comparable to thermal injection can be produced.",
+            "start_char": 280,
+            "end_char": 414,
+            "materials": [],
+            "params": {}
+          },
+          {
+            "op_type": "heat",
+            "sentence": "Figure  4 a illustrates the fundamental process of nanocrystal formation in heated synthesis and its correlation with the reaction vessel temperature [ 54 ].",
+            "start_char": 908,
+            "end_char": 1065,
+            "materials": [],
+            "params": {}
+          },
+          {
+            "op_type": "heat",
+            "sentence": "Pidluzhna et al. employed the heating method to prepare core-shell InP/ZnS hybrid QDs, as depicted in Fig.  ",
+            "start_char": 1066,
+            "end_char": 1174,
+            "materials": [
+              "core-shell InP"
+            ],
+            "params": {}
+          },
+          {
+            "op_type": "heat",
+            "sentence": "Wang et al. developed cadmium-free InP/ZnSeS/ZnS thick-shell QDs using the heating method.",
+            "start_char": 1405,
+            "end_char": 1495,
+            "materials": [
+              "Wang et al. developed cadmium-free InP/ZnSeS/ZnS thick-shell QDs"
+            ],
+            "params": {}
+          },
+          {
+            "op_type": "heat",
+            "sentence": "Kim et al. reported a simple one-pot heating method for synthesizing InP and InP/ZnS core-shell QDs.",
+            "start_char": 1686,
+            "end_char": 1786,
+            "materials": [
+              "a simple one-pot heating method",
+              "InP",
+              "InP/ZnS core-shell QDs"
+            ],
+            "params": {}
+          },
+          {
+            "op_type": "heat",
+            "sentence": "By precisely controlling the flow rate and crystal growth temperature, they successfully synthesized high-quality InP/ZnS QDs with tunable emission wavelengths ranging from blue-green to red [ 57 ].Summarizing, the heating method in the synthesis of InP-based QDs exhibits the advantages of controllable core-shell structure construction, precise emission wavelength tuning, and highly efficient synthesis in a one-pot method.",
+            "start_char": 1787,
+            "end_char": 2213,
+            "materials": [
+              "high-quality InP/ZnS QDs",
+              "InP-based QDs",
+              "a one-pot method"
+            ],
+            "params": {}
+          },
+          {
+            "op_type": "add",
+            "sentence": "In the future, further breakthroughs can be achieved by developing bio-based ligands to replace oleylamine and coupling distillation/adsorption to achieve closed-loop production, introducing gradient shell layers and post-processing passivation to reduce the defect density, as well as combining microfluidic continuous-flow synthesis with machine-learning optimization of parameters. \n ",
+            "start_char": 2361,
+            "end_char": 2748,
+            "materials": [],
+            "params": {}
+          },
+          {
+            "op_type": "heat",
+            "sentence": "4 a  Preparation of nanocrystals by heating-up method [ 54 ].  ",
+            "start_char": 2753,
+            "end_char": 2816,
+            "materials": [
+              "4 a  Preparation"
+            ],
+            "params": {}
+          },
+          {
+            "op_type": "heat",
+            "sentence": "b  Scheme of InP/ZnS QDs synthesis by heating-up method [ 55 ]",
+            "start_char": 2816,
+            "end_char": 2878,
+            "materials": [
+              "InP/ZnS QDs synthesis"
+            ],
+            "params": {}
+          }
+        ],
+        "expanded": [
+          {
+            "op_type": "heat",
+            "steps": [
+              "Place the reaction vessel on a hotplate.",
+              "Ramp to the target temperature.",
+              "Maintain the target temperature for the specified time."
+            ]
+          },
+          {
+            "op_type": "heat",
+            "steps": [
+              "Place the reaction vessel on a hotplate.",
+              "Ramp to the target temperature.",
+              "Maintain the target temperature for the specified time."
+            ]
+          },
+          {
+            "op_type": "heat",
+            "steps": [
+              "Place the reaction vessel on a hotplate.",
+              "Ramp to the target temperature.",
+              "Maintain the target temperature for the specified time."
+            ]
+          },
+          {
+            "op_type": "heat",
+            "steps": [
+              "Place the reaction vessel on a hotplate.",
+              "Ramp to the target temperature.",
+              "Maintain the target temperature for the specified time."
+            ]
+          },
+          {
+            "op_type": "heat",
+            "steps": [
+              "Place the reaction vessel on a hotplate.",
+              "Ramp to the target temperature.",
+              "Maintain the target temperature for the specified time."
+            ]
+          },
+          {
+            "op_type": "heat",
+            "steps": [
+              "Place the reaction vessel on a hotplate.",
+              "Ramp to the target temperature.",
+              "Maintain the target temperature for the specified time."
+            ]
+          },
+          {
+            "op_type": "heat",
+            "steps": [
+              "Place the reaction vessel on a hotplate.",
+              "Ramp to the target temperature.",
+              "Maintain the target temperature for the specified time."
+            ]
+          },
+          {
+            "op_type": "heat",
+            "steps": [
+              "Place the reaction vessel on a hotplate.",
+              "Ramp to the target temperature.",
+              "Maintain the target temperature for the specified time."
+            ]
+          },
+          {
+            "op_type": "add",
+            "steps": [
+              "Ensure reaction vessel is present and empty.",
+              "Place a clean stir bar in the vessel.",
+              "Measure the specified amount of reagent.",
+              "Transfer reagent into the vessel."
+            ]
+          },
+          {
+            "op_type": "heat",
+            "steps": [
+              "Place the reaction vessel on a hotplate.",
+              "Ramp to the target temperature.",
+              "Maintain the target temperature for the specified time."
+            ]
+          },
+          {
+            "op_type": "heat",
+            "steps": [
+              "Place the reaction vessel on a hotplate.",
+              "Ramp to the target temperature.",
+              "Maintain the target temperature for the specified time."
+            ]
+          }
+        ]
+      },
+      {
+        "text": "Hot injection method for the preparation of inp QDs The hot-injection method achieves the separation of nucleation and growth phases by dissolving the precursor in organic solvents (e.g., octadecene, oleylamine, and trioctylphosphine) by heating and injecting another precursor several times at a specific temperature to trigger the transient supersaturation of the solution, which allows for the homogeneous nucleation and controlled growth of crystals, and the products are both monodispersed and homogeneous; the variety of the choice of the reaction solvents and active agents further expand the product system [ 34 – 58 ]. However, the volatilization/decomposition of solvents at high temperatures (> 300 °C) releases volatile organic compounds (VOCs) (amines, alkanes, etc.), which causes air pollution and health risks, and requires secondary treatment of the exhaust gases and waste liquids. For example, Jamshidi Zavaraki et al. employed a hot injection method to synthesize colloidal InP and ZnS-covered InP QDs, which were successfully applied for the first time as sensitizers in quantum dot-sensitized solar cells (QDSSCs) [ 59 ]. However, the stability of colloidal InP QDs was lower and the sensitivity to moisture is higher, so ZnS coating was used in this work to enhance the stability of InP and to protect InP QDs from moisture and interaction with electrolytes. Song et al. first introduced of high-quality InP QDs by the reaction of P(N(CH 3 ) 2 ) 3  hot injected at 220 °C with In and Zn chlorides dissolved in the relatively weakly coordinated solvent oleylamine, and achieved an unprecedented series of controlled synthesis of bandgap-tunable InP QDs, successfully achieving nucleation/growth of QDs (Fig.  5 ) [ 60 ]. Ramasamy et al. prepared InP/ZnS core-shell QDs using the hot injection method, and in this experiment, it was found that the presence of a small amount of water as an impurity not only significantly reduced the FWHM and increased the QY of InP/ZnS QDs [ 61 ]. InP/ZnS QDs obtained using In precursors and the presence of water in the solvent had a narrow FWHM of 46 nm and a high QY of 45%. In comparison, without water doping, the emission wavelength of the synthesized QDs was around 625 nm, with a FWHM of 66 nm and a QY of about 33% (its High Resolution Transmission Electron Microscope (HR-TEM) schematic of QDs synthesized with and without water was displayed in Fig.  6 ). Singh et al. successfully synthesized InP QDs and InP/ZnS core-shell structures using the hot injection technique. It was observed that the PL intensity increased gradually when the ZnS shell layer was increased, and the synthesized QDs were treated with HF to remove the defects on the surface of QDs and thus enhanced the luminescence intensity [ 62 ]. Hot injection method shows multiple breakthroughs in the synthesis of InP QDs. However, the method still suffers from limitations such as high-temperature decomposition of solvents, unidentified mechanism of water impurity enhancement, and strong corrosive waste liquid from strong acid treatment. In the future, we need to focus on the development of low-toxicity solvents to replace oleylamine, establish a quantitative model of water content and defect states to stabilize the process, and explore green defect passivation techniques such as photo/thermal annealing. \n Fig. 5 a  Normalized PL spectra,  b  photograph, and  c  variations of emission QY and FWHM of four InP/ZnS QD samples with different emission colors [ 60 ] \n \n Fig. 6 TEM images of InP core QDs synthesized ( a ) with and ( d ) without water. TEM and HR-TEM images of InP/ZnS core-shell QDs synthesized ( b ,  c ) with and ( e ,  f ) without water [ 61 ] \n In addition to the aforementioned common preparation methods, alternative approaches such as ion exchange and crystal growth techniques, have been developed. The ion exchange system (Fig.  7 ) addresses the limitations of conventional crystal preparation methods and has emerged as a superior alternative for fabricating semiconductor nanostructures with phases that are challenging to obtain through direct chemical synthesis [ 63 ]. In this method, guest ions in organic or aqueous solvents replace cations in the host material, facilitating rapid ion exchange among Group II-VI, I-VI, and IV-VI semiconductors while preserving the original nanoparticle size and morphology. Moreover, this preparation procedure does not require expensive experimental equipment or specialized laboratory conditions [ 64 – 65 ]. For instance, Friedfeld et al. investigated the cationic doping behavior of InP clusters with Zn²⁺ and Ga³⁺ [ 66 ]. They identified the mixed alkyl carboxylic acid cluster Zn₅(Et)₄(OAc)₆ as the most effective zinc precursor, while both Ga(OAc)₃ and [Ga(CH₃)₂(MA)]₂ exhibited comparable doping activity. Shan et al. synthesized monodisperse InP QDs with a substabilized feldspathic zincite structure through a cation exchange reaction between Cu₃P nanocrystals and In precursors in the presence of tri-n-octylphosphine [ 67 ]. By adjusting the size of Cu₃P nanocrystals, size-tunable fibrillated zincite InP QDs were obtained (as shown in Fig.  8 ), demonstrating excellent optical properties. The crystal growth process involves separating nucleation and crystal growth into two distinct steps [ 68 ]. In the first step, a homogeneous solution containing seed crystals is prepared. In the second step, the seed crystal solution is mixed with the quantum dot precursor solution at room temperature. Finally, the mixture undergoes segmented flow processing at a temperature lower than the initial seed crystal formation temperature to ensure controlled crystal growth. This approach represents a significant advancement in achieving controlled QD synthesis with a narrow size distribution. Enright et al. successfully synthesized InP nanoparticles with a particle size of 3.0 nm using this crystal growth method. Their work also demonstrated that the crystal seed growth technique can be employed to synthesize tetrahedral nanostructures, and nearly any seed crystal with an accessible (111) plane can be grown in the direction of tetrahedral prisms. This methodology not only encompasses cubic core structures but also extends to (111) planar distorted quadrilateral lattices [ 69 ]. \n Fig. 7 Process of preparing QDs by cation exchange method [ 63 ] \n \n Fig. 8 TEM images of Cu 3 P NCs (TOP) with tunable size by applying different Cu/TOP molar ratios and corresponding exchanged InP QDs (bottom):  a ,  b  Cu/ TOP, 1/1.75.  c ,  d  Cu/TOP, 1/2.0.  e ,  f  Cu/TOP, 1/2.5. The inset images show the relevant size histograms.  g  XRD patterns and  h  Absorption spectra of different-sized InP QDs [ 67 ]",
+        "operations": [
+          {
+            "op_type": "inject",
+            "sentence": "Hot injection method for the preparation of inp QDs",
+            "start_char": 0,
+            "end_char": 51,
+            "materials": [],
+            "params": {}
+          },
+          {
+            "op_type": "inject",
+            "sentence": "The hot-injection method achieves the separation of nucleation and growth phases by dissolving the precursor in organic solvents (e.g., octadecene, oleylamine, and trioctylphosphine) by heating and injecting another precursor several times at a specific temperature to trigger the transient supersaturation of the solution, which allows for the homogeneous nucleation and controlled growth of crystals, and the products are both monodispersed and homogeneous; the variety of the choice of the reaction solvents and active agents further expand the product system [ 34 – 58 ].",
+            "start_char": 52,
+            "end_char": 627,
+            "materials": [],
+            "params": {}
+          },
+          {
+            "op_type": "inject",
+            "sentence": "For example, Jamshidi Zavaraki et al. employed a hot injection method to synthesize colloidal InP and ZnS-covered InP QDs, which were successfully applied for the first time as sensitizers in quantum dot-sensitized solar cells (QDSSCs) [ 59 ].",
+            "start_char": 900,
+            "end_char": 1143,
+            "materials": [
+              "colloidal InP",
+              "ZnS-covered InP QDs",
+              "the first time"
+            ],
+            "params": {}
+          },
+          {
+            "op_type": "add",
+            "sentence": "Song et al. first introduced of high-quality InP QDs by the reaction of P(N(CH 3 ) 2 ) 3  hot injected at 220 °C with In and Zn chlorides dissolved in the relatively weakly coordinated solvent oleylamine, and achieved an unprecedented series of controlled synthesis of bandgap-tunable InP QDs, successfully achieving nucleation/growth of QDs (Fig.  5 )",
+            "start_char": 1382,
+            "end_char": 1734,
+            "materials": [
+              "high-quality InP QDs",
+              "220 °C",
+              "In and Zn chlorides",
+              "bandgap-tunable InP QDs"
+            ],
+            "params": {
+              "temp": "220 °C"
+            }
+          },
+          {
+            "op_type": "inject",
+            "sentence": "Ramasamy et al. prepared InP/ZnS core-shell QDs using the hot injection method, and in this experiment, it was found that the presence of a small amount of water as an impurity not only significantly reduced the FWHM and increased the QY of InP/ZnS QDs [ 61 ].",
+            "start_char": 1743,
+            "end_char": 2003,
+            "materials": [
+              "InP"
+            ],
+            "params": {}
+          },
+          {
+            "op_type": "inject",
+            "sentence": "Singh et al. successfully synthesized InP QDs and InP/ZnS core-shell structures using the hot injection technique.",
+            "start_char": 2424,
+            "end_char": 2538,
+            "materials": [
+              "InP QDs",
+              "InP/ZnS core-shell structures"
+            ],
+            "params": {}
+          },
+          {
+            "op_type": "inject",
+            "sentence": "Hot injection method shows multiple breakthroughs in the synthesis of InP QDs.",
+            "start_char": 2779,
+            "end_char": 2857,
+            "materials": [
+              "InP QDs"
+            ],
+            "params": {}
+          },
+          {
+            "op_type": "stir",
+            "sentence": "They identified the mixed alkyl carboxylic acid cluster Zn₅(Et)₄(OAc)₆ as the most effective zinc precursor, while both Ga(OAc)₃ and [Ga(CH₃)₂(MA)]₂ exhibited comparable doping activity.",
+            "start_char": 4638,
+            "end_char": 4824,
+            "materials": [
+              "the mixed alkyl carboxylic acid cluster Zn₅(Et)₄(OAc)₆",
+              "[Ga(CH₃)₂(MA)]₂"
+            ],
+            "params": {}
+          },
+          {
+            "op_type": "stir",
+            "sentence": "In the second step, the seed crystal solution is mixed with the quantum dot precursor solution at room temperature.",
+            "start_char": 5404,
+            "end_char": 5519,
+            "materials": [
+              "the second step"
+            ],
+            "params": {}
+          }
+        ],
+        "expanded": [
+          {
+            "op_type": "inject",
+            "steps": [
+              "Perform operation 'inject' as described: Hot injection method for the preparation of inp QDs"
+            ]
+          },
+          {
+            "op_type": "inject",
+            "steps": [
+              "Perform operation 'inject' as described: The hot-injection method achieves the separation of nucleation and growth phases by dissolving the precursor in organic solvents (e.g., octadecene, oleylamine, and trioctylphosphine) by heating and injecting another precursor several times at a specific temperature to trigger the transient supersaturation of the solution, which allows for the homogeneous nucleation and controlled growth of crystals, and the products are both monodispersed and homogeneous; the variety of the choice of the reaction solvents and active agents further expand the product system [ 34 – 58 ]."
+            ]
+          },
+          {
+            "op_type": "inject",
+            "steps": [
+              "Perform operation 'inject' as described: For example, Jamshidi Zavaraki et al. employed a hot injection method to synthesize colloidal InP and ZnS-covered InP QDs, which were successfully applied for the first time as sensitizers in quantum dot-sensitized solar cells (QDSSCs) [ 59 ]."
+            ]
+          },
+          {
+            "op_type": "add",
+            "steps": [
+              "Ensure reaction vessel is present and empty.",
+              "Place a clean stir bar in the vessel.",
+              "Measure the specified amount of high-quality InP QDs.",
+              "Transfer high-quality InP QDs into the vessel."
+            ]
+          },
+          {
+            "op_type": "inject",
+            "steps": [
+              "Perform operation 'inject' as described: Ramasamy et al. prepared InP/ZnS core-shell QDs using the hot injection method, and in this experiment, it was found that the presence of a small amount of water as an impurity not only significantly reduced the FWHM and increased the QY of InP/ZnS QDs [ 61 ]."
+            ]
+          },
+          {
+            "op_type": "inject",
+            "steps": [
+              "Perform operation 'inject' as described: Singh et al. successfully synthesized InP QDs and InP/ZnS core-shell structures using the hot injection technique."
+            ]
+          },
+          {
+            "op_type": "inject",
+            "steps": [
+              "Perform operation 'inject' as described: Hot injection method shows multiple breakthroughs in the synthesis of InP QDs."
+            ]
+          },
+          {
+            "op_type": "stir",
+            "steps": [
+              "Place the reaction vessel on a stir plate.",
+              "Set the stirrer to an appropriate speed.",
+              "Stir for the specified time."
+            ]
+          },
+          {
+            "op_type": "stir",
+            "steps": [
+              "Place the reaction vessel on a stir plate.",
+              "Set the stirrer to an appropriate speed.",
+              "Stir for the specified time."
+            ]
+          }
+        ]
+      },
+      {
+        "text": "Top-down method for the preparation of GQDs The top-down approach allows direct physical or chemical access to large-area graphene arrays into GQDs with nanometer dimensions, controlling the shape, size, and growth direction of GQDs, and is suitable for large-scale production. However, the insufficient controllability of the size and shape of QDs prepared by this method, the serious surface defects and structural damages of QDs, the low efficiency of large-scale production, the high cost and energy consumption as well as the biocompatibility of nanoparticles limit their applications in medical fields. The top-down method presents diversified technological paths in the synthesis of GQDs, such as Samra et al. used coke as a raw material (with low impurities and high carbon content) to produce GQDs by a facile process (Fig.  9 a), and spectroscopic characterization verified the feasibility [ 77 ]. Xie et al. synthesized highly crystalline monodispersed bluish N-GQDs by nitrogen-containing 3D nanocarbon electrochemical cutting (Fig.  9 b), with a QY of 19.3% and nitrogen doping of 12.3%, combining both economic and green advantages [ 78 ]. Zhou’s team innovated acid vapor cutting of bulk nitrogen-doped carbon films (1 ml of nitric acid) and in situ filtration to obtain water-soluble blue-green photoresponsive N-GQDs (1.5–3.7 nm, Fig.  10 a), circumventing the tedious isolation step [ 79 ]. Tadyszak et al. demonstrated that the that the graphene oxide precursor preparation of GOQDs did not change the C/O ratio, and found 500 nm strong fluorescence dispersion and paramagnetism under 280–380 nm excitation (Fig.  10 b) [ 80 ]. Soriano et al. developed GQDs fluorescence for the detection of carbamates in water by using mixed-acid oxidation to modulate the reaction time (Fig.  10 c) [ 81 ].However, there are core limitations of this method, such as the strong corrosive waste liquid generated by the acid treatment method, the still low QY (< 20%) and the unclear mechanism of magnetic/optical property regulation. In the future, it could be attempted to develop green stripping technologies like laser/plasma to replace the strong acid process, construct doping-fluorescence-magnetism constitutive relationship models, and explore biomass carbon sources to reduce costs and increase efficiency. \n Fig. 9 a  Top-down method for the preparation of GQDs [ 77 ].  b  Schematic of the structure of N-doped GQDs [ 78 ] \n \n Fig. 10 a  Preparation schematic of water-soluble N-GQDs [ 79 ].  b  Fluorescence spectrogram at multiple excitation wavelengths [ 80 ].  c  Overall synthesis strategy for the formation of GQDs [ 81 ]",
+        "operations": [
+          {
+            "op_type": "filter",
+            "sentence": "Zhou’s team innovated acid vapor cutting of bulk nitrogen-doped carbon films (1 ml of nitric acid) and in situ filtration to obtain water-soluble blue-green photoresponsive N-GQDs (1.5–3.7 nm, Fig.  ",
+            "start_char": 1154,
+            "end_char": 1353,
+            "materials": [
+              "1 ml"
+            ],
+            "params": {
+              "amounts": [
+                "1 ml"
+              ]
+            }
+          },
+          {
+            "op_type": "stir",
+            "sentence": "Soriano et al. developed GQDs fluorescence for the detection of carbamates in water by using mixed-acid oxidation to modulate the reaction time (Fig.  ",
+            "start_char": 1647,
+            "end_char": 1798,
+            "materials": [
+              "(Fig"
+            ],
+            "params": {}
+          }
+        ],
+        "expanded": [
+          {
+            "op_type": "filter",
+            "steps": [
+              "Perform operation 'filter' as described: Zhou’s team innovated acid vapor cutting of bulk nitrogen-doped carbon films (1 ml of nitric acid) and in situ filtration to obtain water-soluble blue-green photoresponsive N-GQDs (1.5–3.7 nm, Fig.  "
+            ]
+          },
+          {
+            "op_type": "stir",
+            "steps": [
+              "Place the reaction vessel on a stir plate.",
+              "Set the stirrer to an appropriate speed.",
+              "Stir for the specified time."
+            ]
+          }
+        ]
+      },
+      {
+        "text": "Bottom-up Preparation method for the Preparation of GQDs The bottom-up approach is to synthesize GQDs organically by the carbonization of organic molecules (e.g., citric acid, glucose, etc.) or polymers (the process is depicted in Fig.  11 ). The advantage of this method is that it is easy to control the shape and size of GQDs, which is an irreplaceable advantage in regulating the physical properties and molecular structure of substances. There are also certain disadvantages, such as the synthesis of large-size GQDs with many steps and cumbersome processes [ 82 ]. Prof. Chiang’s team investigated a bottom-up preparation method for the synthesis of colloidal QDs using an aqueous organosulfate solution treated with an atmospheric pressure argon (Ar) microplasma [ 83 ]. The average diameter of the fabricated colloidal GQDs was 4.9 nm, the QY was 1.5%, and the room temperature photoluminescence peak was 448 nm. Xu et al.used a top-down preparation method to synthesize GQDs with high solubility and excellent film-forming ability in common organic solvents. Significantly, this research not only solved the limitation of low solubility of GQDs prepared by traditional methods in organic solubility but also expected to successfully apply GQDs in other optoelectronic fields [ 84 ].Gao’s team applied a bottom-up synthesis method to prepare two water-soluble GQDs with different degrees of oxidation using graphene molecules, namely O-GQDs prepared by oxidation and R-QDs synthesized by reduction. The structural and compositional information of two GQDs, such as relevant functional groups, optical properties, structures, and molecular weights, was directly obtained through a series of characterizations, such as HR-TEM, Atomic Force Microscope (AFM), UV-vis spectroscopy, FL spectroscopy, and so on, to investigate their luminescence mechanisms [ 85 ]. Although the bottom-up method is novel and green, the current quantum efficiency is low; the top-down method is effective in solving the solubility problem, but has deficiencies in the complexity of the preparation process, etc. In the future, it is expected to optimize the preparation method to improve the quantum efficiency and further expand the applications in the field of optoelectronics. \n Fig. 11 A diagram of the process of preparing QDs by bottom-up method [ 82 ]",
+        "operations": [],
+        "expanded": []
+      },
+      {
+        "text": "Hot injection method for the Preparation of CIS QDs In the study of the synthesis of CIS QDs, hot injection is an effective means of preparing high-quality monodisperse QDs, but is limited by the scarcity of low-toxicity or nontoxic precursors. Zhu et al. applied a low-temperature hot injection preparation method to synthesize super-efficient green luminescent CIS QDs (the synthesis process appeared in Fig.  12 ). The introduction of S- Oil Amine (OAm)(S powder dissolved in ethylamine) as a sulfur precursor provided a large concentration of H 2 S at low temperature, which subsequently reacted chemically with Cu +  and In 3+ , leading to the explosive nucleation of CIS and the formation of CIS nuclei with smaller size and higher concentration [ 90 ]. Niyamakom et al. prepared ternary CIS QDs with particle sizes in the range of 7–14 nm using [Cu(acac) 2 ], [in (acac) 3 ], elemental sulfur and oleylamine (OLA) as raw materials, and investigated the effects of reaction time and precursors on the properties of the synthesized QDs. It was determined that the injection of elemental sulfur, [Cu(acac) 2 ], and oleylamine precursors in [In(acac) 3 ], respectively, initially formed a mixture of CuS nanoparticles, followed by a slow transformation to a tetragonal CIS phase (Fig.  13 ). The In content in the nanocrystals can be adjusted by changing the ratio of Cu: In precursors [ 91 ]. Liu et al. synthesized CIS/ZnS and CIS/ZnS: Al QDs using a hot injection method. Different ratios of PS-PE-BR-PS (SEBS) were used to blend with QDs to promote the dispersion of QDs, and finally a solution-based QDs/SEBS copolymer mixture was produced to form fluorescent films. The emission wavelengths and QY of CIS/ZnS and CIS/ZnS: Al QDs were 533 nm (84%) and 536 nm (97%), respectively. The emission wavelengths of CIS/ZnS and CIS/ZnS: Al fluorescent films were classified as 574 nm, 582 nm, and CIS/ZnS: Al QDs fluorescent films with improved compatibility resulted in a luminescence efficiency of 51 lm/W [ 92 ]. Bao et al. fabricated monodisperse CIS nanocrystals by injecting mixed metal oleic acid (OA) precursors into hot organic solvents containing dissolved sulfur sources, such as OLA, 1-octadecene (ODE), OA, and their mixtures with dissolved sulfur sources. Different shapes of CIS nanocrystals were synthesized by changing the preparation conditions, such as triangular pyramids with tunable crystalline phases, bullet-like rods and conical anisotropic crystals [ 93 ]. Although the existing methods have made progress in morphology control, luminescence efficiency and dispersion improvement, they still face limitations such as high toxicity of precursors, complicated preparation process, and difficult to control the uniformity of components in large-scale production. Future research could focus on the development of environment-friendly precursors, optimization of the hot injection process to simplify the process and improve the reproducibility of production. \n Fig. 12 Preparation of CIS QDs by hot injection method [ 90 ] \n \n Fig. 13 a – c  TEM of samples taken after 1 min, 5 min and 15 min.  d  XRD powder analysis of the corresponding samples [ 91 ]",
+        "operations": [
+          {
+            "op_type": "inject",
+            "sentence": "Hot injection method for the Preparation of CIS QDs In the study of the synthesis of CIS QDs, hot injection is an effective means of preparing high-quality monodisperse QDs, but is limited by the scarcity of low-toxicity or nontoxic precursors.",
+            "start_char": 0,
+            "end_char": 244,
+            "materials": [
+              "CIS QDs"
+            ],
+            "params": {}
+          },
+          {
+            "op_type": "inject",
+            "sentence": "Zhu et al. applied a low-temperature hot injection preparation method to synthesize super-efficient green luminescent CIS QDs (the synthesis process appeared in Fig.  12 ).",
+            "start_char": 245,
+            "end_char": 417,
+            "materials": [
+              "super-efficient green luminescent CIS QDs"
+            ],
+            "params": {}
+          },
+          {
+            "op_type": "inject",
+            "sentence": "It was determined that the injection of elemental sulfur, [Cu(acac) 2 ], and oleylamine precursors in [In(acac) 3 ], respectively, initially formed a mixture of CuS nanoparticles, followed by a slow transformation to a tetragonal CIS phase (Fig.  13 ).",
+            "start_char": 1042,
+            "end_char": 1294,
+            "materials": [
+              "Cu(acac",
+              "a tetragonal CIS phase"
+            ],
+            "params": {}
+          },
+          {
+            "op_type": "inject",
+            "sentence": "Al QDs using a hot injection method.",
+            "start_char": 1441,
+            "end_char": 1477,
+            "materials": [],
+            "params": {}
+          },
+          {
+            "op_type": "inject",
+            "sentence": "Bao et al. fabricated monodisperse CIS nanocrystals by injecting mixed metal oleic acid (OA) precursors into hot organic solvents containing dissolved sulfur sources, such as OLA, 1-octadecene (ODE), OA, and their mixtures with dissolved sulfur sources.",
+            "start_char": 2016,
+            "end_char": 2269,
+            "materials": [
+              "1-octadecene"
+            ],
+            "params": {}
+          },
+          {
+            "op_type": "inject",
+            "sentence": "Future research could focus on the development of environment-friendly precursors, optimization of the hot injection process to simplify the process and improve the reproducibility of production. \n ",
+            "start_char": 2786,
+            "end_char": 2984,
+            "materials": [],
+            "params": {}
+          },
+          {
+            "op_type": "inject",
+            "sentence": "12 Preparation of CIS QDs by hot injection method [ 90 ] \n \n Fig. 13",
+            "start_char": 2989,
+            "end_char": 3057,
+            "materials": [
+              "12 Preparation",
+              "CIS QDs",
+              "90 ] \n \n Fig"
+            ],
+            "params": {}
+          }
+        ],
+        "expanded": [
+          {
+            "op_type": "inject",
+            "steps": [
+              "Perform operation 'inject' as described: Hot injection method for the Preparation of CIS QDs In the study of the synthesis of CIS QDs, hot injection is an effective means of preparing high-quality monodisperse QDs, but is limited by the scarcity of low-toxicity or nontoxic precursors."
+            ]
+          },
+          {
+            "op_type": "inject",
+            "steps": [
+              "Perform operation 'inject' as described: Zhu et al. applied a low-temperature hot injection preparation method to synthesize super-efficient green luminescent CIS QDs (the synthesis process appeared in Fig.  12 )."
+            ]
+          },
+          {
+            "op_type": "inject",
+            "steps": [
+              "Perform operation 'inject' as described: It was determined that the injection of elemental sulfur, [Cu(acac) 2 ], and oleylamine precursors in [In(acac) 3 ], respectively, initially formed a mixture of CuS nanoparticles, followed by a slow transformation to a tetragonal CIS phase (Fig.  13 )."
+            ]
+          },
+          {
+            "op_type": "inject",
+            "steps": [
+              "Perform operation 'inject' as described: Al QDs using a hot injection method."
+            ]
+          },
+          {
+            "op_type": "inject",
+            "steps": [
+              "Perform operation 'inject' as described: Bao et al. fabricated monodisperse CIS nanocrystals by injecting mixed metal oleic acid (OA) precursors into hot organic solvents containing dissolved sulfur sources, such as OLA, 1-octadecene (ODE), OA, and their mixtures with dissolved sulfur sources."
+            ]
+          },
+          {
+            "op_type": "inject",
+            "steps": [
+              "Perform operation 'inject' as described: Future research could focus on the development of environment-friendly precursors, optimization of the hot injection process to simplify the process and improve the reproducibility of production. \n "
+            ]
+          },
+          {
+            "op_type": "inject",
+            "steps": [
+              "Perform operation 'inject' as described: 12 Preparation of CIS QDs by hot injection method [ 90 ] \n \n Fig. 13"
+            ]
+          }
+        ]
+      },
+      {
+        "text": "Cation exchange and template synthesis for the preparation of CIS QDs Cation exchange, as an efficient two-stage synthesis strategy, has become a key technology in interdisciplinary fields such as electrochemistry, chemical engineering, bioengineering, environmental protection, and optoelectronics, by preparing binary compounds of specific morphology at low temperatures and then introducing the target atoms for exchange to realize the efficient separation and purification of the target products in complex systems [ 94 ]. As applied to QDs synthesis, it can circumvent the adverse effects of high-temperature reactions, such as avoiding Ostwald ripening, preventing volatilization/decomposition of organic solvents and reducing VOCs emissions [ 95 ]. However, this method also has drawbacks, which include the susceptibility of small particles to over-exchange or compositional inhomogeneity, the susceptibility of the reaction to inverse exchange leading to compositional drift of the product, and the decrease in the fluorescence QY due to residual ionic contamination during the reaction process. Chen et al.proposed a novel low-temperature template synthesis of efficient CIS semiconductor nanocrystals by a facile cation exchange strategy using In 2 S 3  carbon nanotubes as precursors, which allowed the synthesis of a series of size-tunable CIS semiconductor nanocrystals. By reasonably controlling the Cu/In stoichiometry, the efficient luminescence of CIS with a maximum QY of 28.6% was obtained [ 96 ]. Xia et al. reported a multi-step seeded growth synthesis of CuInS₂/ZnS core/rod-shell QDs, wherein wurtzite CuInS₂ NCs were obtained through localized Cu⁺and In³⁺ cation exchange within template Cu₂₋ₓS NCs (synthetic steps illustrated in Fig.  14 a). The resulting colloidal wurtzite CuInS₂/ZnS core/rod-shell QDs exhibited a high molar extinction coefficient, near-infrared PL with QY of 20%, and excellent dispersibility in diverse solvents [ 97 ]. Thiel et al. investigated the formation of fibrillated zincite CIS NCs from copper-deficient djurleite Cu 2 -xS nanorods using a cation exchange method. A wide temperature range of 40 °C to 160 °C allows for a variety of intermediates to be realized while retaining size and shape., synthesis schematic as in Fig.  14 b [ 98 ].These methods have their own characteristics in the preparation process and performance, and although progress has been made in QY, size regulation, optical properties, etc., there exist limitations such as relatively cumbersome process steps, difficulty in controlling the cation exchange process, harsh conditions in some syntheses, and difficulty in large-scale production [ 38 ,  99 ,  100 ]. In the future, efforts can be made to simplify the synthesis process, optimize the parameters of the cation exchange process to improve reproducibility, and explore milder and easier-to-control synthesis conditions (Table  2 ). \n Fig. 14 a  Synthesis of colloidal CIS/ZnS core/rod-shell QDs by cation exchange [ 97 ].  b  Temperature dependence of CIS semiconductor nanocrystals synthesized by cation exchange method [ 98 ] \n \n Table 2 Comprehensive comparison of different QDs synthesis methods QDs Type Synthesis Method Advantages Disadvantages InP QDs The solvothermal method: Sarma et al.(2009) Nozik et al.(1994) Yang et al.(2013) Kuo et al.(2017) Excellent efficiency and fast access to highly crystalline monodisperse InP QDs; Controllable quantum dot size and adjustable band gap; 1. Harsh reaction conditions: high-temperature and pressure closed systems are required, increasing the risk of explosion and the difficulty of safe operation; 2. Solvent toxicity and environmental burden: commonly used organophosphorus precursors are highly toxic and environmentally persistent. Heating method: Pdluzhna et al.(2022) Wang et al.(2017) Kim et al. (2012) High quality colloidal nanocrystals can be obtained on a large scale; Can realize closed-loop production by distillation or adsorption technology back to organic solvent pollutants; 1.High density of quantum dot defect states; 2.High treatment cost of solvent volatile contamination; 3.Rapid nucleation tends to lead to lattice distortion; Hot injection method: Chen et al. (2020) Delbos et al. (2012) Jamshidi et al.(2020) Song et al.(2013) Ramasamy et al.(2016) Singh et al.(2017) Separation of nucleation and growth process of QDs, homogeneous nucleation, which can control the growth state of crystals; Good monodispersity and consistency of QDs. Wide selectivity of reaction solvents and active agents; Volatilization or decomposition of solvents under high temperature reaction (usually > 300 °C), which pollutes the air and jeopardizes human health. High cost of secondary treatment of exhaust gas and residual waste liquid. GQDs Top-down method: Samra et al.(2021) Xie et al.(2019) Zhou’s (2021) Tadyszak et al.(2020) Soriano et al.(2020) Directly cutting large-area graphene arrays into GQDs with nanometer size by physical or chemical means; and The morphology, size and growth direction of GQDs can be controlled, which is suitable for large-scale production; The process is relatively simple and the raw materials are easily available. Insufficient controllability of size and shape; Significant surface defects and structural damage; Low efficiency and high cost and energy consumption in large-scale production; Nanoparticle biocompatibility potential limits its application in the medical field; Bottom-up preparation method: Shen et al. (2021) Chiang’s team (2019) Xu et al.(2017) Liu’s (2020) Easy to control the morphology and size of GQDs; Synthesizing large-size GQDs is step-intensive and tedious CuInS 2  QDs Hot injection method: Zhu et al. (2020) Niyamakom et al.(2015) Liu et al.(2020) Bao et al.(2011) Synthesis of high-quality monodisperse CuInS 2  QDs Highly toxic precursors Cation exchange and template synthesis: Chen et al.(2019) Xia et al.(2018) Thiel et al.(2023) 1.Excellent precision and flexibility in component regulation; 2.Favorable structure retention under mild conditions; 3.Great potential for high-throughput synthesis; 1.small-sized particles are susceptible to over-exchange or compositional inhomogeneity; 2.susceptible to reverse exchange, leading to product composition drift; 3.residual ion contamination, leading to a decrease in quantum dot fluorescence QY;",
+        "operations": [
+          {
+            "op_type": "add",
+            "sentence": "Cation exchange and template synthesis for the preparation of CIS QDs Cation exchange, as an efficient two-stage synthesis strategy, has become a key technology in interdisciplinary fields such as electrochemistry, chemical engineering, bioengineering, environmental protection, and optoelectronics, by preparing binary compounds of specific morphology at low temperatures and then introducing the target atoms for exchange to realize the efficient separation and purification of the target products in complex systems [ 94 ].",
+            "start_char": 0,
+            "end_char": 526,
+            "materials": [
+              "CIS QDs Cation exchange",
+              "an efficient two-stage synthesis strategy"
+            ],
+            "params": {}
+          },
+          {
+            "op_type": "heat",
+            "sentence": "Heating method: Pdluzhna et al.(2022)",
+            "start_char": 3779,
+            "end_char": 3816,
+            "materials": [
+              "al.(2022"
+            ],
+            "params": {}
+          },
+          {
+            "op_type": "inject",
+            "sentence": "Wang et al.(2017) Kim et al. (2012) High quality colloidal nanocrystals can be obtained on a large scale; Can realize closed-loop production by distillation or adsorption technology back to organic solvent pollutants; 1.High density of quantum dot defect states; 2.High treatment cost of solvent volatile contamination; 3.Rapid nucleation tends to lead to lattice distortion; Hot injection method: Chen et al. (2020)",
+            "start_char": 3817,
+            "end_char": 4233,
+            "materials": [],
+            "params": {}
+          },
+          {
+            "op_type": "inject",
+            "sentence": "Easy to control the morphology and size of GQDs; Synthesizing large-size GQDs is step-intensive and tedious CuInS 2  QDs Hot injection method: Zhu et al. (2020)",
+            "start_char": 5563,
+            "end_char": 5723,
+            "materials": [],
+            "params": {}
+          }
+        ],
+        "expanded": [
+          {
+            "op_type": "add",
+            "steps": [
+              "Ensure reaction vessel is present and empty.",
+              "Place a clean stir bar in the vessel.",
+              "Measure the specified amount of CIS QDs Cation exchange.",
+              "Transfer CIS QDs Cation exchange into the vessel."
+            ]
+          },
+          {
+            "op_type": "heat",
+            "steps": [
+              "Place the reaction vessel on a hotplate.",
+              "Ramp to the target temperature.",
+              "Maintain the target temperature for the specified time."
+            ]
+          },
+          {
+            "op_type": "inject",
+            "steps": [
+              "Perform operation 'inject' as described: Wang et al.(2017) Kim et al. (2012) High quality colloidal nanocrystals can be obtained on a large scale; Can realize closed-loop production by distillation or adsorption technology back to organic solvent pollutants; 1.High density of quantum dot defect states; 2.High treatment cost of solvent volatile contamination; 3.Rapid nucleation tends to lead to lattice distortion; Hot injection method: Chen et al. (2020)"
+            ]
+          },
+          {
+            "op_type": "inject",
+            "steps": [
+              "Perform operation 'inject' as described: Easy to control the morphology and size of GQDs; Synthesizing large-size GQDs is step-intensive and tedious CuInS 2  QDs Hot injection method: Zhu et al. (2020)"
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

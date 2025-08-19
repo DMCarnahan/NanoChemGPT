@@ -1,0 +1,69 @@
+{
+  "paper_id": "10.1021/acs.langmuir.5c01022",
+  "title": "From Nano- to Microsilver: Morphology Control and Shape Evolution of Facile One-Step Electrochemical Synthesis of Silver Particles on TiO&lt;sub&gt;2&lt;/sub&gt; Nanotubes.",
+  "authors": [],
+  "doi": "10.1021/acs.langmuir.5c01022",
+  "source": "eupmc",
+  "urls": {
+    "pdf": null
+  },
+  "license": {
+    "type": "unknown"
+  },
+  "access_route": "oa",
+  "sections": [
+    {
+      "heading": "Materials and Methods",
+      "text": "Materials and Methods Titanium\nfoil (99.7%), platinum\nmesh (99.9%), ammonium fluoride\n(NH 4 F, ≥98.0%), ethylene glycol (99.8%), and phosphate-buffered\nsaline (PBS, 0.01 M, pH 7.4) were acquired from Sigma-Aldrich (St.\nLouis, Missouri, USA). Silver nitrate (99.9%) was supplied by Stanlab\n(Lublin, PL). Fabrication of TiO 2  Nanotubes Titanium dioxide\n(TiO 2 ) nanotubes were formed on a titanium foil using the\ntwo-electrode system with a platinum mesh as a counter electrode in\nthe electrochemical anodization process. Anodizing was carried out\nat 17 V for 62.5 min using an Autolab PGSTAT302N (Metrohm, Herisau,\nSwitzerland) in ethylene glycol (85 wt %) with ammonium fluoride (0.65%\nwt.). The as-formed TNTs were heat-treated in an argon atmosphere\nat 450 °C for 2 h with heating and cooling rates of 6 °C·min –1  by using an AMP furnace (Zielona Gora, Poland). Electrodeposition of Silver on TiO 2  Nanotubes The deposition of silver was carried out using an electrochemical\ndeposition process: chronoamperometry and cyclic voltammetry in a\nthree-electrode system (Autolab PGSTAT302N, Metrohm, Herisau, Switzerland).\nThe auxiliary electrode was a platinum mesh, and the reference electrode\nwas a silver/silver chloride electrode ( E \n Ag/AgCl (3 M KCl)  = 0.222 V vs SHE at 25 °C) by Metrohm. In the chronoamperometry\nmethod, the variable parameters were the AgNO 3  precursor\nconcentration, ranging from 0.1 to 50 mM (with conductivity ranging\nfrom 98.7 μS·cm –1  to 9.09 mS·cm –1 ), the deposition time, from 30 to 1200 s, and the\nvoltage from −0.4 to −1.2 V. In the cyclic voltammetry\nmethod, the variable parameters were the AgNO 3  precursor\nconcentration ranging from 0.1 to 50 mM, and the number of deposition\ncycles from 5 to 75, at a constant potential range from −1.25\nto −0.7 V with a scan rate of 50 mV·s –1 . Then, the nanocomposite samples were rinsed with distilled water\nand dried under a nitrogen stream. The paper presents current\ndensity–time transients for the chronoamperometric deposition\nprocess, current–potential transients for cyclic voltammetry,\nand charts of the dependence of the tested parameter (AgNO 3  concentration, voltage, time, number of cycles) on the silver content\nin the obtained composites as well as the average value of the recorded\ncurrent after its relative stabilization. Chemical and Morphological\nCharacterization The surface\nmorphology of the samples was observed by using a scanning electron\nmicroscope (SEM, JEOL JSM-7600F, Tokyo, Japan). The elemental composition\nwas examined by using an energy-dispersive X-ray spectroscopy detector\n(EDS, INCA, Oxford Instruments, Oxford, UK). The silver content\nin  Figures  \n b,  b,  b,  b, and  b was presented as the mean and standard\ndeviation of three randomly selected areas subjected to EDS analysis."
+    }
+  ],
+  "extractions": {
+    "methods_paragraphs": [
+      {
+        "text": "Materials and Methods Titanium\nfoil (99.7%), platinum\nmesh (99.9%), ammonium fluoride\n(NH 4 F, ≥98.0%), ethylene glycol (99.8%), and phosphate-buffered\nsaline (PBS, 0.01 M, pH 7.4) were acquired from Sigma-Aldrich (St.\nLouis, Missouri, USA). Silver nitrate (99.9%) was supplied by Stanlab\n(Lublin, PL). Fabrication of TiO 2  Nanotubes Titanium dioxide\n(TiO 2 ) nanotubes were formed on a titanium foil using the\ntwo-electrode system with a platinum mesh as a counter electrode in\nthe electrochemical anodization process. Anodizing was carried out\nat 17 V for 62.5 min using an Autolab PGSTAT302N (Metrohm, Herisau,\nSwitzerland) in ethylene glycol (85 wt %) with ammonium fluoride (0.65%\nwt.). The as-formed TNTs were heat-treated in an argon atmosphere\nat 450 °C for 2 h with heating and cooling rates of 6 °C·min –1  by using an AMP furnace (Zielona Gora, Poland). Electrodeposition of Silver on TiO 2  Nanotubes The deposition of silver was carried out using an electrochemical\ndeposition process: chronoamperometry and cyclic voltammetry in a\nthree-electrode system (Autolab PGSTAT302N, Metrohm, Herisau, Switzerland).\nThe auxiliary electrode was a platinum mesh, and the reference electrode\nwas a silver/silver chloride electrode ( E \n Ag/AgCl (3 M KCl)  = 0.222 V vs SHE at 25 °C) by Metrohm. In the chronoamperometry\nmethod, the variable parameters were the AgNO 3  precursor\nconcentration, ranging from 0.1 to 50 mM (with conductivity ranging\nfrom 98.7 μS·cm –1  to 9.09 mS·cm –1 ), the deposition time, from 30 to 1200 s, and the\nvoltage from −0.4 to −1.2 V. In the cyclic voltammetry\nmethod, the variable parameters were the AgNO 3  precursor\nconcentration ranging from 0.1 to 50 mM, and the number of deposition\ncycles from 5 to 75, at a constant potential range from −1.25\nto −0.7 V with a scan rate of 50 mV·s –1 . Then, the nanocomposite samples were rinsed with distilled water\nand dried under a nitrogen stream. The paper presents current\ndensity–time transients for the chronoamperometric deposition\nprocess, current–potential transients for cyclic voltammetry,\nand charts of the dependence of the tested parameter (AgNO 3  concentration, voltage, time, number of cycles) on the silver content\nin the obtained composites as well as the average value of the recorded\ncurrent after its relative stabilization. Chemical and Morphological\nCharacterization The surface\nmorphology of the samples was observed by using a scanning electron\nmicroscope (SEM, JEOL JSM-7600F, Tokyo, Japan). The elemental composition\nwas examined by using an energy-dispersive X-ray spectroscopy detector\n(EDS, INCA, Oxford Instruments, Oxford, UK). The silver content\nin  Figures  \n b,  b,  b,  b, and  b was presented as the mean and standard\ndeviation of three randomly selected areas subjected to EDS analysis.",
+        "operations": [
+          {
+            "op_type": "heat",
+            "sentence": "The as-formed TNTs were heat-treated in an argon atmosphere\nat 450 °C for 2 h with heating and cooling rates of 6 °C·min –1  by using an AMP furnace (Zielona Gora, Poland).",
+            "start_char": 693,
+            "end_char": 865,
+            "materials": [
+              "450 °C",
+              "2 h",
+              "6 °",
+              "(Zielona Gora"
+            ],
+            "params": {
+              "temp": "450°C",
+              "time": "2 h"
+            }
+          },
+          {
+            "op_type": "wash",
+            "sentence": "Then, the nanocomposite samples were rinsed with distilled water\nand dried under a nitrogen stream.",
+            "start_char": 1827,
+            "end_char": 1926,
+            "materials": [],
+            "params": {}
+          }
+        ],
+        "expanded": [
+          {
+            "op_type": "heat",
+            "steps": [
+              "Place the reaction vessel on a hotplate.",
+              "Ramp to 450°C.",
+              "Maintain 450°C for 2 h."
+            ]
+          },
+          {
+            "op_type": "wash",
+            "steps": [
+              "Perform operation 'wash' as described: Then, the nanocomposite samples were rinsed with distilled water\nand dried under a nitrogen stream."
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

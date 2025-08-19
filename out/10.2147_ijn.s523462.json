@@ -1,0 +1,129 @@
+{
+  "paper_id": "10.2147/ijn.s523462",
+  "title": "Nanotechnology in Orthopedic Care: Advances in Drug Delivery, Implants, and Biocompatibility Considerations.",
+  "authors": [],
+  "doi": "10.2147/ijn.s523462",
+  "source": "eupmc",
+  "urls": {
+    "pdf": null
+  },
+  "license": {
+    "type": "unknown"
+  },
+  "access_route": "oa",
+  "sections": [
+    {
+      "heading": "Assessment Methods for Biocompatibility of Nanomaterials",
+      "text": "Assessment Methods for Biocompatibility of Nanomaterials Materials used in orthopedic applications must perform effectively in vivo without causing harmful local or systemic effects, such as immune responses, hypersensitivity, inflammation, or carcinogenic reactions. Biocompatibility extends beyond being biologically inert; it also encompasses biofunctionality and long-term stability. The effectiveness of these materials is primarily determined by their properties and how they interact with the biological environment of the target tissues. Important factors include protein adsorption, inflammatory responses, and interactions with blood. 164 Considering these factors, the biological evaluation of biomaterials involves a variety of tests conducted both in vivo and in vitro. Cytocompatibility assessments examine the biological response of living cells to solutions containing nanomaterial extracts, with a focus on cell survival, proliferation, and metabolic activity. Toxic byproducts from nanomaterials, including metallic ions, reactive substances, and residual monomers, have the potential to negatively affect cellular functions and viability. Cellular damage may manifest as alterations in cellular structure, changes in cell shape, reduced cell adhesion and proliferation, decreased metabolic activity, and, ultimately, cell lysis. 165  The cytotoxicity elution test, also referred to as the MEM elution test, is an in vitro method used to qualitatively assess cytotoxicity. In this procedure, L-929 mouse fibroblast cells are cultured with a test material extract for 48 hours. After the incubation period, the cells are examined microscopically for any morphological changes, cell deformation or lysis. The cellular responses to the material are graded on a scale from 0 to 4, with a biomaterial considered biocompatible if the cellular reaction does not exceed grade 2, which indicates mild reactivity. 166 The MTT assay is commonly used to evaluate cell viability and growth. There is a positive, linear correlation between the number of viable cells and the intensity of the formazan color produced. Quantitative assessment of viable cells is performed by measuring the absorbance of formazan at 570 nm. A material is considered cytocompatible when the proportion of viable cells is 70% or higher. 167  Genotoxicity assessment plays a crucial role in evaluating the potential risks of nanomaterials, as damage to genetic material can lead to cancer development or disrupt reproductive function by affecting germ cell DNA. Key genotoxicity endpoints include DNA damage, gene mutations, and chromosomal damage, all of which are considered sensitive indicators of genetic harm. 168  Irritation testing, an in vivo assay, assesses the potential of nanomaterials to cause skin irritation. Intracutaneous injections are made on the dorsal region of albino rabbits, and skin reactions such as erythema, edema, scabbing, and bleeding are evaluated at 24, 48, and 72 hours using a standardized scoring system. 169 The skin sensitization assay evaluates the potential allergenic properties of materials, with the Guinea Pig Maximisation Test (GPMT) being the most widely recognized method. This test involves three phases. In the first phase, known as Stage I (Induction), a biomaterial is injected intradermally into guinea pigs at the designated test site. After a seven-day period, a topical patch is applied. Skin reactions, including erythema and edema, are monitored 24 and 48 hours after the patch is removed. A score of 1 or higher in the test group indicates a tendency for sensitization. 170  Blood compatibility of a medical device is influenced by the material properties of the device, the fluid dynamics within it, and the blood’s coagulation tendencies. Hemocompatibility testing focuses on key factors such as coagulation, hemolysis, hematology, platelet function, and the complement system. This evaluation is typically conducted using in vitro models that replicate static, agitated, or shear flow conditions, where fresh human blood is incubated with biomaterials. Hemocompatibility markers are assessed both before and after the incubation of the experimental material. 171"
+    },
+    {
+      "heading": "Techniques and Methods for Addressing Toxicity of Nanomaterials",
+      "text": "Techniques and Methods for Addressing Toxicity of Nanomaterials Nanoparticles can induce oxidative stress, inflammation, and even cellular damage due to their high surface area and reactivity. To mitigate these toxic effects, several surface modification techniques have been employed. These modifications primarily aim to enhance biocompatibility and reduce toxicity. For instance, surface functionalization involves coating the nanoparticles with biocompatible materials, such as polyethylene glycol (PEG), which can help to prevent nanoparticle aggregation and reduce their toxicity by decreasing interactions with biological systems. Another technique, encapsulation, involves enclosing the nanomaterial in a protective coating, such as biodegradable polymers, to control drug release and prevent direct contact with cells, thus reducing cytotoxicity. 172 These techniques are commonly used to apply coatings and synthesize polymeric layers on the surfaces of metallic implants, thereby improving their performance. The methods can generally be classified into two main categories: physical and chemical modification techniques. 173  Physical modification techniques, such as flame spraying and plasma spraying, alter the implant surface using energetic charges or mechanical tools to apply bioceramic or polymeric materials to metallic implants. Materials commonly used in these processes include hydroxyapatite, tricalcium phosphate, and bioglass for bioceramic coatings, as well as polymers like polycaprolactone (PCL), poly(lactic-co-glycolic acid) (PLGA), and polyethylene glycol (PEG). These processes enhance surface properties at a microscopic level by increasing surface area, improving adhesion, and reducing the risk of inflammation or immune responses. Plasma spraying, for instance, creates a porous structure that promotes osteointegration and minimizes toxicity by fostering beneficial cellular interactions. On the other hand, chemical modification techniques involve immersing implants in reactive solutions to form coatings, such as sol-gel coating, where a precursor solution is applied and dried to form a uniform thin layer. This layer often contains bioceramic materials like hydroxyapatite, bioactive glass, or calcium phosphate, improving biocompatibility and osteoconductivity. Chemical methods can also introduce functional groups that interact with biological tissues, enhancing bioactivity and reducing immune rejection or other toxic effects by precisely controlling the coating composition to optimize material properties. 174"
+    }
+  ],
+  "extractions": {
+    "methods_paragraphs": [
+      {
+        "text": "Assessment Methods for Biocompatibility of Nanomaterials Materials used in orthopedic applications must perform effectively in vivo without causing harmful local or systemic effects, such as immune responses, hypersensitivity, inflammation, or carcinogenic reactions. Biocompatibility extends beyond being biologically inert; it also encompasses biofunctionality and long-term stability. The effectiveness of these materials is primarily determined by their properties and how they interact with the biological environment of the target tissues. Important factors include protein adsorption, inflammatory responses, and interactions with blood. 164 Considering these factors, the biological evaluation of biomaterials involves a variety of tests conducted both in vivo and in vitro. Cytocompatibility assessments examine the biological response of living cells to solutions containing nanomaterial extracts, with a focus on cell survival, proliferation, and metabolic activity. Toxic byproducts from nanomaterials, including metallic ions, reactive substances, and residual monomers, have the potential to negatively affect cellular functions and viability. Cellular damage may manifest as alterations in cellular structure, changes in cell shape, reduced cell adhesion and proliferation, decreased metabolic activity, and, ultimately, cell lysis. 165  The cytotoxicity elution test, also referred to as the MEM elution test, is an in vitro method used to qualitatively assess cytotoxicity. In this procedure, L-929 mouse fibroblast cells are cultured with a test material extract for 48 hours. After the incubation period, the cells are examined microscopically for any morphological changes, cell deformation or lysis. The cellular responses to the material are graded on a scale from 0 to 4, with a biomaterial considered biocompatible if the cellular reaction does not exceed grade 2, which indicates mild reactivity. 166 The MTT assay is commonly used to evaluate cell viability and growth. There is a positive, linear correlation between the number of viable cells and the intensity of the formazan color produced. Quantitative assessment of viable cells is performed by measuring the absorbance of formazan at 570 nm. A material is considered cytocompatible when the proportion of viable cells is 70% or higher. 167  Genotoxicity assessment plays a crucial role in evaluating the potential risks of nanomaterials, as damage to genetic material can lead to cancer development or disrupt reproductive function by affecting germ cell DNA. Key genotoxicity endpoints include DNA damage, gene mutations, and chromosomal damage, all of which are considered sensitive indicators of genetic harm. 168  Irritation testing, an in vivo assay, assesses the potential of nanomaterials to cause skin irritation. Intracutaneous injections are made on the dorsal region of albino rabbits, and skin reactions such as erythema, edema, scabbing, and bleeding are evaluated at 24, 48, and 72 hours using a standardized scoring system. 169 The skin sensitization assay evaluates the potential allergenic properties of materials, with the Guinea Pig Maximisation Test (GPMT) being the most widely recognized method. This test involves three phases. In the first phase, known as Stage I (Induction), a biomaterial is injected intradermally into guinea pigs at the designated test site. After a seven-day period, a topical patch is applied. Skin reactions, including erythema and edema, are monitored 24 and 48 hours after the patch is removed. A score of 1 or higher in the test group indicates a tendency for sensitization. 170  Blood compatibility of a medical device is influenced by the material properties of the device, the fluid dynamics within it, and the blood’s coagulation tendencies. Hemocompatibility testing focuses on key factors such as coagulation, hemolysis, hematology, platelet function, and the complement system. This evaluation is typically conducted using in vitro models that replicate static, agitated, or shear flow conditions, where fresh human blood is incubated with biomaterials. Hemocompatibility markers are assessed both before and after the incubation of the experimental material. 171",
+        "operations": [
+          {
+            "op_type": "inject",
+            "sentence": "Intracutaneous injections are made on the dorsal region of albino rabbits, and skin reactions such as erythema, edema, scabbing, and bleeding are evaluated at 24, 48, and 72 hours using a standardized scoring system.",
+            "start_char": 2805,
+            "end_char": 3021,
+            "materials": [
+              "Intracutaneous injections",
+              "72 hours"
+            ],
+            "params": {
+              "time": "72 hours"
+            }
+          },
+          {
+            "op_type": "inject",
+            "sentence": "In the first phase, known as Stage I (Induction), a biomaterial is injected intradermally into guinea pigs at the designated test site.",
+            "start_char": 3234,
+            "end_char": 3369,
+            "materials": [
+              "the first phase",
+              "Stage I",
+              "Induction"
+            ],
+            "params": {}
+          }
+        ],
+        "expanded": [
+          {
+            "op_type": "inject",
+            "steps": [
+              "Perform operation 'inject' as described: Intracutaneous injections are made on the dorsal region of albino rabbits, and skin reactions such as erythema, edema, scabbing, and bleeding are evaluated at 24, 48, and 72 hours using a standardized scoring system."
+            ]
+          },
+          {
+            "op_type": "inject",
+            "steps": [
+              "Perform operation 'inject' as described: In the first phase, known as Stage I (Induction), a biomaterial is injected intradermally into guinea pigs at the designated test site."
+            ]
+          }
+        ]
+      },
+      {
+        "text": "Techniques and Methods for Addressing Toxicity of Nanomaterials Nanoparticles can induce oxidative stress, inflammation, and even cellular damage due to their high surface area and reactivity. To mitigate these toxic effects, several surface modification techniques have been employed. These modifications primarily aim to enhance biocompatibility and reduce toxicity. For instance, surface functionalization involves coating the nanoparticles with biocompatible materials, such as polyethylene glycol (PEG), which can help to prevent nanoparticle aggregation and reduce their toxicity by decreasing interactions with biological systems. Another technique, encapsulation, involves enclosing the nanomaterial in a protective coating, such as biodegradable polymers, to control drug release and prevent direct contact with cells, thus reducing cytotoxicity. 172 These techniques are commonly used to apply coatings and synthesize polymeric layers on the surfaces of metallic implants, thereby improving their performance. The methods can generally be classified into two main categories: physical and chemical modification techniques. 173  Physical modification techniques, such as flame spraying and plasma spraying, alter the implant surface using energetic charges or mechanical tools to apply bioceramic or polymeric materials to metallic implants. Materials commonly used in these processes include hydroxyapatite, tricalcium phosphate, and bioglass for bioceramic coatings, as well as polymers like polycaprolactone (PCL), poly(lactic-co-glycolic acid) (PLGA), and polyethylene glycol (PEG). These processes enhance surface properties at a microscopic level by increasing surface area, improving adhesion, and reducing the risk of inflammation or immune responses. Plasma spraying, for instance, creates a porous structure that promotes osteointegration and minimizes toxicity by fostering beneficial cellular interactions. On the other hand, chemical modification techniques involve immersing implants in reactive solutions to form coatings, such as sol-gel coating, where a precursor solution is applied and dried to form a uniform thin layer. This layer often contains bioceramic materials like hydroxyapatite, bioactive glass, or calcium phosphate, improving biocompatibility and osteoconductivity. Chemical methods can also introduce functional groups that interact with biological tissues, enhancing bioactivity and reducing immune rejection or other toxic effects by precisely controlling the coating composition to optimize material properties. 174",
+        "operations": [
+          {
+            "op_type": "add",
+            "sentence": "173  Physical modification techniques, such as flame spraying and plasma spraying, alter the implant surface using energetic charges or mechanical tools to apply bioceramic or polymeric materials to metallic implants.",
+            "start_char": 1133,
+            "end_char": 1350,
+            "materials": [
+              "173  Physical modification techniques"
+            ],
+            "params": {}
+          },
+          {
+            "op_type": "dry",
+            "sentence": "On the other hand, chemical modification techniques involve immersing implants in reactive solutions to form coatings, such as sol-gel coating, where a precursor solution is applied and dried to form a uniform thin layer.",
+            "start_char": 1928,
+            "end_char": 2149,
+            "materials": [],
+            "params": {}
+          },
+          {
+            "op_type": "add",
+            "sentence": "Chemical methods can also introduce functional groups that interact with biological tissues, enhancing bioactivity and reducing immune rejection or other toxic effects by precisely controlling the coating composition to optimize material properties.",
+            "start_char": 2307,
+            "end_char": 2556,
+            "materials": [],
+            "params": {}
+          }
+        ],
+        "expanded": [
+          {
+            "op_type": "add",
+            "steps": [
+              "Ensure reaction vessel is present and empty.",
+              "Place a clean stir bar in the vessel.",
+              "Measure the specified amount of 173  Physical modification techniques.",
+              "Transfer 173  Physical modification techniques into the vessel."
+            ]
+          },
+          {
+            "op_type": "dry",
+            "steps": [
+              "Perform operation 'dry' as described: On the other hand, chemical modification techniques involve immersing implants in reactive solutions to form coatings, such as sol-gel coating, where a precursor solution is applied and dried to form a uniform thin layer."
+            ]
+          },
+          {
+            "op_type": "add",
+            "steps": [
+              "Ensure reaction vessel is present and empty.",
+              "Place a clean stir bar in the vessel.",
+              "Measure the specified amount of reagent.",
+              "Transfer reagent into the vessel."
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,74 @@
+{
+  "paper_id": "10.3389/fonc.2024.1514581",
+  "title": "Mapping the intellectual structure and emerging trends on nanomaterials in colorectal cancer: a bibliometric analysis from 2003 to 2024.",
+  "authors": [],
+  "doi": "10.3389/fonc.2024.1514581",
+  "source": "eupmc",
+  "urls": {
+    "pdf": null
+  },
+  "license": {
+    "type": "unknown"
+  },
+  "access_route": "oa",
+  "sections": [
+    {
+      "heading": "Methods",
+      "text": "Methods Research on nanomaterials in CRC from 2003 to 2024 was retrieved from the Web of Science Core Collection (WOSCC). Tools such as CiteSpace, VOSviewer, RStudio, GraphPad Prism, and Excel were used to analyze trends and hotspots, covering publication trends, countries, institutions, authors, journals, co-citation analysis, and keywords. Visual maps were created to forecast future developments."
+    },
+    {
+      "heading": "Materials and methods",
+      "text": "2 Materials and methods 2.1 Data source Our data are sourced from the WOSCC, which is a comprehensive, multidisciplinary journal citation database widely recognized for its extensive coverage. Each article in this database contains metadata such as publication year, country and region, authorship details, institutional affiliations, document type, research field, journal title, citation counts, and references ( 14 ). Researchers generally regard such databases as highly suitable for conducting bibliometric analysis. 2.2 Search strategy We systematically searched and compiled relevant publications concerning nanomaterials in CRC from January 1, 2003, to July 10, 2024. Our study’s inclusion criteria included (1) Full-text publications relevant to nanomaterials in CRC, (2) Articles (research reports that are considered to be citable new and original works), and reviews (detailed, important surveys of published research) written in English. Exclusion criteria comprised: (1) Publications unrelated to nanomaterials in CRC; (2) Types such as proceeding papers (full papers presented at symposia or conferences across various disciplines), meeting abstracts (summaries or extended summaries of reports presented at workshops or conferences), editorial materials (essays expressing the views of individuals, groups, or organizations), early access (papers published electronically by journals before being assigned a volume and issue number), letters (brief correspondence between readers and journal editors on past published material), retracted publications (papers withdrawn by authors, institutions, editors, or publishers), book chapters (monographs or publications on specific topics found within books), and corrections(revisions made to correct errors identified post-publication). The search was conducted on a single day to maintain uniformity in data acquisition. Data were exported in the format of “full records and cited references” as plain text, as illustrated in  \n Figure 1 \n , depicting the screening process. Figure 1 Flowchart of this study. The following is the search formula: TS = (nanodot* OR nanoparticle* OR nanomaterial* OR nanotube* OR nanosheet* OR “quantum dot*” OR nanofiber* OR nanosphere* OR nanorod* OR nanowire* OR nanocrystal* OR nanocomposite* OR nanodevice* OR nanocluster* OR nanotechn* OR nanocarrier* OR nanowire* OR nanoliposome* OR nanoemulsion* OR nanocrystal* OR nanoconjugate* OR nanogels* OR nanodiamond* OR nanoporou* OR nanosilver* OR nanopore* OR nanomicell* OR nano size* OR nanomedicine* OR nanofibrou*)AND (((((((((((((((TS=(Colorectal Neoplasms)) OR TS=(Colorectal Neoplasm)) OR TS=(Neoplasm, Colorectal)) OR TS=(Neoplasms, Colorectal)) OR TS=(Colorectal Tumors)) OR TS=(Colorectal Tumor)) OR TS=(Tumor, Colorectal)) OR TS=(Tumors, Colorectal)) OR TS=(Colorectal Cancer)) OR TS=(Cancer, Colorectal)) OR TS=(Cancers, Colorectal)) OR TS=(Colorectal Cancers)) OR TS=(Colorectal Carcinoma)) OR TS=(Carcinoma, Colorectal)) OR TS=(Carcinomas, Colorectal)) OR TS=(Colorectal Carcinomas). We conducted bibliometric analysis on the collected publications for comprehensive data analysis and visualization. This involved examining multiple aspects, including countries and regions of publications, affiliated institutions, authors, journals, and their impact factor (IF), citation counts, references, and keywords. To ensure rigor, two researchers independently analyzed the data and cross-verified the results to maintain the study’s accuracy and reproducibility. 2.3 Data analysis To quantify the data, we conducted a quantitative analysis focusing on the number of annual publications and their trends. This analysis included ranking the top ten countries/regions, institutions, authors, and journals based on publication volume. Additionally, we performed a qualitative study of the relationships between authors and co-cited authors, journals and co-cited journals, and co-cited references. Furthermore, we comprehensively analyzed the collaborative relationships among different countries/regions, institutions, and authors and the research trends observed over the past twenty years. 2.4 Bibliometric and visualized analysis We utilized CiteSpace (version 6.2.R4) for co-citation, co-word, and keyword analysis ( 15 ), helping researchers identify research hotspots and frontiers and visualize current research trends ( 16 ). We also employed VOSviewer (version 1.6.18) to create visual maps of different authors, journals, and keywords to analyze the literature clustering ( 17 ,  18 ). Moreover, we used RStudio (bibliometrix package) to explore the current research structure and future research trends and identify shifts in research hotspots ( 19 ). Additionally, GraphPad Prism (version 8.0.2) and Microsoft Excel 2010 were used for quantitative visualization of specific data. These software tools enabled us to extract critical insights from many publications, providing valuable perspectives for our research."
+    }
+  ],
+  "extractions": {
+    "methods_paragraphs": [
+      {
+        "text": "Methods Research on nanomaterials in CRC from 2003 to 2024 was retrieved from the Web of Science Core Collection (WOSCC). Tools such as CiteSpace, VOSviewer, RStudio, GraphPad Prism, and Excel were used to analyze trends and hotspots, covering publication trends, countries, institutions, authors, journals, co-citation analysis, and keywords. Visual maps were created to forecast future developments.",
+        "operations": [],
+        "expanded": []
+      },
+      {
+        "text": "2 Materials and methods 2.1 Data source Our data are sourced from the WOSCC, which is a comprehensive, multidisciplinary journal citation database widely recognized for its extensive coverage. Each article in this database contains metadata such as publication year, country and region, authorship details, institutional affiliations, document type, research field, journal title, citation counts, and references ( 14 ). Researchers generally regard such databases as highly suitable for conducting bibliometric analysis. 2.2 Search strategy We systematically searched and compiled relevant publications concerning nanomaterials in CRC from January 1, 2003, to July 10, 2024. Our study’s inclusion criteria included (1) Full-text publications relevant to nanomaterials in CRC, (2) Articles (research reports that are considered to be citable new and original works), and reviews (detailed, important surveys of published research) written in English. Exclusion criteria comprised: (1) Publications unrelated to nanomaterials in CRC; (2) Types such as proceeding papers (full papers presented at symposia or conferences across various disciplines), meeting abstracts (summaries or extended summaries of reports presented at workshops or conferences), editorial materials (essays expressing the views of individuals, groups, or organizations), early access (papers published electronically by journals before being assigned a volume and issue number), letters (brief correspondence between readers and journal editors on past published material), retracted publications (papers withdrawn by authors, institutions, editors, or publishers), book chapters (monographs or publications on specific topics found within books), and corrections(revisions made to correct errors identified post-publication). The search was conducted on a single day to maintain uniformity in data acquisition. Data were exported in the format of “full records and cited references” as plain text, as illustrated in  \n Figure 1 \n , depicting the screening process. Figure 1 Flowchart of this study. The following is the search formula: TS = (nanodot* OR nanoparticle* OR nanomaterial* OR nanotube* OR nanosheet* OR “quantum dot*” OR nanofiber* OR nanosphere* OR nanorod* OR nanowire* OR nanocrystal* OR nanocomposite* OR nanodevice* OR nanocluster* OR nanotechn* OR nanocarrier* OR nanowire* OR nanoliposome* OR nanoemulsion* OR nanocrystal* OR nanoconjugate* OR nanogels* OR nanodiamond* OR nanoporou* OR nanosilver* OR nanopore* OR nanomicell* OR nano size* OR nanomedicine* OR nanofibrou*)AND (((((((((((((((TS=(Colorectal Neoplasms)) OR TS=(Colorectal Neoplasm)) OR TS=(Neoplasm, Colorectal)) OR TS=(Neoplasms, Colorectal)) OR TS=(Colorectal Tumors)) OR TS=(Colorectal Tumor)) OR TS=(Tumor, Colorectal)) OR TS=(Tumors, Colorectal)) OR TS=(Colorectal Cancer)) OR TS=(Cancer, Colorectal)) OR TS=(Cancers, Colorectal)) OR TS=(Colorectal Cancers)) OR TS=(Colorectal Carcinoma)) OR TS=(Carcinoma, Colorectal)) OR TS=(Carcinomas, Colorectal)) OR TS=(Colorectal Carcinomas). We conducted bibliometric analysis on the collected publications for comprehensive data analysis and visualization. This involved examining multiple aspects, including countries and regions of publications, affiliated institutions, authors, journals, and their impact factor (IF), citation counts, references, and keywords. To ensure rigor, two researchers independently analyzed the data and cross-verified the results to maintain the study’s accuracy and reproducibility. 2.3 Data analysis To quantify the data, we conducted a quantitative analysis focusing on the number of annual publications and their trends. This analysis included ranking the top ten countries/regions, institutions, authors, and journals based on publication volume. Additionally, we performed a qualitative study of the relationships between authors and co-cited authors, journals and co-cited journals, and co-cited references. Furthermore, we comprehensively analyzed the collaborative relationships among different countries/regions, institutions, and authors and the research trends observed over the past twenty years. 2.4 Bibliometric and visualized analysis We utilized CiteSpace (version 6.2.R4) for co-citation, co-word, and keyword analysis ( 15 ), helping researchers identify research hotspots and frontiers and visualize current research trends ( 16 ). We also employed VOSviewer (version 1.6.18) to create visual maps of different authors, journals, and keywords to analyze the literature clustering ( 17 ,  18 ). Moreover, we used RStudio (bibliometrix package) to explore the current research structure and future research trends and identify shifts in research hotspots ( 19 ). Additionally, GraphPad Prism (version 8.0.2) and Microsoft Excel 2010 were used for quantitative visualization of specific data. These software tools enabled us to extract critical insights from many publications, providing valuable perspectives for our research.",
+        "operations": [
+          {
+            "op_type": "heat",
+            "sentence": "The search was conducted on a single day to maintain uniformity in data acquisition.",
+            "start_char": 1798,
+            "end_char": 1882,
+            "materials": [],
+            "params": {}
+          },
+          {
+            "op_type": "heat",
+            "sentence": "To ensure rigor, two researchers independently analyzed the data and cross-verified the results to maintain the study’s accuracy and reproducibility.",
+            "start_char": 3368,
+            "end_char": 3517,
+            "materials": [
+              "two researchers"
+            ],
+            "params": {}
+          }
+        ],
+        "expanded": [
+          {
+            "op_type": "heat",
+            "steps": [
+              "Place the reaction vessel on a hotplate.",
+              "Ramp to the target temperature.",
+              "Maintain the target temperature for the specified time."
+            ]
+          },
+          {
+            "op_type": "heat",
+            "steps": [
+              "Place the reaction vessel on a hotplate.",
+              "Ramp to the target temperature.",
+              "Maintain the target temperature for the specified time."
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

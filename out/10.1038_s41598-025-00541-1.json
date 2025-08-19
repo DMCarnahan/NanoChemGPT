@@ -1,0 +1,743 @@
+{
+  "paper_id": "10.1038/s41598-025-00541-1",
+  "title": "Multifaceted biomedical applications of biogenic titanium dioxide nanoparticles fabricated by marine actinobacterium Streptomyces vinaceusdrappus AMG31.",
+  "authors": [],
+  "doi": "10.1038/s41598-025-00541-1",
+  "source": "eupmc",
+  "urls": {
+    "pdf": null
+  },
+  "license": {
+    "type": "unknown"
+  },
+  "access_route": "oa",
+  "sections": [
+    {
+      "heading": "Biosynthesis and characterization of TiO",
+      "text": "Biosynthesis and characterization of TiO 2 -NP Nanoparticles can be broadly classified into two categories based on their elemental composition: metallic and non-metallic. Among the metallic NPs, those composed of metal oxides, such as zinc oxide (ZnO) 27 – 29 , silver oxide (Ag 2 O) 30 , iron oxide (Fe 2 O 3 ) 31 , and titanium dioxide (TiO 2 ), have captured widespread interest in recent years, attributed to their photocatalytic properties. The prominent non-metallic NPs are silica oxide (SiO 2 ), graphene, and carbon nanotubes (CNTs) 32 , 33 . The utilization of actinomycetes such as  Nocardia ,  Streptomyces , and  Thermomonospora  species to produce nanomaterials as a green approach has rapidly increased. This could be explained by the abundance of secondary metabolites that served as reducing and capping agents for synthesized nanoparticles 34 – 36 . Although the promising biomedical applications of TiO 2 -NPs, their synthesis using actinomycetes is low 21 . This is the first report for utilizing  Streptomyces vinaceusdrappus  in their synthesis. The characterization of TiO 2 -NPs is an important step that should be achieved before being used in various biomedical and biotechnological sectors. In the current investigation, the microscopy technique, including TEM, revealed valuable insights into the morphology and size of the biosynthesized TiO 2 -NP. The TEM micrographs showed a well-dispersed, spherical shape with a relatively uniform size distribution in the ranges from 10 nm to 50 nm (Fig.  1 A, B, and C). In recent research, marine  Streptomyces  sp. was used to form oval and spherical shapes of TiO 2 -NPs with sizes from 3.5 to 92 nm 37 . On the other hand, spherical TiO 2 -NPs were fabricated using an actinomycetes strain identified as  Streptomyces  HC1sp.with sizes in the ranges of 43–67 nm 21 . The difference in the shapes and sizes may be related to the metabolites secreted by various  Streptomyces  spp. that cap NPs after production 38 . Comparatively, a photosynthetic TiO 2 -NP derived from  Punica granatum  (pomegranate) was reported to be spherical in shape with an average size of 100–150 nm 39 . Similarly, using  Cissus rotundifolia , the TiO 2 -NP photosynthesized was spherical and sized 100 nm 40 , another round and polydisperse TiO 2 -NP with an average size of 12–30 nm synthesized from  Syzygium cumini  (Java plum) 41  and a rectangular one with 31–42 nm was fabricated by  Tulbhagia violacea 42 . A spherical-shaped Ag-TiO 2 NP with a size range between 25 and 50 nm was synthesized using  Origanum majorana 43 . Further,  Zanthoxylum armatum  facilitated the synthesis of a spherical Zn-TiO 2 NP measuring 15 nm in diameter 44 . The biosynthesis of NPs is regulated by key parameters like pH and temperature. The previous investigation reported that the nanoparticles exhibit irregular shapes and tend to aggregate at lower pH, while it promotes well-dispersed clusters at alkaline conditions 45 . Also, temperature plays a dual function where higher temperatures accelerate reduction rates, leading to smaller, highly dispersed NPs by favoring nuclei formation over secondary surface reduction. Additionally, the shape of nanoparticles differs with reactant concentration 46 . Both reaction duration and microbial levels significantly affect the synthesis process, where longer times yield larger particles through continued metal ion reduction, while higher microbial amounts speed up synthesis by providing more biological reducing agents 47 . Altogether, these factors characterize the final features of the nanoparticles. The surface morphology and elemental contents of the prepared sample were detected by SEM-EDX analysis. As shown, the spherical particles were arranged with small aggregation (Fig.  1 D and E). The presence of peaks at bending energies of 0.5 KeV (corresponding to O ion) and 0.45 and 4.5 KeV (corresponding to Ti) confirmed the formation of TiO (Fig.  1 F). This finding is compatible with published investigations about the peaks of TiO 2 -NPs at specific bending energy 37 , 48 . The EDX analysis confirms the elemental composition, showing the presence of titanium (Ti: 4.2 wt%, 1.5 at%) and oxygen (O: 95.8 wt%, 98.5 at%), validating the main components of the prepared sample are Ti and O (Fig.  1 D). The presence of other minor peaks or second peaks in EDX chart could be related to some impurities from actinobacterial metabolites that coating the synthesized NPs 49 . The difference in the percentages of atoms during EDX analysis could be related to distinct factors such as surface roughness, homogeneity of the sample during grid preparation, interaction of electron beam with the prepared sample, organic residue from capping agents, moisture content, and sensitivity of the EDX detector. However, the presence of target elements, which here are Ti and O, confirmed the successful formation of TiO 2 -NPs. \n Fig. 1 Characterization of actinobacterial-mediated biogenic synthesis of TiO 2 -NPs. ( A ,  B ) TEM images, ( C ) size distribution, ( D ,  E ) the SEM analysis, and ( F ) the EDX analysis. \n The XRD pattern exhibits distinct diffraction peaks at 2θ values of 25.57°, 38.21°, 48.25°, 54.42°, 55.45°, 63.16°, 68.98°, 70.74°, and 75.53°, corresponding to the (101), (004), (200), (105), (211), (204), (116), (220), and (215) planes, respectively (Fig.  2 A), of the anatase phase of TiO 2  (JCPDS card no. 21-1272). The high intensity and sharpness of these peaks indicate the high crystallinity of the nanoparticles and the formation of a single-phase anatase TiO 2  without significant impurities. The XRD chart shows the presence of the highest plane (101) at 2θ values in the ranges of 24–26°, indicating the structure formed was anatase crystalline 50 . The obtained results were matched with published ones about the formation of anatase crystallographic TiO 2 -NPs 37 , 51 . The average size of formed crystallite TiO 2  was assessed using the Debye-Scherrer equation based on all XRD peaks, which was 33.3 nm (Table  S1 , see supplementary data). As shown, the size obtained by XRD is smaller than those obtained by TEM. This finding is because the XRD measures the size of each crystallite, whereas the TEM measures the size of entire particles. Also, the size obtained by TEM represents the average total particle size, while XRD gives the average size of crystalline domains 52 . \n Fig. 2 XRD ( A ), FT-IR ( B ), DLS ( C ), zeta potential ( D ), and UV–Vis spectroscopic analysis ( E ) of biosynthesized TiO 2 -NPs showing crystallinity, different functional groups, sizes in the colloidal solution, stability, and maximum SPR, respectively. \n The FT-IR spectrum of actinobacterial cell-free filtrate (CFF) exhibited characteristic peaks represented to specific groups related by different metabolites, such as carbohydrates, proteins, amino acids, polysaccharides, and amines (primary and secondary), having a vital role in NPs biosynthesis through reduction of the metal precursor. As shown, the strong and broad peak at 3400 cm –1  in CFF refers to the stretching N–H of primary amines overlapping with the O–H group 53 , 54 . This peak was shifted to more than ones, 3360, 3195, 3130, and 3095 cm –1  upon TiO 2 -NPs formation (Fig.  2 B). Moreover, the medium peaks at 2920 and 2855 cm –1  in CFF indicate the presence of stretching C–H of aliphatic hydrocarbon. These peaks were shifted to 2970 cm –1  after TiO 2  formation. The weak peak at 2190 cm –1  in CFF signifies the stretching C ≡ C of alkyne. The strong peak at 2260 cm –1  indicates the N = C = O of isocyanate. The appearance of medium peaks in the ranges of 1800–2000 cm –1  upon TiO 2  formation indicates aromatic compounds’ bending C–H. The FT-IR analysis exhibited the formation of new peaks or changes in the intensity of peaks at the ranges of 1600–900 cm –1  after the formation of NPs compared to the control (CFF), which indicates the roles of lipids, proteins, and primary alcohol in the fabrication process 55 . The presence of strong peaks in the ranges of 700–400 cm –1  upon NPs formation refers to the successful O–Ti–O formation 37 . Derived from the FT-IR analysis, the presence of various functional groups has a main function in the reduction followed by capping and subsequently increased stabilization of biosynthesis NPs, leading to a decrease or prevention of agglomeration. The behaviors and sizes of TiO 2 -NPs in the fluids were detected using dynamic light scattering (DLS). The data exhibit that the size of TiO 2 -NPs in the solution was 684.4 d. nm (hydrodynamic diameter) (Fig.  2 C), which is bigger than the sizes obtained from TEM and XRD. This finding could be related to the DLS measure hydrodynamic diameter which means the effective size in the solution. Also, NPs’ core and any coating substances, such as proteins, will interfere and increase the obtained DLS sizes. On the other hand, the TEM analysis measures the physical size (in solid state) of the NPs’ core, whereas DLS measures sizes, including any surface coating. This is the reason for the increased sizes obtained by DLS compared to other techniques 56 . Moreover, the stability of TiO 2 -NPs was investigated by the zeta potential value that detects the surface charge. The presence of one charge on the NP’s surface (positive or negative) indicates that the repulsion between particles will increase, which decreases the agglomeration and increases stability. Also, the stability of NPs could be caused by the reducing agents, such as proteins, carbohydrates, and amines, that coat the NPs and increase their stability 4 , 57 . In the current study, the synthesized TiO 2 -NPs have a negative charge and an electrical potential of -24 mV (Fig.  2 D). Finally, the optical features of biogenic TiO 2 -NPs using actinobacterium strain  S. vinaceusdrappus  were assessed by UV-Vis spectroscopic analysis. Data showed that the maximum surface plasmon resonance (SPR) of synthesized titania was observed at a wavelength of 265 nm (Fig.  2 E). The current result was compatible with those reported that the strong absorption peak of titania fabricated by the green method was localized at wavelengths of 240–400 nm 5 . Srinivasan and coauthors reported that the maximum SPR of titania formed by water extract of  Sesbania grandiflora  was observed at 240 nm 58 . Also, TiO 2 -NPs formed by plant extract showed two absorption peaks at a wavenumber of 245–265 nm, which is identical to titania nanostructure 59 ."
+    },
+    {
+      "heading": "Materials and methods",
+      "text": "Materials and methods Actinobacterium used The actinobacterium strain AMG31 was previously isolated from marine sediment collected from Marsa Allam, Red Sea, Egypt, and utilized to produce exopolysaccharide. The identification of this strain was achieved based on morphological, physiological, biochemical identification, and molecular based on sequencing of 16 S rRNA gene as  Streptomyces vinaceusdrappus  AMG31 and added to the GenBank database with accession number OR793047 93 . S. vinaceusdrappus  AMG31-mediated biogenic synthesis of TiO 2 -NPs A single colony of  S. vinaceusdrappus  AMG31 was inoculated into starch nitrate broth media and incubated at 37 °C for 72 h. Subsequently, the inoculated media underwent centrifugation at 1000 rpm for 10 min to collect the cells. These cells were then rinsed twice with sterilized distilled water (dH 2 O) before resuspending in approximately 100 ml of distilled water containing 10 g of cells. The previous mixture was then incubated again at 37 °C for 24 h. After the incubation period ended, the mixture was centrifuged to collect the supernatant (cell-free filtrate), which was utilized as a biocatalyst for the biosynthesis of TiO 2 -NPs. For this purpose, the filtrate was mixed with titanium isopropoxide (Ti[OCH(CH 3 ) 2 ] 4 ) under stirring conditions for 1 h to achieve a final concentration of 5 mM 48 . The pH of the mixture was adjusted to 8 by dropwise addition of 1 N NaOH. A shift in color from pale yellow to white precipitate signified the successful synthesis of TiO 2 -NPs. After 24 h of incubation, the white precipitate was harvested, rinsed three times with high-purity Milli-Q water, and dried in an oven at 200 °C for 3 h (Fig.  11 ). \n Fig. 11 Flowchart showing different steps for synthesis of TiO 2 -NPs using  S. vinaceusdrappus  AMG31. \n Characterization of the biosynthesized TiO 2 -NP The formation of TiO 2 -NPs was first evident from the color change to white in the cell-free filtrate after adding the metal precursor. The functional groups present in the bacterial cell-free filtrate and the synthesized TiO 2 -NPs were examined using Fourier transform infrared (FT-IR) spectroscopy (Cary-660 model). For this analysis, 10 mg of TiO 2 -NPs or 3 ml of the cell-free filtrate was mixed thoroughly with KBr and pressed into a disk. Subsequently, the disk was scanned over the wavenumber range of 400–4000 cm − 1 94 . The crystalline or amorphous nature of the synthesized TiO 2 -NPs was examined using X-ray diffraction (XRD) analysis on a PANalytical-X’Pert-Pro-MRD instrument. The X-ray source was CuKα radiation with a wavelength of 1.54 Å, operated at 30 mA current and 40 kV voltage. The XRD scan was performed at 2θ ranges of 10–80°. The average crystallite size of the biosynthesized TiO 2 -NPs was calculated from the XRD data using the Debye-Scherrer equation 95  as follows: 1 \\documentclass[12pt]{minimal}\n\t\t\t\t\\usepackage{amsmath}\n\t\t\t\t\\usepackage{wasysym} \n\t\t\t\t\\usepackage{amsfonts} \n\t\t\t\t\\usepackage{amssymb} \n\t\t\t\t\\usepackage{amsbsy}\n\t\t\t\t\\usepackage{mathrsfs}\n\t\t\t\t\\usepackage{upgreek}\n\t\t\t\t\\setlength{\\oddsidemargin}{-69pt}\n\t\t\t\t\\begin{document}$$\\:Average\\:size=\\:\\frac{0.94\\:x\\:1.54}{\\beta\\:\\:cos\\theta\\:}$$\\end{document} Where 0.94 is the constant of Scherrer, 1.54 is the wavelength of the X-ray, β is the half intensity, and θ is the angle of Bragg’s diffraction. For transmission electron microscopy (TEM, JEOL, Ltd-1010, Tokyo, Japan) analysis, the as-formed powder of TiO 2 -NPs was first suspended in high-purity Milli-Q water under sonication. The drops of this suspension were then dried on a TEM grid before examination. The dried nanoparticle powder was separately analyzed using a scanning electron microscope (JEOL, JSM-6360LA, Tokyo, Japan) to study the surface morphology. Concurrently, energy-dispersive X-ray spectroscopy (EDX) and SEM were employed to determine the chemical composition of the nanoparticles. For scanning electron microscopy (SEM) analysis, the biosynthesized TiO 2 -NPs were loaded onto an SEM holder, coated with gold under vacuum, and imaged at 20 kV using a JEOL JSM-6360LA instrument (Tokyo, Japan). Concurrently, the elementary qualitative and quantitative mapping of the nanoparticles was performed by energy-dispersive X-ray spectroscopy (EDX) coupled with the SEM apparatus 50 . Dynamic light scattering (DLS) was used to investigate the nanoparticle’s hydrodynamic sizes and size distribution in colloidal solutions. For this, the biosynthesized TiO 2 -NPs were suspended in high-purity water to avoid the formation of shadows and anomalous peaks during particle scattering. Additionally, the surface charge of the synthesized nanoparticles was analyzed by measuring their zeta potential using a Malvern Zeta-sizer (Nano-ZS, Malvern, UK) 96 . The optical properties of biogenic TiO 2 -NPs were investigated by UV-Vis spectroscopy (JENWAY-6306, Staffordshire, UK) for detecting the maximum surface plasmon resonance (SPR). Approximately 2 mL of synthesized solution was transferred to a spectrophotometric cuvette to measure their absorbance in 200–800 nm ranges. Biomedical applications Antioxidant activity DPPH The free radical scavenging activity of TiO 2 -NP was measured using DPPH (1,1-diphenyl-2-picryl hydrazyl). In brief, a 0.1 mM solution of DPPH in ethanol was prepared. This solution (1 ml) was added to 3 ml of TiO 2 -NP in ethanol at different concentrations (1.95–1000 µg/ml). The mixtures were shaken and allowed to stand for 30 min before measuring absorbance at 517 nm using a spectrophotometer (UV-VIS milton roy). Ascorbic acid was used as a reference standard. The percentages of DPPH scavenging were calculated using the following formula 97 . 2 \\documentclass[12pt]{minimal}\n\t\t\t\t\\usepackage{amsmath}\n\t\t\t\t\\usepackage{wasysym} \n\t\t\t\t\\usepackage{amsfonts} \n\t\t\t\t\\usepackage{amssymb} \n\t\t\t\t\\usepackage{amsbsy}\n\t\t\t\t\\usepackage{mathrsfs}\n\t\t\t\t\\usepackage{upgreek}\n\t\t\t\t\\setlength{\\oddsidemargin}{-69pt}\n\t\t\t\t\\begin{document}$$DPPH{\\text{ }}Scavenging{\\text{ \\% = }}\\frac{{{A_0} - {{\\text{A}}_{\\text{1}}}}}{{{A_0}}} \\times {\\text{100}}$$\\end{document} A 0  and A 1  absorbance of ascorbic acid and TiO2-NP treatment, respectively. ABTS The ABTS •+  radical scavenging activity of the TiO 2 -NP was determined using the method described by González et al. 98 . The ABTS radical cation (ABTS •+ ) was generated by reacting a 7 mM 2,20-azino-bis(3-ethylbenzothiazoline-6-sulphonicacid) (ABTS) stock solution with 2.45 mM K 2 S 2 O 8  and the mixture was allowed to stand in the dark at room temperature. The assay mixture comprised 0.07 ml of TiO 2 -NP and 3 ml of the diluted ABTS •+  solution. After a 6-minute incubation period, the absorbance was measured at 734 nm. The radical scavenging capacity was expressed relative to gallic acid’s standard antioxidant reference. 3 \\documentclass[12pt]{minimal}\n\t\t\t\t\\usepackage{amsmath}\n\t\t\t\t\\usepackage{wasysym} \n\t\t\t\t\\usepackage{amsfonts} \n\t\t\t\t\\usepackage{amssymb} \n\t\t\t\t\\usepackage{amsbsy}\n\t\t\t\t\\usepackage{mathrsfs}\n\t\t\t\t\\usepackage{upgreek}\n\t\t\t\t\\setlength{\\oddsidemargin}{-69pt}\n\t\t\t\t\\begin{document}$$ABT{S^{ \\cdot +}}{\\text{ }}scavenging{\\text{ }}\\% =\\frac{{A - B}}{A} \\times 100$$\\end{document} Where A is the absorbance of the solution at zero time (negative control), and B is the absorbance after 6 min of adding TiO 2 -NPs. TAC The phosphomolybdenum method was employed to evaluate the total antioxidant capacity (TAC) of TiO 2 -NP. A solution containing 0.5 mg/ml of TiO 2 -NP was mixed with 0.6 M H 2 SO 4 , 28 mM NaH 2 PO 4 , and 4 mM ammonium molybdate. A control solution with only the reagent was prepared for comparative analysis. These mixtures were then heated at 95 °C for 150 min 99 . Upon cooling down to ambient temperature, their absorbance was recorded at 630 nm, and the findings were presented as ascorbic acid equivalent (AAE) in µg/mg. FRAP The effect of solvent polarity on the ferric-reducing antioxidant power of TiO 2 -NP was evaluated using the K 3 Fe(CN) 6  and C 2 HCl 3 O 2  method, as described by Benzie & Strain 100 , with modifications and adaptations for a microplate assay 101 . Eppendorf tubes were labeled, and 40 µl of TiO 2 -NP was introduced to each tube, then adding 50 µl of 0.2 mol/l (Na 2 HPO 4 .2H 2 O) buffer, 50 µl of 1% K 3 Fe(CN) 6 , and 50 µl of 10% C 2 HCl 3 O 2 . The mixture was spun at 3,000 rpm for 10 min. After centrifugation, 165 µl of the supernatant from each TiO 2 -NP was transferred to a 96-well plate, followed by the addition of 33.3 µl of 1% FeCl 3 . The absorbance was measured at 630 nm, and the results were presented as ascorbic acid equivalent (AAE) in µg/mg. Wound healing The HFB4 cell line of human normal skin fibroblasts received from VACSERA Company, Cairo, Egypt, was used to examine the wound healing activity of synthesized TiO 2 -NPs. The HFB4 cells were seeded into multi-well plates and allowed to grow until forming a confluent monolayer, ensuring all cultures were fully confluent at the beginning, which was crucial. A straight scratch was made to simulate a wound using a yellow pipette tip angled at approximately 30 degrees. Keeping the pipette tip at an angle helped maintain a narrow scratch width, enabling imaging of both wound edges under a 10x objective lens 102 . The following equation calculated the rate of migration (RM): 4 \\documentclass[12pt]{minimal}\n\t\t\t\t\\usepackage{amsmath}\n\t\t\t\t\\usepackage{wasysym} \n\t\t\t\t\\usepackage{amsfonts} \n\t\t\t\t\\usepackage{amssymb} \n\t\t\t\t\\usepackage{amsbsy}\n\t\t\t\t\\usepackage{mathrsfs}\n\t\t\t\t\\usepackage{upgreek}\n\t\t\t\t\\setlength{\\oddsidemargin}{-69pt}\n\t\t\t\t\\begin{document}$${\\text{RM}}=\\frac{{Wi - Wf}}{T}$$\\end{document} Where Wi is the width average of the initial wound (µm), Wf is the final wound’s (µm) width average, and T is time. On the other hand, the wound closure (WC) percentages were calculated as follows: 5 \\documentclass[12pt]{minimal}\n\t\t\t\t\\usepackage{amsmath}\n\t\t\t\t\\usepackage{wasysym} \n\t\t\t\t\\usepackage{amsfonts} \n\t\t\t\t\\usepackage{amssymb} \n\t\t\t\t\\usepackage{amsbsy}\n\t\t\t\t\\usepackage{mathrsfs}\n\t\t\t\t\\usepackage{upgreek}\n\t\t\t\t\\setlength{\\oddsidemargin}{-69pt}\n\t\t\t\t\\begin{document}$${\\text{WC\\% }}=\\frac{{A{t_0} - A{t_{\\Delta t}}}}{{A{t_0}}} \\times 100$$\\end{document} Where At 0  is the wound area at an initial time, and At Δt  is the wound area after n hours. Moreover, the difference between initial and final area (AD) was calculated as follows: 6 \\documentclass[12pt]{minimal}\n\t\t\t\t\\usepackage{amsmath}\n\t\t\t\t\\usepackage{wasysym} \n\t\t\t\t\\usepackage{amsfonts} \n\t\t\t\t\\usepackage{amssymb} \n\t\t\t\t\\usepackage{amsbsy}\n\t\t\t\t\\usepackage{mathrsfs}\n\t\t\t\t\\usepackage{upgreek}\n\t\t\t\t\\setlength{\\oddsidemargin}{-69pt}\n\t\t\t\t\\begin{document}$${\\text{AD \\% }}={{\\text{A}}_{\\text{i}}} - {{\\text{A}}_{\\text{f}}}$$\\end{document} Where A i  is the initial area, and A f  is the final area. Hemocompatibility assay Anticoagulation test To evaluate anticoagulant activity, classic coagulation assays, including activated partial thromboplastin time (APTT) and prothrombin time (PT), were performed to study TiO 2 -NPs using a systematic method of assessment of blood clotting properties. TiO 2 -NPs applied had concentrations of 0, 25, 50 and 75 µg/ml, heparin was used as the positive control. Citrated plasma (3:1) was mixed with TiO 2 -NP solution, and the mixture was kept in the incubator at 37 °C for 3 min. For PT testing, 0.20 ml of reagent was pre-incubated for 3 min at 37 °C and added. While for APTT testing, 0.10 ml of reagent and 0.10 ml CaCl 2  (0.025 mol/l) were sequentially added and incubated for 5 min at 37 °C, with clotting time noted to examine the blood anticoagulant properties 103 . RBCs cell membrane integrity Human red blood cells (RBCs) were subjected to three washings in 150 mM NaCl and centrifuged at 2500 RPM for 10 min and then resuspended in Phosphate Buffer Saline solution (pH 7.4) to yield a 2% RBC solution. The TiO 2 -NPs were assessed at concentrations of 25, 50, 100, 200, 400, 600, 800, and 1000 µg/ml, employing full hemolysis and the isotonic solution respectively as positive and negative control. RBC’s solution and a serial dilution of TiO 2 -NPs were combined to yield a final volume of 1 ml. The solution was then placed at 37 °C for an hour, spun at 2500 for 15 min, and the optical density of the supernatant fluid was measured at 546 nm 104 , with experiments performed in triplicate and mean ± SD determined. 7 \\documentclass[12pt]{minimal}\n\t\t\t\t\\usepackage{amsmath}\n\t\t\t\t\\usepackage{wasysym} \n\t\t\t\t\\usepackage{amsfonts} \n\t\t\t\t\\usepackage{amssymb} \n\t\t\t\t\\usepackage{amsbsy}\n\t\t\t\t\\usepackage{mathrsfs}\n\t\t\t\t\\usepackage{upgreek}\n\t\t\t\t\\setlength{\\oddsidemargin}{-69pt}\n\t\t\t\t\\begin{document}$${\\text{Hemolytic \\% = }}\\frac{{{\\text{A}}{{\\text{b}}_{{\\text{treatment}}}} - {\\text{A}}{{\\text{b}}_{{\\text{blank}}}}}}{{{\\text{A}}{{\\text{b}}_{{\\text{positive control}}}}}} \\times {\\text{100}}$$\\end{document} Ab is the absorbance of the supernatant fluid measured at 546 nm, blank is the isotonic solution, and positive control is full hemolysis. Cytotoxicity To assess the cytotoxic impact of TiO 2 -NP, three different cell lines were utilized: the WI38 normal fibroblast cell line, the Caco-2 colorectal adenocarcinoma cell line, and the PANC-1 pancreatic cancer cell line. These cell lines were procured from VACSERA Company, Cairo, Egypt. The assay was carried out using the MTT method. Each cell type was grown in separate 96-well plates, with approximately 10,000 cells per well immersed in a growth medium solution. After an initial 24-hour period, the cells were exposed to varying concentrations of TiO 2 -NP (31.25–1000 µg/ml) while control wells received a DMSO solution. The plates were then incubated for an additional 24 h in a controlled environment maintained at 37 °C and 5% CO 2  levels. Subsequent to incubation, the medium was carefully removed from each well, and the cells were rinsed with distilled water to eliminate any residual nanoparticles. A 1% crystal violet staining solution was applied to the cells for 30 min, allowing them to absorb the dye. After discarding the stain, a 30% glacial acetic acid solution was introduced to the wells, and the plates were gently agitated. Each well’s absorbance was then read at 490 nm using a microplate ELISA reader 105 . To ensure reliable results, these experiments were conducted in triplicate. 8 \\documentclass[12pt]{minimal}\n\t\t\t\t\\usepackage{amsmath}\n\t\t\t\t\\usepackage{wasysym} \n\t\t\t\t\\usepackage{amsfonts} \n\t\t\t\t\\usepackage{amssymb} \n\t\t\t\t\\usepackage{amsbsy}\n\t\t\t\t\\usepackage{mathrsfs}\n\t\t\t\t\\usepackage{upgreek}\n\t\t\t\t\\setlength{\\oddsidemargin}{-69pt}\n\t\t\t\t\\begin{document}$${\\text{Cell viability \\% }}=\\frac{{{\\text{Absorbance of treated cells}}}}{{{\\text{Absorbance of control}}}} \\times {\\text{100}}$$\\end{document} Antidiabetic α-Amylase Inhibition The inhibitory capability of TiO 2 -NP against the α-amylase enzyme was assessed utilizing the 3,5-dinitrosalicylic acid (DNS) method. Tested concentrations of TiO 2 -NPs, ranging from 1.95 to 1000 µg/ml, were evaluated and compared to acarbose, a known α-amylase inhibitor, which served as a positive control at the same concentration range. The absorbance readings were obtained at a wavelength of 540 nm using a UV-visible Biosystem 310 spectrophotometer 106 . The α-amylase inhibition percentages were calculated using the following equation: 9 \\documentclass[12pt]{minimal}\n\t\t\t\t\\usepackage{amsmath}\n\t\t\t\t\\usepackage{wasysym} \n\t\t\t\t\\usepackage{amsfonts} \n\t\t\t\t\\usepackage{amssymb} \n\t\t\t\t\\usepackage{amsbsy}\n\t\t\t\t\\usepackage{mathrsfs}\n\t\t\t\t\\usepackage{upgreek}\n\t\t\t\t\\setlength{\\oddsidemargin}{-69pt}\n\t\t\t\t\\begin{document}$${\\text{Enzyme inhibition \\% = }}\\frac{{{\\text{A}}{{\\text{b}}_{{\\text{control}}}} - {\\text{A}}{{\\text{b}}_{{\\text{treatment}}}}}}{{{\\text{A}}{{\\text{b}}_{{\\text{control}}}}}} \\times {\\text{100}}$$\\end{document} Where Ab is the absorbance. To determine the IC 50  values, which represent the concentration of TiO 2 -NP required to inhibit 50% of the α-amylase activity, a graph was plotted illustrating the percentage of α-amylase inhibition against the corresponding tested TiO 2 -NP concentrations. α-Glucosidase Inhibition To evaluate the ability of TiO 2 -NP (1.95–1000 µg/ml) to inhibit the α-glucosidase enzyme. The inhibitory activity of TiO 2 -NP was compared to acarbose, which served as a positive control 107 . Absorbance readings are measured at 405 nm wavelength using a Biosystm 310 Plus spectrophotometer, and the inhibition percentages were detected using Eq.  8 . To determine the IC 50  value, a regression equation is derived by plotting the percentage of inhibition against the corresponding TiO 2 -NP concentrations tested, spanning from 1.95 to 1000 µg/ml. Antimicrobial activity The antimicrobial activity of TiO 2 -NP was evaluated using the agar well diffusion method against a broad spectrum of bacterial and fungal strains. The test was achieved against ATCC (American Type Culture Collection) for bacterial strains and unicellular fungi, whereas multicellular fungi were purchased from Assiut University Mycological Centre (AUMC). The antibacterial activity was achieved against Gram-positive strains ( Bacillus subtilis  ATCC 6633,  Staphylococcus aureus  ATCC 6538, and  Enterococcus faecalis  ATCC 29212) and Gram-negative strains ( Escherichia coli  ATCC 8739,  Klebsiella pneumoniae  ATCC 13883,  Pseudomonas aeruginosa  ATCC 90274, and  Salmonella typhi  ATCC 6539) on Mueller-Hinton agar media. Additionally, the antifungal activity was assessed against  Aspergillus niger  (AUMC 14260),  Mucor circinelloides  (AUMMC 11656),  Trichoderma harzianum  (AUMC 5408),  Penicillium glabrum  (OP694171) (AUMC15597), and  Candida albicans  (ATCC 10221) on Sabouraud dextrose agar. Gentamicin (positive control) was employed as the control drug for bacterial inhibition screening, while Fluconazole (positive control) served as the antifungal control. The inoculum suspension was appropriately adjusted for the standard broth dilution method, and the agar plates were inoculated within 15 min. The dried agar surface was streaked in three directions. After allowing the agar to dry for 15 min, a sterile cork borer with a diameter of 7 mm was used aseptically to create wells in the agar. TiO 2 -NP was suspended in DMSO at 1 mg/ml, and 100 µl of the stock solution was dispensed into each well compared to the same positive control and negative control (DMSO) concentration. The plates were then incubated for 24 h for bacteria and unicellular fungi and 72 h for multicellular fungi. The zones of inhibition were measured to the nearest whole millimeter at the point where significant growth reduction was observed 108 . For MIC (minimum inhibitory concentrations), MBC (minimum bactericidal concentrations), and MFC (minimum fungicidal concentrations), the detection was performed using the microplate assay method by investigating the activity of different TiO 2 -NPs concentrations (400, 200,100,50, 25, and 12.5 µg/ml). The assay was achieved following the guidelines established by the Clinical and Laboratory Standards Institute (CLSI) 109 . The morphological changes of highly affected bacterial cells,  E. coli  (Gram-negative) and  Enterococcus faecalis  (Gram-positive) were investigated under scanning electron microscopy. Antibiofilm The impact of TiO 2 -NP on biofilm formation was assessed using 96-well polystyrene flat-bottom plates against all tested bacterial strains and  C. albicans . Briefly, 300 µl of trypticase soy yeast broth (TSY) containing 10 6  CFU/ml was inoculated with sub-lethal concentrations of 75%, 50%, and 25% of the MBC/MFC of TiO 2 -NP. After incubating for 48 h at 37 °C, the biofilm formed on the plates was stained for 15 min with a 0.1% aqueous crystal violet solution. The excess stain was removed by rinsing with sterile distilled water. Subsequently, 250 µl of 95% ethanol was added to each well to solubilize the dye taken up by the cells. The absorbance at 570 nm was measured using a microplate reader after 15 min, which quantified the biofilm formation 110 . 10 \\documentclass[12pt]{minimal}\n\t\t\t\t\\usepackage{amsmath}\n\t\t\t\t\\usepackage{wasysym} \n\t\t\t\t\\usepackage{amsfonts} \n\t\t\t\t\\usepackage{amssymb} \n\t\t\t\t\\usepackage{amsbsy}\n\t\t\t\t\\usepackage{mathrsfs}\n\t\t\t\t\\usepackage{upgreek}\n\t\t\t\t\\setlength{\\oddsidemargin}{-69pt}\n\t\t\t\t\\begin{document}$${\\text{Biofilm inhibition \\% =}}\\frac{{{{\\text{A}}_{\\text{S}}} - {{\\text{A}}_{\\text{B}}}}}{{{{\\text{A}}_{\\text{C}}} - {{\\text{A}}_{\\text{B}}}}} \\times {\\text{100}}$$\\end{document} Where A is the absorbance at 570 nm, A S  is the absorbance of the sample (media + test organism + TiO 2 -NPs at 25%, 50%, or 75% MBC value), A B  is the absorbance of blank (media only), and A C  (media + test organism). Statistical analysis SPSS (version 18, USA) was used for data analysis. The Shapiro-Wilk, Equal Variance, and One-Way Analysis of Variance (ANOVA) tests were performed. Following the ANOVA test was conducted."
+    }
+  ],
+  "extractions": {
+    "methods_paragraphs": [
+      {
+        "text": "Biosynthesis and characterization of TiO 2 -NP Nanoparticles can be broadly classified into two categories based on their elemental composition: metallic and non-metallic. Among the metallic NPs, those composed of metal oxides, such as zinc oxide (ZnO) 27 – 29 , silver oxide (Ag 2 O) 30 , iron oxide (Fe 2 O 3 ) 31 , and titanium dioxide (TiO 2 ), have captured widespread interest in recent years, attributed to their photocatalytic properties. The prominent non-metallic NPs are silica oxide (SiO 2 ), graphene, and carbon nanotubes (CNTs) 32 , 33 . The utilization of actinomycetes such as  Nocardia ,  Streptomyces , and  Thermomonospora  species to produce nanomaterials as a green approach has rapidly increased. This could be explained by the abundance of secondary metabolites that served as reducing and capping agents for synthesized nanoparticles 34 – 36 . Although the promising biomedical applications of TiO 2 -NPs, their synthesis using actinomycetes is low 21 . This is the first report for utilizing  Streptomyces vinaceusdrappus  in their synthesis. The characterization of TiO 2 -NPs is an important step that should be achieved before being used in various biomedical and biotechnological sectors. In the current investigation, the microscopy technique, including TEM, revealed valuable insights into the morphology and size of the biosynthesized TiO 2 -NP. The TEM micrographs showed a well-dispersed, spherical shape with a relatively uniform size distribution in the ranges from 10 nm to 50 nm (Fig.  1 A, B, and C). In recent research, marine  Streptomyces  sp. was used to form oval and spherical shapes of TiO 2 -NPs with sizes from 3.5 to 92 nm 37 . On the other hand, spherical TiO 2 -NPs were fabricated using an actinomycetes strain identified as  Streptomyces  HC1sp.with sizes in the ranges of 43–67 nm 21 . The difference in the shapes and sizes may be related to the metabolites secreted by various  Streptomyces  spp. that cap NPs after production 38 . Comparatively, a photosynthetic TiO 2 -NP derived from  Punica granatum  (pomegranate) was reported to be spherical in shape with an average size of 100–150 nm 39 . Similarly, using  Cissus rotundifolia , the TiO 2 -NP photosynthesized was spherical and sized 100 nm 40 , another round and polydisperse TiO 2 -NP with an average size of 12–30 nm synthesized from  Syzygium cumini  (Java plum) 41  and a rectangular one with 31–42 nm was fabricated by  Tulbhagia violacea 42 . A spherical-shaped Ag-TiO 2 NP with a size range between 25 and 50 nm was synthesized using  Origanum majorana 43 . Further,  Zanthoxylum armatum  facilitated the synthesis of a spherical Zn-TiO 2 NP measuring 15 nm in diameter 44 . The biosynthesis of NPs is regulated by key parameters like pH and temperature. The previous investigation reported that the nanoparticles exhibit irregular shapes and tend to aggregate at lower pH, while it promotes well-dispersed clusters at alkaline conditions 45 . Also, temperature plays a dual function where higher temperatures accelerate reduction rates, leading to smaller, highly dispersed NPs by favoring nuclei formation over secondary surface reduction. Additionally, the shape of nanoparticles differs with reactant concentration 46 . Both reaction duration and microbial levels significantly affect the synthesis process, where longer times yield larger particles through continued metal ion reduction, while higher microbial amounts speed up synthesis by providing more biological reducing agents 47 . Altogether, these factors characterize the final features of the nanoparticles. The surface morphology and elemental contents of the prepared sample were detected by SEM-EDX analysis. As shown, the spherical particles were arranged with small aggregation (Fig.  1 D and E). The presence of peaks at bending energies of 0.5 KeV (corresponding to O ion) and 0.45 and 4.5 KeV (corresponding to Ti) confirmed the formation of TiO (Fig.  1 F). This finding is compatible with published investigations about the peaks of TiO 2 -NPs at specific bending energy 37 , 48 . The EDX analysis confirms the elemental composition, showing the presence of titanium (Ti: 4.2 wt%, 1.5 at%) and oxygen (O: 95.8 wt%, 98.5 at%), validating the main components of the prepared sample are Ti and O (Fig.  1 D). The presence of other minor peaks or second peaks in EDX chart could be related to some impurities from actinobacterial metabolites that coating the synthesized NPs 49 . The difference in the percentages of atoms during EDX analysis could be related to distinct factors such as surface roughness, homogeneity of the sample during grid preparation, interaction of electron beam with the prepared sample, organic residue from capping agents, moisture content, and sensitivity of the EDX detector. However, the presence of target elements, which here are Ti and O, confirmed the successful formation of TiO 2 -NPs. \n Fig. 1 Characterization of actinobacterial-mediated biogenic synthesis of TiO 2 -NPs. ( A ,  B ) TEM images, ( C ) size distribution, ( D ,  E ) the SEM analysis, and ( F ) the EDX analysis. \n The XRD pattern exhibits distinct diffraction peaks at 2θ values of 25.57°, 38.21°, 48.25°, 54.42°, 55.45°, 63.16°, 68.98°, 70.74°, and 75.53°, corresponding to the (101), (004), (200), (105), (211), (204), (116), (220), and (215) planes, respectively (Fig.  2 A), of the anatase phase of TiO 2  (JCPDS card no. 21-1272). The high intensity and sharpness of these peaks indicate the high crystallinity of the nanoparticles and the formation of a single-phase anatase TiO 2  without significant impurities. The XRD chart shows the presence of the highest plane (101) at 2θ values in the ranges of 24–26°, indicating the structure formed was anatase crystalline 50 . The obtained results were matched with published ones about the formation of anatase crystallographic TiO 2 -NPs 37 , 51 . The average size of formed crystallite TiO 2  was assessed using the Debye-Scherrer equation based on all XRD peaks, which was 33.3 nm (Table  S1 , see supplementary data). As shown, the size obtained by XRD is smaller than those obtained by TEM. This finding is because the XRD measures the size of each crystallite, whereas the TEM measures the size of entire particles. Also, the size obtained by TEM represents the average total particle size, while XRD gives the average size of crystalline domains 52 . \n Fig. 2 XRD ( A ), FT-IR ( B ), DLS ( C ), zeta potential ( D ), and UV–Vis spectroscopic analysis ( E ) of biosynthesized TiO 2 -NPs showing crystallinity, different functional groups, sizes in the colloidal solution, stability, and maximum SPR, respectively. \n The FT-IR spectrum of actinobacterial cell-free filtrate (CFF) exhibited characteristic peaks represented to specific groups related by different metabolites, such as carbohydrates, proteins, amino acids, polysaccharides, and amines (primary and secondary), having a vital role in NPs biosynthesis through reduction of the metal precursor. As shown, the strong and broad peak at 3400 cm –1  in CFF refers to the stretching N–H of primary amines overlapping with the O–H group 53 , 54 . This peak was shifted to more than ones, 3360, 3195, 3130, and 3095 cm –1  upon TiO 2 -NPs formation (Fig.  2 B). Moreover, the medium peaks at 2920 and 2855 cm –1  in CFF indicate the presence of stretching C–H of aliphatic hydrocarbon. These peaks were shifted to 2970 cm –1  after TiO 2  formation. The weak peak at 2190 cm –1  in CFF signifies the stretching C ≡ C of alkyne. The strong peak at 2260 cm –1  indicates the N = C = O of isocyanate. The appearance of medium peaks in the ranges of 1800–2000 cm –1  upon TiO 2  formation indicates aromatic compounds’ bending C–H. The FT-IR analysis exhibited the formation of new peaks or changes in the intensity of peaks at the ranges of 1600–900 cm –1  after the formation of NPs compared to the control (CFF), which indicates the roles of lipids, proteins, and primary alcohol in the fabrication process 55 . The presence of strong peaks in the ranges of 700–400 cm –1  upon NPs formation refers to the successful O–Ti–O formation 37 . Derived from the FT-IR analysis, the presence of various functional groups has a main function in the reduction followed by capping and subsequently increased stabilization of biosynthesis NPs, leading to a decrease or prevention of agglomeration. The behaviors and sizes of TiO 2 -NPs in the fluids were detected using dynamic light scattering (DLS). The data exhibit that the size of TiO 2 -NPs in the solution was 684.4 d. nm (hydrodynamic diameter) (Fig.  2 C), which is bigger than the sizes obtained from TEM and XRD. This finding could be related to the DLS measure hydrodynamic diameter which means the effective size in the solution. Also, NPs’ core and any coating substances, such as proteins, will interfere and increase the obtained DLS sizes. On the other hand, the TEM analysis measures the physical size (in solid state) of the NPs’ core, whereas DLS measures sizes, including any surface coating. This is the reason for the increased sizes obtained by DLS compared to other techniques 56 . Moreover, the stability of TiO 2 -NPs was investigated by the zeta potential value that detects the surface charge. The presence of one charge on the NP’s surface (positive or negative) indicates that the repulsion between particles will increase, which decreases the agglomeration and increases stability. Also, the stability of NPs could be caused by the reducing agents, such as proteins, carbohydrates, and amines, that coat the NPs and increase their stability 4 , 57 . In the current study, the synthesized TiO 2 -NPs have a negative charge and an electrical potential of -24 mV (Fig.  2 D). Finally, the optical features of biogenic TiO 2 -NPs using actinobacterium strain  S. vinaceusdrappus  were assessed by UV-Vis spectroscopic analysis. Data showed that the maximum surface plasmon resonance (SPR) of synthesized titania was observed at a wavelength of 265 nm (Fig.  2 E). The current result was compatible with those reported that the strong absorption peak of titania fabricated by the green method was localized at wavelengths of 240–400 nm 5 . Srinivasan and coauthors reported that the maximum SPR of titania formed by water extract of  Sesbania grandiflora  was observed at 240 nm 58 . Also, TiO 2 -NPs formed by plant extract showed two absorption peaks at a wavenumber of 245–265 nm, which is identical to titania nanostructure 59 .",
+        "operations": [
+          {
+            "op_type": "add",
+            "sentence": "Moreover, the stability of TiO 2 -NPs was investigated by the zeta potential value that detects the surface charge.",
+            "start_char": 9155,
+            "end_char": 9270,
+            "materials": [
+              "2 -NPs"
+            ],
+            "params": {}
+          },
+          {
+            "op_type": "add",
+            "sentence": "The presence of one charge on the NP’s surface (positive or negative) indicates that the repulsion between particles will increase, which decreases the agglomeration and increases stability.",
+            "start_char": 9271,
+            "end_char": 9461,
+            "materials": [
+              "one charge"
+            ],
+            "params": {}
+          },
+          {
+            "op_type": "add",
+            "sentence": "In the current study, the synthesized TiO 2 -NPs have a negative charge and an electrical potential of -24 mV (Fig.  2 D).",
+            "start_char": 9630,
+            "end_char": 9752,
+            "materials": [
+              "2 -NPs",
+              "mV (Fig",
+              "2 D"
+            ],
+            "params": {}
+          }
+        ],
+        "expanded": [
+          {
+            "op_type": "add",
+            "steps": [
+              "Ensure reaction vessel is present and empty.",
+              "Place a clean stir bar in the vessel.",
+              "Measure the specified amount of 2 -NPs.",
+              "Transfer 2 -NPs into the vessel."
+            ]
+          },
+          {
+            "op_type": "add",
+            "steps": [
+              "Ensure reaction vessel is present and empty.",
+              "Place a clean stir bar in the vessel.",
+              "Measure the specified amount of one charge.",
+              "Transfer one charge into the vessel."
+            ]
+          },
+          {
+            "op_type": "add",
+            "steps": [
+              "Ensure reaction vessel is present and empty.",
+              "Place a clean stir bar in the vessel.",
+              "Measure the specified amount of 2 -NPs.",
+              "Transfer 2 -NPs into the vessel."
+            ]
+          }
+        ]
+      },
+      {
+        "text": "Materials and methods Actinobacterium used The actinobacterium strain AMG31 was previously isolated from marine sediment collected from Marsa Allam, Red Sea, Egypt, and utilized to produce exopolysaccharide. The identification of this strain was achieved based on morphological, physiological, biochemical identification, and molecular based on sequencing of 16 S rRNA gene as  Streptomyces vinaceusdrappus  AMG31 and added to the GenBank database with accession number OR793047 93 . S. vinaceusdrappus  AMG31-mediated biogenic synthesis of TiO 2 -NPs A single colony of  S. vinaceusdrappus  AMG31 was inoculated into starch nitrate broth media and incubated at 37 °C for 72 h. Subsequently, the inoculated media underwent centrifugation at 1000 rpm for 10 min to collect the cells. These cells were then rinsed twice with sterilized distilled water (dH 2 O) before resuspending in approximately 100 ml of distilled water containing 10 g of cells. The previous mixture was then incubated again at 37 °C for 24 h. After the incubation period ended, the mixture was centrifuged to collect the supernatant (cell-free filtrate), which was utilized as a biocatalyst for the biosynthesis of TiO 2 -NPs. For this purpose, the filtrate was mixed with titanium isopropoxide (Ti[OCH(CH 3 ) 2 ] 4 ) under stirring conditions for 1 h to achieve a final concentration of 5 mM 48 . The pH of the mixture was adjusted to 8 by dropwise addition of 1 N NaOH. A shift in color from pale yellow to white precipitate signified the successful synthesis of TiO 2 -NPs. After 24 h of incubation, the white precipitate was harvested, rinsed three times with high-purity Milli-Q water, and dried in an oven at 200 °C for 3 h (Fig.  11 ). \n Fig. 11 Flowchart showing different steps for synthesis of TiO 2 -NPs using  S. vinaceusdrappus  AMG31. \n Characterization of the biosynthesized TiO 2 -NP The formation of TiO 2 -NPs was first evident from the color change to white in the cell-free filtrate after adding the metal precursor. The functional groups present in the bacterial cell-free filtrate and the synthesized TiO 2 -NPs were examined using Fourier transform infrared (FT-IR) spectroscopy (Cary-660 model). For this analysis, 10 mg of TiO 2 -NPs or 3 ml of the cell-free filtrate was mixed thoroughly with KBr and pressed into a disk. Subsequently, the disk was scanned over the wavenumber range of 400–4000 cm − 1 94 . The crystalline or amorphous nature of the synthesized TiO 2 -NPs was examined using X-ray diffraction (XRD) analysis on a PANalytical-X’Pert-Pro-MRD instrument. The X-ray source was CuKα radiation with a wavelength of 1.54 Å, operated at 30 mA current and 40 kV voltage. The XRD scan was performed at 2θ ranges of 10–80°. The average crystallite size of the biosynthesized TiO 2 -NPs was calculated from the XRD data using the Debye-Scherrer equation 95  as follows: 1 \\documentclass[12pt]{minimal}\n\t\t\t\t\\usepackage{amsmath}\n\t\t\t\t\\usepackage{wasysym} \n\t\t\t\t\\usepackage{amsfonts} \n\t\t\t\t\\usepackage{amssymb} \n\t\t\t\t\\usepackage{amsbsy}\n\t\t\t\t\\usepackage{mathrsfs}\n\t\t\t\t\\usepackage{upgreek}\n\t\t\t\t\\setlength{\\oddsidemargin}{-69pt}\n\t\t\t\t\\begin{document}$$\\:Average\\:size=\\:\\frac{0.94\\:x\\:1.54}{\\beta\\:\\:cos\\theta\\:}$$\\end{document} Where 0.94 is the constant of Scherrer, 1.54 is the wavelength of the X-ray, β is the half intensity, and θ is the angle of Bragg’s diffraction. For transmission electron microscopy (TEM, JEOL, Ltd-1010, Tokyo, Japan) analysis, the as-formed powder of TiO 2 -NPs was first suspended in high-purity Milli-Q water under sonication. The drops of this suspension were then dried on a TEM grid before examination. The dried nanoparticle powder was separately analyzed using a scanning electron microscope (JEOL, JSM-6360LA, Tokyo, Japan) to study the surface morphology. Concurrently, energy-dispersive X-ray spectroscopy (EDX) and SEM were employed to determine the chemical composition of the nanoparticles. For scanning electron microscopy (SEM) analysis, the biosynthesized TiO 2 -NPs were loaded onto an SEM holder, coated with gold under vacuum, and imaged at 20 kV using a JEOL JSM-6360LA instrument (Tokyo, Japan). Concurrently, the elementary qualitative and quantitative mapping of the nanoparticles was performed by energy-dispersive X-ray spectroscopy (EDX) coupled with the SEM apparatus 50 . Dynamic light scattering (DLS) was used to investigate the nanoparticle’s hydrodynamic sizes and size distribution in colloidal solutions. For this, the biosynthesized TiO 2 -NPs were suspended in high-purity water to avoid the formation of shadows and anomalous peaks during particle scattering. Additionally, the surface charge of the synthesized nanoparticles was analyzed by measuring their zeta potential using a Malvern Zeta-sizer (Nano-ZS, Malvern, UK) 96 . The optical properties of biogenic TiO 2 -NPs were investigated by UV-Vis spectroscopy (JENWAY-6306, Staffordshire, UK) for detecting the maximum surface plasmon resonance (SPR). Approximately 2 mL of synthesized solution was transferred to a spectrophotometric cuvette to measure their absorbance in 200–800 nm ranges. Biomedical applications Antioxidant activity DPPH The free radical scavenging activity of TiO 2 -NP was measured using DPPH (1,1-diphenyl-2-picryl hydrazyl). In brief, a 0.1 mM solution of DPPH in ethanol was prepared. This solution (1 ml) was added to 3 ml of TiO 2 -NP in ethanol at different concentrations (1.95–1000 µg/ml). The mixtures were shaken and allowed to stand for 30 min before measuring absorbance at 517 nm using a spectrophotometer (UV-VIS milton roy). Ascorbic acid was used as a reference standard. The percentages of DPPH scavenging were calculated using the following formula 97 . 2 \\documentclass[12pt]{minimal}\n\t\t\t\t\\usepackage{amsmath}\n\t\t\t\t\\usepackage{wasysym} \n\t\t\t\t\\usepackage{amsfonts} \n\t\t\t\t\\usepackage{amssymb} \n\t\t\t\t\\usepackage{amsbsy}\n\t\t\t\t\\usepackage{mathrsfs}\n\t\t\t\t\\usepackage{upgreek}\n\t\t\t\t\\setlength{\\oddsidemargin}{-69pt}\n\t\t\t\t\\begin{document}$$DPPH{\\text{ }}Scavenging{\\text{ \\% = }}\\frac{{{A_0} - {{\\text{A}}_{\\text{1}}}}}{{{A_0}}} \\times {\\text{100}}$$\\end{document} A 0  and A 1  absorbance of ascorbic acid and TiO2-NP treatment, respectively. ABTS The ABTS •+  radical scavenging activity of the TiO 2 -NP was determined using the method described by González et al. 98 . The ABTS radical cation (ABTS •+ ) was generated by reacting a 7 mM 2,20-azino-bis(3-ethylbenzothiazoline-6-sulphonicacid) (ABTS) stock solution with 2.45 mM K 2 S 2 O 8  and the mixture was allowed to stand in the dark at room temperature. The assay mixture comprised 0.07 ml of TiO 2 -NP and 3 ml of the diluted ABTS •+  solution. After a 6-minute incubation period, the absorbance was measured at 734 nm. The radical scavenging capacity was expressed relative to gallic acid’s standard antioxidant reference. 3 \\documentclass[12pt]{minimal}\n\t\t\t\t\\usepackage{amsmath}\n\t\t\t\t\\usepackage{wasysym} \n\t\t\t\t\\usepackage{amsfonts} \n\t\t\t\t\\usepackage{amssymb} \n\t\t\t\t\\usepackage{amsbsy}\n\t\t\t\t\\usepackage{mathrsfs}\n\t\t\t\t\\usepackage{upgreek}\n\t\t\t\t\\setlength{\\oddsidemargin}{-69pt}\n\t\t\t\t\\begin{document}$$ABT{S^{ \\cdot +}}{\\text{ }}scavenging{\\text{ }}\\% =\\frac{{A - B}}{A} \\times 100$$\\end{document} Where A is the absorbance of the solution at zero time (negative control), and B is the absorbance after 6 min of adding TiO 2 -NPs. TAC The phosphomolybdenum method was employed to evaluate the total antioxidant capacity (TAC) of TiO 2 -NP. A solution containing 0.5 mg/ml of TiO 2 -NP was mixed with 0.6 M H 2 SO 4 , 28 mM NaH 2 PO 4 , and 4 mM ammonium molybdate. A control solution with only the reagent was prepared for comparative analysis. These mixtures were then heated at 95 °C for 150 min 99 . Upon cooling down to ambient temperature, their absorbance was recorded at 630 nm, and the findings were presented as ascorbic acid equivalent (AAE) in µg/mg. FRAP The effect of solvent polarity on the ferric-reducing antioxidant power of TiO 2 -NP was evaluated using the K 3 Fe(CN) 6  and C 2 HCl 3 O 2  method, as described by Benzie & Strain 100 , with modifications and adaptations for a microplate assay 101 . Eppendorf tubes were labeled, and 40 µl of TiO 2 -NP was introduced to each tube, then adding 50 µl of 0.2 mol/l (Na 2 HPO 4 .2H 2 O) buffer, 50 µl of 1% K 3 Fe(CN) 6 , and 50 µl of 10% C 2 HCl 3 O 2 . The mixture was spun at 3,000 rpm for 10 min. After centrifugation, 165 µl of the supernatant from each TiO 2 -NP was transferred to a 96-well plate, followed by the addition of 33.3 µl of 1% FeCl 3 . The absorbance was measured at 630 nm, and the results were presented as ascorbic acid equivalent (AAE) in µg/mg. Wound healing The HFB4 cell line of human normal skin fibroblasts received from VACSERA Company, Cairo, Egypt, was used to examine the wound healing activity of synthesized TiO 2 -NPs. The HFB4 cells were seeded into multi-well plates and allowed to grow until forming a confluent monolayer, ensuring all cultures were fully confluent at the beginning, which was crucial. A straight scratch was made to simulate a wound using a yellow pipette tip angled at approximately 30 degrees. Keeping the pipette tip at an angle helped maintain a narrow scratch width, enabling imaging of both wound edges under a 10x objective lens 102 . The following equation calculated the rate of migration (RM): 4 \\documentclass[12pt]{minimal}\n\t\t\t\t\\usepackage{amsmath}\n\t\t\t\t\\usepackage{wasysym} \n\t\t\t\t\\usepackage{amsfonts} \n\t\t\t\t\\usepackage{amssymb} \n\t\t\t\t\\usepackage{amsbsy}\n\t\t\t\t\\usepackage{mathrsfs}\n\t\t\t\t\\usepackage{upgreek}\n\t\t\t\t\\setlength{\\oddsidemargin}{-69pt}\n\t\t\t\t\\begin{document}$${\\text{RM}}=\\frac{{Wi - Wf}}{T}$$\\end{document} Where Wi is the width average of the initial wound (µm), Wf is the final wound’s (µm) width average, and T is time. On the other hand, the wound closure (WC) percentages were calculated as follows: 5 \\documentclass[12pt]{minimal}\n\t\t\t\t\\usepackage{amsmath}\n\t\t\t\t\\usepackage{wasysym} \n\t\t\t\t\\usepackage{amsfonts} \n\t\t\t\t\\usepackage{amssymb} \n\t\t\t\t\\usepackage{amsbsy}\n\t\t\t\t\\usepackage{mathrsfs}\n\t\t\t\t\\usepackage{upgreek}\n\t\t\t\t\\setlength{\\oddsidemargin}{-69pt}\n\t\t\t\t\\begin{document}$${\\text{WC\\% }}=\\frac{{A{t_0} - A{t_{\\Delta t}}}}{{A{t_0}}} \\times 100$$\\end{document} Where At 0  is the wound area at an initial time, and At Δt  is the wound area after n hours. Moreover, the difference between initial and final area (AD) was calculated as follows: 6 \\documentclass[12pt]{minimal}\n\t\t\t\t\\usepackage{amsmath}\n\t\t\t\t\\usepackage{wasysym} \n\t\t\t\t\\usepackage{amsfonts} \n\t\t\t\t\\usepackage{amssymb} \n\t\t\t\t\\usepackage{amsbsy}\n\t\t\t\t\\usepackage{mathrsfs}\n\t\t\t\t\\usepackage{upgreek}\n\t\t\t\t\\setlength{\\oddsidemargin}{-69pt}\n\t\t\t\t\\begin{document}$${\\text{AD \\% }}={{\\text{A}}_{\\text{i}}} - {{\\text{A}}_{\\text{f}}}$$\\end{document} Where A i  is the initial area, and A f  is the final area. Hemocompatibility assay Anticoagulation test To evaluate anticoagulant activity, classic coagulation assays, including activated partial thromboplastin time (APTT) and prothrombin time (PT), were performed to study TiO 2 -NPs using a systematic method of assessment of blood clotting properties. TiO 2 -NPs applied had concentrations of 0, 25, 50 and 75 µg/ml, heparin was used as the positive control. Citrated plasma (3:1) was mixed with TiO 2 -NP solution, and the mixture was kept in the incubator at 37 °C for 3 min. For PT testing, 0.20 ml of reagent was pre-incubated for 3 min at 37 °C and added. While for APTT testing, 0.10 ml of reagent and 0.10 ml CaCl 2  (0.025 mol/l) were sequentially added and incubated for 5 min at 37 °C, with clotting time noted to examine the blood anticoagulant properties 103 . RBCs cell membrane integrity Human red blood cells (RBCs) were subjected to three washings in 150 mM NaCl and centrifuged at 2500 RPM for 10 min and then resuspended in Phosphate Buffer Saline solution (pH 7.4) to yield a 2% RBC solution. The TiO 2 -NPs were assessed at concentrations of 25, 50, 100, 200, 400, 600, 800, and 1000 µg/ml, employing full hemolysis and the isotonic solution respectively as positive and negative control. RBC’s solution and a serial dilution of TiO 2 -NPs were combined to yield a final volume of 1 ml. The solution was then placed at 37 °C for an hour, spun at 2500 for 15 min, and the optical density of the supernatant fluid was measured at 546 nm 104 , with experiments performed in triplicate and mean ± SD determined. 7 \\documentclass[12pt]{minimal}\n\t\t\t\t\\usepackage{amsmath}\n\t\t\t\t\\usepackage{wasysym} \n\t\t\t\t\\usepackage{amsfonts} \n\t\t\t\t\\usepackage{amssymb} \n\t\t\t\t\\usepackage{amsbsy}\n\t\t\t\t\\usepackage{mathrsfs}\n\t\t\t\t\\usepackage{upgreek}\n\t\t\t\t\\setlength{\\oddsidemargin}{-69pt}\n\t\t\t\t\\begin{document}$${\\text{Hemolytic \\% = }}\\frac{{{\\text{A}}{{\\text{b}}_{{\\text{treatment}}}} - {\\text{A}}{{\\text{b}}_{{\\text{blank}}}}}}{{{\\text{A}}{{\\text{b}}_{{\\text{positive control}}}}}} \\times {\\text{100}}$$\\end{document} Ab is the absorbance of the supernatant fluid measured at 546 nm, blank is the isotonic solution, and positive control is full hemolysis. Cytotoxicity To assess the cytotoxic impact of TiO 2 -NP, three different cell lines were utilized: the WI38 normal fibroblast cell line, the Caco-2 colorectal adenocarcinoma cell line, and the PANC-1 pancreatic cancer cell line. These cell lines were procured from VACSERA Company, Cairo, Egypt. The assay was carried out using the MTT method. Each cell type was grown in separate 96-well plates, with approximately 10,000 cells per well immersed in a growth medium solution. After an initial 24-hour period, the cells were exposed to varying concentrations of TiO 2 -NP (31.25–1000 µg/ml) while control wells received a DMSO solution. The plates were then incubated for an additional 24 h in a controlled environment maintained at 37 °C and 5% CO 2  levels. Subsequent to incubation, the medium was carefully removed from each well, and the cells were rinsed with distilled water to eliminate any residual nanoparticles. A 1% crystal violet staining solution was applied to the cells for 30 min, allowing them to absorb the dye. After discarding the stain, a 30% glacial acetic acid solution was introduced to the wells, and the plates were gently agitated. Each well’s absorbance was then read at 490 nm using a microplate ELISA reader 105 . To ensure reliable results, these experiments were conducted in triplicate. 8 \\documentclass[12pt]{minimal}\n\t\t\t\t\\usepackage{amsmath}\n\t\t\t\t\\usepackage{wasysym} \n\t\t\t\t\\usepackage{amsfonts} \n\t\t\t\t\\usepackage{amssymb} \n\t\t\t\t\\usepackage{amsbsy}\n\t\t\t\t\\usepackage{mathrsfs}\n\t\t\t\t\\usepackage{upgreek}\n\t\t\t\t\\setlength{\\oddsidemargin}{-69pt}\n\t\t\t\t\\begin{document}$${\\text{Cell viability \\% }}=\\frac{{{\\text{Absorbance of treated cells}}}}{{{\\text{Absorbance of control}}}} \\times {\\text{100}}$$\\end{document} Antidiabetic α-Amylase Inhibition The inhibitory capability of TiO 2 -NP against the α-amylase enzyme was assessed utilizing the 3,5-dinitrosalicylic acid (DNS) method. Tested concentrations of TiO 2 -NPs, ranging from 1.95 to 1000 µg/ml, were evaluated and compared to acarbose, a known α-amylase inhibitor, which served as a positive control at the same concentration range. The absorbance readings were obtained at a wavelength of 540 nm using a UV-visible Biosystem 310 spectrophotometer 106 . The α-amylase inhibition percentages were calculated using the following equation: 9 \\documentclass[12pt]{minimal}\n\t\t\t\t\\usepackage{amsmath}\n\t\t\t\t\\usepackage{wasysym} \n\t\t\t\t\\usepackage{amsfonts} \n\t\t\t\t\\usepackage{amssymb} \n\t\t\t\t\\usepackage{amsbsy}\n\t\t\t\t\\usepackage{mathrsfs}\n\t\t\t\t\\usepackage{upgreek}\n\t\t\t\t\\setlength{\\oddsidemargin}{-69pt}\n\t\t\t\t\\begin{document}$${\\text{Enzyme inhibition \\% = }}\\frac{{{\\text{A}}{{\\text{b}}_{{\\text{control}}}} - {\\text{A}}{{\\text{b}}_{{\\text{treatment}}}}}}{{{\\text{A}}{{\\text{b}}_{{\\text{control}}}}}} \\times {\\text{100}}$$\\end{document} Where Ab is the absorbance. To determine the IC 50  values, which represent the concentration of TiO 2 -NP required to inhibit 50% of the α-amylase activity, a graph was plotted illustrating the percentage of α-amylase inhibition against the corresponding tested TiO 2 -NP concentrations. α-Glucosidase Inhibition To evaluate the ability of TiO 2 -NP (1.95–1000 µg/ml) to inhibit the α-glucosidase enzyme. The inhibitory activity of TiO 2 -NP was compared to acarbose, which served as a positive control 107 . Absorbance readings are measured at 405 nm wavelength using a Biosystm 310 Plus spectrophotometer, and the inhibition percentages were detected using Eq.  8 . To determine the IC 50  value, a regression equation is derived by plotting the percentage of inhibition against the corresponding TiO 2 -NP concentrations tested, spanning from 1.95 to 1000 µg/ml. Antimicrobial activity The antimicrobial activity of TiO 2 -NP was evaluated using the agar well diffusion method against a broad spectrum of bacterial and fungal strains. The test was achieved against ATCC (American Type Culture Collection) for bacterial strains and unicellular fungi, whereas multicellular fungi were purchased from Assiut University Mycological Centre (AUMC). The antibacterial activity was achieved against Gram-positive strains ( Bacillus subtilis  ATCC 6633,  Staphylococcus aureus  ATCC 6538, and  Enterococcus faecalis  ATCC 29212) and Gram-negative strains ( Escherichia coli  ATCC 8739,  Klebsiella pneumoniae  ATCC 13883,  Pseudomonas aeruginosa  ATCC 90274, and  Salmonella typhi  ATCC 6539) on Mueller-Hinton agar media. Additionally, the antifungal activity was assessed against  Aspergillus niger  (AUMC 14260),  Mucor circinelloides  (AUMMC 11656),  Trichoderma harzianum  (AUMC 5408),  Penicillium glabrum  (OP694171) (AUMC15597), and  Candida albicans  (ATCC 10221) on Sabouraud dextrose agar. Gentamicin (positive control) was employed as the control drug for bacterial inhibition screening, while Fluconazole (positive control) served as the antifungal control. The inoculum suspension was appropriately adjusted for the standard broth dilution method, and the agar plates were inoculated within 15 min. The dried agar surface was streaked in three directions. After allowing the agar to dry for 15 min, a sterile cork borer with a diameter of 7 mm was used aseptically to create wells in the agar. TiO 2 -NP was suspended in DMSO at 1 mg/ml, and 100 µl of the stock solution was dispensed into each well compared to the same positive control and negative control (DMSO) concentration. The plates were then incubated for 24 h for bacteria and unicellular fungi and 72 h for multicellular fungi. The zones of inhibition were measured to the nearest whole millimeter at the point where significant growth reduction was observed 108 . For MIC (minimum inhibitory concentrations), MBC (minimum bactericidal concentrations), and MFC (minimum fungicidal concentrations), the detection was performed using the microplate assay method by investigating the activity of different TiO 2 -NPs concentrations (400, 200,100,50, 25, and 12.5 µg/ml). The assay was achieved following the guidelines established by the Clinical and Laboratory Standards Institute (CLSI) 109 . The morphological changes of highly affected bacterial cells,  E. coli  (Gram-negative) and  Enterococcus faecalis  (Gram-positive) were investigated under scanning electron microscopy. Antibiofilm The impact of TiO 2 -NP on biofilm formation was assessed using 96-well polystyrene flat-bottom plates against all tested bacterial strains and  C. albicans . Briefly, 300 µl of trypticase soy yeast broth (TSY) containing 10 6  CFU/ml was inoculated with sub-lethal concentrations of 75%, 50%, and 25% of the MBC/MFC of TiO 2 -NP. After incubating for 48 h at 37 °C, the biofilm formed on the plates was stained for 15 min with a 0.1% aqueous crystal violet solution. The excess stain was removed by rinsing with sterile distilled water. Subsequently, 250 µl of 95% ethanol was added to each well to solubilize the dye taken up by the cells. The absorbance at 570 nm was measured using a microplate reader after 15 min, which quantified the biofilm formation 110 . 10 \\documentclass[12pt]{minimal}\n\t\t\t\t\\usepackage{amsmath}\n\t\t\t\t\\usepackage{wasysym} \n\t\t\t\t\\usepackage{amsfonts} \n\t\t\t\t\\usepackage{amssymb} \n\t\t\t\t\\usepackage{amsbsy}\n\t\t\t\t\\usepackage{mathrsfs}\n\t\t\t\t\\usepackage{upgreek}\n\t\t\t\t\\setlength{\\oddsidemargin}{-69pt}\n\t\t\t\t\\begin{document}$${\\text{Biofilm inhibition \\% =}}\\frac{{{{\\text{A}}_{\\text{S}}} - {{\\text{A}}_{\\text{B}}}}}{{{{\\text{A}}_{\\text{C}}} - {{\\text{A}}_{\\text{B}}}}} \\times {\\text{100}}$$\\end{document} Where A is the absorbance at 570 nm, A S  is the absorbance of the sample (media + test organism + TiO 2 -NPs at 25%, 50%, or 75% MBC value), A B  is the absorbance of blank (media only), and A C  (media + test organism). Statistical analysis SPSS (version 18, USA) was used for data analysis. The Shapiro-Wilk, Equal Variance, and One-Way Analysis of Variance (ANOVA) tests were performed. Following the ANOVA test was conducted.",
+        "operations": [
+          {
+            "op_type": "add",
+            "sentence": "The identification of this strain was achieved based on morphological, physiological, biochemical identification, and molecular based on sequencing of 16 S rRNA gene as  Streptomyces vinaceusdrappus  AMG31 and added to the GenBank database with accession number OR793047 93 .",
+            "start_char": 208,
+            "end_char": 483,
+            "materials": [
+              "16 S rRNA gene",
+              "Streptomyces vinaceusdrappus  AMG31",
+              "accession number OR793047"
+            ],
+            "params": {
+              "time": "16 S"
+            }
+          },
+          {
+            "op_type": "centrifuge",
+            "sentence": "Subsequently, the inoculated media underwent centrifugation at 1000 rpm for 10 min to collect the cells.",
+            "start_char": 678,
+            "end_char": 782,
+            "materials": [
+              "1000 rpm"
+            ],
+            "params": {
+              "time": "10 min",
+              "speed": "1000 rpm"
+            }
+          },
+          {
+            "op_type": "wash",
+            "sentence": "These cells were then rinsed twice with sterilized distilled water (dH 2 O) before resuspending in approximately 100 ml of distilled water containing 10 g of cells.",
+            "start_char": 783,
+            "end_char": 947,
+            "materials": [
+              "dH 2 O",
+              "approximately 100 ml",
+              "10 g"
+            ],
+            "params": {
+              "amounts": [
+                "100 ml",
+                "10 g"
+              ]
+            }
+          },
+          {
+            "op_type": "centrifuge",
+            "sentence": "After the incubation period ended, the mixture was centrifuged to collect the supernatant (cell-free filtrate), which was utilized as a biocatalyst for the biosynthesis of TiO 2 -NPs.",
+            "start_char": 1013,
+            "end_char": 1196,
+            "materials": [
+              "(cell-free filtrate",
+              "2 -NPs"
+            ],
+            "params": {}
+          },
+          {
+            "op_type": "stir",
+            "sentence": "For this purpose, the filtrate was mixed with titanium isopropoxide (Ti[OCH(CH 3 ) 2 ] 4 ) under stirring conditions for 1 h to achieve a final concentration of 5 mM 48 .",
+            "start_char": 1197,
+            "end_char": 1367,
+            "materials": [
+              "Ti[OCH(CH",
+              "1 h"
+            ],
+            "params": {
+              "time": "1 h",
+              "concs": [
+                "5 mM"
+              ]
+            }
+          },
+          {
+            "op_type": "wash",
+            "sentence": "After 24 h of incubation, the white precipitate was harvested, rinsed three times with high-purity Milli-Q water, and dried in an oven at 200 °C for 3 h (Fig.  11 ). \n ",
+            "start_char": 1547,
+            "end_char": 1715,
+            "materials": [
+              "24 h",
+              "three times",
+              "200 °C",
+              "3 h"
+            ],
+            "params": {
+              "temp": "200 °C",
+              "time": "24 h"
+            }
+          },
+          {
+            "op_type": "add",
+            "sentence": "Characterization of the biosynthesized TiO 2 -NP The formation of TiO 2 -NPs was first evident from the color change to white in the cell-free filtrate after adding the metal precursor.",
+            "start_char": 1821,
+            "end_char": 2006,
+            "materials": [
+              "2 -NP",
+              "2 -NPs"
+            ],
+            "params": {}
+          },
+          {
+            "op_type": "stir",
+            "sentence": "For this analysis, 10 mg of TiO 2 -NPs or 3 ml of the cell-free filtrate was mixed thoroughly with KBr and pressed into a disk.",
+            "start_char": 2190,
+            "end_char": 2317,
+            "materials": [
+              "10 mg",
+              "2 -NPs",
+              "3 ml"
+            ],
+            "params": {
+              "amounts": [
+                "10 mg",
+                "3 ml"
+              ]
+            }
+          },
+          {
+            "op_type": "sonicate",
+            "sentence": "For transmission electron microscopy (TEM, JEOL, Ltd-1010, Tokyo, Japan) analysis, the as-formed powder of TiO 2 -NPs was first suspended in high-purity Milli-Q water under sonication.",
+            "start_char": 3364,
+            "end_char": 3548,
+            "materials": [
+              "2 -NPs"
+            ],
+            "params": {}
+          },
+          {
+            "op_type": "dry",
+            "sentence": "The drops of this suspension were then dried on a TEM grid before examination.",
+            "start_char": 3549,
+            "end_char": 3627,
+            "materials": [],
+            "params": {}
+          },
+          {
+            "op_type": "dry",
+            "sentence": "The dried nanoparticle powder was separately analyzed using a scanning electron microscope (JEOL, JSM-6360LA, Tokyo, Japan) to study the surface morphology.",
+            "start_char": 3628,
+            "end_char": 3784,
+            "materials": [],
+            "params": {}
+          },
+          {
+            "op_type": "add",
+            "sentence": "Additionally, the surface charge of the synthesized nanoparticles was analyzed by measuring their zeta potential using a Malvern Zeta-sizer (Nano-ZS, Malvern, UK) 96 .",
+            "start_char": 4617,
+            "end_char": 4784,
+            "materials": [
+              "(Nano-ZS"
+            ],
+            "params": {}
+          },
+          {
+            "op_type": "add",
+            "sentence": "This solution (1 ml) was added to 3 ml of TiO 2 -NP in ethanol at different concentrations (1.95–1000 µg/ml).",
+            "start_char": 5324,
+            "end_char": 5433,
+            "materials": [
+              "1 ml",
+              "3 ml",
+              "2 -NP"
+            ],
+            "params": {
+              "amounts": [
+                "1 ml",
+                "3 ml",
+                "1000 µg"
+              ]
+            }
+          },
+          {
+            "op_type": "add",
+            "sentence": "=\\frac{{A - B}}{A} \\times 100$$\\end{document} Where A is the absorbance of the solution at zero time (negative control), and B is the absorbance after 6 min of adding TiO 2 -NPs.",
+            "start_char": 7145,
+            "end_char": 7323,
+            "materials": [
+              "zero time",
+              "6 min",
+              "2 -NPs"
+            ],
+            "params": {
+              "time": "6 min"
+            }
+          },
+          {
+            "op_type": "stir",
+            "sentence": "A solution containing 0.5 mg/ml of TiO 2 -NP was mixed with 0.6 M H 2 SO 4 , 28 mM NaH 2 PO 4 , and 4 mM ammonium molybdate.",
+            "start_char": 7433,
+            "end_char": 7557,
+            "materials": [
+              "0.5 mg",
+              "2 -NP",
+              "0.6 M H",
+              "28 mM NaH"
+            ],
+            "params": {
+              "amounts": [
+                "0.5 mg",
+                "0.6 M"
+              ],
+              "concs": [
+                "0.6 M",
+                "28 mM",
+                "4 mM"
+              ]
+            }
+          },
+          {
+            "op_type": "heat",
+            "sentence": "These mixtures were then heated at 95 °C for 150 min 99 .",
+            "start_char": 7638,
+            "end_char": 7695,
+            "materials": [],
+            "params": {
+              "temp": "95 °C",
+              "time": "150 min"
+            }
+          },
+          {
+            "op_type": "add",
+            "sentence": "Eppendorf tubes were labeled, and 40 µl of TiO 2 -NP was introduced to each tube, then adding 50 µl of 0.2 mol/l (Na 2 HPO 4 .2H 2 O) buffer, 50 µl of 1% K 3 Fe(CN) 6 , and 50 µl of 10% C 2 HCl 3 O 2 .",
+            "start_char": 8112,
+            "end_char": 8313,
+            "materials": [
+              "0.2 mol/l",
+              "(Na 2 HPO 4 .2H 2 O) buffer",
+              "10%",
+              "C 2 HCl"
+            ],
+            "params": {
+              "time": "2H",
+              "amounts": [
+                "40 µl",
+                "50 µl",
+                "0.2 mol",
+                "50 µl",
+                "50 µl"
+              ]
+            }
+          },
+          {
+            "op_type": "centrifuge",
+            "sentence": "After centrifugation, 165 µl of the supernatant from each TiO 2 -NP was transferred to a 96-well plate, followed by the addition of 33.3 µl of 1% FeCl 3 .",
+            "start_char": 8360,
+            "end_char": 8514,
+            "materials": [
+              "165 µl",
+              "2 -NP",
+              "a 96-well plate"
+            ],
+            "params": {
+              "amounts": [
+                "165 µl",
+                "33.3 µl"
+              ]
+            }
+          },
+          {
+            "op_type": "heat",
+            "sentence": "Keeping the pipette tip at an angle helped maintain a narrow scratch width, enabling imaging of both wound edges under a 10x objective lens 102 .",
+            "start_char": 9112,
+            "end_char": 9257,
+            "materials": [],
+            "params": {}
+          },
+          {
+            "op_type": "stir",
+            "sentence": "Citrated plasma (3:1) was mixed with TiO 2 -NP solution, and the mixture was kept in the incubator at 37 °C for 3 min.",
+            "start_char": 11192,
+            "end_char": 11310,
+            "materials": [
+              "TiO 2 -NP solution",
+              "37 °C",
+              "3 min"
+            ],
+            "params": {
+              "temp": "37 °C",
+              "time": "3 min"
+            }
+          },
+          {
+            "op_type": "add",
+            "sentence": "For PT testing, 0.20 ml of reagent was pre-incubated for 3 min at 37 °C and added.",
+            "start_char": 11311,
+            "end_char": 11393,
+            "materials": [
+              "0.20 ml",
+              "3 min",
+              "37 °"
+            ],
+            "params": {
+              "temp": "37 °C",
+              "time": "3 min",
+              "amounts": [
+                "0.20 ml"
+              ]
+            }
+          },
+          {
+            "op_type": "add",
+            "sentence": "While for APTT testing, 0.10 ml of reagent and 0.10 ml CaCl 2  (0.025 mol/l) were sequentially added and incubated for 5 min at 37 °C, with clotting time noted to examine the blood anticoagulant properties 103 .",
+            "start_char": 11394,
+            "end_char": 11605,
+            "materials": [
+              "0.10 ml",
+              "(0.025 mol/l",
+              "5 min",
+              "37 °C"
+            ],
+            "params": {
+              "temp": "37 °C",
+              "time": "5 min",
+              "amounts": [
+                "0.10 ml",
+                "0.10 ml",
+                "0.025 mol"
+              ]
+            }
+          },
+          {
+            "op_type": "centrifuge",
+            "sentence": "RBCs cell membrane integrity Human red blood cells (RBCs) were subjected to three washings in 150 mM NaCl and centrifuged at 2500 RPM for 10 min and then resuspended in Phosphate Buffer Saline solution (pH 7.4) to yield a 2% RBC solution.",
+            "start_char": 11606,
+            "end_char": 11844,
+            "materials": [
+              "three washings",
+              "150 mM NaCl",
+              "2500 RPM",
+              "10 min"
+            ],
+            "params": {
+              "time": "10 min",
+              "speed": "2500 RPM",
+              "concs": [
+                "150 mM"
+              ]
+            }
+          },
+          {
+            "op_type": "heat",
+            "sentence": "The plates were then incubated for an additional 24 h in a controlled environment maintained at 37 °C and 5% CO 2  levels.",
+            "start_char": 13616,
+            "end_char": 13738,
+            "materials": [
+              "an additional 24 h",
+              "37 °C",
+              "5% CO 2  levels"
+            ],
+            "params": {
+              "temp": "37 °C",
+              "time": "24 h"
+            }
+          },
+          {
+            "op_type": "wash",
+            "sentence": "Subsequent to incubation, the medium was carefully removed from each well, and the cells were rinsed with distilled water to eliminate any residual nanoparticles.",
+            "start_char": 13739,
+            "end_char": 13901,
+            "materials": [],
+            "params": {}
+          },
+          {
+            "op_type": "add",
+            "sentence": "After discarding the stain, a 30% glacial acetic acid solution was introduced to the wells, and the plates were gently agitated.",
+            "start_char": 14010,
+            "end_char": 14138,
+            "materials": [
+              "a 30% glacial acetic acid solution"
+            ],
+            "params": {}
+          },
+          {
+            "op_type": "dry",
+            "sentence": "The dried agar surface was streaked in three directions.",
+            "start_char": 17985,
+            "end_char": 18041,
+            "materials": [
+              "three directions"
+            ],
+            "params": {}
+          },
+          {
+            "op_type": "dry",
+            "sentence": "After allowing the agar to dry for 15 min, a sterile cork borer with a diameter of 7 mm was used aseptically to create wells in the agar.",
+            "start_char": 18042,
+            "end_char": 18179,
+            "materials": [
+              "15 min",
+              "7 mm"
+            ],
+            "params": {
+              "time": "15 min",
+              "concs": [
+                "7 mm"
+              ]
+            }
+          },
+          {
+            "op_type": "wash",
+            "sentence": "The excess stain was removed by rinsing with sterile distilled water.",
+            "start_char": 19706,
+            "end_char": 19775,
+            "materials": [],
+            "params": {}
+          },
+          {
+            "op_type": "add",
+            "sentence": "Subsequently, 250 µl of 95% ethanol was added to each well to solubilize the dye taken up by the cells.",
+            "start_char": 19776,
+            "end_char": 19879,
+            "materials": [
+              "95% ethanol"
+            ],
+            "params": {
+              "amounts": [
+                "250 µl"
+              ]
+            }
+          }
+        ],
+        "expanded": [
+          {
+            "op_type": "add",
+            "steps": [
+              "Ensure reaction vessel is present and empty.",
+              "Place a clean stir bar in the vessel.",
+              "Measure the specified amount of 16 S rRNA gene.",
+              "Transfer 16 S rRNA gene into the vessel."
+            ]
+          },
+          {
+            "op_type": "centrifuge",
+            "steps": [
+              "Perform operation 'centrifuge' as described: Subsequently, the inoculated media underwent centrifugation at 1000 rpm for 10 min to collect the cells."
+            ]
+          },
+          {
+            "op_type": "wash",
+            "steps": [
+              "Perform operation 'wash' as described: These cells were then rinsed twice with sterilized distilled water (dH 2 O) before resuspending in approximately 100 ml of distilled water containing 10 g of cells."
+            ]
+          },
+          {
+            "op_type": "centrifuge",
+            "steps": [
+              "Perform operation 'centrifuge' as described: After the incubation period ended, the mixture was centrifuged to collect the supernatant (cell-free filtrate), which was utilized as a biocatalyst for the biosynthesis of TiO 2 -NPs."
+            ]
+          },
+          {
+            "op_type": "stir",
+            "steps": [
+              "Place the reaction vessel on a stir plate.",
+              "Set the stirrer to an appropriate speed.",
+              "Stir for 1 h."
+            ]
+          },
+          {
+            "op_type": "wash",
+            "steps": [
+              "Perform operation 'wash' as described: After 24 h of incubation, the white precipitate was harvested, rinsed three times with high-purity Milli-Q water, and dried in an oven at 200 °C for 3 h (Fig.  11 ). \n "
+            ]
+          },
+          {
+            "op_type": "add",
+            "steps": [
+              "Ensure reaction vessel is present and empty.",
+              "Place a clean stir bar in the vessel.",
+              "Measure the specified amount of 2 -NP.",
+              "Transfer 2 -NP into the vessel."
+            ]
+          },
+          {
+            "op_type": "stir",
+            "steps": [
+              "Place the reaction vessel on a stir plate.",
+              "Set the stirrer to an appropriate speed.",
+              "Stir for the specified time."
+            ]
+          },
+          {
+            "op_type": "sonicate",
+            "steps": [
+              "Perform operation 'sonicate' as described: For transmission electron microscopy (TEM, JEOL, Ltd-1010, Tokyo, Japan) analysis, the as-formed powder of TiO 2 -NPs was first suspended in high-purity Milli-Q water under sonication."
+            ]
+          },
+          {
+            "op_type": "dry",
+            "steps": [
+              "Perform operation 'dry' as described: The drops of this suspension were then dried on a TEM grid before examination."
+            ]
+          },
+          {
+            "op_type": "dry",
+            "steps": [
+              "Perform operation 'dry' as described: The dried nanoparticle powder was separately analyzed using a scanning electron microscope (JEOL, JSM-6360LA, Tokyo, Japan) to study the surface morphology."
+            ]
+          },
+          {
+            "op_type": "add",
+            "steps": [
+              "Ensure reaction vessel is present and empty.",
+              "Place a clean stir bar in the vessel.",
+              "Measure the specified amount of (Nano-ZS.",
+              "Transfer (Nano-ZS into the vessel."
+            ]
+          },
+          {
+            "op_type": "add",
+            "steps": [
+              "Ensure reaction vessel is present and empty.",
+              "Place a clean stir bar in the vessel.",
+              "Measure 1 ml of 1 ml.",
+              "Transfer 1 ml into the vessel."
+            ]
+          },
+          {
+            "op_type": "add",
+            "steps": [
+              "Ensure reaction vessel is present and empty.",
+              "Place a clean stir bar in the vessel.",
+              "Measure the specified amount of zero time.",
+              "Transfer zero time into the vessel."
+            ]
+          },
+          {
+            "op_type": "stir",
+            "steps": [
+              "Place the reaction vessel on a stir plate.",
+              "Set the stirrer to an appropriate speed.",
+              "Stir for the specified time."
+            ]
+          },
+          {
+            "op_type": "heat",
+            "steps": [
+              "Place the reaction vessel on a hotplate.",
+              "Ramp to 95 °C.",
+              "Maintain 95 °C for 150 min."
+            ]
+          },
+          {
+            "op_type": "add",
+            "steps": [
+              "Ensure reaction vessel is present and empty.",
+              "Place a clean stir bar in the vessel.",
+              "Measure 40 µl of 0.2 mol/l.",
+              "Transfer 0.2 mol/l into the vessel."
+            ]
+          },
+          {
+            "op_type": "centrifuge",
+            "steps": [
+              "Perform operation 'centrifuge' as described: After centrifugation, 165 µl of the supernatant from each TiO 2 -NP was transferred to a 96-well plate, followed by the addition of 33.3 µl of 1% FeCl 3 ."
+            ]
+          },
+          {
+            "op_type": "heat",
+            "steps": [
+              "Place the reaction vessel on a hotplate.",
+              "Ramp to the target temperature.",
+              "Maintain the target temperature for the specified time."
+            ]
+          },
+          {
+            "op_type": "stir",
+            "steps": [
+              "Place the reaction vessel on a stir plate.",
+              "Set the stirrer to an appropriate speed.",
+              "Stir for 3 min."
+            ]
+          },
+          {
+            "op_type": "add",
+            "steps": [
+              "Ensure reaction vessel is present and empty.",
+              "Place a clean stir bar in the vessel.",
+              "Measure 0.20 ml of 0.20 ml.",
+              "Transfer 0.20 ml into the vessel."
+            ]
+          },
+          {
+            "op_type": "add",
+            "steps": [
+              "Ensure reaction vessel is present and empty.",
+              "Place a clean stir bar in the vessel.",
+              "Measure 0.10 ml of 0.10 ml.",
+              "Transfer 0.10 ml into the vessel."
+            ]
+          },
+          {
+            "op_type": "centrifuge",
+            "steps": [
+              "Perform operation 'centrifuge' as described: RBCs cell membrane integrity Human red blood cells (RBCs) were subjected to three washings in 150 mM NaCl and centrifuged at 2500 RPM for 10 min and then resuspended in Phosphate Buffer Saline solution (pH 7.4) to yield a 2% RBC solution."
+            ]
+          },
+          {
+            "op_type": "heat",
+            "steps": [
+              "Place the reaction vessel on a hotplate.",
+              "Ramp to 37 °C.",
+              "Maintain 37 °C for 24 h."
+            ]
+          },
+          {
+            "op_type": "wash",
+            "steps": [
+              "Perform operation 'wash' as described: Subsequent to incubation, the medium was carefully removed from each well, and the cells were rinsed with distilled water to eliminate any residual nanoparticles."
+            ]
+          },
+          {
+            "op_type": "add",
+            "steps": [
+              "Ensure reaction vessel is present and empty.",
+              "Place a clean stir bar in the vessel.",
+              "Measure the specified amount of a 30% glacial acetic acid solution.",
+              "Transfer a 30% glacial acetic acid solution into the vessel."
+            ]
+          },
+          {
+            "op_type": "dry",
+            "steps": [
+              "Perform operation 'dry' as described: The dried agar surface was streaked in three directions."
+            ]
+          },
+          {
+            "op_type": "dry",
+            "steps": [
+              "Perform operation 'dry' as described: After allowing the agar to dry for 15 min, a sterile cork borer with a diameter of 7 mm was used aseptically to create wells in the agar."
+            ]
+          },
+          {
+            "op_type": "wash",
+            "steps": [
+              "Perform operation 'wash' as described: The excess stain was removed by rinsing with sterile distilled water."
+            ]
+          },
+          {
+            "op_type": "add",
+            "steps": [
+              "Ensure reaction vessel is present and empty.",
+              "Place a clean stir bar in the vessel.",
+              "Measure 250 µl of 95% ethanol.",
+              "Transfer 95% ethanol into the vessel."
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

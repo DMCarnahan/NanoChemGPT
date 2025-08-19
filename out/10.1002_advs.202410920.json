@@ -1,0 +1,232 @@
+{
+  "paper_id": "10.1002/advs.202410920",
+  "title": "Propagation of Orientation Across Lengthscales in Sheared Self-Assembling Hierarchical Suspensions via Rheo-PLI-SAXS.",
+  "authors": [],
+  "doi": "10.1002/advs.202410920",
+  "source": "eupmc",
+  "urls": {
+    "pdf": null
+  },
+  "license": {
+    "type": "unknown"
+  },
+  "access_route": "oa",
+  "sections": [
+    {
+      "heading": "Experimental Section",
+      "text": "4 Experimental Section 4.1 Materials A list of the samples investigated and some of their main characteristics of relevance to the study is presented in  Table   \n 1 \n  below. Table 1 List of the samples discussed. Abbreviations: CNC ‐ cellulose nanocrystals, [B] ‐ bath sonicated; [P] ‐ probe sonicated; (L,d)‐2NapFF ‐ thin‐wall nanotubes; I ‐ isotropic phase; N ‐ nematic phase; N* ‐ chiral nematice phase. Sample ϕ Phase \n η ( γ ˙ ) \n Figure  [B]‐CNC 1.9% I 3‐region viscosity \n S13.b \n 2.5% I/N* 3‐region viscosity \n 3.a \n 3.9% N*/N 3‐region viscosity \n 3.a \n 4.4% N*/N η 0 , shear thinning \n 4.a,b \n [P]‐CNC 1.2% I/N* Weakly shear thinning \n S13.a \n 2.5% I/N* 3‐region viscosity \n 3.c \n [P]‐CNC‐OH‐2‐Prop‐C 2 ‐N‐C 2 \n 2.5% — η 0 , shear thinning \n 3.b \n [B]‐CNC‐OSO 3 ‐TEOA 2.5% — η 0 , shear thinning \n S13.c \n (L,d)‐2NapFF 10 mg mL −1 \n N shear thinning, thickening \n 4.c \n John Wiley & Sons, Ltd. 4.1.1 Cellulose Nanocrystal (CNC) Suspensions CNC powder purchased from CelluForce (Montreal, Canada) was added and mixed in Milli‐Q water for preparing [B] and [P] CNC suspensions. For [B], the suspensions were sonicated using an ultrasound bath for one hour and subsequently, a bench shaker was used for mixing and homogenizing the suspension for 72 h. Based on previous studies, [ \n \n 31 \n \n ]  we estimate the aspect ratio of [B]‐CNCs to be between 25 and 75 from atomic force microscopy (AFM) analysis, with diameters and lengths approximately 4 nm and 100–300 nm, respectively. Further details and characterization of similar suspensions, such as AFM, ζ‐potential, cryo‐TEM etc. can be found elsewhere. [ \n \n 21 \n ,  \n 23 \n ,  \n 45 \n \n ]  The preparation procedure for [P]‐CNCs has been chosen based on the study by Parton et al. [ \n \n 7 \n \n ]  to access the primary CNC crystallites by probe‐sonicated to the equivalent of 15 kJ mL −1 . As [B]‐CNC have been bath‐sonicated and not probe sonicated, we consider that the sonication dose tends to 0 kJ mL −1  in the data of Parton et al. [ \n \n 7 \n \n ]  This is because probe sonication ensures a uniform and focused transmission of ultrasound waves, and can outperform bath sonication by a factor of 1000. [ \n \n 49 \n \n ]  Thus, [B]‐CNC suspensions are predominantly composed of CNC aggregates and bundles while [P]‐CNC suspensions are predominantly composed of primary CNC particles. During probe‐sonication the (mean effective 3D) aspect ratio of the CNCs has been shown to reduce by approximately 25%. This is confirmed by TEM and POM, see Figure  S7  in Section  S5  (Supporting Information). 4.1.2 Surface Grafted CNC Suspensions The surface modification follows the procedure of Wojno et al. [ \n \n 23 \n \n ]  A 2.5% CNC suspension was prepared by mixing CelluForce CNC powder (4g) in DI water (96 mL) using a magnetic stirrer for 2 h. After homogenous mixing, the cloudy mixture of CNC was sonicated (6.25 J mL −1 ) for 10 mins, (500 W, 40% Amplitude, 20 KHz, Ultrasonic Processor VC505 ‐1/2’’ microtip) to obtain a clear solution. Further, dialkyl (diethyl) azetidinium salt (C 2 ‐N‐C 2 ‐Prop‐2‐OH or 1‐ethyl‐3‐hydroxy‐1‐ethyl azetidin‐1‐ium chloride) was added in 1:1 mole equivalent to sulfate groups present on the surfaces of cellulose nanocrystals as described in our previous report. The mixture was vigorously stirred and heated for 4 h at 90 °C. After the reaction, the suspension was subjected to dialysis to remove unreacted salt and other impurities. After purification, the suspension was stored in the refrigerator at 4 °C prior to testing. 4.1.3 Suspension of Thin‐Wall Nanotubes, (L,d)‐2NapFF Stock solutions of gelator (L,d)‐2NapFF were prepared at a final concentration of 20 mg mL −1 . This was done by suspending 200 mg of gelator in deionised water and one equivalent of sodium hydroxide solution (0.1 M) to a total volume of 10 mL. The solutions were stirred at 1000 rpm overnight in a falcon tube to allow complete dissolution of the gelator. The pH of the solution was then adjusted to pH 11 ± 0.1 by using 1M NaOH. (L,d)‐2NapFF is a low molecular weight gelator (LMWG) that self‐assembles into thin‐wall nanotubes at high pH. [ \n \n 35 \n \n ]  The high‐resolution structure of the nanotubes at high pH has recently been reported. [ \n \n 34 \n \n ]  The molecules were shown to pack through non‐covalent interactions (mainly π − π stacking) in a left‐handed helical manner to form the large hollow structures in solution. Further details about their chemical structure can be found elsewhere. [ \n \n 50 \n ,  \n 51 \n ,  \n 52 \n \n ]  They have previously shown to exhibit liquid‐crystalline textures in Rheo‐PLI investigations and shear‐induced Maltese‐cross patterns. [ \n \n 50 \n \n ]  While not yet fully determined, based on previous cryo‐TEM images and small‐angle neutron scattering data, (L,d)‐2NapFF can be estimated to have aspect ratios in excess of 70 [ \n \n 34 \n ,  \n 35 \n \n ]  and have shown no evidence of “fingerprint” textures in POM, see Figure  S5  (Supporting Information). A consistent diameter of 30 nm was determined from cryo‐TEM and small‐angle neutron scattering (SANS), [ \n \n 34 \n \n ]  however, the lengths and their variability could not be determined as they exceeded the typical observation lenghtscales of the respective techniques. 4.2 Methods An schematic overview of the two Rheo‐PLI‐SAXS experimental setups is shown in Figure  5 , with each unit described separately. 4.2.1 Rheology All rheological experiments were performed on an Anton Paar MCR702 Multidrive rheometer in single motor‐transducer configuration. Three types of measuring geometries were used: (i) a glass parallel plate 43 mm in diameter (ii) a 50 mm steel cone‐plate and (iii) a concentric cylinders standard SAXS polycarbonate geometry with an inner cylinder radius of 24.5 mm and an outer cup of 25 mm outer (radius ratio: 0.98), see Section  S3.1  (Supporting Information). The main Rheo‐PLI‐SAXS setup is based on (i) while tests have also been performed on a custom version of (iii). The novel parallel‐plate Rheo‐PLI‐SAXS is based on a modified Peltier measuring cell to allow for X‐Ray access, see Figure  5a . The steady shear measurements were performed using a custom steady state procedure elaborated in several of our previous studies. [ \n \n 12 \n ,  \n 23 \n ,  \n 45 \n \n ]  The procedure includes an optimized transient time to steady state for each measured point. All transient data was recorded and steady‐state values were subsequently evaluated. The shear rate was varied between 0.014 and 100 s −1  in parallel‐plate tests and between 0.0014 and 400 s −1  in some concentric cylinder tests. 4.2.2 Polarized Light Imaging (PLI) The PLI setup is an adaptation of a custom transmission setup previously used for investigating birefringent suspensions in flow. [ \n \n 21 \n ,  \n 23 \n ,  \n 45 \n ,  \n 53 \n \n ]  The PLI optical train for the plate‐plate measuring geometry consisted of two linear polarizers (Edmund Optics, Barrington, USA) (i), Figure  5 . For concentric cylinders, a combination of linear and circular polarizer was used. PLI was acquired in the form of video recordings (1920×1080 pixel) from which space‐time diagrams were constructed. [ \n \n 22 \n \n ]  Still frame extracts at selected shear rates for all the multiscale data discussed can be found in Figures  S4  and  S5  (Supporting Information). The imaging data was converted into the CIELab colorspace and the Euclidean norm was used in Equation ( 1 ) instead of  I  as\n \n (1) \n I i m = L ∗ 2 + a ∗ 2 + b ∗ 2 \n where  L * is the luminance and  a * and  b * are the chroma, see Figure  S2  (Supporting Information) for a schematic illustration of the color space. Examples of PLI still frame, space‐time diagram and  I \n \n im \n  variation with shear rate are shown in Figure  2 .d,e,f for 2.5% [B]‐CNC. 4.2.3 Small‐Angle X‐Ray Scattering (SAXS) The SAXS experiments were performed at the CoSAXS [ \n \n 54 \n \n ]  and ForMAX beamlines, [ \n \n 55 \n \n ]  MAX IV Laboratory. At CoSAXS, we employed an X‐ray beam energy of 15 keV and a beam size at the sample position of ≈62 × 34 µm 2  (horizontal × vertical), while data were collected 3.5 m downstream of the sample using an EIGER2 X 4M photon‐counting pixel detector. [ \n \n 56 \n \n ]  At ForMAX, the X‐ray beam energy was set to 20.2 keV, the beam size at the sample position to ≈300 × 300 µm 2 , and an EIGER2 X 4M detector was placed 3.1 m downstream of the sample. Example scattering patterns for the (L,d)‐2NapFF are shown in Figure  2a . Hermans orientation parameter from azimuthal integration of the scattering patterns was determined as\n \n (2) \n P 2 S A X S = ∫ 0 π 1 2 3 cos 2 φ − 1 I ( φ ) q sin φ d φ ∫ 0 π I ( φ ) q sin φ d φ \n where φ is the azimuthal angle of the scattering pattern, see Figure  2a  and  I (φ) \n q \n  is the scattering intensity in the integrated  q ‐range. Examples of azimuthal integrations as color maps and as dataplots are shown in Figure  2b,c  for 4.4% [B]‐CNC. Within the [0, π] integration limits used in Equation ( 2 ), 〈 P \n 2 〉 \n SAXS \n  ∈ [− 0.5, 1], where 〈 P \n 2 〉 \n SAXS \n  = 0 signifies random orientation of nanoparticles 〈 P \n 2 〉 \n SAXS \n  = 1 a fully oriented nanostructure with a preferential orientation perpendicular to the flow direction, and 〈 P \n 2 〉 \n SAXS \n  = −0.5 signifying a fully oriented nanostructure with a preferential orientation in the flow direction. The integration  q ‐range was chosen based on radial integration of the scattering patterns, see Section  S4  and especially Figure  S3  (Supporting Information). All azimuthal integrations reported in the manuscript correspond to region around the structural peak identified in the radial integration, see  q \n 2  in Figure  S3  (Supporting Information). For comparison, two other integration intervals were considered for lower and higher  q ‐ranges relative to the structural peak ( q \n 1  and  q \n 3 ). Since concentration and to a limited extent shear influences the structural peak, see Figure  S3b,c  (Supporting Information), the integration  q ‐range is not the same throughout the samples. A list of  q ‐ranges used can be found in Table  S1  (Supporting Information). In parallel‐plate flow, the beam was positioned in the middle of the measuring gap ( h /2). 4.2.4 Experimental Synchronization A waiting time of approximately 3 min was kept between setting the sample to the measuring gap and beginning of the Rheo‐PLI‐SAXS experiments. No pre‐shear has been applied prior to the measurements and the steady shear tests were performed only from low to high shear rates. The optical camera (PLI) was started using a remote control software around the time of the start of the rheological experiment, with the data further corrected at data analysis. A custom macro was written to acquire the SAXS data and it was at first timed and in latter experiments triggered such that for each viscosity measuring point SAXS data was acquired for 5 times with 1 s of exposure time (PP and CP geometries) and 2 times with 0.1 s of exposure time (CC geometry) when the transient data (monitored live) was at steady state. POM and TEM have been used to assess the multiscale structure of the samples at rest, see Section  S5  (Supporting Information) for further details."
+    },
+    {
+      "heading": "Methods",
+      "text": "4.2 Methods An schematic overview of the two Rheo‐PLI‐SAXS experimental setups is shown in Figure  5 , with each unit described separately. 4.2.1 Rheology All rheological experiments were performed on an Anton Paar MCR702 Multidrive rheometer in single motor‐transducer configuration. Three types of measuring geometries were used: (i) a glass parallel plate 43 mm in diameter (ii) a 50 mm steel cone‐plate and (iii) a concentric cylinders standard SAXS polycarbonate geometry with an inner cylinder radius of 24.5 mm and an outer cup of 25 mm outer (radius ratio: 0.98), see Section  S3.1  (Supporting Information). The main Rheo‐PLI‐SAXS setup is based on (i) while tests have also been performed on a custom version of (iii). The novel parallel‐plate Rheo‐PLI‐SAXS is based on a modified Peltier measuring cell to allow for X‐Ray access, see Figure  5a . The steady shear measurements were performed using a custom steady state procedure elaborated in several of our previous studies. [ \n \n 12 \n ,  \n 23 \n ,  \n 45 \n \n ]  The procedure includes an optimized transient time to steady state for each measured point. All transient data was recorded and steady‐state values were subsequently evaluated. The shear rate was varied between 0.014 and 100 s −1  in parallel‐plate tests and between 0.0014 and 400 s −1  in some concentric cylinder tests. 4.2.2 Polarized Light Imaging (PLI) The PLI setup is an adaptation of a custom transmission setup previously used for investigating birefringent suspensions in flow. [ \n \n 21 \n ,  \n 23 \n ,  \n 45 \n ,  \n 53 \n \n ]  The PLI optical train for the plate‐plate measuring geometry consisted of two linear polarizers (Edmund Optics, Barrington, USA) (i), Figure  5 . For concentric cylinders, a combination of linear and circular polarizer was used. PLI was acquired in the form of video recordings (1920×1080 pixel) from which space‐time diagrams were constructed. [ \n \n 22 \n \n ]  Still frame extracts at selected shear rates for all the multiscale data discussed can be found in Figures  S4  and  S5  (Supporting Information). The imaging data was converted into the CIELab colorspace and the Euclidean norm was used in Equation ( 1 ) instead of  I  as\n \n (1) \n I i m = L ∗ 2 + a ∗ 2 + b ∗ 2 \n where  L * is the luminance and  a * and  b * are the chroma, see Figure  S2  (Supporting Information) for a schematic illustration of the color space. Examples of PLI still frame, space‐time diagram and  I \n \n im \n  variation with shear rate are shown in Figure  2 .d,e,f for 2.5% [B]‐CNC. 4.2.3 Small‐Angle X‐Ray Scattering (SAXS) The SAXS experiments were performed at the CoSAXS [ \n \n 54 \n \n ]  and ForMAX beamlines, [ \n \n 55 \n \n ]  MAX IV Laboratory. At CoSAXS, we employed an X‐ray beam energy of 15 keV and a beam size at the sample position of ≈62 × 34 µm 2  (horizontal × vertical), while data were collected 3.5 m downstream of the sample using an EIGER2 X 4M photon‐counting pixel detector. [ \n \n 56 \n \n ]  At ForMAX, the X‐ray beam energy was set to 20.2 keV, the beam size at the sample position to ≈300 × 300 µm 2 , and an EIGER2 X 4M detector was placed 3.1 m downstream of the sample. Example scattering patterns for the (L,d)‐2NapFF are shown in Figure  2a . Hermans orientation parameter from azimuthal integration of the scattering patterns was determined as\n \n (2) \n P 2 S A X S = ∫ 0 π 1 2 3 cos 2 φ − 1 I ( φ ) q sin φ d φ ∫ 0 π I ( φ ) q sin φ d φ \n where φ is the azimuthal angle of the scattering pattern, see Figure  2a  and  I (φ) \n q \n  is the scattering intensity in the integrated  q ‐range. Examples of azimuthal integrations as color maps and as dataplots are shown in Figure  2b,c  for 4.4% [B]‐CNC. Within the [0, π] integration limits used in Equation ( 2 ), 〈 P \n 2 〉 \n SAXS \n  ∈ [− 0.5, 1], where 〈 P \n 2 〉 \n SAXS \n  = 0 signifies random orientation of nanoparticles 〈 P \n 2 〉 \n SAXS \n  = 1 a fully oriented nanostructure with a preferential orientation perpendicular to the flow direction, and 〈 P \n 2 〉 \n SAXS \n  = −0.5 signifying a fully oriented nanostructure with a preferential orientation in the flow direction. The integration  q ‐range was chosen based on radial integration of the scattering patterns, see Section  S4  and especially Figure  S3  (Supporting Information). All azimuthal integrations reported in the manuscript correspond to region around the structural peak identified in the radial integration, see  q \n 2  in Figure  S3  (Supporting Information). For comparison, two other integration intervals were considered for lower and higher  q ‐ranges relative to the structural peak ( q \n 1  and  q \n 3 ). Since concentration and to a limited extent shear influences the structural peak, see Figure  S3b,c  (Supporting Information), the integration  q ‐range is not the same throughout the samples. A list of  q ‐ranges used can be found in Table  S1  (Supporting Information). In parallel‐plate flow, the beam was positioned in the middle of the measuring gap ( h /2). 4.2.4 Experimental Synchronization A waiting time of approximately 3 min was kept between setting the sample to the measuring gap and beginning of the Rheo‐PLI‐SAXS experiments. No pre‐shear has been applied prior to the measurements and the steady shear tests were performed only from low to high shear rates. The optical camera (PLI) was started using a remote control software around the time of the start of the rheological experiment, with the data further corrected at data analysis. A custom macro was written to acquire the SAXS data and it was at first timed and in latter experiments triggered such that for each viscosity measuring point SAXS data was acquired for 5 times with 1 s of exposure time (PP and CP geometries) and 2 times with 0.1 s of exposure time (CC geometry) when the transient data (monitored live) was at steady state. POM and TEM have been used to assess the multiscale structure of the samples at rest, see Section  S5  (Supporting Information) for further details."
+    },
+    {
+      "heading": "Experimental Synchronization",
+      "text": "4.2.4 Experimental Synchronization A waiting time of approximately 3 min was kept between setting the sample to the measuring gap and beginning of the Rheo‐PLI‐SAXS experiments. No pre‐shear has been applied prior to the measurements and the steady shear tests were performed only from low to high shear rates. The optical camera (PLI) was started using a remote control software around the time of the start of the rheological experiment, with the data further corrected at data analysis. A custom macro was written to acquire the SAXS data and it was at first timed and in latter experiments triggered such that for each viscosity measuring point SAXS data was acquired for 5 times with 1 s of exposure time (PP and CP geometries) and 2 times with 0.1 s of exposure time (CC geometry) when the transient data (monitored live) was at steady state. POM and TEM have been used to assess the multiscale structure of the samples at rest, see Section  S5  (Supporting Information) for further details."
+    }
+  ],
+  "extractions": {
+    "methods_paragraphs": [
+      {
+        "text": "4 Experimental Section 4.1 Materials A list of the samples investigated and some of their main characteristics of relevance to the study is presented in  Table   \n 1 \n  below. Table 1 List of the samples discussed. Abbreviations: CNC ‐ cellulose nanocrystals, [B] ‐ bath sonicated; [P] ‐ probe sonicated; (L,d)‐2NapFF ‐ thin‐wall nanotubes; I ‐ isotropic phase; N ‐ nematic phase; N* ‐ chiral nematice phase. Sample ϕ Phase \n η ( γ ˙ ) \n Figure  [B]‐CNC 1.9% I 3‐region viscosity \n S13.b \n 2.5% I/N* 3‐region viscosity \n 3.a \n 3.9% N*/N 3‐region viscosity \n 3.a \n 4.4% N*/N η 0 , shear thinning \n 4.a,b \n [P]‐CNC 1.2% I/N* Weakly shear thinning \n S13.a \n 2.5% I/N* 3‐region viscosity \n 3.c \n [P]‐CNC‐OH‐2‐Prop‐C 2 ‐N‐C 2 \n 2.5% — η 0 , shear thinning \n 3.b \n [B]‐CNC‐OSO 3 ‐TEOA 2.5% — η 0 , shear thinning \n S13.c \n (L,d)‐2NapFF 10 mg mL −1 \n N shear thinning, thickening \n 4.c \n John Wiley & Sons, Ltd. 4.1.1 Cellulose Nanocrystal (CNC) Suspensions CNC powder purchased from CelluForce (Montreal, Canada) was added and mixed in Milli‐Q water for preparing [B] and [P] CNC suspensions. For [B], the suspensions were sonicated using an ultrasound bath for one hour and subsequently, a bench shaker was used for mixing and homogenizing the suspension for 72 h. Based on previous studies, [ \n \n 31 \n \n ]  we estimate the aspect ratio of [B]‐CNCs to be between 25 and 75 from atomic force microscopy (AFM) analysis, with diameters and lengths approximately 4 nm and 100–300 nm, respectively. Further details and characterization of similar suspensions, such as AFM, ζ‐potential, cryo‐TEM etc. can be found elsewhere. [ \n \n 21 \n ,  \n 23 \n ,  \n 45 \n \n ]  The preparation procedure for [P]‐CNCs has been chosen based on the study by Parton et al. [ \n \n 7 \n \n ]  to access the primary CNC crystallites by probe‐sonicated to the equivalent of 15 kJ mL −1 . As [B]‐CNC have been bath‐sonicated and not probe sonicated, we consider that the sonication dose tends to 0 kJ mL −1  in the data of Parton et al. [ \n \n 7 \n \n ]  This is because probe sonication ensures a uniform and focused transmission of ultrasound waves, and can outperform bath sonication by a factor of 1000. [ \n \n 49 \n \n ]  Thus, [B]‐CNC suspensions are predominantly composed of CNC aggregates and bundles while [P]‐CNC suspensions are predominantly composed of primary CNC particles. During probe‐sonication the (mean effective 3D) aspect ratio of the CNCs has been shown to reduce by approximately 25%. This is confirmed by TEM and POM, see Figure  S7  in Section  S5  (Supporting Information). 4.1.2 Surface Grafted CNC Suspensions The surface modification follows the procedure of Wojno et al. [ \n \n 23 \n \n ]  A 2.5% CNC suspension was prepared by mixing CelluForce CNC powder (4g) in DI water (96 mL) using a magnetic stirrer for 2 h. After homogenous mixing, the cloudy mixture of CNC was sonicated (6.25 J mL −1 ) for 10 mins, (500 W, 40% Amplitude, 20 KHz, Ultrasonic Processor VC505 ‐1/2’’ microtip) to obtain a clear solution. Further, dialkyl (diethyl) azetidinium salt (C 2 ‐N‐C 2 ‐Prop‐2‐OH or 1‐ethyl‐3‐hydroxy‐1‐ethyl azetidin‐1‐ium chloride) was added in 1:1 mole equivalent to sulfate groups present on the surfaces of cellulose nanocrystals as described in our previous report. The mixture was vigorously stirred and heated for 4 h at 90 °C. After the reaction, the suspension was subjected to dialysis to remove unreacted salt and other impurities. After purification, the suspension was stored in the refrigerator at 4 °C prior to testing. 4.1.3 Suspension of Thin‐Wall Nanotubes, (L,d)‐2NapFF Stock solutions of gelator (L,d)‐2NapFF were prepared at a final concentration of 20 mg mL −1 . This was done by suspending 200 mg of gelator in deionised water and one equivalent of sodium hydroxide solution (0.1 M) to a total volume of 10 mL. The solutions were stirred at 1000 rpm overnight in a falcon tube to allow complete dissolution of the gelator. The pH of the solution was then adjusted to pH 11 ± 0.1 by using 1M NaOH. (L,d)‐2NapFF is a low molecular weight gelator (LMWG) that self‐assembles into thin‐wall nanotubes at high pH. [ \n \n 35 \n \n ]  The high‐resolution structure of the nanotubes at high pH has recently been reported. [ \n \n 34 \n \n ]  The molecules were shown to pack through non‐covalent interactions (mainly π − π stacking) in a left‐handed helical manner to form the large hollow structures in solution. Further details about their chemical structure can be found elsewhere. [ \n \n 50 \n ,  \n 51 \n ,  \n 52 \n \n ]  They have previously shown to exhibit liquid‐crystalline textures in Rheo‐PLI investigations and shear‐induced Maltese‐cross patterns. [ \n \n 50 \n \n ]  While not yet fully determined, based on previous cryo‐TEM images and small‐angle neutron scattering data, (L,d)‐2NapFF can be estimated to have aspect ratios in excess of 70 [ \n \n 34 \n ,  \n 35 \n \n ]  and have shown no evidence of “fingerprint” textures in POM, see Figure  S5  (Supporting Information). A consistent diameter of 30 nm was determined from cryo‐TEM and small‐angle neutron scattering (SANS), [ \n \n 34 \n \n ]  however, the lengths and their variability could not be determined as they exceeded the typical observation lenghtscales of the respective techniques. 4.2 Methods An schematic overview of the two Rheo‐PLI‐SAXS experimental setups is shown in Figure  5 , with each unit described separately. 4.2.1 Rheology All rheological experiments were performed on an Anton Paar MCR702 Multidrive rheometer in single motor‐transducer configuration. Three types of measuring geometries were used: (i) a glass parallel plate 43 mm in diameter (ii) a 50 mm steel cone‐plate and (iii) a concentric cylinders standard SAXS polycarbonate geometry with an inner cylinder radius of 24.5 mm and an outer cup of 25 mm outer (radius ratio: 0.98), see Section  S3.1  (Supporting Information). The main Rheo‐PLI‐SAXS setup is based on (i) while tests have also been performed on a custom version of (iii). The novel parallel‐plate Rheo‐PLI‐SAXS is based on a modified Peltier measuring cell to allow for X‐Ray access, see Figure  5a . The steady shear measurements were performed using a custom steady state procedure elaborated in several of our previous studies. [ \n \n 12 \n ,  \n 23 \n ,  \n 45 \n \n ]  The procedure includes an optimized transient time to steady state for each measured point. All transient data was recorded and steady‐state values were subsequently evaluated. The shear rate was varied between 0.014 and 100 s −1  in parallel‐plate tests and between 0.0014 and 400 s −1  in some concentric cylinder tests. 4.2.2 Polarized Light Imaging (PLI) The PLI setup is an adaptation of a custom transmission setup previously used for investigating birefringent suspensions in flow. [ \n \n 21 \n ,  \n 23 \n ,  \n 45 \n ,  \n 53 \n \n ]  The PLI optical train for the plate‐plate measuring geometry consisted of two linear polarizers (Edmund Optics, Barrington, USA) (i), Figure  5 . For concentric cylinders, a combination of linear and circular polarizer was used. PLI was acquired in the form of video recordings (1920×1080 pixel) from which space‐time diagrams were constructed. [ \n \n 22 \n \n ]  Still frame extracts at selected shear rates for all the multiscale data discussed can be found in Figures  S4  and  S5  (Supporting Information). The imaging data was converted into the CIELab colorspace and the Euclidean norm was used in Equation ( 1 ) instead of  I  as\n \n (1) \n I i m = L ∗ 2 + a ∗ 2 + b ∗ 2 \n where  L * is the luminance and  a * and  b * are the chroma, see Figure  S2  (Supporting Information) for a schematic illustration of the color space. Examples of PLI still frame, space‐time diagram and  I \n \n im \n  variation with shear rate are shown in Figure  2 .d,e,f for 2.5% [B]‐CNC. 4.2.3 Small‐Angle X‐Ray Scattering (SAXS) The SAXS experiments were performed at the CoSAXS [ \n \n 54 \n \n ]  and ForMAX beamlines, [ \n \n 55 \n \n ]  MAX IV Laboratory. At CoSAXS, we employed an X‐ray beam energy of 15 keV and a beam size at the sample position of ≈62 × 34 µm 2  (horizontal × vertical), while data were collected 3.5 m downstream of the sample using an EIGER2 X 4M photon‐counting pixel detector. [ \n \n 56 \n \n ]  At ForMAX, the X‐ray beam energy was set to 20.2 keV, the beam size at the sample position to ≈300 × 300 µm 2 , and an EIGER2 X 4M detector was placed 3.1 m downstream of the sample. Example scattering patterns for the (L,d)‐2NapFF are shown in Figure  2a . Hermans orientation parameter from azimuthal integration of the scattering patterns was determined as\n \n (2) \n P 2 S A X S = ∫ 0 π 1 2 3 cos 2 φ − 1 I ( φ ) q sin φ d φ ∫ 0 π I ( φ ) q sin φ d φ \n where φ is the azimuthal angle of the scattering pattern, see Figure  2a  and  I (φ) \n q \n  is the scattering intensity in the integrated  q ‐range. Examples of azimuthal integrations as color maps and as dataplots are shown in Figure  2b,c  for 4.4% [B]‐CNC. Within the [0, π] integration limits used in Equation ( 2 ), 〈 P \n 2 〉 \n SAXS \n  ∈ [− 0.5, 1], where 〈 P \n 2 〉 \n SAXS \n  = 0 signifies random orientation of nanoparticles 〈 P \n 2 〉 \n SAXS \n  = 1 a fully oriented nanostructure with a preferential orientation perpendicular to the flow direction, and 〈 P \n 2 〉 \n SAXS \n  = −0.5 signifying a fully oriented nanostructure with a preferential orientation in the flow direction. The integration  q ‐range was chosen based on radial integration of the scattering patterns, see Section  S4  and especially Figure  S3  (Supporting Information). All azimuthal integrations reported in the manuscript correspond to region around the structural peak identified in the radial integration, see  q \n 2  in Figure  S3  (Supporting Information). For comparison, two other integration intervals were considered for lower and higher  q ‐ranges relative to the structural peak ( q \n 1  and  q \n 3 ). Since concentration and to a limited extent shear influences the structural peak, see Figure  S3b,c  (Supporting Information), the integration  q ‐range is not the same throughout the samples. A list of  q ‐ranges used can be found in Table  S1  (Supporting Information). In parallel‐plate flow, the beam was positioned in the middle of the measuring gap ( h /2). 4.2.4 Experimental Synchronization A waiting time of approximately 3 min was kept between setting the sample to the measuring gap and beginning of the Rheo‐PLI‐SAXS experiments. No pre‐shear has been applied prior to the measurements and the steady shear tests were performed only from low to high shear rates. The optical camera (PLI) was started using a remote control software around the time of the start of the rheological experiment, with the data further corrected at data analysis. A custom macro was written to acquire the SAXS data and it was at first timed and in latter experiments triggered such that for each viscosity measuring point SAXS data was acquired for 5 times with 1 s of exposure time (PP and CP geometries) and 2 times with 0.1 s of exposure time (CC geometry) when the transient data (monitored live) was at steady state. POM and TEM have been used to assess the multiscale structure of the samples at rest, see Section  S5  (Supporting Information) for further details.",
+        "operations": [
+          {
+            "op_type": "sonicate",
+            "sentence": "Abbreviations: CNC ‐ cellulose nanocrystals, [B] ‐ bath sonicated; [P] ‐ probe sonicated; (L,d)‐2NapFF ‐ thin‐wall nanotubes; I ‐ isotropic phase; N ‐ nematic phase; N* ‐ chiral nematice phase.",
+            "start_char": 215,
+            "end_char": 408,
+            "materials": [
+              "d)‐2NapFF"
+            ],
+            "params": {}
+          },
+          {
+            "op_type": "add",
+            "sentence": "4.1.1 Cellulose Nanocrystal (CNC) Suspensions CNC powder purchased from CelluForce (Montreal, Canada) was added and mixed in Milli‐Q water for preparing [B] and [P] CNC suspensions.",
+            "start_char": 905,
+            "end_char": 1086,
+            "materials": [
+              "4.1.1 Cellulose Nanocrystal (CNC) Suspensions CNC powder"
+            ],
+            "params": {}
+          },
+          {
+            "op_type": "sonicate",
+            "sentence": "For [B], the suspensions were sonicated using an ultrasound bath for one hour and subsequently, a bench shaker was used for mixing and homogenizing the suspension for 72 h. Based on previous studies, [ \n \n 31 \n \n ]  ",
+            "start_char": 1087,
+            "end_char": 1303,
+            "materials": [
+              "one hour",
+              "72 h."
+            ],
+            "params": {
+              "time": "72 h"
+            }
+          },
+          {
+            "op_type": "sonicate",
+            "sentence": "As [B]‐CNC have been bath‐sonicated and not probe sonicated, we consider that the sonication dose tends to 0 kJ mL −1  in the data of Parton et al.",
+            "start_char": 1849,
+            "end_char": 1996,
+            "materials": [
+              "0 kJ mL −1"
+            ],
+            "params": {}
+          },
+          {
+            "op_type": "sonicate",
+            "sentence": "This is because probe sonication ensures a uniform and focused transmission of ultrasound waves, and can outperform bath sonication by a factor of 1000.",
+            "start_char": 2012,
+            "end_char": 2164,
+            "materials": [],
+            "params": {}
+          },
+          {
+            "op_type": "stir",
+            "sentence": "A 2.5% CNC suspension was prepared by mixing CelluForce CNC powder (4g) in DI water (96 mL) using a magnetic stirrer for 2 h. After homogenous mixing, the cloudy mixture of CNC was sonicated (6.25 J mL −1 ) for 10 mins, (500 W, 40% Amplitude, 20 KHz, Ultrasonic Processor VC505 ‐1/2’’ microtip) to obtain a clear solution.",
+            "start_char": 2672,
+            "end_char": 2994,
+            "materials": [
+              "A 2.5% CNC suspension",
+              "DI water",
+              "96 mL",
+              "6.25 J mL −1"
+            ],
+            "params": {
+              "time": "2 h",
+              "amounts": [
+                "4g",
+                "96 mL"
+              ]
+            }
+          },
+          {
+            "op_type": "add",
+            "sentence": "Further, dialkyl (diethyl) azetidinium salt (C 2 ‐N‐C 2 ‐Prop‐2‐OH or 1‐ethyl‐3‐hydroxy‐1‐ethyl azetidin‐1‐ium chloride) was added in 1:1 mole equivalent to sulfate groups present on the surfaces of cellulose nanocrystals as described in our previous report.",
+            "start_char": 2995,
+            "end_char": 3253,
+            "materials": [
+              "dialkyl (diethyl) azetidinium salt"
+            ],
+            "params": {}
+          },
+          {
+            "op_type": "stir",
+            "sentence": "The mixture was vigorously stirred and heated for 4 h at 90 °C.",
+            "start_char": 3254,
+            "end_char": 3317,
+            "materials": [
+              "4 h",
+              "90 °C"
+            ],
+            "params": {
+              "temp": "90°C",
+              "time": "4 h"
+            }
+          },
+          {
+            "op_type": "stir",
+            "sentence": "This was done by suspending 200 mg of gelator in deionised water and one equivalent of sodium hydroxide solution (0.1 M) to a total volume of 10 mL. The solutions were stirred at 1000 rpm overnight in a falcon tube to allow complete dissolution of the gelator.",
+            "start_char": 3668,
+            "end_char": 3928,
+            "materials": [
+              "200 mg",
+              "one equivalent",
+              "0.1 M",
+              "10 mL."
+            ],
+            "params": {
+              "speed": "1000 rpm",
+              "amounts": [
+                "200 mg",
+                "0.1 M",
+                "10 mL"
+              ],
+              "concs": [
+                "0.1 M"
+              ]
+            }
+          }
+        ],
+        "expanded": [
+          {
+            "op_type": "sonicate",
+            "steps": [
+              "Perform operation 'sonicate' as described: Abbreviations: CNC ‐ cellulose nanocrystals, [B] ‐ bath sonicated; [P] ‐ probe sonicated; (L,d)‐2NapFF ‐ thin‐wall nanotubes; I ‐ isotropic phase; N ‐ nematic phase; N* ‐ chiral nematice phase."
+            ]
+          },
+          {
+            "op_type": "add",
+            "steps": [
+              "Ensure reaction vessel is present and empty.",
+              "Place a clean stir bar in the vessel.",
+              "Measure the specified amount of 4.1.1 Cellulose Nanocrystal (CNC) Suspensions CNC powder.",
+              "Transfer 4.1.1 Cellulose Nanocrystal (CNC) Suspensions CNC powder into the vessel."
+            ]
+          },
+          {
+            "op_type": "sonicate",
+            "steps": [
+              "Perform operation 'sonicate' as described: For [B], the suspensions were sonicated using an ultrasound bath for one hour and subsequently, a bench shaker was used for mixing and homogenizing the suspension for 72 h. Based on previous studies, [ \n \n 31 \n \n ]  "
+            ]
+          },
+          {
+            "op_type": "sonicate",
+            "steps": [
+              "Perform operation 'sonicate' as described: As [B]‐CNC have been bath‐sonicated and not probe sonicated, we consider that the sonication dose tends to 0 kJ mL −1  in the data of Parton et al."
+            ]
+          },
+          {
+            "op_type": "sonicate",
+            "steps": [
+              "Perform operation 'sonicate' as described: This is because probe sonication ensures a uniform and focused transmission of ultrasound waves, and can outperform bath sonication by a factor of 1000."
+            ]
+          },
+          {
+            "op_type": "stir",
+            "steps": [
+              "Place the reaction vessel on a stir plate.",
+              "Set the stirrer to an appropriate speed.",
+              "Stir for 2 h."
+            ]
+          },
+          {
+            "op_type": "add",
+            "steps": [
+              "Ensure reaction vessel is present and empty.",
+              "Place a clean stir bar in the vessel.",
+              "Measure the specified amount of dialkyl (diethyl) azetidinium salt.",
+              "Transfer dialkyl (diethyl) azetidinium salt into the vessel."
+            ]
+          },
+          {
+            "op_type": "stir",
+            "steps": [
+              "Place the reaction vessel on a stir plate.",
+              "Set the stirrer to an appropriate speed.",
+              "Stir for 4 h."
+            ]
+          },
+          {
+            "op_type": "stir",
+            "steps": [
+              "Place the reaction vessel on a stir plate.",
+              "Set the stirrer to 1000 rpm.",
+              "Stir for the specified time."
+            ]
+          }
+        ]
+      },
+      {
+        "text": "4.2 Methods An schematic overview of the two Rheo‐PLI‐SAXS experimental setups is shown in Figure  5 , with each unit described separately. 4.2.1 Rheology All rheological experiments were performed on an Anton Paar MCR702 Multidrive rheometer in single motor‐transducer configuration. Three types of measuring geometries were used: (i) a glass parallel plate 43 mm in diameter (ii) a 50 mm steel cone‐plate and (iii) a concentric cylinders standard SAXS polycarbonate geometry with an inner cylinder radius of 24.5 mm and an outer cup of 25 mm outer (radius ratio: 0.98), see Section  S3.1  (Supporting Information). The main Rheo‐PLI‐SAXS setup is based on (i) while tests have also been performed on a custom version of (iii). The novel parallel‐plate Rheo‐PLI‐SAXS is based on a modified Peltier measuring cell to allow for X‐Ray access, see Figure  5a . The steady shear measurements were performed using a custom steady state procedure elaborated in several of our previous studies. [ \n \n 12 \n ,  \n 23 \n ,  \n 45 \n \n ]  The procedure includes an optimized transient time to steady state for each measured point. All transient data was recorded and steady‐state values were subsequently evaluated. The shear rate was varied between 0.014 and 100 s −1  in parallel‐plate tests and between 0.0014 and 400 s −1  in some concentric cylinder tests. 4.2.2 Polarized Light Imaging (PLI) The PLI setup is an adaptation of a custom transmission setup previously used for investigating birefringent suspensions in flow. [ \n \n 21 \n ,  \n 23 \n ,  \n 45 \n ,  \n 53 \n \n ]  The PLI optical train for the plate‐plate measuring geometry consisted of two linear polarizers (Edmund Optics, Barrington, USA) (i), Figure  5 . For concentric cylinders, a combination of linear and circular polarizer was used. PLI was acquired in the form of video recordings (1920×1080 pixel) from which space‐time diagrams were constructed. [ \n \n 22 \n \n ]  Still frame extracts at selected shear rates for all the multiscale data discussed can be found in Figures  S4  and  S5  (Supporting Information). The imaging data was converted into the CIELab colorspace and the Euclidean norm was used in Equation ( 1 ) instead of  I  as\n \n (1) \n I i m = L ∗ 2 + a ∗ 2 + b ∗ 2 \n where  L * is the luminance and  a * and  b * are the chroma, see Figure  S2  (Supporting Information) for a schematic illustration of the color space. Examples of PLI still frame, space‐time diagram and  I \n \n im \n  variation with shear rate are shown in Figure  2 .d,e,f for 2.5% [B]‐CNC. 4.2.3 Small‐Angle X‐Ray Scattering (SAXS) The SAXS experiments were performed at the CoSAXS [ \n \n 54 \n \n ]  and ForMAX beamlines, [ \n \n 55 \n \n ]  MAX IV Laboratory. At CoSAXS, we employed an X‐ray beam energy of 15 keV and a beam size at the sample position of ≈62 × 34 µm 2  (horizontal × vertical), while data were collected 3.5 m downstream of the sample using an EIGER2 X 4M photon‐counting pixel detector. [ \n \n 56 \n \n ]  At ForMAX, the X‐ray beam energy was set to 20.2 keV, the beam size at the sample position to ≈300 × 300 µm 2 , and an EIGER2 X 4M detector was placed 3.1 m downstream of the sample. Example scattering patterns for the (L,d)‐2NapFF are shown in Figure  2a . Hermans orientation parameter from azimuthal integration of the scattering patterns was determined as\n \n (2) \n P 2 S A X S = ∫ 0 π 1 2 3 cos 2 φ − 1 I ( φ ) q sin φ d φ ∫ 0 π I ( φ ) q sin φ d φ \n where φ is the azimuthal angle of the scattering pattern, see Figure  2a  and  I (φ) \n q \n  is the scattering intensity in the integrated  q ‐range. Examples of azimuthal integrations as color maps and as dataplots are shown in Figure  2b,c  for 4.4% [B]‐CNC. Within the [0, π] integration limits used in Equation ( 2 ), 〈 P \n 2 〉 \n SAXS \n  ∈ [− 0.5, 1], where 〈 P \n 2 〉 \n SAXS \n  = 0 signifies random orientation of nanoparticles 〈 P \n 2 〉 \n SAXS \n  = 1 a fully oriented nanostructure with a preferential orientation perpendicular to the flow direction, and 〈 P \n 2 〉 \n SAXS \n  = −0.5 signifying a fully oriented nanostructure with a preferential orientation in the flow direction. The integration  q ‐range was chosen based on radial integration of the scattering patterns, see Section  S4  and especially Figure  S3  (Supporting Information). All azimuthal integrations reported in the manuscript correspond to region around the structural peak identified in the radial integration, see  q \n 2  in Figure  S3  (Supporting Information). For comparison, two other integration intervals were considered for lower and higher  q ‐ranges relative to the structural peak ( q \n 1  and  q \n 3 ). Since concentration and to a limited extent shear influences the structural peak, see Figure  S3b,c  (Supporting Information), the integration  q ‐range is not the same throughout the samples. A list of  q ‐ranges used can be found in Table  S1  (Supporting Information). In parallel‐plate flow, the beam was positioned in the middle of the measuring gap ( h /2). 4.2.4 Experimental Synchronization A waiting time of approximately 3 min was kept between setting the sample to the measuring gap and beginning of the Rheo‐PLI‐SAXS experiments. No pre‐shear has been applied prior to the measurements and the steady shear tests were performed only from low to high shear rates. The optical camera (PLI) was started using a remote control software around the time of the start of the rheological experiment, with the data further corrected at data analysis. A custom macro was written to acquire the SAXS data and it was at first timed and in latter experiments triggered such that for each viscosity measuring point SAXS data was acquired for 5 times with 1 s of exposure time (PP and CP geometries) and 2 times with 0.1 s of exposure time (CC geometry) when the transient data (monitored live) was at steady state. POM and TEM have been used to assess the multiscale structure of the samples at rest, see Section  S5  (Supporting Information) for further details.",
+        "operations": [],
+        "expanded": []
+      },
+      {
+        "text": "4.2.4 Experimental Synchronization A waiting time of approximately 3 min was kept between setting the sample to the measuring gap and beginning of the Rheo‐PLI‐SAXS experiments. No pre‐shear has been applied prior to the measurements and the steady shear tests were performed only from low to high shear rates. The optical camera (PLI) was started using a remote control software around the time of the start of the rheological experiment, with the data further corrected at data analysis. A custom macro was written to acquire the SAXS data and it was at first timed and in latter experiments triggered such that for each viscosity measuring point SAXS data was acquired for 5 times with 1 s of exposure time (PP and CP geometries) and 2 times with 0.1 s of exposure time (CC geometry) when the transient data (monitored live) was at steady state. POM and TEM have been used to assess the multiscale structure of the samples at rest, see Section  S5  (Supporting Information) for further details.",
+        "operations": [],
+        "expanded": []
+      }
+    ]
+  }
+}

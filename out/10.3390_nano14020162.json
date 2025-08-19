@@ -1,0 +1,517 @@
+{
+  "paper_id": "10.3390/nano14020162",
+  "title": "Effect of Synchrotron X-ray Irradiation Time on the Particle Size and DFAFC Performance of Pd/CNT Catalysts.",
+  "authors": [],
+  "doi": "10.3390/nano14020162",
+  "source": "eupmc",
+  "urls": {
+    "pdf": null
+  },
+  "license": {
+    "type": "unknown"
+  },
+  "access_route": "oa",
+  "sections": [
+    {
+      "heading": "2. Materials and Methods",
+      "text": "2. Materials and Methods 2.1. Preparation of CNT and Synthesis of Pd-Decorated CNT Multiwalled carbon nanotubes (MWCNTs; 98~99%, Yong-Zhen Technomaterial Co., Ltd., Taipei, Taiwan) with and without surface treatment were used as templates for palladium deposition. A total of 3 g of commercial MWCNT was immersed in 300 mL of boiling nitride acid (65%, Merck KGaA. Ltd., Darmstadt, Germany) and refluxed for 9 h. After surface treatment, the products were washed with deionized water until the filtrate was neutral (pH = 7). The products were dried at 80 °C for 12 h and used as templates for Pd decoration. In total, 20 mg of MWCNT or surface-treated MWCNT (coded as R-CNT and A-CNT, respectively) was added into 40 mL of deionized water and placed in a 50 mL centrifugal tube. The CNT-containing solutions were dispersed ultrasonically for 1 h and then 0.1 mL Pd precursor solution (5 wt.% PdCl 2  in 10 wt.% HCl) was added. The pH value of the solution was adjusted to 11 by 1 M KOH solution. The precursor-containing centrifugal tube (rotated counterclockwise, notated by red curved arrows) was magnetically stirred (clockwise, blue curved arrows above the magnets within the tube) continuously and exposed to synchrotron X-ray irradiation, as shown in  Figure 1 a. The synchrotron X-ray was provided by the BL01A beamline of the National Synchrotron Radiation Research Center (NSRRC, Hsinchu, Taiwan). The white-light X-ray beams were trimmed by a pair of slits to obtain a transversal beam section of 13 mm × 9 mm,  Figure 1 a. Under a stable magnetic stirring, the synchrotron white-light X-ray was irradiated at different times (0.5, 1, 2, and 4 min) to reduce the Pd ion. The so-obtained products (coded as Pd/CNT, as shown in  Figure 1 b) were washed with DI water and methanol subsequently, then dried at 80 °C for 12 h. The Pd/CNT-containing ink was pasted on carbon cloth to prepare the anode electrode,  Figure 1 c. 2.2. Characterization of R-CNT, A-CNT, and Pd/CNT The abovementioned materials (R-CNT, A-CNT, and Pd/CNT) were characterized using X-ray diffraction, Raman spectroscopy, field emission scanning electron microscopy, and transmission electron microscopy to reveal their structural and morphological properties. An X-ray diffractometer (XRD, D2 phaser, Bruker, Billerica, MA, USA) operating at 40 KV and 30 mA examined the crystalline structure using nickel-filtered Cu Kα radiation (λ = 0.154 nm). Detailed X-ray analysis was performed by the Rietveld fitting method with XRD analysis software EVA (Bruker-AXS DiffracEVA, Bruker, Billerica, MA, USA) to determine the crystalline size of the synthesized palladium nanocrystals using Scherrer’s formula with a shape factor (k) equal to 0.9 [ 48 , 49 ]. The bonding characteristics of R-CNT and A-CNT were examined by Raman spectroscopy (inVia™ Raman microscope, Renishaw, Wotton-under-Edge, England, UK) to determine the ratio of D-band and G-band. Field emission scanning electron microscopy (FE-SEM, SU 8000 Series UHR, Hitachi, Tokyo, Japan) was used to examine the powder morphology of R-CNT, A-CNT, and Pd/CNT. The detailed crystalline structure and powder morphology were investigated further by using a field emission gun transmission electron microscope (FE-TEM, Tecnai™ G2 F20 S-TWIN, Field Electron and Ion Company, Hillsboro, OR, USA). Brunauer–Emmett–Teller (BET, Porous Materials Inc. BET-201A, Ithaca, NY, USA) measurement was conducted to obtain the specific surface area of the A-CNT and Pd/CNT. 2.3. Electrocatalytic Activity of Pd/CNT The electrochemical performance of the prepared catalysts was evaluated using a three-electrode configuration controlled by a potentiostat (Model 6081C, CH Instrument, Bee Cave, TX, USA). A Pt net was used as the counter electrode, Ag/AgCl saturated with a standard KCl electrode served as a reference electrode, and a catalyst-added SE100-carbon single electrode (Zensor R&D Co., Ltd., Taichung, Taiwan, working diameter 0.5 cm, area 0.196 cm 2 ) was used as the working electrode. The catalyst-added working electrode was prepared using the following procedures. Firstly, the catalyst ink was prepared by mixing 1 mg catalyst in 1 mL ethanol and 10 μL 5 wt.% Nafion. The ink solution was sonicated and a calculated volume of catalyst ink was dropped onto the working electrode to produce a uniform catalyst loading of 0.7 mg cat. /cm 2 . Electrochemical surface area ( ECSA ) and formic acid oxidation (FAO) measurements were examined by using the cyclic voltammetry method.  ECSA  evaluation was performed within −0.2 to 1.5 V (vs. Ag/AgCl) at a scan rate of 50 mV/s using 1 M H 2 SO 4  as the electrolyte [ 50 ]. FAO electrocatalytic activity was determined with the potential ranging from −0.2 to 1.0 V (vs. Ag/AgCl) at a scan rate of 20 mV/s with 3 M HCOOH + 1 M H 2 SO 4  as the electrolyte [ 51 ]. 2.4. DFAFC Assembly and Evaluation A direct formic acid fuel cell (DFAFC) has a sandwich structure consisting of two graphite bipolar plates, two electrodes (anode and cathode), a Nafion proton exchange membrane, and a steel housing. The anode electrode used in the experiments underwent a sequence of preparation procedures. Firstly, 25 mg of Pd/CNT catalyst (corresponding to 0.4 mg/cm 2  of Pd loading) was dispersed in ultrapure water. A total of 5 wt.% isopropanol-based Nafion dispersion was added into the as-prepared solution to obtain the desired anodic catalyst ink. The anode electrode was prepared by pasting the anodic ink in an area of 2.6 × 2.6 cm 2  of Carbon Cloth CC6 Plain (Fuel Cell Store, Bryan, TX, USA). The cathode was prepared through similar procedures, except a different catalyst and carbon cloth were used. Commercially available 40 wt.% Pt/Vulcan XC-72 (Premetek, Cherry Hill, NJ, USA) was used as the cathodic catalyst (corresponding to 3 mg/cm 2  of Pt loading) that was pasted on the surface of the Carbon Cloth CC4 Wet Proofed (Fuel Cell Store, Bryan, TX, USA). The prepared electrodes were dried at 130 °C under an applied pressure of 0.3 MPa. Simultaneously, the Nafion TM  115 (Fuel Cell Store, Bryan, TX, USA) membrane was conditioned using 5% H 2 O 2  (Chempur, Piekary Śląskie, Poland), 0.5 M H 2 SO 4  (Chempur, Piekary Śląskie, Poland), and ultrapure water.  Figure 1 d,e show the schematic illustration and the actual photo of DFAFC components, respectively. DFAFC performance was investigated by using a single cell with a home-made evaluation system [ 52 ]. The components as shown in  Figure 1 e were assembled into the steel house and connected to the evaluation system. DFAFC activity and stability tests were investigated by using a 3 M formic acid solution at a flow rate of 3 mL/min and air in a flow rate of 1240 sccm for anode and cathode fuel, respectively. The polarization curves were obtained by scanning the voltage response of the DFAFC across the current ranging from 0 to 400 mA/g Pd . The stability tests were carried out at a constant current that was determined by 80% of the highest power density. During the tests, the DFAFC was maintained at a constant temperature of 40 °C.  Figure 1 f,g show the schematic illustration and the actual photo of the DFAFC evaluation system, respectively."
+    },
+    {
+      "heading": "2.1. Preparation of CNT and Synthesis of Pd-Decorated CNT",
+      "text": "2.1. Preparation of CNT and Synthesis of Pd-Decorated CNT Multiwalled carbon nanotubes (MWCNTs; 98~99%, Yong-Zhen Technomaterial Co., Ltd., Taipei, Taiwan) with and without surface treatment were used as templates for palladium deposition. A total of 3 g of commercial MWCNT was immersed in 300 mL of boiling nitride acid (65%, Merck KGaA. Ltd., Darmstadt, Germany) and refluxed for 9 h. After surface treatment, the products were washed with deionized water until the filtrate was neutral (pH = 7). The products were dried at 80 °C for 12 h and used as templates for Pd decoration. In total, 20 mg of MWCNT or surface-treated MWCNT (coded as R-CNT and A-CNT, respectively) was added into 40 mL of deionized water and placed in a 50 mL centrifugal tube. The CNT-containing solutions were dispersed ultrasonically for 1 h and then 0.1 mL Pd precursor solution (5 wt.% PdCl 2  in 10 wt.% HCl) was added. The pH value of the solution was adjusted to 11 by 1 M KOH solution. The precursor-containing centrifugal tube (rotated counterclockwise, notated by red curved arrows) was magnetically stirred (clockwise, blue curved arrows above the magnets within the tube) continuously and exposed to synchrotron X-ray irradiation, as shown in  Figure 1 a. The synchrotron X-ray was provided by the BL01A beamline of the National Synchrotron Radiation Research Center (NSRRC, Hsinchu, Taiwan). The white-light X-ray beams were trimmed by a pair of slits to obtain a transversal beam section of 13 mm × 9 mm,  Figure 1 a. Under a stable magnetic stirring, the synchrotron white-light X-ray was irradiated at different times (0.5, 1, 2, and 4 min) to reduce the Pd ion. The so-obtained products (coded as Pd/CNT, as shown in  Figure 1 b) were washed with DI water and methanol subsequently, then dried at 80 °C for 12 h. The Pd/CNT-containing ink was pasted on carbon cloth to prepare the anode electrode,  Figure 1 c."
+    }
+  ],
+  "extractions": {
+    "methods_paragraphs": [
+      {
+        "text": "2. Materials and Methods 2.1. Preparation of CNT and Synthesis of Pd-Decorated CNT Multiwalled carbon nanotubes (MWCNTs; 98~99%, Yong-Zhen Technomaterial Co., Ltd., Taipei, Taiwan) with and without surface treatment were used as templates for palladium deposition. A total of 3 g of commercial MWCNT was immersed in 300 mL of boiling nitride acid (65%, Merck KGaA. Ltd., Darmstadt, Germany) and refluxed for 9 h. After surface treatment, the products were washed with deionized water until the filtrate was neutral (pH = 7). The products were dried at 80 °C for 12 h and used as templates for Pd decoration. In total, 20 mg of MWCNT or surface-treated MWCNT (coded as R-CNT and A-CNT, respectively) was added into 40 mL of deionized water and placed in a 50 mL centrifugal tube. The CNT-containing solutions were dispersed ultrasonically for 1 h and then 0.1 mL Pd precursor solution (5 wt.% PdCl 2  in 10 wt.% HCl) was added. The pH value of the solution was adjusted to 11 by 1 M KOH solution. The precursor-containing centrifugal tube (rotated counterclockwise, notated by red curved arrows) was magnetically stirred (clockwise, blue curved arrows above the magnets within the tube) continuously and exposed to synchrotron X-ray irradiation, as shown in  Figure 1 a. The synchrotron X-ray was provided by the BL01A beamline of the National Synchrotron Radiation Research Center (NSRRC, Hsinchu, Taiwan). The white-light X-ray beams were trimmed by a pair of slits to obtain a transversal beam section of 13 mm × 9 mm,  Figure 1 a. Under a stable magnetic stirring, the synchrotron white-light X-ray was irradiated at different times (0.5, 1, 2, and 4 min) to reduce the Pd ion. The so-obtained products (coded as Pd/CNT, as shown in  Figure 1 b) were washed with DI water and methanol subsequently, then dried at 80 °C for 12 h. The Pd/CNT-containing ink was pasted on carbon cloth to prepare the anode electrode,  Figure 1 c. 2.2. Characterization of R-CNT, A-CNT, and Pd/CNT The abovementioned materials (R-CNT, A-CNT, and Pd/CNT) were characterized using X-ray diffraction, Raman spectroscopy, field emission scanning electron microscopy, and transmission electron microscopy to reveal their structural and morphological properties. An X-ray diffractometer (XRD, D2 phaser, Bruker, Billerica, MA, USA) operating at 40 KV and 30 mA examined the crystalline structure using nickel-filtered Cu Kα radiation (λ = 0.154 nm). Detailed X-ray analysis was performed by the Rietveld fitting method with XRD analysis software EVA (Bruker-AXS DiffracEVA, Bruker, Billerica, MA, USA) to determine the crystalline size of the synthesized palladium nanocrystals using Scherrer’s formula with a shape factor (k) equal to 0.9 [ 48 , 49 ]. The bonding characteristics of R-CNT and A-CNT were examined by Raman spectroscopy (inVia™ Raman microscope, Renishaw, Wotton-under-Edge, England, UK) to determine the ratio of D-band and G-band. Field emission scanning electron microscopy (FE-SEM, SU 8000 Series UHR, Hitachi, Tokyo, Japan) was used to examine the powder morphology of R-CNT, A-CNT, and Pd/CNT. The detailed crystalline structure and powder morphology were investigated further by using a field emission gun transmission electron microscope (FE-TEM, Tecnai™ G2 F20 S-TWIN, Field Electron and Ion Company, Hillsboro, OR, USA). Brunauer–Emmett–Teller (BET, Porous Materials Inc. BET-201A, Ithaca, NY, USA) measurement was conducted to obtain the specific surface area of the A-CNT and Pd/CNT. 2.3. Electrocatalytic Activity of Pd/CNT The electrochemical performance of the prepared catalysts was evaluated using a three-electrode configuration controlled by a potentiostat (Model 6081C, CH Instrument, Bee Cave, TX, USA). A Pt net was used as the counter electrode, Ag/AgCl saturated with a standard KCl electrode served as a reference electrode, and a catalyst-added SE100-carbon single electrode (Zensor R&D Co., Ltd., Taichung, Taiwan, working diameter 0.5 cm, area 0.196 cm 2 ) was used as the working electrode. The catalyst-added working electrode was prepared using the following procedures. Firstly, the catalyst ink was prepared by mixing 1 mg catalyst in 1 mL ethanol and 10 μL 5 wt.% Nafion. The ink solution was sonicated and a calculated volume of catalyst ink was dropped onto the working electrode to produce a uniform catalyst loading of 0.7 mg cat. /cm 2 . Electrochemical surface area ( ECSA ) and formic acid oxidation (FAO) measurements were examined by using the cyclic voltammetry method.  ECSA  evaluation was performed within −0.2 to 1.5 V (vs. Ag/AgCl) at a scan rate of 50 mV/s using 1 M H 2 SO 4  as the electrolyte [ 50 ]. FAO electrocatalytic activity was determined with the potential ranging from −0.2 to 1.0 V (vs. Ag/AgCl) at a scan rate of 20 mV/s with 3 M HCOOH + 1 M H 2 SO 4  as the electrolyte [ 51 ]. 2.4. DFAFC Assembly and Evaluation A direct formic acid fuel cell (DFAFC) has a sandwich structure consisting of two graphite bipolar plates, two electrodes (anode and cathode), a Nafion proton exchange membrane, and a steel housing. The anode electrode used in the experiments underwent a sequence of preparation procedures. Firstly, 25 mg of Pd/CNT catalyst (corresponding to 0.4 mg/cm 2  of Pd loading) was dispersed in ultrapure water. A total of 5 wt.% isopropanol-based Nafion dispersion was added into the as-prepared solution to obtain the desired anodic catalyst ink. The anode electrode was prepared by pasting the anodic ink in an area of 2.6 × 2.6 cm 2  of Carbon Cloth CC6 Plain (Fuel Cell Store, Bryan, TX, USA). The cathode was prepared through similar procedures, except a different catalyst and carbon cloth were used. Commercially available 40 wt.% Pt/Vulcan XC-72 (Premetek, Cherry Hill, NJ, USA) was used as the cathodic catalyst (corresponding to 3 mg/cm 2  of Pt loading) that was pasted on the surface of the Carbon Cloth CC4 Wet Proofed (Fuel Cell Store, Bryan, TX, USA). The prepared electrodes were dried at 130 °C under an applied pressure of 0.3 MPa. Simultaneously, the Nafion TM  115 (Fuel Cell Store, Bryan, TX, USA) membrane was conditioned using 5% H 2 O 2  (Chempur, Piekary Śląskie, Poland), 0.5 M H 2 SO 4  (Chempur, Piekary Śląskie, Poland), and ultrapure water.  Figure 1 d,e show the schematic illustration and the actual photo of DFAFC components, respectively. DFAFC performance was investigated by using a single cell with a home-made evaluation system [ 52 ]. The components as shown in  Figure 1 e were assembled into the steel house and connected to the evaluation system. DFAFC activity and stability tests were investigated by using a 3 M formic acid solution at a flow rate of 3 mL/min and air in a flow rate of 1240 sccm for anode and cathode fuel, respectively. The polarization curves were obtained by scanning the voltage response of the DFAFC across the current ranging from 0 to 400 mA/g Pd . The stability tests were carried out at a constant current that was determined by 80% of the highest power density. During the tests, the DFAFC was maintained at a constant temperature of 40 °C.  Figure 1 f,g show the schematic illustration and the actual photo of the DFAFC evaluation system, respectively.",
+        "operations": [
+          {
+            "op_type": "wash",
+            "sentence": "A total of 3 g of commercial MWCNT was immersed in 300 mL of boiling nitride acid (65%, Merck KGaA. Ltd., Darmstadt, Germany) and refluxed for 9 h. After surface treatment, the products were washed with deionized water until the filtrate was neutral (pH = 7).",
+            "start_char": 265,
+            "end_char": 524,
+            "materials": [
+              "3 g",
+              "300 mL",
+              "65%"
+            ],
+            "params": {
+              "time": "9 h",
+              "amounts": [
+                "3 g",
+                "300 mL"
+              ]
+            }
+          },
+          {
+            "op_type": "dry",
+            "sentence": "The products were dried at 80 °C for 12 h and used as templates for Pd decoration.",
+            "start_char": 525,
+            "end_char": 607,
+            "materials": [
+              "80 °C",
+              "12 h"
+            ],
+            "params": {
+              "temp": "80°C",
+              "time": "12 h"
+            }
+          },
+          {
+            "op_type": "add",
+            "sentence": "In total, 20 mg of MWCNT or surface-treated MWCNT (coded as R-CNT and A-CNT, respectively) was added into 40 mL of deionized water and placed in a 50 mL centrifugal tube.",
+            "start_char": 608,
+            "end_char": 778,
+            "materials": [
+              "20 mg",
+              "40 mL",
+              "a 50 mL centrifugal tube"
+            ],
+            "params": {
+              "amounts": [
+                "20 mg",
+                "40 mL",
+                "50 mL"
+              ]
+            }
+          },
+          {
+            "op_type": "add",
+            "sentence": "The CNT-containing solutions were dispersed ultrasonically for 1 h and then 0.1 mL Pd precursor solution (5 wt.% PdCl 2  in 10 wt.% HCl) was added.",
+            "start_char": 779,
+            "end_char": 926,
+            "materials": [
+              "1 h",
+              "0.1 mL Pd precursor solution",
+              "5 wt.% PdCl",
+              "10 wt.% HCl"
+            ],
+            "params": {
+              "time": "1 h",
+              "amounts": [
+                "0.1 mL"
+              ]
+            }
+          },
+          {
+            "op_type": "stir",
+            "sentence": "The precursor-containing centrifugal tube (rotated counterclockwise, notated by red curved arrows) was magnetically stirred (clockwise, blue curved arrows above the magnets within the tube) continuously and exposed to synchrotron X-ray irradiation, as shown in  Figure 1 a.",
+            "start_char": 996,
+            "end_char": 1269,
+            "materials": [
+              "synchrotron X-ray irradiation"
+            ],
+            "params": {}
+          },
+          {
+            "op_type": "stir",
+            "sentence": ",  Figure 1 a. Under a stable magnetic stirring, the synchrotron white-light X-ray was irradiated at different times (0.5, 1, 2, and 4 min) to reduce the Pd ion.",
+            "start_char": 1519,
+            "end_char": 1680,
+            "materials": [
+              "1 a.",
+              "the synchrotron white-light X",
+              "4 min"
+            ],
+            "params": {
+              "time": "4 min"
+            }
+          },
+          {
+            "op_type": "wash",
+            "sentence": "The so-obtained products (coded as Pd/CNT, as shown in  Figure 1 b) were washed with DI water and methanol subsequently, then dried at 80 °C for 12 h. The Pd/CNT-containing ink was pasted on carbon cloth to prepare the anode electrode,  ",
+            "start_char": 1681,
+            "end_char": 1918,
+            "materials": [
+              "DI water",
+              "12 h."
+            ],
+            "params": {
+              "temp": "80°C",
+              "time": "12 h"
+            }
+          },
+          {
+            "op_type": "filter",
+            "sentence": "An X-ray diffractometer (XRD, D2 phaser, Bruker, Billerica, MA, USA) operating at 40 KV and 30 mA examined the crystalline structure using nickel-filtered Cu Kα radiation (λ = 0.154 nm).",
+            "start_char": 2239,
+            "end_char": 2425,
+            "materials": [
+              "An X-ray diffractometer",
+              "XRD",
+              "D2 phaser",
+              "40 KV"
+            ],
+            "params": {}
+          },
+          {
+            "op_type": "add",
+            "sentence": "A Pt net was used as the counter electrode, Ag/AgCl saturated with a standard KCl electrode served as a reference electrode, and a catalyst-added SE100-carbon single electrode (Zensor R&D Co., Ltd., Taichung, Taiwan, working diameter 0.5 cm, area 0.196 cm 2 ) was used as the working electrode.",
+            "start_char": 3717,
+            "end_char": 4011,
+            "materials": [
+              "a catalyst-added SE100-carbon single electrode",
+              "0.5 cm",
+              "0.196 cm"
+            ],
+            "params": {}
+          },
+          {
+            "op_type": "add",
+            "sentence": "The catalyst-added working electrode was prepared using the following procedures.",
+            "start_char": 4012,
+            "end_char": 4093,
+            "materials": [],
+            "params": {}
+          },
+          {
+            "op_type": "stir",
+            "sentence": "Firstly, the catalyst ink was prepared by mixing 1 mg catalyst in 1 mL ethanol and 10 μL 5 wt.% Nafion.",
+            "start_char": 4094,
+            "end_char": 4197,
+            "materials": [
+              "1 mg catalyst",
+              "1 mL ethanol",
+              "10 μL 5 wt.% Nafion"
+            ],
+            "params": {
+              "amounts": [
+                "1 mg",
+                "1 mL",
+                "10 μL"
+              ]
+            }
+          },
+          {
+            "op_type": "sonicate",
+            "sentence": "The ink solution was sonicated and a calculated volume of catalyst ink was dropped onto the working electrode to produce a uniform catalyst loading of 0.7 mg cat.",
+            "start_char": 4198,
+            "end_char": 4360,
+            "materials": [
+              "0.7 mg cat"
+            ],
+            "params": {
+              "amounts": [
+                "0.7 mg"
+              ]
+            }
+          },
+          {
+            "op_type": "add",
+            "sentence": "A total of 5 wt.% isopropanol-based Nafion dispersion was added into the as-prepared solution to obtain the desired anodic catalyst ink.",
+            "start_char": 5275,
+            "end_char": 5411,
+            "materials": [
+              "5 wt.% isopropanol-based Nafion dispersion"
+            ],
+            "params": {}
+          },
+          {
+            "op_type": "dry",
+            "sentence": "The prepared electrodes were dried at 130 °C under an applied pressure of 0.3 MPa.",
+            "start_char": 5931,
+            "end_char": 6013,
+            "materials": [
+              "130 °C",
+              "0.3 MPa"
+            ],
+            "params": {
+              "temp": "130°C"
+            }
+          },
+          {
+            "op_type": "heat",
+            "sentence": "During the tests, the DFAFC was maintained at a constant temperature of 40 °C.  ",
+            "start_char": 6998,
+            "end_char": 7078,
+            "materials": [],
+            "params": {
+              "temp": "40°C"
+            }
+          }
+        ],
+        "expanded": [
+          {
+            "op_type": "wash",
+            "steps": [
+              "Perform operation 'wash' as described: A total of 3 g of commercial MWCNT was immersed in 300 mL of boiling nitride acid (65%, Merck KGaA. Ltd., Darmstadt, Germany) and refluxed for 9 h. After surface treatment, the products were washed with deionized water until the filtrate was neutral (pH = 7)."
+            ]
+          },
+          {
+            "op_type": "dry",
+            "steps": [
+              "Perform operation 'dry' as described: The products were dried at 80 °C for 12 h and used as templates for Pd decoration."
+            ]
+          },
+          {
+            "op_type": "add",
+            "steps": [
+              "Ensure reaction vessel is present and empty.",
+              "Place a clean stir bar in the vessel.",
+              "Measure 20 mg of 20 mg.",
+              "Transfer 20 mg into the vessel."
+            ]
+          },
+          {
+            "op_type": "add",
+            "steps": [
+              "Ensure reaction vessel is present and empty.",
+              "Place a clean stir bar in the vessel.",
+              "Measure 0.1 mL of 1 h.",
+              "Transfer 1 h into the vessel."
+            ]
+          },
+          {
+            "op_type": "stir",
+            "steps": [
+              "Place the reaction vessel on a stir plate.",
+              "Set the stirrer to an appropriate speed.",
+              "Stir for the specified time."
+            ]
+          },
+          {
+            "op_type": "stir",
+            "steps": [
+              "Place the reaction vessel on a stir plate.",
+              "Set the stirrer to an appropriate speed.",
+              "Stir for 4 min."
+            ]
+          },
+          {
+            "op_type": "wash",
+            "steps": [
+              "Perform operation 'wash' as described: The so-obtained products (coded as Pd/CNT, as shown in  Figure 1 b) were washed with DI water and methanol subsequently, then dried at 80 °C for 12 h. The Pd/CNT-containing ink was pasted on carbon cloth to prepare the anode electrode,  "
+            ]
+          },
+          {
+            "op_type": "filter",
+            "steps": [
+              "Perform operation 'filter' as described: An X-ray diffractometer (XRD, D2 phaser, Bruker, Billerica, MA, USA) operating at 40 KV and 30 mA examined the crystalline structure using nickel-filtered Cu Kα radiation (λ = 0.154 nm)."
+            ]
+          },
+          {
+            "op_type": "add",
+            "steps": [
+              "Ensure reaction vessel is present and empty.",
+              "Place a clean stir bar in the vessel.",
+              "Measure the specified amount of a catalyst-added SE100-carbon single electrode.",
+              "Transfer a catalyst-added SE100-carbon single electrode into the vessel."
+            ]
+          },
+          {
+            "op_type": "add",
+            "steps": [
+              "Ensure reaction vessel is present and empty.",
+              "Place a clean stir bar in the vessel.",
+              "Measure the specified amount of reagent.",
+              "Transfer reagent into the vessel."
+            ]
+          },
+          {
+            "op_type": "stir",
+            "steps": [
+              "Place the reaction vessel on a stir plate.",
+              "Set the stirrer to an appropriate speed.",
+              "Stir for the specified time."
+            ]
+          },
+          {
+            "op_type": "sonicate",
+            "steps": [
+              "Perform operation 'sonicate' as described: The ink solution was sonicated and a calculated volume of catalyst ink was dropped onto the working electrode to produce a uniform catalyst loading of 0.7 mg cat."
+            ]
+          },
+          {
+            "op_type": "add",
+            "steps": [
+              "Ensure reaction vessel is present and empty.",
+              "Place a clean stir bar in the vessel.",
+              "Measure the specified amount of 5 wt.% isopropanol-based Nafion dispersion.",
+              "Transfer 5 wt.% isopropanol-based Nafion dispersion into the vessel."
+            ]
+          },
+          {
+            "op_type": "dry",
+            "steps": [
+              "Perform operation 'dry' as described: The prepared electrodes were dried at 130 °C under an applied pressure of 0.3 MPa."
+            ]
+          },
+          {
+            "op_type": "heat",
+            "steps": [
+              "Place the reaction vessel on a hotplate.",
+              "Ramp to 40°C.",
+              "Maintain 40°C for the specified time."
+            ]
+          }
+        ]
+      },
+      {
+        "text": "2.1. Preparation of CNT and Synthesis of Pd-Decorated CNT Multiwalled carbon nanotubes (MWCNTs; 98~99%, Yong-Zhen Technomaterial Co., Ltd., Taipei, Taiwan) with and without surface treatment were used as templates for palladium deposition. A total of 3 g of commercial MWCNT was immersed in 300 mL of boiling nitride acid (65%, Merck KGaA. Ltd., Darmstadt, Germany) and refluxed for 9 h. After surface treatment, the products were washed with deionized water until the filtrate was neutral (pH = 7). The products were dried at 80 °C for 12 h and used as templates for Pd decoration. In total, 20 mg of MWCNT or surface-treated MWCNT (coded as R-CNT and A-CNT, respectively) was added into 40 mL of deionized water and placed in a 50 mL centrifugal tube. The CNT-containing solutions were dispersed ultrasonically for 1 h and then 0.1 mL Pd precursor solution (5 wt.% PdCl 2  in 10 wt.% HCl) was added. The pH value of the solution was adjusted to 11 by 1 M KOH solution. The precursor-containing centrifugal tube (rotated counterclockwise, notated by red curved arrows) was magnetically stirred (clockwise, blue curved arrows above the magnets within the tube) continuously and exposed to synchrotron X-ray irradiation, as shown in  Figure 1 a. The synchrotron X-ray was provided by the BL01A beamline of the National Synchrotron Radiation Research Center (NSRRC, Hsinchu, Taiwan). The white-light X-ray beams were trimmed by a pair of slits to obtain a transversal beam section of 13 mm × 9 mm,  Figure 1 a. Under a stable magnetic stirring, the synchrotron white-light X-ray was irradiated at different times (0.5, 1, 2, and 4 min) to reduce the Pd ion. The so-obtained products (coded as Pd/CNT, as shown in  Figure 1 b) were washed with DI water and methanol subsequently, then dried at 80 °C for 12 h. The Pd/CNT-containing ink was pasted on carbon cloth to prepare the anode electrode,  Figure 1 c.",
+        "operations": [
+          {
+            "op_type": "wash",
+            "sentence": "A total of 3 g of commercial MWCNT was immersed in 300 mL of boiling nitride acid (65%, Merck KGaA. Ltd., Darmstadt, Germany) and refluxed for 9 h. After surface treatment, the products were washed with deionized water until the filtrate was neutral (pH = 7).",
+            "start_char": 240,
+            "end_char": 499,
+            "materials": [
+              "3 g",
+              "300 mL",
+              "65%"
+            ],
+            "params": {
+              "time": "9 h",
+              "amounts": [
+                "3 g",
+                "300 mL"
+              ]
+            }
+          },
+          {
+            "op_type": "dry",
+            "sentence": "The products were dried at 80 °C for 12 h and used as templates for Pd decoration.",
+            "start_char": 500,
+            "end_char": 582,
+            "materials": [
+              "80 °C",
+              "12 h"
+            ],
+            "params": {
+              "temp": "80°C",
+              "time": "12 h"
+            }
+          },
+          {
+            "op_type": "add",
+            "sentence": "In total, 20 mg of MWCNT or surface-treated MWCNT (coded as R-CNT and A-CNT, respectively) was added into 40 mL of deionized water and placed in a 50 mL centrifugal tube.",
+            "start_char": 583,
+            "end_char": 753,
+            "materials": [
+              "20 mg",
+              "40 mL",
+              "a 50 mL centrifugal tube"
+            ],
+            "params": {
+              "amounts": [
+                "20 mg",
+                "40 mL",
+                "50 mL"
+              ]
+            }
+          },
+          {
+            "op_type": "add",
+            "sentence": "The CNT-containing solutions were dispersed ultrasonically for 1 h and then 0.1 mL Pd precursor solution (5 wt.% PdCl 2  in 10 wt.% HCl) was added.",
+            "start_char": 754,
+            "end_char": 901,
+            "materials": [
+              "1 h",
+              "0.1 mL Pd precursor solution",
+              "5 wt.% PdCl",
+              "10 wt.% HCl"
+            ],
+            "params": {
+              "time": "1 h",
+              "amounts": [
+                "0.1 mL"
+              ]
+            }
+          },
+          {
+            "op_type": "stir",
+            "sentence": "The precursor-containing centrifugal tube (rotated counterclockwise, notated by red curved arrows) was magnetically stirred (clockwise, blue curved arrows above the magnets within the tube) continuously and exposed to synchrotron X-ray irradiation, as shown in  Figure 1 a.",
+            "start_char": 971,
+            "end_char": 1244,
+            "materials": [
+              "synchrotron X-ray irradiation"
+            ],
+            "params": {}
+          },
+          {
+            "op_type": "stir",
+            "sentence": ",  Figure 1 a. Under a stable magnetic stirring, the synchrotron white-light X-ray was irradiated at different times (0.5, 1, 2, and 4 min) to reduce the Pd ion.",
+            "start_char": 1494,
+            "end_char": 1655,
+            "materials": [
+              "1 a.",
+              "the synchrotron white-light X",
+              "4 min"
+            ],
+            "params": {
+              "time": "4 min"
+            }
+          },
+          {
+            "op_type": "wash",
+            "sentence": "The so-obtained products (coded as Pd/CNT, as shown in  Figure 1 b) were washed with DI water and methanol subsequently, then dried at 80 °C for 12 h. The Pd/CNT-containing ink was pasted on carbon cloth to prepare the anode electrode,  ",
+            "start_char": 1656,
+            "end_char": 1893,
+            "materials": [
+              "DI water",
+              "12 h."
+            ],
+            "params": {
+              "temp": "80°C",
+              "time": "12 h"
+            }
+          }
+        ],
+        "expanded": [
+          {
+            "op_type": "wash",
+            "steps": [
+              "Perform operation 'wash' as described: A total of 3 g of commercial MWCNT was immersed in 300 mL of boiling nitride acid (65%, Merck KGaA. Ltd., Darmstadt, Germany) and refluxed for 9 h. After surface treatment, the products were washed with deionized water until the filtrate was neutral (pH = 7)."
+            ]
+          },
+          {
+            "op_type": "dry",
+            "steps": [
+              "Perform operation 'dry' as described: The products were dried at 80 °C for 12 h and used as templates for Pd decoration."
+            ]
+          },
+          {
+            "op_type": "add",
+            "steps": [
+              "Ensure reaction vessel is present and empty.",
+              "Place a clean stir bar in the vessel.",
+              "Measure 20 mg of 20 mg.",
+              "Transfer 20 mg into the vessel."
+            ]
+          },
+          {
+            "op_type": "add",
+            "steps": [
+              "Ensure reaction vessel is present and empty.",
+              "Place a clean stir bar in the vessel.",
+              "Measure 0.1 mL of 1 h.",
+              "Transfer 1 h into the vessel."
+            ]
+          },
+          {
+            "op_type": "stir",
+            "steps": [
+              "Place the reaction vessel on a stir plate.",
+              "Set the stirrer to an appropriate speed.",
+              "Stir for the specified time."
+            ]
+          },
+          {
+            "op_type": "stir",
+            "steps": [
+              "Place the reaction vessel on a stir plate.",
+              "Set the stirrer to an appropriate speed.",
+              "Stir for 4 min."
+            ]
+          },
+          {
+            "op_type": "wash",
+            "steps": [
+              "Perform operation 'wash' as described: The so-obtained products (coded as Pd/CNT, as shown in  Figure 1 b) were washed with DI water and methanol subsequently, then dried at 80 °C for 12 h. The Pd/CNT-containing ink was pasted on carbon cloth to prepare the anode electrode,  "
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

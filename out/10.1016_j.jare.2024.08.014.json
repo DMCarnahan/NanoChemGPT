@@ -1,0 +1,74 @@
+{
+  "paper_id": "10.1016/j.jare.2024.08.014",
+  "title": "Novel furfural-complexed approach to synthesizing carbon-Doped ZnO with breakthrough photocatalytic efficacy.",
+  "authors": [],
+  "doi": "10.1016/j.jare.2024.08.014",
+  "source": "eupmc",
+  "urls": {
+    "pdf": null
+  },
+  "license": {
+    "type": "unknown"
+  },
+  "access_route": "oa",
+  "sections": [
+    {
+      "heading": "Methods",
+      "text": "Methods A series of C-Z variants (C-Z-1 to C-Z-5) and an undoped sample (ZnO-0) were synthesized. The influence of furfural on the synthesis process and doping mechanism was analyzed by X-ray photoelectron spectroscopy (XPS), X-ray diffraction (XRD), and UV–visible diffuse reflectance spectroscopy (DRS)."
+    },
+    {
+      "heading": "Simplified synthesis of C-Z nanostructures",
+      "text": "Simplified synthesis of C-Z nanostructures The fabrication of C-Z nanostructures is a pioneering and simplified method that does not require surfactants, pH adjustment, centrifugation, or hazardous chemicals. This novel approach demands only two precursor substances: zinc nitrate hexahydrate (Zn(NO 3 ) 2 ·6H 2 O) and the organic compound furfural (C 4 H 3 OCHO). The procedure began by manually blending the precursors in a mortar using a pestle for approximately 10 min to obtain a homogenous mixture. During manual grinding, complexation occurs between inorganic zinc and organic carbon-based molecules, setting the stage for the subsequent synthesis of C-ZnO nanoparticles. Upon heating the resultant mixture in a quartz tube furnace at approximately 500 °C under a nitrogen atmosphere, the thermal degradation of furfural uniformly distributes carbon within the zinc oxide matrix. Remarkably, furfural fulfills a dual purpose in this synthetic route: it acts as a carbon source for doping, enhancing the photocatalytic efficacy of ZnO, and concurrently impeding the agglomeration of the nanoparticles, thus yielding a uniform nanostructured material. Adjusting the furfural volume (0.1, 0.3, 0.5, 0.7, and 1.0 mL) allowed the fine-tuning of the carbon levels in ZnO, denoted as C-Z-1 to C-Z-5, respectively. This gradation of carbon content is instrumental in systematically exploring its influence on the photocatalytic activity of the material. For benchmarking purposes, a pristine ZnO reference sample (ZnO-0) was synthesized under identical conditions but without furfural. The innovation of this methodology lies in its minimalism and eco-friendliness, potentially revolutionizing the production of carbon-doped nanostructures by providing an accessible, low-cost, and scalable alternative to traditional nanoparticle-doping techniques. This has significant implications for sustainable material development, particularly for applications in environmental remediation and solar-energy harnessing."
+    }
+  ],
+  "extractions": {
+    "methods_paragraphs": [
+      {
+        "text": "Methods A series of C-Z variants (C-Z-1 to C-Z-5) and an undoped sample (ZnO-0) were synthesized. The influence of furfural on the synthesis process and doping mechanism was analyzed by X-ray photoelectron spectroscopy (XPS), X-ray diffraction (XRD), and UV–visible diffuse reflectance spectroscopy (DRS).",
+        "operations": [],
+        "expanded": []
+      },
+      {
+        "text": "Simplified synthesis of C-Z nanostructures The fabrication of C-Z nanostructures is a pioneering and simplified method that does not require surfactants, pH adjustment, centrifugation, or hazardous chemicals. This novel approach demands only two precursor substances: zinc nitrate hexahydrate (Zn(NO 3 ) 2 ·6H 2 O) and the organic compound furfural (C 4 H 3 OCHO). The procedure began by manually blending the precursors in a mortar using a pestle for approximately 10 min to obtain a homogenous mixture. During manual grinding, complexation occurs between inorganic zinc and organic carbon-based molecules, setting the stage for the subsequent synthesis of C-ZnO nanoparticles. Upon heating the resultant mixture in a quartz tube furnace at approximately 500 °C under a nitrogen atmosphere, the thermal degradation of furfural uniformly distributes carbon within the zinc oxide matrix. Remarkably, furfural fulfills a dual purpose in this synthetic route: it acts as a carbon source for doping, enhancing the photocatalytic efficacy of ZnO, and concurrently impeding the agglomeration of the nanoparticles, thus yielding a uniform nanostructured material. Adjusting the furfural volume (0.1, 0.3, 0.5, 0.7, and 1.0 mL) allowed the fine-tuning of the carbon levels in ZnO, denoted as C-Z-1 to C-Z-5, respectively. This gradation of carbon content is instrumental in systematically exploring its influence on the photocatalytic activity of the material. For benchmarking purposes, a pristine ZnO reference sample (ZnO-0) was synthesized under identical conditions but without furfural. The innovation of this methodology lies in its minimalism and eco-friendliness, potentially revolutionizing the production of carbon-doped nanostructures by providing an accessible, low-cost, and scalable alternative to traditional nanoparticle-doping techniques. This has significant implications for sustainable material development, particularly for applications in environmental remediation and solar-energy harnessing.",
+        "operations": [
+          {
+            "op_type": "centrifuge",
+            "sentence": "Simplified synthesis of C-Z nanostructures The fabrication of C-Z nanostructures is a pioneering and simplified method that does not require surfactants, pH adjustment, centrifugation, or hazardous chemicals.",
+            "start_char": 0,
+            "end_char": 208,
+            "materials": [],
+            "params": {}
+          },
+          {
+            "op_type": "heat",
+            "sentence": "Upon heating the resultant mixture in a quartz tube furnace at approximately 500 °C under a nitrogen atmosphere, the thermal degradation of furfural uniformly distributes carbon within the zinc oxide matrix.",
+            "start_char": 679,
+            "end_char": 886,
+            "materials": [
+              "approximately 500 °C"
+            ],
+            "params": {
+              "temp": "500 °C"
+            }
+          }
+        ],
+        "expanded": [
+          {
+            "op_type": "centrifuge",
+            "steps": [
+              "Perform operation 'centrifuge' as described: Simplified synthesis of C-Z nanostructures The fabrication of C-Z nanostructures is a pioneering and simplified method that does not require surfactants, pH adjustment, centrifugation, or hazardous chemicals."
+            ]
+          },
+          {
+            "op_type": "heat",
+            "steps": [
+              "Place the reaction vessel on a hotplate.",
+              "Ramp to 500 °C.",
+              "Maintain 500 °C for the specified time."
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

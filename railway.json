@@ -4,7 +4,7 @@
     "builder": "NIXPACKS"
   },
   "deploy": {
-    "startCommand": "gunicorn app:app --bind 0.0.0.0:$PORT --workers 1 --threads 8 --timeout 120 --access-logfile - --error-logfile - --log-level info",
+    "startCommand":"python retriever/index_jsonl.py --bundle $BUNDLE_PATH --index_dir $INDEX_DIR && gunicorn -w 2 -b 0.0.0.0:$PORT app:app",
     "healthcheckPath" : "/health",
     "healthcheckTimeout": 100,
     "restartPolicyType": "on_failure"

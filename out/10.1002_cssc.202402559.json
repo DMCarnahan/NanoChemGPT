@@ -1,0 +1,185 @@
+{
+  "paper_id": "10.1002/cssc.202402559",
+  "title": "Machine Learning a Predictive Tool for the Analysis of NiCo&lt;sub&gt;2&lt;/sub&gt;S&lt;sub&gt;4&lt;/sub&gt;/Graphene Composites for Supercapacitor.",
+  "authors": [],
+  "doi": "10.1002/cssc.202402559",
+  "source": "eupmc",
+  "urls": {
+    "pdf": null
+  },
+  "license": {
+    "type": "unknown"
+  },
+  "access_route": "oa",
+  "sections": [
+    {
+      "heading": "Method of Synthesis",
+      "text": "2 Method of Synthesis Generally, the synthesis of MSs follows the dissolution‐recrystallization mechanism, commonly known as the “oxide‐to‐sulfides” strategy. [ \n \n 68 \n \n ]  Modifying the morphologies, structures, sizes, and compositions of MSs allows for the fine adjustment of their electrochemical characteristics. Therefore, the selection of synthesis methods plays a crucial role in tailoring MSs with desired properties, ultimately enhancing the energy storage properties of the material. Researchers have employed assorted synthesis techniques for MSs including hydrothermal/solvothermal methods, [ \n \n 69 \n ,  \n 70 \n \n ]  precipitation, [ \n \n 71 \n \n ]  electrodeposition, [ \n \n 72 \n \n ]  microwave‐assisted synthesis, [ \n \n 73 \n \n ]  and chemical vapor deposition. [ \n \n 74 \n \n ]  NiCo 2 S 4  is synthesized by different methods that include hydrothermal method, one pot refluxing method, [ \n \n 75 \n \n ]  one‐pot method, [ \n \n 76 \n \n ]  solvothermal, [ \n \n 77 \n \n ]  electrodeposition, [ \n \n 78 \n \n ]  chemical bath deposition, [ \n \n 79 \n \n ]  etc. Over the past few decades, there has been significant research into the synthesis of hollow micro and nanostructures ranging in size from 10 nm to 10 μm, driven by their potential applications. Diverse synthesis processes, including Ostwald ripening, [ \n \n 80 \n ,  \n 81 \n ,  \n 82 \n \n ]  layer‐by‐layer (LBL) assembly, [ \n \n 83 \n ,  \n 84 \n \n ]  and the Kirkendall effect, [ \n \n 85 \n ,  \n 86 \n \n ]  have been employed to create micro/nanomaterials with diverse nanostructures such as core–shell and hollow configurations. Among these processes, the Kirkendall effect has garnered particular attention for shaping engineered hollow nano‐microstructures of metal oxides and sulfides due to its promising applications. [ \n \n 87 \n ,  \n 88 \n \n ] \n The Ostwald ripening process is commonly observed in varied synthesis methods, but it is particularly prominent in the synthesis of nanoparticles through solution‐phase methods such as chemical precipitation, [ \n \n 89 \n \n ]  solvothermal, [ \n \n 90 \n \n ]  and hydrothermal methods. [ \n \n 91 \n \n ]  In these methods, nanoparticles initially form as small primary particles, which then undergo Ostwald ripening where smaller particles dissolve and their material is redeposited onto larger particles, causing them to grow over time as shown in Graphical Fig. This process occurs due to differences in surface energy, where smaller particles have higher surface energy than larger ones. This phenomenon leads to a gradual increase in the average size of nanoparticles and a more uniform size distribution. This occurs due to differences in solubility or chemical potential between smaller and larger particles. Therefore, Ostwald ripening is frequently utilized and observed in nanoparticle synthesis methods involving solution‐phase reactions. [ \n \n 92 \n \n ]  Since the initial development of hollow nanocrystals using the nanoscale Kirkendall effect, significant progress has been made in utilizing this approach to create hollow nanostructures in recent years. The nanoscale Kirkendall effect, which relies on mass transport across the interface between different solid phases, has been effectively employed to synthesize hollow nanocrystals spanning several materials categories such as metal oxides, [ \n \n 93 \n \n ]  chalcogenides, [ \n \n 94 \n \n ]  phosphides, [ \n \n 95 \n \n ]  sulfides, [ \n \n 96 \n \n ]  as well as core/hollow shell structures. [ \n \n 97 \n ,  \n 98 \n \n ]  The Kirkendall effects are observed during the formation of hollow particles of NiCo 2 S 4  as shown in Graphical Fig. [ \n \n 99 \n \n ]  The experimental study suggests that metal cations diffuse more rapidly than sulfide anions, potentially due to the smaller size of outward‐diffusing metal cations compared to inward‐diffusing sulfide anions. This observation aligns with the mechanism of the Kirkendall effect. The Kirkendall effect, observed in diffusion between materials with differing atomic mobilities, results in uneven interface growth and the formation of voids or pores in the slower‐diffusing material. This phenomenon is widely utilized in materials science to engineer unique nanostructures, such as NiCo 2 S 4  nanotubes formed via sacrificial templating. The faster diffusion of the inner Ni–Co precursor compared to S 2−  ions during vulcanization leads to void generation, resulting in porous tube nanostructures. These nanotubes exhibit exceptional electrochemical performance, attributed to active sites facilitating redox transitions at the electrode surface. [ \n \n 100 \n ,  \n 101 \n \n ]  In the formation process of NiCo 2 S 4 , the Kirkendall effect induces the formation of a hollow and mesoporous structure, which offers multiple advantages for electrochemical performance. First, the hollow structure provides a larger surface area [ \n \n 102 \n \n ]  than a solid counterpart, facilitating increased contact between the electrode and electrolyte, thereby promoting more efficient electrochemical reactions. Second, the presence of mesopores enhances ion transport within the electrode material, mitigating diffusion limitations and enabling rapid charge and discharge rates. Lastly, the hollow architecture aids in alleviating volume changes during cycling, reducing mechanical stress, and improving the electrode's long‐term structural stability. [ \n \n 103 \n ,  \n 104 \n \n ]  Zhu et al. [ \n \n 105 \n \n ]  formulated Ni–Co carbonate and then transformed it into NiCo 2 S 4 . The structure of nickel cobalt (carbonate) hydroxide can be effectively managed via solvothermal reactions, and NiCo 2 S 4  can be transformed from nickel cobalt (carbonate) hydroxide (for example, NiCo 2 ((CO 3 ) 1.5 (OH) 3 ) through anion exchange reactions induced by Kirkendall effects. [ \n \n 62 \n \n ] \n 2.1 Hydrothermal Method Researchers have recognized the utilization of hydrothermal conditions for processing fine particles. [ \n \n 106 \n \n ]  Hydrothermal is a widely used method for the synthesis of nanostructure via bottom‐up approach because of its significance such as single step, low energy consumption, eco‐friendly, low cost, highly pure product, and different morphologies. Studies showed that the hydrothermal method is widely used for the synthesis of sulfide because of its significant benefits. [ \n \n 107 \n ,  \n 108 \n ,  \n 109 \n ,  \n 110 \n \n ]  This method excels in refining ultrafine powders, exact stoichiometry, uniformity, dense particle structure, heightened crystallinity, increased reactivity, and enhanced sinterability, among numerous other advantages. [ \n \n 111 \n ,  \n 112 \n \n ]  Yang et al. [ \n \n 113 \n \n ]  prepared NiCo 2 S 4  via a hydrothermal method that includes three steps. Which involved the synthesis of NiCo 2 O 4 , and it was converted into NiCo 2 S 4  via sulfurization. The precursors of cobalt and nickel form Co 2+  and Ni 2+  ions in an aqueous medium, these cations reacted with urea (Co 3 \n 2−  and OH − ) hydrolyzing agent to form a pink colored bimetallic hydroxide carbonate, which grew on nickel foam (NF). After that, the previous nickel–cobalt hydroxide carbonate was converted into NiCo 2 O 4  through the annealing process (300 °C). In the third step, obtained NiCo 2 O 4  was converted into NiCo 2 S 4  via an anion exchange process. 2.2 Microwave‐Assisted Method Microwave heating typically induces internal heat within molecules through dielectric polarization. This heating method offers multiple advantages, such as being noncontact, selective, and rapid. [ \n \n 114 \n \n ]  The microwave technique proves to be a valuable strategy for mitigating certain limitations, such as swift heating, rapid reaction rates, elevated product yields, exceptional reproducibility, extended reaction conditions, and efficient energy transformation. [ \n \n 115 \n ,  \n 116 \n \n ]  Recently, NiCo 2 S 4  was prepared through the microwave‐assisted method by Rafai et al. [ \n \n 117 \n \n ]  and it is a short‐time method as compared to another method. Likewise, Wang et al. [ \n \n 118 \n \n ]  fabricated NiCo 2 S 4  nanosheet arrays grown on NF via microwave‐assisted method. Microwave‐assisted heating was acknowledged as a method for crafting or thermally treating conventional functional materials. The dipolar polarization and ionic conduction heating mechanisms allowed for a significant reduction in the reaction time of microwave‐assisted processes to a matter of within a short time. Zhao et al. [ \n \n 119 \n \n ]  produced NiCo 2 S 4  via the microwave‐assisted method and controlled the growth of the structure by varying in time. They developed nanoparticles to hydrangea‐like NCs through the time‐controlled microwave‐assisted method. Due to the swift internal heating mechanism, a substantial quantity of monomer nuclei and crystals can be rapidly generated. These entities then promptly mature into nanosheets through the crystallization process. Over time, as the growth‐controlled process shifts toward thermodynamic dominance, the nanosheets progressively undergo self‐assembly, forming a 3D hydrangea‐like structure. This structural arrangement aims to minimize the surface energy of the nanosheets. 2.3 Electrodeposition Method Electrochemical deposition is commonly employed for the direct growth of metals and conducting metal oxides due to its versatility in manipulation and its lack of need for high vacuum or high reaction temperatures. [ \n \n 120 \n ,  \n 121 \n ,  \n 122 \n \n ]  A simple and cost‐effective single‐step electrodeposition technique was employed to produce NiCo 2 S 4  nanosheets with varying compositions. [ \n \n 123 \n \n ]  Tauquir and co‐workers [ \n \n 124 \n \n ]  prepared a NiCo 2 S 4  nanosheet by facile in situ growth via the electrodeposition method. The experiment involved different concentrations of nickel and cobalt nitrate hexahydrate with 0.75  m  of thiourea and 50 m m  ascorbic acid. The electrodeposition took place using chronoamperometry techniques for 10 min at −1.2 V. While for cyclic voltammetry (CV) deposition the potential was kept between −1.2 and 0.2 V at a scan rate of 10 mV s −1  for 10 cycles. 2.4 Successive Ionic Layer Adsorption and Reaction Method The successive ionic layer adsorption and reaction (SILAR) method was employed to synthesize nanomaterials for SC applications. In addition to being low‐cost, simple, and eco‐friendly, the SILAR technique was more economically stable and allowed for more applications compared to other physical and chemical methods. SILAR offers a unique approach to producing nanocrystalline films. [ \n \n 125 \n \n ]  Shinde and coworkers [ \n \n 126 \n \n ]  studied the influence of the SILAR cycle on the SC performance of nanoflakes, nanosheets, and nanoplates like NiCo 2 S 4  electrodes. The synthesis process involved three steps using the SILAR method. In the initial step, a flexible stainless‐steel substrate was immersed in NiSO 4  solution for 20 s, facilitating the adsorption of Ni 2+  ions on the substrate's surface. Subsequently, the Ni 2+ ‐coated substrate was rinsed with double distilled water (DDW) for 10 s to eliminate loosely bound Ni 2+  species. In the second step, the Ni 2+ ‐coated substrate underwent a 20‐second immersion in CoSO 4  solution, allowing the adsorption of Co 2+  ions. A similar process was employed to remove loosely bound Co 2+  ions. Finally, in the third step, the Ni 2+ /Co 2+ ‐coated substrate was immersed in Na 2 S precursor solution, forming a Ni 2+ ‐, Co 2+ ‐, and S 2− ‐coated substrate. A 10 s rinse with DDW removed roughly bound S 2−  ion species, completing one SILAR cycle of NiCo 2 S 4  deposition. 2.5 Simple Chemical Method The one‐step simple chemical method is simple and facilitated by rational construction. This results in the creation of distinctive hierarchical nanostructures that offer reduced transferring resistance, a larger surface area, and improved structural stability. These attributes are advantageous for facilitating electrolyte ion diffusion and establishing more efficient pathways for electron transport. A one‐step synthesis method combines multiple processes into a single step, enhancing interactions between components and leading to a synergistic effect. This contrasts with simple physical mixing, which may not promote the same level of interaction and synergy. [ \n \n 56 \n ,  \n 127 \n \n ]  Wang et al. [ \n \n 128 \n \n ]  developed a simple one‐step temperature solution‐based synthesis approach for the fabrication of hierarchical NiCo 2 S 4  ultrathin nanosheets on NF. The hydrolyzation process of thiourea tends to be a solution to alkaline resulting in the generation of alkaline medium (ammonia) and sulfur source (S 2− ). A low reaction temperature (90 °C) leads to a slow hydrolyzation rate, which is helpful in the formation of ultrafine nanostructures. Also, chemical coprecipitation and sulfidation are two strategies combined into a single step, which favors time‐saving and low‐cost methods. Also, the mass loading of NiCo 2 S 4  was controlled by tuning a reaction time. [ \n \n 129 \n \n ]  At a time, soluble ions of Ni 2+  and Co 2+  were coordinated and form a Ni–Co hydroxide on NF in alkaline conditions, thoroughly the prepared hydroxide was converted into a NiCo 2 S 4  by reacting with S 2−  via an ion exchange process through a one‐step method. [ \n \n 130 \n \n ] \n Figure   \n 1 A  illustrates the commonly used synthesis method for NiCo 2 S 4 /graphene composite, highlighting the correlation between the synthesis method and the observed morphology. Figure  1B  presents the key parameters influencing specific capacitance. The morphology of the NiCo 2 S 4 /graphene composite is primarily determined by the synthesis method and reaction conditions. By modifying these factors, a desirable morphology can be achieved. To evaluate the electrochemical performance of NiCo 2 S 4 /graphene composite, specific capacitance parameters are analyzed, as they are influenced by morphology, surface area, pore structure, and electrolyte composition. Figure 1 A) Correlation between synthesis method and observed morphology. B) Parameters influencing specific capacitance. © 2025 WILEY‐VCH GmbH"
+    }
+  ],
+  "extractions": {
+    "methods_paragraphs": [
+      {
+        "text": "2 Method of Synthesis Generally, the synthesis of MSs follows the dissolution‐recrystallization mechanism, commonly known as the “oxide‐to‐sulfides” strategy. [ \n \n 68 \n \n ]  Modifying the morphologies, structures, sizes, and compositions of MSs allows for the fine adjustment of their electrochemical characteristics. Therefore, the selection of synthesis methods plays a crucial role in tailoring MSs with desired properties, ultimately enhancing the energy storage properties of the material. Researchers have employed assorted synthesis techniques for MSs including hydrothermal/solvothermal methods, [ \n \n 69 \n ,  \n 70 \n \n ]  precipitation, [ \n \n 71 \n \n ]  electrodeposition, [ \n \n 72 \n \n ]  microwave‐assisted synthesis, [ \n \n 73 \n \n ]  and chemical vapor deposition. [ \n \n 74 \n \n ]  NiCo 2 S 4  is synthesized by different methods that include hydrothermal method, one pot refluxing method, [ \n \n 75 \n \n ]  one‐pot method, [ \n \n 76 \n \n ]  solvothermal, [ \n \n 77 \n \n ]  electrodeposition, [ \n \n 78 \n \n ]  chemical bath deposition, [ \n \n 79 \n \n ]  etc. Over the past few decades, there has been significant research into the synthesis of hollow micro and nanostructures ranging in size from 10 nm to 10 μm, driven by their potential applications. Diverse synthesis processes, including Ostwald ripening, [ \n \n 80 \n ,  \n 81 \n ,  \n 82 \n \n ]  layer‐by‐layer (LBL) assembly, [ \n \n 83 \n ,  \n 84 \n \n ]  and the Kirkendall effect, [ \n \n 85 \n ,  \n 86 \n \n ]  have been employed to create micro/nanomaterials with diverse nanostructures such as core–shell and hollow configurations. Among these processes, the Kirkendall effect has garnered particular attention for shaping engineered hollow nano‐microstructures of metal oxides and sulfides due to its promising applications. [ \n \n 87 \n ,  \n 88 \n \n ] \n The Ostwald ripening process is commonly observed in varied synthesis methods, but it is particularly prominent in the synthesis of nanoparticles through solution‐phase methods such as chemical precipitation, [ \n \n 89 \n \n ]  solvothermal, [ \n \n 90 \n \n ]  and hydrothermal methods. [ \n \n 91 \n \n ]  In these methods, nanoparticles initially form as small primary particles, which then undergo Ostwald ripening where smaller particles dissolve and their material is redeposited onto larger particles, causing them to grow over time as shown in Graphical Fig. This process occurs due to differences in surface energy, where smaller particles have higher surface energy than larger ones. This phenomenon leads to a gradual increase in the average size of nanoparticles and a more uniform size distribution. This occurs due to differences in solubility or chemical potential between smaller and larger particles. Therefore, Ostwald ripening is frequently utilized and observed in nanoparticle synthesis methods involving solution‐phase reactions. [ \n \n 92 \n \n ]  Since the initial development of hollow nanocrystals using the nanoscale Kirkendall effect, significant progress has been made in utilizing this approach to create hollow nanostructures in recent years. The nanoscale Kirkendall effect, which relies on mass transport across the interface between different solid phases, has been effectively employed to synthesize hollow nanocrystals spanning several materials categories such as metal oxides, [ \n \n 93 \n \n ]  chalcogenides, [ \n \n 94 \n \n ]  phosphides, [ \n \n 95 \n \n ]  sulfides, [ \n \n 96 \n \n ]  as well as core/hollow shell structures. [ \n \n 97 \n ,  \n 98 \n \n ]  The Kirkendall effects are observed during the formation of hollow particles of NiCo 2 S 4  as shown in Graphical Fig. [ \n \n 99 \n \n ]  The experimental study suggests that metal cations diffuse more rapidly than sulfide anions, potentially due to the smaller size of outward‐diffusing metal cations compared to inward‐diffusing sulfide anions. This observation aligns with the mechanism of the Kirkendall effect. The Kirkendall effect, observed in diffusion between materials with differing atomic mobilities, results in uneven interface growth and the formation of voids or pores in the slower‐diffusing material. This phenomenon is widely utilized in materials science to engineer unique nanostructures, such as NiCo 2 S 4  nanotubes formed via sacrificial templating. The faster diffusion of the inner Ni–Co precursor compared to S 2−  ions during vulcanization leads to void generation, resulting in porous tube nanostructures. These nanotubes exhibit exceptional electrochemical performance, attributed to active sites facilitating redox transitions at the electrode surface. [ \n \n 100 \n ,  \n 101 \n \n ]  In the formation process of NiCo 2 S 4 , the Kirkendall effect induces the formation of a hollow and mesoporous structure, which offers multiple advantages for electrochemical performance. First, the hollow structure provides a larger surface area [ \n \n 102 \n \n ]  than a solid counterpart, facilitating increased contact between the electrode and electrolyte, thereby promoting more efficient electrochemical reactions. Second, the presence of mesopores enhances ion transport within the electrode material, mitigating diffusion limitations and enabling rapid charge and discharge rates. Lastly, the hollow architecture aids in alleviating volume changes during cycling, reducing mechanical stress, and improving the electrode's long‐term structural stability. [ \n \n 103 \n ,  \n 104 \n \n ]  Zhu et al. [ \n \n 105 \n \n ]  formulated Ni–Co carbonate and then transformed it into NiCo 2 S 4 . The structure of nickel cobalt (carbonate) hydroxide can be effectively managed via solvothermal reactions, and NiCo 2 S 4  can be transformed from nickel cobalt (carbonate) hydroxide (for example, NiCo 2 ((CO 3 ) 1.5 (OH) 3 ) through anion exchange reactions induced by Kirkendall effects. [ \n \n 62 \n \n ] \n 2.1 Hydrothermal Method Researchers have recognized the utilization of hydrothermal conditions for processing fine particles. [ \n \n 106 \n \n ]  Hydrothermal is a widely used method for the synthesis of nanostructure via bottom‐up approach because of its significance such as single step, low energy consumption, eco‐friendly, low cost, highly pure product, and different morphologies. Studies showed that the hydrothermal method is widely used for the synthesis of sulfide because of its significant benefits. [ \n \n 107 \n ,  \n 108 \n ,  \n 109 \n ,  \n 110 \n \n ]  This method excels in refining ultrafine powders, exact stoichiometry, uniformity, dense particle structure, heightened crystallinity, increased reactivity, and enhanced sinterability, among numerous other advantages. [ \n \n 111 \n ,  \n 112 \n \n ]  Yang et al. [ \n \n 113 \n \n ]  prepared NiCo 2 S 4  via a hydrothermal method that includes three steps. Which involved the synthesis of NiCo 2 O 4 , and it was converted into NiCo 2 S 4  via sulfurization. The precursors of cobalt and nickel form Co 2+  and Ni 2+  ions in an aqueous medium, these cations reacted with urea (Co 3 \n 2−  and OH − ) hydrolyzing agent to form a pink colored bimetallic hydroxide carbonate, which grew on nickel foam (NF). After that, the previous nickel–cobalt hydroxide carbonate was converted into NiCo 2 O 4  through the annealing process (300 °C). In the third step, obtained NiCo 2 O 4  was converted into NiCo 2 S 4  via an anion exchange process. 2.2 Microwave‐Assisted Method Microwave heating typically induces internal heat within molecules through dielectric polarization. This heating method offers multiple advantages, such as being noncontact, selective, and rapid. [ \n \n 114 \n \n ]  The microwave technique proves to be a valuable strategy for mitigating certain limitations, such as swift heating, rapid reaction rates, elevated product yields, exceptional reproducibility, extended reaction conditions, and efficient energy transformation. [ \n \n 115 \n ,  \n 116 \n \n ]  Recently, NiCo 2 S 4  was prepared through the microwave‐assisted method by Rafai et al. [ \n \n 117 \n \n ]  and it is a short‐time method as compared to another method. Likewise, Wang et al. [ \n \n 118 \n \n ]  fabricated NiCo 2 S 4  nanosheet arrays grown on NF via microwave‐assisted method. Microwave‐assisted heating was acknowledged as a method for crafting or thermally treating conventional functional materials. The dipolar polarization and ionic conduction heating mechanisms allowed for a significant reduction in the reaction time of microwave‐assisted processes to a matter of within a short time. Zhao et al. [ \n \n 119 \n \n ]  produced NiCo 2 S 4  via the microwave‐assisted method and controlled the growth of the structure by varying in time. They developed nanoparticles to hydrangea‐like NCs through the time‐controlled microwave‐assisted method. Due to the swift internal heating mechanism, a substantial quantity of monomer nuclei and crystals can be rapidly generated. These entities then promptly mature into nanosheets through the crystallization process. Over time, as the growth‐controlled process shifts toward thermodynamic dominance, the nanosheets progressively undergo self‐assembly, forming a 3D hydrangea‐like structure. This structural arrangement aims to minimize the surface energy of the nanosheets. 2.3 Electrodeposition Method Electrochemical deposition is commonly employed for the direct growth of metals and conducting metal oxides due to its versatility in manipulation and its lack of need for high vacuum or high reaction temperatures. [ \n \n 120 \n ,  \n 121 \n ,  \n 122 \n \n ]  A simple and cost‐effective single‐step electrodeposition technique was employed to produce NiCo 2 S 4  nanosheets with varying compositions. [ \n \n 123 \n \n ]  Tauquir and co‐workers [ \n \n 124 \n \n ]  prepared a NiCo 2 S 4  nanosheet by facile in situ growth via the electrodeposition method. The experiment involved different concentrations of nickel and cobalt nitrate hexahydrate with 0.75  m  of thiourea and 50 m m  ascorbic acid. The electrodeposition took place using chronoamperometry techniques for 10 min at −1.2 V. While for cyclic voltammetry (CV) deposition the potential was kept between −1.2 and 0.2 V at a scan rate of 10 mV s −1  for 10 cycles. 2.4 Successive Ionic Layer Adsorption and Reaction Method The successive ionic layer adsorption and reaction (SILAR) method was employed to synthesize nanomaterials for SC applications. In addition to being low‐cost, simple, and eco‐friendly, the SILAR technique was more economically stable and allowed for more applications compared to other physical and chemical methods. SILAR offers a unique approach to producing nanocrystalline films. [ \n \n 125 \n \n ]  Shinde and coworkers [ \n \n 126 \n \n ]  studied the influence of the SILAR cycle on the SC performance of nanoflakes, nanosheets, and nanoplates like NiCo 2 S 4  electrodes. The synthesis process involved three steps using the SILAR method. In the initial step, a flexible stainless‐steel substrate was immersed in NiSO 4  solution for 20 s, facilitating the adsorption of Ni 2+  ions on the substrate's surface. Subsequently, the Ni 2+ ‐coated substrate was rinsed with double distilled water (DDW) for 10 s to eliminate loosely bound Ni 2+  species. In the second step, the Ni 2+ ‐coated substrate underwent a 20‐second immersion in CoSO 4  solution, allowing the adsorption of Co 2+  ions. A similar process was employed to remove loosely bound Co 2+  ions. Finally, in the third step, the Ni 2+ /Co 2+ ‐coated substrate was immersed in Na 2 S precursor solution, forming a Ni 2+ ‐, Co 2+ ‐, and S 2− ‐coated substrate. A 10 s rinse with DDW removed roughly bound S 2−  ion species, completing one SILAR cycle of NiCo 2 S 4  deposition. 2.5 Simple Chemical Method The one‐step simple chemical method is simple and facilitated by rational construction. This results in the creation of distinctive hierarchical nanostructures that offer reduced transferring resistance, a larger surface area, and improved structural stability. These attributes are advantageous for facilitating electrolyte ion diffusion and establishing more efficient pathways for electron transport. A one‐step synthesis method combines multiple processes into a single step, enhancing interactions between components and leading to a synergistic effect. This contrasts with simple physical mixing, which may not promote the same level of interaction and synergy. [ \n \n 56 \n ,  \n 127 \n \n ]  Wang et al. [ \n \n 128 \n \n ]  developed a simple one‐step temperature solution‐based synthesis approach for the fabrication of hierarchical NiCo 2 S 4  ultrathin nanosheets on NF. The hydrolyzation process of thiourea tends to be a solution to alkaline resulting in the generation of alkaline medium (ammonia) and sulfur source (S 2− ). A low reaction temperature (90 °C) leads to a slow hydrolyzation rate, which is helpful in the formation of ultrafine nanostructures. Also, chemical coprecipitation and sulfidation are two strategies combined into a single step, which favors time‐saving and low‐cost methods. Also, the mass loading of NiCo 2 S 4  was controlled by tuning a reaction time. [ \n \n 129 \n \n ]  At a time, soluble ions of Ni 2+  and Co 2+  were coordinated and form a Ni–Co hydroxide on NF in alkaline conditions, thoroughly the prepared hydroxide was converted into a NiCo 2 S 4  by reacting with S 2−  via an ion exchange process through a one‐step method. [ \n \n 130 \n \n ] \n Figure   \n 1 A  illustrates the commonly used synthesis method for NiCo 2 S 4 /graphene composite, highlighting the correlation between the synthesis method and the observed morphology. Figure  1B  presents the key parameters influencing specific capacitance. The morphology of the NiCo 2 S 4 /graphene composite is primarily determined by the synthesis method and reaction conditions. By modifying these factors, a desirable morphology can be achieved. To evaluate the electrochemical performance of NiCo 2 S 4 /graphene composite, specific capacitance parameters are analyzed, as they are influenced by morphology, surface area, pore structure, and electrolyte composition. Figure 1 A) Correlation between synthesis method and observed morphology. B) Parameters influencing specific capacitance. © 2025 WILEY‐VCH GmbH",
+        "operations": [
+          {
+            "op_type": "add",
+            "sentence": "Second, the presence of mesopores enhances ion transport within the electrode material, mitigating diffusion limitations and enabling rapid charge and discharge rates.",
+            "start_char": 4998,
+            "end_char": 5165,
+            "materials": [],
+            "params": {}
+          },
+          {
+            "op_type": "heat",
+            "sentence": "2.2 Microwave‐Assisted Method Microwave heating typically induces internal heat within molecules through dielectric polarization.",
+            "start_char": 7260,
+            "end_char": 7389,
+            "materials": [
+              "2.2 Microwave‐Assisted Method Microwave heating"
+            ],
+            "params": {}
+          },
+          {
+            "op_type": "heat",
+            "sentence": "This heating method offers multiple advantages, such as being noncontact, selective, and rapid.",
+            "start_char": 7390,
+            "end_char": 7485,
+            "materials": [],
+            "params": {}
+          },
+          {
+            "op_type": "heat",
+            "sentence": "The microwave technique proves to be a valuable strategy for mitigating certain limitations, such as swift heating, rapid reaction rates, elevated product yields, exceptional reproducibility, extended reaction conditions, and efficient energy transformation.",
+            "start_char": 7503,
+            "end_char": 7761,
+            "materials": [],
+            "params": {}
+          },
+          {
+            "op_type": "heat",
+            "sentence": "Microwave‐assisted heating was acknowledged as a method for crafting or thermally treating conventional functional materials.",
+            "start_char": 8079,
+            "end_char": 8204,
+            "materials": [],
+            "params": {}
+          },
+          {
+            "op_type": "heat",
+            "sentence": "The dipolar polarization and ionic conduction heating mechanisms allowed for a significant reduction in the reaction time of microwave‐assisted processes to a matter of within a short time.",
+            "start_char": 8205,
+            "end_char": 8394,
+            "materials": [],
+            "params": {}
+          },
+          {
+            "op_type": "heat",
+            "sentence": "Due to the swift internal heating mechanism, a substantial quantity of monomer nuclei and crystals can be rapidly generated.",
+            "start_char": 8648,
+            "end_char": 8772,
+            "materials": [],
+            "params": {}
+          },
+          {
+            "op_type": "wash",
+            "sentence": "Subsequently, the Ni 2+ ‐coated substrate was rinsed with double distilled water (DDW) for 10 s to eliminate loosely bound Ni 2+  species.",
+            "start_char": 10932,
+            "end_char": 11070,
+            "materials": [
+              "the Ni 2+ ‐coated substrate",
+              "loosely bound Ni 2+  species"
+            ],
+            "params": {
+              "time": "10 s"
+            }
+          },
+          {
+            "op_type": "wash",
+            "sentence": "A 10 s rinse with DDW removed roughly bound S 2−  ion species, completing one SILAR cycle of NiCo 2 S 4  deposition.",
+            "start_char": 11442,
+            "end_char": 11558,
+            "materials": [
+              "A 10 s rinse",
+              "one SILAR cycle",
+              "NiCo 2 S 4  deposition"
+            ],
+            "params": {
+              "time": "10 s"
+            }
+          }
+        ],
+        "expanded": [
+          {
+            "op_type": "add",
+            "steps": [
+              "Ensure reaction vessel is present and empty.",
+              "Place a clean stir bar in the vessel.",
+              "Measure the specified amount of reagent.",
+              "Transfer reagent into the vessel."
+            ]
+          },
+          {
+            "op_type": "heat",
+            "steps": [
+              "Place the reaction vessel on a hotplate.",
+              "Ramp to the target temperature.",
+              "Maintain the target temperature for the specified time."
+            ]
+          },
+          {
+            "op_type": "heat",
+            "steps": [
+              "Place the reaction vessel on a hotplate.",
+              "Ramp to the target temperature.",
+              "Maintain the target temperature for the specified time."
+            ]
+          },
+          {
+            "op_type": "heat",
+            "steps": [
+              "Place the reaction vessel on a hotplate.",
+              "Ramp to the target temperature.",
+              "Maintain the target temperature for the specified time."
+            ]
+          },
+          {
+            "op_type": "heat",
+            "steps": [
+              "Place the reaction vessel on a hotplate.",
+              "Ramp to the target temperature.",
+              "Maintain the target temperature for the specified time."
+            ]
+          },
+          {
+            "op_type": "heat",
+            "steps": [
+              "Place the reaction vessel on a hotplate.",
+              "Ramp to the target temperature.",
+              "Maintain the target temperature for the specified time."
+            ]
+          },
+          {
+            "op_type": "heat",
+            "steps": [
+              "Place the reaction vessel on a hotplate.",
+              "Ramp to the target temperature.",
+              "Maintain the target temperature for the specified time."
+            ]
+          },
+          {
+            "op_type": "wash",
+            "steps": [
+              "Perform operation 'wash' as described: Subsequently, the Ni 2+ ‐coated substrate was rinsed with double distilled water (DDW) for 10 s to eliminate loosely bound Ni 2+  species."
+            ]
+          },
+          {
+            "op_type": "wash",
+            "steps": [
+              "Perform operation 'wash' as described: A 10 s rinse with DDW removed roughly bound S 2−  ion species, completing one SILAR cycle of NiCo 2 S 4  deposition."
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

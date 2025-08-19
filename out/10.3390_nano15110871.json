@@ -1,0 +1,68 @@
+{
+  "paper_id": "10.3390/nano15110871",
+  "title": "Excellent Room-Temperature NO&lt;sub&gt;2&lt;/sub&gt; Gas-Sensing Properties of TiO&lt;sub&gt;2&lt;/sub&gt;-SnO&lt;sub&gt;2&lt;/sub&gt; Composite Thin Films Under Light Activation.",
+  "authors": [],
+  "doi": "10.3390/nano15110871",
+  "source": "eupmc",
+  "urls": {
+    "pdf": null
+  },
+  "license": {
+    "type": "unknown"
+  },
+  "access_route": "oa",
+  "sections": [
+    {
+      "heading": "2. Materials and Methods",
+      "text": "2. Materials and Methods 2.1. Chemicals and Substrates The chemicals used in this study, such as tin (IV) chloride pentahydrate (SnCl 4 ·5H 2 O), titanium butoxide ((C 4 H 9 O) 4 Ti), and the organic acid and 1,4-dioxane, were purchased from ECROS, Russia. The synthesis of the intermediate product used to obtain TiO 2 –SnO 2  films was carried out by the oxidative pyrolysis of salts. The amounts of (SnCl 4 ·5H 2 O) and ((C 4 H 9 O) 4 Ti) were calculated based on the ratios of Ti/Sn = 1:99, 3:97, and 5:95 mol. %. The synthesis procedure is described in more detail in the paper [ 44 ]. In this way, precursors were obtained for the further formation of films with the compositions 1TiO 2 –99SnO 2 , 3TiO 2 –97SnO 2 , and 5TiO 2 –95SnO 2 . 2.2. Gas Sensor Design A 0.1 mm thick aluminum oxide sensor platform (1.6 × 1.6 mm 2 ) was selected to form the gas sensor. A platinum thin-film heater with an electrical resistance of 15–20 Ω is formed on the non-working side of the sensor platform. On the working side of the substrate, a contact metallization is formed in the form of two counter-pin contacts with a distance of 100 μm between them. A precursor of the appropriate concentration was applied to a substrate and annealed at a temperature of 600 °C for two hours using a heater. Thus, the films 1TiO 2 –99SnO 2 , 3TiO 2 –97SnO 2 , and 5TiO 2 –95SnO 2  were formed on the sensor platform.  Figure 1  shows a profilogram (Alfa–Step D–100 contact stylus profiler (KLA–Tencor, Milpitas, CA, USA)) of 3TiO 2 –97SnO 2 ; the film thickness is approximately 120 ± 20 nm. 2.3. Characterization of Thin Films The surface composition of TiO 2 –SnO 2  films obtained with different Ti/Sn ratios was studied by X-ray photoelectron spectroscopy. The research was carried out in an ultra-high vacuum installation K-Alpha ThermoScientific (Waltham, MA, USA) (2.4 × 10 −9  mBar) with a source of monochromatic X-rays Al—Kα with quantum energy  hν  = 1486.6 eV. The positions of the core photoelectronic lines of the reference samples took the values of Au 4f = 84 eV, Ag 3d = 368.2 eV, and Cu 2p = 932.6 eV, in this case, the position of the photoelectronic line for atmospheric carbon C 1s corresponded to the binding energy BE = 284.8 eV. The surface composition of the samples was determined from high-resolution spectra obtained in constant transmission energy mode (pass energy = 20 eV) with a spectral resolution of 0.1 eV, and the value of the statistical accumulation was (number of scans) N = 10. Transmission electron microscopy (TEM), scanning transmission electron microscopy (STEM), and energy dispersive X-ray spectroscopy (EDX) using a Multi-purpose Electron Microscope JEM-F200 (JEOL, Akishima, Tokyo, Japan) operating at an accelerating voltage of 200 kV, equipped with a cold field emission electron gun and supported with a Bruker Xflash 6T/60 Quantax 400-STEM (JEOL, Akishima, Tokyo, Japan) were used to study the shape and size of crystallites and the elemental composition of the thin films. For both TEM and EDX measurements, a JEOL EM-01361RSTHB (Akishima, Tokyo, Japan) double-tilt beryllium specimen holder was used. Optical transmission spectra were obtained using a Varian Cary-100 spectrophotometer (Beijing, China) in the range of 300–1000 nm. The band gap was determined using the Tauc plot by Equation (3): (3) α h ν 2 = A ( h ν − E g )  where  h  is Planck’s constant,  A  is a constant, and  E g  is the optical band gap [ 45 ]. Assessment of the electrophysical properties of the obtained film samples was carried out on a software and hardware measuring complex that allows one to measure the effect of resistance on temperature dependence [ 13 ]. Gas-sensitive measurements were carried out on a stand with the possibility of activating gas-sensor interactions by UV–visible radiation with a wavelength of 400 nm (LED, GNL-3014VC, G-nor Electronics, Zhuangshi, China). The intensity of UV radiation did not exceed 0.2 mW/cm 2 . The gas sensor’s response to the concentrations of 0.08–7.7 ppm NO 2  balanced with synthetic air was measured at operating temperatures in the range of RT—200 °C. High-pressure balloons containing synthetic air and a mixture of synthetic air with test gas (LLC Hogas, Moscow, Russia) were employed as the primary sources. The gases were injected at a flow rate of 0.1–0.2 dm 3 /min using a gas-mixing generator (Microgaz F, Moscow, Russia) [ 13 ]. When measuring in humidity conditions of 60 ± 3%, a specially created stand was used, in which synthetic air was bubbled through deionized water. Humidity control was carried out using an HTTP.PF-U10 humidity sensor (KIP-Service LLC, Krasnodar, Russia). Thus, gas sensitivity was measured under conditions of synthetic or humid air, or air and light activation, or humid air and radiation exposure. The sensors were initially exposed to the air or humid air, or air and light activation, or humid air and light activation for 60 min to stabilize the baseline resistance. The response of the sensor elements was calculated using Equation (4): (4) S = R g (NO 2 )/R 0 ,  where  R 0  is the sensor resistance in synthetic air (or humid synthetic air);  R g (NO 2 ) is the sensor resistance in the mixture of synthetic air (or humid synthetic air) and NO 2 . Subsequently, the gas sensor which exhibited the best gas-sensing performance was tested upon exposure to NO 2 ."
+    }
+  ],
+  "extractions": {
+    "methods_paragraphs": [
+      {
+        "text": "2. Materials and Methods 2.1. Chemicals and Substrates The chemicals used in this study, such as tin (IV) chloride pentahydrate (SnCl 4 ·5H 2 O), titanium butoxide ((C 4 H 9 O) 4 Ti), and the organic acid and 1,4-dioxane, were purchased from ECROS, Russia. The synthesis of the intermediate product used to obtain TiO 2 –SnO 2  films was carried out by the oxidative pyrolysis of salts. The amounts of (SnCl 4 ·5H 2 O) and ((C 4 H 9 O) 4 Ti) were calculated based on the ratios of Ti/Sn = 1:99, 3:97, and 5:95 mol. %. The synthesis procedure is described in more detail in the paper [ 44 ]. In this way, precursors were obtained for the further formation of films with the compositions 1TiO 2 –99SnO 2 , 3TiO 2 –97SnO 2 , and 5TiO 2 –95SnO 2 . 2.2. Gas Sensor Design A 0.1 mm thick aluminum oxide sensor platform (1.6 × 1.6 mm 2 ) was selected to form the gas sensor. A platinum thin-film heater with an electrical resistance of 15–20 Ω is formed on the non-working side of the sensor platform. On the working side of the substrate, a contact metallization is formed in the form of two counter-pin contacts with a distance of 100 μm between them. A precursor of the appropriate concentration was applied to a substrate and annealed at a temperature of 600 °C for two hours using a heater. Thus, the films 1TiO 2 –99SnO 2 , 3TiO 2 –97SnO 2 , and 5TiO 2 –95SnO 2  were formed on the sensor platform.  Figure 1  shows a profilogram (Alfa–Step D–100 contact stylus profiler (KLA–Tencor, Milpitas, CA, USA)) of 3TiO 2 –97SnO 2 ; the film thickness is approximately 120 ± 20 nm. 2.3. Characterization of Thin Films The surface composition of TiO 2 –SnO 2  films obtained with different Ti/Sn ratios was studied by X-ray photoelectron spectroscopy. The research was carried out in an ultra-high vacuum installation K-Alpha ThermoScientific (Waltham, MA, USA) (2.4 × 10 −9  mBar) with a source of monochromatic X-rays Al—Kα with quantum energy  hν  = 1486.6 eV. The positions of the core photoelectronic lines of the reference samples took the values of Au 4f = 84 eV, Ag 3d = 368.2 eV, and Cu 2p = 932.6 eV, in this case, the position of the photoelectronic line for atmospheric carbon C 1s corresponded to the binding energy BE = 284.8 eV. The surface composition of the samples was determined from high-resolution spectra obtained in constant transmission energy mode (pass energy = 20 eV) with a spectral resolution of 0.1 eV, and the value of the statistical accumulation was (number of scans) N = 10. Transmission electron microscopy (TEM), scanning transmission electron microscopy (STEM), and energy dispersive X-ray spectroscopy (EDX) using a Multi-purpose Electron Microscope JEM-F200 (JEOL, Akishima, Tokyo, Japan) operating at an accelerating voltage of 200 kV, equipped with a cold field emission electron gun and supported with a Bruker Xflash 6T/60 Quantax 400-STEM (JEOL, Akishima, Tokyo, Japan) were used to study the shape and size of crystallites and the elemental composition of the thin films. For both TEM and EDX measurements, a JEOL EM-01361RSTHB (Akishima, Tokyo, Japan) double-tilt beryllium specimen holder was used. Optical transmission spectra were obtained using a Varian Cary-100 spectrophotometer (Beijing, China) in the range of 300–1000 nm. The band gap was determined using the Tauc plot by Equation (3): (3) α h ν 2 = A ( h ν − E g )  where  h  is Planck’s constant,  A  is a constant, and  E g  is the optical band gap [ 45 ]. Assessment of the electrophysical properties of the obtained film samples was carried out on a software and hardware measuring complex that allows one to measure the effect of resistance on temperature dependence [ 13 ]. Gas-sensitive measurements were carried out on a stand with the possibility of activating gas-sensor interactions by UV–visible radiation with a wavelength of 400 nm (LED, GNL-3014VC, G-nor Electronics, Zhuangshi, China). The intensity of UV radiation did not exceed 0.2 mW/cm 2 . The gas sensor’s response to the concentrations of 0.08–7.7 ppm NO 2  balanced with synthetic air was measured at operating temperatures in the range of RT—200 °C. High-pressure balloons containing synthetic air and a mixture of synthetic air with test gas (LLC Hogas, Moscow, Russia) were employed as the primary sources. The gases were injected at a flow rate of 0.1–0.2 dm 3 /min using a gas-mixing generator (Microgaz F, Moscow, Russia) [ 13 ]. When measuring in humidity conditions of 60 ± 3%, a specially created stand was used, in which synthetic air was bubbled through deionized water. Humidity control was carried out using an HTTP.PF-U10 humidity sensor (KIP-Service LLC, Krasnodar, Russia). Thus, gas sensitivity was measured under conditions of synthetic or humid air, or air and light activation, or humid air and radiation exposure. The sensors were initially exposed to the air or humid air, or air and light activation, or humid air and light activation for 60 min to stabilize the baseline resistance. The response of the sensor elements was calculated using Equation (4): (4) S = R g (NO 2 )/R 0 ,  where  R 0  is the sensor resistance in synthetic air (or humid synthetic air);  R g (NO 2 ) is the sensor resistance in the mixture of synthetic air (or humid synthetic air) and NO 2 . Subsequently, the gas sensor which exhibited the best gas-sensing performance was tested upon exposure to NO 2 .",
+        "operations": [
+          {
+            "op_type": "heat",
+            "sentence": "A precursor of the appropriate concentration was applied to a substrate and annealed at a temperature of 600 °C for two hours using a heater.",
+            "start_char": 1147,
+            "end_char": 1288,
+            "materials": [
+              "600 °C",
+              "two hours"
+            ],
+            "params": {
+              "temp": "600°C"
+            }
+          },
+          {
+            "op_type": "inject",
+            "sentence": "The gases were injected at a flow rate of 0.1–0.2 dm 3 /min using a gas-mixing generator (Microgaz F, Moscow, Russia)",
+            "start_char": 4281,
+            "end_char": 4398,
+            "materials": [
+              "0.1–0.2 dm 3 /min"
+            ],
+            "params": {}
+          }
+        ],
+        "expanded": [
+          {
+            "op_type": "heat",
+            "steps": [
+              "Place the reaction vessel on a hotplate.",
+              "Ramp to 600°C.",
+              "Maintain 600°C for the specified time."
+            ]
+          },
+          {
+            "op_type": "inject",
+            "steps": [
+              "Perform operation 'inject' as described: The gases were injected at a flow rate of 0.1–0.2 dm 3 /min using a gas-mixing generator (Microgaz F, Moscow, Russia)"
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,504 @@
+{
+  "paper_id": "PMC12158349",
+  "title": "Lignin-Based Nanostructured Sensor for Selective Detection of Volatile Amines at Trace Levels",
+  "authors": [],
+  "doi": null,
+  "source": "eupmc",
+  "urls": {
+    "pdf": null
+  },
+  "license": {
+    "type": "unknown"
+  },
+  "access_route": "oa",
+  "sections": [
+    {
+      "heading": "2. Materials and Methods",
+      "text": "2. Materials and Methods 2.1. Materials The utilised solvents and polymers for the material preparations and vapour tests were as follows: Polylactic acid (PLA, Mw 230k) was purchased from GoodFellow (Cambridge, UK). Alkali lignin (Kraft Lignin), Acetone (99.8%), 2,2,2-Trifluoroethanol (TFE) ≥99%(GC), Isopropyl alcohol (99.5%), Methylamine solution 40 wt. % in H 2 O (Mw 31.06), Isobutylamine 99% (Mw 73.14), Ethylamine 70% aqueous solution, Propylamine 98% (Mw 59.11), Acetic Acid ≥ 99.7%, Ammonium hydroxide solution 28.0–30.0%, Hydrogen peroxide solution 30 wt.% in H 2 O, and tetrachloroauric acid trihydrate (HauCl 4 ∙3H 2 O) (Mw 339.79) were purchased from MercK KGaA (Damstadt, Germany). All solvents were of analytical grade and used as received, without further purification. These compounds were handled under controlled conditions in accordance with safety protocols. Interdigitated electrodes (IDEs) supplied by Micrux Technologies (Gijón, Spain) were fabricated on borosilicate glass substrates (10 mm × 6 mm × 0.75 mm). The Pt/Ti electrodes consisted of 120 pairs, each 10 μm wide, 3500 μm long, and 150 nm thick, with a 10 μm inter-electrode gap. Prior to use, the IDE surfaces were cleaned by rinsing with soap and water, followed by immersion in a “base piranha” solution (a 3:1  v / v  mixture of ammonia and hydrogen peroxide) at 60 °C for approximately 60 min under a well-ventilated fume hood. The electrodes were then thoroughly rinsed with Milli-Q water (~18 MΩ·cm), washed with isopropyl alcohol and dried under a nitrogen stream. Lignin nanoparticles were prepared using a bottom-up approach previously reported by the authors [ 22 ] and finally incorporated into PLA nanofibres by electrospinning technology following Au 0  decoration treatment. Indeed, an aliquot of HAuCl 4  was added to the aqueous suspension of lignin nanoparticles (7.1 mg/mL) to achieve a mass ratio of 0.0012:1 ( w : w ), and the mixture was stirred for 4 h (T: 40 °C). Taking advantage of the intrinsic reducing properties of lignin, the gold salt was reduced to metallic gold, as indicated by the reaction solution turning pink. The resulting aqueous suspension was then centrifuged three times at 9000 rpm for 20 min at 8 °C in water (NEYA 16R, REMI Elektrotechnik LTD, Vasai-401208, Palghar, Maharashtra, India) to remove any unreacted gold salt or Au 0  in solution that were not adsorbed onto the LNPs. 2.2. Sensing Materials Preparations The nanofibrous mat was fabricated using the electrospinning technology, a versatile and efficient technique capable of producing fibres with nanometric diameters [ 29 , 30 , 31 ]. This method relies on the application of a high-voltage electric field to a polymer solution, which induces the formation of continuous fibres through the controlled extrusion of a charged jet from a syringe needle. In this study, nanofibres were produced using a Fluidnatek ®  LE-50 electrospinning platform (Bioinicia, Paterna, Valencia, Spain). Electrospinning was performed directly onto IDEs. PLA was chosen as the polymeric matrix to incorporate the LNPs. PLA is particularly attractive for developing nanofibrous sensors due to a combination of material properties, processability, and environmental advantages [ 32 , 33 ]. It readily dissolves in common solvents and forms stable jets under electrospinning conditions, enabling the fabrication of uniform nanofibres with tunable diameters and porosities (key features for sensors with high surface-to-volume ratios). Furthermore, PLA exhibits good mechanical integrity, which helps maintain the structural stability of sensor platforms during handling and deployment while also withstanding moderate thermal fluctuations. As a biodegradable polyester derived from renewable resources (e.g., corn starch, sugarcane), PLA is ideal for environmentally friendly or disposable sensors. A polymeric solution was prepared by dissolving 170 mg/mL of PLA in TFE under continuous stirring at 40 °C for a minimum of 6 h to ensure complete homogenization. Electrospinning deposition was performed with a voltage of +7 kV applied to the needle, while the collector was maintained at −2 kV. The polymer solution was dispensed at a flow rate of 350 µL/h, with a tip-to-collector distance of 15 cm. Electrospinning was conducted under controlled environmental conditions (20 °C, 40% relative humidity), using a rotating drum collector set at 510 rpm, onto which the IDEs were fixed. Under these conditions, a uniform and reproducible deposition of nanofibres was achieved. A deposition time of 5 min was sufficient to form a homogeneous fibrous layer across the surface of the IDEs. After fibre deposition, a dip-coating treatment with the AuLNPs solution (described in the  Section 2 ) was applied. This step enriched the fibre surface with additional lignin nanoparticles, enhancing analyte interaction and overall sensitivity. Furthermore, the gold nanoparticles decoration was expected to improve the electrical conductivity of the sensing layer and contribute catalytic activity during the sensing process. 2.3. Sensing Material Characterization The morphological and compositional features of LNPs were assessed by transmission electron microscopy (TEM) ( Figure 1 A). Images were acquired using a CRYO-TEM TOMO TECNAI G2-20 microscope (FEI Company, Hillsboro, OR 97124-5793 USA), equipped with a LaB 6  thermionic emission gun and a 2HS Eagle CCD camera, operating at 200 kV. Samples were prepared by depositing 3 μL of the nanoparticle suspension onto a carbon-coated copper grid, followed by air drying prior to analysis. The morphology of AuLNPs was investigated by scanning electron microscopy (SEM, JEOL JSM-6010LA; JEOL Ltd., Tokyo, Japan), as shown in  Figure 1 , using both secondary electron (SE, 5 kV,  Figure 1 B) and backscattered electron (BSE, 20 kV,  Figure 1 C) imaging modes. Samples were mounted on aluminium stubs using conductive carbon tape and sputter-coated with a 2 nm gold layer (Quorum Q150R ES, Quorum Technologies, East Sussex, UK) to enhance surface conductivity. Elemental analysis was performed by energy-dispersive X-ray spectroscopy (EDS) using the integrated detector, operated at 20 kV with a 60 s acquisition time (inset  Figure 1 D). The TEM image in  Figure 1 A revealed that the LNPs possessed a predominantly spherical morphology with a relatively narrow size distribution. The LNPs appeared well dispersed, although occasional agglomeration was evident, likely attributable to capillary forces during the drying stage of the sample preparation. The inset in the upper right corner displays the particle size distribution histogram, obtained from statistical analysis of over 50 individual nanoparticles. The data fit a near-Gaussian profile, yielding an average diameter of 33 ± 8 nm. The observed size uniformity indicates a high degree of reproducibility and synthetic control in the nanoprecipitation protocol employed for LNP fabrication. To investigate the elemental composition and spatial distribution of AuLNPs both prior to and following their integration into polymeric substrates, SEM was performed in SE and BSE modes, combined with EDS. While the resolution of SEM was insufficient to resolve individual gold nanostructures ( Figure 1 B), SE images revealed persistent, rounded, particle-like features, suggesting that the native morphology of the lignin nanoparticles was largely retained after metallization. BSE imaging ( Figure 1 C) showed discrete regions of enhanced contrast, typical of elements with high atomic numbers, such as gold, indicating the successful formation of metallic Au 0  domains within the hybrid nanostructures. This interpretation was supported by EDS spectra acquired from these bright regions ( Figure 1 D, inset), which confirmed the presence of gold, alongside carbon and oxygen signals associated with the organic PLA matrix. Upon deposition onto electrospun PLA fibres, as shown in  Figure 1 D and  Figure 2 B, the AuLNPs appeared as bright spots distributed along the fibre surfaces. EDS analysis of selected fibre regions further confirmed the presence of metallic gold through its characteristic peaks. Additional contributions from carbon and oxygen were attributed to both PLA and lignin, while silicon signals originated from the underlying borosilicate substrate used during sample preparation. To quantify the spatial distribution of AuLNPs on the PLA nanofibres, image analysis was carried out on representative BSE-SEM micrographs using the open-source software ImageJ (version 1.53t, National Institutes of Health, Bethesda, MD, USA) in combination with the Diameter J 1.0.18 plugin. Grayscale images were converted to an 8-bit format and subjected to a brightness thresholding procedure to isolate high-intensity regions corresponding to gold-enriched domains. The estimated coverage of bright Au-containing regions on the nanofibre surface was approximately 4%. The electrospun PLA mats ( Figure 2 A) exhibited a moderately porous architecture, with a mean pore area of 0.56 ± 0.66 µm 2 , indicative of a heterogeneous distribution of pore sizes. These findings are consistent with a partially and selectively decorated nanofibrous scaffold, supporting both the morphological evidence and the broad localized surface plasmon resonance (LSPR) features observed in subsequent UV–Vis spectroscopic analyses ( Figure 3 ). UV–Vis spectra of the AuLNP suspension ( Figure 3 , orange curve), compared with that of native LNPs (blue curve), revealed significant spectral changes. While the native LNPs showed intense absorption in the UV range (200–300 nm), characterized by a peak around 220–230 nm and a shoulder near 280 nm—attributed, respectively, to π→π* transitions of aromatic rings and n→π* transitions of carbonyl groups [ 34 , 35 ] —the AuLNPs exhibited a distinct reduction in UV absorbance intensity and the emergence of a broad absorption band extending into the visible range (500–600 nm). This feature, more evident in the magnified inset of  Figure 3 , is indicative of LSPR phenomena arising from metallic gold domains embedded within the hybrid particles. The absence of a sharp LSPR peak around 520 nm—commonly observed for well-dispersed, spherical AuNPs—suggests a heterogeneous size distribution and possibly non-spherical or partially aggregated gold domains, consistent with gold nucleation on biopolymer scaffolds [ 36 , 37 ]. The position and shape of the LSPR band imply the formation of gold nanostructures in the 20–50 nm range, in line with SEM-BSE and EDS results. Although direct visualization by TEM was not feasible for these samples, the combined evidence from SEM contrast, elemental mapping, and UV–Vis spectroscopy strongly supports a model in which gold nucleates and grows on the LNP surface during HauCl 4  reduction. This process is likely mediated by lignin’s phenolic and carboxylic groups, which act as both reducing and stabilizing agents. Overall, these results confirm the successful fabrication of Au-decorated lignin nanoparticles and their effective integration into PLA fibre substrates, with evidence of both surface-bound dispersion and localized aggregation, depending on deposition conditions. Although only ~4% of the nanofibre surface appears covered by bright features in BSE-SEM, the underlying LNPs coating is substantially more extensive ( Figure 2 A). This suggests that most fibres are decorated with AuLNPs, even though gold nucleation or reduction occurred only partially or heterogeneously across the LNPs. As a result, the fibres retain a high degree of morphological coverage by the hybrid nanostructures, while plasmonically active gold domains remain sparsely but selectively distributed. This is consistent with the UV–Vis spectroscopy of AuLNPs performed in solution, which revealed a broad absorption band in the visible region (500–600 nm). In order to estimate the surface area available for functional interactions, we complemented SEM morphological analysis with atomic force microscopy (AFM) topographic measurements on representative areas of electrospun PLA fibres functionalised with AuLNPs, ( Figure 4 ). AFM images compare the morphology of electrospun PLA nanofibres embedding LNPs ( Figure 4 A) and those subsequently decorated via dip coating with AuLNPs, ( Figure 4 B). In  Figure 4 A the PLA nanofibres exhibit a generally continuous structure, yet with surface irregularities along the fibre axis, such as alternating swellings and constrictions, with diameters ranging approximately from 250 to 700 nm. These morphological variations are likely due to the presence of LNPs embedded within the polymer matrix, which may interfere with uniform jet stretching during electrospinning. In  Figure 4 B, the dip-coating process with AuLNPs induces a noticeable reorganization of the fibre morphology. Following the dip-coating treatment with AuLNPs, the fibres appear more linear and aligned, with reduced surface irregularities and a more homogeneous morphology. The apparent fibre diameter is slightly narrower, ranging from about 250 to 500 nm. This effect is not necessarily due to a radial shrinkage but results from a mild axial relaxation of the fibre structure induced by solvent interaction during the dip-coating process. This relaxation may lead to a local redistribution of polymer chains and a reduction in internal stress, resulting in straighter fibres with fewer bulges. Additionally, the fibre surfaces look densely decorated with nanoparticles of variable size, consistent with the heterogeneous deposition of AuLNP aggregates, which increases the nanoscale roughness and enhances the fibre’s functional surface area for sensing applications [ 38 ]. The data were processed using Gwyddion software (version 2.65, 2024), an open-source platform for scanning probe microscopy (SPM) data analysis and visualization [ 39 ]. AFM measurements ( Figure 4 B) on a representative 100 µm 2  region yielded a real surface area of 124.6 µm 2 , corresponding to a surface increase of approximately 24.6% over the 2D projected area. This enhancement is consistent with the nanometric surface features induced by the presence of AuLNPs. The average roughness (Sa) and root-mean-square roughness (Sq) were 123.2 nm and 153.5 nm, respectively. The difference between these values reflects a surface morphology characterized by protrusions and depressions, which contribute to the increased topographical complexity. While the roughness is significant on the nanoscale, it remains compatible with the observed ~25% increase in actual surface area on the micrometric scale. The estimated fibre surface coverage of about 80%, calculated from AFM data, confirmed the formation of a moderately dense and interconnected nanofibre network across the substrate. Figure 4 C,D show 3D AFM reconstructions of the nanofibre mats before (C) and after (D) dip coating with AuLNPs. More specifically, in  Figure 4 C, the PLA fibres appear randomly oriented and significantly interwoven, with evident variations in height and some surface irregularities along the fibre axes. The topography reveals a complex, entangled structure, where fibre intersections create uneven elevation profiles. The surface roughness is moderate and primarily intrinsic to the polymer and embedded LNPs. In contrast,  Figure 4 D reveals a more organized and coherent fibre network following the dip-coating process. Although fibre overlap is still present, the overall topography appears smoother and more continuous, with reduced fluctuations in height across the mat. The fibre surfaces exhibit fine-scale roughness due to the presence of AuLNP clusters, but the general alignment and packing of fibres seem improved. 2.4. Measurement System Setup All measurements were carried out at room temperature (20 ± 2 °C) using a custom-designed gas exposure and measurement system ( Figure 5 ). The setup was specifically designed to ensure stable and reproducible exposure conditions while enabling the precise generation of low-ppm concentrations of the target vapour. A carrier flow of ambient air at 4000 sccms (standard cubic centimetres per minute), supplied by an air pump, was employed. Prior to entering the system, the air stream was filtered through a dust filter followed by an activated carbon filter to remove particulates, hydrocarbons, and residual VOCs. This high flow rate was essential to dilute a small volume (typically a few sccms) of concentrated amine vapour, allowing accurate control of the final vapour concentration. Humidity regulation was achieved using a mass flow controller (MFC), which enabled the precise mixing of dry and humidified air, thereby maintaining a constant and adjustable relative humidity (RH) level. In a parallel branch of the system, a dry carrier gas (air) from a pressurized cylinder was regulated by a separate mass flow controller (MFC) and directed toward a three-way solenoid valve. This configuration enabled either the exclusion of vapour or the metered introduction of concentrated amine vapour into the main airflow. By injecting only small fractions of vapour, the system produced reproducible and well-diluted mixtures at target concentrations. All flow streams were merged using Y-connectors and introduced into a mixing chamber (approximately 2 L in volume) to ensure homogeneous vapour distribution. A continuous sampling flow of 100 sccms was drawn from the mixing chamber by a secondary pump and directed into the sensing chamber for analysis. A key advantage of this system was the use of ambient air as the carrier gas, allowing sensor testing under conditions that more closely resemble real-world human exposure. Unlike conventional systems that often employ dry air to minimize humidity interference, this setup allowed controlled adjustment of relative humidity (RH), enabling the simulation of realistic environmental conditions. Electrical measurements of the IDE sensors in response to varying vapour concentrations were carried out using a Keithley 6517 electrometer (Solon, OH, USA). The output signals were recorded and processed using custom LabVIEW software (LabVIEW 2014, National Instruments, Austin, TX, USA), allowing real-time visualization and analysis of the sensor responses. 2.5. Electrical Parameters Characterization To assess the electrical properties of the developed fibrous materials, preliminary current–voltage (I–V) measurements were conducted to characterize their conductivity and establish a baseline for comparison. Two sets of samples were analysed. The first consisted of electrospun PLA nanofibres embedded with gold–lignin nanoparticles (PLA–AuLNPs), tested in their as-prepared state to evaluate intrinsic electrical properties. The second set comprised the same PLA–AuLNP mats after surface functionalization via dip coating in a solution containing AuLNPs, intended to enhance surface conductivity; these samples are referred to as (PLA–AuLNPs) DIP , ( Figure 6 A). As shown in  Figure 6 A, the I–V curves of the two sample types exhibit markedly different behaviours. The red curve, corresponding to the as-prepared PLA nanofibres containing embedded nanoparticles, shows a negligible current across the −2 V to +2 V range, confirming persistent insulating behaviour and the absence of significant intrinsic conductivity. In contrast, the black curve, representing the fibres after dip coating with AuLNPs, displays a symmetric yet nonlinear current response, suggestive of semiconducting or hybrid conductive behaviour. At an applied voltage of 2 V, the PLA-AuLNP fibres exhibit a current of approximately 0.1 nA, corresponding to a resistance of ~20 GΩ. After dip coating, the current increases to ~6.2 nA, yielding a significantly lower resistance of ~322 MΩ. According to Ohm’s law, Equation (1): (1) R = V I \nand the definition of conductance, Equation (2): (2) G = 1 R \nare used to calculate the conductance of the dipped fibres at 2 V as ~3.1 nS. This substantial increase in current flow should confirm the effective adhesion of conductive pathways, attributed to the presence of gold nanoparticles on the fibre surface and more contact with the microelectrodes. The nearly symmetric, nonlinear shape of the I–V curve for the dip-coated fibres suggests a non-ohmic conduction mechanism, likely governed by charge transport via hopping or tunnelling through localized states within the hybrid material. These findings indicate that the dip-coating process successfully imparts new electrical functionality to the PLA nanofibres, making the composite material a promising candidate for sensing or flexible electronic applications [ 40 , 41 ]. Instead, the symmetry of the IV curves around the origin indicates an absence of clear rectifying (diode-like) behaviour. This suggests that at this level of current, the contacts between fibres and fibre–metal electrodes do not form a Schottky barrier, leading to a symmetric response [ 42 , 43 ]. To investigate the sensor’s electrical response as a function of relative humidity (RH), the electrical current at a fixed voltage was recorded across different RH levels, ranging from 43.5% to 69% at 20 °C. The results are presented in  Figure 6 B. The current response increased steadily with RH, displaying an approximately linear trend up to ~60% RH. Beyond this threshold, the current exhibited a pronounced exponential increase. This two-regime behaviour can be interpreted by considering the distinct roles of the composite components: (i) PLA acts as the structural matrix of the nanofibres. As a hydrophobic and electrically insulating polymer [ 44 , 45 ], PLA provides mechanical support but does not directly participate in charge transport. Nevertheless, its fibrous morphology and porous structure facilitate the adsorption and diffusion of water vapour onto and within the fibre network, enabling interaction with the embedded nanostructures. (ii) LNPs exhibit intrinsic dielectric and semiconductive properties and are known to participate in charge trapping and polarization mechanisms upon exposure to moisture [ 46 ]. As RH increases, water molecules adsorb onto the lignin surface, altering its dielectric environment. This adsorption can enhance proton hopping (Grotthuss mechanism) and modulate the mobility of charge carriers, leading to increased current. Above ~60% RH, multilayer water adsorption likely occurs, creating quasi-continuous water films that enable a dramatic increase in ionic conductivity, explaining the exponential rise in current; (iii) Au 0  nanoclusters provide nanoscale conductive sites that lower the overall resistance of the composite. They likely form percolative conductive paths along or between fibres, enabling efficient electron transfer. Additionally, Au 0  nanoclusters can catalyse the dissociation or polarisation of water molecules adsorbed at the fibre surface, thereby enhancing sensitivity to humidity. Therefore, in combination, these effects lead to a humidity-dependent increase in conductivity, with the (PLA-AuLNPs) DIP  composite remaining relatively insensitive at lower humidity levels, but showing a pronounced and sensitive response above a critical RH threshold (~60%). These findings indicate that the electrical conductivity of the sensor is positively influenced by ambient humidity, enabling reliable sensor operation at room temperature also in moist environments. However, the nonlinear transition beyond this threshold likely corresponds to the onset of water condensation or capillary condensation within the nanofibre mat, facilitating enhanced ionic transport and signal transduction."
+    },
+    {
+      "heading": "2.2. Sensing Materials Preparations",
+      "text": "2.2. Sensing Materials Preparations The nanofibrous mat was fabricated using the electrospinning technology, a versatile and efficient technique capable of producing fibres with nanometric diameters [ 29 , 30 , 31 ]. This method relies on the application of a high-voltage electric field to a polymer solution, which induces the formation of continuous fibres through the controlled extrusion of a charged jet from a syringe needle. In this study, nanofibres were produced using a Fluidnatek ®  LE-50 electrospinning platform (Bioinicia, Paterna, Valencia, Spain). Electrospinning was performed directly onto IDEs. PLA was chosen as the polymeric matrix to incorporate the LNPs. PLA is particularly attractive for developing nanofibrous sensors due to a combination of material properties, processability, and environmental advantages [ 32 , 33 ]. It readily dissolves in common solvents and forms stable jets under electrospinning conditions, enabling the fabrication of uniform nanofibres with tunable diameters and porosities (key features for sensors with high surface-to-volume ratios). Furthermore, PLA exhibits good mechanical integrity, which helps maintain the structural stability of sensor platforms during handling and deployment while also withstanding moderate thermal fluctuations. As a biodegradable polyester derived from renewable resources (e.g., corn starch, sugarcane), PLA is ideal for environmentally friendly or disposable sensors. A polymeric solution was prepared by dissolving 170 mg/mL of PLA in TFE under continuous stirring at 40 °C for a minimum of 6 h to ensure complete homogenization. Electrospinning deposition was performed with a voltage of +7 kV applied to the needle, while the collector was maintained at −2 kV. The polymer solution was dispensed at a flow rate of 350 µL/h, with a tip-to-collector distance of 15 cm. Electrospinning was conducted under controlled environmental conditions (20 °C, 40% relative humidity), using a rotating drum collector set at 510 rpm, onto which the IDEs were fixed. Under these conditions, a uniform and reproducible deposition of nanofibres was achieved. A deposition time of 5 min was sufficient to form a homogeneous fibrous layer across the surface of the IDEs. After fibre deposition, a dip-coating treatment with the AuLNPs solution (described in the  Section 2 ) was applied. This step enriched the fibre surface with additional lignin nanoparticles, enhancing analyte interaction and overall sensitivity. Furthermore, the gold nanoparticles decoration was expected to improve the electrical conductivity of the sensing layer and contribute catalytic activity during the sensing process."
+    }
+  ],
+  "extractions": {
+    "methods_paragraphs": [
+      {
+        "text": "2. Materials and Methods 2.1. Materials The utilised solvents and polymers for the material preparations and vapour tests were as follows: Polylactic acid (PLA, Mw 230k) was purchased from GoodFellow (Cambridge, UK). Alkali lignin (Kraft Lignin), Acetone (99.8%), 2,2,2-Trifluoroethanol (TFE) ≥99%(GC), Isopropyl alcohol (99.5%), Methylamine solution 40 wt. % in H 2 O (Mw 31.06), Isobutylamine 99% (Mw 73.14), Ethylamine 70% aqueous solution, Propylamine 98% (Mw 59.11), Acetic Acid ≥ 99.7%, Ammonium hydroxide solution 28.0–30.0%, Hydrogen peroxide solution 30 wt.% in H 2 O, and tetrachloroauric acid trihydrate (HauCl 4 ∙3H 2 O) (Mw 339.79) were purchased from MercK KGaA (Damstadt, Germany). All solvents were of analytical grade and used as received, without further purification. These compounds were handled under controlled conditions in accordance with safety protocols. Interdigitated electrodes (IDEs) supplied by Micrux Technologies (Gijón, Spain) were fabricated on borosilicate glass substrates (10 mm × 6 mm × 0.75 mm). The Pt/Ti electrodes consisted of 120 pairs, each 10 μm wide, 3500 μm long, and 150 nm thick, with a 10 μm inter-electrode gap. Prior to use, the IDE surfaces were cleaned by rinsing with soap and water, followed by immersion in a “base piranha” solution (a 3:1  v / v  mixture of ammonia and hydrogen peroxide) at 60 °C for approximately 60 min under a well-ventilated fume hood. The electrodes were then thoroughly rinsed with Milli-Q water (~18 MΩ·cm), washed with isopropyl alcohol and dried under a nitrogen stream. Lignin nanoparticles were prepared using a bottom-up approach previously reported by the authors [ 22 ] and finally incorporated into PLA nanofibres by electrospinning technology following Au 0  decoration treatment. Indeed, an aliquot of HAuCl 4  was added to the aqueous suspension of lignin nanoparticles (7.1 mg/mL) to achieve a mass ratio of 0.0012:1 ( w : w ), and the mixture was stirred for 4 h (T: 40 °C). Taking advantage of the intrinsic reducing properties of lignin, the gold salt was reduced to metallic gold, as indicated by the reaction solution turning pink. The resulting aqueous suspension was then centrifuged three times at 9000 rpm for 20 min at 8 °C in water (NEYA 16R, REMI Elektrotechnik LTD, Vasai-401208, Palghar, Maharashtra, India) to remove any unreacted gold salt or Au 0  in solution that were not adsorbed onto the LNPs. 2.2. Sensing Materials Preparations The nanofibrous mat was fabricated using the electrospinning technology, a versatile and efficient technique capable of producing fibres with nanometric diameters [ 29 , 30 , 31 ]. This method relies on the application of a high-voltage electric field to a polymer solution, which induces the formation of continuous fibres through the controlled extrusion of a charged jet from a syringe needle. In this study, nanofibres were produced using a Fluidnatek ®  LE-50 electrospinning platform (Bioinicia, Paterna, Valencia, Spain). Electrospinning was performed directly onto IDEs. PLA was chosen as the polymeric matrix to incorporate the LNPs. PLA is particularly attractive for developing nanofibrous sensors due to a combination of material properties, processability, and environmental advantages [ 32 , 33 ]. It readily dissolves in common solvents and forms stable jets under electrospinning conditions, enabling the fabrication of uniform nanofibres with tunable diameters and porosities (key features for sensors with high surface-to-volume ratios). Furthermore, PLA exhibits good mechanical integrity, which helps maintain the structural stability of sensor platforms during handling and deployment while also withstanding moderate thermal fluctuations. As a biodegradable polyester derived from renewable resources (e.g., corn starch, sugarcane), PLA is ideal for environmentally friendly or disposable sensors. A polymeric solution was prepared by dissolving 170 mg/mL of PLA in TFE under continuous stirring at 40 °C for a minimum of 6 h to ensure complete homogenization. Electrospinning deposition was performed with a voltage of +7 kV applied to the needle, while the collector was maintained at −2 kV. The polymer solution was dispensed at a flow rate of 350 µL/h, with a tip-to-collector distance of 15 cm. Electrospinning was conducted under controlled environmental conditions (20 °C, 40% relative humidity), using a rotating drum collector set at 510 rpm, onto which the IDEs were fixed. Under these conditions, a uniform and reproducible deposition of nanofibres was achieved. A deposition time of 5 min was sufficient to form a homogeneous fibrous layer across the surface of the IDEs. After fibre deposition, a dip-coating treatment with the AuLNPs solution (described in the  Section 2 ) was applied. This step enriched the fibre surface with additional lignin nanoparticles, enhancing analyte interaction and overall sensitivity. Furthermore, the gold nanoparticles decoration was expected to improve the electrical conductivity of the sensing layer and contribute catalytic activity during the sensing process. 2.3. Sensing Material Characterization The morphological and compositional features of LNPs were assessed by transmission electron microscopy (TEM) ( Figure 1 A). Images were acquired using a CRYO-TEM TOMO TECNAI G2-20 microscope (FEI Company, Hillsboro, OR 97124-5793 USA), equipped with a LaB 6  thermionic emission gun and a 2HS Eagle CCD camera, operating at 200 kV. Samples were prepared by depositing 3 μL of the nanoparticle suspension onto a carbon-coated copper grid, followed by air drying prior to analysis. The morphology of AuLNPs was investigated by scanning electron microscopy (SEM, JEOL JSM-6010LA; JEOL Ltd., Tokyo, Japan), as shown in  Figure 1 , using both secondary electron (SE, 5 kV,  Figure 1 B) and backscattered electron (BSE, 20 kV,  Figure 1 C) imaging modes. Samples were mounted on aluminium stubs using conductive carbon tape and sputter-coated with a 2 nm gold layer (Quorum Q150R ES, Quorum Technologies, East Sussex, UK) to enhance surface conductivity. Elemental analysis was performed by energy-dispersive X-ray spectroscopy (EDS) using the integrated detector, operated at 20 kV with a 60 s acquisition time (inset  Figure 1 D). The TEM image in  Figure 1 A revealed that the LNPs possessed a predominantly spherical morphology with a relatively narrow size distribution. The LNPs appeared well dispersed, although occasional agglomeration was evident, likely attributable to capillary forces during the drying stage of the sample preparation. The inset in the upper right corner displays the particle size distribution histogram, obtained from statistical analysis of over 50 individual nanoparticles. The data fit a near-Gaussian profile, yielding an average diameter of 33 ± 8 nm. The observed size uniformity indicates a high degree of reproducibility and synthetic control in the nanoprecipitation protocol employed for LNP fabrication. To investigate the elemental composition and spatial distribution of AuLNPs both prior to and following their integration into polymeric substrates, SEM was performed in SE and BSE modes, combined with EDS. While the resolution of SEM was insufficient to resolve individual gold nanostructures ( Figure 1 B), SE images revealed persistent, rounded, particle-like features, suggesting that the native morphology of the lignin nanoparticles was largely retained after metallization. BSE imaging ( Figure 1 C) showed discrete regions of enhanced contrast, typical of elements with high atomic numbers, such as gold, indicating the successful formation of metallic Au 0  domains within the hybrid nanostructures. This interpretation was supported by EDS spectra acquired from these bright regions ( Figure 1 D, inset), which confirmed the presence of gold, alongside carbon and oxygen signals associated with the organic PLA matrix. Upon deposition onto electrospun PLA fibres, as shown in  Figure 1 D and  Figure 2 B, the AuLNPs appeared as bright spots distributed along the fibre surfaces. EDS analysis of selected fibre regions further confirmed the presence of metallic gold through its characteristic peaks. Additional contributions from carbon and oxygen were attributed to both PLA and lignin, while silicon signals originated from the underlying borosilicate substrate used during sample preparation. To quantify the spatial distribution of AuLNPs on the PLA nanofibres, image analysis was carried out on representative BSE-SEM micrographs using the open-source software ImageJ (version 1.53t, National Institutes of Health, Bethesda, MD, USA) in combination with the Diameter J 1.0.18 plugin. Grayscale images were converted to an 8-bit format and subjected to a brightness thresholding procedure to isolate high-intensity regions corresponding to gold-enriched domains. The estimated coverage of bright Au-containing regions on the nanofibre surface was approximately 4%. The electrospun PLA mats ( Figure 2 A) exhibited a moderately porous architecture, with a mean pore area of 0.56 ± 0.66 µm 2 , indicative of a heterogeneous distribution of pore sizes. These findings are consistent with a partially and selectively decorated nanofibrous scaffold, supporting both the morphological evidence and the broad localized surface plasmon resonance (LSPR) features observed in subsequent UV–Vis spectroscopic analyses ( Figure 3 ). UV–Vis spectra of the AuLNP suspension ( Figure 3 , orange curve), compared with that of native LNPs (blue curve), revealed significant spectral changes. While the native LNPs showed intense absorption in the UV range (200–300 nm), characterized by a peak around 220–230 nm and a shoulder near 280 nm—attributed, respectively, to π→π* transitions of aromatic rings and n→π* transitions of carbonyl groups [ 34 , 35 ] —the AuLNPs exhibited a distinct reduction in UV absorbance intensity and the emergence of a broad absorption band extending into the visible range (500–600 nm). This feature, more evident in the magnified inset of  Figure 3 , is indicative of LSPR phenomena arising from metallic gold domains embedded within the hybrid particles. The absence of a sharp LSPR peak around 520 nm—commonly observed for well-dispersed, spherical AuNPs—suggests a heterogeneous size distribution and possibly non-spherical or partially aggregated gold domains, consistent with gold nucleation on biopolymer scaffolds [ 36 , 37 ]. The position and shape of the LSPR band imply the formation of gold nanostructures in the 20–50 nm range, in line with SEM-BSE and EDS results. Although direct visualization by TEM was not feasible for these samples, the combined evidence from SEM contrast, elemental mapping, and UV–Vis spectroscopy strongly supports a model in which gold nucleates and grows on the LNP surface during HauCl 4  reduction. This process is likely mediated by lignin’s phenolic and carboxylic groups, which act as both reducing and stabilizing agents. Overall, these results confirm the successful fabrication of Au-decorated lignin nanoparticles and their effective integration into PLA fibre substrates, with evidence of both surface-bound dispersion and localized aggregation, depending on deposition conditions. Although only ~4% of the nanofibre surface appears covered by bright features in BSE-SEM, the underlying LNPs coating is substantially more extensive ( Figure 2 A). This suggests that most fibres are decorated with AuLNPs, even though gold nucleation or reduction occurred only partially or heterogeneously across the LNPs. As a result, the fibres retain a high degree of morphological coverage by the hybrid nanostructures, while plasmonically active gold domains remain sparsely but selectively distributed. This is consistent with the UV–Vis spectroscopy of AuLNPs performed in solution, which revealed a broad absorption band in the visible region (500–600 nm). In order to estimate the surface area available for functional interactions, we complemented SEM morphological analysis with atomic force microscopy (AFM) topographic measurements on representative areas of electrospun PLA fibres functionalised with AuLNPs, ( Figure 4 ). AFM images compare the morphology of electrospun PLA nanofibres embedding LNPs ( Figure 4 A) and those subsequently decorated via dip coating with AuLNPs, ( Figure 4 B). In  Figure 4 A the PLA nanofibres exhibit a generally continuous structure, yet with surface irregularities along the fibre axis, such as alternating swellings and constrictions, with diameters ranging approximately from 250 to 700 nm. These morphological variations are likely due to the presence of LNPs embedded within the polymer matrix, which may interfere with uniform jet stretching during electrospinning. In  Figure 4 B, the dip-coating process with AuLNPs induces a noticeable reorganization of the fibre morphology. Following the dip-coating treatment with AuLNPs, the fibres appear more linear and aligned, with reduced surface irregularities and a more homogeneous morphology. The apparent fibre diameter is slightly narrower, ranging from about 250 to 500 nm. This effect is not necessarily due to a radial shrinkage but results from a mild axial relaxation of the fibre structure induced by solvent interaction during the dip-coating process. This relaxation may lead to a local redistribution of polymer chains and a reduction in internal stress, resulting in straighter fibres with fewer bulges. Additionally, the fibre surfaces look densely decorated with nanoparticles of variable size, consistent with the heterogeneous deposition of AuLNP aggregates, which increases the nanoscale roughness and enhances the fibre’s functional surface area for sensing applications [ 38 ]. The data were processed using Gwyddion software (version 2.65, 2024), an open-source platform for scanning probe microscopy (SPM) data analysis and visualization [ 39 ]. AFM measurements ( Figure 4 B) on a representative 100 µm 2  region yielded a real surface area of 124.6 µm 2 , corresponding to a surface increase of approximately 24.6% over the 2D projected area. This enhancement is consistent with the nanometric surface features induced by the presence of AuLNPs. The average roughness (Sa) and root-mean-square roughness (Sq) were 123.2 nm and 153.5 nm, respectively. The difference between these values reflects a surface morphology characterized by protrusions and depressions, which contribute to the increased topographical complexity. While the roughness is significant on the nanoscale, it remains compatible with the observed ~25% increase in actual surface area on the micrometric scale. The estimated fibre surface coverage of about 80%, calculated from AFM data, confirmed the formation of a moderately dense and interconnected nanofibre network across the substrate. Figure 4 C,D show 3D AFM reconstructions of the nanofibre mats before (C) and after (D) dip coating with AuLNPs. More specifically, in  Figure 4 C, the PLA fibres appear randomly oriented and significantly interwoven, with evident variations in height and some surface irregularities along the fibre axes. The topography reveals a complex, entangled structure, where fibre intersections create uneven elevation profiles. The surface roughness is moderate and primarily intrinsic to the polymer and embedded LNPs. In contrast,  Figure 4 D reveals a more organized and coherent fibre network following the dip-coating process. Although fibre overlap is still present, the overall topography appears smoother and more continuous, with reduced fluctuations in height across the mat. The fibre surfaces exhibit fine-scale roughness due to the presence of AuLNP clusters, but the general alignment and packing of fibres seem improved. 2.4. Measurement System Setup All measurements were carried out at room temperature (20 ± 2 °C) using a custom-designed gas exposure and measurement system ( Figure 5 ). The setup was specifically designed to ensure stable and reproducible exposure conditions while enabling the precise generation of low-ppm concentrations of the target vapour. A carrier flow of ambient air at 4000 sccms (standard cubic centimetres per minute), supplied by an air pump, was employed. Prior to entering the system, the air stream was filtered through a dust filter followed by an activated carbon filter to remove particulates, hydrocarbons, and residual VOCs. This high flow rate was essential to dilute a small volume (typically a few sccms) of concentrated amine vapour, allowing accurate control of the final vapour concentration. Humidity regulation was achieved using a mass flow controller (MFC), which enabled the precise mixing of dry and humidified air, thereby maintaining a constant and adjustable relative humidity (RH) level. In a parallel branch of the system, a dry carrier gas (air) from a pressurized cylinder was regulated by a separate mass flow controller (MFC) and directed toward a three-way solenoid valve. This configuration enabled either the exclusion of vapour or the metered introduction of concentrated amine vapour into the main airflow. By injecting only small fractions of vapour, the system produced reproducible and well-diluted mixtures at target concentrations. All flow streams were merged using Y-connectors and introduced into a mixing chamber (approximately 2 L in volume) to ensure homogeneous vapour distribution. A continuous sampling flow of 100 sccms was drawn from the mixing chamber by a secondary pump and directed into the sensing chamber for analysis. A key advantage of this system was the use of ambient air as the carrier gas, allowing sensor testing under conditions that more closely resemble real-world human exposure. Unlike conventional systems that often employ dry air to minimize humidity interference, this setup allowed controlled adjustment of relative humidity (RH), enabling the simulation of realistic environmental conditions. Electrical measurements of the IDE sensors in response to varying vapour concentrations were carried out using a Keithley 6517 electrometer (Solon, OH, USA). The output signals were recorded and processed using custom LabVIEW software (LabVIEW 2014, National Instruments, Austin, TX, USA), allowing real-time visualization and analysis of the sensor responses. 2.5. Electrical Parameters Characterization To assess the electrical properties of the developed fibrous materials, preliminary current–voltage (I–V) measurements were conducted to characterize their conductivity and establish a baseline for comparison. Two sets of samples were analysed. The first consisted of electrospun PLA nanofibres embedded with gold–lignin nanoparticles (PLA–AuLNPs), tested in their as-prepared state to evaluate intrinsic electrical properties. The second set comprised the same PLA–AuLNP mats after surface functionalization via dip coating in a solution containing AuLNPs, intended to enhance surface conductivity; these samples are referred to as (PLA–AuLNPs) DIP , ( Figure 6 A). As shown in  Figure 6 A, the I–V curves of the two sample types exhibit markedly different behaviours. The red curve, corresponding to the as-prepared PLA nanofibres containing embedded nanoparticles, shows a negligible current across the −2 V to +2 V range, confirming persistent insulating behaviour and the absence of significant intrinsic conductivity. In contrast, the black curve, representing the fibres after dip coating with AuLNPs, displays a symmetric yet nonlinear current response, suggestive of semiconducting or hybrid conductive behaviour. At an applied voltage of 2 V, the PLA-AuLNP fibres exhibit a current of approximately 0.1 nA, corresponding to a resistance of ~20 GΩ. After dip coating, the current increases to ~6.2 nA, yielding a significantly lower resistance of ~322 MΩ. According to Ohm’s law, Equation (1): (1) R = V I \nand the definition of conductance, Equation (2): (2) G = 1 R \nare used to calculate the conductance of the dipped fibres at 2 V as ~3.1 nS. This substantial increase in current flow should confirm the effective adhesion of conductive pathways, attributed to the presence of gold nanoparticles on the fibre surface and more contact with the microelectrodes. The nearly symmetric, nonlinear shape of the I–V curve for the dip-coated fibres suggests a non-ohmic conduction mechanism, likely governed by charge transport via hopping or tunnelling through localized states within the hybrid material. These findings indicate that the dip-coating process successfully imparts new electrical functionality to the PLA nanofibres, making the composite material a promising candidate for sensing or flexible electronic applications [ 40 , 41 ]. Instead, the symmetry of the IV curves around the origin indicates an absence of clear rectifying (diode-like) behaviour. This suggests that at this level of current, the contacts between fibres and fibre–metal electrodes do not form a Schottky barrier, leading to a symmetric response [ 42 , 43 ]. To investigate the sensor’s electrical response as a function of relative humidity (RH), the electrical current at a fixed voltage was recorded across different RH levels, ranging from 43.5% to 69% at 20 °C. The results are presented in  Figure 6 B. The current response increased steadily with RH, displaying an approximately linear trend up to ~60% RH. Beyond this threshold, the current exhibited a pronounced exponential increase. This two-regime behaviour can be interpreted by considering the distinct roles of the composite components: (i) PLA acts as the structural matrix of the nanofibres. As a hydrophobic and electrically insulating polymer [ 44 , 45 ], PLA provides mechanical support but does not directly participate in charge transport. Nevertheless, its fibrous morphology and porous structure facilitate the adsorption and diffusion of water vapour onto and within the fibre network, enabling interaction with the embedded nanostructures. (ii) LNPs exhibit intrinsic dielectric and semiconductive properties and are known to participate in charge trapping and polarization mechanisms upon exposure to moisture [ 46 ]. As RH increases, water molecules adsorb onto the lignin surface, altering its dielectric environment. This adsorption can enhance proton hopping (Grotthuss mechanism) and modulate the mobility of charge carriers, leading to increased current. Above ~60% RH, multilayer water adsorption likely occurs, creating quasi-continuous water films that enable a dramatic increase in ionic conductivity, explaining the exponential rise in current; (iii) Au 0  nanoclusters provide nanoscale conductive sites that lower the overall resistance of the composite. They likely form percolative conductive paths along or between fibres, enabling efficient electron transfer. Additionally, Au 0  nanoclusters can catalyse the dissociation or polarisation of water molecules adsorbed at the fibre surface, thereby enhancing sensitivity to humidity. Therefore, in combination, these effects lead to a humidity-dependent increase in conductivity, with the (PLA-AuLNPs) DIP  composite remaining relatively insensitive at lower humidity levels, but showing a pronounced and sensitive response above a critical RH threshold (~60%). These findings indicate that the electrical conductivity of the sensor is positively influenced by ambient humidity, enabling reliable sensor operation at room temperature also in moist environments. However, the nonlinear transition beyond this threshold likely corresponds to the onset of water condensation or capillary condensation within the nanofibre mat, facilitating enhanced ionic transport and signal transduction.",
+        "operations": [
+          {
+            "op_type": "wash",
+            "sentence": "Prior to use, the IDE surfaces were cleaned by rinsing with soap and water, followed by immersion in a “base piranha” solution (a 3:1  v / v  mixture of ammonia and hydrogen peroxide) at 60 °C for approximately 60 min under a well-ventilated fume hood.",
+            "start_char": 1164,
+            "end_char": 1416,
+            "materials": [
+              "the IDE surfaces",
+              "60 °C",
+              "approximately 60 min"
+            ],
+            "params": {
+              "temp": "60°C",
+              "time": "60 min"
+            }
+          },
+          {
+            "op_type": "wash",
+            "sentence": "The electrodes were then thoroughly rinsed with Milli-Q water (~18 MΩ·cm), washed with isopropyl alcohol and dried under a nitrogen stream.",
+            "start_char": 1417,
+            "end_char": 1556,
+            "materials": [],
+            "params": {}
+          },
+          {
+            "op_type": "add",
+            "sentence": "Indeed, an aliquot of HAuCl 4  was added to the aqueous suspension of lignin nanoparticles (7.1 mg/mL) to achieve a mass ratio of 0.0012:1 ( w : w ), and the mixture was stirred for 4 h (T: 40 °C).",
+            "start_char": 1774,
+            "end_char": 1971,
+            "materials": [
+              "7.1 mg/mL",
+              "4 h"
+            ],
+            "params": {
+              "temp": "40°C",
+              "time": "4 h",
+              "amounts": [
+                "7.1 mg"
+              ]
+            }
+          },
+          {
+            "op_type": "centrifuge",
+            "sentence": "The resulting aqueous suspension was then centrifuged three times at 9000 rpm for 20 min at 8 °C in water (NEYA 16R, REMI Elektrotechnik LTD, Vasai-401208, Palghar, Maharashtra, India) to remove any unreacted gold salt or Au 0  in solution that were not adsorbed onto the LNPs.",
+            "start_char": 2133,
+            "end_char": 2410,
+            "materials": [
+              "9000 rpm",
+              "20 min",
+              "8 °C",
+              "India"
+            ],
+            "params": {
+              "temp": "8°C",
+              "time": "20 min",
+              "speed": "9000 rpm"
+            }
+          },
+          {
+            "op_type": "add",
+            "sentence": "This method relies on the application of a high-voltage electric field to a polymer solution, which induces the formation of continuous fibres through the controlled extrusion of a charged jet from a syringe needle.",
+            "start_char": 2628,
+            "end_char": 2843,
+            "materials": [],
+            "params": {}
+          },
+          {
+            "op_type": "heat",
+            "sentence": "Furthermore, PLA exhibits good mechanical integrity, which helps maintain the structural stability of sensor platforms during handling and deployment while also withstanding moderate thermal fluctuations.",
+            "start_char": 3503,
+            "end_char": 3707,
+            "materials": [],
+            "params": {}
+          },
+          {
+            "op_type": "stir",
+            "sentence": "A polymeric solution was prepared by dissolving 170 mg/mL of PLA in TFE under continuous stirring at 40 °C for a minimum of 6 h to ensure complete homogenization.",
+            "start_char": 3867,
+            "end_char": 4029,
+            "materials": [
+              "40 °C",
+              "6 h"
+            ],
+            "params": {
+              "temp": "40°C",
+              "time": "6 h",
+              "amounts": [
+                "170 mg"
+              ]
+            }
+          },
+          {
+            "op_type": "heat",
+            "sentence": "Electrospinning deposition was performed with a voltage of +7 kV applied to the needle, while the collector was maintained at −2 kV.",
+            "start_char": 4030,
+            "end_char": 4162,
+            "materials": [
+              "+7 kV"
+            ],
+            "params": {}
+          },
+          {
+            "op_type": "dry",
+            "sentence": "Images were acquired using a CRYO-TEM TOMO TECNAI G2-20 microscope (FEI Company, Hillsboro, OR 97124-5793 USA), equipped with a LaB 6  thermionic emission gun and a 2HS Eagle CCD camera, operating at 200 kV. Samples were prepared by depositing 3 μL of the nanoparticle suspension onto a carbon-coated copper grid, followed by air drying prior to analysis.",
+            "start_char": 5245,
+            "end_char": 5600,
+            "materials": [
+              "Images",
+              "a CRYO-TEM TOMO TECNAI G2-20 microscope",
+              "(FEI Company",
+              "97124-5793 USA"
+            ],
+            "params": {
+              "amounts": [
+                "3 μL"
+              ]
+            }
+          },
+          {
+            "op_type": "dry",
+            "sentence": "The LNPs appeared well dispersed, although occasional agglomeration was evident, likely attributable to capillary forces during the drying stage of the sample preparation.",
+            "start_char": 6391,
+            "end_char": 6562,
+            "materials": [],
+            "params": {}
+          },
+          {
+            "op_type": "filter",
+            "sentence": "Prior to entering the system, the air stream was filtered through a dust filter followed by an activated carbon filter to remove particulates, hydrocarbons, and residual VOCs.",
+            "start_char": 16209,
+            "end_char": 16384,
+            "materials": [
+              "residual VOCs"
+            ],
+            "params": {}
+          },
+          {
+            "op_type": "dry",
+            "sentence": "Humidity regulation was achieved using a mass flow controller (MFC), which enabled the precise mixing of dry and humidified air, thereby maintaining a constant and adjustable relative humidity (RH) level.",
+            "start_char": 16559,
+            "end_char": 16763,
+            "materials": [
+              "a constant and adjustable relative humidity (RH) level"
+            ],
+            "params": {}
+          },
+          {
+            "op_type": "dry",
+            "sentence": "In a parallel branch of the system, a dry carrier gas (air) from a pressurized cylinder was regulated by a separate mass flow controller (MFC) and directed toward a three-way solenoid valve.",
+            "start_char": 16764,
+            "end_char": 16954,
+            "materials": [
+              "a three-way solenoid valve"
+            ],
+            "params": {}
+          },
+          {
+            "op_type": "inject",
+            "sentence": "By injecting only small fractions of vapour, the system produced reproducible and well-diluted mixtures at target concentrations.",
+            "start_char": 17093,
+            "end_char": 17222,
+            "materials": [],
+            "params": {}
+          },
+          {
+            "op_type": "add",
+            "sentence": "All flow streams were merged using Y-connectors and introduced into a mixing chamber (approximately 2 L in volume) to ensure homogeneous vapour distribution.",
+            "start_char": 17223,
+            "end_char": 17380,
+            "materials": [
+              "approximately 2 L"
+            ],
+            "params": {
+              "amounts": [
+                "2 L"
+              ]
+            }
+          },
+          {
+            "op_type": "stir",
+            "sentence": "A continuous sampling flow of 100 sccms was drawn from the mixing chamber by a secondary pump and directed into the sensing chamber for analysis.",
+            "start_char": 17381,
+            "end_char": 17526,
+            "materials": [
+              "100 sccms"
+            ],
+            "params": {}
+          },
+          {
+            "op_type": "dry",
+            "sentence": "Unlike conventional systems that often employ dry air to minimize humidity interference, this setup allowed controlled adjustment of relative humidity (RH), enabling the simulation of realistic environmental conditions.",
+            "start_char": 17700,
+            "end_char": 17919,
+            "materials": [],
+            "params": {}
+          },
+          {
+            "op_type": "add",
+            "sentence": "The nearly symmetric, nonlinear shape of the I–V curve for the dip-coated fibres suggests a non-ohmic conduction mechanism, likely governed by charge transport via hopping or tunnelling through localized states within the hybrid material.",
+            "start_char": 20198,
+            "end_char": 20436,
+            "materials": [
+              "the I–V curve"
+            ],
+            "params": {}
+          },
+          {
+            "op_type": "add",
+            "sentence": "As a hydrophobic and electrically insulating polymer [ 44 , 45 ], PLA provides mechanical support but does not directly participate in charge transport.",
+            "start_char": 21575,
+            "end_char": 21727,
+            "materials": [],
+            "params": {}
+          },
+          {
+            "op_type": "add",
+            "sentence": "(ii) LNPs exhibit intrinsic dielectric and semiconductive properties and are known to participate in charge trapping and polarization mechanisms upon exposure to moisture [ 46 ].",
+            "start_char": 21932,
+            "end_char": 22110,
+            "materials": [
+              "ii) LNPs"
+            ],
+            "params": {}
+          },
+          {
+            "op_type": "add",
+            "sentence": "This adsorption can enhance proton hopping (Grotthuss mechanism) and modulate the mobility of charge carriers, leading to increased current.",
+            "start_char": 22213,
+            "end_char": 22353,
+            "materials": [],
+            "params": {}
+          }
+        ],
+        "expanded": [
+          {
+            "op_type": "wash",
+            "steps": [
+              "Perform operation 'wash' as described: Prior to use, the IDE surfaces were cleaned by rinsing with soap and water, followed by immersion in a “base piranha” solution (a 3:1  v / v  mixture of ammonia and hydrogen peroxide) at 60 °C for approximately 60 min under a well-ventilated fume hood."
+            ]
+          },
+          {
+            "op_type": "wash",
+            "steps": [
+              "Perform operation 'wash' as described: The electrodes were then thoroughly rinsed with Milli-Q water (~18 MΩ·cm), washed with isopropyl alcohol and dried under a nitrogen stream."
+            ]
+          },
+          {
+            "op_type": "add",
+            "steps": [
+              "Ensure reaction vessel is present and empty.",
+              "Place a clean stir bar in the vessel.",
+              "Measure 7.1 mg of 7.1 mg/mL.",
+              "Transfer 7.1 mg/mL into the vessel."
+            ]
+          },
+          {
+            "op_type": "centrifuge",
+            "steps": [
+              "Perform operation 'centrifuge' as described: The resulting aqueous suspension was then centrifuged three times at 9000 rpm for 20 min at 8 °C in water (NEYA 16R, REMI Elektrotechnik LTD, Vasai-401208, Palghar, Maharashtra, India) to remove any unreacted gold salt or Au 0  in solution that were not adsorbed onto the LNPs."
+            ]
+          },
+          {
+            "op_type": "add",
+            "steps": [
+              "Ensure reaction vessel is present and empty.",
+              "Place a clean stir bar in the vessel.",
+              "Measure the specified amount of reagent.",
+              "Transfer reagent into the vessel."
+            ]
+          },
+          {
+            "op_type": "heat",
+            "steps": [
+              "Place the reaction vessel on a hotplate.",
+              "Ramp to the target temperature.",
+              "Maintain the target temperature for the specified time."
+            ]
+          },
+          {
+            "op_type": "stir",
+            "steps": [
+              "Place the reaction vessel on a stir plate.",
+              "Set the stirrer to an appropriate speed.",
+              "Stir for 6 h."
+            ]
+          },
+          {
+            "op_type": "heat",
+            "steps": [
+              "Place the reaction vessel on a hotplate.",
+              "Ramp to the target temperature.",
+              "Maintain the target temperature for the specified time."
+            ]
+          },
+          {
+            "op_type": "dry",
+            "steps": [
+              "Perform operation 'dry' as described: Images were acquired using a CRYO-TEM TOMO TECNAI G2-20 microscope (FEI Company, Hillsboro, OR 97124-5793 USA), equipped with a LaB 6  thermionic emission gun and a 2HS Eagle CCD camera, operating at 200 kV. Samples were prepared by depositing 3 μL of the nanoparticle suspension onto a carbon-coated copper grid, followed by air drying prior to analysis."
+            ]
+          },
+          {
+            "op_type": "dry",
+            "steps": [
+              "Perform operation 'dry' as described: The LNPs appeared well dispersed, although occasional agglomeration was evident, likely attributable to capillary forces during the drying stage of the sample preparation."
+            ]
+          },
+          {
+            "op_type": "filter",
+            "steps": [
+              "Perform operation 'filter' as described: Prior to entering the system, the air stream was filtered through a dust filter followed by an activated carbon filter to remove particulates, hydrocarbons, and residual VOCs."
+            ]
+          },
+          {
+            "op_type": "dry",
+            "steps": [
+              "Perform operation 'dry' as described: Humidity regulation was achieved using a mass flow controller (MFC), which enabled the precise mixing of dry and humidified air, thereby maintaining a constant and adjustable relative humidity (RH) level."
+            ]
+          },
+          {
+            "op_type": "dry",
+            "steps": [
+              "Perform operation 'dry' as described: In a parallel branch of the system, a dry carrier gas (air) from a pressurized cylinder was regulated by a separate mass flow controller (MFC) and directed toward a three-way solenoid valve."
+            ]
+          },
+          {
+            "op_type": "inject",
+            "steps": [
+              "Perform operation 'inject' as described: By injecting only small fractions of vapour, the system produced reproducible and well-diluted mixtures at target concentrations."
+            ]
+          },
+          {
+            "op_type": "add",
+            "steps": [
+              "Ensure reaction vessel is present and empty.",
+              "Place a clean stir bar in the vessel.",
+              "Measure 2 L of approximately 2 L.",
+              "Transfer approximately 2 L into the vessel."
+            ]
+          },
+          {
+            "op_type": "stir",
+            "steps": [
+              "Place the reaction vessel on a stir plate.",
+              "Set the stirrer to an appropriate speed.",
+              "Stir for the specified time."
+            ]
+          },
+          {
+            "op_type": "dry",
+            "steps": [
+              "Perform operation 'dry' as described: Unlike conventional systems that often employ dry air to minimize humidity interference, this setup allowed controlled adjustment of relative humidity (RH), enabling the simulation of realistic environmental conditions."
+            ]
+          },
+          {
+            "op_type": "add",
+            "steps": [
+              "Ensure reaction vessel is present and empty.",
+              "Place a clean stir bar in the vessel.",
+              "Measure the specified amount of the I–V curve.",
+              "Transfer the I–V curve into the vessel."
+            ]
+          },
+          {
+            "op_type": "add",
+            "steps": [
+              "Ensure reaction vessel is present and empty.",
+              "Place a clean stir bar in the vessel.",
+              "Measure the specified amount of reagent.",
+              "Transfer reagent into the vessel."
+            ]
+          },
+          {
+            "op_type": "add",
+            "steps": [
+              "Ensure reaction vessel is present and empty.",
+              "Place a clean stir bar in the vessel.",
+              "Measure the specified amount of ii) LNPs.",
+              "Transfer ii) LNPs into the vessel."
+            ]
+          },
+          {
+            "op_type": "add",
+            "steps": [
+              "Ensure reaction vessel is present and empty.",
+              "Place a clean stir bar in the vessel.",
+              "Measure the specified amount of reagent.",
+              "Transfer reagent into the vessel."
+            ]
+          }
+        ]
+      },
+      {
+        "text": "2.2. Sensing Materials Preparations The nanofibrous mat was fabricated using the electrospinning technology, a versatile and efficient technique capable of producing fibres with nanometric diameters [ 29 , 30 , 31 ]. This method relies on the application of a high-voltage electric field to a polymer solution, which induces the formation of continuous fibres through the controlled extrusion of a charged jet from a syringe needle. In this study, nanofibres were produced using a Fluidnatek ®  LE-50 electrospinning platform (Bioinicia, Paterna, Valencia, Spain). Electrospinning was performed directly onto IDEs. PLA was chosen as the polymeric matrix to incorporate the LNPs. PLA is particularly attractive for developing nanofibrous sensors due to a combination of material properties, processability, and environmental advantages [ 32 , 33 ]. It readily dissolves in common solvents and forms stable jets under electrospinning conditions, enabling the fabrication of uniform nanofibres with tunable diameters and porosities (key features for sensors with high surface-to-volume ratios). Furthermore, PLA exhibits good mechanical integrity, which helps maintain the structural stability of sensor platforms during handling and deployment while also withstanding moderate thermal fluctuations. As a biodegradable polyester derived from renewable resources (e.g., corn starch, sugarcane), PLA is ideal for environmentally friendly or disposable sensors. A polymeric solution was prepared by dissolving 170 mg/mL of PLA in TFE under continuous stirring at 40 °C for a minimum of 6 h to ensure complete homogenization. Electrospinning deposition was performed with a voltage of +7 kV applied to the needle, while the collector was maintained at −2 kV. The polymer solution was dispensed at a flow rate of 350 µL/h, with a tip-to-collector distance of 15 cm. Electrospinning was conducted under controlled environmental conditions (20 °C, 40% relative humidity), using a rotating drum collector set at 510 rpm, onto which the IDEs were fixed. Under these conditions, a uniform and reproducible deposition of nanofibres was achieved. A deposition time of 5 min was sufficient to form a homogeneous fibrous layer across the surface of the IDEs. After fibre deposition, a dip-coating treatment with the AuLNPs solution (described in the  Section 2 ) was applied. This step enriched the fibre surface with additional lignin nanoparticles, enhancing analyte interaction and overall sensitivity. Furthermore, the gold nanoparticles decoration was expected to improve the electrical conductivity of the sensing layer and contribute catalytic activity during the sensing process.",
+        "operations": [
+          {
+            "op_type": "add",
+            "sentence": "This method relies on the application of a high-voltage electric field to a polymer solution, which induces the formation of continuous fibres through the controlled extrusion of a charged jet from a syringe needle.",
+            "start_char": 217,
+            "end_char": 432,
+            "materials": [],
+            "params": {}
+          },
+          {
+            "op_type": "heat",
+            "sentence": "Furthermore, PLA exhibits good mechanical integrity, which helps maintain the structural stability of sensor platforms during handling and deployment while also withstanding moderate thermal fluctuations.",
+            "start_char": 1092,
+            "end_char": 1296,
+            "materials": [],
+            "params": {}
+          },
+          {
+            "op_type": "stir",
+            "sentence": "A polymeric solution was prepared by dissolving 170 mg/mL of PLA in TFE under continuous stirring at 40 °C for a minimum of 6 h to ensure complete homogenization.",
+            "start_char": 1456,
+            "end_char": 1618,
+            "materials": [
+              "40 °C",
+              "6 h"
+            ],
+            "params": {
+              "temp": "40°C",
+              "time": "6 h",
+              "amounts": [
+                "170 mg"
+              ]
+            }
+          },
+          {
+            "op_type": "heat",
+            "sentence": "Electrospinning deposition was performed with a voltage of +7 kV applied to the needle, while the collector was maintained at −2 kV.",
+            "start_char": 1619,
+            "end_char": 1751,
+            "materials": [
+              "+7 kV"
+            ],
+            "params": {}
+          }
+        ],
+        "expanded": [
+          {
+            "op_type": "add",
+            "steps": [
+              "Ensure reaction vessel is present and empty.",
+              "Place a clean stir bar in the vessel.",
+              "Measure the specified amount of reagent.",
+              "Transfer reagent into the vessel."
+            ]
+          },
+          {
+            "op_type": "heat",
+            "steps": [
+              "Place the reaction vessel on a hotplate.",
+              "Ramp to the target temperature.",
+              "Maintain the target temperature for the specified time."
+            ]
+          },
+          {
+            "op_type": "stir",
+            "steps": [
+              "Place the reaction vessel on a stir plate.",
+              "Set the stirrer to an appropriate speed.",
+              "Stir for 6 h."
+            ]
+          },
+          {
+            "op_type": "heat",
+            "steps": [
+              "Place the reaction vessel on a hotplate.",
+              "Ramp to the target temperature.",
+              "Maintain the target temperature for the specified time."
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

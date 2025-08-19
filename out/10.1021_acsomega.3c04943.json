@@ -1,0 +1,29 @@
+{
+  "paper_id": "10.1021/acsomega.3c04943",
+  "title": "Emergence of a Low-Energy Peak in the Smoothed Absolute Value Circular Dichroism Spectra of Small Helical Gold Nanorods.",
+  "authors": [],
+  "doi": "10.1021/acsomega.3c04943",
+  "source": "eupmc",
+  "urls": {
+    "pdf": null
+  },
+  "license": {
+    "type": "unknown"
+  },
+  "access_route": "oa",
+  "sections": [
+    {
+      "heading": "Computational Methods",
+      "text": "2 Computational Methods To obtain the\noptimized Au 24  to Au 56  structures,\nwe used DFT as implemented in the Gaussian 09 software package. 29  As in our previous DFT studies of small gold\nnanorods, 24 − 26  we employed the BP86 functional with a double-ζ\nbasis set and relativistic effects were included via the LanL2DZ pseudopotential.\nThe BP86 functional is a widely used gradient-corrected functional,\nwhich combines the exchange term of Becke 30  with the correlation term of Perdew. 31 To obtain the absorption and CD spectra for the optimized\nAu 24  to Au 56  structures, we used time-dependent\ndensity\nfunctional theory (TDDFT) as implemented in the Gaussian 09 software\npackage. 29  See the  SI  for the equations used to generate the spectra. We employed\nthe long-range-corrected BP86 functional since this correction has\nbeen shown to significantly improve the accuracy of TDDFT calculations. 32 We note that the BP86 functional with\na double-ζ basis set\nwas used in several recent TDDFT studies of Ag nanoclusters, including\noctahedra and icosahedra with comparison to spherical Jellium results, 33  and the geometries and optical spectra of small\nAg clusters (Ag 5  to Ag 12 ) with favorable comparisons\nto gas phase spectra. 34  Other studies have\nsuggested that similar GGA functionals (e.g., PBE) combined with the\nLANL2DZ can closely reproduce absorption spectra from rigorous electrodynamics\ncalculations for small gold clusters. 35 The smoothed spectra were obtained using the standard procedure\n(see for example ref ( 9 ) of broadening individual lines with Gaussians as discussed below\nwith additional details found in the  SI ."
+    }
+  ],
+  "extractions": {
+    "methods_paragraphs": [
+      {
+        "text": "2 Computational Methods To obtain the\noptimized Au 24  to Au 56  structures,\nwe used DFT as implemented in the Gaussian 09 software package. 29  As in our previous DFT studies of small gold\nnanorods, 24 − 26  we employed the BP86 functional with a double-ζ\nbasis set and relativistic effects were included via the LanL2DZ pseudopotential.\nThe BP86 functional is a widely used gradient-corrected functional,\nwhich combines the exchange term of Becke 30  with the correlation term of Perdew. 31 To obtain the absorption and CD spectra for the optimized\nAu 24  to Au 56  structures, we used time-dependent\ndensity\nfunctional theory (TDDFT) as implemented in the Gaussian 09 software\npackage. 29  See the  SI  for the equations used to generate the spectra. We employed\nthe long-range-corrected BP86 functional since this correction has\nbeen shown to significantly improve the accuracy of TDDFT calculations. 32 We note that the BP86 functional with\na double-ζ basis set\nwas used in several recent TDDFT studies of Ag nanoclusters, including\noctahedra and icosahedra with comparison to spherical Jellium results, 33  and the geometries and optical spectra of small\nAg clusters (Ag 5  to Ag 12 ) with favorable comparisons\nto gas phase spectra. 34  Other studies have\nsuggested that similar GGA functionals (e.g., PBE) combined with the\nLANL2DZ can closely reproduce absorption spectra from rigorous electrodynamics\ncalculations for small gold clusters. 35 The smoothed spectra were obtained using the standard procedure\n(see for example ref ( 9 ) of broadening individual lines with Gaussians as discussed below\nwith additional details found in the  SI .",
+        "operations": [],
+        "expanded": []
+      }
+    ]
+  }
+}

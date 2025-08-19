@@ -1,0 +1,123 @@
+{
+  "paper_id": "10.3390/bios15010061",
+  "title": "Potential of Zinc Oxide Nanostructures in Biosensor Application.",
+  "authors": [],
+  "doi": "10.3390/bios15010061",
+  "source": "eupmc",
+  "urls": {
+    "pdf": null
+  },
+  "license": {
+    "type": "unknown"
+  },
+  "access_route": "oa",
+  "sections": [
+    {
+      "heading": "4. Methods for Synthesizing ZnO Nanostructures",
+      "text": "4. Methods for Synthesizing ZnO Nanostructures Nanostructures can be synthesized using a variety of techniques, which are generally divided into two main categories: top-down and bottom-up approaches [ 14 ]. In the top-down scheme, the procedure begins with a larger bulk material that is gradually reduced or broken down into nanoscale structures using methods such as exfoliation or mechanical grinding. Conversely, the bottom-up method starts at the atomic level, where atoms or molecules aggregate to form nanostructures. The primary methods for developing ZnO nanostructures are outlined below. 4.1. Pulsed Laser Deposition In the pulsed laser deposition (PLD) technique, nanostructures are created by directing a high-energy laser at a bulk crystal. When the laser is focused, the target material is ablated and then deposited as nanostructures on a substrate positioned a short distance away. Kawakami et al. synthesized 99% pure ZnO nanorods using sapphire substrate [ 15 ]. These nanorods were synthesized at substrate temperatures ranging from 400 to 700 °C and oxygen pressure between 1 and 10 torr. The rod size can be regulated by varying the duration of deposition, with rods measuring 6 μm in length and 300 nm in diameter obtained after 30 min deposition period. Bae et al. produced nanocones at 580 °C, using pulse energy of 90–100 mJ, in a 10 mTorr O 2  environment on a substrate [ 16 ]. The PLD technique guarantees the stoichiometry and nanostructures with high quality; however, it is constrained by the limited area available for deposition. 4.2. Sputtering Sputtering provides flexibility for growing nanostructures over large substrate areas. In this technique, Zn or ZnO serves as target material, which is showered with high energy Ar ions. In this process, target atoms are knocked out through bombardment and then accumulate on the surface of substrate. The radio frequency (RF) magnetron sputtering method generates a powerful magnetic field around the target, effectively trapping the plasma close to the substrate. Liu and his team utilized RF reactive sputtering, with high-purity zinc (99.99%) as the target and polyvinyl pyrrolidone (PVP) fibers as the substrate, to fabricate nanotubes [ 17 ]. The deposition process lasted 20 min at a pressure of 7 × 10 −4  Pa, followed by annealing at 600 °C. Chiou et al. produced nanowires on Cu/Ti/Si wafers at a pressure of 0.05 torr, achieving diameters of approximately 45 nm after a 5-min deposition and 55 nm after a 30-min deposition [ 18 ]. Venkatesh et al. deposited nanorods with a preferred growth orientation in the (002) direction using Ar sputtering at a pressure of 0.01 mbar and 650 °C substrate temperature, with a deposition time of 60 min [ 19 ] While sputtering enables large-area deposition, the film quality is generally lower in comparison to that achieved by PLD. 4.3. Sol–Gel In comparison to the chemical vapor deposition method, the sol–gel process is a less costly method suitable for large-area deposition. It supports superior rates of deposition while offering excellent control over the morphology of nanostructures [ 20 ]. The sol–gel method generally involves three primary steps. First, the sol is prepared from the initial materials. Next, the sol is deposited onto the substrate using an appropriate method. Finally, a heat treatment is applied to the xerogel film. Ahn et al. prepared nanorods of ZnO by preparing a sol of a mixture of Zn(NO 3 ) 2 ·6H 2 O and hexamethylenetetramine (HMTA) in equal parts [ 21 ]. The process requires a temperature of around 95 °C, resulting in the production of crystalline nanorods of ZnO having wurtzite structures of hexagonal shape on a SiO 2 /Si substrate. These nanorods’ diameter can be adjusted by adjusting the initial materials’ concentration. Various precursors like zinc alkoxides, chlorides, nitrates, and zinc acetate dihydrate are used in the sol–gel process. Alkoxides are less favored because they are insoluble in alcohols [ 22 ]. Inorganic salts such as nitrates pose challenges during removal of anionic species from the formed product, while employing acetate dihydrate results in by-products having volatile nature. A detailed description of the sol–gel method can be found in the work of Znaidi et al. [ 23 ]. 4.4. Thermal Evaporation In the thermal evaporation process, the source material is heated to a high temperature, causing it to vaporize and subsequently condense onto the substrate. Interestingly, the substrate doesn’t burn during ZnO nanostructure formation by thermal evaporation because the process is conducted under controlled conditions. The temperature is optimized to vaporize the ZnO precursor while remaining below the substrate’s thermal degradation point. Additionally, the process typically occurs in a vacuum or inert gas atmosphere, preventing oxidative reactions. Substrates are chosen for their thermal stability and are positioned at a distance from the heat source where it remains relatively cooler, sufficient only for ZnO condensation and growth. Umar and colleagues used ZnO powder as the source material to grow ZnO nanorods on a silicon substrate coated with nickel [ 24 ]. Nitrogen and oxygen gases were introduced at flow rates of 5–15 sccm and 10–30 sccm, respectively, with deposition times ranging from 30 to 120 min. The ZnO nanorods, measuring 4–5 μm in length and 300–350 nm in diameter, were grown at temperatures between 500 and 550 °C. Bae et al. produced nanowires at temperatures between 800 and 1000 °C, using 500 sccm of argon gas [ 25 ]. One advantage of thermal evaporation is that it does not need a catalyst, thereby avoiding unintentional contamination. However, the high temperatures necessary for this process limit the choice of substrates that can be employed to synthesize ZnO nanostructures."
+    }
+  ],
+  "extractions": {
+    "methods_paragraphs": [
+      {
+        "text": "4. Methods for Synthesizing ZnO Nanostructures Nanostructures can be synthesized using a variety of techniques, which are generally divided into two main categories: top-down and bottom-up approaches [ 14 ]. In the top-down scheme, the procedure begins with a larger bulk material that is gradually reduced or broken down into nanoscale structures using methods such as exfoliation or mechanical grinding. Conversely, the bottom-up method starts at the atomic level, where atoms or molecules aggregate to form nanostructures. The primary methods for developing ZnO nanostructures are outlined below. 4.1. Pulsed Laser Deposition In the pulsed laser deposition (PLD) technique, nanostructures are created by directing a high-energy laser at a bulk crystal. When the laser is focused, the target material is ablated and then deposited as nanostructures on a substrate positioned a short distance away. Kawakami et al. synthesized 99% pure ZnO nanorods using sapphire substrate [ 15 ]. These nanorods were synthesized at substrate temperatures ranging from 400 to 700 °C and oxygen pressure between 1 and 10 torr. The rod size can be regulated by varying the duration of deposition, with rods measuring 6 μm in length and 300 nm in diameter obtained after 30 min deposition period. Bae et al. produced nanocones at 580 °C, using pulse energy of 90–100 mJ, in a 10 mTorr O 2  environment on a substrate [ 16 ]. The PLD technique guarantees the stoichiometry and nanostructures with high quality; however, it is constrained by the limited area available for deposition. 4.2. Sputtering Sputtering provides flexibility for growing nanostructures over large substrate areas. In this technique, Zn or ZnO serves as target material, which is showered with high energy Ar ions. In this process, target atoms are knocked out through bombardment and then accumulate on the surface of substrate. The radio frequency (RF) magnetron sputtering method generates a powerful magnetic field around the target, effectively trapping the plasma close to the substrate. Liu and his team utilized RF reactive sputtering, with high-purity zinc (99.99%) as the target and polyvinyl pyrrolidone (PVP) fibers as the substrate, to fabricate nanotubes [ 17 ]. The deposition process lasted 20 min at a pressure of 7 × 10 −4  Pa, followed by annealing at 600 °C. Chiou et al. produced nanowires on Cu/Ti/Si wafers at a pressure of 0.05 torr, achieving diameters of approximately 45 nm after a 5-min deposition and 55 nm after a 30-min deposition [ 18 ]. Venkatesh et al. deposited nanorods with a preferred growth orientation in the (002) direction using Ar sputtering at a pressure of 0.01 mbar and 650 °C substrate temperature, with a deposition time of 60 min [ 19 ] While sputtering enables large-area deposition, the film quality is generally lower in comparison to that achieved by PLD. 4.3. Sol–Gel In comparison to the chemical vapor deposition method, the sol–gel process is a less costly method suitable for large-area deposition. It supports superior rates of deposition while offering excellent control over the morphology of nanostructures [ 20 ]. The sol–gel method generally involves three primary steps. First, the sol is prepared from the initial materials. Next, the sol is deposited onto the substrate using an appropriate method. Finally, a heat treatment is applied to the xerogel film. Ahn et al. prepared nanorods of ZnO by preparing a sol of a mixture of Zn(NO 3 ) 2 ·6H 2 O and hexamethylenetetramine (HMTA) in equal parts [ 21 ]. The process requires a temperature of around 95 °C, resulting in the production of crystalline nanorods of ZnO having wurtzite structures of hexagonal shape on a SiO 2 /Si substrate. These nanorods’ diameter can be adjusted by adjusting the initial materials’ concentration. Various precursors like zinc alkoxides, chlorides, nitrates, and zinc acetate dihydrate are used in the sol–gel process. Alkoxides are less favored because they are insoluble in alcohols [ 22 ]. Inorganic salts such as nitrates pose challenges during removal of anionic species from the formed product, while employing acetate dihydrate results in by-products having volatile nature. A detailed description of the sol–gel method can be found in the work of Znaidi et al. [ 23 ]. 4.4. Thermal Evaporation In the thermal evaporation process, the source material is heated to a high temperature, causing it to vaporize and subsequently condense onto the substrate. Interestingly, the substrate doesn’t burn during ZnO nanostructure formation by thermal evaporation because the process is conducted under controlled conditions. The temperature is optimized to vaporize the ZnO precursor while remaining below the substrate’s thermal degradation point. Additionally, the process typically occurs in a vacuum or inert gas atmosphere, preventing oxidative reactions. Substrates are chosen for their thermal stability and are positioned at a distance from the heat source where it remains relatively cooler, sufficient only for ZnO condensation and growth. Umar and colleagues used ZnO powder as the source material to grow ZnO nanorods on a silicon substrate coated with nickel [ 24 ]. Nitrogen and oxygen gases were introduced at flow rates of 5–15 sccm and 10–30 sccm, respectively, with deposition times ranging from 30 to 120 min. The ZnO nanorods, measuring 4–5 μm in length and 300–350 nm in diameter, were grown at temperatures between 500 and 550 °C. Bae et al. produced nanowires at temperatures between 800 and 1000 °C, using 500 sccm of argon gas [ 25 ]. One advantage of thermal evaporation is that it does not need a catalyst, thereby avoiding unintentional contamination. However, the high temperatures necessary for this process limit the choice of substrates that can be employed to synthesize ZnO nanostructures.",
+        "operations": [
+          {
+            "op_type": "heat",
+            "sentence": "The deposition process lasted 20 min at a pressure of 7 × 10 −4  Pa, followed by annealing at 600 °C.",
+            "start_char": 2230,
+            "end_char": 2331,
+            "materials": [
+              "20 min",
+              "10 −4",
+              "600 °C"
+            ],
+            "params": {
+              "temp": "600°C",
+              "time": "20 min"
+            }
+          },
+          {
+            "op_type": "heat",
+            "sentence": "Finally, a heat treatment is applied to the xerogel film.",
+            "start_char": 3319,
+            "end_char": 3376,
+            "materials": [],
+            "params": {}
+          },
+          {
+            "op_type": "heat",
+            "sentence": "Thermal Evaporation In the thermal evaporation process, the source material is heated to a high temperature, causing it to vaporize and subsequently condense onto the substrate.",
+            "start_char": 4284,
+            "end_char": 4461,
+            "materials": [],
+            "params": {}
+          },
+          {
+            "op_type": "heat",
+            "sentence": "Substrates are chosen for their thermal stability and are positioned at a distance from the heat source where it remains relatively cooler, sufficient only for ZnO condensation and growth.",
+            "start_char": 4860,
+            "end_char": 5048,
+            "materials": [],
+            "params": {}
+          },
+          {
+            "op_type": "add",
+            "sentence": "Nitrogen and oxygen gases were introduced at flow rates of 5–15 sccm and 10–30 sccm, respectively, with deposition times ranging from 30 to 120 min.",
+            "start_char": 5179,
+            "end_char": 5327,
+            "materials": [
+              "to 120 min"
+            ],
+            "params": {
+              "time": "120 min"
+            }
+          }
+        ],
+        "expanded": [
+          {
+            "op_type": "heat",
+            "steps": [
+              "Place the reaction vessel on a hotplate.",
+              "Ramp to 600°C.",
+              "Maintain 600°C for 20 min."
+            ]
+          },
+          {
+            "op_type": "heat",
+            "steps": [
+              "Place the reaction vessel on a hotplate.",
+              "Ramp to the target temperature.",
+              "Maintain the target temperature for the specified time."
+            ]
+          },
+          {
+            "op_type": "heat",
+            "steps": [
+              "Place the reaction vessel on a hotplate.",
+              "Ramp to the target temperature.",
+              "Maintain the target temperature for the specified time."
+            ]
+          },
+          {
+            "op_type": "heat",
+            "steps": [
+              "Place the reaction vessel on a hotplate.",
+              "Ramp to the target temperature.",
+              "Maintain the target temperature for the specified time."
+            ]
+          },
+          {
+            "op_type": "add",
+            "steps": [
+              "Ensure reaction vessel is present and empty.",
+              "Place a clean stir bar in the vessel.",
+              "Measure the specified amount of to 120 min.",
+              "Transfer to 120 min into the vessel."
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

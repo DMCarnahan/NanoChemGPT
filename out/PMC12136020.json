@@ -1,0 +1,114 @@
+{
+  "paper_id": "PMC12136020",
+  "title": "Harmonic-induced plasmonic resonant energy transfer between metal and semiconductor nanoparticles",
+  "authors": [],
+  "doi": null,
+  "source": "eupmc",
+  "urls": {
+    "pdf": null
+  },
+  "license": {
+    "type": "unknown"
+  },
+  "access_route": "oa",
+  "sections": [
+    {
+      "heading": "MATERIALS AND METHODS",
+      "text": "MATERIALS AND METHODS Nanoparticle synthesis and film deposition Nanoparticles of CuS and Au are synthesized using standard solvothermal techniques and then assembled into heterostructure films sequentially by spin coating as described in previous reports ( 31 ,  32 ). The alumina of varying thickness is vertically deposited via electron-beam physical vapor deposition (Angstrom Amod) onto the Au layers after the Au film deposition on the glass slides. The electron beam evaporation is carried out at the pressure  5 · 1 0 − 6  torr, and the electron beam is rastered across the alumina precursor in a crucible while the power increases until the deposition rate stabilizes at 0.3 Å/s, at which point the sample shutter opens and the deposition on the sample initiates. Last, the CuS NPs will be added atop the alumina layers via sputter coating. The thickness of the deposited alumina is verified by AFM (Bruker Dimension Icon AFM) in tapping mode. The structure of the alumina deposition on the Au films is confirmed with scanning electron microscopy (SEM) (Zeiss Merlin SEM) at 1.20 and 10.00 kV with the high-efficiency secondary electron detector and energy dispersive spectroscopy at 10.00 kV and 500 pA (Oxford X-MAX 50 SDD and Oxford Aztec 3.3 EDS analysis software). Nonlinear optical measurements The extinction spectrum of the Au- Al 2 O 3 -CuS films is acquired in the Agilent Technologies Cary 5000 UV-vis–NIR spectrophotometer with an integrating sphere from 400 to 3000 nm. Optical measurements are performed using the nonlinear setup depicted in fig. S16. The Orpheus-F OPA is pumped by a compact, high-repetition rate femtosecond Pharos laser comprising an oscillator and chirped-pulse amplifier, using diode-pumped Yb:KGW [KGd(WO 4 ) 2 ] as an active medium and generating pulses centered at 1035  ±  5 nm at an average power of 600 mW, 187-fs duration, at a repetition rate of 60 kHz, and an energy per pulse of 10  μ  J. The signal and idler pulses of the OPA are tunable over 650 to 1000 nm and 1000- to 2500-nm ranges, respectively, providing gap-free tunability. The laser beam from the OPA is mechanically chopped at a frequency of 265 Hz, with a duty cycle of 20%. This avoids repetitive exposures and ensures stable measurement conditions. To determine the dependence of the upconverted signal on the pump intensity, we use a rotational polarizer to adjust the laser power by varying the angle between the fixed output pump polarization of the pump laser and the axis of the rotational polarizer. Pump power is measured in a Thorlabs S130C power meter with a PM100D readout. The SHG, THG, and MPPL signals are isolated from other upconverted signals using the respective bandpass filter for each pump wavelength (Optosigma VPF-25C-10-25-350 for 1050-nm THG, Optosigma YIF-BA515-560S for 1050-nm SHG and 1600-nm THG, Optosigma VPF-25C-10-12-265 for 800-nm THG, Thorlabs FBH400-10 for 800-nm SHG and 1200-nm THG, Thorlabs FBH600-10 for 1200-nm SHG, and Thorlabs FBH800-10 for 1600-nm SHG). Our detector is the solid-state photomultiplier tube (PMT; Hamamatsu, R9875U for UV light detection and R9880U for visible light detection) operating at 1.1 kV. A Newport ¼ m 74100 Monochromator and the PMT detector are used to collect the output spectrum of the NP heterostructures. Ultrafast pump-probe measurement The ultrafast dynamics of NP films are measured using the signal (105 fs, 1200 nm) and idler (130 fs, 2400 nm) beam from a Light Conversion TOPAS OPA pumped by a 1-kHz Ti:sapphire regenerative amplifier (Spectra Physics Spitfire Ace, 100 fs, 800 nm) ( 51 ). The signal (pump) is chopped at 500 Hz, while the idler (probe) retains a 1-kHz repetition rate. The pump is delayed relative to the probe by computer-controlled delay stage. To ensure probing of a uniformly pumped region, the signal and idler beams are focused to beam waists of 200 and 90  μ  m, respectively, measured via knife edge experiments. A linear polarizer on a motorized rotational mount adjusts the pump fluence at 1.12 mJ/cm 2 . The probe is attenuated using a neutral density filter (ND3) and a linear polarizer to achieve an incident fluence of less than 24  μ J/cm 2 . The transmitted probe signal is detected using a PbS-fixed gain detector (Thorlabs PDA30G) via an SR830 lock-in amplifier referenced by the chopper. The transient kinetic traces are plotted with five points movingaverage smoothing. Each curve is normalized to its respective peak differential absorption after subtracting the background signal, defined as the average signal before zero delay. Each normalized differential absorption is calculated using the following equation Normalized ( Δ A A ) i = ( Δ A A ) i − ( Δ A A ) background ( Δ A A ) max (4) To determine the rate of thermalization due to hole-hole scattering and relaxation due to hole-phonon scattering, the rise time of the TA change is fit to a phenomenological response function ( 52 ) u ( t ) = H ( t ) [ 1 − exp ( − t τ rise ) ] exp ( − t τ recovery ) (5) and the decay trace is fit to the mono-exponential u ( t ) = A * exp ( − t τ recovery ) (6) where  H ( t ) is the Heaviside step function and  τ rise  and  τ recovery  are the time constants of hole-hole scattering and hole-phonon scattering process. Optical simulations The theoretical simulations of the absorption spectra and near-field distributions are performed by commercially available software (Ansys Lumerical FDTD 2021 R2) using a FDTD solver. The material properties of Au sphere (15 nm diameter) are taken from the Johnson and Christy dataset ( 53 ), while the CuS polygon (base side length of 7.3 nm and 6.7 nm in height) are created as Drude plasma model. The damping constants and plasma frequency of these models are adopted from the reference ( 32 ). The plane wave centered at 1050 nm is used as the incident pump. The perfectly matched layer boundary conditions are employed in all  x ,  y , and  z  directions to prevent any nonphysical scattering at boundaries. The grid size in all axes is set to 0.6 nm for the overall simulated region. The simulation time is set to 1000 fs, and the auto shutoff min is set to  10 − 5  s. The absorption cross section is computed by a power monitor, and the near-field patterns in the coupling regions between the Au and CuS NP are examined by a frequency domain field profile monitor."
+    },
+    {
+      "heading": "Nanoparticle synthesis and film deposition",
+      "text": "Nanoparticle synthesis and film deposition Nanoparticles of CuS and Au are synthesized using standard solvothermal techniques and then assembled into heterostructure films sequentially by spin coating as described in previous reports ( 31 ,  32 ). The alumina of varying thickness is vertically deposited via electron-beam physical vapor deposition (Angstrom Amod) onto the Au layers after the Au film deposition on the glass slides. The electron beam evaporation is carried out at the pressure  5 · 1 0 − 6  torr, and the electron beam is rastered across the alumina precursor in a crucible while the power increases until the deposition rate stabilizes at 0.3 Å/s, at which point the sample shutter opens and the deposition on the sample initiates. Last, the CuS NPs will be added atop the alumina layers via sputter coating. The thickness of the deposited alumina is verified by AFM (Bruker Dimension Icon AFM) in tapping mode. The structure of the alumina deposition on the Au films is confirmed with scanning electron microscopy (SEM) (Zeiss Merlin SEM) at 1.20 and 10.00 kV with the high-efficiency secondary electron detector and energy dispersive spectroscopy at 10.00 kV and 500 pA (Oxford X-MAX 50 SDD and Oxford Aztec 3.3 EDS analysis software)."
+    }
+  ],
+  "extractions": {
+    "methods_paragraphs": [
+      {
+        "text": "MATERIALS AND METHODS Nanoparticle synthesis and film deposition Nanoparticles of CuS and Au are synthesized using standard solvothermal techniques and then assembled into heterostructure films sequentially by spin coating as described in previous reports ( 31 ,  32 ). The alumina of varying thickness is vertically deposited via electron-beam physical vapor deposition (Angstrom Amod) onto the Au layers after the Au film deposition on the glass slides. The electron beam evaporation is carried out at the pressure  5 · 1 0 − 6  torr, and the electron beam is rastered across the alumina precursor in a crucible while the power increases until the deposition rate stabilizes at 0.3 Å/s, at which point the sample shutter opens and the deposition on the sample initiates. Last, the CuS NPs will be added atop the alumina layers via sputter coating. The thickness of the deposited alumina is verified by AFM (Bruker Dimension Icon AFM) in tapping mode. The structure of the alumina deposition on the Au films is confirmed with scanning electron microscopy (SEM) (Zeiss Merlin SEM) at 1.20 and 10.00 kV with the high-efficiency secondary electron detector and energy dispersive spectroscopy at 10.00 kV and 500 pA (Oxford X-MAX 50 SDD and Oxford Aztec 3.3 EDS analysis software). Nonlinear optical measurements The extinction spectrum of the Au- Al 2 O 3 -CuS films is acquired in the Agilent Technologies Cary 5000 UV-vis–NIR spectrophotometer with an integrating sphere from 400 to 3000 nm. Optical measurements are performed using the nonlinear setup depicted in fig. S16. The Orpheus-F OPA is pumped by a compact, high-repetition rate femtosecond Pharos laser comprising an oscillator and chirped-pulse amplifier, using diode-pumped Yb:KGW [KGd(WO 4 ) 2 ] as an active medium and generating pulses centered at 1035  ±  5 nm at an average power of 600 mW, 187-fs duration, at a repetition rate of 60 kHz, and an energy per pulse of 10  μ  J. The signal and idler pulses of the OPA are tunable over 650 to 1000 nm and 1000- to 2500-nm ranges, respectively, providing gap-free tunability. The laser beam from the OPA is mechanically chopped at a frequency of 265 Hz, with a duty cycle of 20%. This avoids repetitive exposures and ensures stable measurement conditions. To determine the dependence of the upconverted signal on the pump intensity, we use a rotational polarizer to adjust the laser power by varying the angle between the fixed output pump polarization of the pump laser and the axis of the rotational polarizer. Pump power is measured in a Thorlabs S130C power meter with a PM100D readout. The SHG, THG, and MPPL signals are isolated from other upconverted signals using the respective bandpass filter for each pump wavelength (Optosigma VPF-25C-10-25-350 for 1050-nm THG, Optosigma YIF-BA515-560S for 1050-nm SHG and 1600-nm THG, Optosigma VPF-25C-10-12-265 for 800-nm THG, Thorlabs FBH400-10 for 800-nm SHG and 1200-nm THG, Thorlabs FBH600-10 for 1200-nm SHG, and Thorlabs FBH800-10 for 1600-nm SHG). Our detector is the solid-state photomultiplier tube (PMT; Hamamatsu, R9875U for UV light detection and R9880U for visible light detection) operating at 1.1 kV. A Newport ¼ m 74100 Monochromator and the PMT detector are used to collect the output spectrum of the NP heterostructures. Ultrafast pump-probe measurement The ultrafast dynamics of NP films are measured using the signal (105 fs, 1200 nm) and idler (130 fs, 2400 nm) beam from a Light Conversion TOPAS OPA pumped by a 1-kHz Ti:sapphire regenerative amplifier (Spectra Physics Spitfire Ace, 100 fs, 800 nm) ( 51 ). The signal (pump) is chopped at 500 Hz, while the idler (probe) retains a 1-kHz repetition rate. The pump is delayed relative to the probe by computer-controlled delay stage. To ensure probing of a uniformly pumped region, the signal and idler beams are focused to beam waists of 200 and 90  μ  m, respectively, measured via knife edge experiments. A linear polarizer on a motorized rotational mount adjusts the pump fluence at 1.12 mJ/cm 2 . The probe is attenuated using a neutral density filter (ND3) and a linear polarizer to achieve an incident fluence of less than 24  μ J/cm 2 . The transmitted probe signal is detected using a PbS-fixed gain detector (Thorlabs PDA30G) via an SR830 lock-in amplifier referenced by the chopper. The transient kinetic traces are plotted with five points movingaverage smoothing. Each curve is normalized to its respective peak differential absorption after subtracting the background signal, defined as the average signal before zero delay. Each normalized differential absorption is calculated using the following equation Normalized ( Δ A A ) i = ( Δ A A ) i − ( Δ A A ) background ( Δ A A ) max (4) To determine the rate of thermalization due to hole-hole scattering and relaxation due to hole-phonon scattering, the rise time of the TA change is fit to a phenomenological response function ( 52 ) u ( t ) = H ( t ) [ 1 − exp ( − t τ rise ) ] exp ( − t τ recovery ) (5) and the decay trace is fit to the mono-exponential u ( t ) = A * exp ( − t τ recovery ) (6) where  H ( t ) is the Heaviside step function and  τ rise  and  τ recovery  are the time constants of hole-hole scattering and hole-phonon scattering process. Optical simulations The theoretical simulations of the absorption spectra and near-field distributions are performed by commercially available software (Ansys Lumerical FDTD 2021 R2) using a FDTD solver. The material properties of Au sphere (15 nm diameter) are taken from the Johnson and Christy dataset ( 53 ), while the CuS polygon (base side length of 7.3 nm and 6.7 nm in height) are created as Drude plasma model. The damping constants and plasma frequency of these models are adopted from the reference ( 32 ). The plane wave centered at 1050 nm is used as the incident pump. The perfectly matched layer boundary conditions are employed in all  x ,  y , and  z  directions to prevent any nonphysical scattering at boundaries. The grid size in all axes is set to 0.6 nm for the overall simulated region. The simulation time is set to 1000 fs, and the auto shutoff min is set to  10 − 5  s. The absorption cross section is computed by a power monitor, and the near-field patterns in the coupling regions between the Au and CuS NP are examined by a frequency domain field profile monitor.",
+        "operations": [
+          {
+            "op_type": "add",
+            "sentence": "Last, the CuS NPs will be added atop the alumina layers via sputter coating.",
+            "start_char": 773,
+            "end_char": 849,
+            "materials": [],
+            "params": {}
+          },
+          {
+            "op_type": "filter",
+            "sentence": "The SHG, THG, and MPPL signals are isolated from other upconverted signals using the respective bandpass filter for each pump wavelength (Optosigma VPF-25C-10-25-350 for 1050-nm THG, Optosigma YIF-BA515-560S for 1050-nm SHG and 1600-nm THG, Optosigma VPF-25C-10-12-265 for 800-nm THG, Thorlabs FBH400-10 for 800-nm SHG and 1200-nm THG, Thorlabs FBH600-10 for 1200-nm SHG, and Thorlabs FBH800-10 for 1600-nm SHG).",
+            "start_char": 2604,
+            "end_char": 3016,
+            "materials": [
+              "1050-nm THG",
+              "BA515",
+              "1050-nm SHG",
+              "1600-nm THG"
+            ],
+            "params": {
+              "time": "560S"
+            }
+          },
+          {
+            "op_type": "filter",
+            "sentence": "The probe is attenuated using a neutral density filter (ND3) and a linear polarizer to achieve an incident fluence of less than 24  μ J/cm 2 .",
+            "start_char": 4035,
+            "end_char": 4177,
+            "materials": [
+              "(ND3",
+              "less than 24  μ J/cm"
+            ],
+            "params": {}
+          }
+        ],
+        "expanded": [
+          {
+            "op_type": "add",
+            "steps": [
+              "Ensure reaction vessel is present and empty.",
+              "Place a clean stir bar in the vessel.",
+              "Measure the specified amount of reagent.",
+              "Transfer reagent into the vessel."
+            ]
+          },
+          {
+            "op_type": "filter",
+            "steps": [
+              "Perform operation 'filter' as described: The SHG, THG, and MPPL signals are isolated from other upconverted signals using the respective bandpass filter for each pump wavelength (Optosigma VPF-25C-10-25-350 for 1050-nm THG, Optosigma YIF-BA515-560S for 1050-nm SHG and 1600-nm THG, Optosigma VPF-25C-10-12-265 for 800-nm THG, Thorlabs FBH400-10 for 800-nm SHG and 1200-nm THG, Thorlabs FBH600-10 for 1200-nm SHG, and Thorlabs FBH800-10 for 1600-nm SHG)."
+            ]
+          },
+          {
+            "op_type": "filter",
+            "steps": [
+              "Perform operation 'filter' as described: The probe is attenuated using a neutral density filter (ND3) and a linear polarizer to achieve an incident fluence of less than 24  μ J/cm 2 ."
+            ]
+          }
+        ]
+      },
+      {
+        "text": "Nanoparticle synthesis and film deposition Nanoparticles of CuS and Au are synthesized using standard solvothermal techniques and then assembled into heterostructure films sequentially by spin coating as described in previous reports ( 31 ,  32 ). The alumina of varying thickness is vertically deposited via electron-beam physical vapor deposition (Angstrom Amod) onto the Au layers after the Au film deposition on the glass slides. The electron beam evaporation is carried out at the pressure  5 · 1 0 − 6  torr, and the electron beam is rastered across the alumina precursor in a crucible while the power increases until the deposition rate stabilizes at 0.3 Å/s, at which point the sample shutter opens and the deposition on the sample initiates. Last, the CuS NPs will be added atop the alumina layers via sputter coating. The thickness of the deposited alumina is verified by AFM (Bruker Dimension Icon AFM) in tapping mode. The structure of the alumina deposition on the Au films is confirmed with scanning electron microscopy (SEM) (Zeiss Merlin SEM) at 1.20 and 10.00 kV with the high-efficiency secondary electron detector and energy dispersive spectroscopy at 10.00 kV and 500 pA (Oxford X-MAX 50 SDD and Oxford Aztec 3.3 EDS analysis software).",
+        "operations": [
+          {
+            "op_type": "add",
+            "sentence": "Last, the CuS NPs will be added atop the alumina layers via sputter coating.",
+            "start_char": 751,
+            "end_char": 827,
+            "materials": [],
+            "params": {}
+          }
+        ],
+        "expanded": [
+          {
+            "op_type": "add",
+            "steps": [
+              "Ensure reaction vessel is present and empty.",
+              "Place a clean stir bar in the vessel.",
+              "Measure the specified amount of reagent.",
+              "Transfer reagent into the vessel."
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

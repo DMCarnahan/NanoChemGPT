@@ -16,7 +16,6 @@ from flask import (
 from jinja2 import TemplateNotFound
 from openai import OpenAI
 from werkzeug.utils import secure_filename
-
 # ──────────────── Local modules ──────────────── #
 import vector_store as vs
 from converter import validate_step, convert_text_to_robot_ops
@@ -136,6 +135,155 @@ def _safe_text(x: Any) -> str:
     except Exception:
         return ""
 
+RETRIEVER_URL = os.getenv("RETRIEVER_URL","http://127.0.0.1:8000")
+OPENAI_API_KEY= os.getenv("OPENAI_API_KEY","")
+OPENAI_MODEL  = os.getenv("OPENAI_MODEL","gpt-4o")
+HARVESTER_PY  = "./harvester/harvester.py"         
+BUNDLE_PATH   = "./out/bundle_with_methods.jsonl"  
+INDEX_DIR     = "./retriever/index"
+
+class Ask(BaseModel):
+    question: str
+    k: int = 6
+    allow_fetch: bool = True  
+
+def needs_more(question: str, hits: List[Dict[str,Any]]) -> bool:
+    # Heuristics: too few unique papers OR low scores OR short contexts
+    if not hits: return True
+    uniq = {h.get("paper_id") for h in hits if h.get("paper_id")}
+    if len(uniq) < 2: return True
+    scores = [h.get("score",0) for h in hits]
+    if sum(scores[:3])/max(1,len(scores[:3])) < 0.18: return True
+    if sum(len(h.get("text","")) for h in hits) < 800: return True
+    return False
+
+def expand_queries(question: str) -> List[str]:
+    # Lightweight expansion without LLM — add nanochem method terms
+    seeds = [
+        "hydrothermal","solvothermal","sol-gel","calcination","anneal",
+        "spin-coating","precursor","coprecipitation","microwave",
+        "template","electrospinning","nanoparticle","thin film","TiO2","oxide"
+    ]
+    q = question.strip()
+    out = [q]
+    for w in seeds:
+        out.append(f"{q} {w}")
+    return list(dict.fromkeys(out))[:6]  # dedupe & cap
+
+import os, json, tempfile, textwrap, pathlib, subprocess
+from typing import List, Optional
+
+def run_cmd(argv: list[str]) -> None:
+    """Thin wrapper with error surface."""
+    print(f"[run] {' '.join(argv)}")
+    cp = subprocess.run(argv, capture_output=True, text=True)
+    if cp.stdout:
+        print(cp.stdout)
+    if cp.returncode != 0:
+        print(cp.stderr)
+        raise RuntimeError(f"Command failed: {' '.join(argv)} (code {cp.returncode})")
+
+def harvest_once(
+    queries: List[str],
+    out_dir: str = "harvester/out_auto",
+    *,
+    since_year: int = 2016,
+    max_results_per_source: int = 15,
+    grobid_url: Optional[str] = "http://127.0.0.1:8070",
+    unpaywall_email: Optional[str] = None,
+    harvester_py: str = "harvester/harvest.py",           # <-- adjust if different
+    bundle_path: str = "data/bundles/bundle.jsonl",       # the canonical working bundle
+    index_dir: str = "data/vector_store",                 # where indexes are written
+    embed_backend: Optional[str] = None                   # 'st'|'openai'|None -> use script default/env
+) -> str:
+    """
+    1) Harvest papers for `queries` into {out_dir}/bundle.jsonl
+    2) Merge them into `bundle_path` (append/replace as your script defines)
+    3) Rebuild the retrieval index in `index_dir`
+    Returns: absolute path to the updated working bundle (bundle_path)
+    """
+    if not queries:
+        raise ValueError("harvest_once: `queries` cannot be empty")
+
+    out_dir_p = pathlib.Path(out_dir)
+    out_dir_p.mkdir(parents=True, exist_ok=True)
+    bundle_path_p = pathlib.Path(bundle_path)
+    index_dir_p = pathlib.Path(index_dir)
+    index_dir_p.mkdir(parents=True, exist_ok=True)
+
+    # ----- Build YAML config safely (avoid hand-rolled YAML mistakes) -----
+    # Keep it dependency-free: format YAML manually but correctly.
+    # Use JSON quoting for queries for safety.
+    q_lines = "\n".join(f"  - {json.dumps(q, ensure_ascii=False)}" for q in queries)
+    # Only include unpaywall_email if provided
+    unpaywall_line = f'unpaywall_email: {json.dumps(unpaywall_email)}\n' if unpaywall_email else ""
+
+    cfg = textwrap.dedent(
+        f"""
+        out_dir: {out_dir_p.as_posix()}
+        queries:
+        {q_lines}
+        since_year: {since_year}
+        max_results_per_source: {max_results_per_source}
+        grobid_url: {grobid_url if grobid_url else 'null'}
+        {unpaywall_line}"""
+    ).strip() + "\n"
+
+    with tempfile.NamedTemporaryFile("w", suffix=".yaml", delete=False) as tf:
+        tf.write(cfg)
+        cfg_path = tf.name
+
+    # ----- 1) harvest -> {out_dir}/bundle.jsonl -----
+    local_bundle = out_dir_p / "bundle.jsonl"
+    run_cmd(["python", harvester_py, "--config", cfg_path])
+
+    if not local_bundle.exists():
+        raise FileNotFoundError(f"Expected harvester output not found: {local_bundle}")
+
+    # ----- 2) merge fallback procedural paragraphs into the working bundle -----
+    # NOTE: your script name/path may differ
+    run_cmd([
+        "python",
+        "scripts/bundle_add_fallback.py",
+        str(local_bundle),
+        str(bundle_path_p)
+    ])
+
+    # ----- 3) rebuild index over the working bundle -----
+    # Let the indexer pick the backend from env unless explicitly passed.
+    # Avoid '--embed-backend none' which disables vectorization.
+    index_cmd = [
+        "python",
+        "retriever/index_jsonl.py",
+        "--bundle", str(bundle_path_p),
+        "--index_dir", str(index_dir_p),
+    ]
+    if embed_backend:  # 'st' or 'openai' or anything your script supports
+        index_cmd += ["--embed-backend", embed_backend]
+
+    run_cmd(index_cmd)
+
+    return str(bundle_path_p.resolve())
+
+def ask_llm(question: str, hits: List[Dict[str,Any]]) -> str:
+    if not client:
+        return "(No OPENAI_API_KEY set) Top contexts only:\n\n" + "\n\n".join(h["text"] for h in hits)
+    lines=[]
+    for i,h in enumerate(hits,1):
+        lines.append(f"[{i}] {h.get('title','')}")
+        lines.append(h["text"])
+        lines.append("")
+    system = "Answer using only the excerpts. Cite with [1], [2]. If unsure, say so."
+    user = f"Question: {question}\n\nContext:\n" + "\n".join(lines)
+    r = client.chat.completions.create(model=OPENAI_MODEL, temperature=0.1,
+                                       messages=[{"role":"system","content":system},{"role":"user","content":user}])
+    return r.choices[0].message.content.strip()
+
+def retrieve(question: str, k: int) -> List[Dict[str,Any]]:
+    with httpx.Client(timeout=60) as s:
+        r = s.post(f"{RETRIEVER_URL}/search", json={"query":question, "k":k, "mode":"tfidf"})
+        r.raise_for_status()
+        return r.json().get("hits", [])
 
 # ---- Citation extraction and formatting helpers ----
 _CIT_RX_BRACKET = re.compile(r"\[(\d{1,4})\]")
@@ -455,7 +603,7 @@ def ask():
       • Builds a numbered REFERENCES list (web + KB), asks the LLM to cite with [n].
       • Extracts **used** citation indexes and returns only those in an ACS-style block.
       • Computes usage markers via _extract_used_markers.
-      • Judges sufficiency and, if thin, enqueues text-mining for future runs.
+      • Judges sufficiency and, if thin, optionally harvests more data, reindexes, reloads retriever, and retries once.
     """
     # ----------------- tiny helpers -----------------
     def _s(x):
@@ -465,14 +613,14 @@ def ask():
         if not raw:
             return "", ""
         text = raw.strip()
-        fence_rx = re.compile(r"```(?:reason|rationale|reasoning)\s*([\\s\\S]*?)```", re.I)
+        fence_rx = re.compile(r"```(?:reason|rationale|reasoning)\s*([\s\S]*?)```", re.I)
         rationale = ""
         fences = list(fence_rx.finditer(text))
         if fences:
             rationale = fences[-1].group(1).strip()
             answer = fence_rx.sub("", text).strip()
             return answer, rationale
-        head = re.compile(r"(?:^|\\n)#{1,3}\\s*(rationale|reasoning)\\b[^\\n]*\\n((?:.*\\n?)*)$", re.I | re.S)
+        head = re.compile(r"(?:^|\n)#{1,3}\s*(rationale|reasoning)\b[^\n]*\n((?:.*\n?)*)$", re.I | re.S)
         m = head.search(text)
         if m:
             rationale = m.group(2).strip()
@@ -485,11 +633,63 @@ def ask():
         if r.get("doi"): return f"https://doi.org/{r['doi']}"
         return ""
 
+    # --------------- on-demand harvest helpers (inner) ---------------
+    def _needs_more(hits: list[dict]) -> bool:
+        if not hits:
+            return True
+        uniq = {h.get("paper_id") for h in hits if h.get("paper_id")}
+        if len(uniq) < 2:
+            return True
+        scores = [float(h.get("score", 0.0)) for h in hits[:3]]
+        if scores and sum(scores) / len(scores) < 0.18:
+            return True
+        total_ctx = sum(len(_s(h.get("text",""))) for h in hits)
+        return total_ctx < 800
+
+    def _expand_queries(q: str) -> list[str]:
+        seeds = [
+            "hydrothermal","solvothermal","sol-gel","calcination","anneal",
+            "spin-coating","precursor","coprecipitation","microwave",
+            "template","electrospinning","nanoparticle","thin film","oxide"
+        ]
+        base = q.strip()
+        out = [base] + [f"{base} {w}" for w in seeds]
+        seen, uniq = set(), []
+        for s in out:
+            if s not in seen:
+                seen.add(s); uniq.append(s)
+        return uniq[:6]
+
+    def _harvest_reindex(queries: list[str]) -> None:
+        import os, json, subprocess, tempfile, pathlib
+        out_dir = "harvester/out_auto"
+        pathlib.Path(out_dir).mkdir(parents=True, exist_ok=True)
+        cfg = "out_dir: {od}\nqueries:\n{qs}\nsince_year: 2016\nmax_results_per_source: 15\ngrobid_url: http://127.0.0.1:8070\nunpaywall_email: \"\"\n".format(
+            od=out_dir.replace("\\","/"),
+            qs="\n".join(f"- {json.dumps(q)}" for q in queries),
+        )
+        with tempfile.NamedTemporaryFile("w", suffix=".yaml", delete=False) as tf:
+            tf.write(cfg); cfg_path = tf.name
+        # 1) harvest -> out_auto/bundle.jsonl
+        subprocess.run(["python","harvester/harvester.py","--config",cfg_path], check=True)
+        # 2) merge/refresh working bundle
+        subprocess.run(["python","scripts/bundle_add_fallback.py", f"{out_dir}/bundle.jsonl", "out/bundle_with_methods.jsonl"], check=True)
+        # 3) rebuild index
+        subprocess.run(["python","retriever/index_jsonl.py","--bundle","out/bundle_with_methods.jsonl","--index_dir","retriever/index","--embed-backend","none"], check=True)
+        # 4) tell retriever to reload (best-effort)
+        try:
+            import httpx
+            with httpx.Client(timeout=20) as s:
+                s.post("http://127.0.0.1:8000/reload")
+        except Exception:
+            pass
+
     try:
         payload = request.get_json(silent=True) or {}
         user_mode = _s(payload.get("mode") or "").lower().strip()
         question = _s(payload.get("question")).strip()
         want_inline = bool(payload.get("want_inline_citations", True))
+        allow_fetch = bool(payload.get("allow_fetch", True))  # <-- new flag (default True)
         if not question:
             abort(400, "No question.")
 
@@ -505,13 +705,13 @@ def ask():
         # Decide mode from user preference > intent > default
         if user_mode in ("robot","reasoning"):
             mode = user_mode
-        elif intent_str.lower() in ("mechanism","explain","reason"):
+        elif (intent_str or "").lower() in ("mechanism","explain","reason"):
             mode = "reasoning"
         else:
             mode = "robot"
 
         # Search breadth from intent (fallbacks are conservative)
-        kb_k = 6 if "kb" in intent_str.lower() else 4
+        kb_k = 6 if "kb" in (intent_str or "").lower() else 4
         web_k = 8
 
         # ----------------- uploads vector context -----------------
@@ -526,8 +726,8 @@ def ask():
         table_refs = []
         if LOOKUP is not None:
             try:
-                hits = LOOKUP.query(question, topk=5)
-                rows = hits.to_dict(orient="records")
+                hits_tbl = LOOKUP.query(question, topk=5)
+                rows = hits_tbl.to_dict(orient="records")
                 lines = []
                 for i, row in enumerate(rows, start=1):
                     solvent = row.get("solvent") or row.get("solvent_system")
@@ -538,7 +738,7 @@ def ask():
                     lines.append(line)
                     url = row.get("url") or (row.get("doi") and f"https://doi.org/{row['doi']}")
                     if url: table_refs.append({"title": f"Table row {i}", "url": url})
-                table_ctx = "\\n".join(lines)
+                table_ctx = "\n".join(lines)
             except Exception as e:
                 print("[/ask] LOOKUP query error:", e)
 
@@ -550,7 +750,6 @@ def ask():
                 kb_hits = kb_search(question, k=kb_k) or []
             except TypeError:
                 kb_hits = kb_search(question) or []
-
             kb_ids = [h.get("id") for h in kb_hits if isinstance(h, dict) and h.get("id")]
             kb_docs = []
             if kb_ids:
@@ -574,12 +773,22 @@ def ask():
             kb_refs_raw = [_mk_kb_ref(d) for d in items if isinstance(d, dict)]
             if kb_refs_raw:
                 kb_lines = [f"[KB{i}] {r['title']}" for i,r in enumerate(kb_refs_raw, 1)]
-                kb_ctx = "\\n".join(kb_lines)
+                kb_ctx = "\n".join(kb_lines)
         except Exception as e:
             print("[/ask] KB search failed:", e)
 
-        # ----------------- Web/hybrid retriever -----------------
+        # ----------------- Web/hybrid retriever (initial) -----------------
         hits = retriever_search(question, k=web_k, mode="hybrid", alpha=0.7) or []
+
+        # If evidence thin, optionally auto-harvest -> reindex -> reload -> retry once
+        if allow_fetch and _needs_more(hits):
+            try:
+                _harvest_reindex(_expand_queries(question))
+                hits = retriever_search(question, k=web_k, mode="hybrid", alpha=0.7) or []
+            except Exception as e:
+                print("[/ask] auto-harvest failed:", e)
+
+        # ---- Convert hits to web_refs ----
         web_refs = []
         for h in hits:
             web_refs.append({
@@ -603,30 +812,30 @@ def ask():
                 refs.append(r)
                 seen.add(key)
 
-        refs_prompt = "\\n".join(
+        refs_prompt = "\n".join(
             f"[{i+1}] {(r.get('title') or '(no title)')} ({r.get('year') or ''}) — {_ref_url(r)}"
             for i, r in enumerate(refs)
         ).strip()
 
         # ----------------- Compose CONTEXT -----------------
         ctx_parts = []
-        if uploads_ctx: ctx_parts.append("<<<CTX_UPLOADS>>>\\n" + uploads_ctx)
-        if table_ctx:   ctx_parts.append("<<<CTX_TABLE>>>\\n" + table_ctx)
-        if kb_ctx:      ctx_parts.append("<<<CTX_KB>>>\\n" + kb_ctx)
-        context_joined = "\\n\\n---\\n\\n".join(ctx_parts).strip()
+        if uploads_ctx: ctx_parts.append("<<<CTX_UPLOADS>>>\n" + uploads_ctx)
+        if table_ctx:   ctx_parts.append("<<<CTX_TABLE>>>\n" + table_ctx)
+        if kb_ctx:      ctx_parts.append("<<<CTX_KB>>>\n" + kb_ctx)
+        context_joined = "\n\n---\n\n".join(ctx_parts).strip()
 
         # ----------------- Prompting -----------------
         robot_rules = (
-            "Return a discrete lab protocol with exact quantities on a small scale (~0.5 mmol Co):\\n"
-            " - Include specific masses (mg) or mmol for reagents; volumes (mL) for liquids.\\n"
-            " - Specify temperatures (°C), ramp rates (°C/min), hold times (min/h), and atmosphere (Ar/N2/vacuum).\\n"
-            " - Include workup and purification (quench, washing/centrifugation, drying) with volumes.\\n"
-            " - No placeholders (avoid “e.g.”/“or”). Be decisive.\\n"
+            "Return a discrete lab protocol with exact quantities on a small scale (~0.5 mmol Co):\n"
+            " - Include specific masses (mg) or mmol for reagents; volumes (mL) for liquids.\n"
+            " - Specify temperatures (°C), ramp rates (°C/min), hold times (min/h), and atmosphere (Ar/N2/vacuum).\n"
+            " - Include workup and purification (quench, washing/centrifugation, drying) with volumes.\n"
+            " - No placeholders (avoid “e.g.”/“or”). Be decisive.\n"
             " - Output only the final protocol in markdown. Do not include any fenced blocks named reason or rationale in the answer. Put all reasoning in the separate rationale channel."
         )
         reasoning_rules = (
-            " - Provide a mechanistic explanation and design considerations for the target.\\n"
-            " - Focus on: nucleation vs growth; ligand/solvent coordination; surfactants; reduction/oxidation; temperature profile and morphology control; atmosphere; pitfalls; safety.\\n"
+            " - Provide a mechanistic explanation and design considerations for the target.\n"
+            " - Focus on: nucleation vs growth; ligand/solvent coordination; surfactants; reduction/oxidation; temperature profile and morphology control; atmosphere; pitfalls; safety.\n"
             " - Do NOT return a step-by-step protocol. Be concise but specific."
         )
         inline_rule = (
@@ -635,54 +844,54 @@ def ask():
             " - Inline numeric citations are optional for this request."
         )
         acs_rule = (
-            " - Write the REFERENCES block in ACS format: author(s), title, journal, year, volume, pages, DOI.\\n"
+            " - Write the REFERENCES block in ACS format: author(s), title, journal, year, volume, pages, DOI.\n"
             " - Use inline numeric citations ([n]) for facts from REFERENCES. Do NOT include a REFERENCES block in your answer."
         )
 
         def strip_references_block(text: str) -> str:
-            return re.sub(r"##\\s*References[\\s\\S]*", "", text, flags=re.I).strip()
+            return re.sub(r"##\s*References[\s\S]*", "", text, flags=re.I).strip()
 
         if mode == "reasoning":
             prompt = (
-                "You are NanoChemGPT. Use the CONTEXT and numbered REFERENCES.\\n"
-                "Rules:\\n"
-                " - Prefer CONTEXT and REFERENCES over general knowledge when relevant.\\n"
-                " - For each bullet, quote or paraphrase a specific finding from CONTEXT or REFERENCES, and cite the source. Do not generalize or invent citations.\\n"
-                " - If you use any content from CONTEXT, append [CTX] on that line.\\n"
-                f"{inline_rule}\\n"
-                " - If CONTEXT is insufficient, say so explicitly before generalizing.\\n"
-                f"{reasoning_rules}\\n"
-                f"{acs_rule}\\n"
-                "Return exactly ONE block:\\n"
-                "## Mechanistic reasoning\\n"
-                "- bullet points with inline [n] and [CTX] where appropriate.\\n\\n"
-                f"CONTEXT:\\n{context_joined}\\n\\n"
-                f"REFERENCES:\\n{refs_prompt}\\n\\n"
+                "You are NanoChemGPT. Use the CONTEXT and numbered REFERENCES.\n"
+                "Rules:\n"
+                " - Prefer CONTEXT and REFERENCES over general knowledge when relevant.\n"
+                " - For each bullet, quote or paraphrase a specific finding from CONTEXT or REFERENCES, and cite the source. Do not generalize or invent citations.\n"
+                " - If you use any content from CONTEXT, append [CTX] on that line.\n"
+                f"{inline_rule}\n"
+                " - If CONTEXT is insufficient, say so explicitly before generalizing.\n"
+                f"{reasoning_rules}\n"
+                f"{acs_rule}\n"
+                "Return exactly ONE block:\n"
+                "## Mechanistic reasoning\n"
+                "- bullet points with inline [n] and [CTX] where appropriate.\n\n"
+                f"CONTEXT:\n{context_joined}\n\n"
+                f"REFERENCES:\n{refs_prompt}\n\n"
                 f"User question: {question}"
             )
         else:
             prompt = (
-                "You are NanoChemGPT. Use the CONTEXT and the numbered REFERENCES to propose a synthesis.\\n"
-                "Rules:\\n"
-                " - Prefer CONTEXT and REFERENCES over general knowledge when relevant.\\n"
-                " - For each step, quote or paraphrase a specific finding from CONTEXT or REFERENCES, and cite the source. Do not generalize or invent citations.\\n"
-                " - If you use any content from CONTEXT, append [CTX] on that line.\\n"
-                f"{inline_rule}\\n"
-                " - If CONTEXT is insufficient, say so explicitly before generalizing.\\n"
-                f"{robot_rules}\\n"
-                f"{acs_rule}\\n"
-                "Return two blocks exactly in this order:\\n"
-                "## Synthesis Protocol:\\n"
-                "1. **Hardware & Glassware**:\\n[]\\n"
-                "2. **Materials**:\\n[]\\n"
-                "3. **Procedure**\\n[]\\n\\n"
-                "```reason\\n"
-                "For each key justification, add inline tags: [CTX] uploaded/context hits, [PARSED] parsed protocols, [n] for numbered web REFERENCES, [GEN] if inferred.\\n"
-                "Keep rationales terse.\\n"
-                "Add NO other blocks of text.\\n"
-                "```\\n\\n"
-                f"CONTEXT:\\n{context_joined}\\n\\n"
-                f"REFERENCES:\\n{refs_prompt}\\n\\n"
+                "You are NanoChemGPT. Use the CONTEXT and the numbered REFERENCES to propose a synthesis.\n"
+                "Rules:\n"
+                " - Prefer CONTEXT and REFERENCES over general knowledge when relevant.\n"
+                " - For each step, quote or paraphrase a specific finding from CONTEXT or REFERENCES, and cite the source. Do not generalize or invent citations.\n"
+                " - If you use any content from CONTEXT, append [CTX] on that line.\n"
+                f"{inline_rule}\n"
+                " - If CONTEXT is insufficient, say so explicitly before generalizing.\n"
+                f"{robot_rules}\n"
+                f"{acs_rule}\n"
+                "Return two blocks exactly in this order:\n"
+                "## Synthesis Protocol:\n"
+                "1. **Hardware & Glassware**:\n[]\n"
+                "2. **Materials**:\n[]\n"
+                "3. **Procedure**\n[]\n\n"
+                "```reason\n"
+                "For each key justification, add inline tags: [CTX] uploaded/context hits, [PARSED] parsed protocols, [n] for numbered web REFERENCES, [GEN] if inferred.\n"
+                "Keep rationales terse.\n"
+                "Add NO other blocks of text.\n"
+                "```\n\n"
+                f"CONTEXT:\n{context_joined}\n\n"
+                f"REFERENCES:\n{refs_prompt}\n\n"
                 f"User question: {question}"
             )
 
@@ -707,7 +916,7 @@ def ask():
         # ---- Usage markers (refs + tags) ----
         markers = _extract_used_markers(answer, rationale)
 
-        # ---- Sufficiency check + enqueue mining if thin ----
+        # ---- Sufficiency check + enqueue mining if thin (kept) ----
         enqueued = False
         try:
             try:
@@ -763,6 +972,7 @@ def ask():
     except Exception as e:
         traceback.print_exc()
         return jsonify({"ok": False, "error": f"/ask failed: {e}"}), 500
+
 @app.post("/parse")
 def parse_route():
     try:

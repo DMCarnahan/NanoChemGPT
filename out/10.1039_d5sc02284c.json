@@ -1,0 +1,71 @@
+{
+  "paper_id": "10.1039/d5sc02284c",
+  "title": "Toward high-selectivity CO&lt;sub&gt;2&lt;/sub&gt; photoelectroreduction: mechanistic foundations, recent advances and challenges.",
+  "authors": [],
+  "doi": "10.1039/d5sc02284c",
+  "source": "eupmc",
+  "urls": {
+    "pdf": null
+  },
+  "license": {
+    "type": "unknown"
+  },
+  "access_route": "oa",
+  "sections": [
+    {
+      "heading": "Product detection methods and the product selectivity calculation formula",
+      "text": "2.1.2 Product detection methods and the product selectivity calculation formula The products of PEC CO 2 RR include various gaseous, liquid, and solid substances, and their types depend on the composition of the photocatalyst, reaction conditions, and device design. To accurately detect these products, it is usually necessary to rely on a variety of devices, depending on the category and nature of the products. The detection of gaseous products mainly relies on gas chromatography (GC) and mass spectrometry (MS). These devices can separate and quantitatively analyze gases such as methane CH 4 , CO, C 2 H 4  and H 2 . Gas chromatography separates different gas components through a chromatography column and is combined with a flame ionization detector (FID) or thermal conductivity detector (TCD) for quantitative analysis, while mass spectrometry further improves the accuracy and sensitivity of product identification through ionization and mass analysis. The detection of liquid products mainly relies on ion chromatography (IC), high-performance liquid chromatography (HPLC), and nuclear magnetic resonance (NMR). These techniques can detect and analyze liquid products such as HCOOH, ethanol C 2 H 5 OH and CH 3 COOH. For example, IC detects ionic components (HCOO −  and CH 3 COO − ) in liquid phase products and is combined with a conductivity detector or UV-vis detector for quantitative analysis; HPLC separates the components of the liquid products and is combined with a UV-vis detector or fluorescence detector for quantitative analysis; while NMR can provide information on the molecular structure of the products by analyzing changes in the chemical environment. A combination of multiple devices may be required, such as gas chromatography-mass spectrometry (GC-MS) for simultaneously separating and analyzing gaseous products. In conclusion, the detection of the products of PEC CO 2 RR requires the selection of appropriate devices and setups according to the types and characteristics of different products to achieve accurate qualitative and quantitative analysis of the products. The product selectivity, FE and product photocurrent density in PEC CO 2  reduction are the key parameters for evaluating the reaction performance. 39  Their definitions and formulae are as follows: The product selectivity (PS) refers to the ratio of the yield of a specific reduction product (A) to that of all possible products. Usually, in some studies, only a portion of reduction products is detected to calculate the relative selectivity. Its calculation formula is shown in  eqn (1) : 1 where PS A  is the product selectivity of A, the  n A  (mol) is the molar mass of A, and  n Total  (mol) is the molar mass of all reduction products. FE is used to measure how much electrical charge is used to drive the CO 2  reduction reaction. Specifically, FE represents the ratio of the number of electrons used to generate a specific reduction product to the total number of electrons involved in the electrochemical reaction. FE is an important indicator for measuring the selectivity and energy efficiency of the reaction. In the PEC CO 2 RR, a higher FE means that more electrical energy is used for the generation of the desired reduction product rather than being consumed by other side reactions (such as water decomposition). An ideal PEC CO 2 RR system should have a high FE, especially in the case of highly selective generation of the target product. Its calculation formula is shown in  eqn (2) : 2 where FE A  is the FE of A,  n A  (mol) is the molar mass of A,  N  is the number of electrons required to reduce CO 2  to produce an A molecule,  F  is the Faraday constant ( F  = 96 485 C mol −1 ) and  Q  (C) is the total amount of charge. The photocurrent density of the product ( j A ) refers to the current density of the product generated on the electrode per unit area. It indicates the current required per unit area on the catalyst surface to generate the target product under a specific voltage. A high photocurrent density usually means that the catalyst can more effectively convert light energy into electrical energy and drive the CO 2  reduction reaction under given light conditions, thereby increasing the generation rate of the specific product. Its calculation formula is shown in  eqn (3) : 3 where  j A  (mA cm −2 ) is the photocurrent density of A,  I  (mA) is the current intensity during the test, and  S  (cm 2 ) is the effective area of the working electrode."
+    }
+  ],
+  "extractions": {
+    "methods_paragraphs": [
+      {
+        "text": "2.1.2 Product detection methods and the product selectivity calculation formula The products of PEC CO 2 RR include various gaseous, liquid, and solid substances, and their types depend on the composition of the photocatalyst, reaction conditions, and device design. To accurately detect these products, it is usually necessary to rely on a variety of devices, depending on the category and nature of the products. The detection of gaseous products mainly relies on gas chromatography (GC) and mass spectrometry (MS). These devices can separate and quantitatively analyze gases such as methane CH 4 , CO, C 2 H 4  and H 2 . Gas chromatography separates different gas components through a chromatography column and is combined with a flame ionization detector (FID) or thermal conductivity detector (TCD) for quantitative analysis, while mass spectrometry further improves the accuracy and sensitivity of product identification through ionization and mass analysis. The detection of liquid products mainly relies on ion chromatography (IC), high-performance liquid chromatography (HPLC), and nuclear magnetic resonance (NMR). These techniques can detect and analyze liquid products such as HCOOH, ethanol C 2 H 5 OH and CH 3 COOH. For example, IC detects ionic components (HCOO −  and CH 3 COO − ) in liquid phase products and is combined with a conductivity detector or UV-vis detector for quantitative analysis; HPLC separates the components of the liquid products and is combined with a UV-vis detector or fluorescence detector for quantitative analysis; while NMR can provide information on the molecular structure of the products by analyzing changes in the chemical environment. A combination of multiple devices may be required, such as gas chromatography-mass spectrometry (GC-MS) for simultaneously separating and analyzing gaseous products. In conclusion, the detection of the products of PEC CO 2 RR requires the selection of appropriate devices and setups according to the types and characteristics of different products to achieve accurate qualitative and quantitative analysis of the products. The product selectivity, FE and product photocurrent density in PEC CO 2  reduction are the key parameters for evaluating the reaction performance. 39  Their definitions and formulae are as follows: The product selectivity (PS) refers to the ratio of the yield of a specific reduction product (A) to that of all possible products. Usually, in some studies, only a portion of reduction products is detected to calculate the relative selectivity. Its calculation formula is shown in  eqn (1) : 1 where PS A  is the product selectivity of A, the  n A  (mol) is the molar mass of A, and  n Total  (mol) is the molar mass of all reduction products. FE is used to measure how much electrical charge is used to drive the CO 2  reduction reaction. Specifically, FE represents the ratio of the number of electrons used to generate a specific reduction product to the total number of electrons involved in the electrochemical reaction. FE is an important indicator for measuring the selectivity and energy efficiency of the reaction. In the PEC CO 2 RR, a higher FE means that more electrical energy is used for the generation of the desired reduction product rather than being consumed by other side reactions (such as water decomposition). An ideal PEC CO 2 RR system should have a high FE, especially in the case of highly selective generation of the target product. Its calculation formula is shown in  eqn (2) : 2 where FE A  is the FE of A,  n A  (mol) is the molar mass of A,  N  is the number of electrons required to reduce CO 2  to produce an A molecule,  F  is the Faraday constant ( F  = 96 485 C mol −1 ) and  Q  (C) is the total amount of charge. The photocurrent density of the product ( j A ) refers to the current density of the product generated on the electrode per unit area. It indicates the current required per unit area on the catalyst surface to generate the target product under a specific voltage. A high photocurrent density usually means that the catalyst can more effectively convert light energy into electrical energy and drive the CO 2  reduction reaction under given light conditions, thereby increasing the generation rate of the specific product. Its calculation formula is shown in  eqn (3) : 3 where  j A  (mA cm −2 ) is the photocurrent density of A,  I  (mA) is the current intensity during the test, and  S  (cm 2 ) is the effective area of the working electrode.",
+        "operations": [
+          {
+            "op_type": "add",
+            "sentence": "FE is used to measure how much electrical charge is used to drive the CO 2  reduction reaction.",
+            "start_char": 2751,
+            "end_char": 2846,
+            "materials": [
+              "the CO 2  reduction reaction"
+            ],
+            "params": {}
+          },
+          {
+            "op_type": "add",
+            "sentence": "Its calculation formula is shown in  eqn (2) : 2 where FE A  is the FE of A,  n A  (mol) is the molar mass of A,  N  is the number of electrons required to reduce CO 2  to produce an A molecule,  F  is the Faraday constant ( F  = 96 485 C mol −1 ) and  Q  (C) is the total amount of charge.",
+            "start_char": 3467,
+            "end_char": 3757,
+            "materials": [
+              "Its calculation formula",
+              "(mol",
+              "96 485 C mol"
+            ],
+            "params": {}
+          }
+        ],
+        "expanded": [
+          {
+            "op_type": "add",
+            "steps": [
+              "Ensure reaction vessel is present and empty.",
+              "Place a clean stir bar in the vessel.",
+              "Measure the specified amount of the CO 2  reduction reaction.",
+              "Transfer the CO 2  reduction reaction into the vessel."
+            ]
+          },
+          {
+            "op_type": "add",
+            "steps": [
+              "Ensure reaction vessel is present and empty.",
+              "Place a clean stir bar in the vessel.",
+              "Measure the specified amount of Its calculation formula.",
+              "Transfer Its calculation formula into the vessel."
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

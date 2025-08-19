@@ -1,0 +1,348 @@
+{
+  "paper_id": "10.1021/acsomega.5c02816",
+  "title": "Facile Epitaxial Growth of Novel Nanoscale Ag-MAFs on Reverse Osmosis Membranes: Enhancing Performance, Antibacterial Activity, and (Bio)fouling Resistance.",
+  "authors": [],
+  "doi": "10.1021/acsomega.5c02816",
+  "source": "eupmc",
+  "urls": {
+    "pdf": null
+  },
+  "license": {
+    "type": "unknown"
+  },
+  "access_route": "oa",
+  "sections": [
+    {
+      "heading": "Materials and Methods",
+      "text": "2 Materials and Methods 2.1 Materials Silver acetate (99.0%),\nsilver nitrate (99.0%), amino-benzimidazole (≥95.0%), and ethanol\n(>99%) were purchased from Sigma-Aldrich and used for surface modification.\nTFC RO membranes were supplied by GreEnvi Corp. (Canada). Sodium chloride\n(NaCl, 99.5%, Sigma-Aldrich) was utilized to prepare the feed solution.\nBovine serum albumin (BSA), from Sigma-Aldrich, served as a model\norganic foulant. Luria–Bertani (LB) broth (Sigma-Aldrich) was\nused for the bacterial cell culture. (BL21­(DE3)) was used as a Gram-negative bacterium. Propidium iodide\n(PI) and SYTO9 (Molecular Probes) were purchased from Thermo Fisher\nScientific. All chemicals were of analytical grade and used without\nfurther purification. 2.2 Synthesis of Ag-MAFs Two types of\nAg-MAFs were synthesized for this study: one derived from the nitrate\nsalt and the other from the acetate salt. An identical procedure was\nemployed for both cases. For nitrate-based MAFs, 0.15 g of silver\nnitrate (AgNO 3 ) was dissolved in 30 mL of deionized water.\nThen, 0.1 g of amino-benzimidazole was dissolved in 25 mL of ethanol.\nBefore synthesis, both solutions were thoroughly stirred and sonicated\nto achieve a homogeneous solution without agglomeration. The organic\nsolution was added to the silver salt solution while stirring to induce\nprecipitation. The mixture was stirred for 20 min to complete the\nreaction. Then, the precipitate was filtered and washed twice with\n50 mL of fresh ethanol to remove any unreacted reagents. The same\nprocedure was followed for synthesizing the acetate-based MAFs with\ndifferent quantities of silver salt (0.12 g). 2.3 Surface Modification of TFC Membrane The polyamide TFC RO membranes were prepared via an interfacial polymerization\n(IP) process between MPD and TMC on the surface of the poly­(ether\nsulfone) (PES) substrate. The polyamide TFC membrane was fabricated\nby soaking the PES substrate in an aqueous solution containing 2 wt\n% MPD, 2 wt % CSA, 1 wt % TEA, and some additives for 2 min. The excess\nMPD solution was then carefully discarded from the membrane surface\nwith a roller. The MPD-saturated membrane was immersed in a 0.1 wt/v\n% TMC solution containing  n -hexane and an additive\nfor 30 s to allow polyamide layer formation. Subsequently, the membrane\nwas subjected to an oven at 80 °C for 5 min for post-thermal\ntreatment. The IP reaction, based on the Schotten–Baumann mechanism,\ntends to be rapid and unregulated, leading to a nonuniform cross-linked\npolyamide active layer.  The thermal treatment\napplied post-IP primarily serves to enhance polymer chain cross-linking,\nremove residual solvents, and improve membrane structural integrity,\nrather than driving the initial polymerization itself. Ag-MAFs were\ninsitu deposited on the TFC membrane surface through a rapid and environmentally\nfriendly procedure at room temperature. The residual acyl chloride\nfunctional groups present on the surface of the fresh TFC membrane\nundergo hydrolysis, transforming into carboxyl groups. \n , \n  The RO membranes have many carboxylic groups spread over the polyamide\nsurface. These carboxyl groups, carrying a negative charge, serve\nas active deposition sites for further modification. The strong interaction\nbetween the negatively charged moieties of the polyamide surface and\nthe positively charged Ag ions leads to the adhesion of Ag particles\nto the membrane surface.  Once the Ag\nions are anchored to these sites, the amino-benzimidazole linker coordinates\nwith the Ag atoms through a robust chemical interaction between the\nAg ions and the amino-benzimidazole ligand.  This interaction facilitates the formation of Ag-MAFs on the Ag-anchored\nsites, creating a functionalized membrane surface. The membrane\nsurface was treated with silver salt, followed by ligand solutions\nto attach Ag-MAFs covalently. First, the membrane was contacted with\n100 mL of aqueous solution containing 0.48 g silver nitrate (or 0.38\ng silver acetate) for 30 min to allow the attachment of silver ions.\nAfterward, the silver-treated surface was exposed to 100 mL ethanol\nsolution containing 0.33 g of amino-benzimidazole for 30 min to form\nAg-MAFs. The whole surface modification process was conducted at ambient\ntemperature. The surface of modified membranes featured a brownish\ncolor. The membranes were washed with water to remove unattached Ag-MAFs\nand stored in deionized water before characterizations. \n Figure  \n - illustrates\nthe schematic representation of (a) the synthesis of Ag-MAFs, (b)\nthe surface functionalization of TFC membranes by in-situ deposition\nof Ag-MAFs, (c) the color changes seen on the membrane surface, and\n(d) the interaction of carboxylic groups and Ag-MAFs over the membrane\nsurface. In  Figure  \n c, the TFC membrane undergoes a color change from white to brown,\nobserved in both Ag-nitrate MAFs and Ag-acetate MAFs membranes. This\ncolor change signifies the successful deposition of Ag-MAFs on the\nTFC surface. 1 (a) The schematic illustration of Ag-MAFs synthesis. Ag-MAFs\nwere\nsynthesized separately for chemical and morphological characterizations,\n(b) IP reaction between MPD ( m -phenylenediamine)\nand TMC (trimesoyl chloride) to fabricate TFC membranes and insitu\nsurface functionalization of TFC membranes with Ag-MAFs, (c) digital\nimages of the synthesized membranes, and (d) the chemical interactions\nof carboxylic groups and Ag-MAFs on the polyamide surface."
+    },
+    {
+      "heading": "Synthesis of Ag-MAFs",
+      "text": "2.2 Synthesis of Ag-MAFs Two types of\nAg-MAFs were synthesized for this study: one derived from the nitrate\nsalt and the other from the acetate salt. An identical procedure was\nemployed for both cases. For nitrate-based MAFs, 0.15 g of silver\nnitrate (AgNO 3 ) was dissolved in 30 mL of deionized water.\nThen, 0.1 g of amino-benzimidazole was dissolved in 25 mL of ethanol.\nBefore synthesis, both solutions were thoroughly stirred and sonicated\nto achieve a homogeneous solution without agglomeration. The organic\nsolution was added to the silver salt solution while stirring to induce\nprecipitation. The mixture was stirred for 20 min to complete the\nreaction. Then, the precipitate was filtered and washed twice with\n50 mL of fresh ethanol to remove any unreacted reagents. The same\nprocedure was followed for synthesizing the acetate-based MAFs with\ndifferent quantities of silver salt (0.12 g)."
+    },
+    {
+      "heading": "Bacteria Strains and Suspension Preparation",
+      "text": "3.4.1 Bacteria Strains and Suspension Preparation The antibacterial properties of the pristine and Ag-MAFs functionalized\nmembranes were assessed using the Gram-negative BL21 (D3) strain. The cells were cryopreserved\n(via liquid nitrogen flash freezing) using a 70% glycerol solution\nand stored in a freezer maintained at −80 °C until needed.\nUpon thawing and revival, the optical density of the cryopreserved\ncells was between 0.8 and 1.0 at 600 nm, indicating a healthy population\nof viable cells. To prepare enough cells to conduct the biofouling\nexperiments, one vial containing 1 mL of the cryopreserved cells was\ngently thawed in a 37 °C water bath for 15 min and then added\nto a sterile flask containing 50 mL of LB (Luria–Bertani) media.\nThe inoculated flask was placed in an incubator to maintain (37 °C)\nand shaken at 200 rpm (rpm) until an optical density of 1.5 at 600\nnm (measured using an 800 TS absorbance reader) was achieved. This\nexpanded cell stock was subsequently utilized to inoculate a larger\nvolume of 1 L of LB media, which was grown in the same incubator under\nthe same conditions for several more hours to the same optical density\n(corresponding to mid log-phase). The 1 L culture was then centrifuged\nat 4000 rpm for 2 min, and the resulting cell pellet was gently washed\nthree times with sterile phosphate-buffered saline (PBS, 10 mM, pH\n7) to remove any residual LB medium. The bacteria were resuspended\nin 50 mL of PBS, yielding a stock solution with a cell concentration\nof 107 colony-forming units (cfu)/mL, which was used for subsequent\nantibacterial and antifouling assessments."
+    }
+  ],
+  "extractions": {
+    "methods_paragraphs": [
+      {
+        "text": "2 Materials and Methods 2.1 Materials Silver acetate (99.0%),\nsilver nitrate (99.0%), amino-benzimidazole (≥95.0%), and ethanol\n(>99%) were purchased from Sigma-Aldrich and used for surface modification.\nTFC RO membranes were supplied by GreEnvi Corp. (Canada). Sodium chloride\n(NaCl, 99.5%, Sigma-Aldrich) was utilized to prepare the feed solution.\nBovine serum albumin (BSA), from Sigma-Aldrich, served as a model\norganic foulant. Luria–Bertani (LB) broth (Sigma-Aldrich) was\nused for the bacterial cell culture. (BL21­(DE3)) was used as a Gram-negative bacterium. Propidium iodide\n(PI) and SYTO9 (Molecular Probes) were purchased from Thermo Fisher\nScientific. All chemicals were of analytical grade and used without\nfurther purification. 2.2 Synthesis of Ag-MAFs Two types of\nAg-MAFs were synthesized for this study: one derived from the nitrate\nsalt and the other from the acetate salt. An identical procedure was\nemployed for both cases. For nitrate-based MAFs, 0.15 g of silver\nnitrate (AgNO 3 ) was dissolved in 30 mL of deionized water.\nThen, 0.1 g of amino-benzimidazole was dissolved in 25 mL of ethanol.\nBefore synthesis, both solutions were thoroughly stirred and sonicated\nto achieve a homogeneous solution without agglomeration. The organic\nsolution was added to the silver salt solution while stirring to induce\nprecipitation. The mixture was stirred for 20 min to complete the\nreaction. Then, the precipitate was filtered and washed twice with\n50 mL of fresh ethanol to remove any unreacted reagents. The same\nprocedure was followed for synthesizing the acetate-based MAFs with\ndifferent quantities of silver salt (0.12 g). 2.3 Surface Modification of TFC Membrane The polyamide TFC RO membranes were prepared via an interfacial polymerization\n(IP) process between MPD and TMC on the surface of the poly­(ether\nsulfone) (PES) substrate. The polyamide TFC membrane was fabricated\nby soaking the PES substrate in an aqueous solution containing 2 wt\n% MPD, 2 wt % CSA, 1 wt % TEA, and some additives for 2 min. The excess\nMPD solution was then carefully discarded from the membrane surface\nwith a roller. The MPD-saturated membrane was immersed in a 0.1 wt/v\n% TMC solution containing  n -hexane and an additive\nfor 30 s to allow polyamide layer formation. Subsequently, the membrane\nwas subjected to an oven at 80 °C for 5 min for post-thermal\ntreatment. The IP reaction, based on the Schotten–Baumann mechanism,\ntends to be rapid and unregulated, leading to a nonuniform cross-linked\npolyamide active layer.  The thermal treatment\napplied post-IP primarily serves to enhance polymer chain cross-linking,\nremove residual solvents, and improve membrane structural integrity,\nrather than driving the initial polymerization itself. Ag-MAFs were\ninsitu deposited on the TFC membrane surface through a rapid and environmentally\nfriendly procedure at room temperature. The residual acyl chloride\nfunctional groups present on the surface of the fresh TFC membrane\nundergo hydrolysis, transforming into carboxyl groups. \n , \n  The RO membranes have many carboxylic groups spread over the polyamide\nsurface. These carboxyl groups, carrying a negative charge, serve\nas active deposition sites for further modification. The strong interaction\nbetween the negatively charged moieties of the polyamide surface and\nthe positively charged Ag ions leads to the adhesion of Ag particles\nto the membrane surface.  Once the Ag\nions are anchored to these sites, the amino-benzimidazole linker coordinates\nwith the Ag atoms through a robust chemical interaction between the\nAg ions and the amino-benzimidazole ligand.  This interaction facilitates the formation of Ag-MAFs on the Ag-anchored\nsites, creating a functionalized membrane surface. The membrane\nsurface was treated with silver salt, followed by ligand solutions\nto attach Ag-MAFs covalently. First, the membrane was contacted with\n100 mL of aqueous solution containing 0.48 g silver nitrate (or 0.38\ng silver acetate) for 30 min to allow the attachment of silver ions.\nAfterward, the silver-treated surface was exposed to 100 mL ethanol\nsolution containing 0.33 g of amino-benzimidazole for 30 min to form\nAg-MAFs. The whole surface modification process was conducted at ambient\ntemperature. The surface of modified membranes featured a brownish\ncolor. The membranes were washed with water to remove unattached Ag-MAFs\nand stored in deionized water before characterizations. \n Figure  \n - illustrates\nthe schematic representation of (a) the synthesis of Ag-MAFs, (b)\nthe surface functionalization of TFC membranes by in-situ deposition\nof Ag-MAFs, (c) the color changes seen on the membrane surface, and\n(d) the interaction of carboxylic groups and Ag-MAFs over the membrane\nsurface. In  Figure  \n c, the TFC membrane undergoes a color change from white to brown,\nobserved in both Ag-nitrate MAFs and Ag-acetate MAFs membranes. This\ncolor change signifies the successful deposition of Ag-MAFs on the\nTFC surface. 1 (a) The schematic illustration of Ag-MAFs synthesis. Ag-MAFs\nwere\nsynthesized separately for chemical and morphological characterizations,\n(b) IP reaction between MPD ( m -phenylenediamine)\nand TMC (trimesoyl chloride) to fabricate TFC membranes and insitu\nsurface functionalization of TFC membranes with Ag-MAFs, (c) digital\nimages of the synthesized membranes, and (d) the chemical interactions\nof carboxylic groups and Ag-MAFs on the polyamide surface.",
+        "operations": [
+          {
+            "op_type": "stir",
+            "sentence": "Before synthesis, both solutions were thoroughly stirred and sonicated\nto achieve a homogeneous solution without agglomeration.",
+            "start_char": 1116,
+            "end_char": 1243,
+            "materials": [],
+            "params": {}
+          },
+          {
+            "op_type": "add",
+            "sentence": "The organic\nsolution was added to the silver salt solution while stirring to induce\nprecipitation.",
+            "start_char": 1244,
+            "end_char": 1342,
+            "materials": [],
+            "params": {}
+          },
+          {
+            "op_type": "stir",
+            "sentence": "The mixture was stirred for 20 min to complete the\nreaction.",
+            "start_char": 1343,
+            "end_char": 1403,
+            "materials": [
+              "20 min"
+            ],
+            "params": {
+              "time": "20 min"
+            }
+          },
+          {
+            "op_type": "filter",
+            "sentence": "Then, the precipitate was filtered and washed twice with\n50 mL of fresh ethanol to remove any unreacted reagents.",
+            "start_char": 1404,
+            "end_char": 1517,
+            "materials": [
+              "50 mL"
+            ],
+            "params": {
+              "amounts": [
+                "50 mL"
+              ]
+            }
+          },
+          {
+            "op_type": "add",
+            "sentence": "These carboxyl groups, carrying a negative charge, serve\nas active deposition sites for further modification.",
+            "start_char": 3114,
+            "end_char": 3223,
+            "materials": [],
+            "params": {}
+          },
+          {
+            "op_type": "add",
+            "sentence": "The strong interaction\nbetween the negatively charged moieties of the polyamide surface and\nthe positively charged Ag ions leads to the adhesion of Ag particles\nto the membrane surface.  ",
+            "start_char": 3224,
+            "end_char": 3411,
+            "materials": [],
+            "params": {}
+          },
+          {
+            "op_type": "wash",
+            "sentence": "The membranes were washed with water to remove unattached Ag-MAFs\nand stored in deionized water before characterizations. \n ",
+            "start_char": 4308,
+            "end_char": 4432,
+            "materials": [],
+            "params": {}
+          }
+        ],
+        "expanded": [
+          {
+            "op_type": "stir",
+            "steps": [
+              "Place the reaction vessel on a stir plate.",
+              "Set the stirrer to an appropriate speed.",
+              "Stir for the specified time."
+            ]
+          },
+          {
+            "op_type": "add",
+            "steps": [
+              "Ensure reaction vessel is present and empty.",
+              "Place a clean stir bar in the vessel.",
+              "Measure the specified amount of reagent.",
+              "Transfer reagent into the vessel."
+            ]
+          },
+          {
+            "op_type": "stir",
+            "steps": [
+              "Place the reaction vessel on a stir plate.",
+              "Set the stirrer to an appropriate speed.",
+              "Stir for 20 min."
+            ]
+          },
+          {
+            "op_type": "filter",
+            "steps": [
+              "Perform operation 'filter' as described: Then, the precipitate was filtered and washed twice with\n50 mL of fresh ethanol to remove any unreacted reagents."
+            ]
+          },
+          {
+            "op_type": "add",
+            "steps": [
+              "Ensure reaction vessel is present and empty.",
+              "Place a clean stir bar in the vessel.",
+              "Measure the specified amount of reagent.",
+              "Transfer reagent into the vessel."
+            ]
+          },
+          {
+            "op_type": "add",
+            "steps": [
+              "Ensure reaction vessel is present and empty.",
+              "Place a clean stir bar in the vessel.",
+              "Measure the specified amount of reagent.",
+              "Transfer reagent into the vessel."
+            ]
+          },
+          {
+            "op_type": "wash",
+            "steps": [
+              "Perform operation 'wash' as described: The membranes were washed with water to remove unattached Ag-MAFs\nand stored in deionized water before characterizations. \n "
+            ]
+          }
+        ]
+      },
+      {
+        "text": "2.2 Synthesis of Ag-MAFs Two types of\nAg-MAFs were synthesized for this study: one derived from the nitrate\nsalt and the other from the acetate salt. An identical procedure was\nemployed for both cases. For nitrate-based MAFs, 0.15 g of silver\nnitrate (AgNO 3 ) was dissolved in 30 mL of deionized water.\nThen, 0.1 g of amino-benzimidazole was dissolved in 25 mL of ethanol.\nBefore synthesis, both solutions were thoroughly stirred and sonicated\nto achieve a homogeneous solution without agglomeration. The organic\nsolution was added to the silver salt solution while stirring to induce\nprecipitation. The mixture was stirred for 20 min to complete the\nreaction. Then, the precipitate was filtered and washed twice with\n50 mL of fresh ethanol to remove any unreacted reagents. The same\nprocedure was followed for synthesizing the acetate-based MAFs with\ndifferent quantities of silver salt (0.12 g).",
+        "operations": [
+          {
+            "op_type": "stir",
+            "sentence": "Before synthesis, both solutions were thoroughly stirred and sonicated\nto achieve a homogeneous solution without agglomeration.",
+            "start_char": 374,
+            "end_char": 501,
+            "materials": [],
+            "params": {}
+          },
+          {
+            "op_type": "add",
+            "sentence": "The organic\nsolution was added to the silver salt solution while stirring to induce\nprecipitation.",
+            "start_char": 502,
+            "end_char": 600,
+            "materials": [],
+            "params": {}
+          },
+          {
+            "op_type": "stir",
+            "sentence": "The mixture was stirred for 20 min to complete the\nreaction.",
+            "start_char": 601,
+            "end_char": 661,
+            "materials": [
+              "20 min"
+            ],
+            "params": {
+              "time": "20 min"
+            }
+          },
+          {
+            "op_type": "filter",
+            "sentence": "Then, the precipitate was filtered and washed twice with\n50 mL of fresh ethanol to remove any unreacted reagents.",
+            "start_char": 662,
+            "end_char": 775,
+            "materials": [
+              "50 mL"
+            ],
+            "params": {
+              "amounts": [
+                "50 mL"
+              ]
+            }
+          }
+        ],
+        "expanded": [
+          {
+            "op_type": "stir",
+            "steps": [
+              "Place the reaction vessel on a stir plate.",
+              "Set the stirrer to an appropriate speed.",
+              "Stir for the specified time."
+            ]
+          },
+          {
+            "op_type": "add",
+            "steps": [
+              "Ensure reaction vessel is present and empty.",
+              "Place a clean stir bar in the vessel.",
+              "Measure the specified amount of reagent.",
+              "Transfer reagent into the vessel."
+            ]
+          },
+          {
+            "op_type": "stir",
+            "steps": [
+              "Place the reaction vessel on a stir plate.",
+              "Set the stirrer to an appropriate speed.",
+              "Stir for 20 min."
+            ]
+          },
+          {
+            "op_type": "filter",
+            "steps": [
+              "Perform operation 'filter' as described: Then, the precipitate was filtered and washed twice with\n50 mL of fresh ethanol to remove any unreacted reagents."
+            ]
+          }
+        ]
+      },
+      {
+        "text": "3.4.1 Bacteria Strains and Suspension Preparation The antibacterial properties of the pristine and Ag-MAFs functionalized\nmembranes were assessed using the Gram-negative BL21 (D3) strain. The cells were cryopreserved\n(via liquid nitrogen flash freezing) using a 70% glycerol solution\nand stored in a freezer maintained at −80 °C until needed.\nUpon thawing and revival, the optical density of the cryopreserved\ncells was between 0.8 and 1.0 at 600 nm, indicating a healthy population\nof viable cells. To prepare enough cells to conduct the biofouling\nexperiments, one vial containing 1 mL of the cryopreserved cells was\ngently thawed in a 37 °C water bath for 15 min and then added\nto a sterile flask containing 50 mL of LB (Luria–Bertani) media.\nThe inoculated flask was placed in an incubator to maintain (37 °C)\nand shaken at 200 rpm (rpm) until an optical density of 1.5 at 600\nnm (measured using an 800 TS absorbance reader) was achieved. This\nexpanded cell stock was subsequently utilized to inoculate a larger\nvolume of 1 L of LB media, which was grown in the same incubator under\nthe same conditions for several more hours to the same optical density\n(corresponding to mid log-phase). The 1 L culture was then centrifuged\nat 4000 rpm for 2 min, and the resulting cell pellet was gently washed\nthree times with sterile phosphate-buffered saline (PBS, 10 mM, pH\n7) to remove any residual LB medium. The bacteria were resuspended\nin 50 mL of PBS, yielding a stock solution with a cell concentration\nof 107 colony-forming units (cfu)/mL, which was used for subsequent\nantibacterial and antifouling assessments.",
+        "operations": [
+          {
+            "op_type": "heat",
+            "sentence": "The cells were cryopreserved\n(via liquid nitrogen flash freezing) using a 70% glycerol solution\nand stored in a freezer maintained at −80 °C until needed.\n",
+            "start_char": 188,
+            "end_char": 343,
+            "materials": [
+              "a 70% glycerol solution"
+            ],
+            "params": {
+              "temp": "80°C"
+            }
+          },
+          {
+            "op_type": "add",
+            "sentence": "To prepare enough cells to conduct the biofouling\nexperiments, one vial containing 1 mL of the cryopreserved cells was\ngently thawed in a 37 °C water bath for 15 min and then added\nto a sterile flask containing 50 mL of LB (Luria–Bertani) media.\n",
+            "start_char": 500,
+            "end_char": 746,
+            "materials": [
+              "one vial",
+              "1 mL",
+              "a 37 °C water bath",
+              "15 min"
+            ],
+            "params": {
+              "temp": "37°C",
+              "time": "15 min",
+              "amounts": [
+                "1 mL",
+                "50 mL"
+              ]
+            }
+          },
+          {
+            "op_type": "heat",
+            "sentence": "The inoculated flask was placed in an incubator to maintain (37 °C)\nand shaken at 200 rpm (rpm) until an optical density of 1.5 at 600\nnm (measured using an 800 TS absorbance reader) was achieved.",
+            "start_char": 746,
+            "end_char": 942,
+            "materials": [
+              "37 °C",
+              "200 rpm",
+              "600\nnm",
+              "an 800 TS absorbance reader"
+            ],
+            "params": {
+              "temp": "37°C",
+              "speed": "200 rpm"
+            }
+          },
+          {
+            "op_type": "centrifuge",
+            "sentence": "The 1 L culture was then centrifuged\nat 4000 rpm for 2 min, and the resulting cell pellet was gently washed\nthree times with sterile phosphate-buffered saline (PBS, 10 mM, pH\n7) to remove any residual LB medium.",
+            "start_char": 1192,
+            "end_char": 1403,
+            "materials": [
+              "The 1 L culture",
+              "4000 rpm",
+              "2 min",
+              "three times"
+            ],
+            "params": {
+              "time": "2 min",
+              "speed": "4000 rpm",
+              "amounts": [
+                "1 L"
+              ],
+              "concs": [
+                "10 mM"
+              ]
+            }
+          }
+        ],
+        "expanded": [
+          {
+            "op_type": "heat",
+            "steps": [
+              "Place the reaction vessel on a hotplate.",
+              "Ramp to 80°C.",
+              "Maintain 80°C for the specified time."
+            ]
+          },
+          {
+            "op_type": "add",
+            "steps": [
+              "Ensure reaction vessel is present and empty.",
+              "Place a clean stir bar in the vessel.",
+              "Measure 1 mL of one vial.",
+              "Transfer one vial into the vessel."
+            ]
+          },
+          {
+            "op_type": "heat",
+            "steps": [
+              "Place the reaction vessel on a hotplate.",
+              "Ramp to 37°C.",
+              "Maintain 37°C for the specified time."
+            ]
+          },
+          {
+            "op_type": "centrifuge",
+            "steps": [
+              "Perform operation 'centrifuge' as described: The 1 L culture was then centrifuged\nat 4000 rpm for 2 min, and the resulting cell pellet was gently washed\nthree times with sterile phosphate-buffered saline (PBS, 10 mM, pH\n7) to remove any residual LB medium."
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

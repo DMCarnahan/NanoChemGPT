@@ -1,0 +1,78 @@
+{
+  "paper_id": "10.3390/nano14131134",
+  "title": "Rocket Dynamics of Capped Nanotubes: A Molecular Dynamics Study.",
+  "authors": [],
+  "doi": "10.3390/nano14131134",
+  "source": "eupmc",
+  "urls": {
+    "pdf": null
+  },
+  "license": {
+    "type": "unknown"
+  },
+  "access_route": "oa",
+  "sections": [
+    {
+      "heading": "2. Methods",
+      "text": "2. Methods 2.1. Nanorocket Concept The nanorocket concept proposed herein consists of a CNT with one capped end and a second open end. Furthermore, a gold coating is envisaged to have been chemically deposited on the walls [ 37 , 38 , 39 ]. This system requires immersion in water. By irradiating the nanorocket with near-infrared radiation, the temperature of the gold coating is expected to reach up to 1300 K [ 35 , 36 ], causing the evaporation of neighboring water molecules. Water molecules then exchange momentum with the walls of the CNT and flow out of the CNT through the open end, resulting in significant propulsion. Simple schematics showing a typical configuration and the working principle are depicted in  Figure 1 a,b, respectively, along with the nanoscale structure of a simulated CNT in  Figure 1 c. 2.2. Simulation Details The nanorocket dynamics were investigated by performing molecular dynamics simulations using the open-source GROMACS 4.6.5 package [ 40 ]. Bonded interactions between carbon–carbon and oxygen–hydrogen were modeled by harmonic potentials. Stretching of covalent bonds, bond angle deformations, and proper dihedral deformations were considered. In detail, the bond stretching between two covalently bonded atoms (i.e.,  i  and  j ) is represented by the following harmonic potential: (1) V b ( r i j ) = 1 2 k i j b ( r i j − b i j ) 2 \nwhere  V b  is the bond stretching potential,  r i j  is the distance between two atoms,  k i j b  is the effective stiffness of the covalent bond (i.e., the harmonic constant), and  b i j  is the equilibrium distance. Then, the bond-angle between a triplet of bonded atoms (i.e.,  i ,  j ,  k ), represented by a harmonic potential, is in the following form: (2) V a ( θ i j k ) = 1 2 k i j k θ ( cos θ i j k − cos θ i j k 0 ) 2 \nwhere  V a ( θ i j k )  is the bond-angle potential,  k i j k θ  is the effective bending stiffness of the bond angle,  θ i j k  is the bond angular deformation (i.e., the angle between vectors  r i j → = r j → − r i →  and  r k j → = r j → − r k → ), and  θ i j k 0  is the equilibrium angle of the bond. Finally, the torsion energy can be evaluated by the following function: (3) V d ( ξ i j k l ) = 1 2 k ξ ( 1 − cos 2 ξ i j k l ) \nwhere  V d ( ξ i j k l )  is the proper dihedral potential for four bonded atoms  i ,  j ,  k , and  l , while  k ξ  is the effective torsional stiffness, and  ξ i j k l  is the dihedral deformation (i.e., the angle between planes  i j k  and  i j l ). Then, non-bonded interactions comprising electrostatic and Van der Waals interactions [ 41 ] were considered. The Lennard-Jones potential represents carbon–carbon and carbon–water Van der Waals interactions [ 42 ]: (4) U L J ( r i j ) = 4 ε i j σ i j r i j 12 − σ i j r i j 6 \nwhere  U L J ( r i j )  is the Lennard-Jones potential,  ε i j  is the depth of the potential well, and  σ i j  is the Van der Waals radius, namely, the finite distance at which inter-particle potential equals to 0. A cut-off distance of 1.2 nm and Lorentz Berthelot combination rules for cross-interaction terms were considered for the Lennard-Jones potential. Both bonded and non-bonded force-field parameters were taken from [ 43 ] (see Table 1 there), which have previously demonstrated good prediction capability for the heat and mass transfer behavior of solvated CNTs [ 19 , 42 , 44 , 45 ]. The SPC/E model was adopted to describe the structure of the water molecules, with bonded interactions treated using the SETTLE algorithm [ 46 ]. This model accurately represents the dynamics and behavior of water [ 47 ]. All CNT geometries were produced using NanoCAP 1.0b15 software [ 48 , 49 ]. First, energy minimization of the dry structure was performed. Then, water was added to the system via the  genbox  command by GROMACS (see  Figure 1 d) and energy minimization of the new system was performed. An NVT simulation was conducted until the steady state was achieved. Velocities were initialized assuming a Maxwell–Boltzmann distribution, then rescaled using the velocity-rescaling thermostat at a temperature of 300 K [ 50 ]. The initialization of the pressure of the system was implemented by running an NPT simulation until temperature and pressure achieved equilibrium. A combination of the Nose–Hoover thermostat [ 51 ] at 300 K and the Parrinello–Rahman barostat [ 52 , 53 ] at 1 bar was implemented. During the NVT and NPT simulations, harmonic constraints were imposed on the CNT to ensure its positioning at the center of the simulation box during equilibration. The Leap-Frog integrator [ 54 ] was used to solve the equations of motion. For production runs, the same combination of Nose–Hoover thermostat and Parrinello–Rahman barostat was used. A thermostat at  T  temperature (see  Table 1 ) was applied to the carbon atoms mimicking the presence of the gold coating between the closed end and half of the CNT (i.e.,  H = L / 2 ; see  Figure 1 c). The remaining unheated carbon atoms and water molecules were allowed to relax to equilibrium. All production simulations lasted for 200 ps, and the target rocket dynamics was completed after the first 150 ps of simulation time (see  Supplementary Video S1 ). A time step of 1 fs was used. To assess the box-size independence of MD simulations, the CNT with 2.5 nm diameter was simulated with water boxes of increasing size and the results were checked for convergence. Moreover, the CNTs analyzed in this study exhibit armchair chirality (excluding the cap), characterized by equal chiral indices (i.e., n = m) [ 55 ]. The latter indicates the way in which the graphene sheet is rolled up to form the nanotube; these are reported in  Table 1 . For clarity and compactness, the list of simulation settings and parameters for all the production runs is reported in  Table 1 ."
+    }
+  ],
+  "extractions": {
+    "methods_paragraphs": [
+      {
+        "text": "2. Methods 2.1. Nanorocket Concept The nanorocket concept proposed herein consists of a CNT with one capped end and a second open end. Furthermore, a gold coating is envisaged to have been chemically deposited on the walls [ 37 , 38 , 39 ]. This system requires immersion in water. By irradiating the nanorocket with near-infrared radiation, the temperature of the gold coating is expected to reach up to 1300 K [ 35 , 36 ], causing the evaporation of neighboring water molecules. Water molecules then exchange momentum with the walls of the CNT and flow out of the CNT through the open end, resulting in significant propulsion. Simple schematics showing a typical configuration and the working principle are depicted in  Figure 1 a,b, respectively, along with the nanoscale structure of a simulated CNT in  Figure 1 c. 2.2. Simulation Details The nanorocket dynamics were investigated by performing molecular dynamics simulations using the open-source GROMACS 4.6.5 package [ 40 ]. Bonded interactions between carbon–carbon and oxygen–hydrogen were modeled by harmonic potentials. Stretching of covalent bonds, bond angle deformations, and proper dihedral deformations were considered. In detail, the bond stretching between two covalently bonded atoms (i.e.,  i  and  j ) is represented by the following harmonic potential: (1) V b ( r i j ) = 1 2 k i j b ( r i j − b i j ) 2 \nwhere  V b  is the bond stretching potential,  r i j  is the distance between two atoms,  k i j b  is the effective stiffness of the covalent bond (i.e., the harmonic constant), and  b i j  is the equilibrium distance. Then, the bond-angle between a triplet of bonded atoms (i.e.,  i ,  j ,  k ), represented by a harmonic potential, is in the following form: (2) V a ( θ i j k ) = 1 2 k i j k θ ( cos θ i j k − cos θ i j k 0 ) 2 \nwhere  V a ( θ i j k )  is the bond-angle potential,  k i j k θ  is the effective bending stiffness of the bond angle,  θ i j k  is the bond angular deformation (i.e., the angle between vectors  r i j → = r j → − r i →  and  r k j → = r j → − r k → ), and  θ i j k 0  is the equilibrium angle of the bond. Finally, the torsion energy can be evaluated by the following function: (3) V d ( ξ i j k l ) = 1 2 k ξ ( 1 − cos 2 ξ i j k l ) \nwhere  V d ( ξ i j k l )  is the proper dihedral potential for four bonded atoms  i ,  j ,  k , and  l , while  k ξ  is the effective torsional stiffness, and  ξ i j k l  is the dihedral deformation (i.e., the angle between planes  i j k  and  i j l ). Then, non-bonded interactions comprising electrostatic and Van der Waals interactions [ 41 ] were considered. The Lennard-Jones potential represents carbon–carbon and carbon–water Van der Waals interactions [ 42 ]: (4) U L J ( r i j ) = 4 ε i j σ i j r i j 12 − σ i j r i j 6 \nwhere  U L J ( r i j )  is the Lennard-Jones potential,  ε i j  is the depth of the potential well, and  σ i j  is the Van der Waals radius, namely, the finite distance at which inter-particle potential equals to 0. A cut-off distance of 1.2 nm and Lorentz Berthelot combination rules for cross-interaction terms were considered for the Lennard-Jones potential. Both bonded and non-bonded force-field parameters were taken from [ 43 ] (see Table 1 there), which have previously demonstrated good prediction capability for the heat and mass transfer behavior of solvated CNTs [ 19 , 42 , 44 , 45 ]. The SPC/E model was adopted to describe the structure of the water molecules, with bonded interactions treated using the SETTLE algorithm [ 46 ]. This model accurately represents the dynamics and behavior of water [ 47 ]. All CNT geometries were produced using NanoCAP 1.0b15 software [ 48 , 49 ]. First, energy minimization of the dry structure was performed. Then, water was added to the system via the  genbox  command by GROMACS (see  Figure 1 d) and energy minimization of the new system was performed. An NVT simulation was conducted until the steady state was achieved. Velocities were initialized assuming a Maxwell–Boltzmann distribution, then rescaled using the velocity-rescaling thermostat at a temperature of 300 K [ 50 ]. The initialization of the pressure of the system was implemented by running an NPT simulation until temperature and pressure achieved equilibrium. A combination of the Nose–Hoover thermostat [ 51 ] at 300 K and the Parrinello–Rahman barostat [ 52 , 53 ] at 1 bar was implemented. During the NVT and NPT simulations, harmonic constraints were imposed on the CNT to ensure its positioning at the center of the simulation box during equilibration. The Leap-Frog integrator [ 54 ] was used to solve the equations of motion. For production runs, the same combination of Nose–Hoover thermostat and Parrinello–Rahman barostat was used. A thermostat at  T  temperature (see  Table 1 ) was applied to the carbon atoms mimicking the presence of the gold coating between the closed end and half of the CNT (i.e.,  H = L / 2 ; see  Figure 1 c). The remaining unheated carbon atoms and water molecules were allowed to relax to equilibrium. All production simulations lasted for 200 ps, and the target rocket dynamics was completed after the first 150 ps of simulation time (see  Supplementary Video S1 ). A time step of 1 fs was used. To assess the box-size independence of MD simulations, the CNT with 2.5 nm diameter was simulated with water boxes of increasing size and the results were checked for convergence. Moreover, the CNTs analyzed in this study exhibit armchair chirality (excluding the cap), characterized by equal chiral indices (i.e., n = m) [ 55 ]. The latter indicates the way in which the graphene sheet is rolled up to form the nanotube; these are reported in  Table 1 . For clarity and compactness, the list of simulation settings and parameters for all the production runs is reported in  Table 1 .",
+        "operations": [
+          {
+            "op_type": "heat",
+            "sentence": "Both bonded and non-bonded force-field parameters were taken from [ 43 ] (see Table 1 there), which have previously demonstrated good prediction capability for the heat and mass transfer behavior of solvated CNTs [ 19 , 42 , 44 , 45 ].",
+            "start_char": 3137,
+            "end_char": 3372,
+            "materials": [],
+            "params": {}
+          },
+          {
+            "op_type": "dry",
+            "sentence": "First, energy minimization of the dry structure was performed.",
+            "start_char": 3671,
+            "end_char": 3733,
+            "materials": [],
+            "params": {}
+          },
+          {
+            "op_type": "add",
+            "sentence": "Then, water was added to the system via the  genbox  command by GROMACS (see  Figure 1 d) and energy minimization of the new system was performed.",
+            "start_char": 3734,
+            "end_char": 3880,
+            "materials": [],
+            "params": {}
+          }
+        ],
+        "expanded": [
+          {
+            "op_type": "heat",
+            "steps": [
+              "Place the reaction vessel on a hotplate.",
+              "Ramp to the target temperature.",
+              "Maintain the target temperature for the specified time."
+            ]
+          },
+          {
+            "op_type": "dry",
+            "steps": [
+              "Perform operation 'dry' as described: First, energy minimization of the dry structure was performed."
+            ]
+          },
+          {
+            "op_type": "add",
+            "steps": [
+              "Ensure reaction vessel is present and empty.",
+              "Place a clean stir bar in the vessel.",
+              "Measure the specified amount of reagent.",
+              "Transfer reagent into the vessel."
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

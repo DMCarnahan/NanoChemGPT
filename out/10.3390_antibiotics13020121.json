@@ -1,0 +1,57 @@
+{
+  "paper_id": "10.3390/antibiotics13020121",
+  "title": "Nanotechnology in the Diagnosis and Treatment of Antibiotic-Resistant Infections.",
+  "authors": [],
+  "doi": "10.3390/antibiotics13020121",
+  "source": "eupmc",
+  "urls": {
+    "pdf": null
+  },
+  "license": {
+    "type": "unknown"
+  },
+  "access_route": "oa",
+  "sections": [
+    {
+      "heading": "1. Introduction",
+      "text": "1. Introduction Infectious diseases are an important cause of mortality worldwide [ 1 ]. During the last decades, there has been a reduction in morbidity and mortality of these communicable diseases in higher-income countries; however, infectious diseases are still a cause for significant morbidity, even in these countries [ 2 , 3 , 4 ]. Importantly, antimicrobial resistance (AMR) is a global problem that poses a significant threat to millions of people [ 5 , 6 ]. For example, 4.95 million deaths were estimated to be associated with bacterial AMR in 2019, and it is predicted that this number will greatly increase [ 5 ]. Unfortunately, the pharmaceutical pipeline has not met the growing need for antimicrobials to combat AMR [ 7 ]. Thus, academia and the pharmaceutical industry have also tried to identify methods that involve treatments other than antimicrobial use to fight resistant pathogens that very few, if any, antimicrobials are potent to kill. To that end, non-antibiotic treatments may include simple nutrients or amino-acids, such as D-mannose, antimicrobial peptides, bacteriophages, or even more technically elegant methods, such as nanobiotics [ 8 , 9 , 10 , 11 , 12 ]. Nanoscience involves the use of materials on the scale of nanometers in an attempt to develop technology (nanotechnology) that could have several applications in electronics or medicine [ 13 ]. More specifically, several applications of nanotechnology in medicine have been developed in the last decades, such as the development of liposomes [ 14 , 15 ], polymer-drug conjugates [ 16 ], DNA-drug complexes [ 17 ], polymer nanocapsules [ 18 , 19 ], antibody-drug conjugates [ 20 ], albumin-drug conjugates [ 21 ], polymer-protein conjugates [ 22 ], antimicrobial silver nanoparticles [ 23 ], and gold nanoparticles for rheumatologic disorders [ 24 , 25 ]. Nanotechnology has numerous applications in medicine, such as in drug delivery, where several nanostructures can be used for the direct delivery of a specific drug to a specific biological target with controlled drug release and reduced toxicity, and in in vivo imaging with nanoparticles used as imaging contrast agents, such as in computed tomography and magnetic resonance imaging [ 26 ]. Other applications of nanotechnology in medicine include in vitro diagnosis, tissue regeneration and engineering, as well as its use with implantable or wearable devices for diagnosis or treatment [ 26 ]. This study aimed to provide an overview of the current medical applications of nanotechnology in infectious diseases and, more specifically, against pathogens with significant AMR. In particular, applications of nanotechnology in the diagnosis and treatment of infectious diseases are discussed, along with specific representative examples of the different technologies that have been developed so far."
+    },
+    {
+      "heading": "2. Search Methodology",
+      "text": "2. Search Methodology This narrative review aims to present the basic principles of the applications of nanotechnology in the diagnosis and treatment of infectious diseases with a focus on pathogens with AMR, and it also aims to provide representative examples of the different technologies that have been developed so far. Importantly, this manuscript was written from a clinician’s perspective; thus, its main focus is to inform the reader of the spectrum of the applications of nanotechnology in infectious diseases by providing the necessary emphasis on technical information and, more importantly, underlining the current and future potential of nanotechnology. For this review, a search of the PubMed/Medline database up until 18 January 2024 for eligible articles was conducted, using the search terms ‘nanotechnology AND infectious diseases’. Relevant reviews and original studies providing information on the topic were retrieved, evaluated, and added to the evidence synthesis in a liberal, non-systematic way. Two investigators (PI and SB) performed the process of screening, extracting, and synthesizing the evidence. The references of the included articles were searched for the identification of other relevant articles."
+    }
+  ],
+  "extractions": {
+    "methods_paragraphs": [
+      {
+        "text": "1. Introduction Infectious diseases are an important cause of mortality worldwide [ 1 ]. During the last decades, there has been a reduction in morbidity and mortality of these communicable diseases in higher-income countries; however, infectious diseases are still a cause for significant morbidity, even in these countries [ 2 , 3 , 4 ]. Importantly, antimicrobial resistance (AMR) is a global problem that poses a significant threat to millions of people [ 5 , 6 ]. For example, 4.95 million deaths were estimated to be associated with bacterial AMR in 2019, and it is predicted that this number will greatly increase [ 5 ]. Unfortunately, the pharmaceutical pipeline has not met the growing need for antimicrobials to combat AMR [ 7 ]. Thus, academia and the pharmaceutical industry have also tried to identify methods that involve treatments other than antimicrobial use to fight resistant pathogens that very few, if any, antimicrobials are potent to kill. To that end, non-antibiotic treatments may include simple nutrients or amino-acids, such as D-mannose, antimicrobial peptides, bacteriophages, or even more technically elegant methods, such as nanobiotics [ 8 , 9 , 10 , 11 , 12 ]. Nanoscience involves the use of materials on the scale of nanometers in an attempt to develop technology (nanotechnology) that could have several applications in electronics or medicine [ 13 ]. More specifically, several applications of nanotechnology in medicine have been developed in the last decades, such as the development of liposomes [ 14 , 15 ], polymer-drug conjugates [ 16 ], DNA-drug complexes [ 17 ], polymer nanocapsules [ 18 , 19 ], antibody-drug conjugates [ 20 ], albumin-drug conjugates [ 21 ], polymer-protein conjugates [ 22 ], antimicrobial silver nanoparticles [ 23 ], and gold nanoparticles for rheumatologic disorders [ 24 , 25 ]. Nanotechnology has numerous applications in medicine, such as in drug delivery, where several nanostructures can be used for the direct delivery of a specific drug to a specific biological target with controlled drug release and reduced toxicity, and in in vivo imaging with nanoparticles used as imaging contrast agents, such as in computed tomography and magnetic resonance imaging [ 26 ]. Other applications of nanotechnology in medicine include in vitro diagnosis, tissue regeneration and engineering, as well as its use with implantable or wearable devices for diagnosis or treatment [ 26 ]. This study aimed to provide an overview of the current medical applications of nanotechnology in infectious diseases and, more specifically, against pathogens with significant AMR. In particular, applications of nanotechnology in the diagnosis and treatment of infectious diseases are discussed, along with specific representative examples of the different technologies that have been developed so far.",
+        "operations": [],
+        "expanded": []
+      },
+      {
+        "text": "2. Search Methodology This narrative review aims to present the basic principles of the applications of nanotechnology in the diagnosis and treatment of infectious diseases with a focus on pathogens with AMR, and it also aims to provide representative examples of the different technologies that have been developed so far. Importantly, this manuscript was written from a clinician’s perspective; thus, its main focus is to inform the reader of the spectrum of the applications of nanotechnology in infectious diseases by providing the necessary emphasis on technical information and, more importantly, underlining the current and future potential of nanotechnology. For this review, a search of the PubMed/Medline database up until 18 January 2024 for eligible articles was conducted, using the search terms ‘nanotechnology AND infectious diseases’. Relevant reviews and original studies providing information on the topic were retrieved, evaluated, and added to the evidence synthesis in a liberal, non-systematic way. Two investigators (PI and SB) performed the process of screening, extracting, and synthesizing the evidence. The references of the included articles were searched for the identification of other relevant articles.",
+        "operations": [
+          {
+            "op_type": "add",
+            "sentence": "Relevant reviews and original studies providing information on the topic were retrieved, evaluated, and added to the evidence synthesis in a liberal, non-systematic way.",
+            "start_char": 851,
+            "end_char": 1020,
+            "materials": [],
+            "params": {}
+          }
+        ],
+        "expanded": [
+          {
+            "op_type": "add",
+            "steps": [
+              "Ensure reaction vessel is present and empty.",
+              "Place a clean stir bar in the vessel.",
+              "Measure the specified amount of reagent.",
+              "Transfer reagent into the vessel."
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

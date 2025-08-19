@@ -1,0 +1,274 @@
+{
+  "paper_id": "10.3390/nano14030305",
+  "title": "Hierarchical Nanoheterostructure of HFIP-Grafted α-Fe<sub>2</sub>O<sub>3</sub>@Multiwall Carbon Nanotubes as High-Performance Chemiresistive Sensors for Nerve Agents.",
+  "authors": [],
+  "doi": "10.3390/nano14030305",
+  "source": "eupmc",
+  "urls": {
+    "pdf": null
+  },
+  "license": {
+    "type": "unknown"
+  },
+  "access_route": "oa",
+  "sections": [
+    {
+      "heading": "2. Experimental Section",
+      "text": "2. Experimental Section Details of the full range of chemical reagents and characterization equipment are described in the  Supplementary Material . 2.1. Fabrication of α-Fe 2 O 3  and α-Fe 2 O 3 @MWCNT Compounds It is well known that carboxyl (-COOH) and hydroxyl (-OH) groups usually adhere in small amounts on the surface of carbon materials [ 38 ]. In order to enhance the number of carboxyl groups on the surface of the MWCNTs, the MWCNTs were subjected to reflux in a mixture of acids. Specifically, 0.5 g of MWCNTs was refluxed in a 20 mL acidic solution comprising 2 mL of HNO 3  and 6 mL of H 2 SO 4  for 5 h at a temperature of 40 °C. Later, the resulting samples were flushed alternately with ethanol and deionized (DI) water until the liquid reached a neutral pH and dried overnight. To grow the FeOOH nanospindles on the MWCNTs skeleton, the acid-treated MWCNTs were homogeneously dispersed in an FeCl 3  solution and underwent a reaction at 80°C for a duration of 5 h. Subsequently, the samples were separated by centrifugation, flushed alternately with DI water and ethanol, and dried overnight at 60 °C. Finally, after annealing in air at 400 °C for 10 h with a slow ramp rate of 2 °C min −1 , FeOOH was successfully converted to α-Fe 2 O 3  to obtain the α-Fe 2 O 3 @MWCNTs hierarchical nanoheterostructure. Schematic diagrams of the synthesis process and the final structure are illustrated in  Figure 1 . 2.2. Functionalization with HFIP Chemical Group The presence of a number of -COOH groups on the surface is a necessary condition for grafting HFIP groups on α-Fe 2 O 3 @MWCNTs [ 10 , 38 ]. To create -COOH groups, 0.5 g α-Fe 2 O 3 @MWCNT nanomaterials were dissolved in 30 mL DI water, the solution’s acidity was lowered to a pH of 4–5 with HCl, and stirred at 40 °C for 30 min [ 44 ]. Subsequently, 1.1 mL of carboxyethylsilanetriol was gradually added into the solution and stirred for 1 day at 40 °C. Then, the solution was centrifuged several times with DI water and acetone and dried in a vacuum oven at 45 °C overnight to obtain α-Fe 2 O 3 @MWCNTs–COOH. Subsequently, to graft HFIP groups on the α-Fe 2 O 3 @MWCNTs–COOH, 0.06 g from the as-prepared α-Fe 2 O 3 @MWCNTs-COOH and 0.1 mL of hexafluoroacetone trihydrate were added to 20 mL of N,N-Dimethylformamide (DMF), next the solution was magnetically stirred in a cold-water bath (≈−5 °C) for 3 h. Then, 0.7 g of N-ethyl-N-(3-dimethylaminopropyl) carbodiimide hydrochloride (EDCl), 0.06 g of Hydroxybenzotriazole (HOBt), and 0.6 mL of triethylamine were subsequently added to the former solution and stirred in a cold-water (−5 °C) bath for 3 h and at room temperature (20 °C) for 1 day. In the end, the collected material was centrifuged, washed with DI water, and dried at 45 °C for 1 day. The fabrication and the methodology of HFIP functionalization α-Fe 2 O 3 @MWCNTs are depicted in  Figure 1 . 2.3. Fabrication of Gas Sensors To prepare the gas sensors, it was necessary to coat the prepared sensitive material onto the external surface of the ceramic tube, forming a thick sensing film. The sensitive materials need to be covered on the external surface of the ceramic tube to create a dense sensing film [ 45 ]. The illustration of the sensor structure in  Figure 2  shows the dimensions of the ceramic tube, which are 0.8 mm internal diameter, 1.2 mm external diameter, and 4 mm length. A couple of Au electrodes are fixed at the ends of the tube, and each electrode is attached to a Pt wire. Then, appropriate quantities of MWCNT, α-Fe 2 O 3 , α-Fe 2 O 3 @MWCNTs, and HFIP-α-Fe 2 O 3 @MWCNTs were dispersed in anhydrous ethanol and ground into even pastes. Then, the sensing materials were carefully painted on a ceramic tube to connect the Au electrodes. Subsequently, the sensors were left in the air for 30 min, annealed at 400 °C for 2 h and aged for 7 days before conducting gas measurements. In the electrical circuit of sensors, the resistors of the sensor and load (R l ) are linked in series, which supplies the circuit voltage (V c ). The Ni-Cr coil provides the heating voltage (V h ).  Figure 2  displays the electrical circuit schematic of the sensor. When sensors are in contact with the target gas, the chemical adsorption reaction between the sensing material and gas molecules will result in a variation in the resistance of the sensors’ circuit, and this alteration is then detected and presented as an output voltage (V out ) [ 46 ]."
+    }
+  ],
+  "extractions": {
+    "methods_paragraphs": [
+      {
+        "text": "2. Experimental Section Details of the full range of chemical reagents and characterization equipment are described in the  Supplementary Material . 2.1. Fabrication of α-Fe 2 O 3  and α-Fe 2 O 3 @MWCNT Compounds It is well known that carboxyl (-COOH) and hydroxyl (-OH) groups usually adhere in small amounts on the surface of carbon materials [ 38 ]. In order to enhance the number of carboxyl groups on the surface of the MWCNTs, the MWCNTs were subjected to reflux in a mixture of acids. Specifically, 0.5 g of MWCNTs was refluxed in a 20 mL acidic solution comprising 2 mL of HNO 3  and 6 mL of H 2 SO 4  for 5 h at a temperature of 40 °C. Later, the resulting samples were flushed alternately with ethanol and deionized (DI) water until the liquid reached a neutral pH and dried overnight. To grow the FeOOH nanospindles on the MWCNTs skeleton, the acid-treated MWCNTs were homogeneously dispersed in an FeCl 3  solution and underwent a reaction at 80°C for a duration of 5 h. Subsequently, the samples were separated by centrifugation, flushed alternately with DI water and ethanol, and dried overnight at 60 °C. Finally, after annealing in air at 400 °C for 10 h with a slow ramp rate of 2 °C min −1 , FeOOH was successfully converted to α-Fe 2 O 3  to obtain the α-Fe 2 O 3 @MWCNTs hierarchical nanoheterostructure. Schematic diagrams of the synthesis process and the final structure are illustrated in  Figure 1 . 2.2. Functionalization with HFIP Chemical Group The presence of a number of -COOH groups on the surface is a necessary condition for grafting HFIP groups on α-Fe 2 O 3 @MWCNTs [ 10 , 38 ]. To create -COOH groups, 0.5 g α-Fe 2 O 3 @MWCNT nanomaterials were dissolved in 30 mL DI water, the solution’s acidity was lowered to a pH of 4–5 with HCl, and stirred at 40 °C for 30 min [ 44 ]. Subsequently, 1.1 mL of carboxyethylsilanetriol was gradually added into the solution and stirred for 1 day at 40 °C. Then, the solution was centrifuged several times with DI water and acetone and dried in a vacuum oven at 45 °C overnight to obtain α-Fe 2 O 3 @MWCNTs–COOH. Subsequently, to graft HFIP groups on the α-Fe 2 O 3 @MWCNTs–COOH, 0.06 g from the as-prepared α-Fe 2 O 3 @MWCNTs-COOH and 0.1 mL of hexafluoroacetone trihydrate were added to 20 mL of N,N-Dimethylformamide (DMF), next the solution was magnetically stirred in a cold-water bath (≈−5 °C) for 3 h. Then, 0.7 g of N-ethyl-N-(3-dimethylaminopropyl) carbodiimide hydrochloride (EDCl), 0.06 g of Hydroxybenzotriazole (HOBt), and 0.6 mL of triethylamine were subsequently added to the former solution and stirred in a cold-water (−5 °C) bath for 3 h and at room temperature (20 °C) for 1 day. In the end, the collected material was centrifuged, washed with DI water, and dried at 45 °C for 1 day. The fabrication and the methodology of HFIP functionalization α-Fe 2 O 3 @MWCNTs are depicted in  Figure 1 . 2.3. Fabrication of Gas Sensors To prepare the gas sensors, it was necessary to coat the prepared sensitive material onto the external surface of the ceramic tube, forming a thick sensing film. The sensitive materials need to be covered on the external surface of the ceramic tube to create a dense sensing film [ 45 ]. The illustration of the sensor structure in  Figure 2  shows the dimensions of the ceramic tube, which are 0.8 mm internal diameter, 1.2 mm external diameter, and 4 mm length. A couple of Au electrodes are fixed at the ends of the tube, and each electrode is attached to a Pt wire. Then, appropriate quantities of MWCNT, α-Fe 2 O 3 , α-Fe 2 O 3 @MWCNTs, and HFIP-α-Fe 2 O 3 @MWCNTs were dispersed in anhydrous ethanol and ground into even pastes. Then, the sensing materials were carefully painted on a ceramic tube to connect the Au electrodes. Subsequently, the sensors were left in the air for 30 min, annealed at 400 °C for 2 h and aged for 7 days before conducting gas measurements. In the electrical circuit of sensors, the resistors of the sensor and load (R l ) are linked in series, which supplies the circuit voltage (V c ). The Ni-Cr coil provides the heating voltage (V h ).  Figure 2  displays the electrical circuit schematic of the sensor. When sensors are in contact with the target gas, the chemical adsorption reaction between the sensing material and gas molecules will result in a variation in the resistance of the sensors’ circuit, and this alteration is then detected and presented as an output voltage (V out ) [ 46 ].",
+        "operations": [
+          {
+            "op_type": "heat",
+            "sentence": "In order to enhance the number of carboxyl groups on the surface of the MWCNTs, the MWCNTs were subjected to reflux in a mixture of acids.",
+            "start_char": 353,
+            "end_char": 491,
+            "materials": [],
+            "params": {}
+          },
+          {
+            "op_type": "dry",
+            "sentence": "Later, the resulting samples were flushed alternately with ethanol and deionized (DI) water until the liquid reached a neutral pH and dried overnight.",
+            "start_char": 645,
+            "end_char": 795,
+            "materials": [
+              "deionized (DI) water"
+            ],
+            "params": {}
+          },
+          {
+            "op_type": "centrifuge",
+            "sentence": "To grow the FeOOH nanospindles on the MWCNTs skeleton, the acid-treated MWCNTs were homogeneously dispersed in an FeCl 3  solution and underwent a reaction at 80°C for a duration of 5 h. Subsequently, the samples were separated by centrifugation, flushed alternately with DI water and ethanol, and dried overnight at 60 °C.",
+            "start_char": 796,
+            "end_char": 1119,
+            "materials": [
+              "an FeCl 3  solution",
+              "80°C",
+              "DI water"
+            ],
+            "params": {
+              "temp": "80°C",
+              "time": "5 h"
+            }
+          },
+          {
+            "op_type": "heat",
+            "sentence": "Finally, after annealing in air at 400 °C for 10 h with a slow ramp rate of 2 °C min −1 , FeOOH was successfully converted to α-Fe 2 O 3  to obtain the α-Fe 2 O 3 @MWCNTs hierarchical nanoheterostructure.",
+            "start_char": 1120,
+            "end_char": 1324,
+            "materials": [
+              "400 °C",
+              "10 h",
+              "2 °C min −1",
+              "α-Fe 2 O"
+            ],
+            "params": {
+              "temp": "400°C",
+              "time": "10 h"
+            }
+          },
+          {
+            "op_type": "stir",
+            "sentence": "@MWCNT nanomaterials were dissolved in 30 mL DI water, the solution’s acidity was lowered to a pH of 4–5 with HCl, and stirred at 40 °C for 30 min [ 44 ].",
+            "start_char": 1654,
+            "end_char": 1808,
+            "materials": [
+              "30 mL DI water",
+              "40 °C",
+              "30 min"
+            ],
+            "params": {
+              "temp": "40°C",
+              "time": "30 min",
+              "amounts": [
+                "30 mL"
+              ]
+            }
+          },
+          {
+            "op_type": "add",
+            "sentence": "Subsequently, 1.1 mL of carboxyethylsilanetriol was gradually added into the solution and stirred for 1 day at 40 °C.",
+            "start_char": 1809,
+            "end_char": 1926,
+            "materials": [
+              "1.1 mL",
+              "1 day"
+            ],
+            "params": {
+              "temp": "40°C",
+              "amounts": [
+                "1.1 mL"
+              ]
+            }
+          },
+          {
+            "op_type": "centrifuge",
+            "sentence": "Then, the solution was centrifuged several times with DI water and acetone and dried in a vacuum oven at 45 °C overnight to obtain α-Fe 2 O 3 @MWCNTs–COOH.",
+            "start_char": 1927,
+            "end_char": 2082,
+            "materials": [
+              "DI water",
+              "45 °C",
+              "α-Fe 2 O 3 @MWCNTs"
+            ],
+            "params": {
+              "temp": "45°C"
+            }
+          },
+          {
+            "op_type": "add",
+            "sentence": "Subsequently, to graft HFIP groups on the α-Fe 2 O 3 @MWCNTs–COOH, 0.06 g from the as-prepared α-Fe 2 O 3 @MWCNTs-COOH and 0.1 mL of hexafluoroacetone trihydrate were added to 20 mL of N,N-Dimethylformamide (DMF), next the solution was magnetically stirred in a cold-water bath (≈−5 °C) for 3 h. Then, 0.7 g of N-ethyl-N-(3-dimethylaminopropyl) carbodiimide hydrochloride (EDCl), 0.06 g of Hydroxybenzotriazole (HOBt), and 0.6 mL of triethylamine were subsequently added to the former solution and stirred in a cold-water (−5 °C) bath for 3 h and at room temperature (20 °C) for 1 day.",
+            "start_char": 2083,
+            "end_char": 2668,
+            "materials": [
+              "HFIP groups",
+              "the α-Fe 2 O 3 @MWCNTs",
+              "0.06 g",
+              "the as-prepared α-Fe 2 O 3 @MWCNTs-COOH"
+            ],
+            "params": {
+              "temp": "5°C",
+              "time": "3 h",
+              "amounts": [
+                "0.06 g",
+                "0.1 mL",
+                "20 mL",
+                "0.7 g",
+                "0.06 g",
+                "0.6 mL"
+              ]
+            }
+          },
+          {
+            "op_type": "centrifuge",
+            "sentence": "In the end, the collected material was centrifuged, washed with DI water, and dried at 45 °C for 1 day.",
+            "start_char": 2669,
+            "end_char": 2772,
+            "materials": [
+              "DI water",
+              "45 °C",
+              "1 day"
+            ],
+            "params": {
+              "temp": "45°C"
+            }
+          },
+          {
+            "op_type": "heat",
+            "sentence": "Subsequently, the sensors were left in the air for 30 min, annealed at 400 °C for 2 h and aged for 7 days before conducting gas measurements.",
+            "start_char": 3748,
+            "end_char": 3889,
+            "materials": [
+              "30 min",
+              "400 °C",
+              "2 h",
+              "7 days"
+            ],
+            "params": {
+              "temp": "400°C",
+              "time": "30 min"
+            }
+          },
+          {
+            "op_type": "heat",
+            "sentence": "The Ni-Cr coil provides the heating voltage (V h ).  ",
+            "start_char": 4037,
+            "end_char": 4090,
+            "materials": [
+              "(V h"
+            ],
+            "params": {}
+          }
+        ],
+        "expanded": [
+          {
+            "op_type": "heat",
+            "steps": [
+              "Place the reaction vessel on a hotplate.",
+              "Ramp to the target temperature.",
+              "Maintain the target temperature for the specified time."
+            ]
+          },
+          {
+            "op_type": "dry",
+            "steps": [
+              "Perform operation 'dry' as described: Later, the resulting samples were flushed alternately with ethanol and deionized (DI) water until the liquid reached a neutral pH and dried overnight."
+            ]
+          },
+          {
+            "op_type": "centrifuge",
+            "steps": [
+              "Perform operation 'centrifuge' as described: To grow the FeOOH nanospindles on the MWCNTs skeleton, the acid-treated MWCNTs were homogeneously dispersed in an FeCl 3  solution and underwent a reaction at 80°C for a duration of 5 h. Subsequently, the samples were separated by centrifugation, flushed alternately with DI water and ethanol, and dried overnight at 60 °C."
+            ]
+          },
+          {
+            "op_type": "heat",
+            "steps": [
+              "Place the reaction vessel on a hotplate.",
+              "Ramp to 400°C.",
+              "Maintain 400°C for 10 h."
+            ]
+          },
+          {
+            "op_type": "stir",
+            "steps": [
+              "Place the reaction vessel on a stir plate.",
+              "Set the stirrer to an appropriate speed.",
+              "Stir for 30 min."
+            ]
+          },
+          {
+            "op_type": "add",
+            "steps": [
+              "Ensure reaction vessel is present and empty.",
+              "Place a clean stir bar in the vessel.",
+              "Measure 1.1 mL of 1.1 mL.",
+              "Transfer 1.1 mL into the vessel."
+            ]
+          },
+          {
+            "op_type": "centrifuge",
+            "steps": [
+              "Perform operation 'centrifuge' as described: Then, the solution was centrifuged several times with DI water and acetone and dried in a vacuum oven at 45 °C overnight to obtain α-Fe 2 O 3 @MWCNTs–COOH."
+            ]
+          },
+          {
+            "op_type": "add",
+            "steps": [
+              "Ensure reaction vessel is present and empty.",
+              "Place a clean stir bar in the vessel.",
+              "Measure 0.06 g of HFIP groups.",
+              "Transfer HFIP groups into the vessel."
+            ]
+          },
+          {
+            "op_type": "centrifuge",
+            "steps": [
+              "Perform operation 'centrifuge' as described: In the end, the collected material was centrifuged, washed with DI water, and dried at 45 °C for 1 day."
+            ]
+          },
+          {
+            "op_type": "heat",
+            "steps": [
+              "Place the reaction vessel on a hotplate.",
+              "Ramp to 400°C.",
+              "Maintain 400°C for 30 min."
+            ]
+          },
+          {
+            "op_type": "heat",
+            "steps": [
+              "Place the reaction vessel on a hotplate.",
+              "Ramp to the target temperature.",
+              "Maintain the target temperature for the specified time."
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,1485 @@
+{
+  "paper_id": "10.1038/s41467-025-62019-y",
+  "title": "Nanowhisker glues for fatigue-resistant bioadhesion and interfacial functionalization.",
+  "authors": [],
+  "doi": "10.1038/s41467-025-62019-y",
+  "source": "eupmc",
+  "urls": {
+    "pdf": null
+  },
+  "license": {
+    "type": "unknown"
+  },
+  "access_route": "oa",
+  "sections": [
+    {
+      "heading": "Deployment methods",
+      "text": "Deployment methods In an initial test, we directly applied a ChsNWs suspension (pH = 5-6) onto porcine skin, prior to pressing an alginate-polyacrylamide hydrogel upon it. The adhesion energy between the two adherends (skin and hydrogel) was low at 18 J m −2 , as measured by a modified lap-shear test (Fig.  1c, d ). This result echoed previous reports that nanoparticles suffer from tissue barrier effects, yielding relatively weak bioadhesion 15 . As tissue barriers impair bioadhesion with ChsNWs on their own, we sought to address this limitation and explored three deployment methods: chemical enhancer, microneedle, and ultrasound treatment (Fig.  1b ). By applying ChsNWs along with laurocapram, a chemical enhancer that is a commonly utilized biocompatible additive in cosmetics 28 , we increased the adhesion energy to 74 J m −2  (Fig.  1c, d ). It is worth nothing that a mixed solvent that allows for the well dispersion of both hydrophilic ChsNWs and hydrophobic laurocapram is essential for the enhancing effect. Laurocapram enhances the fluidity of intercellular lipid bilayers in the stratum corneum 28 , opening pathways for the nanowhisker to overcome skin barriers. The second method we tested was micro-needling to mechanically pierce the tissues and deliver ChsNWs for deep tissue penetration. It was realized with a derma roller (microneedle length = 250 μm), applied on the skin area treated with ChsNWs, followed by the placement of the hydrogel matrix. The resulting adhesion energy reached 226 J m −2  with just 1 min of microneedling, marking a 13-fold enhancement compared to the non-treatment group (Fig.  1d ). This enhancement stems from the mechanical piercing of dense stratum corneum by the microneedles, efficiently delivering ChsNWs into deep tissues (Supplementary Fig.  S1 ). In addition, we observed a positive correlation between adhesion energy and microneedling duration (Fig.  1e ), further reinforcing the correlation between tissue penetration and adhesion performance. We further explored ultrasound treatment as the third deployment method, known to induce cavitation and microjetting, propelling bridging polymers into tissues 29 . We optimized both formulation and ultrasound parameters for the ChsNWs. This optimization yielded a high adhesion energy of 1185 J m −2  (Fig.  1d ), representing a 66-time enhancement over the non-treatment control, rivaling chitosan chain-based adhesives in performance. Altogether, these results suggest the importance of tissue penetration in achieving bioadhesion for nanowhisker glues. The properly deployed ChsNWs can form tough adhesion between skin and alginate-polyacrylamide hydrogel. Besides skin, this performance extends to other biological tissues with known tissue barrier effects. The ChsNWs deployed with ultrasound enabled tough adhesion between hydrogels and tendon, as well as trachea (Fig.  1f ). Among the three methods tested, the ultrasound afforded the best adhesion performance, so was used in subsequent experiments."
+    },
+    {
+      "heading": "Methods",
+      "text": "Methods Materials PG chitin, ammonium persulfate, sodium borohydride, sodium hydroxide, hydrogen tetrachloroaurate, Brij C10, nickel (II) chloride, hydrazine, diethylamine, and tetraethylorthosilicate (TEOS), acrylamide, N,N’-methylene bis(acrylamide), tetramethylethylenediamine, calcium sulfate, and 2′,7′-dichlorofluorescin diacetate (DCFH-DA) were all purchased from Sigma Aldrich (St. Louis, MO). High molecular weight sodium alginate (I1G) was acquired from Kimica Corporation. Chitosan (448869) was from Sigma-Aldrich. All commercial chemicals were of reagent grade and used as received. Synthesis of chitosan nanowhisker Carboxylated chitin nanowhiskers (ChNWs) and chitosan nanowhiskers (ChsNWs) used in this study were synthesized following a previously described protocol method 26 . In brief, 27.2 g of PG chitin was dispersed in 540 mL of 1 M ammonium persulfate and incubated at 60 °C for 16 h. The resulting mixture was centrifuged at 15,300 ×  g  for 10 min, and the pellet was washed six times with deionized water. The purified ChNWs was lyophilized, yielding a white fluffy powder. To produce ChsNWs, 9 g of the ChNWs were combined with 0.9 g of NaBH₄ in 900 mL of 40% (w/w) aqueous NaOH and refluxed at 117 °C for 18 h. After reflux, the suspension was centrifuged at 15,300 ×  g  for 10 min. The pellet was collected and resuspended in fresh NaOH solution. This centrifugation and resuspension step was repeated two to three times. Following each cycle, a small sample was taken to determine the degree of deacetylation (DDA) via FTIR by monitoring the absorbance at 1030 and 1560 cm⁻¹. When the DDA exceeded 80%, the pellet was suspended in deionized water and centrifuged under the same conditions. Washing was repeated eight times until the supernatant conductivity dropped below 400 µS cm⁻¹. The final pellet was resuspended in water and acidified to pH 5 with 1 M HCl. The resulting ChsNWs were freeze-dried to achieve a white powder (5.7 g, 63% yield) with a final DDA of 88%. Synthesis of partially deacetylated ChsNWs The experiments to study the effect of amine density were carried out with ChsNWs prepared using an aging protocol reported by our group before 27 . This protocol allowed for tuning the DDA and produced ChsNWs with low, medium, and high DDA, denoted as ChsNWs-L, ChsNWs-M, and ChsNWs-H, respectively. The synthesis protocol is as follows. To a standard Tupperware glass container was added 1 g of ChNCs and 1 g of NaOH, placed within a 3-dram vial, and a beaker filled with supersaturated potassium sulfate solution to obtain 98% relative humidity. The glass container was then allowed to incubate for 1 day (ChsNWs-L), 3 days (ChsNWs-M), and 6 days (ChsNWs-H). After the allotted incubation period, the as-obtained product was rinsed with methanol to remove excess NaOH until the pH reached neutral. The average yield was 71%. The DDA calculated for the ChsNWs-L, ChsNWs-M, and ChsNWs-H were 32%, 52%, and 66%, respectively. Synthesis of functionalized ChsNWs For AuNP-ChsNWs, Au NPs were immobilized onto ChsNWs using a modified literature procedure. First, 250 mg of ChsNWs were suspended in 25 mL of water and mixed with 3.75 mL of HAuCl 4  (0.01 M aqueous solution), and magnetically stirred for 10 min in ambient conditions. After, the reaction mixture was placed inside a Teflon liner, and subjected to 4 bar H 2  pressure using a Parr reactor system for 2 h. After, 1 mL of dilute NaBH 4  solution (1.5 w/w% aqueous) was added dropwise into the reaction vessel and stirred for 5 min. A purple suspension emerged. The suspension was then lyophilized to yield a fluffy purple powder with 81% yield. For TiO 2 -ChsNWs, 200 mg of ChsNWs was suspended in 200 mL of water. Then, 1 mL of titanium oxysulfate aqueous solution (1.8 M) was added dropwise to the reaction vessel and stirred at 70 °C for 1 h. The as-obtained TiO 2 -labeled ChsNWs suspension was then washed and centrifugated with water 3 times at 15,300 ×  g for 10 min three times. Synthesis of fluorescent ChsNWs The fluorescent ChsNWs (FITC-ChsNWs) were prepared by labeling ChsNWs with fluorescein isothiocyanate (FITC) via amine-isothiocyanate reaction. Specifically, 1 g of ChsNWs was dispersed in 100 mL of 0.1 M acetic acid. An equal volume of anhydrous methanol was then added gradually under continuous stirring. FITC (17.5 mg, Sigma) was dissolved in anhydrous methanol (1 mg/mL) and added dropwise to the ChsNW solution. The molar feed ratio of FITC to primary amines on the ChsNWs was set at 2%. The reaction proceeded at room temperature in the dark for 2 h. Following the reaction, the mixture was transferred to 14 kDa MWCO dialysis tubing and dialyzed against deionized water for 3 days. The resulting product was recovered by lyophilization. Synthesis of silica nanoparticles The silica nanoparticles in this study was synthesized with a nickel-hydrazine templating protocol. Typically, 4.25 g of Brij C10 was added to 7.5 mL of cyclohexane and heated to 50 °C to dissolve the Brij C10. Then, a variable volume of NiCl 2  aqueous solution (0.8 M) was added dropwise to the mixture. For the small, medium, and large silica nanotubes, 0.45 mL, 0.6 mL, and 0.8 mL were added, respectively. After 0.225 mL of hydrazine was added to the mixture, followed by 3 h of stirring at 50 °C. After 0.5 mL of diethylamine and 1 mL of TEOS was added, followed by an additional 3 h stirring. The as-obtained silica nanotubes were then washed with isopropyl alcohol and centrifuged 3 times at 15,300 ×  g  for 10 min. The nanotubes were then dispersed in water after the final centrifugation cycle. Preparation of nanoparticle suspensions The nanoparticles used in this study include ChsNWs, ChNWs, ChsNWs with a varied degree of deacetylation (ChsNWs-L, ChsNWs-M, and ChsNWs-H), cellulose nanocrystals with varied functionalities (CNC-OH, CNC-COOH), silica nanorods with varied aspect ratios, Au-labeled ChsNWs, and TiO 2 -labeled ChsNWs. Typically, the 1% (w/v) suspension of ChsNWs was prepared by mixing 10 mg of ChsNWs with 1 mL DI water, vortexed for 1 min, and dispersed in an ultrasonic bath for 5 min for a final pH of 5 before usage. The suspensions of ChNWs, ChsNWs-L, ChsNWs-M, and ChsNWs-H were prepared at 2% (w/v) in pH = 6 MES buffer. Other nanoparticle suspensions were prepared at 1% (w/v) in DI water unless otherwise mentioned. The 1% (w/v) solution of polymeric chitosan was prepared by dissolving 1 g of chitosan powder into 50 mL of DI water with 400 µL of acetic acid added for a final pH of around 5. Synthesis of hydrogel matrix An alginate-polyacrylamide hydrogel was synthesized using a modified protocol previously reported 4 . Briefly, sodium alginate (high molecular weight, I1G, Kimica) and acrylamide (AAm, Sigma-Aldrich) were dissolved in deionized water at concentrations of 2% w/w and 12% w/w, respectively. The solution was stirred overnight until fully clarified. A 20 mL aliquot of this solution was then combined via syringe mixing with 72 µL of 2% w/w N,N’-methylene bis(acrylamide) (MBAA) as a covalent crosslinker, 32 µL of tetramethylethylenediamine (TEMED), 452 µL of ammonium persulfate (APS) at 66 mg/mL, and 250 µL of 15% w/w calcium sulfate (CaSO 4 ) slurry. The final mixture was injected into a sealed glass mold and allowed to polymerize overnight. Ultrasound-deployed nanowhisker glue Porcine skin, trachea, and bovine tendon were purchased from a local slaughterhouse, cut into regular strips, stored in the freezer, and thawed at room temperature before use. To confine the nanowhisker suspension on the tissue surface during the ultrasound treatment, a customized plastic ring of 15 mm inner diameter and 15 mm height was first placed on the tissue surface. Then 300 µL of suspension was added into the ring. A US transducer (VWR ultrasonic homogenizer) was subsequently immersed into this suspension and positioned so that the distance between the transducer and tissue surface is 1-2 mm. The typical ultrasound treatment was conducted at 32 W cm −2  for 1 min continuously, unless stated otherwise. After ultrasound treatment, a hydrogel patch was placed onto the nanowhisker-covered tissue with the overlapping area of 15 × 15 mm 2  for adhesion and an additional 5 × 15 mm 2  at the end as the non-adherent area (as the initial crack). Compression was applied to the tissue-nanowhisker-hydrogel specimens to enable optimal adhesion, typically for 1 h unless specified otherwise. During the waiting time, the specimens were sealed in humid plastic bags to prevent specimen dehydration. The condition without ultrasound treatment was prepared by directly adding the nanowhisker suspension to the tissue surface for 1 min, followed by the placement of a hydrogel patch without any treatment. Chemical enhancer-deployed nanowhisker glue The 1% (w/v) suspension of ChsNWs was prepared by mixing 10 mg of ChsNWs with 1 mL mixed solvent (DI water/isopropanol = 1/1 by volume), followed by vortex and ultrasonication to achieve a well-dispersed suspension. Laurocapram (as known as Azone ® ) was added to the mixture at 3% (v/v) as the chemical penetration enhancer and vortexed for complete mixing. 300 µL ChsNWs suspension was added onto the skin and left on the surface for 1 min. Then, a hydrogel patch was placed onto the nanowhisker-covered skin as mentioned above for adhesion. The control group is the same as described above. Microneedle-deployed nanowhisker glue The 1% (w/v) suspension of ChsNWs dissolved in DI water was used. First, 150 µL ChsNWs suspension was added onto the skin, then a microneedle roller with titanium needles of 250 µm in length was rolling on the skin with the ChsNWs suspension for a certain period, during which another 150 µL ChsNWs suspension was added. The microneedle treating time was set as 10, 30, and 60 s, respectively. After the treatment, a hydrogel patch was placed onto the nanowhisker-covered skin as mentioned above for adhesion. The control group is the same as described above. Confocal imaging The adhesive interface of skin-hydrogel specimens and the penetration profiles of ChsNWs into skin were studied by using confocal imaging and fluorescent ChsNWs. Around 300 µL of FITC-ChsNWs suspension was added to porcine skin, treated with chemical enhancer, microneedle, or ultrasound as described above, and no treatment as the control. The skin-hydrogel adhesive specimens were prepared, embedded in OCT compound, and snap-frozen in liquid nitrogen. Frozen sections of 10 µm in thickness were prepared by a microtome, mounted on slides, and imaged using a confocal microscope (LSM710, Zeiss). The samples for characterizing the penetration of ChsNWs into tissues were prepared using porcine skins. FITC-ChsNWs was added on the skin surface, treated for 1 min using different methods as described above. Skin samples were immediately rinsed by DI water thoroughly to removed excessive and unanchored FITC-ChsNWs. Cross-sections were prepared as described above and imaged using a confocal microscope. The penetration depth was analyzed from confocal images. Histological staining and imaging The skin-hydrogel adhesive specimens were fixed using 4% paraformaldehyde (PFA) solution for overnight and then incubated with a gradient sucrose solution. Frozen sections of 10 µm in thickness were prepared by a microtome, stained with hematoxylin and eosin stain (H&E), and mounted on slides. Skin tissue, hydrogel, and adhesive interface of ChsNWs were observed under optical microscopy. Interface characterization with TEM Four samples were chosen to be fixed and subjected to microtomography for TEM imaging of the interface. All of these used the porcine skin and hydrogel strip dimensions as stated above. The samples are as follows: (1) 200 µL of 1 wt.% suspension of AuNP-ChsNWs simply pipetted onto the skin surface and left for 1 min, (2) 200 µL of 1 wt.% suspension of AuNP-ChsNWs pipetted onto the skin surface and ultrasonicated for 1 min, (3) 200 µL of 1 wt.% suspension of AuNP-ChsNWs simply pipetted onto the skin surface and left for 1 min, then a strip of hydrogel is placed on top; excess suspension was wiped off with Kimwipes, and (4) 200 µL of 1 wt.% suspension of AuNP-ChsNWs pipetted onto the skin surface and ultrasonicated for 1 min, then a strip of hydrogel is placed on top. The samples were cut with a scalpel into approximately 2.5 × 5 mm strips. The samples were then submersed in 2.5 wt.% glutaraldehyde fixative in 0.1 M sodium cacodylate with 4 wt.% sucrose overnight at 4 °C. After the post-fixative procedure consisted of submersing the sample in 1 wt.% aqueous osmium tetroxide and 1.5 wt.% potassium ferrocyanide for 2 h at 4 °C (Note that OsO 4  is highly poisonous and can lead to blindness. Handle with extreme caution in a well-ventilated fume hood, and follow protocols outlined in the SDS). After post-fix, wash the samples with doubly distilled water for three times and start dehydration by submersing the samples for 10 min in increasing ratios of acetone:water until 100% acetone. Fully dehydrated samples were then infiltrated with Epon in acetone. The process takes several days in which each day, the dehydrated samples are submersed in baths of 1:1, 2:1, 3:1 epon:acetone overnight. Finally, the samples are submerged into pure epon for 4 h and under vacuum for 2 h. Finally, the samples are then put into the oven at 60 °C for polymerization. A photograph of the fixed and polymerized samples is given below (Supplementary Fig.  S13 ). The samples were then cut using a Leica Microsystems cryo-ultramicrotome perpendicular to the surface of the samples, such that the cross-sections can be visualized. The slices were placed on standard Cu-mesh TEM grids and analyzed via TEM. Samples were analyzed using STEM coupled with the high-angle annular dark field (HAADF) detector in a Talos F200X G2 ThermoFisher microscope. The energy dispersive X-ray spectroscopy (EDS) analyses were performed using a SDD Super-X detector at 200 keV for 5 min. The EDS maps for the Au signal shown in this manuscript are displayed, taken the signal at 2.08 eV, characteristic for the Au Mα peak. Adhesion energy measurements Modified lap-shear tests were performed with an Instron machine (Model 5965) to characterize the adhesion energy between the hydrogel and the tissue. A hydrogel–tissue adhesion construct was assembled with a 15 mm overlapping adhesion region and a pre-formed 5 mm interfacial crack. Uniaxial tensile loading was applied to the two free ends using an Instron testing machine, while force and displacement were continuously recorded. We assume the shear strain is completely carried by the gel adhesive due to its much smaller elastic modulus than that of skin, the adhesion energy was calculated via  \\documentclass[12pt]{minimal}\n\t\t\t\t\\usepackage{amsmath}\n\t\t\t\t\\usepackage{wasysym} \n\t\t\t\t\\usepackage{amsfonts} \n\t\t\t\t\\usepackage{amssymb} \n\t\t\t\t\\usepackage{amsbsy}\n\t\t\t\t\\usepackage{mathrsfs}\n\t\t\t\t\\usepackage{upgreek}\n\t\t\t\t\\setlength{\\oddsidemargin}{-69pt}\n\t\t\t\t\\begin{document}$${\\varGamma }_{a}=t{\\int }_{1}^{{\\gamma }_{c}}\\tau d{{{\\rm{\\gamma }}}}$$\\end{document} Γ a = t ∫ 1 γ c τ d γ , where  t  is the thickness of the gel,  τ  is the shear stress,  γ  is the shear strain, and  γ c  is the critical shear strain where the interfacial crack starts propagating. Interfacial fatigue threshold measurements The 180-degree peeling tests were conducted under cyclic loading using force-control mode to evaluate the interfacial fatigue threshold of hydrogel adhesion to porcine skin. An Instron testing machine applied cyclic forces with amplitude  Fₐ  (set below the monotonic peeling force) for  N  cycles, while the propagation of the interfacial crack ( c ) was recorded as a function of cycle number ( N ). The crack growth rate was determined as  dc/dN , and the corresponding energy release rate was calculated using  G  =  2Fₐ/W , where  W  is the width of the sample. This procedure was repeated across a range of force amplitudes to generate a plot of  dc/dN  versus  G . By linearly extrapolating this plot to the x-axis, the interfacial fatigue threshold, denoted as  Γ 0 , was obtained. Photothermal tests The 2% (w/v) Au-labeled chitosan nanowhiskers (AuNP-ChsNWs) were pipetted onto the skin surface, treated with ultrasound, and then formed adhesion between the skin and hydrogel as described above. A 532 nm green laser with a power of 100 mW was used for laser irradiation. The skin-nanowhisker-hydrogel specimen was attached to the lab stands, and the distance from the laser was set to be around 5 cm. Immediately, the specimen was irradiated by the laser, and an infrared thermal imaging camera was used to map the temperature of the irradiated region, where the maximum temperature of the region was identified to benchmark the photothermal effect. The specimens with unlabeled ChsNWs and without any ChsNWs were included as the control. To test the responsiveness of the photothermal effect, we conducted cyclic photothermal tests by intermittently irradiating the laser for a 30 s ON period followed by a 30 s OFF period, during which the specimen temperature was continuously measured by the thermal imaging camera. Also, we measured the temperature of the back surface of the specimen to show the localized photothermal effect. Sonodynamic tests The sonodynamic effect of TiO 2 -labeled chitosan nanowhisker (TiO 2 -ChsNWs) was firstly evaluated using a previously reported protocol 37 . The 2′,7′-dichlorofuorescein (DCFH), which was converted from DCFH-DA, was used as a probe for measuring reactive oxygen species (ROS). The stock solution of DCFH was prepared accordingly and kept in the dark and on ice before use. TiO 2 -ChsNWs was suspended in the DCFH solution at 1% w/v in a 1.5 mL vial. The vials were placed on the therapeutic ultrasound horn with couplant gel for acoustic impedance matching and treated with ultrasound at 1.5 W cm −2  for different times. To prevent the overheating ofthe ultrasound horn, it was cooled with ice after each one minute of function. The total time of ultrasound treatment was recorded. The suspensions were centrifuged, and the fluorescence intensity of the supernatants was detected by fluorescence spectrophotometry (BioTek Synergy HTX multi-mode microplate reader, λ ex  = 485/20 nm, λ em  = 528/20 nm) to evaluate the ROS content. A proof-of-concept of ultrasound-mediated activation and delivery of drugs was performed. DCFH was used as a mock prodrug representing the drug caged by a ROS-cleavable functional group. It was encapsulated in an alginate hydrogel at a concentration of 10 mg mL −1 . The hydrogel was then sandwiched between a piece of porcine skin (1 cm in thickness) and porcine muscle tissue. The ultrasound horn was placed onto the skin and can penetrate the depth of the skin and activate the prodrug through the sonodynamic effect of ChsNWs. After ultrasound treatment, the samples were observed by confocal imaging. Statistical analysis A sample size of  N  ≥ 3 was used for all experiments. Data are shown as mean ± S.D. Statistical analysis was performed using one-way ANOVA and post hoc Tukey tests for multiple comparisons or Student’s  t  tests for comparison between two groups (Prism 9).  P -values < 0.05 were considered statistically significant. Reporting summary Further information on research design is available in the  Nature Portfolio Reporting Summary  linked to this article."
+    },
+    {
+      "heading": "Synthesis of chitosan nanowhisker",
+      "text": "Synthesis of chitosan nanowhisker Carboxylated chitin nanowhiskers (ChNWs) and chitosan nanowhiskers (ChsNWs) used in this study were synthesized following a previously described protocol method 26 . In brief, 27.2 g of PG chitin was dispersed in 540 mL of 1 M ammonium persulfate and incubated at 60 °C for 16 h. The resulting mixture was centrifuged at 15,300 ×  g  for 10 min, and the pellet was washed six times with deionized water. The purified ChNWs was lyophilized, yielding a white fluffy powder. To produce ChsNWs, 9 g of the ChNWs were combined with 0.9 g of NaBH₄ in 900 mL of 40% (w/w) aqueous NaOH and refluxed at 117 °C for 18 h. After reflux, the suspension was centrifuged at 15,300 ×  g  for 10 min. The pellet was collected and resuspended in fresh NaOH solution. This centrifugation and resuspension step was repeated two to three times. Following each cycle, a small sample was taken to determine the degree of deacetylation (DDA) via FTIR by monitoring the absorbance at 1030 and 1560 cm⁻¹. When the DDA exceeded 80%, the pellet was suspended in deionized water and centrifuged under the same conditions. Washing was repeated eight times until the supernatant conductivity dropped below 400 µS cm⁻¹. The final pellet was resuspended in water and acidified to pH 5 with 1 M HCl. The resulting ChsNWs were freeze-dried to achieve a white powder (5.7 g, 63% yield) with a final DDA of 88%."
+    },
+    {
+      "heading": "Synthesis of partially deacetylated ChsNWs",
+      "text": "Synthesis of partially deacetylated ChsNWs The experiments to study the effect of amine density were carried out with ChsNWs prepared using an aging protocol reported by our group before 27 . This protocol allowed for tuning the DDA and produced ChsNWs with low, medium, and high DDA, denoted as ChsNWs-L, ChsNWs-M, and ChsNWs-H, respectively. The synthesis protocol is as follows. To a standard Tupperware glass container was added 1 g of ChNCs and 1 g of NaOH, placed within a 3-dram vial, and a beaker filled with supersaturated potassium sulfate solution to obtain 98% relative humidity. The glass container was then allowed to incubate for 1 day (ChsNWs-L), 3 days (ChsNWs-M), and 6 days (ChsNWs-H). After the allotted incubation period, the as-obtained product was rinsed with methanol to remove excess NaOH until the pH reached neutral. The average yield was 71%. The DDA calculated for the ChsNWs-L, ChsNWs-M, and ChsNWs-H were 32%, 52%, and 66%, respectively."
+    },
+    {
+      "heading": "Synthesis of functionalized ChsNWs",
+      "text": "Synthesis of functionalized ChsNWs For AuNP-ChsNWs, Au NPs were immobilized onto ChsNWs using a modified literature procedure. First, 250 mg of ChsNWs were suspended in 25 mL of water and mixed with 3.75 mL of HAuCl 4  (0.01 M aqueous solution), and magnetically stirred for 10 min in ambient conditions. After, the reaction mixture was placed inside a Teflon liner, and subjected to 4 bar H 2  pressure using a Parr reactor system for 2 h. After, 1 mL of dilute NaBH 4  solution (1.5 w/w% aqueous) was added dropwise into the reaction vessel and stirred for 5 min. A purple suspension emerged. The suspension was then lyophilized to yield a fluffy purple powder with 81% yield. For TiO 2 -ChsNWs, 200 mg of ChsNWs was suspended in 200 mL of water. Then, 1 mL of titanium oxysulfate aqueous solution (1.8 M) was added dropwise to the reaction vessel and stirred at 70 °C for 1 h. The as-obtained TiO 2 -labeled ChsNWs suspension was then washed and centrifugated with water 3 times at 15,300 ×  g for 10 min three times."
+    }
+  ],
+  "extractions": {
+    "methods_paragraphs": [
+      {
+        "text": "Deployment methods In an initial test, we directly applied a ChsNWs suspension (pH = 5-6) onto porcine skin, prior to pressing an alginate-polyacrylamide hydrogel upon it. The adhesion energy between the two adherends (skin and hydrogel) was low at 18 J m −2 , as measured by a modified lap-shear test (Fig.  1c, d ). This result echoed previous reports that nanoparticles suffer from tissue barrier effects, yielding relatively weak bioadhesion 15 . As tissue barriers impair bioadhesion with ChsNWs on their own, we sought to address this limitation and explored three deployment methods: chemical enhancer, microneedle, and ultrasound treatment (Fig.  1b ). By applying ChsNWs along with laurocapram, a chemical enhancer that is a commonly utilized biocompatible additive in cosmetics 28 , we increased the adhesion energy to 74 J m −2  (Fig.  1c, d ). It is worth nothing that a mixed solvent that allows for the well dispersion of both hydrophilic ChsNWs and hydrophobic laurocapram is essential for the enhancing effect. Laurocapram enhances the fluidity of intercellular lipid bilayers in the stratum corneum 28 , opening pathways for the nanowhisker to overcome skin barriers. The second method we tested was micro-needling to mechanically pierce the tissues and deliver ChsNWs for deep tissue penetration. It was realized with a derma roller (microneedle length = 250 μm), applied on the skin area treated with ChsNWs, followed by the placement of the hydrogel matrix. The resulting adhesion energy reached 226 J m −2  with just 1 min of microneedling, marking a 13-fold enhancement compared to the non-treatment group (Fig.  1d ). This enhancement stems from the mechanical piercing of dense stratum corneum by the microneedles, efficiently delivering ChsNWs into deep tissues (Supplementary Fig.  S1 ). In addition, we observed a positive correlation between adhesion energy and microneedling duration (Fig.  1e ), further reinforcing the correlation between tissue penetration and adhesion performance. We further explored ultrasound treatment as the third deployment method, known to induce cavitation and microjetting, propelling bridging polymers into tissues 29 . We optimized both formulation and ultrasound parameters for the ChsNWs. This optimization yielded a high adhesion energy of 1185 J m −2  (Fig.  1d ), representing a 66-time enhancement over the non-treatment control, rivaling chitosan chain-based adhesives in performance. Altogether, these results suggest the importance of tissue penetration in achieving bioadhesion for nanowhisker glues. The properly deployed ChsNWs can form tough adhesion between skin and alginate-polyacrylamide hydrogel. Besides skin, this performance extends to other biological tissues with known tissue barrier effects. The ChsNWs deployed with ultrasound enabled tough adhesion between hydrogels and tendon, as well as trachea (Fig.  1f ). Among the three methods tested, the ultrasound afforded the best adhesion performance, so was used in subsequent experiments.",
+        "operations": [
+          {
+            "op_type": "stir",
+            "sentence": "It is worth nothing that a mixed solvent that allows for the well dispersion of both hydrophilic ChsNWs and hydrophobic laurocapram is essential for the enhancing effect.",
+            "start_char": 856,
+            "end_char": 1026,
+            "materials": [],
+            "params": {}
+          }
+        ],
+        "expanded": [
+          {
+            "op_type": "stir",
+            "steps": [
+              "Place the reaction vessel on a stir plate.",
+              "Set the stirrer to an appropriate speed.",
+              "Stir for the specified time."
+            ]
+          }
+        ]
+      },
+      {
+        "text": "Methods Materials PG chitin, ammonium persulfate, sodium borohydride, sodium hydroxide, hydrogen tetrachloroaurate, Brij C10, nickel (II) chloride, hydrazine, diethylamine, and tetraethylorthosilicate (TEOS), acrylamide, N,N’-methylene bis(acrylamide), tetramethylethylenediamine, calcium sulfate, and 2′,7′-dichlorofluorescin diacetate (DCFH-DA) were all purchased from Sigma Aldrich (St. Louis, MO). High molecular weight sodium alginate (I1G) was acquired from Kimica Corporation. Chitosan (448869) was from Sigma-Aldrich. All commercial chemicals were of reagent grade and used as received. Synthesis of chitosan nanowhisker Carboxylated chitin nanowhiskers (ChNWs) and chitosan nanowhiskers (ChsNWs) used in this study were synthesized following a previously described protocol method 26 . In brief, 27.2 g of PG chitin was dispersed in 540 mL of 1 M ammonium persulfate and incubated at 60 °C for 16 h. The resulting mixture was centrifuged at 15,300 ×  g  for 10 min, and the pellet was washed six times with deionized water. The purified ChNWs was lyophilized, yielding a white fluffy powder. To produce ChsNWs, 9 g of the ChNWs were combined with 0.9 g of NaBH₄ in 900 mL of 40% (w/w) aqueous NaOH and refluxed at 117 °C for 18 h. After reflux, the suspension was centrifuged at 15,300 ×  g  for 10 min. The pellet was collected and resuspended in fresh NaOH solution. This centrifugation and resuspension step was repeated two to three times. Following each cycle, a small sample was taken to determine the degree of deacetylation (DDA) via FTIR by monitoring the absorbance at 1030 and 1560 cm⁻¹. When the DDA exceeded 80%, the pellet was suspended in deionized water and centrifuged under the same conditions. Washing was repeated eight times until the supernatant conductivity dropped below 400 µS cm⁻¹. The final pellet was resuspended in water and acidified to pH 5 with 1 M HCl. The resulting ChsNWs were freeze-dried to achieve a white powder (5.7 g, 63% yield) with a final DDA of 88%. Synthesis of partially deacetylated ChsNWs The experiments to study the effect of amine density were carried out with ChsNWs prepared using an aging protocol reported by our group before 27 . This protocol allowed for tuning the DDA and produced ChsNWs with low, medium, and high DDA, denoted as ChsNWs-L, ChsNWs-M, and ChsNWs-H, respectively. The synthesis protocol is as follows. To a standard Tupperware glass container was added 1 g of ChNCs and 1 g of NaOH, placed within a 3-dram vial, and a beaker filled with supersaturated potassium sulfate solution to obtain 98% relative humidity. The glass container was then allowed to incubate for 1 day (ChsNWs-L), 3 days (ChsNWs-M), and 6 days (ChsNWs-H). After the allotted incubation period, the as-obtained product was rinsed with methanol to remove excess NaOH until the pH reached neutral. The average yield was 71%. The DDA calculated for the ChsNWs-L, ChsNWs-M, and ChsNWs-H were 32%, 52%, and 66%, respectively. Synthesis of functionalized ChsNWs For AuNP-ChsNWs, Au NPs were immobilized onto ChsNWs using a modified literature procedure. First, 250 mg of ChsNWs were suspended in 25 mL of water and mixed with 3.75 mL of HAuCl 4  (0.01 M aqueous solution), and magnetically stirred for 10 min in ambient conditions. After, the reaction mixture was placed inside a Teflon liner, and subjected to 4 bar H 2  pressure using a Parr reactor system for 2 h. After, 1 mL of dilute NaBH 4  solution (1.5 w/w% aqueous) was added dropwise into the reaction vessel and stirred for 5 min. A purple suspension emerged. The suspension was then lyophilized to yield a fluffy purple powder with 81% yield. For TiO 2 -ChsNWs, 200 mg of ChsNWs was suspended in 200 mL of water. Then, 1 mL of titanium oxysulfate aqueous solution (1.8 M) was added dropwise to the reaction vessel and stirred at 70 °C for 1 h. The as-obtained TiO 2 -labeled ChsNWs suspension was then washed and centrifugated with water 3 times at 15,300 ×  g for 10 min three times. Synthesis of fluorescent ChsNWs The fluorescent ChsNWs (FITC-ChsNWs) were prepared by labeling ChsNWs with fluorescein isothiocyanate (FITC) via amine-isothiocyanate reaction. Specifically, 1 g of ChsNWs was dispersed in 100 mL of 0.1 M acetic acid. An equal volume of anhydrous methanol was then added gradually under continuous stirring. FITC (17.5 mg, Sigma) was dissolved in anhydrous methanol (1 mg/mL) and added dropwise to the ChsNW solution. The molar feed ratio of FITC to primary amines on the ChsNWs was set at 2%. The reaction proceeded at room temperature in the dark for 2 h. Following the reaction, the mixture was transferred to 14 kDa MWCO dialysis tubing and dialyzed against deionized water for 3 days. The resulting product was recovered by lyophilization. Synthesis of silica nanoparticles The silica nanoparticles in this study was synthesized with a nickel-hydrazine templating protocol. Typically, 4.25 g of Brij C10 was added to 7.5 mL of cyclohexane and heated to 50 °C to dissolve the Brij C10. Then, a variable volume of NiCl 2  aqueous solution (0.8 M) was added dropwise to the mixture. For the small, medium, and large silica nanotubes, 0.45 mL, 0.6 mL, and 0.8 mL were added, respectively. After 0.225 mL of hydrazine was added to the mixture, followed by 3 h of stirring at 50 °C. After 0.5 mL of diethylamine and 1 mL of TEOS was added, followed by an additional 3 h stirring. The as-obtained silica nanotubes were then washed with isopropyl alcohol and centrifuged 3 times at 15,300 ×  g  for 10 min. The nanotubes were then dispersed in water after the final centrifugation cycle. Preparation of nanoparticle suspensions The nanoparticles used in this study include ChsNWs, ChNWs, ChsNWs with a varied degree of deacetylation (ChsNWs-L, ChsNWs-M, and ChsNWs-H), cellulose nanocrystals with varied functionalities (CNC-OH, CNC-COOH), silica nanorods with varied aspect ratios, Au-labeled ChsNWs, and TiO 2 -labeled ChsNWs. Typically, the 1% (w/v) suspension of ChsNWs was prepared by mixing 10 mg of ChsNWs with 1 mL DI water, vortexed for 1 min, and dispersed in an ultrasonic bath for 5 min for a final pH of 5 before usage. The suspensions of ChNWs, ChsNWs-L, ChsNWs-M, and ChsNWs-H were prepared at 2% (w/v) in pH = 6 MES buffer. Other nanoparticle suspensions were prepared at 1% (w/v) in DI water unless otherwise mentioned. The 1% (w/v) solution of polymeric chitosan was prepared by dissolving 1 g of chitosan powder into 50 mL of DI water with 400 µL of acetic acid added for a final pH of around 5. Synthesis of hydrogel matrix An alginate-polyacrylamide hydrogel was synthesized using a modified protocol previously reported 4 . Briefly, sodium alginate (high molecular weight, I1G, Kimica) and acrylamide (AAm, Sigma-Aldrich) were dissolved in deionized water at concentrations of 2% w/w and 12% w/w, respectively. The solution was stirred overnight until fully clarified. A 20 mL aliquot of this solution was then combined via syringe mixing with 72 µL of 2% w/w N,N’-methylene bis(acrylamide) (MBAA) as a covalent crosslinker, 32 µL of tetramethylethylenediamine (TEMED), 452 µL of ammonium persulfate (APS) at 66 mg/mL, and 250 µL of 15% w/w calcium sulfate (CaSO 4 ) slurry. The final mixture was injected into a sealed glass mold and allowed to polymerize overnight. Ultrasound-deployed nanowhisker glue Porcine skin, trachea, and bovine tendon were purchased from a local slaughterhouse, cut into regular strips, stored in the freezer, and thawed at room temperature before use. To confine the nanowhisker suspension on the tissue surface during the ultrasound treatment, a customized plastic ring of 15 mm inner diameter and 15 mm height was first placed on the tissue surface. Then 300 µL of suspension was added into the ring. A US transducer (VWR ultrasonic homogenizer) was subsequently immersed into this suspension and positioned so that the distance between the transducer and tissue surface is 1-2 mm. The typical ultrasound treatment was conducted at 32 W cm −2  for 1 min continuously, unless stated otherwise. After ultrasound treatment, a hydrogel patch was placed onto the nanowhisker-covered tissue with the overlapping area of 15 × 15 mm 2  for adhesion and an additional 5 × 15 mm 2  at the end as the non-adherent area (as the initial crack). Compression was applied to the tissue-nanowhisker-hydrogel specimens to enable optimal adhesion, typically for 1 h unless specified otherwise. During the waiting time, the specimens were sealed in humid plastic bags to prevent specimen dehydration. The condition without ultrasound treatment was prepared by directly adding the nanowhisker suspension to the tissue surface for 1 min, followed by the placement of a hydrogel patch without any treatment. Chemical enhancer-deployed nanowhisker glue The 1% (w/v) suspension of ChsNWs was prepared by mixing 10 mg of ChsNWs with 1 mL mixed solvent (DI water/isopropanol = 1/1 by volume), followed by vortex and ultrasonication to achieve a well-dispersed suspension. Laurocapram (as known as Azone ® ) was added to the mixture at 3% (v/v) as the chemical penetration enhancer and vortexed for complete mixing. 300 µL ChsNWs suspension was added onto the skin and left on the surface for 1 min. Then, a hydrogel patch was placed onto the nanowhisker-covered skin as mentioned above for adhesion. The control group is the same as described above. Microneedle-deployed nanowhisker glue The 1% (w/v) suspension of ChsNWs dissolved in DI water was used. First, 150 µL ChsNWs suspension was added onto the skin, then a microneedle roller with titanium needles of 250 µm in length was rolling on the skin with the ChsNWs suspension for a certain period, during which another 150 µL ChsNWs suspension was added. The microneedle treating time was set as 10, 30, and 60 s, respectively. After the treatment, a hydrogel patch was placed onto the nanowhisker-covered skin as mentioned above for adhesion. The control group is the same as described above. Confocal imaging The adhesive interface of skin-hydrogel specimens and the penetration profiles of ChsNWs into skin were studied by using confocal imaging and fluorescent ChsNWs. Around 300 µL of FITC-ChsNWs suspension was added to porcine skin, treated with chemical enhancer, microneedle, or ultrasound as described above, and no treatment as the control. The skin-hydrogel adhesive specimens were prepared, embedded in OCT compound, and snap-frozen in liquid nitrogen. Frozen sections of 10 µm in thickness were prepared by a microtome, mounted on slides, and imaged using a confocal microscope (LSM710, Zeiss). The samples for characterizing the penetration of ChsNWs into tissues were prepared using porcine skins. FITC-ChsNWs was added on the skin surface, treated for 1 min using different methods as described above. Skin samples were immediately rinsed by DI water thoroughly to removed excessive and unanchored FITC-ChsNWs. Cross-sections were prepared as described above and imaged using a confocal microscope. The penetration depth was analyzed from confocal images. Histological staining and imaging The skin-hydrogel adhesive specimens were fixed using 4% paraformaldehyde (PFA) solution for overnight and then incubated with a gradient sucrose solution. Frozen sections of 10 µm in thickness were prepared by a microtome, stained with hematoxylin and eosin stain (H&E), and mounted on slides. Skin tissue, hydrogel, and adhesive interface of ChsNWs were observed under optical microscopy. Interface characterization with TEM Four samples were chosen to be fixed and subjected to microtomography for TEM imaging of the interface. All of these used the porcine skin and hydrogel strip dimensions as stated above. The samples are as follows: (1) 200 µL of 1 wt.% suspension of AuNP-ChsNWs simply pipetted onto the skin surface and left for 1 min, (2) 200 µL of 1 wt.% suspension of AuNP-ChsNWs pipetted onto the skin surface and ultrasonicated for 1 min, (3) 200 µL of 1 wt.% suspension of AuNP-ChsNWs simply pipetted onto the skin surface and left for 1 min, then a strip of hydrogel is placed on top; excess suspension was wiped off with Kimwipes, and (4) 200 µL of 1 wt.% suspension of AuNP-ChsNWs pipetted onto the skin surface and ultrasonicated for 1 min, then a strip of hydrogel is placed on top. The samples were cut with a scalpel into approximately 2.5 × 5 mm strips. The samples were then submersed in 2.5 wt.% glutaraldehyde fixative in 0.1 M sodium cacodylate with 4 wt.% sucrose overnight at 4 °C. After the post-fixative procedure consisted of submersing the sample in 1 wt.% aqueous osmium tetroxide and 1.5 wt.% potassium ferrocyanide for 2 h at 4 °C (Note that OsO 4  is highly poisonous and can lead to blindness. Handle with extreme caution in a well-ventilated fume hood, and follow protocols outlined in the SDS). After post-fix, wash the samples with doubly distilled water for three times and start dehydration by submersing the samples for 10 min in increasing ratios of acetone:water until 100% acetone. Fully dehydrated samples were then infiltrated with Epon in acetone. The process takes several days in which each day, the dehydrated samples are submersed in baths of 1:1, 2:1, 3:1 epon:acetone overnight. Finally, the samples are submerged into pure epon for 4 h and under vacuum for 2 h. Finally, the samples are then put into the oven at 60 °C for polymerization. A photograph of the fixed and polymerized samples is given below (Supplementary Fig.  S13 ). The samples were then cut using a Leica Microsystems cryo-ultramicrotome perpendicular to the surface of the samples, such that the cross-sections can be visualized. The slices were placed on standard Cu-mesh TEM grids and analyzed via TEM. Samples were analyzed using STEM coupled with the high-angle annular dark field (HAADF) detector in a Talos F200X G2 ThermoFisher microscope. The energy dispersive X-ray spectroscopy (EDS) analyses were performed using a SDD Super-X detector at 200 keV for 5 min. The EDS maps for the Au signal shown in this manuscript are displayed, taken the signal at 2.08 eV, characteristic for the Au Mα peak. Adhesion energy measurements Modified lap-shear tests were performed with an Instron machine (Model 5965) to characterize the adhesion energy between the hydrogel and the tissue. A hydrogel–tissue adhesion construct was assembled with a 15 mm overlapping adhesion region and a pre-formed 5 mm interfacial crack. Uniaxial tensile loading was applied to the two free ends using an Instron testing machine, while force and displacement were continuously recorded. We assume the shear strain is completely carried by the gel adhesive due to its much smaller elastic modulus than that of skin, the adhesion energy was calculated via  \\documentclass[12pt]{minimal}\n\t\t\t\t\\usepackage{amsmath}\n\t\t\t\t\\usepackage{wasysym} \n\t\t\t\t\\usepackage{amsfonts} \n\t\t\t\t\\usepackage{amssymb} \n\t\t\t\t\\usepackage{amsbsy}\n\t\t\t\t\\usepackage{mathrsfs}\n\t\t\t\t\\usepackage{upgreek}\n\t\t\t\t\\setlength{\\oddsidemargin}{-69pt}\n\t\t\t\t\\begin{document}$${\\varGamma }_{a}=t{\\int }_{1}^{{\\gamma }_{c}}\\tau d{{{\\rm{\\gamma }}}}$$\\end{document} Γ a = t ∫ 1 γ c τ d γ , where  t  is the thickness of the gel,  τ  is the shear stress,  γ  is the shear strain, and  γ c  is the critical shear strain where the interfacial crack starts propagating. Interfacial fatigue threshold measurements The 180-degree peeling tests were conducted under cyclic loading using force-control mode to evaluate the interfacial fatigue threshold of hydrogel adhesion to porcine skin. An Instron testing machine applied cyclic forces with amplitude  Fₐ  (set below the monotonic peeling force) for  N  cycles, while the propagation of the interfacial crack ( c ) was recorded as a function of cycle number ( N ). The crack growth rate was determined as  dc/dN , and the corresponding energy release rate was calculated using  G  =  2Fₐ/W , where  W  is the width of the sample. This procedure was repeated across a range of force amplitudes to generate a plot of  dc/dN  versus  G . By linearly extrapolating this plot to the x-axis, the interfacial fatigue threshold, denoted as  Γ 0 , was obtained. Photothermal tests The 2% (w/v) Au-labeled chitosan nanowhiskers (AuNP-ChsNWs) were pipetted onto the skin surface, treated with ultrasound, and then formed adhesion between the skin and hydrogel as described above. A 532 nm green laser with a power of 100 mW was used for laser irradiation. The skin-nanowhisker-hydrogel specimen was attached to the lab stands, and the distance from the laser was set to be around 5 cm. Immediately, the specimen was irradiated by the laser, and an infrared thermal imaging camera was used to map the temperature of the irradiated region, where the maximum temperature of the region was identified to benchmark the photothermal effect. The specimens with unlabeled ChsNWs and without any ChsNWs were included as the control. To test the responsiveness of the photothermal effect, we conducted cyclic photothermal tests by intermittently irradiating the laser for a 30 s ON period followed by a 30 s OFF period, during which the specimen temperature was continuously measured by the thermal imaging camera. Also, we measured the temperature of the back surface of the specimen to show the localized photothermal effect. Sonodynamic tests The sonodynamic effect of TiO 2 -labeled chitosan nanowhisker (TiO 2 -ChsNWs) was firstly evaluated using a previously reported protocol 37 . The 2′,7′-dichlorofuorescein (DCFH), which was converted from DCFH-DA, was used as a probe for measuring reactive oxygen species (ROS). The stock solution of DCFH was prepared accordingly and kept in the dark and on ice before use. TiO 2 -ChsNWs was suspended in the DCFH solution at 1% w/v in a 1.5 mL vial. The vials were placed on the therapeutic ultrasound horn with couplant gel for acoustic impedance matching and treated with ultrasound at 1.5 W cm −2  for different times. To prevent the overheating ofthe ultrasound horn, it was cooled with ice after each one minute of function. The total time of ultrasound treatment was recorded. The suspensions were centrifuged, and the fluorescence intensity of the supernatants was detected by fluorescence spectrophotometry (BioTek Synergy HTX multi-mode microplate reader, λ ex  = 485/20 nm, λ em  = 528/20 nm) to evaluate the ROS content. A proof-of-concept of ultrasound-mediated activation and delivery of drugs was performed. DCFH was used as a mock prodrug representing the drug caged by a ROS-cleavable functional group. It was encapsulated in an alginate hydrogel at a concentration of 10 mg mL −1 . The hydrogel was then sandwiched between a piece of porcine skin (1 cm in thickness) and porcine muscle tissue. The ultrasound horn was placed onto the skin and can penetrate the depth of the skin and activate the prodrug through the sonodynamic effect of ChsNWs. After ultrasound treatment, the samples were observed by confocal imaging. Statistical analysis A sample size of  N  ≥ 3 was used for all experiments. Data are shown as mean ± S.D. Statistical analysis was performed using one-way ANOVA and post hoc Tukey tests for multiple comparisons or Student’s  t  tests for comparison between two groups (Prism 9).  P -values < 0.05 were considered statistically significant. Reporting summary Further information on research design is available in the  Nature Portfolio Reporting Summary  linked to this article.",
+        "operations": [
+          {
+            "op_type": "centrifuge",
+            "sentence": "The resulting mixture was centrifuged at 15,300 ×  g  for 10 min, and the pellet was washed six times with deionized water.",
+            "start_char": 909,
+            "end_char": 1032,
+            "materials": [
+              "15,300 ×  g",
+              "10 min"
+            ],
+            "params": {
+              "time": "10 min"
+            }
+          },
+          {
+            "op_type": "heat",
+            "sentence": "After reflux, the suspension was centrifuged at 15,300 ×  g  for 10 min.",
+            "start_char": 1240,
+            "end_char": 1312,
+            "materials": [
+              "15,300 ×  g",
+              "10 min"
+            ],
+            "params": {
+              "time": "10 min"
+            }
+          },
+          {
+            "op_type": "centrifuge",
+            "sentence": "This centrifugation and resuspension step was repeated two to three times.",
+            "start_char": 1378,
+            "end_char": 1452,
+            "materials": [],
+            "params": {}
+          },
+          {
+            "op_type": "centrifuge",
+            "sentence": "When the DDA exceeded 80%, the pellet was suspended in deionized water and centrifuged under the same conditions.",
+            "start_char": 1608,
+            "end_char": 1721,
+            "materials": [
+              "80%"
+            ],
+            "params": {}
+          },
+          {
+            "op_type": "dry",
+            "sentence": "The resulting ChsNWs were freeze-dried to achieve a white powder (5.7 g, 63% yield) with a final DDA of 88%.",
+            "start_char": 1895,
+            "end_char": 2003,
+            "materials": [
+              "5.7 g",
+              "63% yield",
+              "88%"
+            ],
+            "params": {
+              "amounts": [
+                "5.7 g"
+              ]
+            }
+          },
+          {
+            "op_type": "add",
+            "sentence": "To a standard Tupperware glass container was added 1 g of ChNCs and 1 g of NaOH, placed within a 3-dram vial, and a beaker filled with supersaturated potassium sulfate solution to obtain 98% relative humidity.",
+            "start_char": 2386,
+            "end_char": 2595,
+            "materials": [
+              "1 g",
+              "a 3-dram vial",
+              "98% relative humidity"
+            ],
+            "params": {
+              "amounts": [
+                "1 g",
+                "1 g"
+              ]
+            }
+          },
+          {
+            "op_type": "wash",
+            "sentence": "After the allotted incubation period, the as-obtained product was rinsed with methanol to remove excess NaOH until the pH reached neutral.",
+            "start_char": 2709,
+            "end_char": 2847,
+            "materials": [],
+            "params": {}
+          },
+          {
+            "op_type": "stir",
+            "sentence": "First, 250 mg of ChsNWs were suspended in 25 mL of water and mixed with 3.75 mL of HAuCl 4  (0.01 M aqueous solution), and magnetically stirred for 10 min in ambient conditions.",
+            "start_char": 3100,
+            "end_char": 3277,
+            "materials": [
+              "250 mg",
+              "3.75 mL",
+              "10 min"
+            ],
+            "params": {
+              "time": "10 min",
+              "amounts": [
+                "250 mg",
+                "25 mL",
+                "3.75 mL",
+                "0.01 M"
+              ],
+              "concs": [
+                "0.01 M"
+              ]
+            }
+          },
+          {
+            "op_type": "add",
+            "sentence": "After, 1 mL of dilute NaBH 4  solution (1.5 w/w% aqueous) was added dropwise into the reaction vessel and stirred for 5 min.",
+            "start_char": 3414,
+            "end_char": 3538,
+            "materials": [
+              "dilute NaBH 4  solution",
+              "(1.5 w/w%",
+              "5 min"
+            ],
+            "params": {
+              "time": "5 min",
+              "amounts": [
+                "1 mL"
+              ]
+            }
+          },
+          {
+            "op_type": "add",
+            "sentence": "Then, 1 mL of titanium oxysulfate aqueous solution (1.8 M) was added dropwise to the reaction vessel and stirred at 70 °C for 1 h.",
+            "start_char": 3722,
+            "end_char": 3852,
+            "materials": [
+              "1.8 M",
+              "70 °C"
+            ],
+            "params": {
+              "temp": "70 °C",
+              "time": "1 h",
+              "amounts": [
+                "1 mL",
+                "1.8 M"
+              ],
+              "concs": [
+                "1.8 M"
+              ]
+            }
+          },
+          {
+            "op_type": "wash",
+            "sentence": "The as-obtained TiO 2 -labeled ChsNWs suspension was then washed and centrifugated with water 3 times at 15,300 ×  g for 10 min three times.",
+            "start_char": 3853,
+            "end_char": 3993,
+            "materials": [
+              "The as-obtained TiO 2 -labeled ChsNWs suspension",
+              "15,300 ×  g"
+            ],
+            "params": {
+              "time": "10 min"
+            }
+          },
+          {
+            "op_type": "add",
+            "sentence": "An equal volume of anhydrous methanol was then added gradually under continuous stirring.",
+            "start_char": 4244,
+            "end_char": 4333,
+            "materials": [],
+            "params": {}
+          },
+          {
+            "op_type": "add",
+            "sentence": "FITC (17.5 mg, Sigma) was dissolved in anhydrous methanol (1 mg/mL) and added dropwise to the ChsNW solution.",
+            "start_char": 4334,
+            "end_char": 4443,
+            "materials": [
+              "FITC",
+              "17.5 mg",
+              "1 mg"
+            ],
+            "params": {
+              "amounts": [
+                "17.5 mg",
+                "1 mg"
+              ]
+            }
+          },
+          {
+            "op_type": "add",
+            "sentence": "Typically, 4.25 g of Brij C10 was added to 7.5 mL of cyclohexane and heated to 50 °C to dissolve the Brij C10.",
+            "start_char": 4905,
+            "end_char": 5015,
+            "materials": [
+              "4.25 g",
+              "Brij C10",
+              "7.5 mL",
+              "50 °C"
+            ],
+            "params": {
+              "temp": "50 °C",
+              "amounts": [
+                "4.25 g",
+                "7.5 mL"
+              ]
+            }
+          },
+          {
+            "op_type": "add",
+            "sentence": "Then, a variable volume of NiCl 2  aqueous solution (0.8 M) was added dropwise to the mixture.",
+            "start_char": 5016,
+            "end_char": 5110,
+            "materials": [
+              "NiCl 2  aqueous solution",
+              "0.8 M"
+            ],
+            "params": {
+              "amounts": [
+                "0.8 M"
+              ],
+              "concs": [
+                "0.8 M"
+              ]
+            }
+          },
+          {
+            "op_type": "add",
+            "sentence": "For the small, medium, and large silica nanotubes, 0.45 mL, 0.6 mL, and 0.8 mL were added, respectively.",
+            "start_char": 5111,
+            "end_char": 5215,
+            "materials": [
+              "0.45 mL",
+              "0.6 mL",
+              "0.8 mL"
+            ],
+            "params": {
+              "amounts": [
+                "0.45 mL",
+                "0.6 mL",
+                "0.8 mL"
+              ]
+            }
+          },
+          {
+            "op_type": "add",
+            "sentence": "After 0.225 mL of hydrazine was added to the mixture, followed by 3 h of stirring at 50 °C.",
+            "start_char": 5216,
+            "end_char": 5307,
+            "materials": [
+              "0.225 mL",
+              "3 h",
+              "50 °"
+            ],
+            "params": {
+              "temp": "50 °C",
+              "time": "3 h",
+              "amounts": [
+                "0.225 mL"
+              ]
+            }
+          },
+          {
+            "op_type": "add",
+            "sentence": "After 0.5 mL of diethylamine and 1 mL of TEOS was added, followed by an additional 3 h stirring.",
+            "start_char": 5308,
+            "end_char": 5404,
+            "materials": [
+              "1 mL"
+            ],
+            "params": {
+              "time": "3 h",
+              "amounts": [
+                "0.5 mL",
+                "1 mL"
+              ]
+            }
+          },
+          {
+            "op_type": "wash",
+            "sentence": "The as-obtained silica nanotubes were then washed with isopropyl alcohol and centrifuged 3 times at 15,300 ×  g  for 10 min.",
+            "start_char": 5405,
+            "end_char": 5529,
+            "materials": [
+              "15,300 ×  g",
+              "10 min"
+            ],
+            "params": {
+              "time": "10 min"
+            }
+          },
+          {
+            "op_type": "centrifuge",
+            "sentence": "The nanotubes were then dispersed in water after the final centrifugation cycle.",
+            "start_char": 5530,
+            "end_char": 5610,
+            "materials": [],
+            "params": {}
+          },
+          {
+            "op_type": "stir",
+            "sentence": "Typically, the 1% (w/v) suspension of ChsNWs was prepared by mixing 10 mg of ChsNWs with 1 mL DI water, vortexed for 1 min, and dispersed in an ultrasonic bath for 5 min for a final pH of 5 before usage.",
+            "start_char": 5952,
+            "end_char": 6155,
+            "materials": [
+              "10 mg",
+              "1 mL DI water",
+              "1 min",
+              "5 min"
+            ],
+            "params": {
+              "time": "1 min",
+              "amounts": [
+                "10 mg",
+                "1 mL"
+              ]
+            }
+          },
+          {
+            "op_type": "add",
+            "sentence": "The 1% (w/v) solution of polymeric chitosan was prepared by dissolving 1 g of chitosan powder into 50 mL of DI water with 400 µL of acetic acid added for a final pH of around 5.",
+            "start_char": 6360,
+            "end_char": 6537,
+            "materials": [
+              "1 g",
+              "DI water",
+              "400 µL"
+            ],
+            "params": {
+              "amounts": [
+                "1 g",
+                "50 mL",
+                "400 µL"
+              ]
+            }
+          },
+          {
+            "op_type": "stir",
+            "sentence": "The solution was stirred overnight until fully clarified.",
+            "start_char": 6856,
+            "end_char": 6913,
+            "materials": [],
+            "params": {}
+          },
+          {
+            "op_type": "stir",
+            "sentence": "A 20 mL aliquot of this solution was then combined via syringe mixing with 72 µL of 2% w/w N,N’-methylene bis(acrylamide) (MBAA) as a covalent crosslinker, 32 µL of tetramethylethylenediamine (TEMED), 452 µL of ammonium persulfate (APS) at 66 mg/mL, and 250 µL of 15% w/w calcium sulfate (CaSO 4 ) slurry.",
+            "start_char": 6914,
+            "end_char": 7219,
+            "materials": [
+              "A 20 mL aliquot",
+              "72 µL",
+              "(MBAA",
+              "32 µL"
+            ],
+            "params": {
+              "amounts": [
+                "20 mL",
+                "72 µL",
+                "32 µL",
+                "452 µL",
+                "66 mg",
+                "250 µL"
+              ]
+            }
+          },
+          {
+            "op_type": "inject",
+            "sentence": "The final mixture was injected into a sealed glass mold and allowed to polymerize overnight.",
+            "start_char": 7220,
+            "end_char": 7312,
+            "materials": [],
+            "params": {}
+          },
+          {
+            "op_type": "add",
+            "sentence": "Then 300 µL of suspension was added into the ring.",
+            "start_char": 7726,
+            "end_char": 7776,
+            "materials": [
+              "300 µL"
+            ],
+            "params": {
+              "amounts": [
+                "300 µL"
+              ]
+            }
+          },
+          {
+            "op_type": "add",
+            "sentence": "The condition without ultrasound treatment was prepared by directly adding the nanowhisker suspension to the tissue surface for 1 min, followed by the placement of a hydrogel patch without any treatment.",
+            "start_char": 8557,
+            "end_char": 8760,
+            "materials": [
+              "1 min"
+            ],
+            "params": {
+              "time": "1 min"
+            }
+          },
+          {
+            "op_type": "stir",
+            "sentence": "Chemical enhancer-deployed nanowhisker glue The 1% (w/v) suspension of ChsNWs was prepared by mixing 10 mg of ChsNWs with 1 mL mixed solvent (DI water/isopropanol = 1/1 by volume), followed by vortex and ultrasonication to achieve a well-dispersed suspension.",
+            "start_char": 8761,
+            "end_char": 9020,
+            "materials": [
+              "The 1%",
+              "10 mg",
+              "1 mL mixed solvent",
+              "DI water/isopropanol"
+            ],
+            "params": {
+              "amounts": [
+                "10 mg",
+                "1 mL"
+              ]
+            }
+          },
+          {
+            "op_type": "add",
+            "sentence": "Laurocapram (as known as Azone ® ) was added to the mixture at 3% (v/v) as the chemical penetration enhancer and vortexed for complete mixing.",
+            "start_char": 9021,
+            "end_char": 9163,
+            "materials": [],
+            "params": {}
+          },
+          {
+            "op_type": "add",
+            "sentence": "300 µL ChsNWs suspension was added onto the skin and left on the surface for 1 min.",
+            "start_char": 9164,
+            "end_char": 9247,
+            "materials": [
+              "300 µL ChsNWs suspension",
+              "1 min"
+            ],
+            "params": {
+              "time": "1 min",
+              "amounts": [
+                "300 µL"
+              ]
+            }
+          },
+          {
+            "op_type": "add",
+            "sentence": "First, 150 µL ChsNWs suspension was added onto the skin, then a microneedle roller with titanium needles of 250 µm in length was rolling on the skin with the ChsNWs suspension for a certain period, during which another 150 µL ChsNWs suspension was added.",
+            "start_char": 9503,
+            "end_char": 9757,
+            "materials": [
+              "150 µL ChsNWs suspension",
+              "250 µm",
+              "another 150 µL ChsNWs suspension"
+            ],
+            "params": {
+              "amounts": [
+                "150 µL",
+                "150 µL"
+              ],
+              "concs": [
+                "250 µm"
+              ]
+            }
+          },
+          {
+            "op_type": "add",
+            "sentence": "Around 300 µL of FITC-ChsNWs suspension was added to porcine skin, treated with chemical enhancer, microneedle, or ultrasound as described above, and no treatment as the control.",
+            "start_char": 10176,
+            "end_char": 10354,
+            "materials": [
+              "Around 300 µL",
+              "FITC-ChsNWs suspension"
+            ],
+            "params": {
+              "amounts": [
+                "300 µL"
+              ]
+            }
+          },
+          {
+            "op_type": "add",
+            "sentence": "FITC-ChsNWs was added on the skin surface, treated for 1 min using different methods as described above.",
+            "start_char": 10717,
+            "end_char": 10821,
+            "materials": [
+              "FITC-ChsNWs",
+              "1 min"
+            ],
+            "params": {
+              "time": "1 min"
+            }
+          },
+          {
+            "op_type": "wash",
+            "sentence": "Skin samples were immediately rinsed by DI water thoroughly to removed excessive and unanchored FITC-ChsNWs.",
+            "start_char": 10822,
+            "end_char": 10930,
+            "materials": [
+              "DI water",
+              "excessive and unanchored FITC-ChsNWs"
+            ],
+            "params": {}
+          },
+          {
+            "op_type": "wash",
+            "sentence": "After post-fix, wash the samples with doubly distilled water for three times and start dehydration by submersing the samples for 10 min in increasing ratios of acetone:water until 100% acetone.",
+            "start_char": 12846,
+            "end_char": 13039,
+            "materials": [
+              "three times",
+              "10 min",
+              "100% acetone"
+            ],
+            "params": {
+              "time": "10 min"
+            }
+          },
+          {
+            "op_type": "centrifuge",
+            "sentence": "The suspensions were centrifuged, and the fluorescence intensity of the supernatants was detected by fluorescence spectrophotometry (BioTek Synergy HTX multi-mode microplate reader, λ ex  = 485/20 nm, λ em  = 528/20 nm) to evaluate the ROS content.",
+            "start_char": 18113,
+            "end_char": 18361,
+            "materials": [
+              "(BioTek Synergy HTX multi-mode microplate reader",
+              "λ ex  = 485/20 nm",
+              "528/20 nm"
+            ],
+            "params": {}
+          }
+        ],
+        "expanded": [
+          {
+            "op_type": "centrifuge",
+            "steps": [
+              "Perform operation 'centrifuge' as described: The resulting mixture was centrifuged at 15,300 ×  g  for 10 min, and the pellet was washed six times with deionized water."
+            ]
+          },
+          {
+            "op_type": "heat",
+            "steps": [
+              "Place the reaction vessel on a hotplate.",
+              "Ramp to the target temperature.",
+              "Maintain the target temperature for 10 min."
+            ]
+          },
+          {
+            "op_type": "centrifuge",
+            "steps": [
+              "Perform operation 'centrifuge' as described: This centrifugation and resuspension step was repeated two to three times."
+            ]
+          },
+          {
+            "op_type": "centrifuge",
+            "steps": [
+              "Perform operation 'centrifuge' as described: When the DDA exceeded 80%, the pellet was suspended in deionized water and centrifuged under the same conditions."
+            ]
+          },
+          {
+            "op_type": "dry",
+            "steps": [
+              "Perform operation 'dry' as described: The resulting ChsNWs were freeze-dried to achieve a white powder (5.7 g, 63% yield) with a final DDA of 88%."
+            ]
+          },
+          {
+            "op_type": "add",
+            "steps": [
+              "Ensure reaction vessel is present and empty.",
+              "Place a clean stir bar in the vessel.",
+              "Measure 1 g of 1 g.",
+              "Transfer 1 g into the vessel."
+            ]
+          },
+          {
+            "op_type": "wash",
+            "steps": [
+              "Perform operation 'wash' as described: After the allotted incubation period, the as-obtained product was rinsed with methanol to remove excess NaOH until the pH reached neutral."
+            ]
+          },
+          {
+            "op_type": "stir",
+            "steps": [
+              "Place the reaction vessel on a stir plate.",
+              "Set the stirrer to an appropriate speed.",
+              "Stir for 10 min."
+            ]
+          },
+          {
+            "op_type": "add",
+            "steps": [
+              "Ensure reaction vessel is present and empty.",
+              "Place a clean stir bar in the vessel.",
+              "Measure 1 mL of dilute NaBH 4  solution.",
+              "Transfer dilute NaBH 4  solution into the vessel."
+            ]
+          },
+          {
+            "op_type": "add",
+            "steps": [
+              "Ensure reaction vessel is present and empty.",
+              "Place a clean stir bar in the vessel.",
+              "Measure 1 mL of 1.8 M.",
+              "Transfer 1.8 M into the vessel."
+            ]
+          },
+          {
+            "op_type": "wash",
+            "steps": [
+              "Perform operation 'wash' as described: The as-obtained TiO 2 -labeled ChsNWs suspension was then washed and centrifugated with water 3 times at 15,300 ×  g for 10 min three times."
+            ]
+          },
+          {
+            "op_type": "add",
+            "steps": [
+              "Ensure reaction vessel is present and empty.",
+              "Place a clean stir bar in the vessel.",
+              "Measure the specified amount of reagent.",
+              "Transfer reagent into the vessel."
+            ]
+          },
+          {
+            "op_type": "add",
+            "steps": [
+              "Ensure reaction vessel is present and empty.",
+              "Place a clean stir bar in the vessel.",
+              "Measure 17.5 mg of FITC.",
+              "Transfer FITC into the vessel."
+            ]
+          },
+          {
+            "op_type": "add",
+            "steps": [
+              "Ensure reaction vessel is present and empty.",
+              "Place a clean stir bar in the vessel.",
+              "Measure 4.25 g of 4.25 g.",
+              "Transfer 4.25 g into the vessel."
+            ]
+          },
+          {
+            "op_type": "add",
+            "steps": [
+              "Ensure reaction vessel is present and empty.",
+              "Place a clean stir bar in the vessel.",
+              "Measure 0.8 M of NiCl 2  aqueous solution.",
+              "Transfer NiCl 2  aqueous solution into the vessel."
+            ]
+          },
+          {
+            "op_type": "add",
+            "steps": [
+              "Ensure reaction vessel is present and empty.",
+              "Place a clean stir bar in the vessel.",
+              "Measure 0.45 mL of 0.45 mL.",
+              "Transfer 0.45 mL into the vessel."
+            ]
+          },
+          {
+            "op_type": "add",
+            "steps": [
+              "Ensure reaction vessel is present and empty.",
+              "Place a clean stir bar in the vessel.",
+              "Measure 0.225 mL of 0.225 mL.",
+              "Transfer 0.225 mL into the vessel."
+            ]
+          },
+          {
+            "op_type": "add",
+            "steps": [
+              "Ensure reaction vessel is present and empty.",
+              "Place a clean stir bar in the vessel.",
+              "Measure 0.5 mL of 1 mL.",
+              "Transfer 1 mL into the vessel."
+            ]
+          },
+          {
+            "op_type": "wash",
+            "steps": [
+              "Perform operation 'wash' as described: The as-obtained silica nanotubes were then washed with isopropyl alcohol and centrifuged 3 times at 15,300 ×  g  for 10 min."
+            ]
+          },
+          {
+            "op_type": "centrifuge",
+            "steps": [
+              "Perform operation 'centrifuge' as described: The nanotubes were then dispersed in water after the final centrifugation cycle."
+            ]
+          },
+          {
+            "op_type": "stir",
+            "steps": [
+              "Place the reaction vessel on a stir plate.",
+              "Set the stirrer to an appropriate speed.",
+              "Stir for 1 min."
+            ]
+          },
+          {
+            "op_type": "add",
+            "steps": [
+              "Ensure reaction vessel is present and empty.",
+              "Place a clean stir bar in the vessel.",
+              "Measure 1 g of 1 g.",
+              "Transfer 1 g into the vessel."
+            ]
+          },
+          {
+            "op_type": "stir",
+            "steps": [
+              "Place the reaction vessel on a stir plate.",
+              "Set the stirrer to an appropriate speed.",
+              "Stir for the specified time."
+            ]
+          },
+          {
+            "op_type": "stir",
+            "steps": [
+              "Place the reaction vessel on a stir plate.",
+              "Set the stirrer to an appropriate speed.",
+              "Stir for the specified time."
+            ]
+          },
+          {
+            "op_type": "inject",
+            "steps": [
+              "Perform operation 'inject' as described: The final mixture was injected into a sealed glass mold and allowed to polymerize overnight."
+            ]
+          },
+          {
+            "op_type": "add",
+            "steps": [
+              "Ensure reaction vessel is present and empty.",
+              "Place a clean stir bar in the vessel.",
+              "Measure 300 µL of 300 µL.",
+              "Transfer 300 µL into the vessel."
+            ]
+          },
+          {
+            "op_type": "add",
+            "steps": [
+              "Ensure reaction vessel is present and empty.",
+              "Place a clean stir bar in the vessel.",
+              "Measure the specified amount of 1 min.",
+              "Transfer 1 min into the vessel."
+            ]
+          },
+          {
+            "op_type": "stir",
+            "steps": [
+              "Place the reaction vessel on a stir plate.",
+              "Set the stirrer to an appropriate speed.",
+              "Stir for the specified time."
+            ]
+          },
+          {
+            "op_type": "add",
+            "steps": [
+              "Ensure reaction vessel is present and empty.",
+              "Place a clean stir bar in the vessel.",
+              "Measure the specified amount of reagent.",
+              "Transfer reagent into the vessel."
+            ]
+          },
+          {
+            "op_type": "add",
+            "steps": [
+              "Ensure reaction vessel is present and empty.",
+              "Place a clean stir bar in the vessel.",
+              "Measure 300 µL of 300 µL ChsNWs suspension.",
+              "Transfer 300 µL ChsNWs suspension into the vessel."
+            ]
+          },
+          {
+            "op_type": "add",
+            "steps": [
+              "Ensure reaction vessel is present and empty.",
+              "Place a clean stir bar in the vessel.",
+              "Measure 150 µL of 150 µL ChsNWs suspension.",
+              "Transfer 150 µL ChsNWs suspension into the vessel."
+            ]
+          },
+          {
+            "op_type": "add",
+            "steps": [
+              "Ensure reaction vessel is present and empty.",
+              "Place a clean stir bar in the vessel.",
+              "Measure 300 µL of Around 300 µL.",
+              "Transfer Around 300 µL into the vessel."
+            ]
+          },
+          {
+            "op_type": "add",
+            "steps": [
+              "Ensure reaction vessel is present and empty.",
+              "Place a clean stir bar in the vessel.",
+              "Measure the specified amount of FITC-ChsNWs.",
+              "Transfer FITC-ChsNWs into the vessel."
+            ]
+          },
+          {
+            "op_type": "wash",
+            "steps": [
+              "Perform operation 'wash' as described: Skin samples were immediately rinsed by DI water thoroughly to removed excessive and unanchored FITC-ChsNWs."
+            ]
+          },
+          {
+            "op_type": "wash",
+            "steps": [
+              "Perform operation 'wash' as described: After post-fix, wash the samples with doubly distilled water for three times and start dehydration by submersing the samples for 10 min in increasing ratios of acetone:water until 100% acetone."
+            ]
+          },
+          {
+            "op_type": "centrifuge",
+            "steps": [
+              "Perform operation 'centrifuge' as described: The suspensions were centrifuged, and the fluorescence intensity of the supernatants was detected by fluorescence spectrophotometry (BioTek Synergy HTX multi-mode microplate reader, λ ex  = 485/20 nm, λ em  = 528/20 nm) to evaluate the ROS content."
+            ]
+          }
+        ]
+      },
+      {
+        "text": "Synthesis of chitosan nanowhisker Carboxylated chitin nanowhiskers (ChNWs) and chitosan nanowhiskers (ChsNWs) used in this study were synthesized following a previously described protocol method 26 . In brief, 27.2 g of PG chitin was dispersed in 540 mL of 1 M ammonium persulfate and incubated at 60 °C for 16 h. The resulting mixture was centrifuged at 15,300 ×  g  for 10 min, and the pellet was washed six times with deionized water. The purified ChNWs was lyophilized, yielding a white fluffy powder. To produce ChsNWs, 9 g of the ChNWs were combined with 0.9 g of NaBH₄ in 900 mL of 40% (w/w) aqueous NaOH and refluxed at 117 °C for 18 h. After reflux, the suspension was centrifuged at 15,300 ×  g  for 10 min. The pellet was collected and resuspended in fresh NaOH solution. This centrifugation and resuspension step was repeated two to three times. Following each cycle, a small sample was taken to determine the degree of deacetylation (DDA) via FTIR by monitoring the absorbance at 1030 and 1560 cm⁻¹. When the DDA exceeded 80%, the pellet was suspended in deionized water and centrifuged under the same conditions. Washing was repeated eight times until the supernatant conductivity dropped below 400 µS cm⁻¹. The final pellet was resuspended in water and acidified to pH 5 with 1 M HCl. The resulting ChsNWs were freeze-dried to achieve a white powder (5.7 g, 63% yield) with a final DDA of 88%.",
+        "operations": [
+          {
+            "op_type": "centrifuge",
+            "sentence": "The resulting mixture was centrifuged at 15,300 ×  g  for 10 min, and the pellet was washed six times with deionized water.",
+            "start_char": 314,
+            "end_char": 437,
+            "materials": [
+              "15,300 ×  g",
+              "10 min"
+            ],
+            "params": {
+              "time": "10 min"
+            }
+          },
+          {
+            "op_type": "heat",
+            "sentence": "After reflux, the suspension was centrifuged at 15,300 ×  g  for 10 min.",
+            "start_char": 645,
+            "end_char": 717,
+            "materials": [
+              "15,300 ×  g",
+              "10 min"
+            ],
+            "params": {
+              "time": "10 min"
+            }
+          },
+          {
+            "op_type": "centrifuge",
+            "sentence": "This centrifugation and resuspension step was repeated two to three times.",
+            "start_char": 783,
+            "end_char": 857,
+            "materials": [],
+            "params": {}
+          },
+          {
+            "op_type": "centrifuge",
+            "sentence": "When the DDA exceeded 80%, the pellet was suspended in deionized water and centrifuged under the same conditions.",
+            "start_char": 1013,
+            "end_char": 1126,
+            "materials": [
+              "80%"
+            ],
+            "params": {}
+          },
+          {
+            "op_type": "dry",
+            "sentence": "The resulting ChsNWs were freeze-dried to achieve a white powder (5.7 g, 63% yield) with a final DDA of 88%.",
+            "start_char": 1300,
+            "end_char": 1408,
+            "materials": [
+              "5.7 g",
+              "63% yield",
+              "88%"
+            ],
+            "params": {
+              "amounts": [
+                "5.7 g"
+              ]
+            }
+          }
+        ],
+        "expanded": [
+          {
+            "op_type": "centrifuge",
+            "steps": [
+              "Perform operation 'centrifuge' as described: The resulting mixture was centrifuged at 15,300 ×  g  for 10 min, and the pellet was washed six times with deionized water."
+            ]
+          },
+          {
+            "op_type": "heat",
+            "steps": [
+              "Place the reaction vessel on a hotplate.",
+              "Ramp to the target temperature.",
+              "Maintain the target temperature for 10 min."
+            ]
+          },
+          {
+            "op_type": "centrifuge",
+            "steps": [
+              "Perform operation 'centrifuge' as described: This centrifugation and resuspension step was repeated two to three times."
+            ]
+          },
+          {
+            "op_type": "centrifuge",
+            "steps": [
+              "Perform operation 'centrifuge' as described: When the DDA exceeded 80%, the pellet was suspended in deionized water and centrifuged under the same conditions."
+            ]
+          },
+          {
+            "op_type": "dry",
+            "steps": [
+              "Perform operation 'dry' as described: The resulting ChsNWs were freeze-dried to achieve a white powder (5.7 g, 63% yield) with a final DDA of 88%."
+            ]
+          }
+        ]
+      },
+      {
+        "text": "Synthesis of partially deacetylated ChsNWs The experiments to study the effect of amine density were carried out with ChsNWs prepared using an aging protocol reported by our group before 27 . This protocol allowed for tuning the DDA and produced ChsNWs with low, medium, and high DDA, denoted as ChsNWs-L, ChsNWs-M, and ChsNWs-H, respectively. The synthesis protocol is as follows. To a standard Tupperware glass container was added 1 g of ChNCs and 1 g of NaOH, placed within a 3-dram vial, and a beaker filled with supersaturated potassium sulfate solution to obtain 98% relative humidity. The glass container was then allowed to incubate for 1 day (ChsNWs-L), 3 days (ChsNWs-M), and 6 days (ChsNWs-H). After the allotted incubation period, the as-obtained product was rinsed with methanol to remove excess NaOH until the pH reached neutral. The average yield was 71%. The DDA calculated for the ChsNWs-L, ChsNWs-M, and ChsNWs-H were 32%, 52%, and 66%, respectively.",
+        "operations": [
+          {
+            "op_type": "add",
+            "sentence": "To a standard Tupperware glass container was added 1 g of ChNCs and 1 g of NaOH, placed within a 3-dram vial, and a beaker filled with supersaturated potassium sulfate solution to obtain 98% relative humidity.",
+            "start_char": 382,
+            "end_char": 591,
+            "materials": [
+              "1 g",
+              "a 3-dram vial",
+              "98% relative humidity"
+            ],
+            "params": {
+              "amounts": [
+                "1 g",
+                "1 g"
+              ]
+            }
+          },
+          {
+            "op_type": "wash",
+            "sentence": "After the allotted incubation period, the as-obtained product was rinsed with methanol to remove excess NaOH until the pH reached neutral.",
+            "start_char": 705,
+            "end_char": 843,
+            "materials": [],
+            "params": {}
+          }
+        ],
+        "expanded": [
+          {
+            "op_type": "add",
+            "steps": [
+              "Ensure reaction vessel is present and empty.",
+              "Place a clean stir bar in the vessel.",
+              "Measure 1 g of 1 g.",
+              "Transfer 1 g into the vessel."
+            ]
+          },
+          {
+            "op_type": "wash",
+            "steps": [
+              "Perform operation 'wash' as described: After the allotted incubation period, the as-obtained product was rinsed with methanol to remove excess NaOH until the pH reached neutral."
+            ]
+          }
+        ]
+      },
+      {
+        "text": "Synthesis of functionalized ChsNWs For AuNP-ChsNWs, Au NPs were immobilized onto ChsNWs using a modified literature procedure. First, 250 mg of ChsNWs were suspended in 25 mL of water and mixed with 3.75 mL of HAuCl 4  (0.01 M aqueous solution), and magnetically stirred for 10 min in ambient conditions. After, the reaction mixture was placed inside a Teflon liner, and subjected to 4 bar H 2  pressure using a Parr reactor system for 2 h. After, 1 mL of dilute NaBH 4  solution (1.5 w/w% aqueous) was added dropwise into the reaction vessel and stirred for 5 min. A purple suspension emerged. The suspension was then lyophilized to yield a fluffy purple powder with 81% yield. For TiO 2 -ChsNWs, 200 mg of ChsNWs was suspended in 200 mL of water. Then, 1 mL of titanium oxysulfate aqueous solution (1.8 M) was added dropwise to the reaction vessel and stirred at 70 °C for 1 h. The as-obtained TiO 2 -labeled ChsNWs suspension was then washed and centrifugated with water 3 times at 15,300 ×  g for 10 min three times.",
+        "operations": [
+          {
+            "op_type": "stir",
+            "sentence": "First, 250 mg of ChsNWs were suspended in 25 mL of water and mixed with 3.75 mL of HAuCl 4  (0.01 M aqueous solution), and magnetically stirred for 10 min in ambient conditions.",
+            "start_char": 127,
+            "end_char": 304,
+            "materials": [
+              "250 mg",
+              "3.75 mL",
+              "10 min"
+            ],
+            "params": {
+              "time": "10 min",
+              "amounts": [
+                "250 mg",
+                "25 mL",
+                "3.75 mL",
+                "0.01 M"
+              ],
+              "concs": [
+                "0.01 M"
+              ]
+            }
+          },
+          {
+            "op_type": "add",
+            "sentence": "After, 1 mL of dilute NaBH 4  solution (1.5 w/w% aqueous) was added dropwise into the reaction vessel and stirred for 5 min.",
+            "start_char": 441,
+            "end_char": 565,
+            "materials": [
+              "dilute NaBH 4  solution",
+              "(1.5 w/w%",
+              "5 min"
+            ],
+            "params": {
+              "time": "5 min",
+              "amounts": [
+                "1 mL"
+              ]
+            }
+          },
+          {
+            "op_type": "add",
+            "sentence": "Then, 1 mL of titanium oxysulfate aqueous solution (1.8 M) was added dropwise to the reaction vessel and stirred at 70 °C for 1 h.",
+            "start_char": 749,
+            "end_char": 879,
+            "materials": [
+              "1.8 M",
+              "70 °C"
+            ],
+            "params": {
+              "temp": "70 °C",
+              "time": "1 h",
+              "amounts": [
+                "1 mL",
+                "1.8 M"
+              ],
+              "concs": [
+                "1.8 M"
+              ]
+            }
+          },
+          {
+            "op_type": "wash",
+            "sentence": "The as-obtained TiO 2 -labeled ChsNWs suspension was then washed and centrifugated with water 3 times at 15,300 ×  g for 10 min three times.",
+            "start_char": 880,
+            "end_char": 1020,
+            "materials": [
+              "The as-obtained TiO 2 -labeled ChsNWs suspension",
+              "15,300 ×  g"
+            ],
+            "params": {
+              "time": "10 min"
+            }
+          }
+        ],
+        "expanded": [
+          {
+            "op_type": "stir",
+            "steps": [
+              "Place the reaction vessel on a stir plate.",
+              "Set the stirrer to an appropriate speed.",
+              "Stir for 10 min."
+            ]
+          },
+          {
+            "op_type": "add",
+            "steps": [
+              "Ensure reaction vessel is present and empty.",
+              "Place a clean stir bar in the vessel.",
+              "Measure 1 mL of dilute NaBH 4  solution.",
+              "Transfer dilute NaBH 4  solution into the vessel."
+            ]
+          },
+          {
+            "op_type": "add",
+            "steps": [
+              "Ensure reaction vessel is present and empty.",
+              "Place a clean stir bar in the vessel.",
+              "Measure 1 mL of 1.8 M.",
+              "Transfer 1.8 M into the vessel."
+            ]
+          },
+          {
+            "op_type": "wash",
+            "steps": [
+              "Perform operation 'wash' as described: The as-obtained TiO 2 -labeled ChsNWs suspension was then washed and centrifugated with water 3 times at 15,300 ×  g for 10 min three times."
+            ]
+          }
+        ]
+      },
+      {
+        "text": "Synthesis of fluorescent ChsNWs The fluorescent ChsNWs (FITC-ChsNWs) were prepared by labeling ChsNWs with fluorescein isothiocyanate (FITC) via amine-isothiocyanate reaction. Specifically, 1 g of ChsNWs was dispersed in 100 mL of 0.1 M acetic acid. An equal volume of anhydrous methanol was then added gradually under continuous stirring. FITC (17.5 mg, Sigma) was dissolved in anhydrous methanol (1 mg/mL) and added dropwise to the ChsNW solution. The molar feed ratio of FITC to primary amines on the ChsNWs was set at 2%. The reaction proceeded at room temperature in the dark for 2 h. Following the reaction, the mixture was transferred to 14 kDa MWCO dialysis tubing and dialyzed against deionized water for 3 days. The resulting product was recovered by lyophilization.",
+        "operations": [
+          {
+            "op_type": "add",
+            "sentence": "An equal volume of anhydrous methanol was then added gradually under continuous stirring.",
+            "start_char": 250,
+            "end_char": 339,
+            "materials": [],
+            "params": {}
+          },
+          {
+            "op_type": "add",
+            "sentence": "FITC (17.5 mg, Sigma) was dissolved in anhydrous methanol (1 mg/mL) and added dropwise to the ChsNW solution.",
+            "start_char": 340,
+            "end_char": 449,
+            "materials": [
+              "FITC",
+              "17.5 mg",
+              "1 mg"
+            ],
+            "params": {
+              "amounts": [
+                "17.5 mg",
+                "1 mg"
+              ]
+            }
+          }
+        ],
+        "expanded": [
+          {
+            "op_type": "add",
+            "steps": [
+              "Ensure reaction vessel is present and empty.",
+              "Place a clean stir bar in the vessel.",
+              "Measure the specified amount of reagent.",
+              "Transfer reagent into the vessel."
+            ]
+          },
+          {
+            "op_type": "add",
+            "steps": [
+              "Ensure reaction vessel is present and empty.",
+              "Place a clean stir bar in the vessel.",
+              "Measure 17.5 mg of FITC.",
+              "Transfer FITC into the vessel."
+            ]
+          }
+        ]
+      },
+      {
+        "text": "Synthesis of silica nanoparticles The silica nanoparticles in this study was synthesized with a nickel-hydrazine templating protocol. Typically, 4.25 g of Brij C10 was added to 7.5 mL of cyclohexane and heated to 50 °C to dissolve the Brij C10. Then, a variable volume of NiCl 2  aqueous solution (0.8 M) was added dropwise to the mixture. For the small, medium, and large silica nanotubes, 0.45 mL, 0.6 mL, and 0.8 mL were added, respectively. After 0.225 mL of hydrazine was added to the mixture, followed by 3 h of stirring at 50 °C. After 0.5 mL of diethylamine and 1 mL of TEOS was added, followed by an additional 3 h stirring. The as-obtained silica nanotubes were then washed with isopropyl alcohol and centrifuged 3 times at 15,300 ×  g  for 10 min. The nanotubes were then dispersed in water after the final centrifugation cycle.",
+        "operations": [
+          {
+            "op_type": "add",
+            "sentence": "Typically, 4.25 g of Brij C10 was added to 7.5 mL of cyclohexane and heated to 50 °C to dissolve the Brij C10.",
+            "start_char": 134,
+            "end_char": 244,
+            "materials": [
+              "4.25 g",
+              "Brij C10",
+              "7.5 mL",
+              "50 °C"
+            ],
+            "params": {
+              "temp": "50 °C",
+              "amounts": [
+                "4.25 g",
+                "7.5 mL"
+              ]
+            }
+          },
+          {
+            "op_type": "add",
+            "sentence": "Then, a variable volume of NiCl 2  aqueous solution (0.8 M) was added dropwise to the mixture.",
+            "start_char": 245,
+            "end_char": 339,
+            "materials": [
+              "NiCl 2  aqueous solution",
+              "0.8 M"
+            ],
+            "params": {
+              "amounts": [
+                "0.8 M"
+              ],
+              "concs": [
+                "0.8 M"
+              ]
+            }
+          },
+          {
+            "op_type": "add",
+            "sentence": "For the small, medium, and large silica nanotubes, 0.45 mL, 0.6 mL, and 0.8 mL were added, respectively.",
+            "start_char": 340,
+            "end_char": 444,
+            "materials": [
+              "0.45 mL",
+              "0.6 mL",
+              "0.8 mL"
+            ],
+            "params": {
+              "amounts": [
+                "0.45 mL",
+                "0.6 mL",
+                "0.8 mL"
+              ]
+            }
+          },
+          {
+            "op_type": "add",
+            "sentence": "After 0.225 mL of hydrazine was added to the mixture, followed by 3 h of stirring at 50 °C.",
+            "start_char": 445,
+            "end_char": 536,
+            "materials": [
+              "0.225 mL",
+              "3 h",
+              "50 °"
+            ],
+            "params": {
+              "temp": "50 °C",
+              "time": "3 h",
+              "amounts": [
+                "0.225 mL"
+              ]
+            }
+          },
+          {
+            "op_type": "add",
+            "sentence": "After 0.5 mL of diethylamine and 1 mL of TEOS was added, followed by an additional 3 h stirring.",
+            "start_char": 537,
+            "end_char": 633,
+            "materials": [
+              "1 mL"
+            ],
+            "params": {
+              "time": "3 h",
+              "amounts": [
+                "0.5 mL",
+                "1 mL"
+              ]
+            }
+          },
+          {
+            "op_type": "wash",
+            "sentence": "The as-obtained silica nanotubes were then washed with isopropyl alcohol and centrifuged 3 times at 15,300 ×  g  for 10 min.",
+            "start_char": 634,
+            "end_char": 758,
+            "materials": [
+              "15,300 ×  g",
+              "10 min"
+            ],
+            "params": {
+              "time": "10 min"
+            }
+          },
+          {
+            "op_type": "centrifuge",
+            "sentence": "The nanotubes were then dispersed in water after the final centrifugation cycle.",
+            "start_char": 759,
+            "end_char": 839,
+            "materials": [],
+            "params": {}
+          }
+        ],
+        "expanded": [
+          {
+            "op_type": "add",
+            "steps": [
+              "Ensure reaction vessel is present and empty.",
+              "Place a clean stir bar in the vessel.",
+              "Measure 4.25 g of 4.25 g.",
+              "Transfer 4.25 g into the vessel."
+            ]
+          },
+          {
+            "op_type": "add",
+            "steps": [
+              "Ensure reaction vessel is present and empty.",
+              "Place a clean stir bar in the vessel.",
+              "Measure 0.8 M of NiCl 2  aqueous solution.",
+              "Transfer NiCl 2  aqueous solution into the vessel."
+            ]
+          },
+          {
+            "op_type": "add",
+            "steps": [
+              "Ensure reaction vessel is present and empty.",
+              "Place a clean stir bar in the vessel.",
+              "Measure 0.45 mL of 0.45 mL.",
+              "Transfer 0.45 mL into the vessel."
+            ]
+          },
+          {
+            "op_type": "add",
+            "steps": [
+              "Ensure reaction vessel is present and empty.",
+              "Place a clean stir bar in the vessel.",
+              "Measure 0.225 mL of 0.225 mL.",
+              "Transfer 0.225 mL into the vessel."
+            ]
+          },
+          {
+            "op_type": "add",
+            "steps": [
+              "Ensure reaction vessel is present and empty.",
+              "Place a clean stir bar in the vessel.",
+              "Measure 0.5 mL of 1 mL.",
+              "Transfer 1 mL into the vessel."
+            ]
+          },
+          {
+            "op_type": "wash",
+            "steps": [
+              "Perform operation 'wash' as described: The as-obtained silica nanotubes were then washed with isopropyl alcohol and centrifuged 3 times at 15,300 ×  g  for 10 min."
+            ]
+          },
+          {
+            "op_type": "centrifuge",
+            "steps": [
+              "Perform operation 'centrifuge' as described: The nanotubes were then dispersed in water after the final centrifugation cycle."
+            ]
+          }
+        ]
+      },
+      {
+        "text": "Preparation of nanoparticle suspensions The nanoparticles used in this study include ChsNWs, ChNWs, ChsNWs with a varied degree of deacetylation (ChsNWs-L, ChsNWs-M, and ChsNWs-H), cellulose nanocrystals with varied functionalities (CNC-OH, CNC-COOH), silica nanorods with varied aspect ratios, Au-labeled ChsNWs, and TiO 2 -labeled ChsNWs. Typically, the 1% (w/v) suspension of ChsNWs was prepared by mixing 10 mg of ChsNWs with 1 mL DI water, vortexed for 1 min, and dispersed in an ultrasonic bath for 5 min for a final pH of 5 before usage. The suspensions of ChNWs, ChsNWs-L, ChsNWs-M, and ChsNWs-H were prepared at 2% (w/v) in pH = 6 MES buffer. Other nanoparticle suspensions were prepared at 1% (w/v) in DI water unless otherwise mentioned. The 1% (w/v) solution of polymeric chitosan was prepared by dissolving 1 g of chitosan powder into 50 mL of DI water with 400 µL of acetic acid added for a final pH of around 5.",
+        "operations": [
+          {
+            "op_type": "stir",
+            "sentence": "Typically, the 1% (w/v) suspension of ChsNWs was prepared by mixing 10 mg of ChsNWs with 1 mL DI water, vortexed for 1 min, and dispersed in an ultrasonic bath for 5 min for a final pH of 5 before usage.",
+            "start_char": 341,
+            "end_char": 544,
+            "materials": [
+              "10 mg",
+              "1 mL DI water",
+              "1 min",
+              "5 min"
+            ],
+            "params": {
+              "time": "1 min",
+              "amounts": [
+                "10 mg",
+                "1 mL"
+              ]
+            }
+          },
+          {
+            "op_type": "add",
+            "sentence": "The 1% (w/v) solution of polymeric chitosan was prepared by dissolving 1 g of chitosan powder into 50 mL of DI water with 400 µL of acetic acid added for a final pH of around 5.",
+            "start_char": 749,
+            "end_char": 926,
+            "materials": [
+              "1 g",
+              "DI water",
+              "400 µL"
+            ],
+            "params": {
+              "amounts": [
+                "1 g",
+                "50 mL",
+                "400 µL"
+              ]
+            }
+          }
+        ],
+        "expanded": [
+          {
+            "op_type": "stir",
+            "steps": [
+              "Place the reaction vessel on a stir plate.",
+              "Set the stirrer to an appropriate speed.",
+              "Stir for 1 min."
+            ]
+          },
+          {
+            "op_type": "add",
+            "steps": [
+              "Ensure reaction vessel is present and empty.",
+              "Place a clean stir bar in the vessel.",
+              "Measure 1 g of 1 g.",
+              "Transfer 1 g into the vessel."
+            ]
+          }
+        ]
+      },
+      {
+        "text": "Synthesis of hydrogel matrix An alginate-polyacrylamide hydrogel was synthesized using a modified protocol previously reported 4 . Briefly, sodium alginate (high molecular weight, I1G, Kimica) and acrylamide (AAm, Sigma-Aldrich) were dissolved in deionized water at concentrations of 2% w/w and 12% w/w, respectively. The solution was stirred overnight until fully clarified. A 20 mL aliquot of this solution was then combined via syringe mixing with 72 µL of 2% w/w N,N’-methylene bis(acrylamide) (MBAA) as a covalent crosslinker, 32 µL of tetramethylethylenediamine (TEMED), 452 µL of ammonium persulfate (APS) at 66 mg/mL, and 250 µL of 15% w/w calcium sulfate (CaSO 4 ) slurry. The final mixture was injected into a sealed glass mold and allowed to polymerize overnight.",
+        "operations": [
+          {
+            "op_type": "stir",
+            "sentence": "The solution was stirred overnight until fully clarified.",
+            "start_char": 318,
+            "end_char": 375,
+            "materials": [],
+            "params": {}
+          },
+          {
+            "op_type": "stir",
+            "sentence": "A 20 mL aliquot of this solution was then combined via syringe mixing with 72 µL of 2% w/w N,N’-methylene bis(acrylamide) (MBAA) as a covalent crosslinker, 32 µL of tetramethylethylenediamine (TEMED), 452 µL of ammonium persulfate (APS) at 66 mg/mL, and 250 µL of 15% w/w calcium sulfate (CaSO 4 ) slurry.",
+            "start_char": 376,
+            "end_char": 681,
+            "materials": [
+              "A 20 mL aliquot",
+              "72 µL",
+              "(MBAA",
+              "32 µL"
+            ],
+            "params": {
+              "amounts": [
+                "20 mL",
+                "72 µL",
+                "32 µL",
+                "452 µL",
+                "66 mg",
+                "250 µL"
+              ]
+            }
+          },
+          {
+            "op_type": "inject",
+            "sentence": "The final mixture was injected into a sealed glass mold and allowed to polymerize overnight.",
+            "start_char": 682,
+            "end_char": 774,
+            "materials": [],
+            "params": {}
+          }
+        ],
+        "expanded": [
+          {
+            "op_type": "stir",
+            "steps": [
+              "Place the reaction vessel on a stir plate.",
+              "Set the stirrer to an appropriate speed.",
+              "Stir for the specified time."
+            ]
+          },
+          {
+            "op_type": "stir",
+            "steps": [
+              "Place the reaction vessel on a stir plate.",
+              "Set the stirrer to an appropriate speed.",
+              "Stir for the specified time."
+            ]
+          },
+          {
+            "op_type": "inject",
+            "steps": [
+              "Perform operation 'inject' as described: The final mixture was injected into a sealed glass mold and allowed to polymerize overnight."
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

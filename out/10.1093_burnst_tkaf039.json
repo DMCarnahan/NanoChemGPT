@@ -1,0 +1,142 @@
+{
+  "paper_id": "10.1093/burnst/tkaf039",
+  "title": "Review on electrical stimulation combined with electroactive biomaterials to promote peripheral nerve regeneration.",
+  "authors": [],
+  "doi": "10.1093/burnst/tkaf039",
+  "source": "eupmc",
+  "urls": {
+    "pdf": null
+  },
+  "license": {
+    "type": "unknown"
+  },
+  "access_route": "oa",
+  "sections": [
+    {
+      "heading": "Fabrication methods of conductive nerve guidance channels based on electroactive biomaterials",
+      "text": "Fabrication methods of conductive nerve guidance channels based on electroactive biomaterials Due to the limited solubility and processing challenges associated with most electroactive biomaterials, various fabrication techniques have been developed to produce NGCs to fulfill the specific preparation requirements of these conduits. A series of fabrication methods of conductive NGCs based on electroactive biomaterials are primarily summed up, including electrospinning, dip-coating/salt-leaching technique, freeze drying process, centrifugal casting, phase separation, and 3D bioprinting ( Figure 11 ). These preparation strategies are detailed in the following sections. Figure 11 The fabrication methods of conductive nerve guidance conduits. ( a ) Electrospinning. Reproduced with permission [ 159 ]. Copyright 2024, Wiley. ( b ) Dip-coating. Reproduced with permission [ 142 ]. Copyright 2024, Elsevier. ( c ) Freeze drying. Reproduced with permission [ 160 ]. Copyright 2023, Multidisciplinary Digital Publishing Institute. ( d ) Solvent casting. Reproduced with permission [ 161 ]. Copyright 2017, De Gruyter. ( e ) Phase separation. Reproduced with permission [ 162 ]. Copyright 2023, Elsevier. ( f ) 3D printing. Reproduced with permission [ 156 ]. Copyright 2023, Wiley Electrospinning Electrospinning is a direct spinning method driven by high-voltage electrostatic forces for producing random or aligned nanofibers with diameters ranging from nanometers to micrometers that closely resemble the structure of the extracellular matrix to guide cellular alignment and mediate rapid intercellular communication in nerves [ 138 ]. Single-wall carbon nanotubes were dispersed in the spinning solution by mixing, and conductive aligned polycaprolactone/gelatin/single-walled carbon nanotube nerve conduits were prepared by electrostatic spinning, which exhibited good electrical conductivity and supported the growth and proliferation of nerve cells [ 139 ]. However, several issues of electrospinning still deserve attention, such as poor reproducibility, incomplete evaporation of toxic solvents, and difficulties in customization. Additionally, the uneven dispersion of most electroactive biomaterials in the electrospun solution can compromise the electrical conductivity and mechanical properties of the nerve conduit [ 140 ]. Therefore, many studies have combined electrospinning and dip-coating techniques. Dip-coating A uniform conductive layer can be rapidly formed on the surface of existing matrix NGCs by dip-coating, and the conductive polymer can be chemically polymerized  in situ  on the surface of the matrix material [ 141 ]. For instance, Liu  et al . developed porous polylactic acid–glycolic acid (PLGA)-coated PEDOT:PSS conductive nerve conduits that exhibited superior electrical conductivity and mechanical properties, promoting neural cell growth without cytotoxicity. When combined with ES, these conduits significantly enhanced the recovery of hindlimb function in rats and improved therapeutic outcomes for nerve regeneration [ 142 ]. In another study, PEDOT:PSS solution was coated on PCL electrospun fiber mats to improve the conductivity of the material [ 143 ]. However, there are problems with dip-coating, such as difficulty in precisely controlling the coating thickness, which will affect the mechanical properties of the substrate material, and long-term stability depends on the bonding force between the coating and the substrate [ 144 , 145 ]. Freeze drying The freeze-drying process facilitates the preparation of porous structures, which generates interconnected porous structures by sublimation of the solvent after freezing [ 146 ]. A gelatin/alginate/graphene composite polymer scaffold prepared by freeze-drying technology exhibited electrical conductivity and biodegradability, supported PC12 cell attachment, and mimicked the ECM of natural neural tissue, thereby maintaining structural integrity and enhancing cell permeation and nutrient diffusion [ 147 ]. There are some limitations to the application of this technology, such as time-consuming, the requirement for specialized equipment, and high cost [ 148 ]. Solvent casting Solvent casting has the advantages of easy operation, low cost, and is suitable for mass production, and the ability to adjust the physical properties of mixed materials according to the material ratio [ 149 ]. The PVDF/PEDOT:PSS/ionic liquid membranes prepared by solvent casting have good electrical conductivity and can be adjusted as needed, potentially valuable for applications in neural tissue engineering [ 150 ]. However, the lack of topographic guidance and insufficient porosity in solvent-cast conduits limit the wider application of this method [ 151 ]. Phase separation Phase separation is a common technique for fabricating polymeric scaffolds in which the target polymer is dissolved in a mixture of immiscible solvents. Upon heating, a saturated solution separates into polymer-rich and polymer-poor phases. The subsequent rapid cooling, or quenching, triggers phase separation, with the polymer-poor phase being eliminated through processes such as evaporation or extraction. In contrast, the polymer-rich phase solidifies into a porous structure [ 152 ]. Thermotropic phase separation was used to fabricate a scaffold of PCL and carbon nanofibers, followed by electrospinning to produce PCL/collagen nanofiber sheets. These components were subsequently assembled by putting the nanofiber sheets into the cavity of the scaffold, forming an electrically conductive nerve conduit [ 153 ]. However, the materials that can be used with phase separation are limited [ 154 ]. 3D printing 3D printing stands at the forefront of manufacturing technologies for NGCs, facilitating the precise realization of complex scaffold designs required for advanced neural tissue engineering applications [ 155 ]. Conductive multiscale filled conduits with electrospun PCL/collagen nanofibers as the sheath, 3D-printed reduced graphene oxide/PCL microfibers as the scaffold, and 3D-printed PCL microfibers as the internal support have been developed for peripheral nerve regeneration. These conduits exhibit excellent permeability, mechanical stability, and electrical conductivity, significantly enhancing SCs’ elongation and growth and promoting neurite outgrowth of PC12 cells, thereby facilitating effective peripheral nerve regeneration [ 156 ]. Digital light processing (DLP) printing was used to fabricate complex hydrogel structures using GelMA and CS, while PEDOT nanoparticles were introduced by interfacial polymerization to create conductive pathways within hydrogel structures. In  in vivo  experiments in rats, nerve conduits made of 3D-printed conductive hydrogels effectively promoted nerve regeneration and facilitated muscle recovery [ 157 ]. However, 3D printing faces the challenges of limited print resolution, poor solubility, and fragile conductive materials [ 158 ]. In conclusion, each fabrication method for conductive NGCs based on electroactive biomaterials possesses distinct advantages and limitations, catering to specific application domains. Advances in technology continue to refine these methods, enhancing their ability to address increasingly precise and diverse biomedical requirements. Moreover, there is a growing trend toward integrating multiple fabrication techniques to develop multifunctional conductive NGCs, thus better supporting the complex demands of peripheral nerve regeneration. This integrative approach underscores the evolving sophistication of tissue engineering strategies aimed at functional recovery and repair in neurological tissues."
+    }
+  ],
+  "extractions": {
+    "methods_paragraphs": [
+      {
+        "text": "Fabrication methods of conductive nerve guidance channels based on electroactive biomaterials Due to the limited solubility and processing challenges associated with most electroactive biomaterials, various fabrication techniques have been developed to produce NGCs to fulfill the specific preparation requirements of these conduits. A series of fabrication methods of conductive NGCs based on electroactive biomaterials are primarily summed up, including electrospinning, dip-coating/salt-leaching technique, freeze drying process, centrifugal casting, phase separation, and 3D bioprinting ( Figure 11 ). These preparation strategies are detailed in the following sections. Figure 11 The fabrication methods of conductive nerve guidance conduits. ( a ) Electrospinning. Reproduced with permission [ 159 ]. Copyright 2024, Wiley. ( b ) Dip-coating. Reproduced with permission [ 142 ]. Copyright 2024, Elsevier. ( c ) Freeze drying. Reproduced with permission [ 160 ]. Copyright 2023, Multidisciplinary Digital Publishing Institute. ( d ) Solvent casting. Reproduced with permission [ 161 ]. Copyright 2017, De Gruyter. ( e ) Phase separation. Reproduced with permission [ 162 ]. Copyright 2023, Elsevier. ( f ) 3D printing. Reproduced with permission [ 156 ]. Copyright 2023, Wiley Electrospinning Electrospinning is a direct spinning method driven by high-voltage electrostatic forces for producing random or aligned nanofibers with diameters ranging from nanometers to micrometers that closely resemble the structure of the extracellular matrix to guide cellular alignment and mediate rapid intercellular communication in nerves [ 138 ]. Single-wall carbon nanotubes were dispersed in the spinning solution by mixing, and conductive aligned polycaprolactone/gelatin/single-walled carbon nanotube nerve conduits were prepared by electrostatic spinning, which exhibited good electrical conductivity and supported the growth and proliferation of nerve cells [ 139 ]. However, several issues of electrospinning still deserve attention, such as poor reproducibility, incomplete evaporation of toxic solvents, and difficulties in customization. Additionally, the uneven dispersion of most electroactive biomaterials in the electrospun solution can compromise the electrical conductivity and mechanical properties of the nerve conduit [ 140 ]. Therefore, many studies have combined electrospinning and dip-coating techniques. Dip-coating A uniform conductive layer can be rapidly formed on the surface of existing matrix NGCs by dip-coating, and the conductive polymer can be chemically polymerized  in situ  on the surface of the matrix material [ 141 ]. For instance, Liu  et al . developed porous polylactic acid–glycolic acid (PLGA)-coated PEDOT:PSS conductive nerve conduits that exhibited superior electrical conductivity and mechanical properties, promoting neural cell growth without cytotoxicity. When combined with ES, these conduits significantly enhanced the recovery of hindlimb function in rats and improved therapeutic outcomes for nerve regeneration [ 142 ]. In another study, PEDOT:PSS solution was coated on PCL electrospun fiber mats to improve the conductivity of the material [ 143 ]. However, there are problems with dip-coating, such as difficulty in precisely controlling the coating thickness, which will affect the mechanical properties of the substrate material, and long-term stability depends on the bonding force between the coating and the substrate [ 144 , 145 ]. Freeze drying The freeze-drying process facilitates the preparation of porous structures, which generates interconnected porous structures by sublimation of the solvent after freezing [ 146 ]. A gelatin/alginate/graphene composite polymer scaffold prepared by freeze-drying technology exhibited electrical conductivity and biodegradability, supported PC12 cell attachment, and mimicked the ECM of natural neural tissue, thereby maintaining structural integrity and enhancing cell permeation and nutrient diffusion [ 147 ]. There are some limitations to the application of this technology, such as time-consuming, the requirement for specialized equipment, and high cost [ 148 ]. Solvent casting Solvent casting has the advantages of easy operation, low cost, and is suitable for mass production, and the ability to adjust the physical properties of mixed materials according to the material ratio [ 149 ]. The PVDF/PEDOT:PSS/ionic liquid membranes prepared by solvent casting have good electrical conductivity and can be adjusted as needed, potentially valuable for applications in neural tissue engineering [ 150 ]. However, the lack of topographic guidance and insufficient porosity in solvent-cast conduits limit the wider application of this method [ 151 ]. Phase separation Phase separation is a common technique for fabricating polymeric scaffolds in which the target polymer is dissolved in a mixture of immiscible solvents. Upon heating, a saturated solution separates into polymer-rich and polymer-poor phases. The subsequent rapid cooling, or quenching, triggers phase separation, with the polymer-poor phase being eliminated through processes such as evaporation or extraction. In contrast, the polymer-rich phase solidifies into a porous structure [ 152 ]. Thermotropic phase separation was used to fabricate a scaffold of PCL and carbon nanofibers, followed by electrospinning to produce PCL/collagen nanofiber sheets. These components were subsequently assembled by putting the nanofiber sheets into the cavity of the scaffold, forming an electrically conductive nerve conduit [ 153 ]. However, the materials that can be used with phase separation are limited [ 154 ]. 3D printing 3D printing stands at the forefront of manufacturing technologies for NGCs, facilitating the precise realization of complex scaffold designs required for advanced neural tissue engineering applications [ 155 ]. Conductive multiscale filled conduits with electrospun PCL/collagen nanofibers as the sheath, 3D-printed reduced graphene oxide/PCL microfibers as the scaffold, and 3D-printed PCL microfibers as the internal support have been developed for peripheral nerve regeneration. These conduits exhibit excellent permeability, mechanical stability, and electrical conductivity, significantly enhancing SCs’ elongation and growth and promoting neurite outgrowth of PC12 cells, thereby facilitating effective peripheral nerve regeneration [ 156 ]. Digital light processing (DLP) printing was used to fabricate complex hydrogel structures using GelMA and CS, while PEDOT nanoparticles were introduced by interfacial polymerization to create conductive pathways within hydrogel structures. In  in vivo  experiments in rats, nerve conduits made of 3D-printed conductive hydrogels effectively promoted nerve regeneration and facilitated muscle recovery [ 157 ]. However, 3D printing faces the challenges of limited print resolution, poor solubility, and fragile conductive materials [ 158 ]. In conclusion, each fabrication method for conductive NGCs based on electroactive biomaterials possesses distinct advantages and limitations, catering to specific application domains. Advances in technology continue to refine these methods, enhancing their ability to address increasingly precise and diverse biomedical requirements. Moreover, there is a growing trend toward integrating multiple fabrication techniques to develop multifunctional conductive NGCs, thus better supporting the complex demands of peripheral nerve regeneration. This integrative approach underscores the evolving sophistication of tissue engineering strategies aimed at functional recovery and repair in neurological tissues.",
+        "operations": [
+          {
+            "op_type": "dry",
+            "sentence": "A series of fabrication methods of conductive NGCs based on electroactive biomaterials are primarily summed up, including electrospinning, dip-coating/salt-leaching technique, freeze drying process, centrifugal casting, phase separation, and 3D bioprinting ( Figure 11 ).",
+            "start_char": 334,
+            "end_char": 605,
+            "materials": [],
+            "params": {}
+          },
+          {
+            "op_type": "dry",
+            "sentence": "( c ) Freeze drying.",
+            "start_char": 911,
+            "end_char": 931,
+            "materials": [
+              "( c ) Freeze"
+            ],
+            "params": {}
+          },
+          {
+            "op_type": "dry",
+            "sentence": "Freeze drying The freeze-drying process facilitates the preparation of porous structures, which generates interconnected porous structures by sublimation of the solvent after freezing [ 146 ].",
+            "start_char": 3491,
+            "end_char": 3683,
+            "materials": [],
+            "params": {}
+          },
+          {
+            "op_type": "dry",
+            "sentence": "A gelatin/alginate/graphene composite polymer scaffold prepared by freeze-drying technology exhibited electrical conductivity and biodegradability, supported PC12 cell attachment, and mimicked the ECM of natural neural tissue, thereby maintaining structural integrity and enhancing cell permeation and nutrient diffusion [ 147 ].",
+            "start_char": 3684,
+            "end_char": 4013,
+            "materials": [
+              "PC12 cell attachment"
+            ],
+            "params": {}
+          },
+          {
+            "op_type": "stir",
+            "sentence": "Solvent casting Solvent casting has the advantages of easy operation, low cost, and is suitable for mass production, and the ability to adjust the physical properties of mixed materials according to the material ratio [ 149 ].",
+            "start_char": 4170,
+            "end_char": 4396,
+            "materials": [],
+            "params": {}
+          },
+          {
+            "op_type": "heat",
+            "sentence": "Upon heating, a saturated solution separates into polymer-rich and polymer-poor phases.",
+            "start_char": 4923,
+            "end_char": 5010,
+            "materials": [],
+            "params": {}
+          },
+          {
+            "op_type": "add",
+            "sentence": "Digital light processing (DLP) printing was used to fabricate complex hydrogel structures using GelMA and CS, while PEDOT nanoparticles were introduced by interfacial polymerization to create conductive pathways within hydrogel structures.",
+            "start_char": 6434,
+            "end_char": 6673,
+            "materials": [
+              "Digital light processing (DLP) printing"
+            ],
+            "params": {}
+          }
+        ],
+        "expanded": [
+          {
+            "op_type": "dry",
+            "steps": [
+              "Perform operation 'dry' as described: A series of fabrication methods of conductive NGCs based on electroactive biomaterials are primarily summed up, including electrospinning, dip-coating/salt-leaching technique, freeze drying process, centrifugal casting, phase separation, and 3D bioprinting ( Figure 11 )."
+            ]
+          },
+          {
+            "op_type": "dry",
+            "steps": [
+              "Perform operation 'dry' as described: ( c ) Freeze drying."
+            ]
+          },
+          {
+            "op_type": "dry",
+            "steps": [
+              "Perform operation 'dry' as described: Freeze drying The freeze-drying process facilitates the preparation of porous structures, which generates interconnected porous structures by sublimation of the solvent after freezing [ 146 ]."
+            ]
+          },
+          {
+            "op_type": "dry",
+            "steps": [
+              "Perform operation 'dry' as described: A gelatin/alginate/graphene composite polymer scaffold prepared by freeze-drying technology exhibited electrical conductivity and biodegradability, supported PC12 cell attachment, and mimicked the ECM of natural neural tissue, thereby maintaining structural integrity and enhancing cell permeation and nutrient diffusion [ 147 ]."
+            ]
+          },
+          {
+            "op_type": "stir",
+            "steps": [
+              "Place the reaction vessel on a stir plate.",
+              "Set the stirrer to an appropriate speed.",
+              "Stir for the specified time."
+            ]
+          },
+          {
+            "op_type": "heat",
+            "steps": [
+              "Place the reaction vessel on a hotplate.",
+              "Ramp to the target temperature.",
+              "Maintain the target temperature for the specified time."
+            ]
+          },
+          {
+            "op_type": "add",
+            "steps": [
+              "Ensure reaction vessel is present and empty.",
+              "Place a clean stir bar in the vessel.",
+              "Measure the specified amount of Digital light processing (DLP) printing.",
+              "Transfer Digital light processing (DLP) printing into the vessel."
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

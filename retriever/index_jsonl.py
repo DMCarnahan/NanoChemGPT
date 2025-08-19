@@ -89,9 +89,9 @@ def main():
     print(f"[tfidf] Indexed {len(texts)} paragraphs into {args.index_dir}")
 
     # ----- Embeddings (optional) -----
-    if args.embed-backend != "none":
-        model = args.embed_model or ("text-embedding-3-large" if args.embed-backend=="openai" else "all-MiniLM-L6-v2")
-        if args.embed-backend == "openai":
+    if args.embed_backend != "none":
+        model = args.embed_model or ("text-embedding-3-large" if args.embed_backend=="openai" else "all-MiniLM-L6-v2")
+        if args.embed_backend == "openai":
             E = embed_openai(texts, model)
         else:
             E = embed_sentencetransformers(texts, model)
@@ -99,8 +99,8 @@ def main():
         norms = np.linalg.norm(E, axis=1, keepdims=True) + 1e-8
         E = E / norms
         with open(Path(args.index_dir)/"embed.pkl", "wb") as f:
-            pickle.dump({"backend": args.embed-backend, "model": model, "embeddings": E, "metas": metas, "texts": texts}, f)
-        print(f"[embed] Built embeddings with {args.embed-backend}:{model} → {E.shape}")
+            pickle.dump({"backend": args.embed_backend, "model": model, "embeddings": E, "metas": metas, "texts": texts}, f)
+        print(f"[embed] Built embeddings with {args.embed_backend}:{model} → {E.shape}")
 
 if __name__ == "__main__":
     main()

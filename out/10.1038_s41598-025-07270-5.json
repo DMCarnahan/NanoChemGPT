@@ -1,0 +1,967 @@
+{
+  "paper_id": "10.1038/s41598-025-07270-5",
+  "title": "Fabrication of biodegradable nanocomposite scaffolds with hydroxyapatite, magnetic clay, and graphene oxide for bone tissue engineering.",
+  "authors": [],
+  "doi": "10.1038/s41598-025-07270-5",
+  "source": "eupmc",
+  "urls": {
+    "pdf": null
+  },
+  "license": {
+    "type": "unknown"
+  },
+  "access_route": "oa",
+  "sections": [
+    {
+      "heading": "Materials and methods",
+      "text": "Materials and methods Materials Sodium alginate (Na-Alg) polymer with a molecular weight of 12,000–40,000 Da from Sigma Aldrich, sodium carboxymethyl cellulose with a molecular weight of 70,000 g/mol and a deacetylation degree of 90% from Samchun, Korea, and polyvinyl alcohol with a molecular weight of 72,000 g/mol and a hydrolysis degree of 95% from Merck were used in this study. Potassium hydrogen phosphate (KH 2 PO 4 ), sodium hydroxide (NaOH), and 25% glutaraldehyde as cross-linkers were obtained from Merck. The acids used in this study, including hydrochloric acid (HCl) 37%, phosphoric acid (H 3 PO 4 ), acetic acid (CH 3 COOH) 100%, and sulfuric acid (H 2 SO 4 ) 98%, were all obtained from Merck. Cloisite 30B clay was organically modified to be the clay used in the study, obtained from Southern Clay Company. K 2 HPO 4 .3H 2 O, KCl, NaCl, Na 2 SO 4 , MgCl 2 .6H 2 O, NaHCO 3 , CaCl 2 .2H 2 O, and TRIS salts prepared simulated body fluid purchased from Merck. Iron (II) chloride, Iron (III) chloride, KMnO 4 , and H 2 O 2  were used to modify clay. Synthesis of graphene oxide To prepare graphene oxide using the modified Hummer method. First, 3 g of graphite powder was added to the H 2 SO 4 /H 3 PO 4  mixture (40:360 ml), and then 18 g of KMnO 4  was added and stirred at 50 °C for 14 h with 100 rpm by a magnetic stirrer. The temperature of the resulting mixture was reduced to 25 °C, and then 30% H 2 O 2  was added to it, making the mixture light brown and stirred for 20 min. A centrifuge was used to separate the mixture, and several washes were done with distilled water to reach a neutral pH. In a vacuum oven, 24 h of drying time was spent at 70 °C on the synthesized graphene oxide 34 . Graphene oxide was synthesized in black and in powder form. Preparation of magnetically modified clay To prepare magnetically modified clay, 1 g of synthesized graphene oxide (GO) was sonicated in 100 mL of water for 35 min, while 2 g of Cloisite 30B clay was sonicated in 100 mL of water for 20 min. A solution of iron(III) chloride and iron(II) chloride in a 1:2 molar ratio was then added to the GO-clay mixture, which was heated and stirred at 90 °C for 20 min. The resulting mixture was gradually combined with a 4 M sodium hydroxide solution and stirred for 50 min. Finally, the modified clay was separated from the solution, washed several times with distilled water, and baked at 105 °C for 4 h. Preparation of natural hydroxyapatite (HAp) powder The chicken femur was cleaned entirely of meat and remaining materials to prepare natural hydroxyapatite powder and then boiled for 45 min in boiling water. The cleaned bones were placed in a furnace for 3 h at 900 °C with a nitrogen atmosphere. After the set time, the bones are removed from the oven, cooled to room temperature, and then powdered once they are at room temperature. The production efficiency of natural hydroxyapatite powder is 58%, and the product is white 35 . Preparation of nanocomposite scaffold The nanocomposite scaffolds were prepared using natural polymer materials, PVA, hydroxyapatite extracted from natural bone, and modified clay using a simple mixing method. For the preparation of the scaffold, a solution of 2 wt. in the first step. % of a natural polymer in distilled water was prepared by dissolving the polymer in the water and stirring the solution until the polymer was fully dissolved. It was also possible to prepare a solution of polyvinyl alcohol by dissolving PVA in distilled water at a temperature of 70 °C to prepare a solution of 0.2 wt. % of polyvinyl alcohol. HAp was dispersed in 1 v/v % acetic acid for 24 h to obtain a solution of 2 wt. % of hydroxyapatite. As soon as the materials had been prepared, they were added in the correct proportions, and the mixer was turned on for 12 h. 0.5 v/v % of glutaraldehyde was added to the prepped solution in 5% of the total solution volume to cross-link the polymer solution. The solution needs to be mixed for 20 min. A suspension was obtained by dispersing the modified clay in distilled water. In this method, the last step of adding CGF is included. The particles were evenly dispersed in the solution after adding CGF and then subjected to ultrasonic treatment for two hours. The solution was transferred into a falcon tube and dried using a freeze-dryer. After drying, the samples were washed with a 2 wt. % NaBH 4  solution and a 2 wt. % NaOH solution to neutralize any unreacted glutaraldehyde and excess acetic acid. The samples were then dried once more. The schematic representation of the PVA/Alg/Hap/CGF nanocomposite formation has been shown in the Scheme  1 . Scheme 1 Schematic representation of the formation of PVA/Alg/Hap/CGF nanocomposite scaffolds. Characterization of scaffolds Fourier transform infrared spectroscopy (FTIR) study To examine the functional and chemical properties of HAp, Fe 3 O 4 , GO, clay, Cloisite 30B/GO/Fe 3 O 4 , Alg, CMC, PVA, and their interactions, we performed FTIR analysis on the prepared nanocomposite scaffolds. Infrared spectra of the samples, mixed with KBr powder, were recorded using a Bruker Tensor 27 spectrophotometer (Germany). This FTIR instrument offers a measurement resolution of 0.1 cm⁻ 1 , and its readings are based on absorbance. X-ray diffraction (XRD) study XRD analysis evaluated the crystallinity of PVA, CMC, Alg, HAp, clay, and C30B/GO/Fe 3 O 4  samples and the prepared nanocomposite scaffolds. The analysis was performed using a Krisallofex D500 diffractometer (Siemens, Germany), which employed Cu-Kα radiation at 25 mA, operating at 40 kV, and scanned over a range of 4–80°. The device had a scan step of 0.05° and a measurement accuracy of 0.04 deg/sec. Morphology study of scaffold samples by SEM analysis The scaffolds were prepared by freeze-drying and then coated with a thin layer of gold after being cut into thin sheets. Once the samples were positioned in the microscope, scanning electron microscopy (SEM) images (MIRA3, TESCAN, Brno, Czech Republic) were used to examine the morphology of the scaffolds. Furthermore, the presence and distribution of phosphorus and calcium elements within the nanocomposite scaffold were analyzed using energy-dispersive X-ray (EDX) mapping. A voltage of 30 kV was applied to the SEM device. Also, to image the amount of cell culture by SEM, uniform pieces of the scaffolds were cut and immersed in 70% ethanol solution for 30 min for sterilization. In the next step, the samples were washed three times with PBS to remove excess ethanol and then transferred to a 6-well cell culture plate. A cell plate with a density of 50,000 cells per cell plate was then used to culture the MSCs on scaffolds. As a final step, the samples were cultured in an FBS medium with 1% penicillin–streptomycin and 10% DMEM in an incubator for 72 h. They were incubated for 72 h at 37 °C. After this time, the supernatant of all the wells of the 6-well plate was removed, and after washing with PBS, they were fixed with 2.5% glutaraldehyde for 20 min. After removing the fixative solution, they were dried under the hood and in the environment. Finally, the morphological images of the samples prepared according to this section were examined by SEM. Mechanical properties study The mechanical properties of the scaffold samples were evaluated by measuring the compressive strength prepared by freeze-drying. To assess the material’s compressive strength, cylinder samples measuring 12 mm in height and 6 mm in diameter were cut. During a compression test, a force with 0.5 mm per minute speed and power of 25 kN was used to test the material’s compressive strength at 25 °C. A universal machine model was used to carry out mechanical tests, Al-7000-Taiwand. Three samples of each scaffold were prepared to perform the compressive strength test, and all three samples were tested. Their average compressive strength was reported as the compressive strength of the polymer scaffold. The error value was 0.1 MPa. Measuring the porosity of scaffolds Using the liquid displacement method, we could determine the porosity of scaffolds 36 . Scaffolds were cut into one cubic cm square piece. A displacement liquid was employed in this case, and it was ethanol because it does not dissolve the scaffolds while it is being used. To determine the porosity of the cut scaffolds, the scaffolds were placed in a graduated container containing ethanol with volume (V 1 ) to measure the porosity. Using the total volume of ethanol and scaffold (V 2 ), we calculated the volume difference V 2 -V 1 . After exiting the scaffold from the cylinder containing ethanol, the remaining volume of the ethanol in the cylinder was measured by using the following formula: V 3 . According to the equation below, the scaffold porosity could be estimated using the following equation: 1 \\documentclass[12pt]{minimal}\n\t\t\t\t\\usepackage{amsmath}\n\t\t\t\t\\usepackage{wasysym} \n\t\t\t\t\\usepackage{amsfonts} \n\t\t\t\t\\usepackage{amssymb} \n\t\t\t\t\\usepackage{amsbsy}\n\t\t\t\t\\usepackage{mathrsfs}\n\t\t\t\t\\usepackage{upgreek}\n\t\t\t\t\\setlength{\\oddsidemargin}{-69pt}\n\t\t\t\t\\begin{document}$${\\upvarepsilon } = \\frac{{{\\text{(V}}_{{1}} - {\\text{V}}_{{2}} {)}}}{{{\\text{(V}}_{{2}} - {\\text{V}}_{{3}} {)}}}$$\\end{document} Swelling test of scaffolds Initially, the cut scaffolds were weighed (W initial ) and then immersed in PBS phosphate buffer solution for 24 h for incubation. After incubation, the samples were removed from the buffer solution, and any excess water was blotted off with filter paper. The swelling test was repeated three times for each sample. The swelling ratio for each sample was calculated using the following equation 37 : 2 \\documentclass[12pt]{minimal}\n\t\t\t\t\\usepackage{amsmath}\n\t\t\t\t\\usepackage{wasysym} \n\t\t\t\t\\usepackage{amsfonts} \n\t\t\t\t\\usepackage{amssymb} \n\t\t\t\t\\usepackage{amsbsy}\n\t\t\t\t\\usepackage{mathrsfs}\n\t\t\t\t\\usepackage{upgreek}\n\t\t\t\t\\setlength{\\oddsidemargin}{-69pt}\n\t\t\t\t\\begin{document}$${\\text{Swelling}}\\;{\\text{Ratio}} = \\frac{{{\\text{(W}}_{{{\\text{final}}}} - {\\text{W}}_{{{\\text{initial}}}} {)}}}{{{\\text{W}}_{{{\\text{initial}}}} }}$$\\end{document} Biodegradation test of scaffolds Scaffolds were given the exact dimensions and weighed. Then, the scaffold samples were incubated in a phosphate buffer solution for 21, 14, and 7 days at 37 °C with pH = 7.4. After the specified time, the samples were dried using the freeze-drying method and weighed. The scaffold destruction rate was obtained by the following equation 37 : 3 \\documentclass[12pt]{minimal}\n\t\t\t\t\\usepackage{amsmath}\n\t\t\t\t\\usepackage{wasysym} \n\t\t\t\t\\usepackage{amsfonts} \n\t\t\t\t\\usepackage{amssymb} \n\t\t\t\t\\usepackage{amsbsy}\n\t\t\t\t\\usepackage{mathrsfs}\n\t\t\t\t\\usepackage{upgreek}\n\t\t\t\t\\setlength{\\oddsidemargin}{-69pt}\n\t\t\t\t\\begin{document}$${\\text{Biodegradation}}\\;{\\text{Ratio}} = \\frac{{{\\text{(Initial}}\\;{\\text{weight}}\\;{\\text{of}}\\;{\\text{sample}} - {\\text{Weight}}\\;{\\text{of}}\\;{\\text{sample}}\\;{\\text{in}}\\;{\\text{time}}\\;{\\text{T)}}}}{{{\\text{Initial}}\\;{\\text{weight}}\\;{\\text{of}}\\;{\\text{sample}}}}$$\\end{document} Thermogravimetric analysis (TGA) study The thermal stability of the polymer raw materials and nanocomposite scaffolds was assessed using TGA. A thermogravimetric analyzer (TGA-PL, TGA 1500, Canada) was employed for this analysis, conducted in a nitrogen atmosphere within the 25–600°C temperature range. Investigation of scaffold biomineralization using simulated body fluid (SBF) The performance of the scaffold bone graft was assessed using simulated body fluid (SBF), which was prepared following established protocols with chemical reagents. SBF is essential for examining the formation of biomaterials on polymer scaffolds. To prepare the solution, 1000 mL of SBF was made by adding 700 mL of deionized water into a plastic container in a water bath. It is recommended to cover the container with either a glass or plastic lid while stirring; for the process to be successful, the solution should be kept at a consistent temperature of 36.5 °C throughout. Adding the ingredients in order is essential; once each ingredient is dissolved completely, the next one should be added, and so on. As soon as the ingredients were added, hydrochloric acid was used in the amount of 0–5 ml with an additive solution to achieve a pH of 7.4 in the resulting solution after adding the ingredients. A total of 1000 mL of solution was prepared by adding water to a flask and shaking it at 20 °C to reach the desired volume. The solution was then transferred to a polyethylene container and stored in a refrigerator at 5–10 °C. Scaffold samples were immersed in the SBF solution and incubated at 37 °C for 14 days. After incubation, the samples were removed, rinsed with distilled water, and dried using the freeze-drying method. Finally, EDX and SEM techniques were employed to evaluate the biomineralization capability of the scaffold samples 38 . Assessment of toxicity and cell viability First, uniform pieces of scaffolds were cut and immersed in 70% ethanol solution for 30 min to sterilize them. Eventually, we must continue using PBS to remove any remaining ethanol from the system and transfer it to a 96-well cell culture plate. Then, mesenchymal stem cells were cultured on the scaffolds with a cell density of 1 × 10 4  cells per cell plate. After collecting the samples, they were cultured inside the incubator in a DMEM medium containing 1% penicillin–streptomycin and 10% FBS. They were incubated for 72 h at 37 °C. After 72 h, the supernatant of all the wells of the 96-well plate was removed, and after washing with PBS to each well, 0.2 ml of MTT solution (5 mg/mm) was added, and the wells were kept in the incubator for four hours. It was incubated at 37 °C. A solution of 0.1 mL DMSO was then substituted for the MTT solution for 30 min. Finally, the absorbance was measured by an ELISA reader at a wavelength of 570 nm to determine cell viability."
+    },
+    {
+      "heading": "Synthesis of graphene oxide",
+      "text": "Synthesis of graphene oxide To prepare graphene oxide using the modified Hummer method. First, 3 g of graphite powder was added to the H 2 SO 4 /H 3 PO 4  mixture (40:360 ml), and then 18 g of KMnO 4  was added and stirred at 50 °C for 14 h with 100 rpm by a magnetic stirrer. The temperature of the resulting mixture was reduced to 25 °C, and then 30% H 2 O 2  was added to it, making the mixture light brown and stirred for 20 min. A centrifuge was used to separate the mixture, and several washes were done with distilled water to reach a neutral pH. In a vacuum oven, 24 h of drying time was spent at 70 °C on the synthesized graphene oxide 34 . Graphene oxide was synthesized in black and in powder form."
+    },
+    {
+      "heading": "Preparation of magnetically modified clay",
+      "text": "Preparation of magnetically modified clay To prepare magnetically modified clay, 1 g of synthesized graphene oxide (GO) was sonicated in 100 mL of water for 35 min, while 2 g of Cloisite 30B clay was sonicated in 100 mL of water for 20 min. A solution of iron(III) chloride and iron(II) chloride in a 1:2 molar ratio was then added to the GO-clay mixture, which was heated and stirred at 90 °C for 20 min. The resulting mixture was gradually combined with a 4 M sodium hydroxide solution and stirred for 50 min. Finally, the modified clay was separated from the solution, washed several times with distilled water, and baked at 105 °C for 4 h."
+    },
+    {
+      "heading": "Preparation of natural hydroxyapatite (HAp) powder",
+      "text": "Preparation of natural hydroxyapatite (HAp) powder The chicken femur was cleaned entirely of meat and remaining materials to prepare natural hydroxyapatite powder and then boiled for 45 min in boiling water. The cleaned bones were placed in a furnace for 3 h at 900 °C with a nitrogen atmosphere. After the set time, the bones are removed from the oven, cooled to room temperature, and then powdered once they are at room temperature. The production efficiency of natural hydroxyapatite powder is 58%, and the product is white 35 ."
+    },
+    {
+      "heading": "Preparation of nanocomposite scaffold",
+      "text": "Preparation of nanocomposite scaffold The nanocomposite scaffolds were prepared using natural polymer materials, PVA, hydroxyapatite extracted from natural bone, and modified clay using a simple mixing method. For the preparation of the scaffold, a solution of 2 wt. in the first step. % of a natural polymer in distilled water was prepared by dissolving the polymer in the water and stirring the solution until the polymer was fully dissolved. It was also possible to prepare a solution of polyvinyl alcohol by dissolving PVA in distilled water at a temperature of 70 °C to prepare a solution of 0.2 wt. % of polyvinyl alcohol. HAp was dispersed in 1 v/v % acetic acid for 24 h to obtain a solution of 2 wt. % of hydroxyapatite. As soon as the materials had been prepared, they were added in the correct proportions, and the mixer was turned on for 12 h. 0.5 v/v % of glutaraldehyde was added to the prepped solution in 5% of the total solution volume to cross-link the polymer solution. The solution needs to be mixed for 20 min. A suspension was obtained by dispersing the modified clay in distilled water. In this method, the last step of adding CGF is included. The particles were evenly dispersed in the solution after adding CGF and then subjected to ultrasonic treatment for two hours. The solution was transferred into a falcon tube and dried using a freeze-dryer. After drying, the samples were washed with a 2 wt. % NaBH 4  solution and a 2 wt. % NaOH solution to neutralize any unreacted glutaraldehyde and excess acetic acid. The samples were then dried once more. The schematic representation of the PVA/Alg/Hap/CGF nanocomposite formation has been shown in the Scheme  1 . Scheme 1 Schematic representation of the formation of PVA/Alg/Hap/CGF nanocomposite scaffolds."
+    }
+  ],
+  "extractions": {
+    "methods_paragraphs": [
+      {
+        "text": "Materials and methods Materials Sodium alginate (Na-Alg) polymer with a molecular weight of 12,000–40,000 Da from Sigma Aldrich, sodium carboxymethyl cellulose with a molecular weight of 70,000 g/mol and a deacetylation degree of 90% from Samchun, Korea, and polyvinyl alcohol with a molecular weight of 72,000 g/mol and a hydrolysis degree of 95% from Merck were used in this study. Potassium hydrogen phosphate (KH 2 PO 4 ), sodium hydroxide (NaOH), and 25% glutaraldehyde as cross-linkers were obtained from Merck. The acids used in this study, including hydrochloric acid (HCl) 37%, phosphoric acid (H 3 PO 4 ), acetic acid (CH 3 COOH) 100%, and sulfuric acid (H 2 SO 4 ) 98%, were all obtained from Merck. Cloisite 30B clay was organically modified to be the clay used in the study, obtained from Southern Clay Company. K 2 HPO 4 .3H 2 O, KCl, NaCl, Na 2 SO 4 , MgCl 2 .6H 2 O, NaHCO 3 , CaCl 2 .2H 2 O, and TRIS salts prepared simulated body fluid purchased from Merck. Iron (II) chloride, Iron (III) chloride, KMnO 4 , and H 2 O 2  were used to modify clay. Synthesis of graphene oxide To prepare graphene oxide using the modified Hummer method. First, 3 g of graphite powder was added to the H 2 SO 4 /H 3 PO 4  mixture (40:360 ml), and then 18 g of KMnO 4  was added and stirred at 50 °C for 14 h with 100 rpm by a magnetic stirrer. The temperature of the resulting mixture was reduced to 25 °C, and then 30% H 2 O 2  was added to it, making the mixture light brown and stirred for 20 min. A centrifuge was used to separate the mixture, and several washes were done with distilled water to reach a neutral pH. In a vacuum oven, 24 h of drying time was spent at 70 °C on the synthesized graphene oxide 34 . Graphene oxide was synthesized in black and in powder form. Preparation of magnetically modified clay To prepare magnetically modified clay, 1 g of synthesized graphene oxide (GO) was sonicated in 100 mL of water for 35 min, while 2 g of Cloisite 30B clay was sonicated in 100 mL of water for 20 min. A solution of iron(III) chloride and iron(II) chloride in a 1:2 molar ratio was then added to the GO-clay mixture, which was heated and stirred at 90 °C for 20 min. The resulting mixture was gradually combined with a 4 M sodium hydroxide solution and stirred for 50 min. Finally, the modified clay was separated from the solution, washed several times with distilled water, and baked at 105 °C for 4 h. Preparation of natural hydroxyapatite (HAp) powder The chicken femur was cleaned entirely of meat and remaining materials to prepare natural hydroxyapatite powder and then boiled for 45 min in boiling water. The cleaned bones were placed in a furnace for 3 h at 900 °C with a nitrogen atmosphere. After the set time, the bones are removed from the oven, cooled to room temperature, and then powdered once they are at room temperature. The production efficiency of natural hydroxyapatite powder is 58%, and the product is white 35 . Preparation of nanocomposite scaffold The nanocomposite scaffolds were prepared using natural polymer materials, PVA, hydroxyapatite extracted from natural bone, and modified clay using a simple mixing method. For the preparation of the scaffold, a solution of 2 wt. in the first step. % of a natural polymer in distilled water was prepared by dissolving the polymer in the water and stirring the solution until the polymer was fully dissolved. It was also possible to prepare a solution of polyvinyl alcohol by dissolving PVA in distilled water at a temperature of 70 °C to prepare a solution of 0.2 wt. % of polyvinyl alcohol. HAp was dispersed in 1 v/v % acetic acid for 24 h to obtain a solution of 2 wt. % of hydroxyapatite. As soon as the materials had been prepared, they were added in the correct proportions, and the mixer was turned on for 12 h. 0.5 v/v % of glutaraldehyde was added to the prepped solution in 5% of the total solution volume to cross-link the polymer solution. The solution needs to be mixed for 20 min. A suspension was obtained by dispersing the modified clay in distilled water. In this method, the last step of adding CGF is included. The particles were evenly dispersed in the solution after adding CGF and then subjected to ultrasonic treatment for two hours. The solution was transferred into a falcon tube and dried using a freeze-dryer. After drying, the samples were washed with a 2 wt. % NaBH 4  solution and a 2 wt. % NaOH solution to neutralize any unreacted glutaraldehyde and excess acetic acid. The samples were then dried once more. The schematic representation of the PVA/Alg/Hap/CGF nanocomposite formation has been shown in the Scheme  1 . Scheme 1 Schematic representation of the formation of PVA/Alg/Hap/CGF nanocomposite scaffolds. Characterization of scaffolds Fourier transform infrared spectroscopy (FTIR) study To examine the functional and chemical properties of HAp, Fe 3 O 4 , GO, clay, Cloisite 30B/GO/Fe 3 O 4 , Alg, CMC, PVA, and their interactions, we performed FTIR analysis on the prepared nanocomposite scaffolds. Infrared spectra of the samples, mixed with KBr powder, were recorded using a Bruker Tensor 27 spectrophotometer (Germany). This FTIR instrument offers a measurement resolution of 0.1 cm⁻ 1 , and its readings are based on absorbance. X-ray diffraction (XRD) study XRD analysis evaluated the crystallinity of PVA, CMC, Alg, HAp, clay, and C30B/GO/Fe 3 O 4  samples and the prepared nanocomposite scaffolds. The analysis was performed using a Krisallofex D500 diffractometer (Siemens, Germany), which employed Cu-Kα radiation at 25 mA, operating at 40 kV, and scanned over a range of 4–80°. The device had a scan step of 0.05° and a measurement accuracy of 0.04 deg/sec. Morphology study of scaffold samples by SEM analysis The scaffolds were prepared by freeze-drying and then coated with a thin layer of gold after being cut into thin sheets. Once the samples were positioned in the microscope, scanning electron microscopy (SEM) images (MIRA3, TESCAN, Brno, Czech Republic) were used to examine the morphology of the scaffolds. Furthermore, the presence and distribution of phosphorus and calcium elements within the nanocomposite scaffold were analyzed using energy-dispersive X-ray (EDX) mapping. A voltage of 30 kV was applied to the SEM device. Also, to image the amount of cell culture by SEM, uniform pieces of the scaffolds were cut and immersed in 70% ethanol solution for 30 min for sterilization. In the next step, the samples were washed three times with PBS to remove excess ethanol and then transferred to a 6-well cell culture plate. A cell plate with a density of 50,000 cells per cell plate was then used to culture the MSCs on scaffolds. As a final step, the samples were cultured in an FBS medium with 1% penicillin–streptomycin and 10% DMEM in an incubator for 72 h. They were incubated for 72 h at 37 °C. After this time, the supernatant of all the wells of the 6-well plate was removed, and after washing with PBS, they were fixed with 2.5% glutaraldehyde for 20 min. After removing the fixative solution, they were dried under the hood and in the environment. Finally, the morphological images of the samples prepared according to this section were examined by SEM. Mechanical properties study The mechanical properties of the scaffold samples were evaluated by measuring the compressive strength prepared by freeze-drying. To assess the material’s compressive strength, cylinder samples measuring 12 mm in height and 6 mm in diameter were cut. During a compression test, a force with 0.5 mm per minute speed and power of 25 kN was used to test the material’s compressive strength at 25 °C. A universal machine model was used to carry out mechanical tests, Al-7000-Taiwand. Three samples of each scaffold were prepared to perform the compressive strength test, and all three samples were tested. Their average compressive strength was reported as the compressive strength of the polymer scaffold. The error value was 0.1 MPa. Measuring the porosity of scaffolds Using the liquid displacement method, we could determine the porosity of scaffolds 36 . Scaffolds were cut into one cubic cm square piece. A displacement liquid was employed in this case, and it was ethanol because it does not dissolve the scaffolds while it is being used. To determine the porosity of the cut scaffolds, the scaffolds were placed in a graduated container containing ethanol with volume (V 1 ) to measure the porosity. Using the total volume of ethanol and scaffold (V 2 ), we calculated the volume difference V 2 -V 1 . After exiting the scaffold from the cylinder containing ethanol, the remaining volume of the ethanol in the cylinder was measured by using the following formula: V 3 . According to the equation below, the scaffold porosity could be estimated using the following equation: 1 \\documentclass[12pt]{minimal}\n\t\t\t\t\\usepackage{amsmath}\n\t\t\t\t\\usepackage{wasysym} \n\t\t\t\t\\usepackage{amsfonts} \n\t\t\t\t\\usepackage{amssymb} \n\t\t\t\t\\usepackage{amsbsy}\n\t\t\t\t\\usepackage{mathrsfs}\n\t\t\t\t\\usepackage{upgreek}\n\t\t\t\t\\setlength{\\oddsidemargin}{-69pt}\n\t\t\t\t\\begin{document}$${\\upvarepsilon } = \\frac{{{\\text{(V}}_{{1}} - {\\text{V}}_{{2}} {)}}}{{{\\text{(V}}_{{2}} - {\\text{V}}_{{3}} {)}}}$$\\end{document} Swelling test of scaffolds Initially, the cut scaffolds were weighed (W initial ) and then immersed in PBS phosphate buffer solution for 24 h for incubation. After incubation, the samples were removed from the buffer solution, and any excess water was blotted off with filter paper. The swelling test was repeated three times for each sample. The swelling ratio for each sample was calculated using the following equation 37 : 2 \\documentclass[12pt]{minimal}\n\t\t\t\t\\usepackage{amsmath}\n\t\t\t\t\\usepackage{wasysym} \n\t\t\t\t\\usepackage{amsfonts} \n\t\t\t\t\\usepackage{amssymb} \n\t\t\t\t\\usepackage{amsbsy}\n\t\t\t\t\\usepackage{mathrsfs}\n\t\t\t\t\\usepackage{upgreek}\n\t\t\t\t\\setlength{\\oddsidemargin}{-69pt}\n\t\t\t\t\\begin{document}$${\\text{Swelling}}\\;{\\text{Ratio}} = \\frac{{{\\text{(W}}_{{{\\text{final}}}} - {\\text{W}}_{{{\\text{initial}}}} {)}}}{{{\\text{W}}_{{{\\text{initial}}}} }}$$\\end{document} Biodegradation test of scaffolds Scaffolds were given the exact dimensions and weighed. Then, the scaffold samples were incubated in a phosphate buffer solution for 21, 14, and 7 days at 37 °C with pH = 7.4. After the specified time, the samples were dried using the freeze-drying method and weighed. The scaffold destruction rate was obtained by the following equation 37 : 3 \\documentclass[12pt]{minimal}\n\t\t\t\t\\usepackage{amsmath}\n\t\t\t\t\\usepackage{wasysym} \n\t\t\t\t\\usepackage{amsfonts} \n\t\t\t\t\\usepackage{amssymb} \n\t\t\t\t\\usepackage{amsbsy}\n\t\t\t\t\\usepackage{mathrsfs}\n\t\t\t\t\\usepackage{upgreek}\n\t\t\t\t\\setlength{\\oddsidemargin}{-69pt}\n\t\t\t\t\\begin{document}$${\\text{Biodegradation}}\\;{\\text{Ratio}} = \\frac{{{\\text{(Initial}}\\;{\\text{weight}}\\;{\\text{of}}\\;{\\text{sample}} - {\\text{Weight}}\\;{\\text{of}}\\;{\\text{sample}}\\;{\\text{in}}\\;{\\text{time}}\\;{\\text{T)}}}}{{{\\text{Initial}}\\;{\\text{weight}}\\;{\\text{of}}\\;{\\text{sample}}}}$$\\end{document} Thermogravimetric analysis (TGA) study The thermal stability of the polymer raw materials and nanocomposite scaffolds was assessed using TGA. A thermogravimetric analyzer (TGA-PL, TGA 1500, Canada) was employed for this analysis, conducted in a nitrogen atmosphere within the 25–600°C temperature range. Investigation of scaffold biomineralization using simulated body fluid (SBF) The performance of the scaffold bone graft was assessed using simulated body fluid (SBF), which was prepared following established protocols with chemical reagents. SBF is essential for examining the formation of biomaterials on polymer scaffolds. To prepare the solution, 1000 mL of SBF was made by adding 700 mL of deionized water into a plastic container in a water bath. It is recommended to cover the container with either a glass or plastic lid while stirring; for the process to be successful, the solution should be kept at a consistent temperature of 36.5 °C throughout. Adding the ingredients in order is essential; once each ingredient is dissolved completely, the next one should be added, and so on. As soon as the ingredients were added, hydrochloric acid was used in the amount of 0–5 ml with an additive solution to achieve a pH of 7.4 in the resulting solution after adding the ingredients. A total of 1000 mL of solution was prepared by adding water to a flask and shaking it at 20 °C to reach the desired volume. The solution was then transferred to a polyethylene container and stored in a refrigerator at 5–10 °C. Scaffold samples were immersed in the SBF solution and incubated at 37 °C for 14 days. After incubation, the samples were removed, rinsed with distilled water, and dried using the freeze-drying method. Finally, EDX and SEM techniques were employed to evaluate the biomineralization capability of the scaffold samples 38 . Assessment of toxicity and cell viability First, uniform pieces of scaffolds were cut and immersed in 70% ethanol solution for 30 min to sterilize them. Eventually, we must continue using PBS to remove any remaining ethanol from the system and transfer it to a 96-well cell culture plate. Then, mesenchymal stem cells were cultured on the scaffolds with a cell density of 1 × 10 4  cells per cell plate. After collecting the samples, they were cultured inside the incubator in a DMEM medium containing 1% penicillin–streptomycin and 10% FBS. They were incubated for 72 h at 37 °C. After 72 h, the supernatant of all the wells of the 96-well plate was removed, and after washing with PBS to each well, 0.2 ml of MTT solution (5 mg/mm) was added, and the wells were kept in the incubator for four hours. It was incubated at 37 °C. A solution of 0.1 mL DMSO was then substituted for the MTT solution for 30 min. Finally, the absorbance was measured by an ELISA reader at a wavelength of 570 nm to determine cell viability.",
+        "operations": [
+          {
+            "op_type": "add",
+            "sentence": "First, 3 g of graphite powder was added to the H 2 SO 4 /H 3 PO 4  mixture (40:360 ml), and then 18 g of KMnO 4  was added and stirred at 50 °C for 14 h with 100 rpm by a magnetic stirrer.",
+            "start_char": 1153,
+            "end_char": 1341,
+            "materials": [
+              "3 g",
+              "the H 2 SO 4 /H 3 PO 4  mixture",
+              "then 18 g",
+              "14 h"
+            ],
+            "params": {
+              "temp": "50 °C",
+              "time": "14 h",
+              "speed": "100 rpm",
+              "amounts": [
+                "3 g",
+                "360 ml",
+                "18 g"
+              ]
+            }
+          },
+          {
+            "op_type": "add",
+            "sentence": "The temperature of the resulting mixture was reduced to 25 °C, and then 30% H 2 O 2  was added to it, making the mixture light brown and stirred for 20 min.",
+            "start_char": 1342,
+            "end_char": 1498,
+            "materials": [
+              "25 °C",
+              "30%",
+              "20 min"
+            ],
+            "params": {
+              "temp": "25 °C",
+              "time": "20 min"
+            }
+          },
+          {
+            "op_type": "centrifuge",
+            "sentence": "A centrifuge was used to separate the mixture, and several washes were done with distilled water to reach a neutral pH. In a vacuum oven, 24 h of drying time was spent at 70 °C on the synthesized graphene oxide 34 .",
+            "start_char": 1499,
+            "end_char": 1714,
+            "materials": [
+              "24 h",
+              "70 °C"
+            ],
+            "params": {
+              "temp": "70 °C",
+              "time": "24 h"
+            }
+          },
+          {
+            "op_type": "sonicate",
+            "sentence": "Preparation of magnetically modified clay To prepare magnetically modified clay, 1 g of synthesized graphene oxide (GO) was sonicated in 100 mL of water for 35 min, while 2 g of Cloisite 30B clay was sonicated in 100 mL of water for 20 min.",
+            "start_char": 1775,
+            "end_char": 2015,
+            "materials": [
+              "1 g",
+              "100 mL",
+              "35 min",
+              "20 min"
+            ],
+            "params": {
+              "time": "35 min",
+              "amounts": [
+                "1 g",
+                "100 mL",
+                "2 g",
+                "100 mL"
+              ]
+            }
+          },
+          {
+            "op_type": "add",
+            "sentence": "A solution of iron(III) chloride and iron(II) chloride in a 1:2 molar ratio was then added to the GO-clay mixture, which was heated and stirred at 90 °C for 20 min.",
+            "start_char": 2016,
+            "end_char": 2180,
+            "materials": [
+              "iron(III) chloride and iron(II) chloride",
+              "90 °C",
+              "20 min"
+            ],
+            "params": {
+              "temp": "90 °C",
+              "time": "20 min"
+            }
+          },
+          {
+            "op_type": "stir",
+            "sentence": "The resulting mixture was gradually combined with a 4 M sodium hydroxide solution and stirred for 50 min.",
+            "start_char": 2181,
+            "end_char": 2286,
+            "materials": [
+              "a 4 M sodium hydroxide solution",
+              "50 min"
+            ],
+            "params": {
+              "time": "50 min",
+              "amounts": [
+                "4 M"
+              ],
+              "concs": [
+                "4 M"
+              ]
+            }
+          },
+          {
+            "op_type": "wash",
+            "sentence": "Finally, the modified clay was separated from the solution, washed several times with distilled water, and baked at 105 °C for 4 h.",
+            "start_char": 2287,
+            "end_char": 2418,
+            "materials": [
+              "105 °C"
+            ],
+            "params": {
+              "temp": "105 °C",
+              "time": "4 h"
+            }
+          },
+          {
+            "op_type": "stir",
+            "sentence": "% of a natural polymer in distilled water was prepared by dissolving the polymer in the water and stirring the solution until the polymer was fully dissolved.",
+            "start_char": 3237,
+            "end_char": 3395,
+            "materials": [],
+            "params": {}
+          },
+          {
+            "op_type": "add",
+            "sentence": "As soon as the materials had been prepared, they were added in the correct proportions, and the mixer was turned on for 12 h. 0.5 v/v % of glutaraldehyde was added to the prepped solution in 5% of the total solution volume to cross-link the polymer solution.",
+            "start_char": 3681,
+            "end_char": 3939,
+            "materials": [],
+            "params": {
+              "time": "12 h"
+            }
+          },
+          {
+            "op_type": "stir",
+            "sentence": "The solution needs to be mixed for 20 min.",
+            "start_char": 3940,
+            "end_char": 3982,
+            "materials": [
+              "20 min"
+            ],
+            "params": {
+              "time": "20 min"
+            }
+          },
+          {
+            "op_type": "add",
+            "sentence": "In this method, the last step of adding CGF is included.",
+            "start_char": 4061,
+            "end_char": 4117,
+            "materials": [],
+            "params": {}
+          },
+          {
+            "op_type": "add",
+            "sentence": "The particles were evenly dispersed in the solution after adding CGF and then subjected to ultrasonic treatment for two hours.",
+            "start_char": 4118,
+            "end_char": 4244,
+            "materials": [
+              "two hours"
+            ],
+            "params": {}
+          },
+          {
+            "op_type": "dry",
+            "sentence": "The solution was transferred into a falcon tube and dried using a freeze-dryer.",
+            "start_char": 4245,
+            "end_char": 4324,
+            "materials": [],
+            "params": {}
+          },
+          {
+            "op_type": "dry",
+            "sentence": "After drying, the samples were washed with a 2 wt. % NaBH 4  solution and a 2 wt. % NaOH solution to neutralize any unreacted glutaraldehyde and excess acetic acid.",
+            "start_char": 4325,
+            "end_char": 4489,
+            "materials": [
+              "a 2 wt. %",
+              "NaBH 4  solution",
+              "a 2 wt. % NaOH solution"
+            ],
+            "params": {}
+          },
+          {
+            "op_type": "dry",
+            "sentence": "The samples were then dried once more.",
+            "start_char": 4490,
+            "end_char": 4528,
+            "materials": [],
+            "params": {}
+          },
+          {
+            "op_type": "stir",
+            "sentence": "Infrared spectra of the samples, mixed with KBr powder, were recorded using a Bruker Tensor 27 spectrophotometer (Germany).",
+            "start_char": 5030,
+            "end_char": 5153,
+            "materials": [
+              "Infrared spectra",
+              "a Bruker Tensor 27 spectrophotometer",
+              "(Germany"
+            ],
+            "params": {}
+          },
+          {
+            "op_type": "dry",
+            "sentence": "Morphology study of scaffold samples by SEM analysis The scaffolds were prepared by freeze-drying and then coated with a thin layer of gold after being cut into thin sheets.",
+            "start_char": 5699,
+            "end_char": 5872,
+            "materials": [],
+            "params": {}
+          },
+          {
+            "op_type": "wash",
+            "sentence": "In the next step, the samples were washed three times with PBS to remove excess ethanol and then transferred to a 6-well cell culture plate.",
+            "start_char": 6438,
+            "end_char": 6578,
+            "materials": [
+              "a 6-well cell culture plate"
+            ],
+            "params": {}
+          },
+          {
+            "op_type": "wash",
+            "sentence": "After this time, the supernatant of all the wells of the 6-well plate was removed, and after washing with PBS, they were fixed with 2.5% glutaraldehyde for 20 min.",
+            "start_char": 6856,
+            "end_char": 7019,
+            "materials": [
+              "the 6-well plate",
+              "2.5% glutaraldehyde",
+              "20 min"
+            ],
+            "params": {
+              "time": "20 min"
+            }
+          },
+          {
+            "op_type": "dry",
+            "sentence": "After removing the fixative solution, they were dried under the hood and in the environment.",
+            "start_char": 7020,
+            "end_char": 7112,
+            "materials": [],
+            "params": {}
+          },
+          {
+            "op_type": "dry",
+            "sentence": "Mechanical properties study The mechanical properties of the scaffold samples were evaluated by measuring the compressive strength prepared by freeze-drying.",
+            "start_char": 7219,
+            "end_char": 7376,
+            "materials": [],
+            "params": {}
+          },
+          {
+            "op_type": "filter",
+            "sentence": "After incubation, the samples were removed from the buffer solution, and any excess water was blotted off with filter paper.",
+            "start_char": 9383,
+            "end_char": 9507,
+            "materials": [],
+            "params": {}
+          },
+          {
+            "op_type": "dry",
+            "sentence": "After the specified time, the samples were dried using the freeze-drying method and weighed.",
+            "start_char": 10297,
+            "end_char": 10389,
+            "materials": [],
+            "params": {}
+          },
+          {
+            "op_type": "add",
+            "sentence": "To prepare the solution, 1000 mL of SBF was made by adding 700 mL of deionized water into a plastic container in a water bath.",
+            "start_char": 11652,
+            "end_char": 11778,
+            "materials": [
+              "1000 mL",
+              "700 mL"
+            ],
+            "params": {
+              "amounts": [
+                "1000 mL",
+                "700 mL"
+              ]
+            }
+          },
+          {
+            "op_type": "stir",
+            "sentence": "It is recommended to cover the container with either a glass or plastic lid while stirring; for the process to be successful, the solution should be kept at a consistent temperature of 36.5 °C throughout.",
+            "start_char": 11779,
+            "end_char": 11983,
+            "materials": [
+              "36.5 °C"
+            ],
+            "params": {
+              "temp": "36.5°C"
+            }
+          },
+          {
+            "op_type": "add",
+            "sentence": "Adding the ingredients in order is essential; once each ingredient is dissolved completely, the next one should be added, and so on.",
+            "start_char": 11984,
+            "end_char": 12116,
+            "materials": [
+              "the next one"
+            ],
+            "params": {}
+          },
+          {
+            "op_type": "add",
+            "sentence": "As soon as the ingredients were added, hydrochloric acid was used in the amount of 0–5 ml with an additive solution to achieve a pH of 7.4 in the resulting solution after adding the ingredients.",
+            "start_char": 12117,
+            "end_char": 12311,
+            "materials": [],
+            "params": {
+              "amounts": [
+                "5 ml"
+              ]
+            }
+          },
+          {
+            "op_type": "add",
+            "sentence": "A total of 1000 mL of solution was prepared by adding water to a flask and shaking it at 20 °C to reach the desired volume.",
+            "start_char": 12312,
+            "end_char": 12435,
+            "materials": [
+              "1000 mL",
+              "20 °C"
+            ],
+            "params": {
+              "temp": "20°C",
+              "amounts": [
+                "1000 mL"
+              ]
+            }
+          },
+          {
+            "op_type": "wash",
+            "sentence": "After incubation, the samples were removed, rinsed with distilled water, and dried using the freeze-drying method.",
+            "start_char": 12626,
+            "end_char": 12740,
+            "materials": [],
+            "params": {}
+          },
+          {
+            "op_type": "wash",
+            "sentence": "After 72 h, the supernatant of all the wells of the 96-well plate was removed, and after washing with PBS to each well, 0.2 ml of MTT solution (5 mg/mm) was added, and the wells were kept in the incubator for four hours.",
+            "start_char": 13442,
+            "end_char": 13662,
+            "materials": [
+              "72 h",
+              "the 96-well plate",
+              "0.2 ml",
+              "5 mg"
+            ],
+            "params": {
+              "time": "72 h",
+              "amounts": [
+                "0.2 ml",
+                "5 mg"
+              ]
+            }
+          }
+        ],
+        "expanded": [
+          {
+            "op_type": "add",
+            "steps": [
+              "Ensure reaction vessel is present and empty.",
+              "Place a clean stir bar in the vessel.",
+              "Measure 3 g of 3 g.",
+              "Transfer 3 g into the vessel."
+            ]
+          },
+          {
+            "op_type": "add",
+            "steps": [
+              "Ensure reaction vessel is present and empty.",
+              "Place a clean stir bar in the vessel.",
+              "Measure the specified amount of 25 °C.",
+              "Transfer 25 °C into the vessel."
+            ]
+          },
+          {
+            "op_type": "centrifuge",
+            "steps": [
+              "Perform operation 'centrifuge' as described: A centrifuge was used to separate the mixture, and several washes were done with distilled water to reach a neutral pH. In a vacuum oven, 24 h of drying time was spent at 70 °C on the synthesized graphene oxide 34 ."
+            ]
+          },
+          {
+            "op_type": "sonicate",
+            "steps": [
+              "Perform operation 'sonicate' as described: Preparation of magnetically modified clay To prepare magnetically modified clay, 1 g of synthesized graphene oxide (GO) was sonicated in 100 mL of water for 35 min, while 2 g of Cloisite 30B clay was sonicated in 100 mL of water for 20 min."
+            ]
+          },
+          {
+            "op_type": "add",
+            "steps": [
+              "Ensure reaction vessel is present and empty.",
+              "Place a clean stir bar in the vessel.",
+              "Measure the specified amount of iron(III) chloride and iron(II) chloride.",
+              "Transfer iron(III) chloride and iron(II) chloride into the vessel."
+            ]
+          },
+          {
+            "op_type": "stir",
+            "steps": [
+              "Place the reaction vessel on a stir plate.",
+              "Set the stirrer to an appropriate speed.",
+              "Stir for 50 min."
+            ]
+          },
+          {
+            "op_type": "wash",
+            "steps": [
+              "Perform operation 'wash' as described: Finally, the modified clay was separated from the solution, washed several times with distilled water, and baked at 105 °C for 4 h."
+            ]
+          },
+          {
+            "op_type": "stir",
+            "steps": [
+              "Place the reaction vessel on a stir plate.",
+              "Set the stirrer to an appropriate speed.",
+              "Stir for the specified time."
+            ]
+          },
+          {
+            "op_type": "add",
+            "steps": [
+              "Ensure reaction vessel is present and empty.",
+              "Place a clean stir bar in the vessel.",
+              "Measure the specified amount of reagent.",
+              "Transfer reagent into the vessel."
+            ]
+          },
+          {
+            "op_type": "stir",
+            "steps": [
+              "Place the reaction vessel on a stir plate.",
+              "Set the stirrer to an appropriate speed.",
+              "Stir for 20 min."
+            ]
+          },
+          {
+            "op_type": "add",
+            "steps": [
+              "Ensure reaction vessel is present and empty.",
+              "Place a clean stir bar in the vessel.",
+              "Measure the specified amount of reagent.",
+              "Transfer reagent into the vessel."
+            ]
+          },
+          {
+            "op_type": "add",
+            "steps": [
+              "Ensure reaction vessel is present and empty.",
+              "Place a clean stir bar in the vessel.",
+              "Measure the specified amount of two hours.",
+              "Transfer two hours into the vessel."
+            ]
+          },
+          {
+            "op_type": "dry",
+            "steps": [
+              "Perform operation 'dry' as described: The solution was transferred into a falcon tube and dried using a freeze-dryer."
+            ]
+          },
+          {
+            "op_type": "dry",
+            "steps": [
+              "Perform operation 'dry' as described: After drying, the samples were washed with a 2 wt. % NaBH 4  solution and a 2 wt. % NaOH solution to neutralize any unreacted glutaraldehyde and excess acetic acid."
+            ]
+          },
+          {
+            "op_type": "dry",
+            "steps": [
+              "Perform operation 'dry' as described: The samples were then dried once more."
+            ]
+          },
+          {
+            "op_type": "stir",
+            "steps": [
+              "Place the reaction vessel on a stir plate.",
+              "Set the stirrer to an appropriate speed.",
+              "Stir for the specified time."
+            ]
+          },
+          {
+            "op_type": "dry",
+            "steps": [
+              "Perform operation 'dry' as described: Morphology study of scaffold samples by SEM analysis The scaffolds were prepared by freeze-drying and then coated with a thin layer of gold after being cut into thin sheets."
+            ]
+          },
+          {
+            "op_type": "wash",
+            "steps": [
+              "Perform operation 'wash' as described: In the next step, the samples were washed three times with PBS to remove excess ethanol and then transferred to a 6-well cell culture plate."
+            ]
+          },
+          {
+            "op_type": "wash",
+            "steps": [
+              "Perform operation 'wash' as described: After this time, the supernatant of all the wells of the 6-well plate was removed, and after washing with PBS, they were fixed with 2.5% glutaraldehyde for 20 min."
+            ]
+          },
+          {
+            "op_type": "dry",
+            "steps": [
+              "Perform operation 'dry' as described: After removing the fixative solution, they were dried under the hood and in the environment."
+            ]
+          },
+          {
+            "op_type": "dry",
+            "steps": [
+              "Perform operation 'dry' as described: Mechanical properties study The mechanical properties of the scaffold samples were evaluated by measuring the compressive strength prepared by freeze-drying."
+            ]
+          },
+          {
+            "op_type": "filter",
+            "steps": [
+              "Perform operation 'filter' as described: After incubation, the samples were removed from the buffer solution, and any excess water was blotted off with filter paper."
+            ]
+          },
+          {
+            "op_type": "dry",
+            "steps": [
+              "Perform operation 'dry' as described: After the specified time, the samples were dried using the freeze-drying method and weighed."
+            ]
+          },
+          {
+            "op_type": "add",
+            "steps": [
+              "Ensure reaction vessel is present and empty.",
+              "Place a clean stir bar in the vessel.",
+              "Measure 1000 mL of 1000 mL.",
+              "Transfer 1000 mL into the vessel."
+            ]
+          },
+          {
+            "op_type": "stir",
+            "steps": [
+              "Place the reaction vessel on a stir plate.",
+              "Set the stirrer to an appropriate speed.",
+              "Stir for the specified time."
+            ]
+          },
+          {
+            "op_type": "add",
+            "steps": [
+              "Ensure reaction vessel is present and empty.",
+              "Place a clean stir bar in the vessel.",
+              "Measure the specified amount of the next one.",
+              "Transfer the next one into the vessel."
+            ]
+          },
+          {
+            "op_type": "add",
+            "steps": [
+              "Ensure reaction vessel is present and empty.",
+              "Place a clean stir bar in the vessel.",
+              "Measure 5 ml of reagent.",
+              "Transfer reagent into the vessel."
+            ]
+          },
+          {
+            "op_type": "add",
+            "steps": [
+              "Ensure reaction vessel is present and empty.",
+              "Place a clean stir bar in the vessel.",
+              "Measure 1000 mL of 1000 mL.",
+              "Transfer 1000 mL into the vessel."
+            ]
+          },
+          {
+            "op_type": "wash",
+            "steps": [
+              "Perform operation 'wash' as described: After incubation, the samples were removed, rinsed with distilled water, and dried using the freeze-drying method."
+            ]
+          },
+          {
+            "op_type": "wash",
+            "steps": [
+              "Perform operation 'wash' as described: After 72 h, the supernatant of all the wells of the 96-well plate was removed, and after washing with PBS to each well, 0.2 ml of MTT solution (5 mg/mm) was added, and the wells were kept in the incubator for four hours."
+            ]
+          }
+        ]
+      },
+      {
+        "text": "Synthesis of graphene oxide To prepare graphene oxide using the modified Hummer method. First, 3 g of graphite powder was added to the H 2 SO 4 /H 3 PO 4  mixture (40:360 ml), and then 18 g of KMnO 4  was added and stirred at 50 °C for 14 h with 100 rpm by a magnetic stirrer. The temperature of the resulting mixture was reduced to 25 °C, and then 30% H 2 O 2  was added to it, making the mixture light brown and stirred for 20 min. A centrifuge was used to separate the mixture, and several washes were done with distilled water to reach a neutral pH. In a vacuum oven, 24 h of drying time was spent at 70 °C on the synthesized graphene oxide 34 . Graphene oxide was synthesized in black and in powder form.",
+        "operations": [
+          {
+            "op_type": "add",
+            "sentence": "First, 3 g of graphite powder was added to the H 2 SO 4 /H 3 PO 4  mixture (40:360 ml), and then 18 g of KMnO 4  was added and stirred at 50 °C for 14 h with 100 rpm by a magnetic stirrer.",
+            "start_char": 88,
+            "end_char": 276,
+            "materials": [
+              "3 g",
+              "the H 2 SO 4 /H 3 PO 4  mixture",
+              "then 18 g",
+              "14 h"
+            ],
+            "params": {
+              "temp": "50 °C",
+              "time": "14 h",
+              "speed": "100 rpm",
+              "amounts": [
+                "3 g",
+                "360 ml",
+                "18 g"
+              ]
+            }
+          },
+          {
+            "op_type": "add",
+            "sentence": "The temperature of the resulting mixture was reduced to 25 °C, and then 30% H 2 O 2  was added to it, making the mixture light brown and stirred for 20 min.",
+            "start_char": 277,
+            "end_char": 433,
+            "materials": [
+              "25 °C",
+              "30%",
+              "20 min"
+            ],
+            "params": {
+              "temp": "25 °C",
+              "time": "20 min"
+            }
+          },
+          {
+            "op_type": "centrifuge",
+            "sentence": "A centrifuge was used to separate the mixture, and several washes were done with distilled water to reach a neutral pH. In a vacuum oven, 24 h of drying time was spent at 70 °C on the synthesized graphene oxide 34 .",
+            "start_char": 434,
+            "end_char": 649,
+            "materials": [
+              "24 h",
+              "70 °C"
+            ],
+            "params": {
+              "temp": "70 °C",
+              "time": "24 h"
+            }
+          }
+        ],
+        "expanded": [
+          {
+            "op_type": "add",
+            "steps": [
+              "Ensure reaction vessel is present and empty.",
+              "Place a clean stir bar in the vessel.",
+              "Measure 3 g of 3 g.",
+              "Transfer 3 g into the vessel."
+            ]
+          },
+          {
+            "op_type": "add",
+            "steps": [
+              "Ensure reaction vessel is present and empty.",
+              "Place a clean stir bar in the vessel.",
+              "Measure the specified amount of 25 °C.",
+              "Transfer 25 °C into the vessel."
+            ]
+          },
+          {
+            "op_type": "centrifuge",
+            "steps": [
+              "Perform operation 'centrifuge' as described: A centrifuge was used to separate the mixture, and several washes were done with distilled water to reach a neutral pH. In a vacuum oven, 24 h of drying time was spent at 70 °C on the synthesized graphene oxide 34 ."
+            ]
+          }
+        ]
+      },
+      {
+        "text": "Preparation of magnetically modified clay To prepare magnetically modified clay, 1 g of synthesized graphene oxide (GO) was sonicated in 100 mL of water for 35 min, while 2 g of Cloisite 30B clay was sonicated in 100 mL of water for 20 min. A solution of iron(III) chloride and iron(II) chloride in a 1:2 molar ratio was then added to the GO-clay mixture, which was heated and stirred at 90 °C for 20 min. The resulting mixture was gradually combined with a 4 M sodium hydroxide solution and stirred for 50 min. Finally, the modified clay was separated from the solution, washed several times with distilled water, and baked at 105 °C for 4 h.",
+        "operations": [
+          {
+            "op_type": "sonicate",
+            "sentence": "Preparation of magnetically modified clay To prepare magnetically modified clay, 1 g of synthesized graphene oxide (GO) was sonicated in 100 mL of water for 35 min, while 2 g of Cloisite 30B clay was sonicated in 100 mL of water for 20 min.",
+            "start_char": 0,
+            "end_char": 240,
+            "materials": [
+              "1 g",
+              "100 mL",
+              "35 min",
+              "20 min"
+            ],
+            "params": {
+              "time": "35 min",
+              "amounts": [
+                "1 g",
+                "100 mL",
+                "2 g",
+                "100 mL"
+              ]
+            }
+          },
+          {
+            "op_type": "add",
+            "sentence": "A solution of iron(III) chloride and iron(II) chloride in a 1:2 molar ratio was then added to the GO-clay mixture, which was heated and stirred at 90 °C for 20 min.",
+            "start_char": 241,
+            "end_char": 405,
+            "materials": [
+              "iron(III) chloride and iron(II) chloride",
+              "90 °C",
+              "20 min"
+            ],
+            "params": {
+              "temp": "90 °C",
+              "time": "20 min"
+            }
+          },
+          {
+            "op_type": "stir",
+            "sentence": "The resulting mixture was gradually combined with a 4 M sodium hydroxide solution and stirred for 50 min.",
+            "start_char": 406,
+            "end_char": 511,
+            "materials": [
+              "a 4 M sodium hydroxide solution",
+              "50 min"
+            ],
+            "params": {
+              "time": "50 min",
+              "amounts": [
+                "4 M"
+              ],
+              "concs": [
+                "4 M"
+              ]
+            }
+          },
+          {
+            "op_type": "wash",
+            "sentence": "Finally, the modified clay was separated from the solution, washed several times with distilled water, and baked at 105 °C for 4 h.",
+            "start_char": 512,
+            "end_char": 643,
+            "materials": [
+              "105 °C",
+              "4 h."
+            ],
+            "params": {
+              "temp": "105 °C",
+              "time": "4 h"
+            }
+          }
+        ],
+        "expanded": [
+          {
+            "op_type": "sonicate",
+            "steps": [
+              "Perform operation 'sonicate' as described: Preparation of magnetically modified clay To prepare magnetically modified clay, 1 g of synthesized graphene oxide (GO) was sonicated in 100 mL of water for 35 min, while 2 g of Cloisite 30B clay was sonicated in 100 mL of water for 20 min."
+            ]
+          },
+          {
+            "op_type": "add",
+            "steps": [
+              "Ensure reaction vessel is present and empty.",
+              "Place a clean stir bar in the vessel.",
+              "Measure the specified amount of iron(III) chloride and iron(II) chloride.",
+              "Transfer iron(III) chloride and iron(II) chloride into the vessel."
+            ]
+          },
+          {
+            "op_type": "stir",
+            "steps": [
+              "Place the reaction vessel on a stir plate.",
+              "Set the stirrer to an appropriate speed.",
+              "Stir for 50 min."
+            ]
+          },
+          {
+            "op_type": "wash",
+            "steps": [
+              "Perform operation 'wash' as described: Finally, the modified clay was separated from the solution, washed several times with distilled water, and baked at 105 °C for 4 h."
+            ]
+          }
+        ]
+      },
+      {
+        "text": "Preparation of natural hydroxyapatite (HAp) powder The chicken femur was cleaned entirely of meat and remaining materials to prepare natural hydroxyapatite powder and then boiled for 45 min in boiling water. The cleaned bones were placed in a furnace for 3 h at 900 °C with a nitrogen atmosphere. After the set time, the bones are removed from the oven, cooled to room temperature, and then powdered once they are at room temperature. The production efficiency of natural hydroxyapatite powder is 58%, and the product is white 35 .",
+        "operations": [],
+        "expanded": []
+      },
+      {
+        "text": "Preparation of nanocomposite scaffold The nanocomposite scaffolds were prepared using natural polymer materials, PVA, hydroxyapatite extracted from natural bone, and modified clay using a simple mixing method. For the preparation of the scaffold, a solution of 2 wt. in the first step. % of a natural polymer in distilled water was prepared by dissolving the polymer in the water and stirring the solution until the polymer was fully dissolved. It was also possible to prepare a solution of polyvinyl alcohol by dissolving PVA in distilled water at a temperature of 70 °C to prepare a solution of 0.2 wt. % of polyvinyl alcohol. HAp was dispersed in 1 v/v % acetic acid for 24 h to obtain a solution of 2 wt. % of hydroxyapatite. As soon as the materials had been prepared, they were added in the correct proportions, and the mixer was turned on for 12 h. 0.5 v/v % of glutaraldehyde was added to the prepped solution in 5% of the total solution volume to cross-link the polymer solution. The solution needs to be mixed for 20 min. A suspension was obtained by dispersing the modified clay in distilled water. In this method, the last step of adding CGF is included. The particles were evenly dispersed in the solution after adding CGF and then subjected to ultrasonic treatment for two hours. The solution was transferred into a falcon tube and dried using a freeze-dryer. After drying, the samples were washed with a 2 wt. % NaBH 4  solution and a 2 wt. % NaOH solution to neutralize any unreacted glutaraldehyde and excess acetic acid. The samples were then dried once more. The schematic representation of the PVA/Alg/Hap/CGF nanocomposite formation has been shown in the Scheme  1 . Scheme 1 Schematic representation of the formation of PVA/Alg/Hap/CGF nanocomposite scaffolds.",
+        "operations": [
+          {
+            "op_type": "stir",
+            "sentence": "% of a natural polymer in distilled water was prepared by dissolving the polymer in the water and stirring the solution until the polymer was fully dissolved.",
+            "start_char": 286,
+            "end_char": 444,
+            "materials": [],
+            "params": {}
+          },
+          {
+            "op_type": "add",
+            "sentence": "As soon as the materials had been prepared, they were added in the correct proportions, and the mixer was turned on for 12 h. 0.5 v/v % of glutaraldehyde was added to the prepped solution in 5% of the total solution volume to cross-link the polymer solution.",
+            "start_char": 730,
+            "end_char": 988,
+            "materials": [],
+            "params": {
+              "time": "12 h"
+            }
+          },
+          {
+            "op_type": "stir",
+            "sentence": "The solution needs to be mixed for 20 min.",
+            "start_char": 989,
+            "end_char": 1031,
+            "materials": [
+              "20 min"
+            ],
+            "params": {
+              "time": "20 min"
+            }
+          },
+          {
+            "op_type": "add",
+            "sentence": "In this method, the last step of adding CGF is included.",
+            "start_char": 1110,
+            "end_char": 1166,
+            "materials": [],
+            "params": {}
+          },
+          {
+            "op_type": "add",
+            "sentence": "The particles were evenly dispersed in the solution after adding CGF and then subjected to ultrasonic treatment for two hours.",
+            "start_char": 1167,
+            "end_char": 1293,
+            "materials": [
+              "two hours"
+            ],
+            "params": {}
+          },
+          {
+            "op_type": "dry",
+            "sentence": "The solution was transferred into a falcon tube and dried using a freeze-dryer.",
+            "start_char": 1294,
+            "end_char": 1373,
+            "materials": [],
+            "params": {}
+          },
+          {
+            "op_type": "dry",
+            "sentence": "After drying, the samples were washed with a 2 wt. % NaBH 4  solution and a 2 wt. % NaOH solution to neutralize any unreacted glutaraldehyde and excess acetic acid.",
+            "start_char": 1374,
+            "end_char": 1538,
+            "materials": [
+              "a 2 wt. %",
+              "NaBH 4  solution",
+              "a 2 wt. % NaOH solution"
+            ],
+            "params": {}
+          },
+          {
+            "op_type": "dry",
+            "sentence": "The samples were then dried once more.",
+            "start_char": 1539,
+            "end_char": 1577,
+            "materials": [],
+            "params": {}
+          }
+        ],
+        "expanded": [
+          {
+            "op_type": "stir",
+            "steps": [
+              "Place the reaction vessel on a stir plate.",
+              "Set the stirrer to an appropriate speed.",
+              "Stir for the specified time."
+            ]
+          },
+          {
+            "op_type": "add",
+            "steps": [
+              "Ensure reaction vessel is present and empty.",
+              "Place a clean stir bar in the vessel.",
+              "Measure the specified amount of reagent.",
+              "Transfer reagent into the vessel."
+            ]
+          },
+          {
+            "op_type": "stir",
+            "steps": [
+              "Place the reaction vessel on a stir plate.",
+              "Set the stirrer to an appropriate speed.",
+              "Stir for 20 min."
+            ]
+          },
+          {
+            "op_type": "add",
+            "steps": [
+              "Ensure reaction vessel is present and empty.",
+              "Place a clean stir bar in the vessel.",
+              "Measure the specified amount of reagent.",
+              "Transfer reagent into the vessel."
+            ]
+          },
+          {
+            "op_type": "add",
+            "steps": [
+              "Ensure reaction vessel is present and empty.",
+              "Place a clean stir bar in the vessel.",
+              "Measure the specified amount of two hours.",
+              "Transfer two hours into the vessel."
+            ]
+          },
+          {
+            "op_type": "dry",
+            "steps": [
+              "Perform operation 'dry' as described: The solution was transferred into a falcon tube and dried using a freeze-dryer."
+            ]
+          },
+          {
+            "op_type": "dry",
+            "steps": [
+              "Perform operation 'dry' as described: After drying, the samples were washed with a 2 wt. % NaBH 4  solution and a 2 wt. % NaOH solution to neutralize any unreacted glutaraldehyde and excess acetic acid."
+            ]
+          },
+          {
+            "op_type": "dry",
+            "steps": [
+              "Perform operation 'dry' as described: The samples were then dried once more."
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}
