@@ -1,16 +1,9 @@
 from asgiref.wsgi import WsgiToAsgi
 from fastapi import FastAPI
-
-from app import app as flask_app                 # Flask web app (WSGI)
-from retriever.service import app as retr_app    # FastAPI retriever (ASGI)
+from app import app as flask_app
+from retriever.service import app as retriever_app
 
 root = FastAPI(title="NanoChemGPT (combined)")
-
-# Mount retriever at /retriever
-root.mount("/retriever", retr_app)
-
-# Wrap Flask (WSGI) → ASGI and mount at /
-root.mount("/", WsgiToAsgi(flask_app))
-
-# Final ASGI app entrypoint:
+root.mount("/retriever", retriever_app)          # FastAPI retriever at /retriever/*
+root.mount("/", WsgiToAsgi(flask_app))          # Flask app at /
 app = root

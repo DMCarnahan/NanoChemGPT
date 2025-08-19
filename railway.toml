@@ -5,16 +5,35 @@ builder = "NIXPACKS"
 EMBED_BACKEND = "st"
 EMBED_MODEL   = "sentence-transformers/all-MiniLM-L6-v2"
 
-INDEX_DIR   = "/data/vector_store"
-BUNDLE_PATH = "/data/out/bundle.jsonl"
+INDEX_DIR     = "/data/vector_store"
+BUNDLE_PATH   = "/data/out/bundle.jsonl"
 
 LOOKUP_BACKEND = "none"
+
+PYTHONPATH = "/app"
+
 
 [phases.install]
 cmds = [
   "pip install -U pip wheel",
-  "pip install -r requirements.txt"
+  "pip install -r requirements.txt",
+  "pip install 'spacy<4'",
+  "python -m spacy download en_core_web_sm"
 ]
 
 [phases.start]
-cmd = "export RETRIEVER_URL=http://127.0.0.1:$PORT/retriever && gunicorn -k uvicorn.workers.UvicornWorker -w 2 -b 0.0.0.0:$PORT main_asgi:app'"
+cmd = "bash -lc ' \
+  export RETRIEVER_URL=http://127.0.0.1:$PORT/retriever; \
+  mkdir -p $(dirname \"$BUNDLE_PATH\") \"$INDEX_DIR\"; \
+  if [ ! -s \"$BUNDLE_PATH\" ] && [ -f \"/app/data/out/seed_bundle.jsonl\" ]; then \
+    cp /app/data/out/seed_bundle.jsonl \"$BUNDLE_PATH\"; \
+    echo \"[start] Seeded bundle -> $BUNDLE_PATH\"; \
+  fi; \
+  if [ -s \"$BUNDLE_PATH\" ]; then \
+    echo \"[start] Building index...\"; \
+    python retriever/index_jsonl.py --bundle \"$BUNDLE_PATH\" --index_dir \"$INDEX_DIR\" || true; \
+  else \
+    echo \"[start] No bundle at $BUNDLE_PATH; skipping index\"; \
+  fi; \
+  gunicorn -k uvicorn.workers.UvicornWorker -w 2 -b 0.0.0.0:$PORT main_asgi:app \
+'"
