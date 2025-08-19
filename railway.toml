@@ -1,0 +1,22 @@
+[build]
+builder = "NIXPACKS"
+
+[env]
+EMBED_BACKEND = "st"
+EMBED_MODEL   = "sentence-transformers/all-MiniLM-L6-v2"
+
+RETRIEVER_URL = "http://127.0.0.1:{PORT}/retriever"
+
+INDEX_DIR   = "/data/vector_store"
+BUNDLE_PATH = "/data/out/bundle.jsonl"
+
+LOOKUP_BACKEND = "none"
+
+[phases.install]
+cmds = [
+  "pip install -U pip wheel",
+  "pip install -r requirements.txt"
+]
+
+[phases.start]
+cmd = "bash -lc 'scripts/bootstrap_kb.sh && gunicorn -k uvicorn.workers.UvicornWorker -w 2 -b 0.0.0.0:$PORT main_asgi:app'"

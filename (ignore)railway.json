@@ -4,7 +4,7 @@
     "builder": "NIXPACKS"
   },
   "deploy": {
-    "startCommand":"python retriever/index_jsonl.py --bundle $BUNDLE_PATH --index_dir $INDEX_DIR && gunicorn -w 2 -b 0.0.0.0:$PORT app:app",
+    "startCommand": "gunicorn -k uvicorn.workers.UvicornWorker -w 2 -b 0.0.0.0:$PORT main_asgi:app",
     "healthcheckPath" : "/health",
     "healthcheckTimeout": 100,
     "restartPolicyType": "on_failure"

@@ -4,7 +4,9 @@ from pathlib import Path
 
 logging.getLogger(__name__).setLevel(logging.INFO)
 
-RETRIEVER_URL = os.getenv("RETRIEVER_URL", "").strip()
+_raw_url = os.getenv("RETRIEVER_URL", "").strip()
+RETRIEVER_URL = _raw_url.replace("{PORT}", os.getenv("PORT", "")) if "{PORT}" in _raw_url else _raw_url
+REMOTE_TIMEOUT = float(os.getenv("KB_REMOTE_TIMEOUT", "3.0"))
 
 # Resolve repo root -> data/vector_store by default
 APP_ROOT = Path(__file__).resolve().parents[1]
@@ -55,47 +57,65 @@ def kb_available() -> bool:
 
 def kb_search(query: str, k: int = 8) -> list[dict]:
     """
-    Search KB. If RETRIEVER_URL is set, defer to that HTTP service.
+    Search KB.
+
+    If RETRIEVER_URL is set, try POST {RETRIEVER_URL}/search first
+    (expects {"hits":[...]}) and fall back to local FAISS on error or empty result.
     Otherwise, embed locally via vector_store.v2 and query FAISS.
-    Returns a list of dicts with at least {"i": idx, "score": float, ...meta}
+
+    Returns: list of dicts with at least {"i": idx, "score": float, ...meta}
     """
-    if not query:
+    if not query or not query.strip():
         return []
 
-    # Remote mode
+    # ---- Remote first (co-hosted retriever or separate service) ----
     if RETRIEVER_URL:
         try:
             import requests  # type: ignore
-            r = requests.post(f"{RETRIEVER_URL.rstrip('/')}/search", json={"q": query, "k": k}, timeout=10)
-            r.raise_for_status()
-            return r.json().get("hits", []) or []
+            resp = requests.post(
+                f"{RETRIEVER_URL.rstrip('/')}/search",
+                json={"q": query, "k": int(k)},
+                timeout=REMOTE_TIMEOUT,
+            )
+            resp.raise_for_status()
+            hits = resp.json().get("hits") or []
+            if hits:
+                return hits
+            # If remote is healthy but has no hits (e.g., empty index), try local fallback
         except Exception:
-            logging.exception("KB: remote retriever failed; returning empty hits.")
-            return []
+            logging.exception("KB: remote retriever failed; attempting local fallback.")
 
-    # Local mode
+    # ---- Local fallback (FAISS) ----
     _lazy_load()
-    if _index is None:
+    if _index is None or int(getattr(_index, "ntotal", 0) or 0) <= 0:
         return []
 
-    # Embed with the shared vector_store config
     from vector_store import embed  # uses EMBED_BACKEND/EMBED_MODEL/OPENAI_EMB envs
     import numpy as np
     import faiss  # type: ignore
 
     vec = embed([query])[0]
     xq = np.asarray([vec], dtype="float32")
-    D, I = _index.search(xq, k)
 
-    hits = []
-    idxs, scores = I[0].tolist(), D[0].tolist()
+    try:
+        faiss.normalize_L2(xq)
+    except Exception:
+        pass
+
+    ntotal = int(getattr(_index, "ntotal", 0) or 0)
+    kk = min(int(k), ntotal) if ntotal > 0 else 0
+    if kk <= 0:
+        return []
+
+    D, I = _index.search(xq, kk)
+
+    hits: list[dict] = []
+    idxs, scores = I[0].tolist(), [float(s) for s in D[0].tolist()]
     for idx, score in zip(idxs, scores):
         if idx < 0:
             continue
         meta = _texts[idx] if (_texts and 0 <= idx < len(_texts)) else {}
-        hit = {"i": idx, "score": float(score)}
-        hit.update(meta)
-        hits.append(hit)
+        hits.append({"i": idx, "score": score, **meta})
     return hits
 
 def kb_fetch(idx: int) -> dict:
