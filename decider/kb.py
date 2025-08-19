@@ -27,7 +27,7 @@ import os, json, io, numpy as np
 from typing import List, Dict, Any, Iterable, Tuple
 
 # ----------------- Config -----------------
-INDEX_PATH = os.getenv("FAISS_INDEX_PATH", "data/index.faiss")
+INDEX_PATH = os.getenv("BUILTIN_DATA")
 IDS_PATH   = os.getenv("FAISS_IDS_PATH", "data/ids.json")
 DOCS_JSONL = os.getenv("DOCS_JSONL", "data/docs.jsonl")
 DOCS_IDX_PATH = os.getenv("DOCS_IDX_PATH", DOCS_JSONL + ".idx.json")

@@ -67,7 +67,7 @@ def get_material_filter():
         print("[material_filter] load failed:", e)
         return None
 
-def material_ok(text: str, thresh: float = 0.55) -> bool:
+def material_ok(text: str, thresh: float = 0.65) -> bool:
     mf = get_material_filter()
     if mf is None:
         return True

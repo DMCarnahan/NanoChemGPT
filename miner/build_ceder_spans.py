@@ -4,7 +4,6 @@ from typing import List, Tuple, Dict, Any, Optional
 from pathlib import Path
 import spacy
 from spacy.tokens import Doc, DocBin, Span
-from runtime import material_ok
 
 # -------------------- Configs --------------------
 
@@ -93,18 +92,6 @@ DOPANT_RX = r"[A-Z][a-z]?(?:\d+|[0-9\-+½¼¾⁻⁺]*)"
 COMPLEX_FORMULA_RX = rf"(?:{DOPANT_RX}(?:[:\-–—·•]{DOPANT_RX})+|[A-Z][a-z]?\([A-Za-z0-9\.\-+−⁻]+\)\d*(?:[A-Za-z0-9\.\-+−⁻]*)?)"
 CHEMISH = re.compile(
     rf"(?:{COMPLEX_FORMULA_RX})|(?:[A-Z][a-z]?\d+)+|oxide|nitrate|acetate|chloride|sulfate|hydroxide|phosphate|carbonate|perovskite|aluminate",
-    re.I
-)
-
-STOP_MATERIAL = {
-    "ito glass","fto glass","glass slide","quartz tube","quartz boat","alumina crucible",
-    "al2o3 substrate","sapphire substrate","sapphire wafer","filter paper","teflon liner",
-    "alumina tube","mortar","pestle","ball mill","press die","polypropylene bottle"
-}
-STOP_PATTERNS = re.compile(
-    r"\b(?:ito|fto)\s+glass\b|"
-    r"\b(quartz|alumina|sapphire)\s+(tube|boat|crucible|substrate|wafer)\b|"
-    r"\b(graphite\s+foil|nickel\s+foam)\b",
     re.I
 )
 
@@ -325,35 +312,15 @@ def build_spans_from_record(text: str, rec: Dict[str, Any], extra_material_keys:
     spans: List[Tuple[int, int, str, str]] = []
     covered: List[Tuple[int, int]] = []
 
-    _action_words = collect_action_triggers(rec) or []
-    ACTION_NEAR_RX = re.compile(
-        rf"\b({'|'.join(map(re.escape, _action_words))})(?:ed|ing|s)?\b", re.I
-    ) if _action_words else None
-
-    # -------- MATERIAL (with atmosphere + stoplist + near-ACTION gates) --------
+    # -------- MATERIAL (with atmosphere guard at match time) --------
     for mstr in (collect_material_strings(rec, extra_material_keys) or []):
         core = mstr.strip()
         for a, b in find_all(text, mstr):
             if core.lower() in {"o2", "oxygen", "n2", "nitrogen", "air", "argon", "ar", "h2", "hydrogen"}:
-                win_atm = text[max(0, a-25): b+25]
-                if re.search(r"\b(flow|atmosphere|under|in|purge|gas)\b", win_atm, re.I):
+                win = text[max(0, a - 25): b + 25].lower()
+                if re.search(r"\b(flow|atmosphere|under|in|purge|gas)\b", win, flags=re.I):
                     continue
-
-            low = core.lower()
-            win = text[max(0, a-30): b+30]
-            if low in STOP_MATERIAL or STOP_PATTERNS.search(win):
-                continue
-
-            if " " not in core and not CHEMISH.search(core) and ACTION_NEAR_RX:
-                if not ACTION_NEAR_RX.search(win):
-                    continue
-
-            if not material_ok(core):
-                continue
-
             spans.append((a, b, "MATERIAL", "materials"))
-
-
 
     # -------- AMOUNT+UNIT: pair-first extraction --------
     for m in PAIR_RE.finditer(text):

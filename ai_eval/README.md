@@ -16,7 +16,7 @@ This kit evaluates LLM outputs for chemistry information extraction with:
 # Optional dependency (only used for full JSON Schema checks):
 # pip install jsonschema PyYAML
 
-cd nanochem_eval_pro
+cd ai_eval
 
 # 1) NER span eval (IoU)
 python3 grader.py -c configs/eval_span.yaml
