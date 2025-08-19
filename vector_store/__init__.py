@@ -496,5 +496,15 @@ def _expire_uploads():
                 _dirty_index = True
                 _persist()
                 print("[vector_store.v2] expired old uploads; marked index dirty")
+                
+def embed(texts: List[str]) -> List[List[float]]:
+    """
+    Return embeddings as a list of lists (one vector per input string).
+    Matches callers that do `vec = embed([query])[0]` or `np.asarray(embed(texts))`.
+    """
+    if not texts:
+        return []
+    arr = _encode(texts)          # (n, d) float32 numpy array, L2-normalized
+    return arr.tolist()
 
 threading.Thread(target=_expire_uploads, daemon=True).start()
