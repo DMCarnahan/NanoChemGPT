@@ -16,6 +16,7 @@ from flask import (
 from jinja2 import TemplateNotFound
 from openai import OpenAI
 from werkzeug.utils import secure_filename
+
 # ──────────────── Local modules ──────────────── #
 import vector_store as vs
 from converter import validate_step, convert_text_to_robot_ops
@@ -115,7 +116,8 @@ except Exception as e:
 # ──────────────── OpenAI client ──────────────── #
 load_dotenv()
 _no_proxy = httpx.Client(trust_env=False, timeout=120.0)
-client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"), http_client=_no_proxy)
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "")
+client = OpenAI(api_key=OPENAI_API_KEY, http_client=_no_proxy) if OPENAI_API_KEY else None
 
 RETRIEVER_URL = os.getenv("RETRIEVER_URL", "http://localhost:8000")
 
@@ -135,155 +137,23 @@ def _safe_text(x: Any) -> str:
     except Exception:
         return ""
 
-RETRIEVER_URL = os.getenv("RETRIEVER_URL","http://127.0.0.1:8000")
-OPENAI_API_KEY= os.getenv("OPENAI_API_KEY","")
-OPENAI_MODEL  = os.getenv("OPENAI_MODEL","gpt-4o")
-HARVESTER_PY  = "./harvester/harvester.py"         
-BUNDLE_PATH   = "./out/bundle_with_methods.jsonl"  
-INDEX_DIR     = "./retriever/index"
+def _safe_id(x):
+    try:
+        from bson import ObjectId
+        return ObjectId(x)
+    except Exception:
+        return None
 
-class Ask(BaseModel):
-    question: str
-    k: int = 6
-    allow_fetch: bool = True  
-
-def needs_more(question: str, hits: List[Dict[str,Any]]) -> bool:
-    # Heuristics: too few unique papers OR low scores OR short contexts
-    if not hits: return True
-    uniq = {h.get("paper_id") for h in hits if h.get("paper_id")}
-    if len(uniq) < 2: return True
-    scores = [h.get("score",0) for h in hits]
-    if sum(scores[:3])/max(1,len(scores[:3])) < 0.18: return True
-    if sum(len(h.get("text","")) for h in hits) < 800: return True
-    return False
-
-def expand_queries(question: str) -> List[str]:
-    # Lightweight expansion without LLM — add nanochem method terms
-    seeds = [
-        "hydrothermal","solvothermal","sol-gel","calcination","anneal",
-        "spin-coating","precursor","coprecipitation","microwave",
-        "template","electrospinning","nanoparticle","thin film","TiO2","oxide"
-    ]
-    q = question.strip()
-    out = [q]
-    for w in seeds:
-        out.append(f"{q} {w}")
-    return list(dict.fromkeys(out))[:6]  # dedupe & cap
-
-import os, json, tempfile, textwrap, pathlib, subprocess
-from typing import List, Optional
-
-def run_cmd(argv: list[str]) -> None:
-    """Thin wrapper with error surface."""
-    print(f"[run] {' '.join(argv)}")
-    cp = subprocess.run(argv, capture_output=True, text=True)
-    if cp.stdout:
-        print(cp.stdout)
-    if cp.returncode != 0:
-        print(cp.stderr)
-        raise RuntimeError(f"Command failed: {' '.join(argv)} (code {cp.returncode})")
-
-def harvest_once(
-    queries: List[str],
-    out_dir: str = "harvester/out_auto",
-    *,
-    since_year: int = 2016,
-    max_results_per_source: int = 15,
-    grobid_url: Optional[str] = "http://127.0.0.1:8070",
-    unpaywall_email: Optional[str] = None,
-    harvester_py: str = "harvester/harvest.py",           # <-- adjust if different
-    bundle_path: str = "data/bundles/bundle.jsonl",       # the canonical working bundle
-    index_dir: str = "data/vector_store",                 # where indexes are written
-    embed_backend: Optional[str] = None                   # 'st'|'openai'|None -> use script default/env
-) -> str:
-    """
-    1) Harvest papers for `queries` into {out_dir}/bundle.jsonl
-    2) Merge them into `bundle_path` (append/replace as your script defines)
-    3) Rebuild the retrieval index in `index_dir`
-    Returns: absolute path to the updated working bundle (bundle_path)
-    """
-    if not queries:
-        raise ValueError("harvest_once: `queries` cannot be empty")
-
-    out_dir_p = pathlib.Path(out_dir)
-    out_dir_p.mkdir(parents=True, exist_ok=True)
-    bundle_path_p = pathlib.Path(bundle_path)
-    index_dir_p = pathlib.Path(index_dir)
-    index_dir_p.mkdir(parents=True, exist_ok=True)
-
-    # ----- Build YAML config safely (avoid hand-rolled YAML mistakes) -----
-    # Keep it dependency-free: format YAML manually but correctly.
-    # Use JSON quoting for queries for safety.
-    q_lines = "\n".join(f"  - {json.dumps(q, ensure_ascii=False)}" for q in queries)
-    # Only include unpaywall_email if provided
-    unpaywall_line = f'unpaywall_email: {json.dumps(unpaywall_email)}\n' if unpaywall_email else ""
-
-    cfg = textwrap.dedent(
-        f"""
-        out_dir: {out_dir_p.as_posix()}
-        queries:
-        {q_lines}
-        since_year: {since_year}
-        max_results_per_source: {max_results_per_source}
-        grobid_url: {grobid_url if grobid_url else 'null'}
-        {unpaywall_line}"""
-    ).strip() + "\n"
-
-    with tempfile.NamedTemporaryFile("w", suffix=".yaml", delete=False) as tf:
-        tf.write(cfg)
-        cfg_path = tf.name
-
-    # ----- 1) harvest -> {out_dir}/bundle.jsonl -----
-    local_bundle = out_dir_p / "bundle.jsonl"
-    run_cmd(["python", harvester_py, "--config", cfg_path])
-
-    if not local_bundle.exists():
-        raise FileNotFoundError(f"Expected harvester output not found: {local_bundle}")
-
-    # ----- 2) merge fallback procedural paragraphs into the working bundle -----
-    # NOTE: your script name/path may differ
-    run_cmd([
-        "python",
-        "scripts/bundle_add_fallback.py",
-        str(local_bundle),
-        str(bundle_path_p)
-    ])
-
-    # ----- 3) rebuild index over the working bundle -----
-    # Let the indexer pick the backend from env unless explicitly passed.
-    # Avoid '--embed-backend none' which disables vectorization.
-    index_cmd = [
-        "python",
-        "retriever/index_jsonl.py",
-        "--bundle", str(bundle_path_p),
-        "--index_dir", str(index_dir_p),
-    ]
-    if embed_backend:  # 'st' or 'openai' or anything your script supports
-        index_cmd += ["--embed-backend", embed_backend]
-
-    run_cmd(index_cmd)
-
-    return str(bundle_path_p.resolve())
-
-def ask_llm(question: str, hits: List[Dict[str,Any]]) -> str:
-    if not client:
-        return "(No OPENAI_API_KEY set) Top contexts only:\n\n" + "\n\n".join(h["text"] for h in hits)
-    lines=[]
-    for i,h in enumerate(hits,1):
-        lines.append(f"[{i}] {h.get('title','')}")
-        lines.append(h["text"])
-        lines.append("")
-    system = "Answer using only the excerpts. Cite with [1], [2]. If unsure, say so."
-    user = f"Question: {question}\n\nContext:\n" + "\n".join(lines)
-    r = client.chat.completions.create(model=OPENAI_MODEL, temperature=0.1,
-                                       messages=[{"role":"system","content":system},{"role":"user","content":user}])
-    return r.choices[0].message.content.strip()
-
-def retrieve(question: str, k: int) -> List[Dict[str,Any]]:
-    with httpx.Client(timeout=60) as s:
-        r = s.post(f"{RETRIEVER_URL}/search", json={"query":question, "k":k, "mode":"tfidf"})
-        r.raise_for_status()
-        return r.json().get("hits", [])
+def _doc(obj):
+    if not isinstance(obj, dict):
+        return obj
+    out = dict(obj)
+    if "_id" in out:
+        out["_id"] = str(out["_id"])
+    for k, v in list(out.items()):
+        if hasattr(v, "isoformat"):
+            out[k] = v.isoformat()
+    return out
 
 # ---- Citation extraction and formatting helpers ----
 _CIT_RX_BRACKET = re.compile(r"\[(\d{1,4})\]")
@@ -381,7 +251,7 @@ def _format_references_block_from_used(used_indexes: list[int], refs: list[dict]
         if not isinstance(idx, int) or idx < 1 or idx > len(refs):
             continue
         lines.append(f"{idx}. " + _format_acs_reference(refs[idx-1]))
-    return "\\n".join(lines)
+    return "\n".join(lines)
 
 def _extract_used_markers(*texts: str) -> dict:
     """Find [n] citations and [CTX]/[PARSED]/[DB]/[GEN] tags."""
@@ -401,43 +271,6 @@ def _extract_used_markers(*texts: str) -> dict:
             tag_counts[tag] += len(re.findall(rf"\[{tag}\]", t))
     return {"refs": sorted(seen), "tags": tag_counts, "has_ctx": any(tag_counts[k] > 0 for k in ("CTX", "PARSED", "DB"))}
 
-# def basic_search(query: str, n: int = 6) -> list[dict]:
-#     """Merge local LOOKUP hits + OpenAlex web hits; de-dup by doi/title."""
-#     if not query.strip():
-#         return []
-#     local = []
-#     if LOOKUP is not None:
-#         try:
-#             hits = LOOKUP.query(query, topk=n)
-#             if isinstance(hits, pd.DataFrame) and not hits.empty:
-#                 for _, row in hits.fillna("").iterrows():
-#                     title = row.get("title") or row.get("name") or row.get("__source__") or "table hit"
-#                     year = row.get("year") or row.get("publication_year") or ""
-#                     doi = row.get("doi") or ""
-#                     url = row.get("url") or (f"https://doi.org/{doi}" if doi else "")
-#                     local.append({
-#                         "title": _safe_text(title)[:300],
-#                         "year": _safe_text(year),
-#                         "url": _safe_text(url),
-#                         "doi": _safe_text(doi),
-#                     })
-#         except Exception as e:
-#             print("[basic_search] lookup query failed:", e)
-
-#     web = []
-#     try:
-#         web = search_papers(query, n)
-#     except Exception as e:
-#         print("[basic_search] OpenAlex fetch failed:", e)
-
-#     seen = {(d.get("doi") or d.get("title", "")).lower() for d in local}
-#     for w in web:
-#         key = (w.get("doi") or w.get("title", "")).lower()
-#         if key not in seen:
-#             local.append({k: w.get(k, "") for k in ("title", "year", "url", "doi")})
-#             seen.add(key)
-#     return local[:2 * n]
-
 @lru_cache(maxsize=128)
 def cached_vs_search(q):
     return vs.search(q, k=8) or ""
@@ -450,13 +283,6 @@ def cached_lookup_query(q):
         except Exception:
             return None
     return None
-
-# @lru_cache(maxsize=128)
-# def cached_basic_search(q, n):
-#     try:
-#         return basic_search(q, n) or []
-#     except Exception:
-#         return []
 
 # ──────────────── Routes ──────────────── #
 @app.get("/health")
@@ -582,397 +408,6 @@ def _process_pdf_job(jid: str, path: Path, filename: str):
                 pass
         _set_job(jid, status="error", error=str(e))
 
-# ---- Search API ---- #
-# @app.post("/search")
-# def search_route():
-#     payload = request.get_json(silent=True) or {}
-#     q = (payload.get("q") or payload.get("query") or "").strip()
-#     n = int(payload.get("n") or 6)
-#     if not q:
-#         abort(400, "Missing 'q' (query).")
-#     refs = basic_search(q, n)
-#     return jsonify({"results": refs})
-
-# ---- Ask ---- #
-@app.post("/ask")
-def ask():
-    """
-    Unified Q&A endpoint that:
-      • Classifies intent (classify_intent) to steer behavior (mode, search breadth).
-      • Pulls context from uploads, DuckDB, and **KB** (kb_search/kb_fetch).
-      • Builds a numbered REFERENCES list (web + KB), asks the LLM to cite with [n].
-      • Extracts **used** citation indexes and returns only those in an ACS-style block.
-      • Computes usage markers via _extract_used_markers.
-      • Judges sufficiency and, if thin, optionally harvests more data, reindexes, reloads retriever, and retries once.
-    """
-    # ----------------- tiny helpers -----------------
-    def _s(x):
-        return _safe_text(x)
-
-    def _split_reasoning(raw: str) -> tuple[str, str]:
-        if not raw:
-            return "", ""
-        text = raw.strip()
-        fence_rx = re.compile(r"```(?:reason|rationale|reasoning)\s*([\s\S]*?)```", re.I)
-        rationale = ""
-        fences = list(fence_rx.finditer(text))
-        if fences:
-            rationale = fences[-1].group(1).strip()
-            answer = fence_rx.sub("", text).strip()
-            return answer, rationale
-        head = re.compile(r"(?:^|\n)#{1,3}\s*(rationale|reasoning)\b[^\n]*\n((?:.*\n?)*)$", re.I | re.S)
-        m = head.search(text)
-        if m:
-            rationale = m.group(2).strip()
-            answer = text[:m.start()].strip()
-            return answer, rationale
-        return text, ""
-
-    def _ref_url(r: dict) -> str:
-        if r.get("url"): return r["url"]
-        if r.get("doi"): return f"https://doi.org/{r['doi']}"
-        return ""
-
-    # --------------- on-demand harvest helpers (inner) ---------------
-    def _needs_more(hits: list[dict]) -> bool:
-        if not hits:
-            return True
-        uniq = {h.get("paper_id") for h in hits if h.get("paper_id")}
-        if len(uniq) < 2:
-            return True
-        scores = [float(h.get("score", 0.0)) for h in hits[:3]]
-        if scores and sum(scores) / len(scores) < 0.18:
-            return True
-        total_ctx = sum(len(_s(h.get("text",""))) for h in hits)
-        return total_ctx < 800
-
-    def _expand_queries(q: str) -> list[str]:
-        seeds = [
-            "hydrothermal","solvothermal","sol-gel","calcination","anneal",
-            "spin-coating","precursor","coprecipitation","microwave",
-            "template","electrospinning","nanoparticle","thin film","oxide"
-        ]
-        base = q.strip()
-        out = [base] + [f"{base} {w}" for w in seeds]
-        seen, uniq = set(), []
-        for s in out:
-            if s not in seen:
-                seen.add(s); uniq.append(s)
-        return uniq[:6]
-
-    def _harvest_reindex(queries: list[str]) -> None:
-        import os, json, subprocess, tempfile, pathlib
-        out_dir = "harvester/out_auto"
-        pathlib.Path(out_dir).mkdir(parents=True, exist_ok=True)
-        cfg = "out_dir: {od}\nqueries:\n{qs}\nsince_year: 2016\nmax_results_per_source: 15\ngrobid_url: http://127.0.0.1:8070\nunpaywall_email: \"\"\n".format(
-            od=out_dir.replace("\\","/"),
-            qs="\n".join(f"- {json.dumps(q)}" for q in queries),
-        )
-        with tempfile.NamedTemporaryFile("w", suffix=".yaml", delete=False) as tf:
-            tf.write(cfg); cfg_path = tf.name
-        # 1) harvest -> out_auto/bundle.jsonl
-        subprocess.run(["python","harvester/harvester.py","--config",cfg_path], check=True)
-        # 2) merge/refresh working bundle
-        subprocess.run(["python","scripts/bundle_add_fallback.py", f"{out_dir}/bundle.jsonl", "out/bundle_with_methods.jsonl"], check=True)
-        # 3) rebuild index
-        subprocess.run(["python","retriever/index_jsonl.py","--bundle","out/bundle_with_methods.jsonl","--index_dir","retriever/index","--embed-backend","none"], check=True)
-        # 4) tell retriever to reload (best-effort)
-        try:
-            import httpx
-            with httpx.Client(timeout=20) as s:
-                s.post("http://127.0.0.1:8000/reload")
-        except Exception:
-            pass
-
-    try:
-        payload = request.get_json(silent=True) or {}
-        user_mode = _s(payload.get("mode") or "").lower().strip()
-        question = _s(payload.get("question")).strip()
-        want_inline = bool(payload.get("want_inline_citations", True))
-        allow_fetch = bool(payload.get("allow_fetch", True))  # <-- new flag (default True)
-        if not question:
-            abort(400, "No question.")
-
-        # ----------------- classify intent -----------------
-        intent = None
-        try:
-            intent = classify_intent(question)
-        except Exception as e:
-            print("[/ask] classify_intent failed:", e)
-            intent = None
-        intent_str = _s(intent.get("label") if isinstance(intent, dict) else intent)
-
-        # Decide mode from user preference > intent > default
-        if user_mode in ("robot","reasoning"):
-            mode = user_mode
-        elif (intent_str or "").lower() in ("mechanism","explain","reason"):
-            mode = "reasoning"
-        else:
-            mode = "robot"
-
-        # Search breadth from intent (fallbacks are conservative)
-        kb_k = 6 if "kb" in (intent_str or "").lower() else 4
-        web_k = 8
-
-        # ----------------- uploads vector context -----------------
-        try:
-            uploads_ctx = _s(vs.search(question, k=8) or "")
-        except Exception as e:
-            print("[/ask] vs.search error:", e)
-            uploads_ctx = ""
-
-        # ----------------- DuckDB context -----------------
-        table_ctx = ""
-        table_refs = []
-        if LOOKUP is not None:
-            try:
-                hits_tbl = LOOKUP.query(question, topk=5)
-                rows = hits_tbl.to_dict(orient="records")
-                lines = []
-                for i, row in enumerate(rows, start=1):
-                    solvent = row.get("solvent") or row.get("solvent_system")
-                    temp = row.get("temp_C") or row.get("temperature_C")
-                    time_h = row.get("time_h") or row.get("duration_h")
-                    note = row.get("notes") or ""
-                    line = f"[T{i}] solvent={_s(solvent)}; temp_C={_s(temp)}; time_h={_s(time_h)}; {_s(note)}".strip()
-                    lines.append(line)
-                    url = row.get("url") or (row.get("doi") and f"https://doi.org/{row['doi']}")
-                    if url: table_refs.append({"title": f"Table row {i}", "url": url})
-                table_ctx = "\n".join(lines)
-            except Exception as e:
-                print("[/ask] LOOKUP query error:", e)
-
-        # ----------------- KB search + fetch -----------------
-        kb_ctx = ""
-        kb_refs_raw = []
-        try:
-            try:
-                kb_hits = kb_search(question, k=kb_k) or []
-            except TypeError:
-                kb_hits = kb_search(question) or []
-            kb_ids = [h.get("id") for h in kb_hits if isinstance(h, dict) and h.get("id")]
-            kb_docs = []
-            if kb_ids:
-                try:
-                    kb_docs = kb_fetch(kb_ids) or []
-                except Exception as e:
-                    print("[/ask] kb_fetch failed:", e)
-                    kb_docs = []
-
-            def _mk_kb_ref(d: dict) -> dict:
-                return {
-                    "title": _s(d.get("title") or d.get("name") or "(KB item)"),
-                    "year": _s(d.get("year") or d.get("publication_year") or ""),
-                    "url": _s(d.get("url") or d.get("link") or ""),
-                    "doi": _s(d.get("doi") or ""),
-                    "authors": d.get("authors") or d.get("authorships") or [],
-                    "biblio": d.get("biblio") or {},
-                }
-
-            items = kb_docs if kb_docs else kb_hits
-            kb_refs_raw = [_mk_kb_ref(d) for d in items if isinstance(d, dict)]
-            if kb_refs_raw:
-                kb_lines = [f"[KB{i}] {r['title']}" for i,r in enumerate(kb_refs_raw, 1)]
-                kb_ctx = "\n".join(kb_lines)
-        except Exception as e:
-            print("[/ask] KB search failed:", e)
-
-        # ----------------- Web/hybrid retriever (initial) -----------------
-        hits = retriever_search(question, k=web_k, mode="hybrid", alpha=0.7) or []
-
-        # If evidence thin, optionally auto-harvest -> reindex -> reload -> retry once
-        if allow_fetch and _needs_more(hits):
-            try:
-                _harvest_reindex(_expand_queries(question))
-                hits = retriever_search(question, k=web_k, mode="hybrid", alpha=0.7) or []
-            except Exception as e:
-                print("[/ask] auto-harvest failed:", e)
-
-        # ---- Convert hits to web_refs ----
-        web_refs = []
-        for h in hits:
-            web_refs.append({
-                "title": _s(h.get("title") or "(no title)"),
-                "year": "",
-                "url": _s(h.get("url") or ""),
-                "doi": _s(h.get("paper_id") if (h.get("paper_id","").startswith("10.")) else ""),
-                "authors": h.get("authors", []),
-                "biblio": {},
-            })
-
-        # ----------------- Deduplicate & enumerate references -----------------
-        def _normkey(r: dict) -> str:
-            return (r.get("doi") or r.get("title") or "").strip().lower()
-
-        refs = []
-        seen = set()
-        for r in web_refs + kb_refs_raw:
-            key = _normkey(r)
-            if key and key not in seen:
-                refs.append(r)
-                seen.add(key)
-
-        refs_prompt = "\n".join(
-            f"[{i+1}] {(r.get('title') or '(no title)')} ({r.get('year') or ''}) — {_ref_url(r)}"
-            for i, r in enumerate(refs)
-        ).strip()
-
-        # ----------------- Compose CONTEXT -----------------
-        ctx_parts = []
-        if uploads_ctx: ctx_parts.append("<<<CTX_UPLOADS>>>\n" + uploads_ctx)
-        if table_ctx:   ctx_parts.append("<<<CTX_TABLE>>>\n" + table_ctx)
-        if kb_ctx:      ctx_parts.append("<<<CTX_KB>>>\n" + kb_ctx)
-        context_joined = "\n\n---\n\n".join(ctx_parts).strip()
-
-        # ----------------- Prompting -----------------
-        robot_rules = (
-            "Return a discrete lab protocol with exact quantities on a small scale (~0.5 mmol Co):\n"
-            " - Include specific masses (mg) or mmol for reagents; volumes (mL) for liquids.\n"
-            " - Specify temperatures (°C), ramp rates (°C/min), hold times (min/h), and atmosphere (Ar/N2/vacuum).\n"
-            " - Include workup and purification (quench, washing/centrifugation, drying) with volumes.\n"
-            " - No placeholders (avoid “e.g.”/“or”). Be decisive.\n"
-            " - Output only the final protocol in markdown. Do not include any fenced blocks named reason or rationale in the answer. Put all reasoning in the separate rationale channel."
-        )
-        reasoning_rules = (
-            " - Provide a mechanistic explanation and design considerations for the target.\n"
-            " - Focus on: nucleation vs growth; ligand/solvent coordination; surfactants; reduction/oxidation; temperature profile and morphology control; atmosphere; pitfalls; safety.\n"
-            " - Do NOT return a step-by-step protocol. Be concise but specific."
-        )
-        inline_rule = (
-            " - When you pull a fact from any numbered REFERENCE, put its number in square brackets right after the sentence "
-            "(e.g. “hydrothermal at 200 °C [3]”)." if want_inline else
-            " - Inline numeric citations are optional for this request."
-        )
-        acs_rule = (
-            " - Write the REFERENCES block in ACS format: author(s), title, journal, year, volume, pages, DOI.\n"
-            " - Use inline numeric citations ([n]) for facts from REFERENCES. Do NOT include a REFERENCES block in your answer."
-        )
-
-        def strip_references_block(text: str) -> str:
-            return re.sub(r"##\s*References[\s\S]*", "", text, flags=re.I).strip()
-
-        if mode == "reasoning":
-            prompt = (
-                "You are NanoChemGPT. Use the CONTEXT and numbered REFERENCES.\n"
-                "Rules:\n"
-                " - Prefer CONTEXT and REFERENCES over general knowledge when relevant.\n"
-                " - For each bullet, quote or paraphrase a specific finding from CONTEXT or REFERENCES, and cite the source. Do not generalize or invent citations.\n"
-                " - If you use any content from CONTEXT, append [CTX] on that line.\n"
-                f"{inline_rule}\n"
-                " - If CONTEXT is insufficient, say so explicitly before generalizing.\n"
-                f"{reasoning_rules}\n"
-                f"{acs_rule}\n"
-                "Return exactly ONE block:\n"
-                "## Mechanistic reasoning\n"
-                "- bullet points with inline [n] and [CTX] where appropriate.\n\n"
-                f"CONTEXT:\n{context_joined}\n\n"
-                f"REFERENCES:\n{refs_prompt}\n\n"
-                f"User question: {question}"
-            )
-        else:
-            prompt = (
-                "You are NanoChemGPT. Use the CONTEXT and the numbered REFERENCES to propose a synthesis.\n"
-                "Rules:\n"
-                " - Prefer CONTEXT and REFERENCES over general knowledge when relevant.\n"
-                " - For each step, quote or paraphrase a specific finding from CONTEXT or REFERENCES, and cite the source. Do not generalize or invent citations.\n"
-                " - If you use any content from CONTEXT, append [CTX] on that line.\n"
-                f"{inline_rule}\n"
-                " - If CONTEXT is insufficient, say so explicitly before generalizing.\n"
-                f"{robot_rules}\n"
-                f"{acs_rule}\n"
-                "Return two blocks exactly in this order:\n"
-                "## Synthesis Protocol:\n"
-                "1. **Hardware & Glassware**:\n[]\n"
-                "2. **Materials**:\n[]\n"
-                "3. **Procedure**\n[]\n\n"
-                "```reason\n"
-                "For each key justification, add inline tags: [CTX] uploaded/context hits, [PARSED] parsed protocols, [n] for numbered web REFERENCES, [GEN] if inferred.\n"
-                "Keep rationales terse.\n"
-                "Add NO other blocks of text.\n"
-                "```\n\n"
-                f"CONTEXT:\n{context_joined}\n\n"
-                f"REFERENCES:\n{refs_prompt}\n\n"
-                f"User question: {question}"
-            )
-
-        raw = client.chat.completions.create(
-            model="gpt-4o-mini",
-            messages=[{"role": "user", "content": prompt}],
-            temperature=0.2
-        ).choices[0].message.content
-
-        # Split answer/rationale and strip any in-answer references block
-        if mode == "reasoning":
-            answer = strip_references_block(_s(raw))
-            rationale = ""
-        else:
-            a, r = _split_reasoning(strip_references_block(_s(raw)))
-            answer, rationale = _s(a), _s(r)
-
-        # ---- Build a REFERENCES block of only used items ----
-        used_idxs = _extract_used_ref_indexes(answer, rationale)
-        references_block = _format_references_block_from_used(used_idxs, refs)
-
-        # ---- Usage markers (refs + tags) ----
-        markers = _extract_used_markers(answer, rationale)
-
-        # ---- Sufficiency check + enqueue mining if thin (kept) ----
-        enqueued = False
-        try:
-            try:
-                sufficient = judge_sufficiency(question, context_joined, refs_count=len(refs))
-            except TypeError:
-                sufficient = judge_sufficiency(question, context_joined)
-            if not bool(sufficient):
-                try:
-                    enqueue_text_mining_job(question)
-                    enqueued = True
-                except Exception as e:
-                    print("[/ask] enqueue_text_mining_job failed:", e)
-        except Exception as e:
-            print("[/ask] judge/enqueue error:", e)
-
-        # ---- Save best-effort to DB ----
-        try:
-            db = get_db()
-            db.qa.insert_one({
-                "question": question,
-                "intent": intent,
-                "mode": mode,
-                "created_at": datetime.utcnow(),
-                "answer": answer,
-                "rationale": rationale,
-                "markers": markers,
-                "used_ref_indexes": used_idxs,
-                "references_block": references_block,
-                "refs": refs,
-                "kb_refs_count": len(kb_refs_raw),
-                "web_refs_count": len(web_refs),
-                "table_refs": table_refs,
-                "context_present": bool(context_joined),
-                "mining_enqueued": enqueued,
-            })
-        except Exception as e:
-            print("[/ask] DB save warn:", e)
-
-        return jsonify({
-            "ok": True,
-            "question": question,
-            "intent": intent,
-            "mode": mode,
-            "answer": answer,
-            "rationale": rationale,
-            "markers": markers,
-            "used_ref_indexes": used_idxs,
-            "references_block": references_block,
-            "refs": refs,
-            "context_present": bool(context_joined),
-            "mining_enqueued": enqueued,
-        })
-    except Exception as e:
-        traceback.print_exc()
-        return jsonify({"ok": False, "error": f"/ask failed: {e}"}), 500
-
 @app.post("/parse")
 def parse_route():
     try:
@@ -1027,24 +462,6 @@ def clear_uploads_route():
     except Exception as e:
         print("clear_uploads error:", e)
     return {"status": "uploads cleared"}
-
-def _safe_id(x):
-    try:
-        from bson import ObjectId
-        return ObjectId(x)
-    except Exception:
-        return None
-
-def _doc(obj):
-    if not isinstance(obj, dict):
-        return obj
-    out = dict(obj)
-    if "_id" in out:
-        out["_id"] = str(out["_id"])
-    for k, v in list(out.items()):
-        if hasattr(v, "isoformat"):
-            out[k] = v.isoformat()
-    return out
 
 @app.get("/api/history")
 def api_history():
