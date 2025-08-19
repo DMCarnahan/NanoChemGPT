@@ -1,13 +1,13 @@
 import argparse, json, yaml, httpx, re
 from pathlib import Path
 from tqdm import tqdm
-from harvester.utils import ensure_dir, write_json, safe_slug
-from harvester.arxiv_api import search_arxiv
-from harvester.eupmc_api import search_eupmc, fetch_fulltext_jats
-from harvester.unpaywall_api import unpaywall_lookup
-from harvester.grobid_client import pdf_to_tei
-from harvester.tei_utils import tei_to_sections, filter_methods_sections as filt_tei
-from harvester.jats_utils import jats_to_sections, filter_methods_sections as filt_jats
+from utils import ensure_dir, write_json, safe_slug
+from arxiv_api import search_arxiv
+from eupmc_api import search_eupmc, fetch_fulltext_jats
+from unpaywall_api import unpaywall_lookup
+from grobid_client import pdf_to_tei
+from tei_utils import tei_to_sections, filter_methods_sections as filt_tei
+from jats_utils import jats_to_sections, filter_methods_sections as filt_jats
 from miner.runtime import get_miner, extract_procedure
 
 miner = get_miner()
