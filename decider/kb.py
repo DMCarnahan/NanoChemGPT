@@ -4,8 +4,9 @@ from pathlib import Path
 
 logging.getLogger(__name__).setLevel(logging.INFO)
 
-_raw_url = os.getenv("RETRIEVER_URL", "").strip()
-RETRIEVER_URL = _raw_url.replace("{PORT}", os.getenv("PORT", "")) if "{PORT}" in _raw_url else _raw_url
+_raw = os.getenv("RETRIEVER_URL", "").strip()
+port = os.getenv("PORT", "8080")  # fallback for local dev
+RETRIEVER_URL = _raw.replace("{PORT}", port) if "{PORT}" in _raw else _raw
 REMOTE_TIMEOUT = float(os.getenv("KB_REMOTE_TIMEOUT", "3.0"))
 
 # Resolve repo root -> data/vector_store by default
