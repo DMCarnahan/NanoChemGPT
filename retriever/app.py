@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from pydantic import BaseModel
 from typing import List, Optional, Literal, Dict, Any
-import os, pickle, numpy as np
+import os, pickle, json, logging, numpy as np
 from pathlib import Path
 from functools import lru_cache
 
@@ -10,9 +10,11 @@ BASE_DIR   = Path(__file__).resolve().parent
 INDEX_DIR  = Path(os.getenv("RETRIEVER_INDEX_DIR", BASE_DIR / "index")).resolve()
 TFIDF_PATH = (INDEX_DIR / "tfidf.pkl").resolve()
 EMBED_PATH = (INDEX_DIR / "embed.pkl").resolve()
+_TFIDF = {}
 
 app = FastAPI(title="Nanochem Retriever (Hybrid)", version="1.2.0")
 
+logger = logging.getLogger(__name__)
 # ---------- Schemas ----------
 class SearchRequest(BaseModel):
     query: str
@@ -35,41 +37,26 @@ class SearchResponse(BaseModel):
 
 # ---------- Loaders ----------
 @lru_cache(maxsize=1)
-def _load_tfidf() -> Dict[str, Any]:
-    """Load the TF-IDF index from disk."""
-    print(f"[retriever] TFIDF_PATH={TFIDF_PATH} exists={TFIDF_PATH.exists()}")
-    if not TFIDF_PATH.exists():
-        raise RuntimeError(
-            f"TF-IDF index missing at {TFIDF_PATH}. "
-            f"Build it or set RETRIEVER_INDEX_DIR to the folder containing tfidf.pkl."
-        )
-    with open(TFIDF_PATH, "rb") as f:
-        store = pickle.load(f)
 
-    # Layout A: matrix style
-    if {"vectorizer", "matrix"} <= set(store.keys()):
-        vec   = store["vectorizer"]
-        X     = store["matrix"]
-        metas = store.get("metas")
-        texts = store.get("texts")
-        if metas is None or texts is None:
-            rows = store.get("rows", [])
-            if rows and not texts:
-                texts = [r.get("text", "") for r in rows]
-            if rows and not metas:
-                metas = rows
-        return {"kind": "matrix", "vectorizer": vec, "matrix": X, "metas": metas, "texts": texts}
+def _load_tfidf():
+    try:
+        V = load("retriever/index/vectorizer.joblib")
+        X = sparse.load_npz("retriever/index/tfidf.npz")
+        ids = json.loads(Path("retriever/index/meta.json").read_text())["ids"]
+        _TFIDF.update(dict(vec=V, X=X, ids=ids))
+        logger.info("[retriever] TF-IDF loaded: docs=%d, terms=%d", X.shape[0], X.shape[1])
+    except Exception as e:
+        logger.warning("[retriever] TF-IDF not available: %s", e)
 
-    # Layout B: NN style
-    if {"rows", "vec", "nn"} <= set(store.keys()):
-        rows = store["rows"]
-        vec  = store["vec"]
-        nn   = store["nn"]
-        texts = [r.get("text", "") for r in rows]
-        metas = rows
-        return {"kind": "nn", "rows": rows, "vec": vec, "nn": nn, "metas": metas, "texts": texts}
-
-    raise RuntimeError(f"Unrecognized TF-IDF format keys: {list(store.keys())}")
+def tfidf_search(q: str, k: int = 8):
+    if not _TFIDF:
+        _load_tfidf()
+    if not _TFIDF:
+        return []
+    qv = _TFIDF["vec"].transform([q])
+    scores = (qv @ _TFIDF["X"].T).toarray()[0]
+    idx = np.argsort(scores)[::-1][:k]
+    return [(_TFIDF["ids"][i], float(scores[i])) for i in idx]
 
 @lru_cache(maxsize=1)
 def _load_embed():
