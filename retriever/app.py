@@ -173,6 +173,23 @@ def _extract_used_ref_indexes(*texts: str) -> list[int]:
                 except Exception:
                     pass
     return sorted(seen)
+def _enforce_numeric_citations(ans: str, refs: list[dict], want_inline: bool) -> tuple[str, list[int]]:
+    """
+    If inline citations are required but missing, and [CTX] is present,
+    substitute [1][CTX] (using the first reference index) as a minimal guard.
+    Returns (possibly modified answer, used_indexes).
+    """
+    if not want_inline or not refs:
+        return ans, []
+    used = [int(m.group(1)) for m in re.finditer(r'\[(\d+)\]', ans)]
+    if used:
+        return ans, sorted(set(used))
+    if "[CTX]" in ans:
+        default_idx = refs[0].get("index", 1) if refs else 1
+        ans = ans.replace("[CTX]", f"[{default_idx}][CTX]")
+        return ans, [default_idx]
+    return ans, []
+
 
 def _format_acs_reference(ref: dict) -> str:
     """Lightweight ACS-ish formatting from a heterogeneous ref dict."""
@@ -487,139 +504,99 @@ def ask():
         return uniq[:6]
 
     def _harvest_reindex(queries: list[str], use_grobid: bool | None = None) -> None:
-
-        import tempfile, os, sys, subprocess, httpx, json
-        from pathlib import Path
-
+        import os, json, subprocess, tempfile, pathlib, sys
         out_dir = "harvester/out_auto"
-        Path(out_dir).mkdir(parents=True, exist_ok=True)
+        pathlib.Path(out_dir).mkdir(parents=True, exist_ok=True)
 
-        # Allow env to control breadth
-        max_results = os.getenv("HARVEST_MAX_RESULTS", "8")
+        # Build a minimal harvester config
         cfg = (
             "out_dir: {od}\n"
             "queries:\n{qs}\n"
             "since_year: 2016\n"
-            f"max_results_per_source: {max_results}\n"
+            "max_results_per_source: 15\n"
             "grobid_url: http://127.0.0.1:8070\n"
-            "unpaywall_email: \"\\"\n"
+            "unpaywall_email: \"\"\n"
         ).format(
             od=out_dir.replace("\\", "/"),
             qs="\n".join(f"- {json.dumps(q)}" for q in queries),
         )
 
+        # Decide whether to use GROBID (default OFF unless explicitly enabled)
         env = os.environ.copy()
-        # Default GROBID OFF unless explicitly enabled
         if use_grobid is None:
-            use_grobid = env.get("USE_GROBID", "0").lower() in {"1", "true", "yes"}
+            use_grobid = env.get("USE_GROBID", "0") not in {"0", "false", "False", ""}
         env["USE_GROBID"] = "1" if use_grobid else "0"
 
-        # Cap BLAS/numexpr threads to avoid OOM / SIGKILL (-9)
-        for var in ("OMP_NUM_THREADS","OPENBLAS_NUM_THREADS","MKL_NUM_THREADS","NUMEXPR_NUM_THREADS"):
-            env.setdefault(var, "1")
+        def _run(cmd: list[str], **kw) -> int:
+            proc = subprocess.run([
+                "python","retriever/index_jsonl.py",
+                "--bundle","harvester/out_auto/bundle.jsonl",
+                "--index_dir","retriever/index",
+                "--text-key","methods",
+            ], check=False)
+            if proc.returncode != 0:
+                print(f"[harvest_reindex] cmd failed: {' '.join(cmd)}", file=sys.stderr)
+                if proc.stdout:
+                    print(proc.stdout, file=sys.stderr)
+                if proc.stderr:
+                    print(proc.stderr, file=sys.stderr)
+            return proc.returncode
 
-        def _stream(cmd: list[str], *, env=None) -> int:
-            print(f"[harvest_reindex] running: {' '.join(cmd)}")
-            p = subprocess.Popen(
-                cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
-                text=True, env=env
-            )
-            assert p.stdout is not None
-            for line in p.stdout:
-                sys.stdout.write(line)
-            rc = p.wait()
-            if rc == 0:
-                print(f"[harvest_reindex] {' '.join(cmd)} OK")
-            else:
-                print(f"[harvest_reindex] {' '.join(cmd)} EXIT {rc}")
-            return rc
-
-        def _file_has_lines(path: str, min_lines: int = 1) -> bool:
-            try:
-                n = 0
-                with open(path, "r", encoding="utf-8") as f:
-                    for _ in f:
-                        n += 1
-                        if n >= min_lines:
-                            return True
-                return False
-            except FileNotFoundError:
-                return False
-
-        # 1) harvest -> out_auto/bundle.jsonl
-        with tempfile.NamedTemporaryFile("w", suffix=".yaml", delete=False) as tf:
-            tf.write(cfg); cfg_path = tf.name
-        rc = _stream(["python","harvester/harvester.py","--config",cfg_path], env=env)
-
-        bundle_raw = f"{out_dir}/bundle.jsonl"
-        partial_ok = _file_has_lines(bundle_raw, 1)
-
-        if rc != 0 and not partial_ok:
-            print("[/ask] harvest step failed; no bundle to use — skipping reindex.", file=sys.stderr)
-            return
-        elif rc != 0 and partial_ok:
-            print("[/ask] harvest exited non-zero; bundle found -> continuing with index.", file=sys.stderr)
-
-        # 2) optional merge/refresh working bundle
-        methods_bundle = "out/bundle_with_methods.jsonl"
-        _stream(["python","scripts/bundle_add_fallback.py", bundle_raw, methods_bundle], env=env)
-
-        # 3) choose bundle & key by inspecting content
-        def _has_text(path: str, source: str) -> bool:
+        def _has_nonempty_lines(path: str) -> bool:
             try:
                 with open(path, "r", encoding="utf-8") as f:
                     for line in f:
-                        line = line.strip()
-                        if not line:
-                            continue
-                        try:
-                            rec = json.loads(line)
-                        except Exception:
-                            continue
-                        if source == "methods":
-                            mps = ((rec.get("extractions") or {}).get("methods_paragraphs")) or []
-                            if any(isinstance(d, dict) and isinstance(d.get("text"), str) and d["text"].strip() for d in mps):
-                                return True
-                        elif source == "sections":
-                            secs = rec.get("sections") or []
-                            if any(isinstance(s, dict) and isinstance(s.get("text"), str) and s["text"].strip() for s in secs):
-                                return True
-                        else:
-                            v = rec.get(source)
-                            if isinstance(v, str) and v.strip():
-                                return True
-                return False
+                        if line.strip():
+                            return True
             except FileNotFoundError:
                 return False
+            return False
 
-        bundle_to_index, text_key = None, None
-        if _has_text(bundle_raw, "methods"):
-            bundle_to_index, text_key = bundle_raw, "methods"
-        elif _has_text(bundle_raw, "sections"):
-            bundle_to_index, text_key = bundle_raw, "sections"
-        elif _has_text(methods_bundle, "text"):
-            bundle_to_index, text_key = methods_bundle, "text"
-        elif _has_text(bundle_raw, "raw"):
-            bundle_to_index, text_key = bundle_raw, "raw"
-
-        if not bundle_to_index:
-            print("[/ask] No documents to index; skipping TF-IDF build.", file=sys.stderr)
+        # 1) harvest -> harvester/out_auto/bundle.jsonl
+        with tempfile.NamedTemporaryFile("w", suffix=".yaml", delete=False) as tf:
+            tf.write(cfg)
+            cfg_path = tf.name
+        if _run(["python", "harvester/harvester.py", "--config", cfg_path]) != 0:
+            print("[/ask] harvest step failed; continuing without reindex.", file=sys.stderr)
             return
+
+        # 2) merge/refresh working bundle (methods-only JSONL)
+        methods_bundle = "out/bundle_with_methods.jsonl"
+        _run(["python", "scripts/bundle_add_fallback.py", f"{out_dir}/bundle.jsonl", methods_bundle])
+
+        # Choose which bundle to index:
+        #  - Prefer methods bundle if it has content
+        #  - Else fall back to the harvester bundle (expects 'raw' text)
+        if _has_nonempty_lines(methods_bundle):
+            bundle_to_index = methods_bundle
+            text_key = "text"
         else:
-            print(f"[/ask] indexing bundle={bundle_to_index} text_key={text_key}")
+            bundle_to_index = f"{out_dir}/bundle.jsonl"
+            text_key = "raw"
 
-        # 4) rebuild index
-        _stream(["python","retriever/index_jsonl.py",
+        # 3) rebuild index (TF-IDF); skip if no docs
+        if not _has_nonempty_lines(bundle_to_index):
+            print("[/ask] No documents to index; skipping TF-IDF build.", file=sys.stderr)
+        else:
+            rc = _run([
+                "python",
+                "retriever/index_jsonl.py",
                 "--bundle", bundle_to_index,
-                "--index_dir","retriever/index",
-                "--text-key", text_key], env=env)
+                "--index_dir", "retriever/index",
+                "--text-key", text_key,
+            ])
+            if rc != 0:
+                print("[/ask] TF-IDF build failed; continuing.", file=sys.stderr)
 
-        # 5) retriever reload (best-effort)
+        # 4) tell retriever to reload (best-effort)
         try:
+            import httpx
             with httpx.Client(timeout=20) as s:
                 s.post("http://127.0.0.1:8000/reload")
         except Exception:
             pass
+
+
     try:
         payload = request.get_json(silent=True) or {}
         user_mode = _s(payload.get("mode") or "").lower().strip()
@@ -775,10 +752,12 @@ def ask():
             " - Do NOT return a step-by-step protocol. Be concise but specific."
         )
         inline_rule = (
-            " - When you pull a fact from any numbered REFERENCE, put its number in square brackets right after the sentence "
-            "(e.g. “hydrothermal at 200 °C [3]”)." if want_inline else
+            " - Every nontrivial claim MUST cite a numbered reference as [n]. "
+            "If the sentence is supported by a CONTEXT snippet, append [CTX] AFTER the [n] (e.g., [3][CTX])."
+            if want_inline else
             " - Inline numeric citations are optional for this request."
         )
+
         acs_rule = (
             " - Write the REFERENCES block in ACS format: author(s), title, journal, year, volume, pages, DOI.\n"
             " - Use inline numeric citations ([n]) for facts from REFERENCES. Do NOT include a REFERENCES block in your answer."
@@ -845,10 +824,18 @@ def ask():
             a, r = _split_reasoning(strip_references_block(_s(raw)))
             answer, rationale = _s(a), _s(r)
 
-        # ---- Build a REFERENCES block of only used items ----
-        used_idxs = _extract_used_ref_indexes(answer, rationale)
-        references_block = _format_references_block_from_used(used_idxs, refs)
+        # ---- Enforce numeric citations if model only used [CTX] ----
+        if want_inline and refs:
+            answer, forced_used = _enforce_numeric_citations(answer, refs, want_inline)
+            if forced_used:
+                # re-compute used indexes including rationale just in case
+                used_idxs = sorted(set(forced_used) | set(_extract_used_ref_indexes(rationale)))
+            else:
+                used_idxs = _extract_used_ref_indexes(answer, rationale)
+        else:
+            used_idxs = _extract_used_ref_indexes(answer, rationale)
 
+        references_block = _format_references_block_from_used(used_idxs, refs)
         # ---- Usage markers (refs + tags) ----
         markers = _extract_used_markers(answer, rationale)
 
@@ -1005,12 +992,6 @@ def api_uploads():
     cur = db.uploads.find({}).sort([("indexed_at", -1), ("ts", -1)]).limit(limit)
     items = [_doc(d) for d in cur]
     return jsonify({"items": items, "limit": limit})
-
-@app.post("/admin/rebuild_mech_index")
-def rebuild_mech_index():
-    from retriever.retriever import build_index, Embedder
-    idx, meta = build_index(Embedder())
-    return {"ok": True, "entries": len(meta)}
 
 @app.errorhandler(400)
 @app.errorhandler(422)
