@@ -1,4 +1,4 @@
-import argparse, json, yaml, httpx, re
+import argparse, json, yaml, httpx, re, os
 from pathlib import Path
 from tqdm import tqdm
 from utils import ensure_dir, write_json, safe_slug
@@ -11,6 +11,26 @@ from jats_utils import jats_to_sections, filter_methods_sections as filt_jats
 from miner.runtime import get_miner, extract_procedure
 
 miner = get_miner()
+
+import logging
+logger = logging.getLogger(__name__)
+
+# Toggle with env: USE_GROBID=0 to bypass
+USE_GROBID = os.getenv("USE_GROBID", "1") not in {"0", "false", "False"}
+try:
+    import fitz 
+except Exception:
+    fitz = None
+
+def extract_plain_text_from_pdf(pdf_bytes: bytes) -> str:
+    if not fitz:
+        logger.warning("PyMuPDF not installed; plain-text fallback disabled.")
+        return ""
+    doc = fitz.open(stream=pdf_bytes, filetype="pdf")
+    try:
+        return "\n".join(page.get_text() for page in doc)
+    finally:
+        doc.close()
 
 ACTION_WORDS = [
     "synthesize", "synthesise", "prepare", "mix", "stir", "disperse", "dissolve", "add",
@@ -38,6 +58,14 @@ TEMP_RE   = re.compile(TEMP_RX, re.I)
 TIME_RE   = re.compile(TIME_RX, re.I)
 SPEED_RE  = re.compile(SPEED_RX, re.I)
 CONC_RE   = re.compile(CONC_RX, re.I)
+
+_SECTION_RX = re.compile(
+    r"(?im)^\s*(materials and methods|methods?|experimental)\b.*?"
+    r"(?=^\s*(results?|discussion|conclusion|acknowledg(e)?ments?)\b|\Z)", re.S | re.M
+)
+def fallback_methods_from_text(plain_text: str) -> str | None:
+    m = _SECTION_RX.search(plain_text or "")
+    return m.group(0).strip() if m else None
 
 def split_paragraphs(section_text: str):
     """Split text into paragraphs, preferring double newlines, else chunk by sentence."""
@@ -140,25 +168,41 @@ def main():
                     all_sections = secs
                     methods = filt_jats(secs)
 
-            # --- Unpaywall -> PDF -> GROBID if still nothing
+            # --- Unpaywall -> PDF -> (GROBID or plain-text fallback)
             if not methods:
+                # Try to improve PDF URL via Unpaywall
                 if rec.get('doi') and cfg.get('unpaywall_email'):
                     up = unpaywall_lookup(rec['doi'], cfg['unpaywall_email'])
                     if up and up.get('oa_locations'):
                         paper['license'] = {'type': (up.get('best_oa_location') or {}).get('license') or 'oa'}
                         loc = up.get('best_oa_location') or up['oa_locations'][0]
                         rec['pdf_url'] = rec.get('pdf_url') or loc.get('url_for_pdf') or loc.get('url')
+
                 if rec.get('pdf_url'):
                     pdf = fetch_pdf(rec['pdf_url'])
                     if pdf:
-                        try:
-                            tei = pdf_to_tei(cfg['grobid_url'], pdf)
-                            secs = tei_to_sections(tei)
-                            if not all_sections:
-                                all_sections = secs
-                            methods = filt_tei(secs)
-                        except Exception as e:
-                            print(f"[GROBID] Error: {e}")
+                        # Preferred path: GROBID (if enabled)
+                        if USE_GROBID:
+                            try:
+                                tei = pdf_to_tei(cfg['grobid_url'], pdf)
+                                secs = tei_to_sections(tei)
+                                if not all_sections:
+                                    all_sections = secs
+                                methods = filt_tei(secs)
+                            except Exception as e:
+                                logger.warning("[GROBID] Error; will try plain-text fallback: %s", e)
+
+                        # Fallback path: plain text from PDF → regex section pick
+                        if not methods:
+                            plain = extract_plain_text_from_pdf(pdf)
+                            if plain:
+                                # Keep a catch-all copy of full text for scoring fallback
+                                if not all_sections:
+                                    all_sections = [{"heading": "fulltext", "text": plain}]
+                                found = fallback_methods_from_text(plain)
+                                if found:
+                                    methods = [{"heading": "(fallback)", "text": found}]
+
 
             # --- Fallback: pick top-scoring procedural paragraphs if still empty
             if not methods and all_sections:
