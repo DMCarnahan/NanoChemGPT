@@ -505,7 +505,7 @@ def ask():
 
     def _harvest_reindex(queries: list[str], use_grobid: bool | None = None) -> None:
         import os, json, subprocess, tempfile, pathlib, sys
-        out_dir = "harvester/out_auto"
+        out_dir = "harvester/out"
         pathlib.Path(out_dir).mkdir(parents=True, exist_ok=True)
 
         # Build a minimal harvester config
@@ -530,7 +530,7 @@ def ask():
         def _run(cmd: list[str], **kw) -> int:
             proc = subprocess.run([
                 "python","retriever/index_jsonl.py",
-                "--bundle","harvester/out_auto/bundle.jsonl",
+                "--bundle","/out/bundle.jsonl",
                 "--index_dir","retriever/index",
                 "--text-key","methods",
             ], check=False)
