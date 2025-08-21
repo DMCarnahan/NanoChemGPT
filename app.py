@@ -88,7 +88,8 @@ def maybe_build_duckdb():
         con = duckdb.connect(db_path)
         con.execute(f"CREATE TABLE {tbl} AS SELECT * FROM read_parquet('{parq_glob}', hive_partitioning=1)")
         con.execute("CHECKPOINT")
-        rows = con.execute(f"SELECT COUNT(*) FROM {tbl}").fetchone()[0]
+        result = con.execute(f"SELECT COUNT(*) FROM {tbl}").fetchone()
+        rows = result[0] if result else 0
         con.close()
         app.logger.info("[duckdb-init] created %s rows=%d table=%s", db_path, rows, tbl)
     except Exception as e:
@@ -351,7 +352,7 @@ def upload():
     f = request.files.get("file")
     if not f or f.filename == "":
         abort(400, "No file uploaded.")
-    fname = secure_filename(f.filename)
+    fname = secure_filename(f.filename or "")
     lower = fname.lower()
 
     dest = LOOKUP_UPLOAD_DIR / fname if lower.endswith((".parquet", ".csv", ".tsv", ".xlsx")) else (UPLOADS_DIR / fname)
@@ -597,12 +598,14 @@ def ask():
         if not bundle_to_index:
             print("[/ask] No documents to index; skipping TF-IDF build.", file=sys.stderr)
         else:
-            rc = _run([
+            cmd = [
                 "python", "retriever/index_jsonl.py",
                 "--bundle", bundle_to_index,
-                "--index_dir", "retriever/index",
-                "--text-key", text_key,
-            ])
+                "--index_dir", "retriever/index"
+            ]
+            if text_key:
+                cmd += ["--text-key", text_key]
+            rc = _run(cmd)
             if rc != 0:
                 print("[/ask] TF-IDF build failed; continuing.", file=sys.stderr)
 
@@ -683,7 +686,7 @@ def ask():
             kb_docs = []
             if kb_ids:
                 try:
-                    kb_docs = kb_fetch(kb_ids) or []
+                    kb_docs = [kb_fetch(kbid) for kbid in kb_ids if kbid] if kb_ids else []
                 except Exception as e:
                     print("[/ask] kb_fetch failed:", e)
                     kb_docs = []
@@ -729,72 +732,93 @@ def ask():
             except Exception as e:
                 print("[/ask] auto-harvest failed:", e)
 
-        # ---- Build WEB context (actual text from hits)
-        web_ctx_parts = []
-        for i, h in enumerate(hits[:6], start=1):
-            title = _s(h.get("title") or h.get("paper_id") or "(web)")
-            txt = _s(h.get("text") or "")
-            if not txt:
-                continue
-            # bracket an id header so the fallback can cite something deterministic
-            web_ctx_parts.append(f"[W{i}] {title}\n{txt[:3000]}")
-        web_ctx = "\n\n".join(web_ctx_parts)
+        # ---- Build WEB context with numbers that MATCH REFERENCES ----
+        selected_hits = [h for h in hits if _s(h.get("text"))][:6]  # only hits with text
+        web_ctx_parts: list[str] = []
+        refs: list[dict] = []       # combined (web first, then KB)
+        seen_keys: set[str] = set() # to dedupe when merging KB
 
-        # ---- Convert hits to web_refs ----
-        web_refs = []
-        for h in hits:
-            web_refs.append({
-                "title": _s(h.get("title") or "(no title)"),
+        def _normkey_ref(title: str, doi: str) -> str:
+            return (doi or title).strip().lower()
+
+        # First: number the WEB hits [1..m] and build context with the SAME numbers
+        for i, h in enumerate(selected_hits, start=1):
+            title = _s(h.get("title") or h.get("paper_id") or "(web)")
+            txt   = _s(h.get("text"))
+            doi   = _s(h.get("paper_id")) if _s(h.get("paper_id")).startswith("10.") else ""
+            url   = _s(h.get("url"))
+            refs.append({
+                "index": i,
+                "title": title,
                 "year": "",
-                "url": _s(h.get("url") or ""),
-                "doi": _s(h.get("paper_id") if (h.get("paper_id","").startswith("10.")) else ""),
+                "url": url,
+                "doi": doi,
                 "authors": h.get("authors", []),
                 "biblio": {},
+                "_normkey": _normkey_ref(title, doi),
             })
+            web_ctx_parts.append(f"[{i}] {title}\n{txt[:3000]}")
+            seen_keys.add(_normkey_ref(title, doi))
 
-        # ----------------- Deduplicate & enumerate references -----------------
-        def _normkey(r: dict) -> str:
-            return (r.get("doi") or r.get("title") or "").strip().lower()
+            web_ctx = "\n\n".join(web_ctx_parts)
 
-        refs = []
-        seen = set()
-        for r in web_refs + kb_refs_raw:
-            key = _normkey(r)
-            if key and key not in seen:
-                refs.append(r)
-                seen.add(key)
+            # Keep a web_refs list for downstream counts/logging compatibility
+            web_refs = refs[:]
+            web_refs_count = len(web_refs)
 
-        refs_prompt = "\n".join(
-            f"[{i+1}] {(r.get('title') or '(no title)')} ({r.get('year') or ''}) — {_ref_url(r)}"
-            for i, r in enumerate(refs)
-        ).strip()
+            # ---- Merge KB refs AFTER web refs, avoiding duplicates by doi/title (keep order) ----
+            for r in kb_refs_raw:
+                title = _s(r.get("title") or "(KB item)")
+                doi   = _s(r.get("doi") or "")
+                key   = _normkey_ref(title, doi)
+                if key and key not in seen_keys:
+                    r = dict(r)
+                    r["index"] = len(refs) + 1
+                    r["_normkey"] = key
+                    refs.append(r)
+                    seen_keys.add(key)
 
-        # ----------------- Compose CONTEXT -----------------
-        ctx_parts = []
-        if uploads_ctx: ctx_parts.append("<<<CTX_UPLOADS>>>\n" + uploads_ctx)
-        if table_ctx:   ctx_parts.append("<<<CTX_TABLE>>>\n" + table_ctx)
-        if kb_ctx:      ctx_parts.append("<<<CTX_KB>>>\n" + kb_ctx)
-        if web_ctx:     ctx_parts.append("<<<CTX_WEB>>>\n" + web_ctx)  # ← add harvested/retrieved paragraphs
-        context_joined = "\n\n---\n\n".join(ctx_parts).strip()
+            # ---- Build the printable REFERENCES prompt (ordered) ----
+            def _ref_url(r: dict) -> str:
+                if r.get("url"): return r["url"]
+                if r.get("doi"): return f"https://doi.org/{r['doi']}"
+                return ""
 
-        # ----------------- Prompting -----------------
+            refs_prompt = "\n".join(
+                f"[{r['index']}] {r.get('title') or '(no title)'} "
+                f"({r.get('year') or ''}) — {_ref_url(r)}".strip()
+                for r in refs
+            )
+
+            # ----------------- Compose CONTEXT -----------------
+            ctx_parts = []
+            if uploads_ctx: ctx_parts.append("<<<CTX_UPLOADS>>>\n" + uploads_ctx)
+            if table_ctx:   ctx_parts.append("<<<CTX_TABLE>>>\n" + table_ctx)
+            if kb_ctx:      ctx_parts.append("<<<CTX_KB>>>\n" + kb_ctx)
+            if web_ctx:     ctx_parts.append("<<<CTX_WEB>>>\n" + web_ctx)  # ← numbered [n] snippets aligned to REFERENCES
+            context_joined = "\n\n---\n\n".join(ctx_parts).strip()
+
+                # ----------------- Prompting -----------------
         robot_rules = (
             "Return a discrete lab protocol with exact quantities on a small scale (~0.5 mmol Co):\n"
             " - Include specific masses (mg) or mmol for reagents; volumes (mL) for liquids.\n"
             " - Specify temperatures (°C), ramp rates (°C/min), and hold times (min/h). Avoid using inert atmospheres. If a source you used requires an unusual atmosphere, describe it explicitly.\n"
             " - Include workup and purification (quench, washing/centrifugation, drying) with volumes.\n"
             " - No placeholders (avoid “e.g.”/“or”). Be decisive.\n"
+            " - If you cannot find an applicable reference number, write [GEN] explicitly for that sentence.\n"
             " - Output only the final protocol in markdown. Do not include any fenced blocks named reason or rationale in the answer. Put all reasoning in the separate rationale channel."
         )
         reasoning_rules = (
             " - Provide a mechanistic explanation and design considerations for the target.\n"
             " - Focus on: nucleation vs growth; ligand/solvent coordination; surfactants; reduction/oxidation; temperature profile and morphology control; atmosphere; pitfalls; safety.\n"
-            " - Do NOT return a step-by-step protocol. Be concise but specific."
+            " - Do NOT return a step-by-step protocol. Be concise but specific.\n"
+            " - If you cannot find an applicable reference number, write [GEN] explicitly for that sentence."
+
         )
         inline_rule = (
-            " - When you pull a fact from any numbered REFERENCE, put its number in square brackets right after the sentence "
-            "(e.g. “hydrothermal at 200 °C [3]”)." if want_inline else
-            " - Inline numeric citations are optional for this request."
+                " - Every nontrivial claim MUST cite a numbered reference as [n].\n"
+                " - If the sentence is supported by a CONTEXT snippet, append [CTX] AFTER the [n], i.e. “... [3][CTX]”.\n"
+                if want_inline else " - Inline numeric citations are optional for this request."
         )
         acs_rule = (
             " - Write the REFERENCES block in ACS format: author(s), title, journal, year, volume, pages, DOI.\n"
@@ -1035,12 +1059,6 @@ def api_uploads():
     items = [_doc(d) for d in cur]
     return jsonify({"items": items, "limit": limit})
 
-@app.post("/admin/rebuild_mech_index")
-def rebuild_mech_index():
-    from retriever.retriever import build_index, Embedder
-    idx, meta = build_index(Embedder())
-    return {"ok": True, "entries": len(meta)}
-
 @app.errorhandler(400)
 @app.errorhandler(422)
 @app.errorhandler(500)
@@ -1058,7 +1076,7 @@ def upload_builtin():
         return jsonify({"ok": False, "error": "No files uploaded"}), 400
     saved = []
     for f in files:
-        fname = secure_filename(f.filename)
+        fname = secure_filename(f.filename or "")
         dest = BUILTIN_DIR / fname
         dest.parent.mkdir(parents=True, exist_ok=True)
         f.save(dest)
