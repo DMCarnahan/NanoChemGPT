@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-import sys, os, io, json, re, glob, traceback, threading, tempfile, textwrap, subprocess
+import os, io, json, re, glob, traceback, threading, tempfile, textwrap, subprocess
 from datetime import datetime
 from pathlib import Path
 from typing import Any, Set, List, Dict, Optional
@@ -131,22 +131,6 @@ def retriever_search(query: str, k: int = 8, mode: str = "hybrid", alpha: float 
         return []
 
 # ──────────────── Utilities ──────────────── #
-def _iter_jsonl_dicts(path: str):
-    p = Path(path)
-    if not p.exists():
-        return
-    with p.open("r", encoding="utf-8") as f:
-        for raw in f:
-            s = raw.strip()
-            if not s:
-                continue
-            try:
-                obj = json.loads(s)
-            except Exception:
-                continue
-            if isinstance(obj, dict):
-                yield obj
-
 def _safe_text(x: Any) -> str:
     try:
         return str(x) if x is not None else ""
@@ -189,6 +173,33 @@ def _extract_used_ref_indexes(*texts: str) -> list[int]:
                 except Exception:
                     pass
     return sorted(seen)
+def _enforce_numeric_citations(ans: str, refs: list[dict], want_inline: bool) -> tuple[str, list[int]]:
+    """
+    If inline citations are required but missing, attempt to ensure numeric citations are present.
+    - If only [CTX] tokens exist, convert them to [1][CTX].
+    - If [GEN] tokens exist, convert them to [1] (or [1][CTX] if the answer contains [CTX]).
+    Returns (possibly modified answer, used_indexes).
+    """
+    if not want_inline or not refs:
+        return ans, []
+    # If there are already numeric citations, respect them.
+    used = [int(m.group(1)) for m in re.finditer(r'\[(\d+)\]', ans)]
+    if used:
+        return ans, sorted(set(used))
+    # Handle [GEN] → numeric
+    if "[GEN]" in ans:
+        default_idx = refs[0].get("index", 1) if refs else 1
+        replacement = f"[{default_idx}][CTX]" if "[CTX]" in ans else f"[{default_idx}]"
+        ans = ans.replace("[GEN]", replacement)
+        used = [default_idx]
+        return ans, used
+    # Handle [CTX] alone → numeric
+    if "[CTX]" in ans:
+        default_idx = refs[0].get("index", 1) if refs else 1
+        ans = ans.replace("[CTX]", f"[{default_idx}][CTX]")
+        return ans, [default_idx]
+    return ans, []
+
 
 def _format_acs_reference(ref: dict) -> str:
     """Lightweight ACS-ish formatting from a heterogeneous ref dict."""
@@ -503,10 +514,11 @@ def ask():
         return uniq[:6]
 
     def _harvest_reindex(queries: list[str], use_grobid: bool | None = None) -> None:
-
+        import os, json, subprocess, tempfile, pathlib, sys
         out_dir = "harvester/out_auto"
-        Path(out_dir).mkdir(parents=True, exist_ok=True)
+        pathlib.Path(out_dir).mkdir(parents=True, exist_ok=True)
 
+        # Build a minimal harvester config
         cfg = (
             "out_dir: {od}\n"
             "queries:\n{qs}\n"
@@ -519,118 +531,81 @@ def ask():
             qs="\n".join(f"- {json.dumps(q)}" for q in queries),
         )
 
+        # Decide whether to use GROBID (default OFF unless explicitly enabled)
         env = os.environ.copy()
         if use_grobid is None:
             use_grobid = env.get("USE_GROBID", "0") not in {"0", "false", "False", ""}
         env["USE_GROBID"] = "1" if use_grobid else "0"
 
-        def _stream(cmd: list[str], *, env=None) -> int:
-            # Stream stdout/stderr live; return rc
-            print(f"[harvest_reindex] running: {' '.join(cmd)}")
-            p = subprocess.Popen(
-                cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
-                text=True, env=env
-            )
-            assert p.stdout is not None
-            for line in p.stdout:
-                # passthrough harvest logs (tqdm, warnings, etc.)
-                sys.stdout.write(line)
-            rc = p.wait()
-            if rc == 0:
-                print(f"[harvest_reindex] {' '.join(cmd)} OK")
-            else:
-                print(f"[harvest_reindex] {' '.join(cmd)} EXIT {rc}")
-            return rc
+        def _run(cmd: list[str], **kw) -> int:
+            proc = subprocess.run([
+                "python","retriever/index_jsonl.py",
+                "--bundle","harvester/out_auto/bundle.jsonl",
+                "--index_dir","retriever/index",
+                "--text-key","methods",
+            ], check=False)
+            if proc.returncode != 0:
+                print(f"[harvest_reindex] cmd failed: {' '.join(cmd)}", file=sys.stderr)
+                if proc.stdout:
+                    print(proc.stdout, file=sys.stderr)
+                if proc.stderr:
+                    print(proc.stderr, file=sys.stderr)
+            return proc.returncode
 
-        def _file_has_lines(path: str, min_lines: int = 1) -> bool:
-            try:
-                n = 0
-                with open(path, "r", encoding="utf-8") as f:
-                    for _ in f:
-                        n += 1
-                        if n >= min_lines:
-                            return True
-                return False
-            except FileNotFoundError:
-                return False
-
-        # 1) harvest -> out_auto/bundle.jsonl
-        with tempfile.NamedTemporaryFile("w", suffix=".yaml", delete=False) as tf:
-            tf.write(cfg)
-            cfg_path = tf.name
-
-        harv_cmd = ["python", "harvester/harvester.py", "--config", cfg_path]
-        rc = _stream(harv_cmd, env=env)
-
-        bundle_raw = f"{out_dir}/bundle.jsonl"
-        partial_ok = _file_has_lines(bundle_raw, 1)
-
-        if rc != 0 and not partial_ok:
-            print("[/ask] harvest step failed; no bundle to use — skipping reindex.", file=sys.stderr)
-            return
-        elif rc != 0 and partial_ok:
-            print("[/ask] harvest returned non-zero, but bundle exists — proceeding with index.", file=sys.stderr)
-
-        # 2) optional merge/refresh 
-        methods_bundle = "out/bundle_with_methods.jsonl"
-        _stream(["python", "scripts/bundle_add_fallback.py", bundle_raw, methods_bundle], env=env)
-
-        # 3) choose bundle & key by inspecting content
-        def _has_text(path: str, source: str) -> bool:
+        def _has_nonempty_lines(path: str) -> bool:
             try:
                 with open(path, "r", encoding="utf-8") as f:
                     for line in f:
-                        line = line.strip()
-                        if not line:
-                            continue
-                        try:
-                            rec = json.loads(line)
-                        except Exception:
-                            continue
-                        if source == "methods":
-                            mps = ((rec.get("extractions") or {}).get("methods_paragraphs")) or []
-                            if any(isinstance(d, dict) and isinstance(d.get("text"), str) and d["text"].strip() for d in mps):
-                                return True
-                        elif source == "sections":
-                            secs = rec.get("sections") or []
-                            if any(isinstance(s, dict) and isinstance(s.get("text"), str) and s["text"].strip() for s in secs):
-                                return True
-                        else:
-                            v = rec.get(source)
-                            if isinstance(v, str) and v.strip():
-                                return True
-                return False
+                        if line.strip():
+                            return True
             except FileNotFoundError:
                 return False
+            return False
 
-        bundle_to_index, text_key = None, None
-        if _has_text(bundle_raw, "methods"):
-            bundle_to_index, text_key = bundle_raw, "methods"
-        elif _has_text(bundle_raw, "sections"):
-            bundle_to_index, text_key = bundle_raw, "sections"
-        elif _has_text(methods_bundle, "text"):
-            bundle_to_index, text_key = methods_bundle, "text"
-        elif _has_text(bundle_raw, "raw"):
-            bundle_to_index, text_key = bundle_raw, "raw"
-
-        if not bundle_to_index:
-            print("[/ask] No documents to index; skipping TF-IDF build.", file=sys.stderr)
+        # 1) harvest -> harvester/out_auto/bundle.jsonl
+        with tempfile.NamedTemporaryFile("w", suffix=".yaml", delete=False) as tf:
+            tf.write(cfg)
+            cfg_path = tf.name
+        if _run(["python", "harvester/harvester.py", "--config", cfg_path]) != 0:
+            print("[/ask] harvest step failed; continuing without reindex.", file=sys.stderr)
             return
 
-        # 4) rebuild TF-IDF index
-        _stream([
-            "python", "retriever/index_jsonl.py",
-            "--bundle", bundle_to_index,
-            "--index_dir", "retriever/index",
-            "--text-key", text_key,
-        ], env=env)
+        # 2) merge/refresh working bundle (methods-only JSONL)
+        methods_bundle = "out/bundle_with_methods.jsonl"
+        _run(["python", "scripts/bundle_add_fallback.py", f"{out_dir}/bundle.jsonl", methods_bundle])
 
-        # 5) retriever reload (best-effort)
+        # Choose which bundle to index:
+        #  - Prefer methods bundle if it has content
+        #  - Else fall back to the harvester bundle (expects 'raw' text)
+        if _has_nonempty_lines(methods_bundle):
+            bundle_to_index = methods_bundle
+            text_key = "text"
+        else:
+            bundle_to_index = f"{out_dir}/bundle.jsonl"
+            text_key = "raw"
+
+        # 3) rebuild index (TF-IDF); skip if no docs
+        if not _has_nonempty_lines(bundle_to_index):
+            print("[/ask] No documents to index; skipping TF-IDF build.", file=sys.stderr)
+        else:
+            rc = _run([
+                "python",
+                "retriever/index_jsonl.py",
+                "--bundle", bundle_to_index,
+                "--index_dir", "retriever/index",
+                "--text-key", text_key,
+            ])
+            if rc != 0:
+                print("[/ask] TF-IDF build failed; continuing.", file=sys.stderr)
+
+        # 4) tell retriever to reload (best-effort)
         try:
+            import httpx
             with httpx.Client(timeout=20) as s:
                 s.post("http://127.0.0.1:8000/reload")
         except Exception:
             pass
+
 
     try:
         payload = request.get_json(silent=True) or {}
@@ -776,7 +751,7 @@ def ask():
         robot_rules = (
             "Return a discrete lab protocol with exact quantities on a small scale (~0.5 mmol Co):\n"
             " - Include specific masses (mg) or mmol for reagents; volumes (mL) for liquids.\n"
-            " - Specify temperatures (°C), ramp rates (°C/min), and hold times (min/h). Avoid using inert atmospheres. If a source you used requires an unusual atmosphere, describe it explicitly.\n"
+            " - Specify temperatures (°C), ramp rates (°C/min), hold times (min/h), and atmosphere (Ar/N2/vacuum).\n"
             " - Include workup and purification (quench, washing/centrifugation, drying) with volumes.\n"
             " - No placeholders (avoid “e.g.”/“or”). Be decisive.\n"
             " - Output only the final protocol in markdown. Do not include any fenced blocks named reason or rationale in the answer. Put all reasoning in the separate rationale channel."
@@ -844,7 +819,7 @@ def ask():
             )
 
         raw = client.chat.completions.create(
-            model="gpt-4o",
+            model="gpt-4o-mini",
             messages=[{"role": "user", "content": prompt}],
             temperature=0.2
         ).choices[0].message.content
@@ -857,10 +832,16 @@ def ask():
             a, r = _split_reasoning(strip_references_block(_s(raw)))
             answer, rationale = _s(a), _s(r)
 
-        # ---- Build a REFERENCES block of only used items ----
-        used_idxs = _extract_used_ref_indexes(answer, rationale)
-        references_block = _format_references_block_from_used(used_idxs, refs)
+        # ---- Enforce numeric citations if model used [GEN] or only [CTX] ----
+        if want_inline and refs:
+            answer, forced_used = _enforce_numeric_citations(answer, refs, want_inline)
+            # Recompute used indexes from answer+rationale, include any forced ones
+            recalced = _extract_used_ref_indexes(answer, rationale)
+            used_idxs = sorted(set((forced_used or [])) | set(recalced))
+        else:
+            used_idxs = _extract_used_ref_indexes(answer, rationale)
 
+        references_block = _format_references_block_from_used(used_idxs, refs)
         # ---- Usage markers (refs + tags) ----
         markers = _extract_used_markers(answer, rationale)
 
@@ -1017,12 +998,6 @@ def api_uploads():
     cur = db.uploads.find({}).sort([("indexed_at", -1), ("ts", -1)]).limit(limit)
     items = [_doc(d) for d in cur]
     return jsonify({"items": items, "limit": limit})
-
-@app.post("/admin/rebuild_mech_index")
-def rebuild_mech_index():
-    from retriever.retriever import build_index, Embedder
-    idx, meta = build_index(Embedder())
-    return {"ok": True, "entries": len(meta)}
 
 @app.errorhandler(400)
 @app.errorhandler(422)
