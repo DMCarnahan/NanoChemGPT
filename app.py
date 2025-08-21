@@ -1,6 +1,7 @@
+# NOTE: Auto-patch failed: start token not found
 from __future__ import annotations
 
-import os, io, json, re, glob, traceback, threading, tempfile, textwrap, subprocess, sys, math
+import os, io, json, re, glob, traceback, threading, tempfile, textwrap, subprocess
 from datetime import datetime
 from pathlib import Path
 from typing import Any, Set, List, Dict, Optional
@@ -88,8 +89,7 @@ def maybe_build_duckdb():
         con = duckdb.connect(db_path)
         con.execute(f"CREATE TABLE {tbl} AS SELECT * FROM read_parquet('{parq_glob}', hive_partitioning=1)")
         con.execute("CHECKPOINT")
-        result = con.execute(f"SELECT COUNT(*) FROM {tbl}").fetchone()
-        rows = result[0] if result else 0
+        rows = con.execute(f"SELECT COUNT(*) FROM {tbl}").fetchone()[0]
         con.close()
         app.logger.info("[duckdb-init] created %s rows=%d table=%s", db_path, rows, tbl)
     except Exception as e:
@@ -119,7 +119,6 @@ load_dotenv()
 _no_proxy = httpx.Client(trust_env=False, timeout=120.0)
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "")
 client = OpenAI(api_key=OPENAI_API_KEY, http_client=_no_proxy) if OPENAI_API_KEY else None
-OPENAI_MODEL = os.getenv("OPENAI_MODEL", "gpt-4o")
 
 RETRIEVER_URL = os.getenv("RETRIEVER_URL", "http://localhost:8000")
 
@@ -302,27 +301,6 @@ def cached_lookup_query(q):
             return None
     return None
 
-# ──────────────── Simple fallback “LLM” (no API key) ──────────────── #
-def _fallback_answer(question: str, context: str, refs_prompt: str, mode: str) -> str:
-    # Extremely conservative, but keeps the pipeline testable without an API key.
-    # It just echoes a structured skeleton with snippets and reference numbers present.
-    snippets = []
-    for m in re.finditer(r"^\[(.+?)\]\s*(.+?)$", context, flags=re.M):
-        pid = m.group(1)
-        para = m.group(2)[:400]
-        snippets.append(f"- {para} [{pid}]")
-        if len(snippets) >= 5: break
-    joined = "\n".join(snippets) if snippets else "- (no grounded snippets)"
-    if mode == "reasoning":
-        return f"## Mechanistic reasoning\n{joined}\n"
-    else:
-        return (
-            "## Synthesis Protocol:\n"
-            "1. **Hardware & Glassware**:\n[]\n"
-            "2. **Materials**:\n[]\n"
-            "3. **Procedure**\n[]\n"
-        )
-
 # ──────────────── Routes ──────────────── #
 @app.get("/health")
 def health():
@@ -352,7 +330,7 @@ def upload():
     f = request.files.get("file")
     if not f or f.filename == "":
         abort(400, "No file uploaded.")
-    fname = secure_filename(f.filename or "")
+    fname = secure_filename(f.filename)
     lower = fname.lower()
 
     dest = LOOKUP_UPLOAD_DIR / fname if lower.endswith((".parquet", ".csv", ".tsv", ".xlsx")) else (UPLOADS_DIR / fname)
@@ -447,16 +425,28 @@ def _process_pdf_job(jid: str, path: Path, filename: str):
                 pass
         _set_job(jid, status="error", error=str(e))
 
+# ---- Search API ---- #
+# @app.post("/search")
+# def search_route():
+#     payload = request.get_json(silent=True) or {}
+#     q = (payload.get("q") or payload.get("query") or "").strip()
+#     n = int(payload.get("n") or 6)
+#     if not q:
+#         abort(400, "Missing 'q' (query).")
+#     refs = basic_search(q, n)
+#     return jsonify({"results": refs})
+
 # ---- Ask ---- #
 @app.post("/ask")
 def ask():
     """
-    Unified Q&A endpoint:
-      • Classifies intent.
-      • Pulls context from uploads, DuckDB, KB, and WEB (retriever).
-      • Judges sufficiency on hits; if thin and allowed, auto-harvest → index → reload → re-search.
-      • Builds numbered REFERENCES; asks the LLM to cite with [n] and tag [CTX] when using context.
-      • Extracts used citations and returns an ACS-style block of only used refs.
+    Unified Q&A endpoint that:
+      • Classifies intent (classify_intent) to steer behavior (mode, search breadth).
+      • Pulls context from uploads, DuckDB, and **KB** (kb_search/kb_fetch).
+      • Builds a numbered REFERENCES list (web + KB), asks the LLM to cite with [n].
+      • Extracts **used** citation indexes and returns only those in an ACS-style block.
+      • Computes usage markers via _extract_used_markers.
+      • Judges sufficiency and, if thin, optionally harvests more data, reindexes, reloads retriever, and retries once.
     """
     # ----------------- tiny helpers -----------------
     def _s(x):
@@ -486,15 +476,15 @@ def ask():
         if r.get("doi"): return f"https://doi.org/{r['doi']}"
         return ""
 
-    # --------------- on-demand harvest helpers ---------------
+    # --------------- on-demand harvest helpers (inner) ---------------
     def _needs_more(hits: list[dict]) -> bool:
         if not hits:
             return True
-        uniq = {h.get("paper_id") or h.get("id") for h in hits if (h.get("paper_id") or h.get("id"))}
+        uniq = {h.get("paper_id") for h in hits if h.get("paper_id")}
         if len(uniq) < 2:
             return True
-        sims = [float(h.get("sim", h.get("score", 0.0)) or 0.0) for h in hits[:3]]
-        if sims and sum(sims) / len(sims) < 0.18:
+        scores = [float(h.get("score", 0.0)) for h in hits[:3]]
+        if scores and sum(scores) / len(scores) < 0.18:
             return True
         total_ctx = sum(len(_s(h.get("text",""))) for h in hits)
         return total_ctx < 800
@@ -514,9 +504,12 @@ def ask():
         return uniq[:6]
 
     def _harvest_reindex(queries: list[str], use_grobid: bool | None = None) -> None:
-        out_dir = "harvester/out_auto"
-        Path(out_dir).mkdir(parents=True, exist_ok=True)
+        import os, json, subprocess, tempfile, pathlib, sys
 
+        out_dir = "harvester/out_auto"
+        pathlib.Path(out_dir).mkdir(parents=True, exist_ok=True)
+
+        # Build a minimal harvester config (YAML)
         cfg = (
             "out_dir: {od}\n"
             "queries:\n{qs}\n"
@@ -529,35 +522,26 @@ def ask():
             qs="\n".join(f"- {json.dumps(q)}" for q in queries),
         )
 
+        # Decide whether to use GROBID (default OFF unless explicitly enabled)
         env = os.environ.copy()
         if use_grobid is None:
             use_grobid = env.get("USE_GROBID", "0") not in {"0", "false", "False", ""}
         env["USE_GROBID"] = "1" if use_grobid else "0"
 
         def _run(cmd: list[str]) -> int:
+            """Run a command, log failures, and return the returncode."""
             proc = subprocess.run(cmd, capture_output=True, text=True, env=env)
             if proc.returncode != 0:
                 print(f"[harvest_reindex] cmd failed: {' '.join(cmd)}", file=sys.stderr)
-                if proc.stdout: print(proc.stdout, file=sys.stderr)
-                if proc.stderr: print(proc.stderr, file=sys.stderr)
-            else:
-                print(f"[harvest_reindex] {' '.join(cmd)} OK")
+                if proc.stdout:
+                    print(proc.stdout, file=sys.stderr)
+                if proc.stderr:
+                    print(proc.stderr, file=sys.stderr)
             return proc.returncode
 
-        # 1) harvest -> out_auto/bundle.jsonl
-        with tempfile.NamedTemporaryFile("w", suffix=".yaml", delete=False) as tf:
-            tf.write(cfg); cfg_path = tf.name
-        rc = _run(["python", "harvester/harvester.py", "--config", cfg_path])
-        if rc != 0:
-            print("[/ask] harvest step failed; continuing without reindex.", file=sys.stderr)
-            return
-
-        # 2) optional merge with fallback (keep if you use it)
-        methods_bundle = "out/bundle_with_methods.jsonl"
-        _run(["python", "scripts/bundle_add_fallback.py", f"{out_dir}/bundle.jsonl", methods_bundle])
-
-        # 3) choose bundle & key
         def _has_text(path: str, source: str) -> bool:
+            """Quick probe for text under a given source in a JSONL file."""
+            import json
             try:
                 with open(path, "r", encoding="utf-8") as f:
                     for line in f:
@@ -584,8 +568,25 @@ def ask():
             except FileNotFoundError:
                 return False
 
+        # 1) harvest -> harvester/out_auto/bundle.jsonl
+        with tempfile.NamedTemporaryFile("w", suffix=".yaml", delete=False) as tf:
+            tf.write(cfg)
+            cfg_path = tf.name
+
+        rc = _run(["python", "harvester/harvester.py", "--config", cfg_path])
+        if rc != 0:
+            print("[/ask] harvest step failed; continuing without reindex.", file=sys.stderr)
+            return
+
+        # 2) merge/refresh working bundle with methods fallback (optional, keep if you use it)
+        methods_bundle = "out/bundle_with_methods.jsonl"
+        _run(["python", "scripts/bundle_add_fallback.py", f"{out_dir}/bundle.jsonl", methods_bundle])
+
+        # 3) Choose the bundle + source to index (robust order)
         bundle_to_index, text_key = None, None
         harv_bundle = f"{out_dir}/bundle.jsonl"
+
+        # Prefer methods from the harvester bundle directly (your indexer now supports nested 'methods')
         if _has_text(harv_bundle, "methods"):
             bundle_to_index, text_key = harv_bundle, "methods"
         elif _has_text(harv_bundle, "sections"):
@@ -598,19 +599,18 @@ def ask():
         if not bundle_to_index:
             print("[/ask] No documents to index; skipping TF-IDF build.", file=sys.stderr)
         else:
-            cmd = [
+            rc = _run([
                 "python", "retriever/index_jsonl.py",
                 "--bundle", bundle_to_index,
-                "--index_dir", "retriever/index"
-            ]
-            if text_key:
-                cmd += ["--text-key", text_key]
-            rc = _run(cmd)
+                "--index_dir", "retriever/index",
+                "--text-key", text_key,
+            ])
             if rc != 0:
                 print("[/ask] TF-IDF build failed; continuing.", file=sys.stderr)
 
-        # 4) retriever reload (best-effort)
+        # 4) Ask the retriever service to reload (best-effort)
         try:
+            import httpx
             with httpx.Client(timeout=20) as s:
                 s.post("http://127.0.0.1:8000/reload")
         except Exception:
@@ -621,12 +621,12 @@ def ask():
         user_mode = _s(payload.get("mode") or "").lower().strip()
         question = _s(payload.get("question")).strip()
         want_inline = bool(payload.get("want_inline_citations", True))
-        allow_fetch = bool(payload.get("allow_fetch", True))  # default True
-        use_grobid = payload.get("use_grobid")  # optional bool
+        allow_fetch = bool(payload.get("allow_fetch", True))  # <-- new flag (default True)
         if not question:
             abort(400, "No question.")
 
         # ----------------- classify intent -----------------
+        intent = None
         try:
             intent = classify_intent(question)
         except Exception as e:
@@ -686,7 +686,7 @@ def ask():
             kb_docs = []
             if kb_ids:
                 try:
-                    kb_docs = [kb_fetch(kbid) for kbid in kb_ids if kbid] if kb_ids else []
+                    kb_docs = kb_fetch(kb_ids) or []
                 except Exception as e:
                     print("[/ask] kb_fetch failed:", e)
                     kb_docs = []
@@ -709,116 +709,71 @@ def ask():
         except Exception as e:
             print("[/ask] KB search failed:", e)
 
-        # ----------------- WEB retriever (initial) -----------------
+        # ----------------- Web/hybrid retriever (initial) -----------------
         hits = retriever_search(question, k=web_k, mode="hybrid", alpha=0.7) or []
 
-        # ---- Judge sufficiency **on hits** (not strings)
-        suff_score, suff_decision, suff_details = 0.0, "mine", {}
-        try:
-            suff_score, suff_decision, suff_details = judge_sufficiency(hits, intent_str)
-        except Exception as e:
-            print("[/ask] judge_sufficiency error:", e)
-
-        # If evidence thin (by judge OR heuristics) and allowed, auto-harvest → reindex → reload → retry once
-        if allow_fetch and (suff_decision == "mine" or _needs_more(hits)):
+        # If evidence thin, optionally auto-harvest -> reindex -> reload -> retry once
+        if allow_fetch and _needs_more(hits):
             try:
-                _harvest_reindex(_expand_queries(question), use_grobid=use_grobid)
+                _harvest_reindex(_expand_queries(question))
                 hits = retriever_search(question, k=web_k, mode="hybrid", alpha=0.7) or []
-                # re-judge for telemetry
-                try:
-                    suff_score, suff_decision, suff_details = judge_sufficiency(hits, intent_str)
-                except Exception as e:
-                    print("[/ask] judge_sufficiency (post-harvest) error:", e)
             except Exception as e:
                 print("[/ask] auto-harvest failed:", e)
 
-        # ---- Build WEB context with numbers that MATCH REFERENCES ----
-        selected_hits = [h for h in hits if _s(h.get("text"))][:6]  # only hits with text
-        web_ctx_parts: list[str] = []
-        refs: list[dict] = []       # combined (web first, then KB)
-        seen_keys: set[str] = set() # to dedupe when merging KB
-
-        def _normkey_ref(title: str, doi: str) -> str:
-            return (doi or title).strip().lower()
-
-        # First: number the WEB hits [1..m] and build context with the SAME numbers
-        for i, h in enumerate(selected_hits, start=1):
-            title = _s(h.get("title") or h.get("paper_id") or "(web)")
-            txt   = _s(h.get("text"))
-            doi   = _s(h.get("paper_id")) if _s(h.get("paper_id")).startswith("10.") else ""
-            url   = _s(h.get("url"))
-            refs.append({
-                "index": i,
-                "title": title,
+        # ---- Convert hits to web_refs ----
+        web_refs = []
+        for h in hits:
+            web_refs.append({
+                "title": _s(h.get("title") or "(no title)"),
                 "year": "",
-                "url": url,
-                "doi": doi,
+                "url": _s(h.get("url") or ""),
+                "doi": _s(h.get("paper_id") if (h.get("paper_id","").startswith("10.")) else ""),
                 "authors": h.get("authors", []),
                 "biblio": {},
-                "_normkey": _normkey_ref(title, doi),
             })
-            web_ctx_parts.append(f"[{i}] {title}\n{txt[:3000]}")
-            seen_keys.add(_normkey_ref(title, doi))
 
-            web_ctx = "\n\n".join(web_ctx_parts)
+        # ----------------- Deduplicate & enumerate references -----------------
+        def _normkey(r: dict) -> str:
+            return (r.get("doi") or r.get("title") or "").strip().lower()
 
-            # Keep a web_refs list for downstream counts/logging compatibility
-            web_refs = refs[:]
-            web_refs_count = len(web_refs)
+        refs = []
+        seen = set()
+        for r in web_refs + kb_refs_raw:
+            key = _normkey(r)
+            if key and key not in seen:
+                refs.append(r)
+                seen.add(key)
 
-            # ---- Merge KB refs AFTER web refs, avoiding duplicates by doi/title (keep order) ----
-            for r in kb_refs_raw:
-                title = _s(r.get("title") or "(KB item)")
-                doi   = _s(r.get("doi") or "")
-                key   = _normkey_ref(title, doi)
-                if key and key not in seen_keys:
-                    r = dict(r)
-                    r["index"] = len(refs) + 1
-                    r["_normkey"] = key
-                    refs.append(r)
-                    seen_keys.add(key)
+        refs_prompt = "\n".join(
+            f"[{i+1}] {(r.get('title') or '(no title)')} ({r.get('year') or ''}) — {_ref_url(r)}"
+            for i, r in enumerate(refs)
+        ).strip()
 
-            # ---- Build the printable REFERENCES prompt (ordered) ----
-            def _ref_url(r: dict) -> str:
-                if r.get("url"): return r["url"]
-                if r.get("doi"): return f"https://doi.org/{r['doi']}"
-                return ""
+        # ----------------- Compose CONTEXT -----------------
+        ctx_parts = []
+        if uploads_ctx: ctx_parts.append("<<<CTX_UPLOADS>>>\n" + uploads_ctx)
+        if table_ctx:   ctx_parts.append("<<<CTX_TABLE>>>\n" + table_ctx)
+        if kb_ctx:      ctx_parts.append("<<<CTX_KB>>>\n" + kb_ctx)
+        context_joined = "\n\n---\n\n".join(ctx_parts).strip()
 
-            refs_prompt = "\n".join(
-                f"[{r['index']}] {r.get('title') or '(no title)'} "
-                f"({r.get('year') or ''}) — {_ref_url(r)}".strip()
-                for r in refs
-            )
-
-            # ----------------- Compose CONTEXT -----------------
-            ctx_parts = []
-            if uploads_ctx: ctx_parts.append("<<<CTX_UPLOADS>>>\n" + uploads_ctx)
-            if table_ctx:   ctx_parts.append("<<<CTX_TABLE>>>\n" + table_ctx)
-            if kb_ctx:      ctx_parts.append("<<<CTX_KB>>>\n" + kb_ctx)
-            if web_ctx:     ctx_parts.append("<<<CTX_WEB>>>\n" + web_ctx)  # ← numbered [n] snippets aligned to REFERENCES
-            context_joined = "\n\n---\n\n".join(ctx_parts).strip()
-
-                # ----------------- Prompting -----------------
+        # ----------------- Prompting -----------------
         robot_rules = (
             "Return a discrete lab protocol with exact quantities on a small scale (~0.5 mmol Co):\n"
             " - Include specific masses (mg) or mmol for reagents; volumes (mL) for liquids.\n"
             " - Specify temperatures (°C), ramp rates (°C/min), and hold times (min/h). Avoid using inert atmospheres. If a source you used requires an unusual atmosphere, describe it explicitly.\n"
             " - Include workup and purification (quench, washing/centrifugation, drying) with volumes.\n"
             " - No placeholders (avoid “e.g.”/“or”). Be decisive.\n"
-            " - If you cannot find an applicable reference number, write [GEN] explicitly for that sentence.\n"
             " - Output only the final protocol in markdown. Do not include any fenced blocks named reason or rationale in the answer. Put all reasoning in the separate rationale channel."
         )
         reasoning_rules = (
             " - Provide a mechanistic explanation and design considerations for the target.\n"
             " - Focus on: nucleation vs growth; ligand/solvent coordination; surfactants; reduction/oxidation; temperature profile and morphology control; atmosphere; pitfalls; safety.\n"
-            " - Do NOT return a step-by-step protocol. Be concise but specific.\n"
-            " - If you cannot find an applicable reference number, write [GEN] explicitly for that sentence."
-
+            " - Do NOT return a step-by-step protocol. Be concise but specific."
         )
         inline_rule = (
-                " - Every nontrivial claim MUST cite a numbered reference as [n].\n"
-                " - If the sentence is supported by a CONTEXT snippet, append [CTX] AFTER the [n], i.e. “... [3][CTX]”.\n"
-                if want_inline else " - Inline numeric citations are optional for this request."
+            " - When you pull a fact from any numbered REFERENCE, put its number in square brackets right after the sentence "
+            "(e.g. “hydrothermal at 200 °C [3]”)." if want_inline else
+            " - Inline numeric citations are optional for this request."
         )
         acs_rule = (
             " - Write the REFERENCES block in ACS format: author(s), title, journal, year, volume, pages, DOI.\n"
@@ -851,7 +806,6 @@ def ask():
                 "You are NanoChemGPT. Use the CONTEXT and the numbered REFERENCES to propose a synthesis.\n"
                 "Rules:\n"
                 " - Prefer CONTEXT and REFERENCES over general knowledge when relevant.\n"
-                " - Avoid suggesting the use of inert atmosphere. If a reference you use requires one, say it explicity and explain.\n"
                 " - For each step, quote or paraphrase a specific finding from CONTEXT or REFERENCES, and cite the source. Do not generalize or invent citations.\n"
                 " - If you use any content from CONTEXT, append [CTX] on that line.\n"
                 f"{inline_rule}\n"
@@ -873,15 +827,11 @@ def ask():
                 f"User question: {question}"
             )
 
-        # Call LLM if available, else deterministic fallback
-        if client:
-            raw = client.chat.completions.create(
-                model=OPENAI_MODEL,
-                messages=[{"role": "user", "content": prompt}],
-                temperature=0.2
-            ).choices[0].message.content
-        else:
-            raw = _fallback_answer(question, context_joined, refs_prompt, mode)
+        raw = client.chat.completions.create(
+            model="gpt-4o",
+            messages=[{"role": "user", "content": prompt}],
+            temperature=0.2
+        ).choices[0].message.content
 
         # Split answer/rationale and strip any in-answer references block
         if mode == "reasoning":
@@ -898,11 +848,14 @@ def ask():
         # ---- Usage markers (refs + tags) ----
         markers = _extract_used_markers(answer, rationale)
 
-        # ---- Sufficiency enqueue (longer-term mining if still thin) ----
+        # ---- Sufficiency check + enqueue mining if thin (kept) ----
         enqueued = False
         try:
-            # If still not sufficient after harvest, enqueue a miner job
-            if suff_decision == "mine":
+            try:
+                sufficient = judge_sufficiency(question, context_joined, refs_count=len(refs))
+            except TypeError:
+                sufficient = judge_sufficiency(question, context_joined)
+            if not bool(sufficient):
                 try:
                     enqueue_text_mining_job(question)
                     enqueued = True
@@ -930,11 +883,6 @@ def ask():
                 "table_refs": table_refs,
                 "context_present": bool(context_joined),
                 "mining_enqueued": enqueued,
-                "sufficiency": {
-                    "decision": suff_decision,
-                    "score": suff_score,
-                    "details": suff_details,
-                },
             })
         except Exception as e:
             print("[/ask] DB save warn:", e)
@@ -952,11 +900,6 @@ def ask():
             "refs": refs,
             "context_present": bool(context_joined),
             "mining_enqueued": enqueued,
-            "sufficiency": {
-                "decision": suff_decision,
-                "score": suff_score,
-                "details": suff_details,
-            },
         })
     except Exception as e:
         traceback.print_exc()
@@ -1059,6 +1002,12 @@ def api_uploads():
     items = [_doc(d) for d in cur]
     return jsonify({"items": items, "limit": limit})
 
+@app.post("/admin/rebuild_mech_index")
+def rebuild_mech_index():
+    from retriever.retriever import build_index, Embedder
+    idx, meta = build_index(Embedder())
+    return {"ok": True, "entries": len(meta)}
+
 @app.errorhandler(400)
 @app.errorhandler(422)
 @app.errorhandler(500)
@@ -1076,7 +1025,7 @@ def upload_builtin():
         return jsonify({"ok": False, "error": "No files uploaded"}), 400
     saved = []
     for f in files:
-        fname = secure_filename(f.filename or "")
+        fname = secure_filename(f.filename)
         dest = BUILTIN_DIR / fname
         dest.parent.mkdir(parents=True, exist_ok=True)
         f.save(dest)
