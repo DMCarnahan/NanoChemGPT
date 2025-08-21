@@ -1,5 +1,5 @@
 from __future__ import annotations
-import httpx, logging
+import httpx, logging, re
 
 log = logging.getLogger(__name__)
 
@@ -59,3 +59,45 @@ def search_eupmc(q: str, since_year: int, max_results: int = 200) -> list[dict]:
             "access_route": "oa" if is_oa else "unknown",
         })
     return out
+
+def _ensure_pmcid(pmcid: str) -> str:
+    pmcid = (pmcid or "").strip()
+    if not pmcid:
+        return pmcid
+    return pmcid if pmcid.upper().startswith("PMC") else f"PMC{pmcid}"
+
+def fetch_fulltext_jats(pmcid: str, timeout: float = 60.0) -> str | None:
+    """
+    Fetch JATS full text for a PMCID.
+    Tries Europe PMC first, then falls back to NCBI PMC OAI-PMH.
+    Returns the JATS XML as a string (or None if unavailable).
+    """
+    import httpx, logging
+    log = logging.getLogger(__name__)
+    pmcid = _ensure_pmcid(pmcid)
+    if not pmcid:
+        return None
+
+    # 1) Europe PMC: /webservices/rest/{PMCID}/fullTextXML
+    url_epmc = f"https://www.ebi.ac.uk/europepmc/webservices/rest/{pmcid}/fullTextXML"
+    try:
+        r = httpx.get(url_epmc, headers={"Accept": "application/xml"}, timeout=timeout, follow_redirects=True)
+        if r.status_code == 200 and r.text and "<article" in r.text:
+            return r.text
+    except Exception as e:
+        log.warning("[EUPMC] fullTextXML fetch error for %s: %s", pmcid, e)
+
+    # 2) Fallback: NCBI PMC OAI-PMH → extract <article> … </article>
+    url_oai = f"https://www.ncbi.nlm.nih.gov/pmc/oai/oai.cgi?verb=GetRecord&metadataPrefix=pmc&identifier={pmcid}"
+    try:
+        r = httpx.get(url_oai, headers={"Accept": "application/xml"}, timeout=timeout, follow_redirects=True)
+        if r.status_code == 200 and r.text:
+            m = re.search(r"(<article[\s\S]*?</article>)", r.text, flags=re.I)
+            if m:
+                return m.group(1)
+            # as a last resort, return the entire OAI response
+            return r.text
+    except Exception as e:
+        log.warning("[PMC OAI] fetch error for %s: %s", pmcid, e)
+
+    return None
