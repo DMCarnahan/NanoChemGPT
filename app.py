@@ -1,7 +1,6 @@
-# NOTE: Auto-patch failed: start token not found
 from __future__ import annotations
 
-import os, io, json, re, glob, traceback, threading, tempfile, textwrap, subprocess
+import sys, os, io, json, re, glob, traceback, threading, tempfile, textwrap, subprocess
 from datetime import datetime
 from pathlib import Path
 from typing import Any, Set, List, Dict, Optional
