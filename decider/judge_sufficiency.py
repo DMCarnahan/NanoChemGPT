@@ -27,23 +27,104 @@ def _fresh_ok(hits: List[dict], intent: str) -> bool:
 def clamp01(x: float) -> float:
     return max(0.0, min(1.0, x))
 
-def judge_sufficiency(hits: List[dict], intent: str):
-    k = min(MAX_K, len(hits))
-    top = hits[:k]
+def judge_sufficiency(hits, intent: str):
+    """
+    Robust version: accepts
+      - list[dict] (normal case)
+      - list[str]  (JSON lines or raw strings)
+      - str path to a .jsonl file
+      - str containing JSON (array or object)
+    and coerces everything into a list[dict] with the keys we score on.
+    """
+    import json, os
+
+    def _iter_as_dicts(obj):
+        # If a PATH to .jsonl
+        if isinstance(obj, str) and os.path.exists(obj):
+            with open(obj, "r", encoding="utf-8") as f:
+                for line in f:
+                    s = line.strip()
+                    if not s:
+                        continue
+                    try:
+                        d = json.loads(s)
+                    except Exception:
+                        d = None
+                    yield d if isinstance(d, dict) else {"text": s}
+            return
+
+        # If a JSON string (object/array)
+        if isinstance(obj, str):
+            try:
+                parsed = json.loads(obj)
+                if isinstance(parsed, dict):
+                    yield parsed; return
+                if isinstance(parsed, list):
+                    for it in parsed:
+                        if isinstance(it, dict):
+                            yield it
+                        elif isinstance(it, str):
+                            try:
+                                d = json.loads(it)
+                                yield d if isinstance(d, dict) else {"text": it}
+                            except Exception:
+                                yield {"text": it}
+                    return
+            except Exception:
+                # plain text string fallback
+                yield {"text": obj}; return
+
+        # Iterable of items
+        try:
+            for it in obj:
+                if isinstance(it, dict):
+                    yield it
+                elif isinstance(it, str):
+                    try:
+                        d = json.loads(it)
+                        yield d if isinstance(d, dict) else {"text": it}
+                    except Exception:
+                        yield {"text": it}
+        except TypeError:
+            # Not iterable; nothing to yield
+            return
+
+    def _to_float(x, default=0.0):
+        try:
+            return float(x)
+        except Exception:
+            return default
+
+    # ---- Normalize hits into dicts with safe defaults ----
+    norm = []
+    for d in _iter_as_dicts(hits):
+        if not isinstance(d, dict):
+            continue
+        norm.append({
+            "sim": _to_float(d.get("sim", 0.0), 0.0),
+            "source_domain": d.get("source_domain", "") or "",
+            "slots_present": list(d.get("slots_present") or []),
+            "entity_hit": bool(d.get("entity_hit", False)),
+            # pass through anything else (timestamps, etc.) for _fresh_ok
+            **{k: v for k, v in d.items() if k not in {"sim","source_domain","slots_present","entity_hit"}}
+        })
+
+    # ---- Original scoring logic (unchanged, but safer gets) ----
+    k = min(MAX_K, len(norm))
+    top = norm[:k]
 
     top1 = clamp01(top[0]["sim"]) if k else 0.0
-    mean_topk = clamp01(sum(h["sim"] for h in top) / k) if k else 0.0
-    evidence_count = sum((h["sim"] or 0.0) >= SIM_FLOOR for h in top)
-    distinct_sources = len(set(h.get("source_domain","") for h in top if h.get("source_domain")))
+    mean_topk = clamp01(sum(_to_float(h.get("sim", 0.0), 0.0) for h in top) / k) if k else 0.0
+    evidence_count = sum((_to_float(h.get("sim", 0.0), 0.0)) >= SIM_FLOOR for h in top)
+    distinct_sources = len({(h.get("source_domain") or "") for h in top if h.get("source_domain")})
 
-    merged_slots = set()
-    entity_ok = False
+    merged_slots, entity_ok = set(), False
     for h in top:
-        merged_slots |= set(h.get("slots_present", []))
-        entity_ok = entity_ok or bool(h.get("entity_hit", False))
+        merged_slots |= set(h.get("slots_present") or [])
+        entity_ok = entity_ok or bool(h.get("entity_hit"))
 
     required = REQUIRED_BY_INTENT.get(intent, {"MATERIAL"}) or {"MATERIAL"}
-    coverage = len(merged_slots & required) / float(len(required))
+    coverage = (len(merged_slots & required) / float(len(required))) if required else 0.0
 
     fresh_ok = _fresh_ok(top, intent)
 

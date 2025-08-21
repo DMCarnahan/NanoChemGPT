@@ -131,6 +131,22 @@ def retriever_search(query: str, k: int = 8, mode: str = "hybrid", alpha: float 
         return []
 
 # ──────────────── Utilities ──────────────── #
+def _iter_jsonl_dicts(path: str):
+    p = Path(path)
+    if not p.exists():
+        return
+    with p.open("r", encoding="utf-8") as f:
+        for raw in f:
+            s = raw.strip()
+            if not s:
+                continue
+            try:
+                obj = json.loads(s)
+            except Exception:
+                continue
+            if isinstance(obj, dict):
+                yield obj
+
 def _safe_text(x: Any) -> str:
     try:
         return str(x) if x is not None else ""

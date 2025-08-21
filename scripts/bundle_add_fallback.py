@@ -62,7 +62,6 @@ def fallback_methods_from_sections(sections: List[Dict[str,Any]], top_k=5, min_s
     cands.sort(key=lambda x: x[0], reverse=True)
     return [d for _, d in cands[:top_k]]
 
-# Try to import the miner for structured ops; if not available, we still add text.
 try:
     from miner.runtime import extract_procedure
 except Exception:
