@@ -257,6 +257,17 @@ def main():
                     all_sections = [{"heading": "fulltext", "text": plain}]
                 methods = fallback_methods_from_sections(all_sections, top_k=8, min_score=1.2)
 
+            if not methods:
+                meta_bits = []
+                if rec.get("abstract"):  # arXiv/EUPMC often have this
+                    meta_bits.append(rec["abstract"])
+                if rec.get("title"):
+                    meta_bits.append(rec["title"])
+                meta_text = "\n\n".join([t for t in meta_bits if t])
+                if meta_text:
+                    all_sections = all_sections or [{"heading": "metadata", "text": meta_text}]
+                    methods = fallback_methods_from_sections(all_sections, top_k=5, min_score=1.0)
+
             # Save chosen sections (traceability)
             paper['sections'] = methods[:5]
 
@@ -277,6 +288,16 @@ def main():
                 paper['extractions']['methods_paragraphs'] = mp
             else:
                 paper['extractions']['methods_paragraphs'] = []
+
+            if not paper.get("raw"):
+                if all_sections:
+                    raw_source = "\n\n".join(sec.get("text", "") for sec in all_sections if sec.get("text"))
+                if not raw_source:
+                    meta_bits = []
+                    if rec.get("abstract"): meta_bits.append(rec["abstract"])
+                    if rec.get("title"):    meta_bits.append(rec["title"])
+                    raw_source = "\n\n".join(meta_bits)
+                paper["raw"] = (raw_source or "")[:2_000_000]
 
             pid = safe_slug(paper['paper_id'] or paper['title'][:40])
             write_json(out_dir / f'{pid}.json', paper)

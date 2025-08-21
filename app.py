@@ -486,22 +486,87 @@ def ask():
                 seen.add(s); uniq.append(s)
         return uniq[:6]
 
-    def _harvest_reindex(queries: list[str]) -> None:
-        import os, json, subprocess, tempfile, pathlib
+    def _harvest_reindex(queries: list[str], use_grobid: bool | None = None) -> None:
+        import os, json, subprocess, tempfile, pathlib, sys
         out_dir = "harvester/out_auto"
         pathlib.Path(out_dir).mkdir(parents=True, exist_ok=True)
-        cfg = "out_dir: {od}\nqueries:\n{qs}\nsince_year: 2016\nmax_results_per_source: 15\ngrobid_url: http://127.0.0.1:8070\nunpaywall_email: \"\"\n".format(
-            od=out_dir.replace("\\","/"),
+
+        # Build a minimal harvester config
+        cfg = (
+            "out_dir: {od}\n"
+            "queries:\n{qs}\n"
+            "since_year: 2016\n"
+            "max_results_per_source: 15\n"
+            "grobid_url: http://127.0.0.1:8070\n"
+            "unpaywall_email: \"\"\n"
+        ).format(
+            od=out_dir.replace("\\", "/"),
             qs="\n".join(f"- {json.dumps(q)}" for q in queries),
         )
+
+        # Decide whether to use GROBID (default OFF unless explicitly enabled)
+        env = os.environ.copy()
+        if use_grobid is None:
+            use_grobid = env.get("USE_GROBID", "0") not in {"0", "false", "False", ""}
+        env["USE_GROBID"] = "1" if use_grobid else "0"
+
+        def _run(cmd: list[str], **kw) -> int:
+            proc = subprocess.run(cmd, capture_output=True, text=True, env=env, **kw)
+            if proc.returncode != 0:
+                print(f"[harvest_reindex] cmd failed: {' '.join(cmd)}", file=sys.stderr)
+                if proc.stdout:
+                    print(proc.stdout, file=sys.stderr)
+                if proc.stderr:
+                    print(proc.stderr, file=sys.stderr)
+            return proc.returncode
+
+        def _has_nonempty_lines(path: str) -> bool:
+            try:
+                with open(path, "r", encoding="utf-8") as f:
+                    for line in f:
+                        if line.strip():
+                            return True
+            except FileNotFoundError:
+                return False
+            return False
+
+        # 1) harvest -> harvester/out_auto/bundle.jsonl
         with tempfile.NamedTemporaryFile("w", suffix=".yaml", delete=False) as tf:
-            tf.write(cfg); cfg_path = tf.name
-        # 1) harvest -> out_auto/bundle.jsonl
-        subprocess.run(["python","harvester/harvester.py","--config",cfg_path], check=True)
-        # 2) merge/refresh working bundle
-        subprocess.run(["python","scripts/bundle_add_fallback.py", f"{out_dir}/bundle.jsonl", "out/bundle_with_methods.jsonl"], check=True)
-        # 3) rebuild index
-        subprocess.run(["python","retriever/index_jsonl.py","--bundle","out/bundle_with_methods.jsonl","--index_dir","retriever/index","--embed-backend","none"], check=True)
+            tf.write(cfg)
+            cfg_path = tf.name
+        if _run(["python", "harvester/harvester.py", "--config", cfg_path]) != 0:
+            print("[/ask] harvest step failed; continuing without reindex.", file=sys.stderr)
+            return
+
+        # 2) merge/refresh working bundle (methods-only JSONL)
+        methods_bundle = "out/bundle_with_methods.jsonl"
+        _run(["python", "scripts/bundle_add_fallback.py", f"{out_dir}/bundle.jsonl", methods_bundle])
+
+        # Choose which bundle to index:
+        #  - Prefer methods bundle if it has content
+        #  - Else fall back to the harvester bundle (expects 'raw' text)
+        if _has_nonempty_lines(methods_bundle):
+            bundle_to_index = methods_bundle
+            text_key = "text"
+        else:
+            bundle_to_index = f"{out_dir}/bundle.jsonl"
+            text_key = "raw"
+
+        # 3) rebuild index (TF-IDF); skip if no docs
+        if not _has_nonempty_lines(bundle_to_index):
+            print("[/ask] No documents to index; skipping TF-IDF build.", file=sys.stderr)
+        else:
+            # Use the patched retriever/index_jsonl.py that accepts --text-key
+            rc = _run([
+                "python",
+                "retriever/index_jsonl.py",
+                "--bundle", bundle_to_index,
+                "--index_dir", "retriever/index",
+                "--text-key", text_key,
+            ])
+            if rc != 0:
+                print("[/ask] TF-IDF build failed; continuing.", file=sys.stderr)
+
         # 4) tell retriever to reload (best-effort)
         try:
             import httpx
@@ -509,6 +574,7 @@ def ask():
                 s.post("http://127.0.0.1:8000/reload")
         except Exception:
             pass
+
 
     try:
         payload = request.get_json(silent=True) or {}
