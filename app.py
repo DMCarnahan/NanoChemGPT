@@ -504,12 +504,10 @@ def ask():
         return uniq[:6]
 
     def _harvest_reindex(queries: list[str], use_grobid: bool | None = None) -> None:
-        import os, json, subprocess, tempfile, pathlib, sys
 
         out_dir = "harvester/out_auto"
-        pathlib.Path(out_dir).mkdir(parents=True, exist_ok=True)
+        Path(out_dir).mkdir(parents=True, exist_ok=True)
 
-        # Build a minimal harvester config (YAML)
         cfg = (
             "out_dir: {od}\n"
             "queries:\n{qs}\n"
@@ -522,26 +520,64 @@ def ask():
             qs="\n".join(f"- {json.dumps(q)}" for q in queries),
         )
 
-        # Decide whether to use GROBID (default OFF unless explicitly enabled)
         env = os.environ.copy()
         if use_grobid is None:
             use_grobid = env.get("USE_GROBID", "0") not in {"0", "false", "False", ""}
         env["USE_GROBID"] = "1" if use_grobid else "0"
 
-        def _run(cmd: list[str]) -> int:
-            """Run a command, log failures, and return the returncode."""
-            proc = subprocess.run(cmd, capture_output=True, text=True, env=env)
-            if proc.returncode != 0:
-                print(f"[harvest_reindex] cmd failed: {' '.join(cmd)}", file=sys.stderr)
-                if proc.stdout:
-                    print(proc.stdout, file=sys.stderr)
-                if proc.stderr:
-                    print(proc.stderr, file=sys.stderr)
-            return proc.returncode
+        def _stream(cmd: list[str], *, env=None) -> int:
+            # Stream stdout/stderr live; return rc
+            print(f"[harvest_reindex] running: {' '.join(cmd)}")
+            p = subprocess.Popen(
+                cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
+                text=True, env=env
+            )
+            assert p.stdout is not None
+            for line in p.stdout:
+                # passthrough harvest logs (tqdm, warnings, etc.)
+                sys.stdout.write(line)
+            rc = p.wait()
+            if rc == 0:
+                print(f"[harvest_reindex] {' '.join(cmd)} OK")
+            else:
+                print(f"[harvest_reindex] {' '.join(cmd)} EXIT {rc}")
+            return rc
 
+        def _file_has_lines(path: str, min_lines: int = 1) -> bool:
+            try:
+                n = 0
+                with open(path, "r", encoding="utf-8") as f:
+                    for _ in f:
+                        n += 1
+                        if n >= min_lines:
+                            return True
+                return False
+            except FileNotFoundError:
+                return False
+
+        # 1) harvest -> out_auto/bundle.jsonl
+        with tempfile.NamedTemporaryFile("w", suffix=".yaml", delete=False) as tf:
+            tf.write(cfg)
+            cfg_path = tf.name
+
+        harv_cmd = ["python", "harvester/harvester.py", "--config", cfg_path]
+        rc = _stream(harv_cmd, env=env)
+
+        bundle_raw = f"{out_dir}/bundle.jsonl"
+        partial_ok = _file_has_lines(bundle_raw, 1)
+
+        if rc != 0 and not partial_ok:
+            print("[/ask] harvest step failed; no bundle to use — skipping reindex.", file=sys.stderr)
+            return
+        elif rc != 0 and partial_ok:
+            print("[/ask] harvest returned non-zero, but bundle exists — proceeding with index.", file=sys.stderr)
+
+        # 2) optional merge/refresh 
+        methods_bundle = "out/bundle_with_methods.jsonl"
+        _stream(["python", "scripts/bundle_add_fallback.py", bundle_raw, methods_bundle], env=env)
+
+        # 3) choose bundle & key by inspecting content
         def _has_text(path: str, source: str) -> bool:
-            """Quick probe for text under a given source in a JSONL file."""
-            import json
             try:
                 with open(path, "r", encoding="utf-8") as f:
                     for line in f:
@@ -568,49 +604,30 @@ def ask():
             except FileNotFoundError:
                 return False
 
-        # 1) harvest -> harvester/out_auto/bundle.jsonl
-        with tempfile.NamedTemporaryFile("w", suffix=".yaml", delete=False) as tf:
-            tf.write(cfg)
-            cfg_path = tf.name
-
-        rc = _run(["python", "harvester/harvester.py", "--config", cfg_path])
-        if rc != 0:
-            print("[/ask] harvest step failed; continuing without reindex.", file=sys.stderr)
-            return
-
-        # 2) merge/refresh working bundle with methods fallback (optional, keep if you use it)
-        methods_bundle = "out/bundle_with_methods.jsonl"
-        _run(["python", "scripts/bundle_add_fallback.py", f"{out_dir}/bundle.jsonl", methods_bundle])
-
-        # 3) Choose the bundle + source to index (robust order)
         bundle_to_index, text_key = None, None
-        harv_bundle = f"{out_dir}/bundle.jsonl"
-
-        # Prefer methods from the harvester bundle directly (your indexer now supports nested 'methods')
-        if _has_text(harv_bundle, "methods"):
-            bundle_to_index, text_key = harv_bundle, "methods"
-        elif _has_text(harv_bundle, "sections"):
-            bundle_to_index, text_key = harv_bundle, "sections"
+        if _has_text(bundle_raw, "methods"):
+            bundle_to_index, text_key = bundle_raw, "methods"
+        elif _has_text(bundle_raw, "sections"):
+            bundle_to_index, text_key = bundle_raw, "sections"
         elif _has_text(methods_bundle, "text"):
             bundle_to_index, text_key = methods_bundle, "text"
-        elif _has_text(harv_bundle, "raw"):
-            bundle_to_index, text_key = harv_bundle, "raw"
+        elif _has_text(bundle_raw, "raw"):
+            bundle_to_index, text_key = bundle_raw, "raw"
 
         if not bundle_to_index:
             print("[/ask] No documents to index; skipping TF-IDF build.", file=sys.stderr)
-        else:
-            rc = _run([
-                "python", "retriever/index_jsonl.py",
-                "--bundle", bundle_to_index,
-                "--index_dir", "retriever/index",
-                "--text-key", text_key,
-            ])
-            if rc != 0:
-                print("[/ask] TF-IDF build failed; continuing.", file=sys.stderr)
+            return
 
-        # 4) Ask the retriever service to reload (best-effort)
+        # 4) rebuild TF-IDF index
+        _stream([
+            "python", "retriever/index_jsonl.py",
+            "--bundle", bundle_to_index,
+            "--index_dir", "retriever/index",
+            "--text-key", text_key,
+        ], env=env)
+
+        # 5) retriever reload (best-effort)
         try:
-            import httpx
             with httpx.Client(timeout=20) as s:
                 s.post("http://127.0.0.1:8000/reload")
         except Exception:
