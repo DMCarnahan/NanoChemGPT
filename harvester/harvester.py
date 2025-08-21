@@ -17,20 +17,23 @@ logger = logging.getLogger(__name__)
 
 # Toggle with env: USE_GROBID=0 to bypass
 USE_GROBID = os.getenv("USE_GROBID", "1") not in {"0", "false", "False"}
-try:
-    import fitz 
-except Exception:
-    fitz = None
 
 def extract_plain_text_from_pdf(pdf_bytes: bytes) -> str:
     if not fitz:
-        logger.warning("PyMuPDF not installed; plain-text fallback disabled.")
+        logger.warning("PyMuPDF not installed; skipping PDF plain-text extraction.")
         return ""
-    doc = fitz.open(stream=pdf_bytes, filetype="pdf")
+    if not is_pdf_bytes(pdf_bytes):
+        return ""
     try:
-        return "\n".join(page.get_text() for page in doc)
-    finally:
-        doc.close()
+        doc = fitz.open(stream=pdf_bytes, filetype="pdf")
+        try:
+            return "\n".join(page.get_text() for page in doc)
+        finally:
+            doc.close()
+    except Exception as e:
+        logger.warning("MuPDF failed: %s", e)
+        return ""
+
 
 ACTION_WORDS = [
     "synthesize", "synthesise", "prepare", "mix", "stir", "disperse", "dissolve", "add",
@@ -111,17 +114,44 @@ def fallback_methods_from_sections(sections: list[dict], top_k: int = 5, min_sco
     cands.sort(key=lambda x: x[0], reverse=True)
     return [d for _, d in cands[:top_k]]
 
-def fetch_pdf(url):
-    """Fetch PDF content from a URL, following redirects."""
-    try:
-        r = httpx.get(url, timeout=60.0, follow_redirects=True)
-        if r.status_code == 200 and 'application/pdf' in r.headers.get('content-type', ''):
-            return r.content
-    except Exception as e:
-        print(f"[fetch_pdf] Error fetching {url}: {e}")
-    return None
-
 def main():
+    import logging
+    from urllib.parse import urljoin
+
+    logger = logging.getLogger(__name__)
+    USE_GROBID = os.getenv("USE_GROBID", "1") not in {"0", "false", "False"}
+
+    # -------- helpers local to main() --------
+    PDF_MAGIC = b"%PDF-"
+    PDF_HREF_RX = re.compile(r'href=["\']([^"\']+\.pdf(?:\?[^"\']*)?)["\']', re.I)
+
+    def is_pdf_bytes(b: bytes) -> bool:
+        return isinstance(b, (bytes, bytearray)) and len(b) > 4 and b[:5] == PDF_MAGIC
+
+    def fetch_pdf_or_html(url: str, timeout: float = 60.0):
+        """Return (kind, payload, final_url). kind ∈ {'pdf','html','other'}."""
+        try:
+            r = httpx.get(url, timeout=timeout, follow_redirects=True)
+        except Exception as e:
+            logger.warning("[fetch] error %s", e)
+            return "other", None, url
+        ctype = (r.headers.get("content-type") or "").lower()
+        if "application/pdf" in ctype and is_pdf_bytes(r.content):
+            return "pdf", r.content, str(r.url)
+        if "text/html" in ctype:
+            return "html", r.text, str(r.url)
+        if is_pdf_bytes(r.content):  # servers sometimes mislabel
+            return "pdf", r.content, str(r.url)
+        return "other", None, str(r.url)
+
+    def discover_pdf_in_html(html: str, base_url: str) -> str | None:
+        m = PDF_HREF_RX.search(html or "")
+        if not m:
+            return None
+        return urljoin(base_url, m.group(1))
+
+    # -----------------------------------------
+
     ap = argparse.ArgumentParser()
     ap.add_argument('--config', required=True)
     args = ap.parse_args()
@@ -157,8 +187,9 @@ def main():
                 'extractions': {'methods_paragraphs': []}
             }
 
-            methods = []
-            all_sections = []
+            methods: list[dict] = []
+            all_sections: list[dict] = []
+            plain: str = ""
 
             # --- JATS (PMC) path
             if rec.get('pmcid'):
@@ -179,12 +210,23 @@ def main():
                         rec['pdf_url'] = rec.get('pdf_url') or loc.get('url_for_pdf') or loc.get('url')
 
                 if rec.get('pdf_url'):
-                    pdf = fetch_pdf(rec['pdf_url'])
-                    if pdf:
-                        # Preferred path: GROBID (if enabled)
+                    # fetch PDF or discover it from a landing page
+                    pdf_bytes = None
+                    kind, payload, final_url = fetch_pdf_or_html(rec['pdf_url'])
+                    if kind == "pdf":
+                        pdf_bytes = payload
+                    elif kind == "html":
+                        alt_pdf = discover_pdf_in_html(payload, final_url)
+                        if alt_pdf:
+                            k2, p2, _ = fetch_pdf_or_html(alt_pdf)
+                            if k2 == "pdf":
+                                pdf_bytes = p2
+
+                    if pdf_bytes and is_pdf_bytes(pdf_bytes):
+                        # Preferred: GROBID (if enabled)
                         if USE_GROBID:
                             try:
-                                tei = pdf_to_tei(cfg['grobid_url'], pdf)
+                                tei = pdf_to_tei(cfg['grobid_url'], pdf_bytes)
                                 secs = tei_to_sections(tei)
                                 if not all_sections:
                                     all_sections = secs
@@ -192,24 +234,34 @@ def main():
                             except Exception as e:
                                 logger.warning("[GROBID] Error; will try plain-text fallback: %s", e)
 
-                        # Fallback path: plain text from PDF → regex section pick
+                        # Fallback: extract plain text + regex pick
                         if not methods:
-                            plain = extract_plain_text_from_pdf(pdf)
+                            try:
+                                plain = extract_plain_text_from_pdf(pdf_bytes)  # may not exist → NameError
+                            except NameError:
+                                plain = ""
+                            except Exception as e:
+                                logger.warning("plain-text extraction failed: %s", e)
+                                plain = ""
+
                             if plain:
-                                # Keep a catch-all copy of full text for scoring fallback
                                 if not all_sections:
                                     all_sections = [{"heading": "fulltext", "text": plain}]
                                 found = fallback_methods_from_text(plain)
                                 if found:
                                     methods = [{"heading": "(fallback)", "text": found}]
 
-
-            # --- Fallback: pick top-scoring procedural paragraphs if still empty
-            if not methods and all_sections:
-                methods = fallback_methods_from_sections(all_sections, top_k=5, min_score=2.0)
+            # --- LAST RESORT: score paragraphs if still empty
+            if not methods and (all_sections or plain):
+                if not all_sections and plain:
+                    all_sections = [{"heading": "fulltext", "text": plain}]
+                methods = fallback_methods_from_sections(all_sections, top_k=8, min_score=1.2)
 
             # Save chosen sections (traceability)
             paper['sections'] = methods[:5]
+
+            if plain:
+                paper['raw'] = plain[:2_000_000]
 
             # Run the miner on those paragraphs
             paras = [s['text'] for s in methods]
