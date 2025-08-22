@@ -487,22 +487,6 @@ def ask():
         return uniq[:6]
 
     def _harvest_reindex(queries: list[str], use_grobid: bool | None = None) -> None:
-        import os, json, subprocess, tempfile, pathlib, sys
-        out_dir = "harvester/out_auto"
-        pathlib.Path(out_dir).mkdir(parents=True, exist_ok=True)
-
-        # Build a minimal harvester config
-        cfg = (
-            "out_dir: {od}\n"
-            "queries:\n{qs}\n"
-            "since_year: 2016\n"
-            "max_results_per_source: 15\n"
-            "grobid_url: http://127.0.0.1:8070\n"
-            "unpaywall_email: \"\"\n"
-        ).format(
-            od=out_dir.replace("\\", "/"),
-            qs="\n".join(f"- {json.dumps(q)}" for q in queries),
-    def _harvest_reindex(queries: list[str], use_grobid: bool | None = None) -> None:
         import tempfile, os, sys, subprocess, httpx, json
         from pathlib import Path
 
@@ -986,12 +970,6 @@ def api_uploads():
     cur = db.uploads.find({}).sort([("indexed_at", -1), ("ts", -1)]).limit(limit)
     items = [_doc(d) for d in cur]
     return jsonify({"items": items, "limit": limit})
-
-@app.post("/admin/rebuild_mech_index")
-def rebuild_mech_index():
-    from retriever.retriever import build_index, Embedder
-    idx, meta = build_index(Embedder())
-    return {"ok": True, "entries": len(meta)}
 
 @app.errorhandler(400)
 @app.errorhandler(422)
