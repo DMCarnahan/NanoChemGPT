@@ -623,7 +623,7 @@ def ask():
         out_dir.mkdir(parents=True, exist_ok=True)
 
         # ------------- config -------------
-        max_results = os.getenv("HARVEST_MAX_RESULTS", "8")
+        max_results = os.getenv("HARVEST_MAX_RESULTS", "6")
         cfg = (
             "out_dir: {od}\n"
             "queries:\n{qs}\n"
