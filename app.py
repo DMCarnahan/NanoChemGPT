@@ -436,16 +436,7 @@ def ask():
       • Computes usage markers via _extract_used_markers.
       • Judges sufficiency and, if thin, optionally harvests more data, reindexes, reloads retriever, and retries once.
     """
-    import re
-    from datetime import datetime
 
-    # ---------- request payload ----------
-    payload  = request.get_json(silent=True) or {}
-    question = (payload.get("question") or payload.get("q") or "").strip()
-    if not question:
-        return jsonify({"ok": False, "error": "Missing 'question'"}), 400
-
-    # These may be filled elsewhere in your code; ensure they're at least defined
     uploads_ctx = ""
     table_ctx   = ""
     table_refs  = []
@@ -458,25 +449,58 @@ def ask():
         print("[/ask] classify_intent warn:", e)
         ci = {}
 
-    # Defaults
+    # ---------- request payload ----------
+    payload  = request.get_json(silent=True) or {}
+    question = (payload.get("question") or payload.get("q") or "").strip()
+    if not question:
+        return jsonify({"ok": False, "error": "Missing 'question'"}), 400
+
+    # ---------- intent classification (normalize result) ----------
+    try:
+        from decider.intent import classify_intent
+        ci = classify_intent(question)
+    except Exception as e:
+        print("[/ask] classify_intent warn:", e)
+        ci = {}
+
+    # normalize classify_intent output to a dict
+    if isinstance(ci, str):
+        # treat a bare string as the intent value
+        ci = {"intent": ci}
+    elif not isinstance(ci, dict):
+        ci = {}
+
+    def _coerce_bool(v):
+        if isinstance(v, bool): return v
+        if v is None: return None
+        if isinstance(v, (int, float)): return bool(v)
+        if isinstance(v, str):
+            t = v.strip().lower()
+            if t in {"1","true","yes","y","on"}:  return True
+            if t in {"0","false","no","n","off"}: return False
+        return None
+
+    def _pick_bool(key, default):
+        v = payload.get(key, None)
+        b = _coerce_bool(v) if v is not None else None
+        if b is None:
+            b = _coerce_bool(ci.get(key)) if isinstance(ci, dict) else None
+        return default if b is None else b
+
+    def _pick_int(key, default):
+        for source in (payload, ci):
+            if isinstance(source, dict) and key in source:
+                try:
+                    return int(source[key])
+                except Exception:
+                    pass
+        return default
+
+    # final intent/mode + knobs
     intent = payload.get("intent") or ci.get("intent") or "protocol"
     mode   = payload.get("mode")   or ci.get("mode")
     if not mode:
         mode = "reasoning" if intent in {"reasoning", "analysis"} else "protocol"
-
-    def _pick_bool(key, default):
-        if key in payload:
-            return bool(payload[key])
-        if key in ci:
-            return bool(ci[key])
-        return default
-
-    def _pick_int(key, default):
-        if key in payload and str(payload[key]).isdigit():
-            return int(payload[key])
-        if isinstance(ci.get(key), int):
-            return int(ci[key])
-        return default
 
     want_inline = _pick_bool("want_inline", True)
     allow_fetch = _pick_bool("allow_fetch", True)
