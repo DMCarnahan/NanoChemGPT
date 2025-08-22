@@ -876,7 +876,10 @@ def ask():
         f"[{i+1}] {(r.get('title') or '(no title)')} ({r.get('year') or ''}) — {_ref_url(r)}"
         for i, r in enumerate(refs)
     ).strip()
-    
+
+    if not refs_prompt:
+        refs_prompt = "(no references found)"
+        
     # ----------------- Compose CONTEXT -----------------
     ctx_parts = []
     if uploads_ctx: ctx_parts.append("<<<CTX_UPLOADS>>>\n" + uploads_ctx)

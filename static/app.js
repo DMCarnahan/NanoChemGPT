@@ -1,296 +1,301 @@
 document.addEventListener('DOMContentLoaded', () => {
   const $ = (id) => document.getElementById(id);
 
-  // Elements
-  const askBtn = $('askBtn');
-  const parseBtn = $('parseBtn');
-  const uploadBtn = $('uploadBtn');
-  const fileInput = $('fileInput');
-  const qInput = $('question');
-  const askMsg = $('askMsg');
-  const answerPre = $('answerPre');
-  const rationalePre = $('rationalePre');
-  const refsSection = $('refsSection');
-  const refsList = $('refsList');
-  const jsonBlock = $('jsonPre');
-  const uplList = $('uplList');
-  const uplMsg = $('uplMsg');
-  const historyBtn = $('historyBtn');
-  const historyList = $('historyList');
-  const modeRobot = $('modeRobot');
-  const modeReason = $('modeReason');
-  const saveTxtBtn = $('saveTxtBtn');
-  const builtinDrop = $('builtinDrop');
-  const builtinFile = $('builtinFile');
-  const builtinMsg = $('builtinMsg');
+  // --- Elements (all optional-chained) ---
+  const askBtn        = $('askBtn');
+  const parseBtn      = $('parseBtn');
+  const uploadBtn     = $('uploadBtn');
+  const fileInput     = $('fileInput');
+  const qInput        = $('question');
+  const askMsg        = $('askMsg');
+  const answerPre     = $('answerPre');
+  const rationalePre  = $('rationalePre');
+  const refsSection   = $('refsSection');
+  const refsList      = $('refsList');
+  const jsonPre       = $('jsonPre');
+  const historyBtn    = $('historyBtn');
+  const historyList   = $('historyList');
+  const builtinBtn    = $('builtinBtn');
+  const builtinFile   = $('builtinFile');
+  const builtinMsg    = $('builtinMsg');
 
-  let mode = 'robot';
+  const modeReason    = $('modeReason');
+  const modeRobot     = $('modeRobot');
+  const convertBtn    = $('convertBtn');
 
-  // Mode toggle
-  modeRobot?.addEventListener('click', () => {
-    mode = 'robot';
-    modeRobot.setAttribute('aria-checked', 'true');
-    modeReason?.setAttribute('aria-checked', 'false');
-    modeRobot.classList.add('active');
-    modeReason?.classList.remove('active');
-  });
-  modeReason?.addEventListener('click', () => {
-    mode = 'reasoning';
-    modeReason.setAttribute('aria-checked', 'true');
-    modeRobot?.setAttribute('aria-checked', 'false');
-    modeReason.classList.add('active');
-    modeRobot?.classList.remove('active');
-  });
-
-  function readCsrfToken() {
-    return document.querySelector('meta[name="csrf-token"]')?.content ||
-      (document.cookie.match(/(?:^|;\s*)csrf_token=([^;]+)/)?.[1]);
+  // -------- Utilities --------
+  function escapeHtml(s) {
+    if (s == null) return '';
+    return String(s)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;')
+      .replace(/\//g, '&#x2F;');
   }
 
-  // Ask button
-  askBtn?.addEventListener('click', async () => {
-    const question = qInput?.value.trim();
-    if (!question) return;
-
-    askBtn.disabled = true;
-    askMsg.classList.remove('hidden');
-    askMsg.textContent = 'Asking…';
-
+  function readCsrfToken() {
+    const m = document.cookie.match(/(?:^|;\s*)csrf_token=([^;]+)/);
+    if (!m) return null;
     try {
-      const headers = { 'Content-Type': 'application/json' };
-      const csrf = readCsrfToken();
-      if (csrf) headers['X-CSRFToken'] = csrf;
+      return decodeURIComponent(m[1]);
+    } catch {
+      return m[1];
+    }
+  }
 
-      const res = await fetch('/ask', {
-        method: 'POST',
-        headers,
-        body: JSON.stringify({ question, mode })
-      });
+  function currentMode() {
+    // If you have explicit radio/toggle controls, detect them here.
+    // Fallback: "reason" unless a #modeRobot exists and is active.
+    const reasonActive = !!modeReason && modeReason.getAttribute('aria-checked') === 'true' || modeReason?.classList?.contains('active');
+    const robotActive  = !!modeRobot && modeRobot.getAttribute('aria-checked') === 'true'  || modeRobot?.classList?.contains('active');
+    return robotActive ? 'robot' : 'reason';
+  }
 
-      const raw = await res.text();
-      let data;
-      try { data = JSON.parse(raw); } catch { data = { answer: raw }; }
+  function renderRefsFromData(data) {
+    // Supports either `data.references_block` (preformatted string)
+    // OR an array `data.references` of {title, url, ...}
+    if (!refsSection) return;
 
-      answerPre.textContent = data.answer ?? '(no answer)';
-      rationalePre.textContent = data.rationale ?? '';
-      if (Array.isArray(data.references) && data.references.length) {
-        refsSection.classList.remove('hidden');
-        refsList.innerHTML = (data.references || []).map((r, i) => {
-          const authors = Array.isArray(r.authors) ? r.authors.join(', ') : (r.authors || '');
-          const title = r.title || `Reference ${i + 1}`;
-          const journal = r.journal || '';
-          const year = r.year || '';
-          const volume = r.volume || '';
-          const pages = r.pages || '';
-          const doi = r.doi ? `https://doi.org/${r.doi}` : '';
-          const url = r.url || doi || '#';
-          // Compose ACS format
-          const acs = `${authors}. <i>${title}</i>. <b>${journal}</b> ${year}, ${volume}, ${pages}. <a href="${url}" target="_blank" rel="noopener">${r.doi || url}</a>`;
-          return `<li>${acs}</li>`;
-        }).join('');
+    const block = data?.references_block;
+    const arr   = data?.references;
+
+    // Clear old
+    if (refsList) refsList.innerHTML = '';
+
+    if (block && typeof block === 'string') {
+      // Render block safely inside a <pre>, but as list if it starts with "1. "
+      const lines = block.split(/\r?\n/).filter(Boolean);
+      if (refsList && lines.length) {
+        lines.forEach(line => {
+          const li = document.createElement('li');
+          li.textContent = line.replace(/^\s*\d+\.\s*/, '');
+          refsList.appendChild(li);
+        });
+        refsSection?.classList?.remove('hidden');
       } else {
-        refsSection.classList.add('hidden');
-        refsList.innerHTML = '';
+        refsSection?.classList?.add('hidden');
       }
-
-      askMsg.textContent = res.ok ? 'Done.' : `Error ${res.status}`;
-    } catch (err) {
-      console.error(err);
-      askMsg.textContent = 'Error. Check console.';
-    } finally {
-      askBtn.disabled = false;
-    }
-  });
-
-  // Parse button (Convert to JSON + Download)
-  parseBtn?.addEventListener('click', async () => {
-  const text = answerPre?.textContent || '';
-  if (!text) return;
-
-  parseBtn.disabled = true;
-  parseBtn.textContent = 'Converting…';
-
-  try {
-    const headers = { 'Content-Type': 'application/json' };
-    const csrf = readCsrfToken();
-    if (csrf) headers['X-CSRFToken'] = csrf;
-
-    const res = await fetch('/parse', {
-      method: 'POST',
-      headers,
-      body: JSON.stringify({ text })
-    });
-
-    const data = await res.json();
-    if (!data || !data.ok || !data.data) {
-      throw new Error(data?.error || 'Parse failed');
+      return;
     }
 
-    const pretty = JSON.stringify(data.data, null, 2);
+    if (Array.isArray(arr) && arr.length && refsList) {
+      arr.forEach(r => {
+        const li = document.createElement('li');
+        // Prefer title + link if available
+        if (r?.url) {
+          const a = document.createElement('a');
+          a.href = r.url;
+          a.textContent = r.title ? r.title : (r.url);
+          a.target = '_blank';
+          a.rel = 'noopener noreferrer';
+          li.appendChild(a);
+          if (r?.meta) {
+            const small = document.createElement('small');
+            small.textContent = ' ' + r.meta;
+            li.appendChild(small);
+          }
+        } else {
+          li.textContent = r?.title ? r.title : JSON.stringify(r);
+        }
+        refsList.appendChild(li);
+      });
+      refsSection?.classList?.remove('hidden');
+      return;
+    }
 
-    if (jsonBlock) jsonBlock.textContent = pretty;
-    document.getElementById('jsonBlock')?.classList.remove('hidden');
+    // Nothing to show
+    refsSection?.classList?.add('hidden');
+  }
 
-    // Trigger download
-    const blob = new Blob([pretty], { type: 'application/json' });
+  function download(filename, content, type='application/octet-stream') {
+    const blob = new Blob([content], { type });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = (data.filename || 'converted') + '.json';
-    document.body.appendChild(a); // needed for Firefox
+    a.download = filename;
+    document.body.appendChild(a);
     a.click();
     a.remove();
     URL.revokeObjectURL(url);
-
-  } catch (err) {
-    console.error(err);
-    if (jsonBlock) jsonBlock.textContent = 'Request failed';
-    document.getElementById('jsonBlock')?.classList.remove('hidden');
-  } finally {
-    parseBtn.disabled = false;
-    parseBtn.textContent = 'Convert → JSON';
   }
-});
 
-  // Upload button
-  uploadBtn?.addEventListener('click', async () => {
-    const file = fileInput?.files?.[0];
-    if (!file) return;
-    uploadBtn.disabled = true;
-    uplMsg.textContent = 'Uploading…';
-    uplMsg.classList.remove('hidden');
+  async function fetchJSON(url, options = {}) {
+    const headers = options.headers ? { ...options.headers } : {};
+    const csrf = readCsrfToken();
+    if (csrf) headers['X-CSRF-Token'] = csrf;
+    return fetch(url, { ...options, headers });
+  }
+
+  // -------- Event handlers --------
+
+  // Ask
+  askBtn?.addEventListener('click', async () => {
+    const question = qInput?.value?.trim();
+    if (!question) return;
+
+    askBtn.disabled = true;
+    askMsg?.classList?.remove('hidden');
+    askMsg && (askMsg.textContent = 'Asking…');
 
     try {
-      const headers = {};
-      const csrf = readCsrfToken();
-      if (csrf) headers['X-CSRFToken'] = csrf;
-
-      const fd = new FormData();
-      fd.append('file', file);
-
-      const res = await fetch('/upload', {
+      const res = await fetchJSON('/ask', {
         method: 'POST',
-        headers,
-        body: fd
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ question, mode: currentMode() })
       });
+      const data = await res.json();
 
-      const json = await res.json();
-      if (json.ok) {
-        uplMsg.textContent = 'Uploaded OK';
-        if (json.filename) {
-          const li = document.createElement('li');
-          li.textContent = json.filename;
-          uplList?.appendChild(li);
-        }
-      } else {
-        uplMsg.textContent = 'Upload error: ' + (json.error || 'unknown');
-      }
+      // Update UI
+      answerPre && (answerPre.textContent = data.answer || '');
+      rationalePre && (rationalePre.textContent = data.rationale || '');
+      renderRefsFromData(data);
+
+      // If server returns history id, store it on the answer pre for later
+      if (data?._id && answerPre) answerPre.setAttribute('data-id', data._id);
 
     } catch (err) {
       console.error(err);
-      uplMsg.textContent = 'Upload failed';
+      askMsg && (askMsg.textContent = 'Error while asking.');
+    } finally {
+      askBtn.disabled = false;
+      setTimeout(() => askMsg && (askMsg.textContent = ''), 1200);
+    }
+  });
+
+  // Convert → JSON (parse current answer)
+  parseBtn?.addEventListener('click', async () => {
+    const answerText = answerPre?.textContent?.trim();
+    if (!answerText) return;
+
+    parseBtn.disabled = true;
+    try {
+      const res = await fetchJSON('/parse', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text: answerText })
+      });
+      const data = await res.json();
+      const pretty = JSON.stringify(data, null, 2);
+      jsonPre && (jsonPre.textContent = pretty);
+      // Offer a download of the JSON too
+      download('answer.json', pretty, 'application/json');
+    } catch (err) {
+      console.error(err);
+    } finally {
+      parseBtn.disabled = false;
+    }
+  });
+
+  // Upload a PDF or file to /upload
+  uploadBtn?.addEventListener('click', async () => {
+    const file = fileInput?.files?.[0];
+    if (!file) return;
+
+    uploadBtn.disabled = true;
+    try {
+      const fd = new FormData();
+      fd.append('file', file);
+      const res = await fetchJSON('/upload', {
+        method: 'POST',
+        body: fd
+      });
+      const data = await res.json();
+      alert(data?.ok ? 'Upload OK' : ('Upload failed: ' + (data?.error || 'unknown')));
+    } catch (err) {
+      console.error(err);
+      alert('Upload failed.');
     } finally {
       uploadBtn.disabled = false;
     }
   });
 
-  // History button
+  // Load history
   historyBtn?.addEventListener('click', async () => {
     try {
-      const res = await fetch('/api/history');
-      const data = await res.json();
-      const items = data.items || [];
-      historyList.innerHTML = items.map(r =>
-        `<li><a href="#" data-id="${r._id}">${r.question || '(no question)'}</a></li>`
-      ).join('');
+      const res = await fetchJSON('/api/history', { method: 'GET' });
+      const items = await res.json();
+      if (!Array.isArray(items)) return;
 
-      // Add click handler for each link
-      historyList.querySelectorAll('a[data-id]').forEach(a => {
-        a.addEventListener('click', async (e) => {
-          e.preventDefault();
-          const id = a.getAttribute('data-id');
-          if (!id) return;
-          try {
-            const res = await fetch(`/api/history/${id}`);
-            const data = await res.json();
-            answerPre.textContent = data.answer ?? '(no answer)';
-            rationalePre.textContent = data.rationale ?? '';
-          } catch (err) {
-            console.error(err);
-          }
-        });
+      // Clear list safely
+      if (historyList) historyList.innerHTML = '';
+
+      items.forEach(rec => {
+        const li = document.createElement('li');
+        const a = document.createElement('a');
+        a.href = '#';
+        if (rec?._id) a.setAttribute('data-id', rec._id);
+        a.textContent = rec?.question || '(no question)';
+        li.appendChild(a);
+        historyList?.appendChild(li);
       });
     } catch (err) {
       console.error(err);
     }
   });
 
-  // Save as TXT button (Export answer)
-  saveTxtBtn?.addEventListener('click', () => {
-    const text = answerPre?.textContent || '';
-    if (!text) return;
-
-    const blob = new Blob([text], { type: 'text/plain' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'answer.txt';
-    document.body.appendChild(a); // Required for Firefox
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-  });
-
-  // Built-in file upload
-  builtinDrop?.addEventListener('click', () => builtinFile?.click());
-  builtinDrop?.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') builtinFile?.click();
-  });
-  builtinDrop?.addEventListener('dragover', (e) => {
+  // Click on a history item → load the full record
+  historyList?.addEventListener('click', async (e) => {
+    const target = e.target;
+    if (!(target instanceof Element)) return;
+    if (target.tagName !== 'A') return;
     e.preventDefault();
-    builtinDrop.classList.add('dragover');
-  });
-  builtinDrop?.addEventListener('dragleave', () => {
-    builtinDrop.classList.remove('dragover');
-  });
-  builtinDrop?.addEventListener('drop', (e) => {
-    e.preventDefault();
-    builtinDrop.classList.remove('dragover');
-    if (e.dataTransfer.files.length) {
-      builtinFile.files = e.dataTransfer.files;
-      uploadBuiltinFiles(e.dataTransfer.files);
+    const id = target.getAttribute('data-id');
+    if (!id) return;
+
+    try {
+      const res = await fetchJSON(`/api/history/${encodeURIComponent(id)}`, { method: 'GET' });
+      const data = await res.json();
+
+      answerPre && (answerPre.textContent = data.answer || '');
+      rationalePre && (rationalePre.textContent = data.rationale || '');
+      renderRefsFromData(data);
+    } catch (err) {
+      console.error(err);
     }
   });
-  builtinFile?.addEventListener('change', () => {
-    if (builtinFile.files.length) uploadBuiltinFiles(builtinFile.files);
-  });
 
-  async function uploadBuiltinFiles(files) {
-    if (!files.length) return;
-    builtinMsg.textContent = 'Uploading…';
-    builtinMsg.classList.remove('hidden');
+  // Optional: upload a built-in dataset or config
+  builtinBtn?.addEventListener('click', async () => {
+    const file = builtinFile?.files?.[0];
+    if (!file) return;
+    builtinBtn.disabled = true;
+    if (builtinMsg) builtinMsg.textContent = 'Uploading…';
     try {
       const fd = new FormData();
-      for (const file of files) fd.append('file', file);
-
-      // Add CSRF token to headers
-      const headers = {};
-      const csrf = readCsrfToken();
-      if (csrf) headers['X-CSRFToken'] = csrf;
-
-      const res = await fetch('/upload_builtin', {
+      fd.append('file', file);
+      const res = await fetchJSON('/upload_builtin', {
         method: 'POST',
-        headers,
         body: fd
       });
       const json = await res.json();
-      builtinMsg.textContent = json.ok ? 'Uploaded OK' : 'Error: ' + (json.error || 'unknown');
+      if (builtinMsg) {
+        builtinMsg.textContent = json.ok ? 'Uploaded OK' : 'Error: ' + (json.error || 'unknown');
+      }
     } catch (err) {
-      builtinMsg.textContent = 'Upload failed';
+      if (builtinMsg) builtinMsg.textContent = 'Upload failed';
       console.error(err);
+    } finally {
+      builtinBtn.disabled = false;
     }
-  }
+  });
+
+  // Default mode toggle 
+  modeReason?.addEventListener('click', () => {
+    modeReason?.setAttribute('aria-checked', 'true');
+    modeRobot?.setAttribute('aria-checked', 'false');
+    modeReason?.classList?.add('active');
+    modeRobot?.classList?.remove('active');
+  });
+
+  modeRobot?.addEventListener('click', () => {
+    modeRobot?.setAttribute('aria-checked', 'true');
+    modeReason?.setAttribute('aria-checked', 'false');
+    modeRobot?.classList?.add('active');
+    modeReason?.classList?.remove('active');
+  });
 
   // Auto-load history on page load
-  if (historyBtn) historyBtn.click();
+  historyBtn?.click();
 });
