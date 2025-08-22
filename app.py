@@ -609,10 +609,11 @@ def ask():
                 seen.add(s); uniq.append(s)
         return uniq[:6]
 
-    def _harvest_reindex(queries: list[str], use_grobid: bool | None = None) -> None:
+    def _harvest_reindex(queries: list[str], use_grobid: bool | None = None) -> list[dict]:
         """
         Harvest new papers for the given queries and rebuild the retriever index.
-        Side-effects only. No prompting, no KB, no DuckDB, no DB writes.
+        Returns a list of reference dicts extracted from the chosen bundle so the agent
+        can cite them immediately (even before/independent of retriever hits).
         """
         import tempfile, os, sys, subprocess, json
         from pathlib import Path
@@ -623,7 +624,7 @@ def ask():
         out_dir.mkdir(parents=True, exist_ok=True)
 
         # ------------- config -------------
-        max_results = os.getenv("HARVEST_MAX_RESULTS", "6")
+        max_results = os.getenv("HARVEST_MAX_RESULTS", "8")
         cfg = (
             "out_dir: {od}\n"
             "queries:\n{qs}\n"
@@ -669,7 +670,7 @@ def ask():
             except FileNotFoundError:
                 return False
 
-        # --------- 1) harvest -> harvester/out_auto/bundle.jsonl ---------
+        # --------- 1) harvest ---------
         with tempfile.NamedTemporaryFile("w", suffix=".yaml", delete=False) as tf:
             tf.write(cfg)
             cfg_path = tf.name
@@ -680,30 +681,41 @@ def ask():
 
         if rc != 0 and not partial_ok:
             print("[harvest_reindex] harvest failed and no bundle produced; skipping index.")
-            return
-        elif rc != 0 and partial_ok:
+            return []
+
+        if rc != 0 and partial_ok:
             print("[harvest_reindex] harvest non-zero, but bundle exists — continuing with index.")
 
         # --------- 2) add fallback (methods) ---------
-        methods_bundle = ROOT / "harvester" / "out_auto" / "bundle_with_methods.jsonl"
+        merged_bundle = out_dir / "bundle_with_methods.jsonl"
         _stream([
             "python", str(ROOT/"scripts/bundle_add_fallback.py"),
-            str(bundle_raw), str(methods_bundle)
+            str(bundle_raw), str(merged_bundle)
         ])
 
-        # --------- 3) choose freshest bundle + text_key, then index ---------
-
+        # --------- 3) choose bundle + text_key ---------
+        # (Assumes BUNDLE_AUTO/MERGED/PLAIN/INDEX_DIR defined at module top)
         bundle_for_index = None
         text_key = "methods"
         if BUNDLE_AUTO.exists():
             bundle_for_index = BUNDLE_AUTO
-        elif BUNDLE_MERGED.exists():
-            bundle_for_index = BUNDLE_MERGED
+        elif (ROOT / "out" / "bundle_with_methods.jsonl").exists():
+            bundle_for_index = ROOT / "out" / "bundle_with_methods.jsonl"
+        elif BUNDLE_PLAIN.exists():
+            bundle_for_index = BUNDLE_PLAIN
+            text_key = "text"
+        else:
+            # fall back to the ones we just wrote in out_auto
+            if merged_bundle.exists():
+                bundle_for_index = merged_bundle
+            elif bundle_raw.exists():
+                bundle_for_index = bundle_raw
 
         if bundle_for_index is None:
             print("[harvest_reindex] No bundle found to index.")
-            return
+            return []
 
+        # --------- 4) index ---------
         _stream([
             "python", str(ROOT/"retriever/index_jsonl.py"),
             "--bundle", str(bundle_for_index),
@@ -712,12 +724,81 @@ def ask():
         ])
         print(f"[harvest_reindex] indexed {bundle_for_index} (text_key={text_key}) → {INDEX_DIR}")
 
-        # --------- 4) ping retriever to reload (best-effort) ---------
+        # --------- 5) ping retriever ---------
         try:
             with httpx.Client(timeout=20) as s:
                 s.post("http://127.0.0.1:8000/reload")
         except Exception:
             pass
+
+        # --------- 6) BUILD REFERENCE TABLE from the chosen bundle ---------
+        def _mk_ref(rec: dict) -> dict:
+            def _author_names(auths):
+                out = []
+                if isinstance(auths, list):
+                    for a in auths:
+                        if isinstance(a, str):
+                            out.append(a)
+                        elif isinstance(a, dict):
+                            n = (
+                                a.get("name")
+                                or " ".join(x for x in [a.get("first"), a.get("last")] if x)
+                                or " ".join(x for x in [a.get("given"), a.get("family")] if x)
+                            )
+                            if n:
+                                out.append(n)
+                return out
+
+            title = (rec.get("title") or rec.get("name") or "").strip()
+            paper_id = str(rec.get("paper_id") or "")
+            doi = (rec.get("doi") or (paper_id if paper_id.startswith("10.") else "") or "").strip()
+            url = (
+                rec.get("url") or rec.get("oa_url") or rec.get("pdf_url")
+                or (f"https://doi.org/{doi}" if doi else "")
+                or ""
+            ).strip()
+            # year: try explicit, else parse YYYY out of date-like fields
+            year = rec.get("year") or rec.get("publication_year")
+            if not year:
+                for k in ("date", "published", "pub_date"):
+                    v = rec.get(k)
+                    if isinstance(v, str) and len(v) >= 4 and v[:4].isdigit():
+                        year = v[:4]
+                        break
+            year = str(year or "")
+            authors = rec.get("authors") or rec.get("authorships") or rec.get("metadata", {}).get("authors") or []
+            authors = _author_names(authors) or authors  # normalize to list of strings if possible
+
+            return {
+                "title": title,
+                "year": year,
+                "url": url,
+                "doi": doi,
+                "authors": authors,
+                "biblio": {},
+            }
+
+        harvest_refs: list[dict] = []
+        try:
+            import json
+            with bundle_for_index.open("r", encoding="utf-8") as f:
+                for i, line in enumerate(f):
+                    if i >= 40:  # cap to keep prompt small
+                        break
+                    line = line.strip()
+                    if not line:
+                        continue
+                    try:
+                        rec = json.loads(line)
+                    except Exception:
+                        continue
+                    ref = _mk_ref(rec)
+                    if ref.get("title"):
+                        harvest_refs.append(ref)
+        except Exception as e:
+            print("[harvest_reindex] refs build warn:", e)
+
+        return harvest_refs
 
     # ----------------- KB search + fetch -----------------
     kb_ctx = ""
@@ -758,9 +839,10 @@ def ask():
     hits = retriever_search(question, k=web_k, mode="hybrid", alpha=0.7) or []
 
     # If evidence thin, optionally auto-harvest -> reindex -> reload -> retry once
+    harvest_refs = []  
     if allow_fetch and _needs_more(hits):
         try:
-            _harvest_reindex(_expand_queries(question))
+            harvest_refs = _harvest_reindex(_expand_queries(question)) or []   # <— collect refs
             hits = retriever_search(question, k=web_k, mode="hybrid", alpha=0.7) or []
         except Exception as e:
             print("[/ask] auto-harvest failed:", e)
@@ -783,16 +865,11 @@ def ask():
 
     refs = []
     seen = set()
-    for r in web_refs + kb_refs_raw:
+    for r in (web_refs + kb_refs_raw + (harvest_refs or [])):   
         key = _normkey(r)
         if key and key not in seen:
             refs.append(r)
             seen.add(key)
-
-    refs_prompt = "\n".join(
-        f"[{i+1}] {(r.get('title') or '(no title)')} ({r.get('year') or ''}) — {_ref_url(r)}"
-        for i, r in enumerate(refs)
-    ).strip()
 
     # ----------------- Compose CONTEXT -----------------
     ctx_parts = []
@@ -805,21 +882,21 @@ def ask():
     robot_rules = (
         "Return a discrete lab protocol with exact quantities on a small scale (~0.5 mmol Co):\n"
         " - Include specific masses (mg) or mmol for reagents; volumes (mL) for liquids.\n"
-        " - Specify temperatures (°C), ramp rates (°C/min), hold times (min/h), and atmosphere (Ar/N2/vacuum).\n"
+        " - Specify temperatures (°C), ramp rates (°C/min), and hold times (min/h).\n"
         " - Include workup and purification (quench, washing/centrifugation, drying) with volumes.\n"
         " - No placeholders (avoid “e.g.”/“or”). Be decisive.\n"
         " - Output only the final protocol in markdown. Do not include any fenced blocks named reason or rationale in the answer. Put all reasoning in the separate rationale channel."
     )
     reasoning_rules = (
         " - Provide a mechanistic explanation and design considerations for the target.\n"
-        " - Focus on: nucleation vs growth; ligand/solvent coordination; \n" 
-        " - IMPORTANT: why certain precursors over others; and IMPORTANT: why certain reagents over other.\n"
+        " - Focus on: nucleation vs growth; ligand/solvent coordination; " 
+        "IMPORTANT: specify why certain precursors over others; and IMPORTANT: why certain reagents over others.\n"
+        " - Do NOT say generic statements, or say you only chose things because they were in context or references. Specify your reasoning.\n"
         " - Do NOT return a step-by-step protocol. Be concise but specific."
     )
     inline_rule = (
         " - When you pull a fact from any numbered REFERENCE, put its number in square brackets right after the sentence "
-        "(e.g. “hydrothermal at 200 °C [3]”)." if want_inline else
-        " - Inline numeric citations are optional for this request."
+        " - (e.g. “hydrothermal at 200 °C [3]”)."
     )
     acs_rule = (
         " - Write the REFERENCES block in ACS format: author(s), title, journal, year, volume, pages, DOI.\n"
