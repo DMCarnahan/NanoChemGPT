@@ -1,59 +1,159 @@
 document.addEventListener('DOMContentLoaded', () => {
   const $ = (id) => document.getElementById(id);
 
-  // --- Elements (all optional-chained) ---
-  const askBtn        = $('askBtn');
-  const parseBtn      = $('parseBtn');
-  const uploadBtn     = $('uploadBtn');
-  const fileInput     = $('fileInput');
-  const qInput        = $('question');
-  const askMsg        = $('askMsg');
-  const answerPre     = $('answerPre');
-  const rationalePre  = $('rationalePre');
-  const refsSection   = $('refsSection');
-  const refsList      = $('refsList');
-  const jsonPre       = $('jsonPre');
-  const historyBtn    = $('historyBtn');
-  const historyList   = $('historyList');
-  const builtinBtn    = $('builtinBtn');
-  const builtinFile   = $('builtinFile');
-  const builtinMsg    = $('builtinMsg');
+  // Elements
+  const askBtn = $('askBtn');
+  const parseBtn = $('parseBtn');
+  const uploadBtn = $('uploadBtn');
+  const fileInput = $('fileInput');
+  const qInput = $('question');
+  const askMsg = $('askMsg');
+  const answerPre = $('answerPre');
+  const rationalePre = $('rationalePre');
+  const refsSection = $('refsSection');
+  const refsList = $('refsList');
+  const jsonBlock = $('jsonPre');
+  const uplList = $('uplList');
+  const uplMsg = $('uplMsg');
+  const historyBtn = $('historyBtn');
+  const historyList = $('historyList');
+  const modeRobot = $('modeRobot');
+  const modeReason = $('modeReason');
+  const saveTxtBtn = $('saveTxtBtn');
+  const builtinDrop = $('builtinDrop');
+  const builtinFile = $('builtinFile');
+  const builtinMsg = $('builtinMsg');
 
-  const modeReason    = $('modeReason');
-  const modeRobot     = $('modeRobot');
-  const convertBtn    = $('convertBtn');
+  let mode = 'robot';
 
-  // -------- Utilities --------
-  function escapeHtml(s) {
-    if (s == null) return '';
-    return String(s)
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;')
-      .replace(/"/g, '&quot;')
-      .replace(/'/g, '&#39;')
-      .replace(/\//g, '&#x2F;');
-  }
+  // Mode toggle
+  modeRobot?.addEventListener('click', () => {
+    mode = 'robot';
+    modeRobot.setAttribute('aria-checked', 'true');
+    modeReason?.setAttribute('aria-checked', 'false');
+    modeRobot.classList.add('active');
+    modeReason?.classList.remove('active');
+  });
+  modeReason?.addEventListener('click', () => {
+    mode = 'reasoning';
+    modeReason.setAttribute('aria-checked', 'true');
+    modeRobot?.setAttribute('aria-checked', 'false');
+    modeReason.classList.add('active');
+    modeRobot?.classList.remove('active');
+  });
 
   function readCsrfToken() {
-    const m = document.cookie.match(/(?:^|;\s*)csrf_token=([^;]+)/);
-    if (!m) return null;
+    return document.querySelector('meta[name="csrf-token"]')?.content ||
+      (document.cookie.match(/(?:^|;\s*)csrf_token=([^;]+)/)?.[1]);
+  }
+
+  // Ask button
+  askBtn?.addEventListener('click', async () => {
+    const question = qInput?.value.trim();
+    if (!question) return;
+
+    askBtn.disabled = true;
+    askMsg.classList.remove('hidden');
+    askMsg.textContent = 'Asking…';
+
     try {
-      return decodeURIComponent(m[1]);
-    } catch {
-      return m[1];
+      const headers = { 'Content-Type': 'application/json' };
+      const csrf = readCsrfToken();
+      if (csrf) headers['X-CSRFToken'] = csrf;
+
+      const res = await fetch('/ask', {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({ question, mode })
+      });
+
+      const raw = await res.text();
+      let data;
+      try { data = JSON.parse(raw); } catch { data = { answer: raw }; }
+
+      answerPre.textContent = data.answer ?? '(no answer)';
+      rationalePre.textContent = data.rationale ?? '';
+      renderRefsFromData(data);
+      // ----- References (used-only), with fallback to preformatted block -----
+  const usedIdxSet = new Set(
+    Array.isArray(data.used_ref_indexes) ? data.used_ref_indexes.map(Number) : []
+  );
+  const haveStructured = Array.isArray(data.refs) && data.refs.length > 0;
+  const haveBlock = typeof data.references_block === 'string' && data.references_block.trim().length > 0;
+
+  // clear any previous <pre> block if we switch back to list mode
+  refsSection.querySelector('.refs-pre')?.remove();
+
+  if (haveStructured && usedIdxSet.size > 0) {
+    refsSection.classList.remove('hidden');
+    refsList.innerHTML = data.refs
+      .map((r, i) => ({ r, i: i + 1 }))
+      .filter(x => usedIdxSet.has(x.i))
+      .map(({ r, i }) => {
+        const authors = Array.isArray(r.authors) ? r.authors.join(', ') : (r.authors || '');
+        const title = r.title || `Reference ${i}`;
+        const journal = (r.biblio && r.biblio.journal) || r.journal || '';
+        const year = r.year || (r.biblio && r.biblio.year) || '';
+        const volume = (r.biblio && r.biblio.volume) || r.volume || '';
+        const pages = (r.biblio && r.biblio.pages) || r.pages || '';
+        const doiUrl = r.doi ? `https://doi.org/${r.doi}` : '';
+        const url = r.url || doiUrl || '#';
+        const acs = `${authors}. <i>${title}</i>. <b>${journal}</b> ${year}, ${volume}, ${pages}. ` +
+                    `<a href="${url}" target="_blank" rel="noopener">${r.doi || url}</a>`;
+        return `<li>${acs}</li>`;
+      })
+      .join('');
+  } else if (haveBlock) {
+    refsSection.classList.remove('hidden');
+    refsList.innerHTML = '';
+    const pre = document.createElement('pre');
+    pre.className = 'refs-pre';
+    pre.textContent = data.references_block.trim();
+    refsSection.appendChild(pre);
+  } else {
+    refsSection.classList.add('hidden');
+    refsList.innerHTML = '';
+  }
+
+      askMsg.textContent = res.ok ? 'Done.' : `Error ${res.status}`;
+    } catch (err) {
+      console.error(err);
+      askMsg.textContent = 'Error. Check console.';
+    } finally {
+      askBtn.disabled = false;
     }
-  }
+  });
 
-  function currentMode() {
-    // If you have explicit radio/toggle controls, detect them here.
-    // Fallback: "reason" unless a #modeRobot exists and is active.
-    const reasonActive = !!modeReason && (modeReason.getAttribute('aria-checked') === 'true' || modeReason?.classList?.contains('active'));
-    const robotActive  = !!modeRobot && (modeRobot.getAttribute('aria-checked') === 'true'  || modeRobot?.classList?.contains('active'));
-    return robotActive ? 'robot' : 'reason';
-  }
+  // Parse button (Convert to JSON + Download)
+  parseBtn?.addEventListener('click', async () => {
+  const text = answerPre?.textContent || '';
+  if (!text) return;
 
-  function renderRefsFromData(data) {
+  parseBtn.disabled = true;
+  parseBtn.textContent = 'Converting…';
+
+  try {
+    const headers = { 'Content-Type': 'application/json' };
+    const csrf = readCsrfToken();
+    if (csrf) headers['X-CSRFToken'] = csrf;
+
+    const res = await fetch('/parse', {
+      method: 'POST',
+      headers,
+      body: JSON.stringify({ text })
+    });
+
+    const data = await res.json();
+    if (!data || !data.ok || !data.data) {
+      throw new Error(data?.error || 'Parse failed');
+    }
+
+    const pretty = JSON.stringify(data.data, null, 2);
+
+    if (jsonBlock) jsonBlock.textContent = pretty;
+    document.getElementById('jsonBlock')?.classList.remove('hidden');
+
+    function renderRefsFromData(data) {
     // Supports either `data.references_block` (preformatted string)
     // OR an array `data.references` of {title, url, ...}
     if (!refsSection) return;
@@ -109,193 +209,167 @@ document.addEventListener('DOMContentLoaded', () => {
     refsSection?.classList?.add('hidden');
   }
 
-  function download(filename, content, type='application/octet-stream') {
-    const blob = new Blob([content], { type });
+    // Trigger download
+    const blob = new Blob([pretty], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = filename;
-    document.body.appendChild(a);
+    a.download = (data.filename || 'converted') + '.json';
+    document.body.appendChild(a); // needed for Firefox
     a.click();
     a.remove();
     URL.revokeObjectURL(url);
+
+  } catch (err) {
+    console.error(err);
+    if (jsonBlock) jsonBlock.textContent = 'Request failed';
+    document.getElementById('jsonBlock')?.classList.remove('hidden');
+  } finally {
+    parseBtn.disabled = false;
+    parseBtn.textContent = 'Convert → JSON';
   }
+});
 
-  async function fetchJSON(url, options = {}) {
-    const headers = options.headers ? { ...options.headers } : {};
-    const csrf = readCsrfToken();
-    if (csrf) headers['X-CSRF-Token'] = csrf;
-    return fetch(url, { ...options, headers });
-  }
-
-  // -------- Event handlers --------
-
-  // Ask
-  askBtn?.addEventListener('click', async () => {
-    const question = qInput?.value?.trim();
-    if (!question) return;
-
-    askBtn.disabled = true;
-    askMsg?.classList?.remove('hidden');
-    askMsg && (askMsg.textContent = 'Asking…');
-
-    try {
-      const res = await fetchJSON('/ask', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ question, mode: currentMode() })
-      });
-      const data = await res.json();
-
-      // Update UI
-      answerPre && (answerPre.textContent = data.answer || '');
-      rationalePre && (rationalePre.textContent = data.rationale || '');
-      renderRefsFromData(data);
-
-      // If server returns history id, store it on the answer pre for later
-      if (data?._id && answerPre) answerPre.setAttribute('data-id', data._id);
-
-    } catch (err) {
-      console.error(err);
-      askMsg && (askMsg.textContent = 'Error while asking.');
-    } finally {
-      askBtn.disabled = false;
-      setTimeout(() => askMsg && (askMsg.textContent = ''), 1200);
-    }
-  });
-
-  // Convert → JSON (parse current answer)
-  parseBtn?.addEventListener('click', async () => {
-    const answerText = answerPre?.textContent?.trim();
-    if (!answerText) return;
-
-    parseBtn.disabled = true;
-    try {
-      const res = await fetchJSON('/parse', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ text: answerText })
-      });
-      const data = await res.json();
-      const pretty = JSON.stringify(data, null, 2);
-      jsonPre && (jsonPre.textContent = pretty);
-      // Offer a download of the JSON too
-      download('answer.json', pretty, 'application/json');
-    } catch (err) {
-      console.error(err);
-    } finally {
-      parseBtn.disabled = false;
-    }
-  });
-
-  // Upload a PDF or file to /upload
+  // Upload button
   uploadBtn?.addEventListener('click', async () => {
     const file = fileInput?.files?.[0];
     if (!file) return;
-
     uploadBtn.disabled = true;
+    uplMsg.textContent = 'Uploading…';
+    uplMsg.classList.remove('hidden');
 
     try {
+      const headers = {};
+      const csrf = readCsrfToken();
+      if (csrf) headers['X-CSRFToken'] = csrf;
+
       const fd = new FormData();
       fd.append('file', file);
-      const res = await fetchJSON('/upload', {
+
+      const res = await fetch('/upload', {
         method: 'POST',
+        headers,
         body: fd
       });
-      const data = await res.json();
-      alert(data?.ok ? 'Upload OK' : ('Upload failed: ' + (data?.error || 'unknown')));
+
+      const json = await res.json();
+      if (json.ok) {
+        uplMsg.textContent = 'Uploaded OK';
+        if (json.filename) {
+          const li = document.createElement('li');
+          li.textContent = json.filename;
+          uplList?.appendChild(li);
+        }
+      } else {
+        uplMsg.textContent = 'Upload error: ' + (json.error || 'unknown');
+      }
+
     } catch (err) {
       console.error(err);
-      alert('Upload failed.');
+      uplMsg.textContent = 'Upload failed';
     } finally {
       uploadBtn.disabled = false;
     }
   });
 
-  // Load history
+  // History button
   historyBtn?.addEventListener('click', async () => {
     try {
-      const res = await fetchJSON('/api/history', { method: 'GET' });
-      const items = await res.json();
-      if (!Array.isArray(items)) return;
+      const res = await fetch('/api/history');
+      const data = await res.json();
+      const items = data.items || [];
+      historyList.innerHTML = items.map(r =>
+        `<li><a href="#" data-id="${r._id}">${r.question || '(no question)'}</a></li>`
+      ).join('');
 
-      // Clear list safely
-      if (historyList) historyList.innerHTML = '';
-
-      items.forEach(rec => {
-        const li = document.createElement('li');
-        const a = document.createElement('a');
-        a.href = '#';
-        if (rec?._id) a.setAttribute('data-id', rec._id);
-        a.textContent = rec?.question || '(no question)';
-        li.appendChild(a);
-        historyList?.appendChild(li);
+      // Add click handler for each link
+      historyList.querySelectorAll('a[data-id]').forEach(a => {
+        a.addEventListener('click', async (e) => {
+          e.preventDefault();
+          const id = a.getAttribute('data-id');
+          if (!id) return;
+          try {
+            const res = await fetch(`/api/history/${id}`);
+            const data = await res.json();
+            answerPre.textContent = data.answer ?? '(no answer)';
+            rationalePre.textContent = data.rationale ?? '';
+            renderRefsFromData(data);
+          } catch (err) {
+            console.error(err);
+          }
+        });
       });
     } catch (err) {
       console.error(err);
     }
   });
 
-  // Click on a history item → load the full record
-  historyList?.addEventListener('click', async (e) => {
-    const target = e.target;
-    if (!(target instanceof Element)) return;
-    if (target.tagName !== 'A') return;
-    e.preventDefault();
-    const id = target.getAttribute('data-id');
-    if (!id) return;
+  // Save as TXT button (Export answer)
+  saveTxtBtn?.addEventListener('click', () => {
+    const text = answerPre?.textContent || '';
+    if (!text) return;
 
-    try {
-      const res = await fetchJSON(`/api/history/${encodeURIComponent(id)}`, { method: 'GET' });
-      const data = await res.json();
-      answerPre && (answerPre.textContent = data.answer || '');
-      rationalePre && (rationalePre.textContent = data.rationale || '');
-      renderRefsFromData(data);
-    } catch (err) {
-      console.error(err);
-    }
+    const blob = new Blob([text], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'answer.txt';
+    document.body.appendChild(a); // Required for Firefox
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
   });
 
-  // Optional: upload a built-in dataset or config
-  builtinBtn?.addEventListener('click', async () => {
-    const file = builtinFile?.files?.[0];
-    if (!file) return;
-    builtinBtn.disabled = true;
-    if (builtinMsg) builtinMsg.textContent = 'Uploading…';
+  // Built-in file upload
+  builtinDrop?.addEventListener('click', () => builtinFile?.click());
+  builtinDrop?.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') builtinFile?.click();
+  });
+  builtinDrop?.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    builtinDrop.classList.add('dragover');
+  });
+  builtinDrop?.addEventListener('dragleave', () => {
+    builtinDrop.classList.remove('dragover');
+  });
+  builtinDrop?.addEventListener('drop', (e) => {
+    e.preventDefault();
+    builtinDrop.classList.remove('dragover');
+    if (e.dataTransfer.files.length) {
+      builtinFile.files = e.dataTransfer.files;
+      uploadBuiltinFiles(e.dataTransfer.files);
+    }
+  });
+  builtinFile?.addEventListener('change', () => {
+    if (builtinFile.files.length) uploadBuiltinFiles(builtinFile.files);
+  });
+
+  async function uploadBuiltinFiles(files) {
+    if (!files.length) return;
+    builtinMsg.textContent = 'Uploading…';
+    builtinMsg.classList.remove('hidden');
     try {
       const fd = new FormData();
-      fd.append('file', file);
-      const res = await fetchJSON('/upload_builtin', {
+      for (const file of files) fd.append('file', file);
+
+      // Add CSRF token to headers
+      const headers = {};
+      const csrf = readCsrfToken();
+      if (csrf) headers['X-CSRFToken'] = csrf;
+
+      const res = await fetch('/upload_builtin', {
         method: 'POST',
+        headers,
         body: fd
       });
       const json = await res.json();
-      if (builtinMsg) {
-        builtinMsg.textContent = json.ok ? 'Uploaded OK' : 'Error: ' + (json.error || 'unknown');
-      }
+      builtinMsg.textContent = json.ok ? 'Uploaded OK' : 'Error: ' + (json.error || 'unknown');
     } catch (err) {
-      if (builtinMsg) builtinMsg.textContent = 'Upload failed';
+      builtinMsg.textContent = 'Upload failed';
       console.error(err);
-    } finally {
-      builtinBtn.disabled = false;
     }
-  });
-
-  // Default mode toggle (if you have two buttons for mode)
-  modeReason?.addEventListener('click', () => {
-    modeReason?.setAttribute('aria-checked', 'true');
-    modeRobot?.setAttribute('aria-checked', 'false');
-    modeReason?.classList?.add('active');
-    modeRobot?.classList?.remove('active');
-  });
-
-  modeRobot?.addEventListener('click', () => {
-    modeRobot?.setAttribute('aria-checked', 'true');
-    modeReason?.setAttribute('aria-checked', 'false');
-    modeRobot?.classList?.add('active');
-    modeReason?.classList?.remove('active');
-  });
+  }
 
   // Auto-load history on page load
-  historyBtn?.click();
+  if (historyBtn) historyBtn.click();
 });
