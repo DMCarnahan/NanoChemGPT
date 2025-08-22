@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-import os, io, json, re, glob, traceback, threading, tempfile, textwrap, subprocess
+import os, io, sys, json, re, glob, traceback, threading, tempfile, textwrap, subprocess
 from datetime import datetime
 from pathlib import Path
 from typing import Any, Set, List, Dict, Optional
@@ -28,13 +28,18 @@ from decider.miner_queue import enqueue_text_mining_job
 from DuckDB.duck_searcher import get_duck_searcher
 
 # ──────────────── Paths/Config ──────────────── #
-BASE_DIR = Path(__file__).resolve().parent
-TEMPLATES_DIR = BASE_DIR / "templates"
-STATIC_DIR = BASE_DIR / "static"
-BUILTIN_DIR = Path(os.getenv("BUILTIN_DIR", BASE_DIR / "builtin")).resolve()
+ROOT = Path(__file__).resolve().parent
+TEMPLATES_DIR = ROOT / "templates"
+STATIC_DIR = ROOT / "static"
+BUILTIN_DIR = Path(os.getenv("BUILTIN_DIR", ROOT / "builtin")).resolve()
 UPLOADS_DIR = Path(os.getenv("UPLOADS_DIR", "/mnt/data/uploads")).resolve()
 LOOKUP_UPLOAD_DIR = Path(os.getenv("LOOKUP_UPLOAD_DIR", "/mnt/data/datasets")).resolve()
 VECTORSTORE_DIR = Path(os.getenv("VECTORSTORE_DIR", "/mnt/data/index")).resolve()
+
+BUNDLE_AUTO   = ROOT / "harvester" / "out_auto" / "bundle.jsonl"
+BUNDLE_MERGED = ROOT / "out" / "bundle_with_methods.jsonl"
+BUNDLE_PLAIN  = ROOT / "out" / "bundle.jsonl"
+INDEX_DIR     = ROOT / "retriever" / "index"
 
 for d in (BUILTIN_DIR, UPLOADS_DIR, LOOKUP_UPLOAD_DIR, VECTORSTORE_DIR):
     d.mkdir(parents=True, exist_ok=True)
@@ -431,6 +436,53 @@ def ask():
       • Computes usage markers via _extract_used_markers.
       • Judges sufficiency and, if thin, optionally harvests more data, reindexes, reloads retriever, and retries once.
     """
+    import re
+    from datetime import datetime
+
+    # ---------- request payload ----------
+    payload  = request.get_json(silent=True) or {}
+    question = (payload.get("question") or payload.get("q") or "").strip()
+    if not question:
+        return jsonify({"ok": False, "error": "Missing 'question'"}), 400
+
+    # These may be filled elsewhere in your code; ensure they're at least defined
+    uploads_ctx = ""
+    table_ctx   = ""
+    table_refs  = []
+
+    # ---------- intent classification (with payload overrides & defaults) ----------
+    try:
+        from decider.intent import classify_intent
+        ci = classify_intent(question) or {}
+    except Exception as e:
+        print("[/ask] classify_intent warn:", e)
+        ci = {}
+
+    # Defaults
+    intent = payload.get("intent") or ci.get("intent") or "protocol"
+    mode   = payload.get("mode")   or ci.get("mode")
+    if not mode:
+        mode = "reasoning" if intent in {"reasoning", "analysis"} else "protocol"
+
+    def _pick_bool(key, default):
+        if key in payload:
+            return bool(payload[key])
+        if key in ci:
+            return bool(ci[key])
+        return default
+
+    def _pick_int(key, default):
+        if key in payload and str(payload[key]).isdigit():
+            return int(payload[key])
+        if isinstance(ci.get(key), int):
+            return int(ci[key])
+        return default
+
+    want_inline = _pick_bool("want_inline", True)
+    allow_fetch = _pick_bool("allow_fetch", True)
+    kb_k        = _pick_int("kb_k", 5)
+    web_k       = _pick_int("web_k", 10)
+
     # ----------------- tiny helpers -----------------
     def _s(x):
         return _safe_text(x)
@@ -487,14 +539,19 @@ def ask():
         return uniq[:6]
 
     def _harvest_reindex(queries: list[str], use_grobid: bool | None = None) -> None:
-        import tempfile, os, sys, subprocess, httpx, json
+        """
+        Harvest new papers for the given queries and rebuild the retriever index.
+        Side-effects only. No prompting, no KB, no DuckDB, no DB writes.
+        """
+        import tempfile, os, sys, subprocess, json
         from pathlib import Path
+        import httpx
 
         ROOT = Path(__file__).resolve().parent
         out_dir = ROOT / "harvester" / "out_auto"
         out_dir.mkdir(parents=True, exist_ok=True)
 
-        # Allow env to control breadth; default smaller to avoid OOM
+        # ------------- config -------------
         max_results = os.getenv("HARVEST_MAX_RESULTS", "8")
         cfg = (
             "out_dir: {od}\n"
@@ -502,19 +559,16 @@ def ask():
             "since_year: 2016\n"
             f"max_results_per_source: {max_results}\n"
             "grobid_url: http://127.0.0.1:8070\n"
-            "unpaywall_email: \"\\"\n"
+            "unpaywall_email: \"\"\n"
         ).format(
             od=str(out_dir).replace("\\", "/"),
             qs="\n".join(f"- {json.dumps(q)}" for q in queries),
         )
 
         env = os.environ.copy()
-        # Default GROBID OFF unless explicitly enabled
         if use_grobid is None:
             use_grobid = env.get("USE_GROBID", "0").lower() in {"1", "true", "yes"}
         env["USE_GROBID"] = "1" if use_grobid else "0"
-
-        # Cap BLAS/numexpr threads to reduce memory
         for var in ("OMP_NUM_THREADS","OPENBLAS_NUM_THREADS","MKL_NUM_THREADS","NUMEXPR_NUM_THREADS"):
             env.setdefault(var, "1")
 
@@ -544,335 +598,290 @@ def ask():
             except FileNotFoundError:
                 return False
 
-        # 1) harvest -> out_auto/bundle.jsonl
+        # --------- 1) harvest -> harvester/out_auto/bundle.jsonl ---------
         with tempfile.NamedTemporaryFile("w", suffix=".yaml", delete=False) as tf:
-            tf.write(cfg); cfg_path = tf.name
-        rc = _stream(["python", str(ROOT/"harvester/harvester.py"), "--config", cfg_path])
+            tf.write(cfg)
+            cfg_path = tf.name
 
+        rc = _stream(["python", str(ROOT/"harvester/harvester.py"), "--config", cfg_path])
         bundle_raw = out_dir / "bundle.jsonl"
         partial_ok = _file_has_lines(bundle_raw, 1)
 
         if rc != 0 and not partial_ok:
-            print("[/ask] harvest step failed; no bundle to use — skipping reindex.", file=sys.stderr)
+            print("[harvest_reindex] harvest failed and no bundle produced; skipping index.")
             return
         elif rc != 0 and partial_ok:
-            print("[/ask] harvest exited non-zero; bundle found -> continuing with index.", file=sys.stderr)
+            print("[harvest_reindex] harvest non-zero, but bundle exists — continuing with index.")
 
-        # 2) optional merge/refresh working bundle
+        # --------- 2) add fallback (methods) → out/bundle_with_methods.jsonl ---------
         methods_bundle = ROOT / "out" / "bundle_with_methods.jsonl"
-        _stream(["python", str(ROOT/"scripts/bundle_add_fallback.py"), str(bundle_raw), str(methods_bundle)])
-
-        # 3) choose bundle & key by inspecting content
-        def _has_text(path: Path, source: str) -> bool:
-            try:
-                with path.open("r", encoding="utf-8") as f:
-                    for line in f:
-                        line = line.strip()
-                        if not line:
-                            continue
-                        try:
-                            rec = json.loads(line)
-                        except Exception:
-                            continue
-                        if source == "methods":
-                            mps = ((rec.get("extractions") or {}).get("methods_paragraphs")) or []
-                            if any(isinstance(d, dict) and isinstance(d.get("text"), str) and d["text"].strip() for d in mps):
-                                return True
-                        elif source == "sections":
-                            secs = rec.get("sections") or []
-                            if any(isinstance(s, dict) and isinstance(s.get("text"), str) and s["text"].strip() for s in secs):
-                                return True
-                        else:
-                            v = rec.get(source)
-                            if isinstance(v, str) and v.strip():
-                                return True
-                return False
-            except FileNotFoundError:
-                return False
-
-        bundle_to_index, text_key = None, None
-        if _has_text(bundle_raw, "methods"):
-            bundle_to_index, text_key = bundle_raw, "methods"
-        elif _has_text(bundle_raw, "sections"):
-            bundle_to_index, text_key = bundle_raw, "sections"
-        elif _has_text(methods_bundle, "text"):
-            bundle_to_index, text_key = methods_bundle, "text"
-        elif _has_text(bundle_raw, "raw"):
-            bundle_to_index, text_key = bundle_raw, "raw"
-
-        if not bundle_to_index:
-            print("[/ask] No documents to index; skipping TF-IDF build.", file=sys.stderr)
-            return
-        else:
-            print(f"[/ask] indexing bundle={bundle_to_index} text_key={text_key}")
-
-        # 4) rebuild index with ABSOLUTE paths
-        index_dir = ROOT / "retriever" / "index"
         _stream([
-            "python", str(ROOT/"retriever/index_jsonl.py"),
-            "--bundle", str(bundle_to_index),
-            "--index_dir", str(index_dir),
-            "--text-key", str(text_key),
+            "python", str(ROOT/"scripts/bundle_add_fallback.py"),
+            str(bundle_raw), str(methods_bundle)
         ])
 
-        # 5) retriever reload (best-effort)
+        # --------- 3) choose freshest bundle + text_key, then index ---------
+        BUNDLE_AUTO   = out_dir / "bundle.jsonl"
+        BUNDLE_MERGED = ROOT / "out" / "bundle_with_methods.jsonl"
+        BUNDLE_PLAIN  = ROOT / "out" / "bundle.jsonl"
+        INDEX_DIR     = ROOT / "retriever" / "index"
+
+        bundle_for_index = None
+        text_key = "methods"
+        if BUNDLE_AUTO.exists():
+            bundle_for_index = BUNDLE_AUTO
+        elif BUNDLE_MERGED.exists():
+            bundle_for_index = BUNDLE_MERGED
+        elif BUNDLE_PLAIN.exists():
+            bundle_for_index = BUNDLE_PLAIN
+            text_key = "text"  # plain bundle has 'text', not 'methods'
+
+        if bundle_for_index is None:
+            print("[harvest_reindex] No bundle found to index.")
+            return
+
+        _stream([
+            "python", str(ROOT/"retriever/index_jsonl.py"),
+            "--bundle", str(bundle_for_index),
+            "--index_dir", str(INDEX_DIR),
+            "--text-key", text_key,
+        ])
+        print(f"[harvest_reindex] indexed {bundle_for_index} (text_key={text_key}) → {INDEX_DIR}")
+
+        # --------- 4) ping retriever to reload (best-effort) ---------
         try:
             with httpx.Client(timeout=20) as s:
                 s.post("http://127.0.0.1:8000/reload")
         except Exception:
             pass
 
-        # ----------------- DuckDB context -----------------
-        table_ctx = ""
-        table_refs = []
-        if LOOKUP is not None:
+    # ----------------- KB search + fetch -----------------
+    kb_ctx = ""
+    kb_refs_raw = []
+    try:
+        try:
+            kb_hits = kb_search(question, k=kb_k) or []
+        except TypeError:
+            kb_hits = kb_search(question) or []
+        kb_ids = [h.get("id") for h in kb_hits if isinstance(h, dict) and h.get("id")]
+        kb_docs = []
+        if kb_ids:
             try:
-                hits_tbl = LOOKUP.query(question, topk=5)
-                rows = hits_tbl.to_dict(orient="records")
-                lines = []
-                for i, row in enumerate(rows, start=1):
-                    solvent = row.get("solvent") or row.get("solvent_system")
-                    temp = row.get("temp_C") or row.get("temperature_C")
-                    time_h = row.get("time_h") or row.get("duration_h")
-                    note = row.get("notes") or ""
-                    line = f"[T{i}] solvent={_s(solvent)}; temp_C={_s(temp)}; time_h={_s(time_h)}; {_s(note)}".strip()
-                    lines.append(line)
-                    url = row.get("url") or (row.get("doi") and f"https://doi.org/{row['doi']}")
-                    if url: table_refs.append({"title": f"Table row {i}", "url": url})
-                table_ctx = "\n".join(lines)
+                kb_docs = kb_fetch(kb_ids) or []
             except Exception as e:
-                print("[/ask] LOOKUP query error:", e)
+                print("[/ask] kb_fetch failed:", e)
+                kb_docs = []
 
-        # ----------------- KB search + fetch -----------------
-        kb_ctx = ""
-        kb_refs_raw = []
+        def _mk_kb_ref(d: dict) -> dict:
+            return {
+                "title": _s(d.get("title") or d.get("name") or "(KB item)"),
+                "year": _s(d.get("year") or d.get("publication_year") or ""),
+                "url": _s(d.get("url") or d.get("link") or ""),
+                "doi": _s(d.get("doi") or ""),
+                "authors": d.get("authors") or d.get("authorships") or [],
+                "biblio": d.get("biblio") or {},
+            }
+
+        items = kb_docs if kb_docs else kb_hits
+        kb_refs_raw = [_mk_kb_ref(d) for d in items if isinstance(d, dict)]
+        if kb_refs_raw:
+            kb_lines = [f"[KB{i}] {r['title']}" for i,r in enumerate(kb_refs_raw, 1)]
+            kb_ctx = "\n".join(kb_lines)
+    except Exception as e:
+        print("[/ask] KB search failed:", e)
+
+    # ----------------- Web/hybrid retriever (initial) -----------------
+    hits = retriever_search(question, k=web_k, mode="hybrid", alpha=0.7) or []
+
+    # If evidence thin, optionally auto-harvest -> reindex -> reload -> retry once
+    if allow_fetch and _needs_more(hits):
         try:
-            try:
-                kb_hits = kb_search(question, k=kb_k) or []
-            except TypeError:
-                kb_hits = kb_search(question) or []
-            kb_ids = [h.get("id") for h in kb_hits if isinstance(h, dict) and h.get("id")]
-            kb_docs = []
-            if kb_ids:
-                try:
-                    kb_docs = kb_fetch(kb_ids) or []
-                except Exception as e:
-                    print("[/ask] kb_fetch failed:", e)
-                    kb_docs = []
-
-            def _mk_kb_ref(d: dict) -> dict:
-                return {
-                    "title": _s(d.get("title") or d.get("name") or "(KB item)"),
-                    "year": _s(d.get("year") or d.get("publication_year") or ""),
-                    "url": _s(d.get("url") or d.get("link") or ""),
-                    "doi": _s(d.get("doi") or ""),
-                    "authors": d.get("authors") or d.get("authorships") or [],
-                    "biblio": d.get("biblio") or {},
-                }
-
-            items = kb_docs if kb_docs else kb_hits
-            kb_refs_raw = [_mk_kb_ref(d) for d in items if isinstance(d, dict)]
-            if kb_refs_raw:
-                kb_lines = [f"[KB{i}] {r['title']}" for i,r in enumerate(kb_refs_raw, 1)]
-                kb_ctx = "\n".join(kb_lines)
+            _harvest_reindex(_expand_queries(question))
+            hits = retriever_search(question, k=web_k, mode="hybrid", alpha=0.7) or []
         except Exception as e:
-            print("[/ask] KB search failed:", e)
+            print("[/ask] auto-harvest failed:", e)
 
-        # ----------------- Web/hybrid retriever (initial) -----------------
-        hits = retriever_search(question, k=web_k, mode="hybrid", alpha=0.7) or []
+    # ---- Convert hits to web_refs ----
+    web_refs = []
+    for h in hits:
+        web_refs.append({
+            "title": _s(h.get("title") or "(no title)"),
+            "year": "",
+            "url": _s(h.get("url") or ""),
+            "doi": _s(h.get("paper_id") if (h.get("paper_id","").startswith("10.")) else ""),
+            "authors": h.get("authors", []),
+            "biblio": {},
+        })
 
-        # If evidence thin, optionally auto-harvest -> reindex -> reload -> retry once
-        if allow_fetch and _needs_more(hits):
+    # ----------------- Deduplicate & enumerate references -----------------
+    def _normkey(r: dict) -> str:
+        return (r.get("doi") or r.get("title") or "").strip().lower()
+
+    refs = []
+    seen = set()
+    for r in web_refs + kb_refs_raw:
+        key = _normkey(r)
+        if key and key not in seen:
+            refs.append(r)
+            seen.add(key)
+
+    refs_prompt = "\n".join(
+        f"[{i+1}] {(r.get('title') or '(no title)')} ({r.get('year') or ''}) — {_ref_url(r)}"
+        for i, r in enumerate(refs)
+    ).strip()
+
+    # ----------------- Compose CONTEXT -----------------
+    ctx_parts = []
+    if uploads_ctx: ctx_parts.append("<<<CTX_UPLOADS>>>\n" + uploads_ctx)
+    if table_ctx:   ctx_parts.append("<<<CTX_TABLE>>>\n" + table_ctx)
+    if kb_ctx:      ctx_parts.append("<<<CTX_KB>>>\n" + kb_ctx)
+    context_joined = "\n\n---\n\n".join(ctx_parts).strip()
+
+    # ----------------- Prompting -----------------
+    robot_rules = (
+        "Return a discrete lab protocol with exact quantities on a small scale (~0.5 mmol Co):\n"
+        " - Include specific masses (mg) or mmol for reagents; volumes (mL) for liquids.\n"
+        " - Specify temperatures (°C), ramp rates (°C/min), hold times (min/h), and atmosphere (Ar/N2/vacuum).\n"
+        " - Include workup and purification (quench, washing/centrifugation, drying) with volumes.\n"
+        " - No placeholders (avoid “e.g.”/“or”). Be decisive.\n"
+        " - Output only the final protocol in markdown. Do not include any fenced blocks named reason or rationale in the answer. Put all reasoning in the separate rationale channel."
+    )
+    reasoning_rules = (
+        " - Provide a mechanistic explanation and design considerations for the target.\n"
+        " - Focus on: nucleation vs growth; ligand/solvent coordination; surfactants; reduction/oxidation; temperature profile and morphology control; atmosphere; pitfalls; safety.\n"
+        " - Do NOT return a step-by-step protocol. Be concise but specific."
+    )
+    inline_rule = (
+        " - When you pull a fact from any numbered REFERENCE, put its number in square brackets right after the sentence "
+        "(e.g. “hydrothermal at 200 °C [3]”)." if want_inline else
+        " - Inline numeric citations are optional for this request."
+    )
+    acs_rule = (
+        " - Write the REFERENCES block in ACS format: author(s), title, journal, year, volume, pages, DOI.\n"
+        " - Use inline numeric citations ([n]) for facts from REFERENCES. Do NOT include a REFERENCES block in your answer."
+    )
+
+    def strip_references_block(text: str) -> str:
+        return re.sub(r"##\s*References[\s\S]*", "", text, flags=re.I).strip()
+
+    if mode == "reasoning":
+        prompt = (
+            "You are NanoChemGPT. Use the CONTEXT and numbered REFERENCES.\n"
+            "Rules:\n"
+            " - Prefer CONTEXT and REFERENCES over general knowledge when relevant.\n"
+            " - For each bullet, quote or paraphrase a specific finding from CONTEXT or REFERENCES, and cite the source. Do not generalize or invent citations.\n"
+            " - If you use any content from CONTEXT, append [CTX] on that line.\n"
+            f"{inline_rule}\n"
+            " - If CONTEXT is insufficient, say so explicitly before generalizing.\n"
+            f"{reasoning_rules}\n"
+            f"{acs_rule}\n"
+            "Return exactly ONE block:\n"
+            "## Mechanistic reasoning\n"
+            "- bullet points with inline [n] and [CTX] where appropriate.\n\n"
+            f"CONTEXT:\n{context_joined}\n\n"
+            f"REFERENCES:\n{refs_prompt}\n\n"
+            f"User question: {question}"
+        )
+    else:
+        prompt = (
+            "You are NanoChemGPT. Use the CONTEXT and the numbered REFERENCES to propose a synthesis.\n"
+            "Rules:\n"
+            " - Prefer CONTEXT and REFERENCES over general knowledge when relevant.\n"
+            " - For each step, quote or paraphrase a specific finding from CONTEXT or REFERENCES, and cite the source. Do not generalize or invent citations.\n"
+            " - If you use any content from CONTEXT, append [CTX] on that line.\n"
+            f"{inline_rule}\n"
+            " - If CONTEXT is insufficient, say so explicitly before generalizing.\n"
+            f"{robot_rules}\n"
+            f"{acs_rule}\n"
+            "Return two blocks exactly in this order:\n"
+            "## Synthesis Protocol:\n"
+            "1. **Hardware & Glassware**:\n[]\n"
+            "2. **Materials**:\n[]\n"
+            "3. **Procedure**\n[]\n\n"
+            "```reason\n"
+            "For each key justification, add inline tags: [CTX] uploaded/context hits, [PARSED] parsed protocols, [n] for numbered web REFERENCES, [GEN] if inferred.\n"
+            "Keep rationales terse.\n"
+            "Add NO other blocks of text.\n"
+            "```\n\n"
+            f"CONTEXT:\n{context_joined}\n\n"
+            f"REFERENCES:\n{refs_prompt}\n\n"
+            f"User question: {question}"
+        )
+
+    raw = client.chat.completions.create(
+        model="gpt-4o-mini",
+        messages=[{"role": "user", "content": prompt}],
+        temperature=0.2
+    ).choices[0].message.content
+
+    # Split answer/rationale and strip any in-answer references block
+    if mode == "reasoning":
+        answer = strip_references_block(_s(raw))
+        rationale = ""
+    else:
+        a, r = _split_reasoning(strip_references_block(_s(raw)))
+        answer, rationale = _s(a), _s(r)
+
+    # ---- Build a REFERENCES block of only used items ----
+    used_idxs = _extract_used_ref_indexes(answer, rationale)
+    references_block = _format_references_block_from_used(used_idxs, refs)
+
+    # ---- Usage markers (refs + tags) ----
+    markers = _extract_used_markers(answer, rationale)
+
+    # ---- Sufficiency check + enqueue mining if thin (kept) ----
+    enqueued = False
+    try:
+        try:
+            sufficient = judge_sufficiency(question, context_joined, refs_count=len(refs))
+        except TypeError:
+            sufficient = judge_sufficiency(question, context_joined)
+        if not bool(sufficient):
             try:
-                _harvest_reindex(_expand_queries(question))
-                hits = retriever_search(question, k=web_k, mode="hybrid", alpha=0.7) or []
+                enqueue_text_mining_job(question)
+                enqueued = True
             except Exception as e:
-                print("[/ask] auto-harvest failed:", e)
+                print("[/ask] enqueue_text_mining_job failed:", e)
+    except Exception as e:
+        print("[/ask] judge/enqueue error:", e)
 
-        # ---- Convert hits to web_refs ----
-        web_refs = []
-        for h in hits:
-            web_refs.append({
-                "title": _s(h.get("title") or "(no title)"),
-                "year": "",
-                "url": _s(h.get("url") or ""),
-                "doi": _s(h.get("paper_id") if (h.get("paper_id","").startswith("10.")) else ""),
-                "authors": h.get("authors", []),
-                "biblio": {},
-            })
-
-        # ----------------- Deduplicate & enumerate references -----------------
-        def _normkey(r: dict) -> str:
-            return (r.get("doi") or r.get("title") or "").strip().lower()
-
-        refs = []
-        seen = set()
-        for r in web_refs + kb_refs_raw:
-            key = _normkey(r)
-            if key and key not in seen:
-                refs.append(r)
-                seen.add(key)
-
-        refs_prompt = "\n".join(
-            f"[{i+1}] {(r.get('title') or '(no title)')} ({r.get('year') or ''}) — {_ref_url(r)}"
-            for i, r in enumerate(refs)
-        ).strip()
-
-        # ----------------- Compose CONTEXT -----------------
-        ctx_parts = []
-        if uploads_ctx: ctx_parts.append("<<<CTX_UPLOADS>>>\n" + uploads_ctx)
-        if table_ctx:   ctx_parts.append("<<<CTX_TABLE>>>\n" + table_ctx)
-        if kb_ctx:      ctx_parts.append("<<<CTX_KB>>>\n" + kb_ctx)
-        context_joined = "\n\n---\n\n".join(ctx_parts).strip()
-
-        # ----------------- Prompting -----------------
-        robot_rules = (
-            "Return a discrete lab protocol with exact quantities on a small scale (~0.5 mmol Co):\n"
-            " - Include specific masses (mg) or mmol for reagents; volumes (mL) for liquids.\n"
-            " - Specify temperatures (°C), ramp rates (°C/min), hold times (min/h), and atmosphere (Ar/N2/vacuum).\n"
-            " - Include workup and purification (quench, washing/centrifugation, drying) with volumes.\n"
-            " - No placeholders (avoid “e.g.”/“or”). Be decisive.\n"
-            " - Output only the final protocol in markdown. Do not include any fenced blocks named reason or rationale in the answer. Put all reasoning in the separate rationale channel."
-        )
-        reasoning_rules = (
-            " - Provide a mechanistic explanation and design considerations for the target.\n"
-            " - Focus on: nucleation vs growth; ligand/solvent coordination; surfactants; reduction/oxidation; temperature profile and morphology control; atmosphere; pitfalls; safety.\n"
-            " - Do NOT return a step-by-step protocol. Be concise but specific."
-        )
-        inline_rule = (
-            " - When you pull a fact from any numbered REFERENCE, put its number in square brackets right after the sentence "
-            "(e.g. “hydrothermal at 200 °C [3]”)." if want_inline else
-            " - Inline numeric citations are optional for this request."
-        )
-        acs_rule = (
-            " - Write the REFERENCES block in ACS format: author(s), title, journal, year, volume, pages, DOI.\n"
-            " - Use inline numeric citations ([n]) for facts from REFERENCES. Do NOT include a REFERENCES block in your answer."
-        )
-
-        def strip_references_block(text: str) -> str:
-            return re.sub(r"##\s*References[\s\S]*", "", text, flags=re.I).strip()
-
-        if mode == "reasoning":
-            prompt = (
-                "You are NanoChemGPT. Use the CONTEXT and numbered REFERENCES.\n"
-                "Rules:\n"
-                " - Prefer CONTEXT and REFERENCES over general knowledge when relevant.\n"
-                " - For each bullet, quote or paraphrase a specific finding from CONTEXT or REFERENCES, and cite the source. Do not generalize or invent citations.\n"
-                " - If you use any content from CONTEXT, append [CTX] on that line.\n"
-                f"{inline_rule}\n"
-                " - If CONTEXT is insufficient, say so explicitly before generalizing.\n"
-                f"{reasoning_rules}\n"
-                f"{acs_rule}\n"
-                "Return exactly ONE block:\n"
-                "## Mechanistic reasoning\n"
-                "- bullet points with inline [n] and [CTX] where appropriate.\n\n"
-                f"CONTEXT:\n{context_joined}\n\n"
-                f"REFERENCES:\n{refs_prompt}\n\n"
-                f"User question: {question}"
-            )
-        else:
-            prompt = (
-                "You are NanoChemGPT. Use the CONTEXT and the numbered REFERENCES to propose a synthesis.\n"
-                "Rules:\n"
-                " - Prefer CONTEXT and REFERENCES over general knowledge when relevant.\n"
-                " - For each step, quote or paraphrase a specific finding from CONTEXT or REFERENCES, and cite the source. Do not generalize or invent citations.\n"
-                " - If you use any content from CONTEXT, append [CTX] on that line.\n"
-                f"{inline_rule}\n"
-                " - If CONTEXT is insufficient, say so explicitly before generalizing.\n"
-                f"{robot_rules}\n"
-                f"{acs_rule}\n"
-                "Return two blocks exactly in this order:\n"
-                "## Synthesis Protocol:\n"
-                "1. **Hardware & Glassware**:\n[]\n"
-                "2. **Materials**:\n[]\n"
-                "3. **Procedure**\n[]\n\n"
-                "```reason\n"
-                "For each key justification, add inline tags: [CTX] uploaded/context hits, [PARSED] parsed protocols, [n] for numbered web REFERENCES, [GEN] if inferred.\n"
-                "Keep rationales terse.\n"
-                "Add NO other blocks of text.\n"
-                "```\n\n"
-                f"CONTEXT:\n{context_joined}\n\n"
-                f"REFERENCES:\n{refs_prompt}\n\n"
-                f"User question: {question}"
-            )
-
-        raw = client.chat.completions.create(
-            model="gpt-4o-mini",
-            messages=[{"role": "user", "content": prompt}],
-            temperature=0.2
-        ).choices[0].message.content
-
-        # Split answer/rationale and strip any in-answer references block
-        if mode == "reasoning":
-            answer = strip_references_block(_s(raw))
-            rationale = ""
-        else:
-            a, r = _split_reasoning(strip_references_block(_s(raw)))
-            answer, rationale = _s(a), _s(r)
-
-        # ---- Build a REFERENCES block of only used items ----
-        used_idxs = _extract_used_ref_indexes(answer, rationale)
-        references_block = _format_references_block_from_used(used_idxs, refs)
-
-        # ---- Usage markers (refs + tags) ----
-        markers = _extract_used_markers(answer, rationale)
-
-        # ---- Sufficiency check + enqueue mining if thin (kept) ----
-        enqueued = False
-        try:
-            try:
-                sufficient = judge_sufficiency(question, context_joined, refs_count=len(refs))
-            except TypeError:
-                sufficient = judge_sufficiency(question, context_joined)
-            if not bool(sufficient):
-                try:
-                    enqueue_text_mining_job(question)
-                    enqueued = True
-                except Exception as e:
-                    print("[/ask] enqueue_text_mining_job failed:", e)
-        except Exception as e:
-            print("[/ask] judge/enqueue error:", e)
-
-        # ---- Save best-effort to DB ----
-        try:
-            db = get_db()
-            db.qa.insert_one({
-                "question": question,
-                "intent": intent,
-                "mode": mode,
-                "created_at": datetime.utcnow(),
-                "answer": answer,
-                "rationale": rationale,
-                "markers": markers,
-                "used_ref_indexes": used_idxs,
-                "references_block": references_block,
-                "refs": refs,
-                "kb_refs_count": len(kb_refs_raw),
-                "web_refs_count": len(web_refs),
-                "table_refs": table_refs,
-                "context_present": bool(context_joined),
-                "mining_enqueued": enqueued,
-            })
-        except Exception as e:
-            print("[/ask] DB save warn:", e)
-
-        return jsonify({
-            "ok": True,
+    # ---- Save best-effort to DB ----
+    try:
+        db = get_db()
+        db.qa.insert_one({
             "question": question,
             "intent": intent,
             "mode": mode,
+            "created_at": datetime.utcnow(),
             "answer": answer,
             "rationale": rationale,
             "markers": markers,
             "used_ref_indexes": used_idxs,
             "references_block": references_block,
             "refs": refs,
+            "kb_refs_count": len(kb_refs_raw),
+            "web_refs_count": len(web_refs),
+            "table_refs": table_refs,
             "context_present": bool(context_joined),
             "mining_enqueued": enqueued,
         })
     except Exception as e:
-        traceback.print_exc()
-        return jsonify({"ok": False, "error": f"/ask failed: {e}"}), 500
+        print("[/ask] DB save warn:", e)
+
+    return jsonify({
+        "ok": True,
+        "question": question,
+        "intent": intent,
+        "mode": mode,
+        "answer": answer,
+        "rationale": rationale,
+        "markers": markers,
+        "used_ref_indexes": used_idxs,
+        "references_block": references_block,
+        "refs": refs,
+        "context_present": bool(context_joined),
+        "mining_enqueued": enqueued,
+    })
 
 @app.post("/parse")
 def parse_route():

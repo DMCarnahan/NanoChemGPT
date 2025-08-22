@@ -6,4 +6,4 @@ unpaywall_email: os.getenv("UNPAYWALL_EMAIL")
 grobid_url: "http://localhost:8070"
 spaCy_model_dir: "../NanoChemGPT/miner/ner_model/model-best"
 heuristic_linker_path: "../NanoChemGPT/miner/heuristic_linker.py"
-out_dir: "out"
+out_dir: "harvester/out_auto"

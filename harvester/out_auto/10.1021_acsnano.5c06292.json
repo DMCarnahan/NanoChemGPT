@@ -1,0 +1,268 @@
+{
+  "paper_id": "10.1021/acsnano.5c06292",
+  "title": "Atomic-Scale Imaging of Transformation of Nickel Nanocrystals to Nickel Carbides in Real Time.",
+  "authors": [
+    {
+      "name": "Yan P"
+    },
+    {
+      "name": "Zhang D"
+    },
+    {
+      "name": "Zhang W"
+    },
+    {
+      "name": "Sun K"
+    },
+    {
+      "name": "Jin M"
+    },
+    {
+      "name": "Chamberlain TW"
+    },
+    {
+      "name": "Khlobystov AN"
+    },
+    {
+      "name": "Kaiser U"
+    },
+    {
+      "name": "Hu Y"
+    },
+    {
+      "name": "Cao K."
+    }
+  ],
+  "doi": "10.1021/acsnano.5c06292",
+  "source": "eupmc",
+  "urls": {
+    "pdf": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC12224334/pdf"
+  },
+  "license": {
+    "type": "oa"
+  },
+  "access_route": "oa",
+  "sections": [
+    {
+      "heading": "Methods",
+      "text": "Methods Sample Preparation Single-walled carbon nanotubes (SWNTs,\nCarbon solutions) were thermally treated to open the termini of the\nSWNTs and to remove the residual amorphous carbon and organic ligand\nfrom the outer walls of the SWNTs before use. The as-received SWNTs\nwere heated in air for 30 min at 600 °C with a weight loss of\napproximately 30% observed for both samples. All other reagents and\nsolvents were used as supplied by Sigma-Aldrich. Nickel­(II) hexafluoroacetylacetonate\nNi­(C 5 HF 6 O 2 ) 2  was sealed\nunder vacuum in a quartz ampule and heated at a temperature slightly\nabove its vaporization point (140 °C) for 3 days to ensure complete\npenetration of the SWNT by Ni­(C 5 HF 6 O 2 ) 2 . The sample was cooled to room temperature and washed\nrepeatedly with tetrahydrofuran to remove Ni­(C 5 HF 6 O 2 ) 2  deposited on the outside of the SWNT.\nThe nanotubes filled with Ni­(C 5 HF 6 O 2 ) 2  were then sealed in a quartz ampule under an argon\natmosphere and heated at 600 °C, a temperature significantly\nabove the decomposition point of the metal species (∼150–200\n°C), for 2 h to decompose Ni­(C 5 HF 6 O 2 ) 2  into the pure nickel metal nanoparticles. Subsequently,\nC 5 HF 6 O 2  ligands would thermally decompose\ninto CO 2  gases and other volatile fragments, which make\nthe internal space in the hosted SWNT more pressurized than the outside.\nAll of the fragments escaped from the SWNT and cannot be observed\nin TEM. The elementary composition of the prepared sample is determined\nby EDS mapping as shown in  Figure S22 . Characterization and Simulation The SWNTs filled with\nnickel nanoparticles were dispersed in methanol and drop-cast onto\nlacey carbon–carbon-coated copper TEM grids. Time series AC-TEM\nimages were carried out on an image side C s -corrected FEI\nTitan 80–300 TEM operated at 80 kV at room temperature. HAADF-STEM\nand corresponding EDS mapping are carried out at a JEOL-Grand Arm\n300F. The TEM specimen was heated in air at 150 °C for 5 min\nshortly before insertion into the TEM column. TEM image simulation\nwas carried out using the multislice program QSTEM. The relevant image\nsimulation is carried out by QSTEM software, and the simulation parameters\nare listed in  Table S1 ."
+    },
+    {
+      "heading": "Sample Preparation",
+      "text": "Sample Preparation Single-walled carbon nanotubes (SWNTs,\nCarbon solutions) were thermally treated to open the termini of the\nSWNTs and to remove the residual amorphous carbon and organic ligand\nfrom the outer walls of the SWNTs before use. The as-received SWNTs\nwere heated in air for 30 min at 600 °C with a weight loss of\napproximately 30% observed for both samples. All other reagents and\nsolvents were used as supplied by Sigma-Aldrich. Nickel­(II) hexafluoroacetylacetonate\nNi­(C 5 HF 6 O 2 ) 2  was sealed\nunder vacuum in a quartz ampule and heated at a temperature slightly\nabove its vaporization point (140 °C) for 3 days to ensure complete\npenetration of the SWNT by Ni­(C 5 HF 6 O 2 ) 2 . The sample was cooled to room temperature and washed\nrepeatedly with tetrahydrofuran to remove Ni­(C 5 HF 6 O 2 ) 2  deposited on the outside of the SWNT.\nThe nanotubes filled with Ni­(C 5 HF 6 O 2 ) 2  were then sealed in a quartz ampule under an argon\natmosphere and heated at 600 °C, a temperature significantly\nabove the decomposition point of the metal species (∼150–200\n°C), for 2 h to decompose Ni­(C 5 HF 6 O 2 ) 2  into the pure nickel metal nanoparticles. Subsequently,\nC 5 HF 6 O 2  ligands would thermally decompose\ninto CO 2  gases and other volatile fragments, which make\nthe internal space in the hosted SWNT more pressurized than the outside.\nAll of the fragments escaped from the SWNT and cannot be observed\nin TEM. The elementary composition of the prepared sample is determined\nby EDS mapping as shown in  Figure S22 ."
+    }
+  ],
+  "extractions": {
+    "methods_paragraphs": [
+      {
+        "text": "Methods Sample Preparation Single-walled carbon nanotubes (SWNTs,\nCarbon solutions) were thermally treated to open the termini of the\nSWNTs and to remove the residual amorphous carbon and organic ligand\nfrom the outer walls of the SWNTs before use. The as-received SWNTs\nwere heated in air for 30 min at 600 °C with a weight loss of\napproximately 30% observed for both samples. All other reagents and\nsolvents were used as supplied by Sigma-Aldrich. Nickel­(II) hexafluoroacetylacetonate\nNi­(C 5 HF 6 O 2 ) 2  was sealed\nunder vacuum in a quartz ampule and heated at a temperature slightly\nabove its vaporization point (140 °C) for 3 days to ensure complete\npenetration of the SWNT by Ni­(C 5 HF 6 O 2 ) 2 . The sample was cooled to room temperature and washed\nrepeatedly with tetrahydrofuran to remove Ni­(C 5 HF 6 O 2 ) 2  deposited on the outside of the SWNT.\nThe nanotubes filled with Ni­(C 5 HF 6 O 2 ) 2  were then sealed in a quartz ampule under an argon\natmosphere and heated at 600 °C, a temperature significantly\nabove the decomposition point of the metal species (∼150–200\n°C), for 2 h to decompose Ni­(C 5 HF 6 O 2 ) 2  into the pure nickel metal nanoparticles. Subsequently,\nC 5 HF 6 O 2  ligands would thermally decompose\ninto CO 2  gases and other volatile fragments, which make\nthe internal space in the hosted SWNT more pressurized than the outside.\nAll of the fragments escaped from the SWNT and cannot be observed\nin TEM. The elementary composition of the prepared sample is determined\nby EDS mapping as shown in  Figure S22 . Characterization and Simulation The SWNTs filled with\nnickel nanoparticles were dispersed in methanol and drop-cast onto\nlacey carbon–carbon-coated copper TEM grids. Time series AC-TEM\nimages were carried out on an image side C s -corrected FEI\nTitan 80–300 TEM operated at 80 kV at room temperature. HAADF-STEM\nand corresponding EDS mapping are carried out at a JEOL-Grand Arm\n300F. The TEM specimen was heated in air at 150 °C for 5 min\nshortly before insertion into the TEM column. TEM image simulation\nwas carried out using the multislice program QSTEM. The relevant image\nsimulation is carried out by QSTEM software, and the simulation parameters\nare listed in  Table S1 .",
+        "operations": [
+          {
+            "op_type": "heat",
+            "sentence": "The as-received SWNTs\nwere heated in air for 30 min at 600 °C with a weight loss of\napproximately 30% observed for both samples.",
+            "start_char": 249,
+            "end_char": 377,
+            "materials": [
+              "30 min",
+              "600 °",
+              "approximately 30%"
+            ],
+            "params": {
+              "temp": "600°C",
+              "time": "30 min"
+            }
+          },
+          {
+            "op_type": "heat",
+            "sentence": "Nickel­(II) hexafluoroacetylacetonate\nNi­(C 5 HF 6 O 2 ) 2  was sealed\nunder vacuum in a quartz ampule and heated at a temperature slightly\nabove its vaporization point (140 °C) for 3 days to ensure complete\npenetration of the SWNT by Ni­(C 5 HF 6 O 2 ) 2 .",
+            "start_char": 450,
+            "end_char": 707,
+            "materials": [
+              "Nickel­(II) hexafluoroacetylacetonate\nNi­(C 5 HF",
+              "6 O",
+              "140 °C",
+              "3 days"
+            ],
+            "params": {
+              "temp": "140°C"
+            }
+          },
+          {
+            "op_type": "wash",
+            "sentence": "The sample was cooled to room temperature and washed\nrepeatedly with tetrahydrofuran to remove Ni­(C 5 HF 6 O 2 ) 2  deposited on the outside of the SWNT.\n",
+            "start_char": 708,
+            "end_char": 863,
+            "materials": [
+              "5 HF"
+            ],
+            "params": {}
+          },
+          {
+            "op_type": "heat",
+            "sentence": "The nanotubes filled with Ni­(C 5 HF 6 O 2 ) 2  were then sealed in a quartz ampule under an argon\natmosphere and heated at 600 °C, a temperature significantly\nabove the decomposition point of the metal species (∼150–200\n°C), for 2 h to decompose Ni­(C 5 HF 6 O 2 ) 2  into the pure nickel metal nanoparticles.",
+            "start_char": 863,
+            "end_char": 1173,
+            "materials": [
+              "Ni­(C 5 HF",
+              "6 O",
+              "600 °C",
+              "2 h"
+            ],
+            "params": {
+              "temp": "600°C",
+              "time": "2 h"
+            }
+          },
+          {
+            "op_type": "heat",
+            "sentence": "The TEM specimen was heated in air at 150 °C for 5 min\nshortly before insertion into the TEM column.",
+            "start_char": 1930,
+            "end_char": 2030,
+            "materials": [
+              "150 °C",
+              "5 min"
+            ],
+            "params": {
+              "temp": "150°C",
+              "time": "5 min"
+            }
+          }
+        ],
+        "expanded": [
+          {
+            "op_type": "heat",
+            "steps": [
+              "Place the reaction vessel on a hotplate.",
+              "Ramp to 600°C.",
+              "Maintain 600°C for 30 min."
+            ]
+          },
+          {
+            "op_type": "heat",
+            "steps": [
+              "Place the reaction vessel on a hotplate.",
+              "Ramp to 140°C.",
+              "Maintain 140°C for the specified time."
+            ]
+          },
+          {
+            "op_type": "wash",
+            "steps": [
+              "Perform operation 'wash' as described: The sample was cooled to room temperature and washed\nrepeatedly with tetrahydrofuran to remove Ni­(C 5 HF 6 O 2 ) 2  deposited on the outside of the SWNT.\n"
+            ]
+          },
+          {
+            "op_type": "heat",
+            "steps": [
+              "Place the reaction vessel on a hotplate.",
+              "Ramp to 600°C.",
+              "Maintain 600°C for 2 h."
+            ]
+          },
+          {
+            "op_type": "heat",
+            "steps": [
+              "Place the reaction vessel on a hotplate.",
+              "Ramp to 150°C.",
+              "Maintain 150°C for 5 min."
+            ]
+          }
+        ]
+      },
+      {
+        "text": "Sample Preparation Single-walled carbon nanotubes (SWNTs,\nCarbon solutions) were thermally treated to open the termini of the\nSWNTs and to remove the residual amorphous carbon and organic ligand\nfrom the outer walls of the SWNTs before use. The as-received SWNTs\nwere heated in air for 30 min at 600 °C with a weight loss of\napproximately 30% observed for both samples. All other reagents and\nsolvents were used as supplied by Sigma-Aldrich. Nickel­(II) hexafluoroacetylacetonate\nNi­(C 5 HF 6 O 2 ) 2  was sealed\nunder vacuum in a quartz ampule and heated at a temperature slightly\nabove its vaporization point (140 °C) for 3 days to ensure complete\npenetration of the SWNT by Ni­(C 5 HF 6 O 2 ) 2 . The sample was cooled to room temperature and washed\nrepeatedly with tetrahydrofuran to remove Ni­(C 5 HF 6 O 2 ) 2  deposited on the outside of the SWNT.\nThe nanotubes filled with Ni­(C 5 HF 6 O 2 ) 2  were then sealed in a quartz ampule under an argon\natmosphere and heated at 600 °C, a temperature significantly\nabove the decomposition point of the metal species (∼150–200\n°C), for 2 h to decompose Ni­(C 5 HF 6 O 2 ) 2  into the pure nickel metal nanoparticles. Subsequently,\nC 5 HF 6 O 2  ligands would thermally decompose\ninto CO 2  gases and other volatile fragments, which make\nthe internal space in the hosted SWNT more pressurized than the outside.\nAll of the fragments escaped from the SWNT and cannot be observed\nin TEM. The elementary composition of the prepared sample is determined\nby EDS mapping as shown in  Figure S22 .",
+        "operations": [
+          {
+            "op_type": "heat",
+            "sentence": "The as-received SWNTs\nwere heated in air for 30 min at 600 °C with a weight loss of\napproximately 30% observed for both samples.",
+            "start_char": 241,
+            "end_char": 369,
+            "materials": [
+              "30 min",
+              "600 °",
+              "approximately 30%"
+            ],
+            "params": {
+              "temp": "600°C",
+              "time": "30 min"
+            }
+          },
+          {
+            "op_type": "heat",
+            "sentence": "Nickel­(II) hexafluoroacetylacetonate\nNi­(C 5 HF 6 O 2 ) 2  was sealed\nunder vacuum in a quartz ampule and heated at a temperature slightly\nabove its vaporization point (140 °C) for 3 days to ensure complete\npenetration of the SWNT by Ni­(C 5 HF 6 O 2 ) 2 .",
+            "start_char": 442,
+            "end_char": 699,
+            "materials": [
+              "Nickel­(II) hexafluoroacetylacetonate\nNi­(C 5 HF",
+              "6 O",
+              "140 °C",
+              "3 days"
+            ],
+            "params": {
+              "temp": "140°C"
+            }
+          },
+          {
+            "op_type": "wash",
+            "sentence": "The sample was cooled to room temperature and washed\nrepeatedly with tetrahydrofuran to remove Ni­(C 5 HF 6 O 2 ) 2  deposited on the outside of the SWNT.\n",
+            "start_char": 700,
+            "end_char": 855,
+            "materials": [
+              "5 HF"
+            ],
+            "params": {}
+          },
+          {
+            "op_type": "heat",
+            "sentence": "The nanotubes filled with Ni­(C 5 HF 6 O 2 ) 2  were then sealed in a quartz ampule under an argon\natmosphere and heated at 600 °C, a temperature significantly\nabove the decomposition point of the metal species (∼150–200\n°C), for 2 h to decompose Ni­(C 5 HF 6 O 2 ) 2  into the pure nickel metal nanoparticles.",
+            "start_char": 855,
+            "end_char": 1165,
+            "materials": [
+              "Ni­(C 5 HF",
+              "6 O",
+              "600 °C",
+              "2 h"
+            ],
+            "params": {
+              "temp": "600°C",
+              "time": "2 h"
+            }
+          }
+        ],
+        "expanded": [
+          {
+            "op_type": "heat",
+            "steps": [
+              "Place the reaction vessel on a hotplate.",
+              "Ramp to 600°C.",
+              "Maintain 600°C for 30 min."
+            ]
+          },
+          {
+            "op_type": "heat",
+            "steps": [
+              "Place the reaction vessel on a hotplate.",
+              "Ramp to 140°C.",
+              "Maintain 140°C for the specified time."
+            ]
+          },
+          {
+            "op_type": "wash",
+            "steps": [
+              "Perform operation 'wash' as described: The sample was cooled to room temperature and washed\nrepeatedly with tetrahydrofuran to remove Ni­(C 5 HF 6 O 2 ) 2  deposited on the outside of the SWNT.\n"
+            ]
+          },
+          {
+            "op_type": "heat",
+            "steps": [
+              "Place the reaction vessel on a hotplate.",
+              "Ramp to 600°C.",
+              "Maintain 600°C for 2 h."
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "raw": "Results and Discussion The time\nseries images ( Figure  \n ) show the gradual carbonization process of nickel\nnanocrystals confined in a SWNT under 80 keV electron beam irradiation\n( Video S1 ). The diameter of the host SWNT\nwas measured to be 1.40–1.44 nm, with a chirality of ( m  = 15,  n  = 5) ( Figure S2 ). We constructed the SWNT model and carried out the AC-TEM\nsimulation by QSTEM ( Figure S3 ). The SWNTs\nin our experiments are measured using a line profile with a diameter\nof 1.2–1.5 nm ( Figure S4 ). At the\ninitial state (0 s), a nickel nanocrystal is attached to amorphous\ncarbon within the cavity of the host SWNT. The nanocrystal rotates\nwithin the nanotube, exhibiting different projections, which were\ncompared with AC-TEM images simulated for a 4 × 5 × 4 nanocrystal\nof pure nickel, identifying a face-centered cubic (fcc) structure\n( Figures  \n a,  S5–S6 , and  Table S1 ). There is a 0.3 nm van der Waals gap separating the nickel nanocrystal\nand SWNT wall, indicating that carbon atoms of the SWNT are not bonded\nto the nickel nanocrystal at the initial stages of the process between\n0 and 20 s ( Figure  \n b,c). The diameter of SWNT 1.5 nm allows at most four layers of nickel\natoms along the  Z  direction, and therefore, the overall\n4 × 5 × 4 fcc structure is dictated by confinement in the\nhost SWNT, which limits the maximal total number of nickel atoms in\nthe nanocrystal to 40 (Ni 40 ) ( Figures  \n b,c and  S5–S6 ). A comparison of the experimental and simulated AC-TEM images is\nshown in  Figure  \n d,e;\ncorresponding simulation parameters are listed in  Table S1 . A detailed contrast analysis of the experimental\nimage and correlation with simulations confirm that the observed nanocrystal\nis a pure nickel metal with a different number of atoms in the atomic\ncolumns along the [100] direction ( Figure  \n d,e). 1 Typical time series of AC-TEM images showing\nthe carbonization\nprocess of nickel nanocrystal in the SWNT selected from  Video S1  with an exposure time of 1 s per frame.\nThe pure nickel crystal gradually carbonized and cut the SWNT under\nelectron beam irradiation in 324 s ( Figure S1 ). Yellow box in 0 s represents amorphous carbon, and red box represents\npure nickel nanocrystal at the start of the process. Green arrow at\n20 s represents the van der Waals gap. Yellow box in 82 s represents\nthe bonding between partially carbonized nanocrystals with the outer\nwall of SWNT. Red box in 179 s represents the two-dimensionalization\nstructure of nanocrystals. The yellow box in 212 s represents the\ndefects of the outer SWNT. 2 Analysis\nof the atomic structure of the nickel nanocrystal confined\nin the SWNT at the initial state (0 s in  Figure  \n ). (a) Structural diagram including 40 nickel\natoms at the initial state. (b) The whole model diagram of a nickel\nnanocrystal in SWNT. (c) End-on view of the model diagram. Yellow\nlines indicate the van der Waals gap. (d) Experimental image at 0\ns and (e) corresponding simulation image based on the model in part\n(b), view along [100] direction of nickel fcc lattice, distances between\nrows of nickel atoms are 0.17 and 0.18 nm. Time-resolved imaging utilizing the 80 keV electron beam both as\na probe and stimulus of chemical transformation allowed us to capture\nthe dynamics and reactivity of nickel nanocrystals with atomic resolution\nin real time. As from 0 to 9 s, the orientation of nickel nanocrystal\nchanges, it begins to interact with the SWNT sidewall, followed by\nincreasing, yet intermittent bonding, from 9 to 33 s with the van\nder Waals gap opening and closing again (green arrows at 20 and 33\ns in  Figure  \n ). At\n33 s, a significant deformation of the carbon nanotube due to the\nstrong bonding of the nickel nanocrystal was observed ( Figure  \n ). The nickel nanocrystal noticeably\nelongated after 60 s, while the Ni–C bond between the amorphous\ncarbon and nickel nanocrystal broke at 82 s. The distances between\nnickel atoms are increased at this stage, indicating the insertion\nof carbon atoms into the interstitial spaces of the nickel nanocrystal.\nThe partly carbonized nickel nanocrystal then interacts with carbon\natoms of the host SWNT, catalyzing the C–C bond breakage under\nelectron beam irradiation. Unexpectedly, the nickel nanocrystal began\nflattening from 82 to 207 s, becoming two-dimensional at 179 s while\ncontinuing to catalyze the dissociation of carbon atoms on SWNT. At\n212 s, the lower part of the SWNT became significantly defective due\nto the loss of carbon atoms. Most of these lost carbon atoms are activated\nby the incident electrons and then captured by the carbonizing nickel\nnanocrystals, while others are ejected into vacuum. At 221 s, the\nnanocrystal cut into the upper wall of the host SWNT, leading to a\nphase transition and the formation of a large defect in the carbon\nnanotube at 277 s due to the carbon loss from the SWNT structure. Under 80 keV electron beam irradiation, the maximum transferred\nkinetic energy from an 80 keV electron to carbon and nickel atoms\n( E \n T max \n ) is 15.8 and 3.23 eV,\nrespectively,  due to a momentum transfer,\nwhich is the main driving force for dynamics promoted by the electron\nbeam in atoms and molecules confined inside carbon nanotubes.  The direct displacement threshold energy for\natoms in amorphous carbon and SWNT by incident electron impact should\nbe comparable or higher than  E \n T max \n , respectively, and in the region of 17 eV for the nanotube. \n , \n  However, interaction with metal atoms can lower the displacement\nthreshold significantly in the case of nickel, which can be regarded\nas catalytic C–C bond dissociation.  Thus, it has been proposed that under 80 keV electron beam irradiation,\nthe carbon atoms around the nickel nanocrystal can be activated to\nbecome ejected into the vacuum  or captured\nby the metal nanocrystal and permeate into the lattice forming metal\ncarbide as in the case of Fe,  and in\nthis study, the latter process is being imaged in real time. There are two types of interstitial spaces in the nickel nanocrystal\nfcc structure, which, respectively, are octahedral (0.414R Ni ) and tetrahedral interstices (0.225R Ni ), with the octahedral\ninterstices being more energetically favorable to host carbon atoms.  Consequently, in the process of carbonization,\nindividual carbon atoms gradually enter into the octahedral interstices\nof the nickel nanocrystal, which retains the shape but changes the\nstructure in the process. Conveniently, as the nanocrystal is restructuring,\nthe host nanotube allows it to tumble and expose different crystal\nfacets, which helps us to follow the carbonization process ( Figures  \n –  and  S5 ). 3 Analysis of the atomic\nstructure of the nickel nanocrystal confined\nin SWNT at 82 s. (a) Experimental AC-TEM image of the 82 s of the\nobservation process, and the distance between atomic rows of nickel\nin the  x  direction is 0.32 nm. (b) Simulation image\nusing the nickel metal model viewed in [110] direction, and the distance\nbetween atomic rows of nickel in the  x  direction\nis 0.25 nm. (c) Simulation image using the Ni 3 C model viewed\nin [210] direction, and the distance between atomic rows of nickel\nin the  x  direction is 0.22 nm. (d) Simulation image\nusing the NiC model viewed in [111] direction, and the distance between\natomic rows of nickel in the  x  direction is 0.29\nnm. (e) Simulation image using the NiC model viewed in [110] direction,\nand the distance between atomic rows of nickel in the  x  direction is 0.32 nm. (f) Size comparison of the real and simulated\nnanocrystals by measuring their dimensions in the  x  and  y  directions. (g) Model diagram of the partially\ncarbonized nanocrystal of NiC structure (Ni 40 C 20 ) in SWNT. (h) Side view of the model in part (g) (relevant model\ndiagram is shown in  Figure S7 ). 4 Analysis of the atomic structure of the nickel nanocrystal confined\nin SWNT at 207 and 277 s. (a) Experimental AC-TEM image of the 207\ns from  Video S1 , and the distance between\natomic rows of nickel in the  x  and  y  directions is 0.21 and 0.21 nm, respectively. (b) Simulation image\nusing the NiC model view from [110] direction, and the distance between\natomic rows of nickel in the  x  and  y  directions is 0.21 and 0.21 nm, respectively. (c) Model diagram\nof the fully carbonized nanocrystal in SWNT. (d) Side view of the\nmodel in part (c). (e) Experimental image of the 277 s from  Video S1 . (f) Simulation image of part (e). (g)\nModel diagram of the nanocrystal cut of the SWNT. (h) Side view of\nthe model in part (g) (relevant model diagram is shown in  Figure S8 ). For understanding the evolution of the atomic structure of the\nnanocrystal, we performed meticulous TEM image simulation using atomic\nmodels to match the experimental AC-TEM images ( Figures  \n a–f and  S7 ). Catalyzed by nickel under the 80 keV electron beam, the bonding\nbetween the nanocrystal and amorphous carbon dissociated at 82 s.\nHowever, at this point, the nickel nanocrystal is clearly in contact\nwith the lower wall of the SWNT. Considering that the atomic ratio\nof Ni/C in nickel carbide is variable, we chose nickel metal, Ni 3 C, and NiC as the three stable typical structures to build\nthe structural models for TEM image simulation ( Figures  \n g,h and  S7 ). Because\nthe atomic column contrast of the AC-TEM image is related to the atomic\nstructure and composition of the material, we were able to reveal\nthe nature of the nanocrystal using the contrast information on the\nexperimental AC-TEM images compared to TEM image simulations. Accordingly,\nthe number and position of carbon and nickel atoms in each atomic\ncolumn were adjusted for the best match of the observed contrast in\nthe experimental AC-TEM images, alongside directions of projection\nof the model to optimize the match ( Figure  \n ). By measuring and comparing the dimensions\nof the nanocrystal along the  x  and  y  directions, we were able to estimate the total number of atoms in\nthe nanocrystal of NiC as Ni 40 C 20 , indicating\nthat the nanocrystal had not been completely carbonized. Therefore,\nthe nanocrystal continued to interact and bond with the lower wall\nof the SWNT. According to TEM image simulations, the carbide structure\nformed at 82 s changed from the initial four-layered to a three-layered\nNiC structure as viewed along the [110] direction. By extension of\nthe nickel-based nanocrystal, more octahedral interstices on the surface\nwere exposed. At 125 s ( Figure  \n ), the partially carbonized nickel nanocrystal disconnected\nfrom\nthe amorphous carbon and its lower part bonded strongly to the host\nSWNT, as the distance between the nanotube sidewall and nanocrystal\ndecreased significantly below the van der Waals gap. This indicates\nvacancy defect formation in SWNT, which becomes the main source of\ncarbon atoms for the nanocrystal carbonization. From 82 to 179 s,\nthe nanocrystal restructured again, accompanied by enlargement along\nits  x -axis and changes to the exposed crystal facet.\nAs at this stage, the nanocrystal is directly bonded to the host SWNT,\nthis prevents its rotation, and therefore the observed changes in\nthe crystal facet must be caused by its lattice restructuring. Furthermore,\nthe interaction between the nanocrystal and the SWNT becomes unstable\nas the defect develops and the nanocrystal captures more carbon atoms\nfrom the SWNT sidewall. At 207 s, the atomic structure of the nanocrystal\ncan be well resolved, which allows quantitative comparison with TEM\nimage simulation ( Figures  \n a–d). At this point, there are 40 nickel atoms, out\nof which 20 are positioned in the top layer of the nanocrystal, indicating\nthat the structure becomes double-layered. Compared with the simulation\nof double-layered Ni 40  metal ( Figures S8–S10 ), the simulation of the Ni 40 C 40  nanocrystal is expanded by 14.7% in the  x  direction and 11.5% in the  y  direction. Thus, the\nnanocrystal reduced its thickness from 4 layers at the start of the\nprocess to 3 layers at 82 s and then to 2 layers at 207 s, which can\nbe interpreted as a progressive two-dimensionalization accompanying\nthe carbonization. The two-dimensionalization process may be caused\nby the stretching force from the carbon atoms on the SWNT to the nickel\natoms, or the stretching force is from the flattening of the defective\nSWNT. In the parallel case presented in  Figure S18 , from 0 to 123 s, a confined Ni nanoparticle gradually\ncarbonized and extended to a two-dimensional (2D) structure. Then\nit started cutting the host SWNT from 132 to 194 s. Interestingly,\nthe divided left part of the SWNT dragged the 2D NiC and even pulled\nout one nickel atom, as pointed out by the arrow in the image of 176\ns. Thus, we show that the stretching force between the host SWNT and\nthe formed NiC when the SWNT is breaking is large enough to deform\nthe structure of NiC. This larger stretching force should be the cause\nof the formation of 2D NiC. This finding provides a new possible mechanism\nfor fabricating 2D materials. To gain a detailed understanding of\nthe atomic structure of the nanocrystal formed at 207 s, we carried\nout FFT analysis and applied the pure NiC structure for simulation,\nwhich has the same geometry as nickel metal but with carbon atoms\noccupying all octahedral interstices ( Figure S11 ). Our simulation-based NiC model matches well the experimental images\n( Figures S8–S10 ). To exclude the\ninfluence of the defects of the host SWNT and the defocus changes\nduring the experiment process, we carried out TEM simulation and found\nthat these factors had no effect on the TEM results, as shown in  Figures S12 and S13 . At 212 s, an extensive defect\nis formed on the lower part of the SWNT with carbon atoms being extracted\nand captured by the nanocrystal during NiC formation, leading to the\nbreaking of bonds between the lower part of NiC and the host SWNT.\nAs a result, the tension on the NiC nanocrystal is released such that\nfrom 277 s, it became 4-layered again ( Figure  \n e–h) and began cutting into the upper\nwall of the SWNT. In order to verify the reproducibility of\nthe carbonization process\nof nickel nanocrystals, we presented 9 more cases in  Figures  \n  and  S14–S20 . Because the SWNTs we applied to encapsulate Ni nanoparticles have\na narrow diameter distribution (1.2 −1.5 nm), the initial Ni\nnanoparticles also have similar sizes, as shown in all 10 cases including  Figure  \n . However, the initial\nNi nanoparticles in  Figures  \n , , and  S16  show crystalline structures, while others (in  Figures S14, S15, and S17–S20 ) are amorphous clusters.\nUnder 80 keV electron beam irradiation, all of these 10 Ni nanoparticles\nobtained carbon atoms from the host SWNTs, gradually carbonized to\ncrystalline NiC nanoparticles. In addition, due to the loss of carbon\natoms, the SWNTs became defective and were all eventually cut by the\nformed NiC nanoparticles (more formed NiC nanoparticles shown in  Figure S21 ). 5 Typical carbonization processes of the\nnickel nanocrystals in SWNT\nbundles. (a) Time series AC-TEM images of the carbonization process\nof a nickel nanocrystal. The nanocrystal in the yellow box is a pure\nnickel nanocrystal and can also be found in  Figure S1 . The nanocrystal in red box is a fully carbonized nickel\ncarbide nanocrystal. (b) Model diagram of 229 s in part (a). (c) Corresponding\nsimulation image of the 229 s in part (a). (d) Time series AC-TEM\nimages of the carbonization process of another nickel nanocrystal.\nThe nanocrystal in the yellow box is a pure nickel nanocrystal. The\nnanocrystal in red box is a fully carbonized nickel carbide nanocrystal.\n(e) Model diagram of 378 s in part (d). (f) Corresponding simulation\nimage of the 378 s in part (d). During the entire process in  Figure  \n , we observed the atomic carbonization process of the\n4 × 5 × 4 nickel nanocrystal under the irradiation of 80\nkeV electron beam. The number of nickel atoms remained constant, as\nthe number of carbon atoms was gradually increasing, leading to Ni 40 C 20 , and it gradually progressed into fully carbonized\nNi 40 C 40 . The structure of the nanocrystal undergoes\ndrastic transformations during the carbonization process, including\nnot only lattice reconstitution but also two-dimensionalization as\nshown in  Figure  \n .\nIn comparison to conventional thermally induced metal carbonization\nprocesses, during which heating increases the mean free energy of\natoms in the system, the energy source for the carbonization of nickel\nin this work is the kinetic energy transferred from the electron beam\nto the atoms. More details are discussed in the Comparison of the\nthermally stimulated process and electron beam stimulated process\nsection” in  Supporting Information . However, the underlying principles for these kinds of carbonizations\nare similar, which are based on the fundamental chemical properties\nof nickel and NiC, as well as the threshold energies for breaking\nC–C bonds and forming Ni–C bonds. The key advantage\nof our method is that, as carbon receives significantly more energy\nfrom the 80 keV electron beam, C atoms penetrate into interstitial\nspaces of the nickel nanocrystal, leading to the transformations observed\nin real time by AC-TEM. Nickel and carbon have rich and versatile\nchemistry, as prior studies have reported nickel cutting CNTs under\n80 keV electron beam irradiation or catalyzing the formation of new\ncarbon structures such as fullerenes. \n , \n  Our current\nresults clearly demonstrate the carbonization of nickel as a competing\nreaction taking place under the same conditions. 6 Process map of carbonization\nof nickel using a model diagram derived\nfrom AC-TEM experimental and simulated image analysis. (a) An initial\npure nickel nanocrystal immersed in a carbon-rich environment with\ncarbon atoms gradually squeezing into the octahedral interstices of\nthe fcc nickel lattice. (b) Top view of the nanocrystal model diagrams\nat 0, 82, and 207s. (c) Side view of the model diagram in part (b).\n\nConclusions In this study, we directly\nimaged the carbonization of nickel nanocrystals\nconfined in SWNTs stimulated by electron beam irradiation in real\ntime and with atomic resolution. The nickel nanocrystal catalyzed\nthe C–C bond breaking and captured the activated carbon atoms\nfrom amorphous carbon and the host SWNT under electron beam irradiation.\nWe revealed that the carbonization of nickel is a progressive permeation\nprocess of the fcc nickel lattice with carbon atoms, leading to the\nevolution of pure nickel to Ni 40 C 20  and then\nto Ni 40 C 40 . Furthermore, we discovered the two-dimensionalization\nprocess during the carbonization of nickel nanoparticles, involving\nthe 4-layered nickel reconstructs to 2-layered NiC, which may be caused\nby the stretching force from the SWNT sidewall exerted onto the nanocrystal.\nThus, utilizing the SWNT as a nano test tube providing a carbon-rich\nenvironment for nickel nanocrystals and applying the electron beam\nof AC-TEM both as an imaging probe as well as a stimulus of reactions,\nwe revealed the atomic mechanism of nickel carbonization. Our findings\ncan provide guidance for designing stable metal-based catalysts as\nwell as new routes toward carbide-based two-dimensional materials.\n\nMethods Sample Preparation Single-walled carbon nanotubes (SWNTs,\nCarbon solutions) were thermally treated to open the termini of the\nSWNTs and to remove the residual amorphous carbon and organic ligand\nfrom the outer walls of the SWNTs before use. The as-received SWNTs\nwere heated in air for 30 min at 600 °C with a weight loss of\napproximately 30% observed for both samples. All other reagents and\nsolvents were used as supplied by Sigma-Aldrich. Nickel­(II) hexafluoroacetylacetonate\nNi­(C 5 HF 6 O 2 ) 2  was sealed\nunder vacuum in a quartz ampule and heated at a temperature slightly\nabove its vaporization point (140 °C) for 3 days to ensure complete\npenetration of the SWNT by Ni­(C 5 HF 6 O 2 ) 2 . The sample was cooled to room temperature and washed\nrepeatedly with tetrahydrofuran to remove Ni­(C 5 HF 6 O 2 ) 2  deposited on the outside of the SWNT.\nThe nanotubes filled with Ni­(C 5 HF 6 O 2 ) 2  were then sealed in a quartz ampule under an argon\natmosphere and heated at 600 °C, a temperature significantly\nabove the decomposition point of the metal species (∼150–200\n°C), for 2 h to decompose Ni­(C 5 HF 6 O 2 ) 2  into the pure nickel metal nanoparticles. Subsequently,\nC 5 HF 6 O 2  ligands would thermally decompose\ninto CO 2  gases and other volatile fragments, which make\nthe internal space in the hosted SWNT more pressurized than the outside.\nAll of the fragments escaped from the SWNT and cannot be observed\nin TEM. The elementary composition of the prepared sample is determined\nby EDS mapping as shown in  Figure S22 . Characterization and Simulation The SWNTs filled with\nnickel nanoparticles were dispersed in methanol and drop-cast onto\nlacey carbon–carbon-coated copper TEM grids. Time series AC-TEM\nimages were carried out on an image side C s -corrected FEI\nTitan 80–300 TEM operated at 80 kV at room temperature. HAADF-STEM\nand corresponding EDS mapping are carried out at a JEOL-Grand Arm\n300F. The TEM specimen was heated in air at 150 °C for 5 min\nshortly before insertion into the TEM column. TEM image simulation\nwas carried out using the multislice program QSTEM. The relevant image\nsimulation is carried out by QSTEM software, and the simulation parameters\nare listed in  Table S1 .\n\nSample Preparation Single-walled carbon nanotubes (SWNTs,\nCarbon solutions) were thermally treated to open the termini of the\nSWNTs and to remove the residual amorphous carbon and organic ligand\nfrom the outer walls of the SWNTs before use. The as-received SWNTs\nwere heated in air for 30 min at 600 °C with a weight loss of\napproximately 30% observed for both samples. All other reagents and\nsolvents were used as supplied by Sigma-Aldrich. Nickel­(II) hexafluoroacetylacetonate\nNi­(C 5 HF 6 O 2 ) 2  was sealed\nunder vacuum in a quartz ampule and heated at a temperature slightly\nabove its vaporization point (140 °C) for 3 days to ensure complete\npenetration of the SWNT by Ni­(C 5 HF 6 O 2 ) 2 . The sample was cooled to room temperature and washed\nrepeatedly with tetrahydrofuran to remove Ni­(C 5 HF 6 O 2 ) 2  deposited on the outside of the SWNT.\nThe nanotubes filled with Ni­(C 5 HF 6 O 2 ) 2  were then sealed in a quartz ampule under an argon\natmosphere and heated at 600 °C, a temperature significantly\nabove the decomposition point of the metal species (∼150–200\n°C), for 2 h to decompose Ni­(C 5 HF 6 O 2 ) 2  into the pure nickel metal nanoparticles. Subsequently,\nC 5 HF 6 O 2  ligands would thermally decompose\ninto CO 2  gases and other volatile fragments, which make\nthe internal space in the hosted SWNT more pressurized than the outside.\nAll of the fragments escaped from the SWNT and cannot be observed\nin TEM. The elementary composition of the prepared sample is determined\nby EDS mapping as shown in  Figure S22 .\n\nCharacterization and Simulation The SWNTs filled with\nnickel nanoparticles were dispersed in methanol and drop-cast onto\nlacey carbon–carbon-coated copper TEM grids. Time series AC-TEM\nimages were carried out on an image side C s -corrected FEI\nTitan 80–300 TEM operated at 80 kV at room temperature. HAADF-STEM\nand corresponding EDS mapping are carried out at a JEOL-Grand Arm\n300F. The TEM specimen was heated in air at 150 °C for 5 min\nshortly before insertion into the TEM column. TEM image simulation\nwas carried out using the multislice program QSTEM. The relevant image\nsimulation is carried out by QSTEM software, and the simulation parameters\nare listed in  Table S1 .\n\nSupplementary Material"
+}

@@ -1,0 +1,875 @@
+{
+  "paper_id": "PMC12127921",
+  "title": "Transforming henna: from natural dye to photosensitizer for efficient photocatalytic degradation of 4-nitrophenol using a green-synthesized ZnO@henna nanocomposite",
+  "authors": [
+    {
+      "name": "Kader D"
+    },
+    {
+      "name": "Mohammed A"
+    },
+    {
+      "name": "Mohammed S"
+    },
+    {
+      "name": "Aziz D."
+    }
+  ],
+  "doi": null,
+  "source": "eupmc",
+  "urls": {
+    "pdf": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC12127921/pdf"
+  },
+  "license": {
+    "type": "oa"
+  },
+  "access_route": "oa",
+  "sections": [
+    {
+      "heading": "Materials and methods",
+      "text": "2. Materials and methods 2.1. Materials 4-Nitrophenol (CAS: 100-02-7; 139.11 g mol −1 ), ethanol. Zinc nitrate hexahydrate (Zn(NO 3 ) 2 ·6H 2 O (CAS:10196-18-6; 297.49 g mol −1 )) and KOH were sourced from Sigma-Aldrich and were of analytical grade. Additional materials, including kaffir lime and dried henna leaves, were collected locally. The harvesting process occurred in an environmentally friendly way, using small amounts in alignment with an ethical and eco-friendly manner. 2.2. Methods 2.2.1. Green synthesis of ZnONPs from kaffir lime extract Initially, 200 grams of kaffir lime ( Citrus hystrix ) fruits were thoroughly rinsed with tap water, followed by distilled water (DW) to get rid of any potential pollutants. The lime fruits were then halved, and the juice was collected manually. The juice was then filtered through a piece of cotton fabric to remove larger particles and was then filtered again using Whatman filter paper ( Fig. 2 , step (a)). The resulting juice extract was then stored at 4 °C for possible future analysis. Fig. 2 Visual presentations of (a) extraction of kaffir lime, (b) green synthesis of ZnONPs, (c) henna leaf extract, and (d) green synthesis of ZnO@henna nanocomposite. To synthesize the ZnO nanoparticles, five grams of zinc nitrate hexahydrate was dissolved in 50 mL of DW, and subsequently, 50 mL of kaffir lime extract was added as a capping and reducing agent. The pH level of the solution was brought to 12 using 0.1 M potassium hydroxide (KOH). Afterward, the solution was homogenized forcefully at 500 rpm for 2 hours. The milky yellow solution that gradually turned to a brownish yellow would mark the completion of zinc hydroxide formation. The resulting precipitate was collected through centrifugation and filtration. It was subsequently washed with deionized water and ethyl alcohol to wipe out any lingering chemicals. The purified precipitate was then allowed to dry at 75 °C, annealed for one hour at 500 °C, and then collected for further applications. The product obtained was characterized through several analysis techniques as zinc oxide nanoparticles, which were utilized for subsequent processes ( Fig. 2 , step (b)). 2.2.2. Green synthesis of ZnO@henna nanocomposite To start, ten grams of dehydrated henna leaves were ground using a coffee grinder into fine powder. The henna leaf powder received 50 milliliters of double-distilled water during one hour of heating at 60 degrees celsius. The henna extract became ready for harvesting after simple filtration of the heated solution in which it had been obtained ( Fig. 2 , step (c)). Two grams of ZnONPs were introduced into the henna extract for the following step. The solution received dark conditions with a continuous stirring operation for four hours. The centrifugation process yielded the final product of ZnO@henna nanocomposite from the solution. A deep brown color appeared in the final synthesized nanocomposite, whereas a white color appeared in unmodified ZnONPs. The appearance of the new brown color shows that nanocomposite synthesis together with conjugation has been successful ( Fig. 2 , step (d)). The synthesis of ZnO@henna nanocomposite resulted in about 2.073 g of product through the complete drying and centrifugation period. We should interpret this yield figure as an estimated value. Minor losses of nanocomposite material might occur due to multiple synthesis steps that use repeated centrifugation and washing (deionized water and EtOH) procedures. Analytical techniques, including FTIR, XRD, FESEM, EDS, TEM, UV-vis DRS, zeta potential, PL, and EBT analysis, were used to show detailed information about the synthesized nanocomposite. 2.2.3. Instruments and characterizations A PANalytical X'Pert PRO equipped with Cu Kα radiation ( λ  = 1.5406 Å) operated at 40 kV and 30 mA executed X-ray diffraction (XRD) testing. The X-ray diffraction analysis through XRD required patterns from 10° to 80° degrees with a measurement step of 0.02° and a time duration of 1° per minute. The Bruker Tensor 27 FTIR spectrometer obtained FTIR spectra from the samples within the 4000–400 cm −1  wavelength range. The detailed imaging instrument featured JEOL JSM-7600F equipped with FEG optimization. The analysis of elements became possible with an EDS system integrated into FESEM—a JEOL JEM-2100F. The FEG-equipped transmission electron microscope worked as a tool for high-resolution imaging during experimental execution—sample analysis using UV-vis DRS spectroscopy conducted by PerkinElmer Lambda 750 UV-vis spectrophotometer that employed integrating sphere attachment. The Laboratory Zeta Potential Analyzer of HORIBA SZ-100 (HORIBA Scientific Japan) utilizes ELS and DLS techniques to evaluate sample zeta potential. Surface area and porosity measurement of samples took place through Micromeritics Porosity and Surface Area Analyzer (ASAP 2020, Micromeritics Instrument Corporation, USA) utilizing Brunauer–Emmett–Teller (BET) theory. 2.2.4. Photocatalytic activity of ZnO@henna nanocomposite The photocatalytic degradation of 4-NP was directed using a low-intensity blue LED lamp ( λ  > 425 nm, 30 W, 166 mW cm −2 ) as the irradiation source at room temperature and atmospheric pressure. For the initial experiment, 10 mg of the ZnO@henna catalyst was dispersed in 25 mL of a 4-NP (50 ppm) aqueous solution. The reaction mixture was stirred in the dark for one hour to reach adsorption equilibrium. The solution was then continuously stirred while being irradiated. After the adsorption test, photocatalyst samples were collected and centrifuged for separative analysis. The clear supernatant was scrutinized using a PG-T80+ double-beam UV-vis Spectrophotometer (PG Instruments Ltd, UK). In keeping with the 4-NP maximum absorption wavelength, absorbance measurements were taken at 317 nm. 48  The concentration of 4-NP can efficiently and accurately be determined by the highly trusted spectrophotometric method. The photodegradation percentage of the 4-NP was calculated using the equation: degradation% = [( C o  −  C )/ C o ] × 100.  C o  is the original concentration, and  C  is the concentration at a specified time."
+    },
+    {
+      "heading": "Methods",
+      "text": "2.2. Methods 2.2.1. Green synthesis of ZnONPs from kaffir lime extract Initially, 200 grams of kaffir lime ( Citrus hystrix ) fruits were thoroughly rinsed with tap water, followed by distilled water (DW) to get rid of any potential pollutants. The lime fruits were then halved, and the juice was collected manually. The juice was then filtered through a piece of cotton fabric to remove larger particles and was then filtered again using Whatman filter paper ( Fig. 2 , step (a)). The resulting juice extract was then stored at 4 °C for possible future analysis. Fig. 2 Visual presentations of (a) extraction of kaffir lime, (b) green synthesis of ZnONPs, (c) henna leaf extract, and (d) green synthesis of ZnO@henna nanocomposite. To synthesize the ZnO nanoparticles, five grams of zinc nitrate hexahydrate was dissolved in 50 mL of DW, and subsequently, 50 mL of kaffir lime extract was added as a capping and reducing agent. The pH level of the solution was brought to 12 using 0.1 M potassium hydroxide (KOH). Afterward, the solution was homogenized forcefully at 500 rpm for 2 hours. The milky yellow solution that gradually turned to a brownish yellow would mark the completion of zinc hydroxide formation. The resulting precipitate was collected through centrifugation and filtration. It was subsequently washed with deionized water and ethyl alcohol to wipe out any lingering chemicals. The purified precipitate was then allowed to dry at 75 °C, annealed for one hour at 500 °C, and then collected for further applications. The product obtained was characterized through several analysis techniques as zinc oxide nanoparticles, which were utilized for subsequent processes ( Fig. 2 , step (b)). 2.2.2. Green synthesis of ZnO@henna nanocomposite To start, ten grams of dehydrated henna leaves were ground using a coffee grinder into fine powder. The henna leaf powder received 50 milliliters of double-distilled water during one hour of heating at 60 degrees celsius. The henna extract became ready for harvesting after simple filtration of the heated solution in which it had been obtained ( Fig. 2 , step (c)). Two grams of ZnONPs were introduced into the henna extract for the following step. The solution received dark conditions with a continuous stirring operation for four hours. The centrifugation process yielded the final product of ZnO@henna nanocomposite from the solution. A deep brown color appeared in the final synthesized nanocomposite, whereas a white color appeared in unmodified ZnONPs. The appearance of the new brown color shows that nanocomposite synthesis together with conjugation has been successful ( Fig. 2 , step (d)). The synthesis of ZnO@henna nanocomposite resulted in about 2.073 g of product through the complete drying and centrifugation period. We should interpret this yield figure as an estimated value. Minor losses of nanocomposite material might occur due to multiple synthesis steps that use repeated centrifugation and washing (deionized water and EtOH) procedures. Analytical techniques, including FTIR, XRD, FESEM, EDS, TEM, UV-vis DRS, zeta potential, PL, and EBT analysis, were used to show detailed information about the synthesized nanocomposite. 2.2.3. Instruments and characterizations A PANalytical X'Pert PRO equipped with Cu Kα radiation ( λ  = 1.5406 Å) operated at 40 kV and 30 mA executed X-ray diffraction (XRD) testing. The X-ray diffraction analysis through XRD required patterns from 10° to 80° degrees with a measurement step of 0.02° and a time duration of 1° per minute. The Bruker Tensor 27 FTIR spectrometer obtained FTIR spectra from the samples within the 4000–400 cm −1  wavelength range. The detailed imaging instrument featured JEOL JSM-7600F equipped with FEG optimization. The analysis of elements became possible with an EDS system integrated into FESEM—a JEOL JEM-2100F. The FEG-equipped transmission electron microscope worked as a tool for high-resolution imaging during experimental execution—sample analysis using UV-vis DRS spectroscopy conducted by PerkinElmer Lambda 750 UV-vis spectrophotometer that employed integrating sphere attachment. The Laboratory Zeta Potential Analyzer of HORIBA SZ-100 (HORIBA Scientific Japan) utilizes ELS and DLS techniques to evaluate sample zeta potential. Surface area and porosity measurement of samples took place through Micromeritics Porosity and Surface Area Analyzer (ASAP 2020, Micromeritics Instrument Corporation, USA) utilizing Brunauer–Emmett–Teller (BET) theory. 2.2.4. Photocatalytic activity of ZnO@henna nanocomposite The photocatalytic degradation of 4-NP was directed using a low-intensity blue LED lamp ( λ  > 425 nm, 30 W, 166 mW cm −2 ) as the irradiation source at room temperature and atmospheric pressure. For the initial experiment, 10 mg of the ZnO@henna catalyst was dispersed in 25 mL of a 4-NP (50 ppm) aqueous solution. The reaction mixture was stirred in the dark for one hour to reach adsorption equilibrium. The solution was then continuously stirred while being irradiated. After the adsorption test, photocatalyst samples were collected and centrifuged for separative analysis. The clear supernatant was scrutinized using a PG-T80+ double-beam UV-vis Spectrophotometer (PG Instruments Ltd, UK). In keeping with the 4-NP maximum absorption wavelength, absorbance measurements were taken at 317 nm. 48  The concentration of 4-NP can efficiently and accurately be determined by the highly trusted spectrophotometric method. The photodegradation percentage of the 4-NP was calculated using the equation: degradation% = [( C o  −  C )/ C o ] × 100.  C o  is the original concentration, and  C  is the concentration at a specified time."
+    },
+    {
+      "heading": "Green synthesis of ZnONPs from kaffir lime extract",
+      "text": "2.2.1. Green synthesis of ZnONPs from kaffir lime extract Initially, 200 grams of kaffir lime ( Citrus hystrix ) fruits were thoroughly rinsed with tap water, followed by distilled water (DW) to get rid of any potential pollutants. The lime fruits were then halved, and the juice was collected manually. The juice was then filtered through a piece of cotton fabric to remove larger particles and was then filtered again using Whatman filter paper ( Fig. 2 , step (a)). The resulting juice extract was then stored at 4 °C for possible future analysis. Fig. 2 Visual presentations of (a) extraction of kaffir lime, (b) green synthesis of ZnONPs, (c) henna leaf extract, and (d) green synthesis of ZnO@henna nanocomposite. To synthesize the ZnO nanoparticles, five grams of zinc nitrate hexahydrate was dissolved in 50 mL of DW, and subsequently, 50 mL of kaffir lime extract was added as a capping and reducing agent. The pH level of the solution was brought to 12 using 0.1 M potassium hydroxide (KOH). Afterward, the solution was homogenized forcefully at 500 rpm for 2 hours. The milky yellow solution that gradually turned to a brownish yellow would mark the completion of zinc hydroxide formation. The resulting precipitate was collected through centrifugation and filtration. It was subsequently washed with deionized water and ethyl alcohol to wipe out any lingering chemicals. The purified precipitate was then allowed to dry at 75 °C, annealed for one hour at 500 °C, and then collected for further applications. The product obtained was characterized through several analysis techniques as zinc oxide nanoparticles, which were utilized for subsequent processes ( Fig. 2 , step (b))."
+    },
+    {
+      "heading": "Green synthesis of ZnO@henna nanocomposite",
+      "text": "2.2.2. Green synthesis of ZnO@henna nanocomposite To start, ten grams of dehydrated henna leaves were ground using a coffee grinder into fine powder. The henna leaf powder received 50 milliliters of double-distilled water during one hour of heating at 60 degrees celsius. The henna extract became ready for harvesting after simple filtration of the heated solution in which it had been obtained ( Fig. 2 , step (c)). Two grams of ZnONPs were introduced into the henna extract for the following step. The solution received dark conditions with a continuous stirring operation for four hours. The centrifugation process yielded the final product of ZnO@henna nanocomposite from the solution. A deep brown color appeared in the final synthesized nanocomposite, whereas a white color appeared in unmodified ZnONPs. The appearance of the new brown color shows that nanocomposite synthesis together with conjugation has been successful ( Fig. 2 , step (d)). The synthesis of ZnO@henna nanocomposite resulted in about 2.073 g of product through the complete drying and centrifugation period. We should interpret this yield figure as an estimated value. Minor losses of nanocomposite material might occur due to multiple synthesis steps that use repeated centrifugation and washing (deionized water and EtOH) procedures. Analytical techniques, including FTIR, XRD, FESEM, EDS, TEM, UV-vis DRS, zeta potential, PL, and EBT analysis, were used to show detailed information about the synthesized nanocomposite."
+    },
+    {
+      "heading": "Synthesis of ZnO@henna nanocomposite and the conjugation strategy",
+      "text": "3.1. Synthesis of ZnO@henna nanocomposite and the conjugation strategy The extract of kaffir lime is known to contain polyphenols, flavonoids, and organic acids that act as reducing and stabilizing agents. 49  The most significant phytochemicals present in kaffir lime extract are terpins, citronellal, and isopulegol. 50  These compounds can make complexations with zinc ions to form intermediates with hydrogen bonding and electrostatic interaction  via  hydroxyl and carbonyl groups. 51  The possible interactions are depicted in  Fig. 3(a) . During calcination, organic moieties are oxidized to carbon dioxide and water, forming ZnONPs by calcination. 52,53  Lawsone (2-hydroxy-1,4-naphthaquinone) is the primary pigment in henna. The hydroxyl and carbonyl groups may bind onto the surface of zinc oxide nanoparticles by either chelation or bridging while releasing water molecules through dehydration ( Fig. 3(b) ). 54,55  When compared to titanium, zinc bears a greater tendency to interact with ligands because of its relatively higher electron affinity. 56  Surface complexes are known to form between phenolic compounds and ZnO; this is also expected for lawsone with the carbonyl and phenolic hydroxyl groups. 57–59 Fig. 3 (a) Synthesis protocol of ZnONPs from phytochemicals available in kaffir lime, and (b) conjugation strategy between ZnONPs and lawsone as the primary pigment in henna."
+    }
+  ],
+  "extractions": {
+    "methods_paragraphs": [
+      {
+        "text": "2. Materials and methods 2.1. Materials 4-Nitrophenol (CAS: 100-02-7; 139.11 g mol −1 ), ethanol. Zinc nitrate hexahydrate (Zn(NO 3 ) 2 ·6H 2 O (CAS:10196-18-6; 297.49 g mol −1 )) and KOH were sourced from Sigma-Aldrich and were of analytical grade. Additional materials, including kaffir lime and dried henna leaves, were collected locally. The harvesting process occurred in an environmentally friendly way, using small amounts in alignment with an ethical and eco-friendly manner. 2.2. Methods 2.2.1. Green synthesis of ZnONPs from kaffir lime extract Initially, 200 grams of kaffir lime ( Citrus hystrix ) fruits were thoroughly rinsed with tap water, followed by distilled water (DW) to get rid of any potential pollutants. The lime fruits were then halved, and the juice was collected manually. The juice was then filtered through a piece of cotton fabric to remove larger particles and was then filtered again using Whatman filter paper ( Fig. 2 , step (a)). The resulting juice extract was then stored at 4 °C for possible future analysis. Fig. 2 Visual presentations of (a) extraction of kaffir lime, (b) green synthesis of ZnONPs, (c) henna leaf extract, and (d) green synthesis of ZnO@henna nanocomposite. To synthesize the ZnO nanoparticles, five grams of zinc nitrate hexahydrate was dissolved in 50 mL of DW, and subsequently, 50 mL of kaffir lime extract was added as a capping and reducing agent. The pH level of the solution was brought to 12 using 0.1 M potassium hydroxide (KOH). Afterward, the solution was homogenized forcefully at 500 rpm for 2 hours. The milky yellow solution that gradually turned to a brownish yellow would mark the completion of zinc hydroxide formation. The resulting precipitate was collected through centrifugation and filtration. It was subsequently washed with deionized water and ethyl alcohol to wipe out any lingering chemicals. The purified precipitate was then allowed to dry at 75 °C, annealed for one hour at 500 °C, and then collected for further applications. The product obtained was characterized through several analysis techniques as zinc oxide nanoparticles, which were utilized for subsequent processes ( Fig. 2 , step (b)). 2.2.2. Green synthesis of ZnO@henna nanocomposite To start, ten grams of dehydrated henna leaves were ground using a coffee grinder into fine powder. The henna leaf powder received 50 milliliters of double-distilled water during one hour of heating at 60 degrees celsius. The henna extract became ready for harvesting after simple filtration of the heated solution in which it had been obtained ( Fig. 2 , step (c)). Two grams of ZnONPs were introduced into the henna extract for the following step. The solution received dark conditions with a continuous stirring operation for four hours. The centrifugation process yielded the final product of ZnO@henna nanocomposite from the solution. A deep brown color appeared in the final synthesized nanocomposite, whereas a white color appeared in unmodified ZnONPs. The appearance of the new brown color shows that nanocomposite synthesis together with conjugation has been successful ( Fig. 2 , step (d)). The synthesis of ZnO@henna nanocomposite resulted in about 2.073 g of product through the complete drying and centrifugation period. We should interpret this yield figure as an estimated value. Minor losses of nanocomposite material might occur due to multiple synthesis steps that use repeated centrifugation and washing (deionized water and EtOH) procedures. Analytical techniques, including FTIR, XRD, FESEM, EDS, TEM, UV-vis DRS, zeta potential, PL, and EBT analysis, were used to show detailed information about the synthesized nanocomposite. 2.2.3. Instruments and characterizations A PANalytical X'Pert PRO equipped with Cu Kα radiation ( λ  = 1.5406 Å) operated at 40 kV and 30 mA executed X-ray diffraction (XRD) testing. The X-ray diffraction analysis through XRD required patterns from 10° to 80° degrees with a measurement step of 0.02° and a time duration of 1° per minute. The Bruker Tensor 27 FTIR spectrometer obtained FTIR spectra from the samples within the 4000–400 cm −1  wavelength range. The detailed imaging instrument featured JEOL JSM-7600F equipped with FEG optimization. The analysis of elements became possible with an EDS system integrated into FESEM—a JEOL JEM-2100F. The FEG-equipped transmission electron microscope worked as a tool for high-resolution imaging during experimental execution—sample analysis using UV-vis DRS spectroscopy conducted by PerkinElmer Lambda 750 UV-vis spectrophotometer that employed integrating sphere attachment. The Laboratory Zeta Potential Analyzer of HORIBA SZ-100 (HORIBA Scientific Japan) utilizes ELS and DLS techniques to evaluate sample zeta potential. Surface area and porosity measurement of samples took place through Micromeritics Porosity and Surface Area Analyzer (ASAP 2020, Micromeritics Instrument Corporation, USA) utilizing Brunauer–Emmett–Teller (BET) theory. 2.2.4. Photocatalytic activity of ZnO@henna nanocomposite The photocatalytic degradation of 4-NP was directed using a low-intensity blue LED lamp ( λ  > 425 nm, 30 W, 166 mW cm −2 ) as the irradiation source at room temperature and atmospheric pressure. For the initial experiment, 10 mg of the ZnO@henna catalyst was dispersed in 25 mL of a 4-NP (50 ppm) aqueous solution. The reaction mixture was stirred in the dark for one hour to reach adsorption equilibrium. The solution was then continuously stirred while being irradiated. After the adsorption test, photocatalyst samples were collected and centrifuged for separative analysis. The clear supernatant was scrutinized using a PG-T80+ double-beam UV-vis Spectrophotometer (PG Instruments Ltd, UK). In keeping with the 4-NP maximum absorption wavelength, absorbance measurements were taken at 317 nm. 48  The concentration of 4-NP can efficiently and accurately be determined by the highly trusted spectrophotometric method. The photodegradation percentage of the 4-NP was calculated using the equation: degradation% = [( C o  −  C )/ C o ] × 100.  C o  is the original concentration, and  C  is the concentration at a specified time.",
+        "operations": [
+          {
+            "op_type": "dry",
+            "sentence": "Additional materials, including kaffir lime and dried henna leaves, were collected locally.",
+            "start_char": 250,
+            "end_char": 341,
+            "materials": [],
+            "params": {}
+          },
+          {
+            "op_type": "wash",
+            "sentence": "Green synthesis of ZnONPs from kaffir lime extract Initially, 200 grams of kaffir lime ( Citrus hystrix ) fruits were thoroughly rinsed with tap water, followed by distilled water (DW) to get rid of any potential pollutants.",
+            "start_char": 504,
+            "end_char": 728,
+            "materials": [
+              "200 grams",
+              "( Citrus hystrix"
+            ],
+            "params": {}
+          },
+          {
+            "op_type": "filter",
+            "sentence": "The juice was then filtered through a piece of cotton fabric to remove larger particles and was then filtered again using Whatman filter paper ( Fig. 2 , step (a)).",
+            "start_char": 801,
+            "end_char": 965,
+            "materials": [],
+            "params": {}
+          },
+          {
+            "op_type": "add",
+            "sentence": "To synthesize the ZnO nanoparticles, five grams of zinc nitrate hexahydrate was dissolved in 50 mL of DW, and subsequently, 50 mL of kaffir lime extract was added as a capping and reducing agent.",
+            "start_char": 1217,
+            "end_char": 1412,
+            "materials": [
+              "five grams"
+            ],
+            "params": {
+              "amounts": [
+                "50 mL",
+                "50 mL"
+              ]
+            }
+          },
+          {
+            "op_type": "centrifuge",
+            "sentence": "The resulting precipitate was collected through centrifugation and filtration.",
+            "start_char": 1698,
+            "end_char": 1776,
+            "materials": [],
+            "params": {}
+          },
+          {
+            "op_type": "wash",
+            "sentence": "It was subsequently washed with deionized water and ethyl alcohol to wipe out any lingering chemicals.",
+            "start_char": 1777,
+            "end_char": 1879,
+            "materials": [],
+            "params": {}
+          },
+          {
+            "op_type": "dry",
+            "sentence": "The purified precipitate was then allowed to dry at 75 °C, annealed for one hour at 500 °C, and then collected for further applications.",
+            "start_char": 1880,
+            "end_char": 2016,
+            "materials": [
+              "75 °C",
+              "one hour",
+              "500 °C"
+            ],
+            "params": {
+              "temp": "75°C"
+            }
+          },
+          {
+            "op_type": "heat",
+            "sentence": "The henna leaf powder received 50 milliliters of double-distilled water during one hour of heating at 60 degrees celsius.",
+            "start_char": 2338,
+            "end_char": 2459,
+            "materials": [
+              "50 milliliters",
+              "one hour",
+              "60 degrees celsius"
+            ],
+            "params": {}
+          },
+          {
+            "op_type": "filter",
+            "sentence": "The henna extract became ready for harvesting after simple filtration of the heated solution in which it had been obtained ( Fig. 2 , step (c)).",
+            "start_char": 2460,
+            "end_char": 2604,
+            "materials": [
+              "( Fig"
+            ],
+            "params": {}
+          },
+          {
+            "op_type": "add",
+            "sentence": "Two grams of ZnONPs were introduced into the henna extract for the following step.",
+            "start_char": 2605,
+            "end_char": 2687,
+            "materials": [
+              "Two grams"
+            ],
+            "params": {}
+          },
+          {
+            "op_type": "stir",
+            "sentence": "The solution received dark conditions with a continuous stirring operation for four hours.",
+            "start_char": 2688,
+            "end_char": 2778,
+            "materials": [
+              "four hours"
+            ],
+            "params": {}
+          },
+          {
+            "op_type": "centrifuge",
+            "sentence": "The centrifugation process yielded the final product of ZnO@henna nanocomposite from the solution.",
+            "start_char": 2779,
+            "end_char": 2877,
+            "materials": [],
+            "params": {}
+          },
+          {
+            "op_type": "dry",
+            "sentence": "The synthesis of ZnO@henna nanocomposite resulted in about 2.073 g of product through the complete drying and centrifugation period.",
+            "start_char": 3140,
+            "end_char": 3272,
+            "materials": [
+              "about 2.073 g"
+            ],
+            "params": {
+              "amounts": [
+                "2.073 g"
+              ]
+            }
+          },
+          {
+            "op_type": "centrifuge",
+            "sentence": "Minor losses of nanocomposite material might occur due to multiple synthesis steps that use repeated centrifugation and washing (deionized water and EtOH) procedures.",
+            "start_char": 3334,
+            "end_char": 3500,
+            "materials": [
+              "repeated centrifugation and washing (deionized water and EtOH) procedures"
+            ],
+            "params": {}
+          },
+          {
+            "op_type": "stir",
+            "sentence": "The reaction mixture was stirred in the dark for one hour to reach adsorption equilibrium.",
+            "start_char": 5357,
+            "end_char": 5447,
+            "materials": [
+              "one hour"
+            ],
+            "params": {}
+          },
+          {
+            "op_type": "stir",
+            "sentence": "The solution was then continuously stirred while being irradiated.",
+            "start_char": 5448,
+            "end_char": 5514,
+            "materials": [],
+            "params": {}
+          },
+          {
+            "op_type": "centrifuge",
+            "sentence": "After the adsorption test, photocatalyst samples were collected and centrifuged for separative analysis.",
+            "start_char": 5515,
+            "end_char": 5619,
+            "materials": [],
+            "params": {}
+          }
+        ],
+        "expanded": [
+          {
+            "op_type": "dry",
+            "steps": [
+              "Perform operation 'dry' as described: Additional materials, including kaffir lime and dried henna leaves, were collected locally."
+            ]
+          },
+          {
+            "op_type": "wash",
+            "steps": [
+              "Perform operation 'wash' as described: Green synthesis of ZnONPs from kaffir lime extract Initially, 200 grams of kaffir lime ( Citrus hystrix ) fruits were thoroughly rinsed with tap water, followed by distilled water (DW) to get rid of any potential pollutants."
+            ]
+          },
+          {
+            "op_type": "filter",
+            "steps": [
+              "Perform operation 'filter' as described: The juice was then filtered through a piece of cotton fabric to remove larger particles and was then filtered again using Whatman filter paper ( Fig. 2 , step (a))."
+            ]
+          },
+          {
+            "op_type": "add",
+            "steps": [
+              "Ensure reaction vessel is present and empty.",
+              "Place a clean stir bar in the vessel.",
+              "Measure 50 mL of five grams.",
+              "Transfer five grams into the vessel."
+            ]
+          },
+          {
+            "op_type": "centrifuge",
+            "steps": [
+              "Perform operation 'centrifuge' as described: The resulting precipitate was collected through centrifugation and filtration."
+            ]
+          },
+          {
+            "op_type": "wash",
+            "steps": [
+              "Perform operation 'wash' as described: It was subsequently washed with deionized water and ethyl alcohol to wipe out any lingering chemicals."
+            ]
+          },
+          {
+            "op_type": "dry",
+            "steps": [
+              "Perform operation 'dry' as described: The purified precipitate was then allowed to dry at 75 °C, annealed for one hour at 500 °C, and then collected for further applications."
+            ]
+          },
+          {
+            "op_type": "heat",
+            "steps": [
+              "Place the reaction vessel on a hotplate.",
+              "Ramp to the target temperature.",
+              "Maintain the target temperature for the specified time."
+            ]
+          },
+          {
+            "op_type": "filter",
+            "steps": [
+              "Perform operation 'filter' as described: The henna extract became ready for harvesting after simple filtration of the heated solution in which it had been obtained ( Fig. 2 , step (c))."
+            ]
+          },
+          {
+            "op_type": "add",
+            "steps": [
+              "Ensure reaction vessel is present and empty.",
+              "Place a clean stir bar in the vessel.",
+              "Measure the specified amount of Two grams.",
+              "Transfer Two grams into the vessel."
+            ]
+          },
+          {
+            "op_type": "stir",
+            "steps": [
+              "Place the reaction vessel on a stir plate.",
+              "Set the stirrer to an appropriate speed.",
+              "Stir for the specified time."
+            ]
+          },
+          {
+            "op_type": "centrifuge",
+            "steps": [
+              "Perform operation 'centrifuge' as described: The centrifugation process yielded the final product of ZnO@henna nanocomposite from the solution."
+            ]
+          },
+          {
+            "op_type": "dry",
+            "steps": [
+              "Perform operation 'dry' as described: The synthesis of ZnO@henna nanocomposite resulted in about 2.073 g of product through the complete drying and centrifugation period."
+            ]
+          },
+          {
+            "op_type": "centrifuge",
+            "steps": [
+              "Perform operation 'centrifuge' as described: Minor losses of nanocomposite material might occur due to multiple synthesis steps that use repeated centrifugation and washing (deionized water and EtOH) procedures."
+            ]
+          },
+          {
+            "op_type": "stir",
+            "steps": [
+              "Place the reaction vessel on a stir plate.",
+              "Set the stirrer to an appropriate speed.",
+              "Stir for the specified time."
+            ]
+          },
+          {
+            "op_type": "stir",
+            "steps": [
+              "Place the reaction vessel on a stir plate.",
+              "Set the stirrer to an appropriate speed.",
+              "Stir for the specified time."
+            ]
+          },
+          {
+            "op_type": "centrifuge",
+            "steps": [
+              "Perform operation 'centrifuge' as described: After the adsorption test, photocatalyst samples were collected and centrifuged for separative analysis."
+            ]
+          }
+        ]
+      },
+      {
+        "text": "2.2. Methods 2.2.1. Green synthesis of ZnONPs from kaffir lime extract Initially, 200 grams of kaffir lime ( Citrus hystrix ) fruits were thoroughly rinsed with tap water, followed by distilled water (DW) to get rid of any potential pollutants. The lime fruits were then halved, and the juice was collected manually. The juice was then filtered through a piece of cotton fabric to remove larger particles and was then filtered again using Whatman filter paper ( Fig. 2 , step (a)). The resulting juice extract was then stored at 4 °C for possible future analysis. Fig. 2 Visual presentations of (a) extraction of kaffir lime, (b) green synthesis of ZnONPs, (c) henna leaf extract, and (d) green synthesis of ZnO@henna nanocomposite. To synthesize the ZnO nanoparticles, five grams of zinc nitrate hexahydrate was dissolved in 50 mL of DW, and subsequently, 50 mL of kaffir lime extract was added as a capping and reducing agent. The pH level of the solution was brought to 12 using 0.1 M potassium hydroxide (KOH). Afterward, the solution was homogenized forcefully at 500 rpm for 2 hours. The milky yellow solution that gradually turned to a brownish yellow would mark the completion of zinc hydroxide formation. The resulting precipitate was collected through centrifugation and filtration. It was subsequently washed with deionized water and ethyl alcohol to wipe out any lingering chemicals. The purified precipitate was then allowed to dry at 75 °C, annealed for one hour at 500 °C, and then collected for further applications. The product obtained was characterized through several analysis techniques as zinc oxide nanoparticles, which were utilized for subsequent processes ( Fig. 2 , step (b)). 2.2.2. Green synthesis of ZnO@henna nanocomposite To start, ten grams of dehydrated henna leaves were ground using a coffee grinder into fine powder. The henna leaf powder received 50 milliliters of double-distilled water during one hour of heating at 60 degrees celsius. The henna extract became ready for harvesting after simple filtration of the heated solution in which it had been obtained ( Fig. 2 , step (c)). Two grams of ZnONPs were introduced into the henna extract for the following step. The solution received dark conditions with a continuous stirring operation for four hours. The centrifugation process yielded the final product of ZnO@henna nanocomposite from the solution. A deep brown color appeared in the final synthesized nanocomposite, whereas a white color appeared in unmodified ZnONPs. The appearance of the new brown color shows that nanocomposite synthesis together with conjugation has been successful ( Fig. 2 , step (d)). The synthesis of ZnO@henna nanocomposite resulted in about 2.073 g of product through the complete drying and centrifugation period. We should interpret this yield figure as an estimated value. Minor losses of nanocomposite material might occur due to multiple synthesis steps that use repeated centrifugation and washing (deionized water and EtOH) procedures. Analytical techniques, including FTIR, XRD, FESEM, EDS, TEM, UV-vis DRS, zeta potential, PL, and EBT analysis, were used to show detailed information about the synthesized nanocomposite. 2.2.3. Instruments and characterizations A PANalytical X'Pert PRO equipped with Cu Kα radiation ( λ  = 1.5406 Å) operated at 40 kV and 30 mA executed X-ray diffraction (XRD) testing. The X-ray diffraction analysis through XRD required patterns from 10° to 80° degrees with a measurement step of 0.02° and a time duration of 1° per minute. The Bruker Tensor 27 FTIR spectrometer obtained FTIR spectra from the samples within the 4000–400 cm −1  wavelength range. The detailed imaging instrument featured JEOL JSM-7600F equipped with FEG optimization. The analysis of elements became possible with an EDS system integrated into FESEM—a JEOL JEM-2100F. The FEG-equipped transmission electron microscope worked as a tool for high-resolution imaging during experimental execution—sample analysis using UV-vis DRS spectroscopy conducted by PerkinElmer Lambda 750 UV-vis spectrophotometer that employed integrating sphere attachment. The Laboratory Zeta Potential Analyzer of HORIBA SZ-100 (HORIBA Scientific Japan) utilizes ELS and DLS techniques to evaluate sample zeta potential. Surface area and porosity measurement of samples took place through Micromeritics Porosity and Surface Area Analyzer (ASAP 2020, Micromeritics Instrument Corporation, USA) utilizing Brunauer–Emmett–Teller (BET) theory. 2.2.4. Photocatalytic activity of ZnO@henna nanocomposite The photocatalytic degradation of 4-NP was directed using a low-intensity blue LED lamp ( λ  > 425 nm, 30 W, 166 mW cm −2 ) as the irradiation source at room temperature and atmospheric pressure. For the initial experiment, 10 mg of the ZnO@henna catalyst was dispersed in 25 mL of a 4-NP (50 ppm) aqueous solution. The reaction mixture was stirred in the dark for one hour to reach adsorption equilibrium. The solution was then continuously stirred while being irradiated. After the adsorption test, photocatalyst samples were collected and centrifuged for separative analysis. The clear supernatant was scrutinized using a PG-T80+ double-beam UV-vis Spectrophotometer (PG Instruments Ltd, UK). In keeping with the 4-NP maximum absorption wavelength, absorbance measurements were taken at 317 nm. 48  The concentration of 4-NP can efficiently and accurately be determined by the highly trusted spectrophotometric method. The photodegradation percentage of the 4-NP was calculated using the equation: degradation% = [( C o  −  C )/ C o ] × 100.  C o  is the original concentration, and  C  is the concentration at a specified time.",
+        "operations": [
+          {
+            "op_type": "wash",
+            "sentence": "Green synthesis of ZnONPs from kaffir lime extract Initially, 200 grams of kaffir lime ( Citrus hystrix ) fruits were thoroughly rinsed with tap water, followed by distilled water (DW) to get rid of any potential pollutants.",
+            "start_char": 20,
+            "end_char": 244,
+            "materials": [
+              "200 grams",
+              "( Citrus hystrix"
+            ],
+            "params": {}
+          },
+          {
+            "op_type": "filter",
+            "sentence": "The juice was then filtered through a piece of cotton fabric to remove larger particles and was then filtered again using Whatman filter paper ( Fig. 2 , step (a)).",
+            "start_char": 317,
+            "end_char": 481,
+            "materials": [],
+            "params": {}
+          },
+          {
+            "op_type": "add",
+            "sentence": "To synthesize the ZnO nanoparticles, five grams of zinc nitrate hexahydrate was dissolved in 50 mL of DW, and subsequently, 50 mL of kaffir lime extract was added as a capping and reducing agent.",
+            "start_char": 733,
+            "end_char": 928,
+            "materials": [
+              "five grams"
+            ],
+            "params": {
+              "amounts": [
+                "50 mL",
+                "50 mL"
+              ]
+            }
+          },
+          {
+            "op_type": "centrifuge",
+            "sentence": "The resulting precipitate was collected through centrifugation and filtration.",
+            "start_char": 1214,
+            "end_char": 1292,
+            "materials": [],
+            "params": {}
+          },
+          {
+            "op_type": "wash",
+            "sentence": "It was subsequently washed with deionized water and ethyl alcohol to wipe out any lingering chemicals.",
+            "start_char": 1293,
+            "end_char": 1395,
+            "materials": [],
+            "params": {}
+          },
+          {
+            "op_type": "dry",
+            "sentence": "The purified precipitate was then allowed to dry at 75 °C, annealed for one hour at 500 °C, and then collected for further applications.",
+            "start_char": 1396,
+            "end_char": 1532,
+            "materials": [
+              "75 °C",
+              "one hour",
+              "500 °C"
+            ],
+            "params": {
+              "temp": "75°C"
+            }
+          },
+          {
+            "op_type": "heat",
+            "sentence": "The henna leaf powder received 50 milliliters of double-distilled water during one hour of heating at 60 degrees celsius.",
+            "start_char": 1854,
+            "end_char": 1975,
+            "materials": [
+              "50 milliliters",
+              "one hour",
+              "60 degrees celsius"
+            ],
+            "params": {}
+          },
+          {
+            "op_type": "filter",
+            "sentence": "The henna extract became ready for harvesting after simple filtration of the heated solution in which it had been obtained ( Fig. 2 , step (c)).",
+            "start_char": 1976,
+            "end_char": 2120,
+            "materials": [
+              "( Fig"
+            ],
+            "params": {}
+          },
+          {
+            "op_type": "add",
+            "sentence": "Two grams of ZnONPs were introduced into the henna extract for the following step.",
+            "start_char": 2121,
+            "end_char": 2203,
+            "materials": [
+              "Two grams"
+            ],
+            "params": {}
+          },
+          {
+            "op_type": "stir",
+            "sentence": "The solution received dark conditions with a continuous stirring operation for four hours.",
+            "start_char": 2204,
+            "end_char": 2294,
+            "materials": [
+              "four hours"
+            ],
+            "params": {}
+          },
+          {
+            "op_type": "centrifuge",
+            "sentence": "The centrifugation process yielded the final product of ZnO@henna nanocomposite from the solution.",
+            "start_char": 2295,
+            "end_char": 2393,
+            "materials": [],
+            "params": {}
+          },
+          {
+            "op_type": "dry",
+            "sentence": "The synthesis of ZnO@henna nanocomposite resulted in about 2.073 g of product through the complete drying and centrifugation period.",
+            "start_char": 2656,
+            "end_char": 2788,
+            "materials": [
+              "about 2.073 g"
+            ],
+            "params": {
+              "amounts": [
+                "2.073 g"
+              ]
+            }
+          },
+          {
+            "op_type": "centrifuge",
+            "sentence": "Minor losses of nanocomposite material might occur due to multiple synthesis steps that use repeated centrifugation and washing (deionized water and EtOH) procedures.",
+            "start_char": 2850,
+            "end_char": 3016,
+            "materials": [
+              "repeated centrifugation and washing (deionized water and EtOH) procedures"
+            ],
+            "params": {}
+          },
+          {
+            "op_type": "stir",
+            "sentence": "The reaction mixture was stirred in the dark for one hour to reach adsorption equilibrium.",
+            "start_char": 4873,
+            "end_char": 4963,
+            "materials": [
+              "one hour"
+            ],
+            "params": {}
+          },
+          {
+            "op_type": "stir",
+            "sentence": "The solution was then continuously stirred while being irradiated.",
+            "start_char": 4964,
+            "end_char": 5030,
+            "materials": [],
+            "params": {}
+          },
+          {
+            "op_type": "centrifuge",
+            "sentence": "After the adsorption test, photocatalyst samples were collected and centrifuged for separative analysis.",
+            "start_char": 5031,
+            "end_char": 5135,
+            "materials": [],
+            "params": {}
+          }
+        ],
+        "expanded": [
+          {
+            "op_type": "wash",
+            "steps": [
+              "Perform operation 'wash' as described: Green synthesis of ZnONPs from kaffir lime extract Initially, 200 grams of kaffir lime ( Citrus hystrix ) fruits were thoroughly rinsed with tap water, followed by distilled water (DW) to get rid of any potential pollutants."
+            ]
+          },
+          {
+            "op_type": "filter",
+            "steps": [
+              "Perform operation 'filter' as described: The juice was then filtered through a piece of cotton fabric to remove larger particles and was then filtered again using Whatman filter paper ( Fig. 2 , step (a))."
+            ]
+          },
+          {
+            "op_type": "add",
+            "steps": [
+              "Ensure reaction vessel is present and empty.",
+              "Place a clean stir bar in the vessel.",
+              "Measure 50 mL of five grams.",
+              "Transfer five grams into the vessel."
+            ]
+          },
+          {
+            "op_type": "centrifuge",
+            "steps": [
+              "Perform operation 'centrifuge' as described: The resulting precipitate was collected through centrifugation and filtration."
+            ]
+          },
+          {
+            "op_type": "wash",
+            "steps": [
+              "Perform operation 'wash' as described: It was subsequently washed with deionized water and ethyl alcohol to wipe out any lingering chemicals."
+            ]
+          },
+          {
+            "op_type": "dry",
+            "steps": [
+              "Perform operation 'dry' as described: The purified precipitate was then allowed to dry at 75 °C, annealed for one hour at 500 °C, and then collected for further applications."
+            ]
+          },
+          {
+            "op_type": "heat",
+            "steps": [
+              "Place the reaction vessel on a hotplate.",
+              "Ramp to the target temperature.",
+              "Maintain the target temperature for the specified time."
+            ]
+          },
+          {
+            "op_type": "filter",
+            "steps": [
+              "Perform operation 'filter' as described: The henna extract became ready for harvesting after simple filtration of the heated solution in which it had been obtained ( Fig. 2 , step (c))."
+            ]
+          },
+          {
+            "op_type": "add",
+            "steps": [
+              "Ensure reaction vessel is present and empty.",
+              "Place a clean stir bar in the vessel.",
+              "Measure the specified amount of Two grams.",
+              "Transfer Two grams into the vessel."
+            ]
+          },
+          {
+            "op_type": "stir",
+            "steps": [
+              "Place the reaction vessel on a stir plate.",
+              "Set the stirrer to an appropriate speed.",
+              "Stir for the specified time."
+            ]
+          },
+          {
+            "op_type": "centrifuge",
+            "steps": [
+              "Perform operation 'centrifuge' as described: The centrifugation process yielded the final product of ZnO@henna nanocomposite from the solution."
+            ]
+          },
+          {
+            "op_type": "dry",
+            "steps": [
+              "Perform operation 'dry' as described: The synthesis of ZnO@henna nanocomposite resulted in about 2.073 g of product through the complete drying and centrifugation period."
+            ]
+          },
+          {
+            "op_type": "centrifuge",
+            "steps": [
+              "Perform operation 'centrifuge' as described: Minor losses of nanocomposite material might occur due to multiple synthesis steps that use repeated centrifugation and washing (deionized water and EtOH) procedures."
+            ]
+          },
+          {
+            "op_type": "stir",
+            "steps": [
+              "Place the reaction vessel on a stir plate.",
+              "Set the stirrer to an appropriate speed.",
+              "Stir for the specified time."
+            ]
+          },
+          {
+            "op_type": "stir",
+            "steps": [
+              "Place the reaction vessel on a stir plate.",
+              "Set the stirrer to an appropriate speed.",
+              "Stir for the specified time."
+            ]
+          },
+          {
+            "op_type": "centrifuge",
+            "steps": [
+              "Perform operation 'centrifuge' as described: After the adsorption test, photocatalyst samples were collected and centrifuged for separative analysis."
+            ]
+          }
+        ]
+      },
+      {
+        "text": "2.2.1. Green synthesis of ZnONPs from kaffir lime extract Initially, 200 grams of kaffir lime ( Citrus hystrix ) fruits were thoroughly rinsed with tap water, followed by distilled water (DW) to get rid of any potential pollutants. The lime fruits were then halved, and the juice was collected manually. The juice was then filtered through a piece of cotton fabric to remove larger particles and was then filtered again using Whatman filter paper ( Fig. 2 , step (a)). The resulting juice extract was then stored at 4 °C for possible future analysis. Fig. 2 Visual presentations of (a) extraction of kaffir lime, (b) green synthesis of ZnONPs, (c) henna leaf extract, and (d) green synthesis of ZnO@henna nanocomposite. To synthesize the ZnO nanoparticles, five grams of zinc nitrate hexahydrate was dissolved in 50 mL of DW, and subsequently, 50 mL of kaffir lime extract was added as a capping and reducing agent. The pH level of the solution was brought to 12 using 0.1 M potassium hydroxide (KOH). Afterward, the solution was homogenized forcefully at 500 rpm for 2 hours. The milky yellow solution that gradually turned to a brownish yellow would mark the completion of zinc hydroxide formation. The resulting precipitate was collected through centrifugation and filtration. It was subsequently washed with deionized water and ethyl alcohol to wipe out any lingering chemicals. The purified precipitate was then allowed to dry at 75 °C, annealed for one hour at 500 °C, and then collected for further applications. The product obtained was characterized through several analysis techniques as zinc oxide nanoparticles, which were utilized for subsequent processes ( Fig. 2 , step (b)).",
+        "operations": [
+          {
+            "op_type": "wash",
+            "sentence": "Green synthesis of ZnONPs from kaffir lime extract Initially, 200 grams of kaffir lime ( Citrus hystrix ) fruits were thoroughly rinsed with tap water, followed by distilled water (DW) to get rid of any potential pollutants.",
+            "start_char": 7,
+            "end_char": 231,
+            "materials": [
+              "200 grams",
+              "( Citrus hystrix"
+            ],
+            "params": {}
+          },
+          {
+            "op_type": "filter",
+            "sentence": "The juice was then filtered through a piece of cotton fabric to remove larger particles and was then filtered again using Whatman filter paper ( Fig. 2 , step (a)).",
+            "start_char": 304,
+            "end_char": 468,
+            "materials": [],
+            "params": {}
+          },
+          {
+            "op_type": "add",
+            "sentence": "To synthesize the ZnO nanoparticles, five grams of zinc nitrate hexahydrate was dissolved in 50 mL of DW, and subsequently, 50 mL of kaffir lime extract was added as a capping and reducing agent.",
+            "start_char": 720,
+            "end_char": 915,
+            "materials": [
+              "five grams"
+            ],
+            "params": {
+              "amounts": [
+                "50 mL",
+                "50 mL"
+              ]
+            }
+          },
+          {
+            "op_type": "centrifuge",
+            "sentence": "The resulting precipitate was collected through centrifugation and filtration.",
+            "start_char": 1201,
+            "end_char": 1279,
+            "materials": [],
+            "params": {}
+          },
+          {
+            "op_type": "wash",
+            "sentence": "It was subsequently washed with deionized water and ethyl alcohol to wipe out any lingering chemicals.",
+            "start_char": 1280,
+            "end_char": 1382,
+            "materials": [],
+            "params": {}
+          },
+          {
+            "op_type": "dry",
+            "sentence": "The purified precipitate was then allowed to dry at 75 °C, annealed for one hour at 500 °C, and then collected for further applications.",
+            "start_char": 1383,
+            "end_char": 1519,
+            "materials": [
+              "75 °C",
+              "one hour",
+              "500 °C"
+            ],
+            "params": {
+              "temp": "75°C"
+            }
+          }
+        ],
+        "expanded": [
+          {
+            "op_type": "wash",
+            "steps": [
+              "Perform operation 'wash' as described: Green synthesis of ZnONPs from kaffir lime extract Initially, 200 grams of kaffir lime ( Citrus hystrix ) fruits were thoroughly rinsed with tap water, followed by distilled water (DW) to get rid of any potential pollutants."
+            ]
+          },
+          {
+            "op_type": "filter",
+            "steps": [
+              "Perform operation 'filter' as described: The juice was then filtered through a piece of cotton fabric to remove larger particles and was then filtered again using Whatman filter paper ( Fig. 2 , step (a))."
+            ]
+          },
+          {
+            "op_type": "add",
+            "steps": [
+              "Ensure reaction vessel is present and empty.",
+              "Place a clean stir bar in the vessel.",
+              "Measure 50 mL of five grams.",
+              "Transfer five grams into the vessel."
+            ]
+          },
+          {
+            "op_type": "centrifuge",
+            "steps": [
+              "Perform operation 'centrifuge' as described: The resulting precipitate was collected through centrifugation and filtration."
+            ]
+          },
+          {
+            "op_type": "wash",
+            "steps": [
+              "Perform operation 'wash' as described: It was subsequently washed with deionized water and ethyl alcohol to wipe out any lingering chemicals."
+            ]
+          },
+          {
+            "op_type": "dry",
+            "steps": [
+              "Perform operation 'dry' as described: The purified precipitate was then allowed to dry at 75 °C, annealed for one hour at 500 °C, and then collected for further applications."
+            ]
+          }
+        ]
+      },
+      {
+        "text": "2.2.2. Green synthesis of ZnO@henna nanocomposite To start, ten grams of dehydrated henna leaves were ground using a coffee grinder into fine powder. The henna leaf powder received 50 milliliters of double-distilled water during one hour of heating at 60 degrees celsius. The henna extract became ready for harvesting after simple filtration of the heated solution in which it had been obtained ( Fig. 2 , step (c)). Two grams of ZnONPs were introduced into the henna extract for the following step. The solution received dark conditions with a continuous stirring operation for four hours. The centrifugation process yielded the final product of ZnO@henna nanocomposite from the solution. A deep brown color appeared in the final synthesized nanocomposite, whereas a white color appeared in unmodified ZnONPs. The appearance of the new brown color shows that nanocomposite synthesis together with conjugation has been successful ( Fig. 2 , step (d)). The synthesis of ZnO@henna nanocomposite resulted in about 2.073 g of product through the complete drying and centrifugation period. We should interpret this yield figure as an estimated value. Minor losses of nanocomposite material might occur due to multiple synthesis steps that use repeated centrifugation and washing (deionized water and EtOH) procedures. Analytical techniques, including FTIR, XRD, FESEM, EDS, TEM, UV-vis DRS, zeta potential, PL, and EBT analysis, were used to show detailed information about the synthesized nanocomposite.",
+        "operations": [
+          {
+            "op_type": "heat",
+            "sentence": "The henna leaf powder received 50 milliliters of double-distilled water during one hour of heating at 60 degrees celsius.",
+            "start_char": 150,
+            "end_char": 271,
+            "materials": [
+              "50 milliliters",
+              "one hour",
+              "60 degrees celsius"
+            ],
+            "params": {}
+          },
+          {
+            "op_type": "filter",
+            "sentence": "The henna extract became ready for harvesting after simple filtration of the heated solution in which it had been obtained ( Fig. 2 , step (c)).",
+            "start_char": 272,
+            "end_char": 416,
+            "materials": [
+              "( Fig"
+            ],
+            "params": {}
+          },
+          {
+            "op_type": "add",
+            "sentence": "Two grams of ZnONPs were introduced into the henna extract for the following step.",
+            "start_char": 417,
+            "end_char": 499,
+            "materials": [
+              "Two grams"
+            ],
+            "params": {}
+          },
+          {
+            "op_type": "stir",
+            "sentence": "The solution received dark conditions with a continuous stirring operation for four hours.",
+            "start_char": 500,
+            "end_char": 590,
+            "materials": [
+              "four hours"
+            ],
+            "params": {}
+          },
+          {
+            "op_type": "centrifuge",
+            "sentence": "The centrifugation process yielded the final product of ZnO@henna nanocomposite from the solution.",
+            "start_char": 591,
+            "end_char": 689,
+            "materials": [],
+            "params": {}
+          },
+          {
+            "op_type": "dry",
+            "sentence": "The synthesis of ZnO@henna nanocomposite resulted in about 2.073 g of product through the complete drying and centrifugation period.",
+            "start_char": 952,
+            "end_char": 1084,
+            "materials": [
+              "about 2.073 g"
+            ],
+            "params": {
+              "amounts": [
+                "2.073 g"
+              ]
+            }
+          },
+          {
+            "op_type": "centrifuge",
+            "sentence": "Minor losses of nanocomposite material might occur due to multiple synthesis steps that use repeated centrifugation and washing (deionized water and EtOH) procedures.",
+            "start_char": 1146,
+            "end_char": 1312,
+            "materials": [
+              "repeated centrifugation and washing (deionized water and EtOH) procedures"
+            ],
+            "params": {}
+          }
+        ],
+        "expanded": [
+          {
+            "op_type": "heat",
+            "steps": [
+              "Place the reaction vessel on a hotplate.",
+              "Ramp to the target temperature.",
+              "Maintain the target temperature for the specified time."
+            ]
+          },
+          {
+            "op_type": "filter",
+            "steps": [
+              "Perform operation 'filter' as described: The henna extract became ready for harvesting after simple filtration of the heated solution in which it had been obtained ( Fig. 2 , step (c))."
+            ]
+          },
+          {
+            "op_type": "add",
+            "steps": [
+              "Ensure reaction vessel is present and empty.",
+              "Place a clean stir bar in the vessel.",
+              "Measure the specified amount of Two grams.",
+              "Transfer Two grams into the vessel."
+            ]
+          },
+          {
+            "op_type": "stir",
+            "steps": [
+              "Place the reaction vessel on a stir plate.",
+              "Set the stirrer to an appropriate speed.",
+              "Stir for the specified time."
+            ]
+          },
+          {
+            "op_type": "centrifuge",
+            "steps": [
+              "Perform operation 'centrifuge' as described: The centrifugation process yielded the final product of ZnO@henna nanocomposite from the solution."
+            ]
+          },
+          {
+            "op_type": "dry",
+            "steps": [
+              "Perform operation 'dry' as described: The synthesis of ZnO@henna nanocomposite resulted in about 2.073 g of product through the complete drying and centrifugation period."
+            ]
+          },
+          {
+            "op_type": "centrifuge",
+            "steps": [
+              "Perform operation 'centrifuge' as described: Minor losses of nanocomposite material might occur due to multiple synthesis steps that use repeated centrifugation and washing (deionized water and EtOH) procedures."
+            ]
+          }
+        ]
+      },
+      {
+        "text": "3.1. Synthesis of ZnO@henna nanocomposite and the conjugation strategy The extract of kaffir lime is known to contain polyphenols, flavonoids, and organic acids that act as reducing and stabilizing agents. 49  The most significant phytochemicals present in kaffir lime extract are terpins, citronellal, and isopulegol. 50  These compounds can make complexations with zinc ions to form intermediates with hydrogen bonding and electrostatic interaction  via  hydroxyl and carbonyl groups. 51  The possible interactions are depicted in  Fig. 3(a) . During calcination, organic moieties are oxidized to carbon dioxide and water, forming ZnONPs by calcination. 52,53  Lawsone (2-hydroxy-1,4-naphthaquinone) is the primary pigment in henna. The hydroxyl and carbonyl groups may bind onto the surface of zinc oxide nanoparticles by either chelation or bridging while releasing water molecules through dehydration ( Fig. 3(b) ). 54,55  When compared to titanium, zinc bears a greater tendency to interact with ligands because of its relatively higher electron affinity. 56  Surface complexes are known to form between phenolic compounds and ZnO; this is also expected for lawsone with the carbonyl and phenolic hydroxyl groups. 57–59 Fig. 3 (a) Synthesis protocol of ZnONPs from phytochemicals available in kaffir lime, and (b) conjugation strategy between ZnONPs and lawsone as the primary pigment in henna.",
+        "operations": [],
+        "expanded": []
+      }
+    ]
+  },
+  "raw": "1. Introduction The removal of highly toxic polycyclic aromatic hydrocarbons with phenolic structures, azo dyes, and nitroaromatic compounds has been the focus of many studies because of their environmental impacts. Industrial effluents rich in phenolic constituents are, perhaps, the most serious ecological threat of all. Numerous studies have shown that these chlorophenols, phenolic compounds, and other aromatic constituents have been categorized as urgency hazardous substances by the EPA and pose a serious public health risk in the U.S. Since 1976, the EPA has been vigilant about monitoring these pollutants for environmental damage, 1  which underscores the need for more remediation research. These substances are judged harmful because of their probable risks to public health, and their removal from industrial effluents remains a priority within environmental concerns. Ultrasonic degradation, 2  catalytic oxidation, 3  photo-Fenton oxidation, 4  photocatalysis, 5,6  photo-electrocatalysis, 7  microwave-assisted advanced oxidation processes, 8  and ultraviolet/peroxide-based advanced oxidation methods 9  all provide some of the other solutions developed to try and solve the issue. Removal of organic pollutants from wastewater using photocatalysis is one of the most recently studied methods rather than other techniques because it has the potential to fit the primary tenets of green chemistry, which are (i) the energy source employed, (ii) oxidant choice, and (iii) the nature of the catalyst. Of particular note is the growing use of visible light as an energy reservoir because of its low cost and practical benefits. This technique has already been applied in medicine, industrial use, and environmental remediation, particularly for persistent pollutants like polycyclic aromatic hydrocarbons and polychlorinated biphenyls. 4-Nitrophenol (4-NP) is a chemical entity that has varied uses in several fields of industry. It is an essential organic compound in preparing the first steps in drug synthesis, particularly as a key ingredient in making  para -aminophenol (PAP) and its later-stage derivative, paracetamol. 10  The synthesis of insecticides, fungicides, and herbicides is essential at this point. 11–13  4-NP is a precursor to organophosphate pesticides like parathion and methyl parathion, which are used in agriculture. 14  Besides, 4-NP contributes to the azo-chemical sulphonate dyes and pigments that are found to be applicable in the textile and printing industries. 15–17  As a compound, it is employed as an acid–base indicator 18  and a corrosion inhibitor for metals in certain industrial processes. 19  It plays some role in manufacturing certain nitrate explosives as well. 20  The presence of 4-NP and its various derivatives in both wastewater and surface water is quite worrisome. For this reason, many studies and investment resources have been aimed to tackle these challenges. Controlled removal of 4-NP has been subjected to various methods, including biodegradation, 21  advanced oxidation processes (AOPs), 22  and heterogeneous photocatalytic methodologies. 23  Biodegradation uses microorganisms like  Achromobacter denitrificans , which can transform 4-NP into less toxic by-products. 24  Yet, it faces constraints due to slow reaction rate and environmental sensitivity. The restrictions of biological techniques have led to rising interest in physicochemical solutions for improved pollution elimination. However, advanced oxidation processes (Fenton, photolysis, or ozonolysis generate reactive species) and photocatalysis have gained rising interest since they quickly produce reactive oxygen species, which effectively degrade organic contaminants. Among these, heterogeneous photocatalysis stands out as a solution of choice due to its ability to deliver high degradation efficiency while allowing the use of visible light as a renewable energy source that meets green chemistry principles. Specifically, photocatalysis such as TiO 2  and ZnO 25,26  are used under the influence of light illumination, which enhances 4-NP degradation by oxidizing organic contaminants. This makes life-threatening organics less life threatening. The photocatalyst, when stimulated by the supplied light, produces superoxide (O 2 ˙ − ) and hydroxyl (˙OH) radical reactive oxygen species (ROS). These dynamically oxidize and completely remove organic pollutants thus, thorough oxidation occurs. With heterogeneous photocatalysis the distinct merit of using solar energy to suffice reactive energy makes it economically feasible, cost-effective, and accessible for high-scale usage. Zinc oxide (ZnO) has become a preeminent choice from multiple well-known photocatalysts during the past few decades. Zinc oxide stands prominent due to its multiple advantageous features including its non-toxic composition combined with redox properties along with economic value, durable life span and compatibility with biological systems and broad availability in the market. 27  The main weakness of ZnO photocatalysis consists of the high rate at which photogenerated electrons and holes recombine thus restricting its broad practical use. The wide inherent bandgap of ZnO extends from 3.1 to 4.0 eV according to fabrication methodology thus inhibiting its absorption of visible light. 28–30  Various approaches to tackle this challenge include metal and non-metal dopant addition and combinations with different metal oxides as well as the incorporation of polymer materials and organic dye coupling. 31–33 Various methods were applied to enhance ZnO photocatalytic activity, including doping treatment, composite development, and organic material sensitization strategies. Scientists have investigated henna as a natural photosensitizer to transform the band gap and photocatalytic efficiency of pure ZnO while operating under visible light. 34  People have used henna for centuries; it originates from  Lawsonia inermis  leaves. Historically, The henna material comes from dry regions of North Africa, South Asia, and the Middle East because the  Lawsonia inermis  plant grows best in hot and arid conditions. 35  Applying henna as a body decoration remains popular for ceremonial wedding events and religious ceremonies, and it also functions as a coloring agent for hair and fabrics. 36,37  Due to its cultural importance, henna has received new scientific interest from researchers who use it to advance dye-sensitized solar cells (DSSCs). Diagrams from henna plants contain the light-absorbing lawsone substance, which shows potential as a sustainable replacement for manufactured dyes in DSSCs. 38  Henna works as an effective photosensitizing agent in solar cells, which improves their electron transfer operation for building sustainable energy technologies. 39–43 The key component of henna responsibility for its coloring effects is the natural pigment lawsone (2-hydroxy-1,4-naphthoquinone). Lawsone adopts a naphthoquinone core structure with an OH group at the second position ( Fig. 1(a) ). Recent investigations show that henna is an efficient photosensitizer through its active component, lawsone, which strongly absorbs light within the UV and visible spectrum. 44  Researchers have effectively used henna to modify ZnO in DSSCs because these cells absorb mostly visible light since visible light makes up most solar radiation, yet UV represents less than 5%. 45  The powerful visible light absorption abilities of henna toward blue light make it useful as a natural photosensitive agent. Furthermore, integrating henna with semiconductor materials leads to decreased band gap values, which enhances their ability to interact with visible light. 46  Light activation facilitates electron transfer through the hydroxyl and quinone groups, making lawsone a natural photosensitizing agent. The light-absorbing properties of this structure, combined with its ability to transfer electrons into semiconductor materials, make lawsone a promising clean solar energy solution ( Fig. 1(b) ). Fig. 1 (a) Molecular structure of lawsone as a central component in henna, and (b) illustration of electron injection to the metal oxides from the photosensitizer (henna extract) under the influence of visible light. The current research introduced a green synthesis approach that produced a newly formulated nanocomposite, which we named ZnO@henna nanocomposite. Lawsone dye extracted from henna leaf aqueous extract served as a photosensitizer for pre-made ZnONPs using kaffir lime extract. Previous studies have researched henna extract combined with ZnO nanoparticles for use in dye-sensitized solar cells (DSSCs). 34,47  In contrast, this research becomes the first to apply ZnO@henna nanocomposite as a visible-light photocatalyst for degrading organic pollutants (4-NP) in wastewater. Our research implements plant extracts as a green synthesis approach for catalyst production while eliminating hazardous chemicals through its completely environment-friendly method.\n\n2. Materials and methods 2.1. Materials 4-Nitrophenol (CAS: 100-02-7; 139.11 g mol −1 ), ethanol. Zinc nitrate hexahydrate (Zn(NO 3 ) 2 ·6H 2 O (CAS:10196-18-6; 297.49 g mol −1 )) and KOH were sourced from Sigma-Aldrich and were of analytical grade. Additional materials, including kaffir lime and dried henna leaves, were collected locally. The harvesting process occurred in an environmentally friendly way, using small amounts in alignment with an ethical and eco-friendly manner. 2.2. Methods 2.2.1. Green synthesis of ZnONPs from kaffir lime extract Initially, 200 grams of kaffir lime ( Citrus hystrix ) fruits were thoroughly rinsed with tap water, followed by distilled water (DW) to get rid of any potential pollutants. The lime fruits were then halved, and the juice was collected manually. The juice was then filtered through a piece of cotton fabric to remove larger particles and was then filtered again using Whatman filter paper ( Fig. 2 , step (a)). The resulting juice extract was then stored at 4 °C for possible future analysis. Fig. 2 Visual presentations of (a) extraction of kaffir lime, (b) green synthesis of ZnONPs, (c) henna leaf extract, and (d) green synthesis of ZnO@henna nanocomposite. To synthesize the ZnO nanoparticles, five grams of zinc nitrate hexahydrate was dissolved in 50 mL of DW, and subsequently, 50 mL of kaffir lime extract was added as a capping and reducing agent. The pH level of the solution was brought to 12 using 0.1 M potassium hydroxide (KOH). Afterward, the solution was homogenized forcefully at 500 rpm for 2 hours. The milky yellow solution that gradually turned to a brownish yellow would mark the completion of zinc hydroxide formation. The resulting precipitate was collected through centrifugation and filtration. It was subsequently washed with deionized water and ethyl alcohol to wipe out any lingering chemicals. The purified precipitate was then allowed to dry at 75 °C, annealed for one hour at 500 °C, and then collected for further applications. The product obtained was characterized through several analysis techniques as zinc oxide nanoparticles, which were utilized for subsequent processes ( Fig. 2 , step (b)). 2.2.2. Green synthesis of ZnO@henna nanocomposite To start, ten grams of dehydrated henna leaves were ground using a coffee grinder into fine powder. The henna leaf powder received 50 milliliters of double-distilled water during one hour of heating at 60 degrees celsius. The henna extract became ready for harvesting after simple filtration of the heated solution in which it had been obtained ( Fig. 2 , step (c)). Two grams of ZnONPs were introduced into the henna extract for the following step. The solution received dark conditions with a continuous stirring operation for four hours. The centrifugation process yielded the final product of ZnO@henna nanocomposite from the solution. A deep brown color appeared in the final synthesized nanocomposite, whereas a white color appeared in unmodified ZnONPs. The appearance of the new brown color shows that nanocomposite synthesis together with conjugation has been successful ( Fig. 2 , step (d)). The synthesis of ZnO@henna nanocomposite resulted in about 2.073 g of product through the complete drying and centrifugation period. We should interpret this yield figure as an estimated value. Minor losses of nanocomposite material might occur due to multiple synthesis steps that use repeated centrifugation and washing (deionized water and EtOH) procedures. Analytical techniques, including FTIR, XRD, FESEM, EDS, TEM, UV-vis DRS, zeta potential, PL, and EBT analysis, were used to show detailed information about the synthesized nanocomposite. 2.2.3. Instruments and characterizations A PANalytical X'Pert PRO equipped with Cu Kα radiation ( λ  = 1.5406 Å) operated at 40 kV and 30 mA executed X-ray diffraction (XRD) testing. The X-ray diffraction analysis through XRD required patterns from 10° to 80° degrees with a measurement step of 0.02° and a time duration of 1° per minute. The Bruker Tensor 27 FTIR spectrometer obtained FTIR spectra from the samples within the 4000–400 cm −1  wavelength range. The detailed imaging instrument featured JEOL JSM-7600F equipped with FEG optimization. The analysis of elements became possible with an EDS system integrated into FESEM—a JEOL JEM-2100F. The FEG-equipped transmission electron microscope worked as a tool for high-resolution imaging during experimental execution—sample analysis using UV-vis DRS spectroscopy conducted by PerkinElmer Lambda 750 UV-vis spectrophotometer that employed integrating sphere attachment. The Laboratory Zeta Potential Analyzer of HORIBA SZ-100 (HORIBA Scientific Japan) utilizes ELS and DLS techniques to evaluate sample zeta potential. Surface area and porosity measurement of samples took place through Micromeritics Porosity and Surface Area Analyzer (ASAP 2020, Micromeritics Instrument Corporation, USA) utilizing Brunauer–Emmett–Teller (BET) theory. 2.2.4. Photocatalytic activity of ZnO@henna nanocomposite The photocatalytic degradation of 4-NP was directed using a low-intensity blue LED lamp ( λ  > 425 nm, 30 W, 166 mW cm −2 ) as the irradiation source at room temperature and atmospheric pressure. For the initial experiment, 10 mg of the ZnO@henna catalyst was dispersed in 25 mL of a 4-NP (50 ppm) aqueous solution. The reaction mixture was stirred in the dark for one hour to reach adsorption equilibrium. The solution was then continuously stirred while being irradiated. After the adsorption test, photocatalyst samples were collected and centrifuged for separative analysis. The clear supernatant was scrutinized using a PG-T80+ double-beam UV-vis Spectrophotometer (PG Instruments Ltd, UK). In keeping with the 4-NP maximum absorption wavelength, absorbance measurements were taken at 317 nm. 48  The concentration of 4-NP can efficiently and accurately be determined by the highly trusted spectrophotometric method. The photodegradation percentage of the 4-NP was calculated using the equation: degradation% = [( C o  −  C )/ C o ] × 100.  C o  is the original concentration, and  C  is the concentration at a specified time.\n\n2.1. Materials 4-Nitrophenol (CAS: 100-02-7; 139.11 g mol −1 ), ethanol. Zinc nitrate hexahydrate (Zn(NO 3 ) 2 ·6H 2 O (CAS:10196-18-6; 297.49 g mol −1 )) and KOH were sourced from Sigma-Aldrich and were of analytical grade. Additional materials, including kaffir lime and dried henna leaves, were collected locally. The harvesting process occurred in an environmentally friendly way, using small amounts in alignment with an ethical and eco-friendly manner.\n\n2.2. Methods 2.2.1. Green synthesis of ZnONPs from kaffir lime extract Initially, 200 grams of kaffir lime ( Citrus hystrix ) fruits were thoroughly rinsed with tap water, followed by distilled water (DW) to get rid of any potential pollutants. The lime fruits were then halved, and the juice was collected manually. The juice was then filtered through a piece of cotton fabric to remove larger particles and was then filtered again using Whatman filter paper ( Fig. 2 , step (a)). The resulting juice extract was then stored at 4 °C for possible future analysis. Fig. 2 Visual presentations of (a) extraction of kaffir lime, (b) green synthesis of ZnONPs, (c) henna leaf extract, and (d) green synthesis of ZnO@henna nanocomposite. To synthesize the ZnO nanoparticles, five grams of zinc nitrate hexahydrate was dissolved in 50 mL of DW, and subsequently, 50 mL of kaffir lime extract was added as a capping and reducing agent. The pH level of the solution was brought to 12 using 0.1 M potassium hydroxide (KOH). Afterward, the solution was homogenized forcefully at 500 rpm for 2 hours. The milky yellow solution that gradually turned to a brownish yellow would mark the completion of zinc hydroxide formation. The resulting precipitate was collected through centrifugation and filtration. It was subsequently washed with deionized water and ethyl alcohol to wipe out any lingering chemicals. The purified precipitate was then allowed to dry at 75 °C, annealed for one hour at 500 °C, and then collected for further applications. The product obtained was characterized through several analysis techniques as zinc oxide nanoparticles, which were utilized for subsequent processes ( Fig. 2 , step (b)). 2.2.2. Green synthesis of ZnO@henna nanocomposite To start, ten grams of dehydrated henna leaves were ground using a coffee grinder into fine powder. The henna leaf powder received 50 milliliters of double-distilled water during one hour of heating at 60 degrees celsius. The henna extract became ready for harvesting after simple filtration of the heated solution in which it had been obtained ( Fig. 2 , step (c)). Two grams of ZnONPs were introduced into the henna extract for the following step. The solution received dark conditions with a continuous stirring operation for four hours. The centrifugation process yielded the final product of ZnO@henna nanocomposite from the solution. A deep brown color appeared in the final synthesized nanocomposite, whereas a white color appeared in unmodified ZnONPs. The appearance of the new brown color shows that nanocomposite synthesis together with conjugation has been successful ( Fig. 2 , step (d)). The synthesis of ZnO@henna nanocomposite resulted in about 2.073 g of product through the complete drying and centrifugation period. We should interpret this yield figure as an estimated value. Minor losses of nanocomposite material might occur due to multiple synthesis steps that use repeated centrifugation and washing (deionized water and EtOH) procedures. Analytical techniques, including FTIR, XRD, FESEM, EDS, TEM, UV-vis DRS, zeta potential, PL, and EBT analysis, were used to show detailed information about the synthesized nanocomposite. 2.2.3. Instruments and characterizations A PANalytical X'Pert PRO equipped with Cu Kα radiation ( λ  = 1.5406 Å) operated at 40 kV and 30 mA executed X-ray diffraction (XRD) testing. The X-ray diffraction analysis through XRD required patterns from 10° to 80° degrees with a measurement step of 0.02° and a time duration of 1° per minute. The Bruker Tensor 27 FTIR spectrometer obtained FTIR spectra from the samples within the 4000–400 cm −1  wavelength range. The detailed imaging instrument featured JEOL JSM-7600F equipped with FEG optimization. The analysis of elements became possible with an EDS system integrated into FESEM—a JEOL JEM-2100F. The FEG-equipped transmission electron microscope worked as a tool for high-resolution imaging during experimental execution—sample analysis using UV-vis DRS spectroscopy conducted by PerkinElmer Lambda 750 UV-vis spectrophotometer that employed integrating sphere attachment. The Laboratory Zeta Potential Analyzer of HORIBA SZ-100 (HORIBA Scientific Japan) utilizes ELS and DLS techniques to evaluate sample zeta potential. Surface area and porosity measurement of samples took place through Micromeritics Porosity and Surface Area Analyzer (ASAP 2020, Micromeritics Instrument Corporation, USA) utilizing Brunauer–Emmett–Teller (BET) theory. 2.2.4. Photocatalytic activity of ZnO@henna nanocomposite The photocatalytic degradation of 4-NP was directed using a low-intensity blue LED lamp ( λ  > 425 nm, 30 W, 166 mW cm −2 ) as the irradiation source at room temperature and atmospheric pressure. For the initial experiment, 10 mg of the ZnO@henna catalyst was dispersed in 25 mL of a 4-NP (50 ppm) aqueous solution. The reaction mixture was stirred in the dark for one hour to reach adsorption equilibrium. The solution was then continuously stirred while being irradiated. After the adsorption test, photocatalyst samples were collected and centrifuged for separative analysis. The clear supernatant was scrutinized using a PG-T80+ double-beam UV-vis Spectrophotometer (PG Instruments Ltd, UK). In keeping with the 4-NP maximum absorption wavelength, absorbance measurements were taken at 317 nm. 48  The concentration of 4-NP can efficiently and accurately be determined by the highly trusted spectrophotometric method. The photodegradation percentage of the 4-NP was calculated using the equation: degradation% = [( C o  −  C )/ C o ] × 100.  C o  is the original concentration, and  C  is the concentration at a specified time.\n\n2.2.1. Green synthesis of ZnONPs from kaffir lime extract Initially, 200 grams of kaffir lime ( Citrus hystrix ) fruits were thoroughly rinsed with tap water, followed by distilled water (DW) to get rid of any potential pollutants. The lime fruits were then halved, and the juice was collected manually. The juice was then filtered through a piece of cotton fabric to remove larger particles and was then filtered again using Whatman filter paper ( Fig. 2 , step (a)). The resulting juice extract was then stored at 4 °C for possible future analysis. Fig. 2 Visual presentations of (a) extraction of kaffir lime, (b) green synthesis of ZnONPs, (c) henna leaf extract, and (d) green synthesis of ZnO@henna nanocomposite. To synthesize the ZnO nanoparticles, five grams of zinc nitrate hexahydrate was dissolved in 50 mL of DW, and subsequently, 50 mL of kaffir lime extract was added as a capping and reducing agent. The pH level of the solution was brought to 12 using 0.1 M potassium hydroxide (KOH). Afterward, the solution was homogenized forcefully at 500 rpm for 2 hours. The milky yellow solution that gradually turned to a brownish yellow would mark the completion of zinc hydroxide formation. The resulting precipitate was collected through centrifugation and filtration. It was subsequently washed with deionized water and ethyl alcohol to wipe out any lingering chemicals. The purified precipitate was then allowed to dry at 75 °C, annealed for one hour at 500 °C, and then collected for further applications. The product obtained was characterized through several analysis techniques as zinc oxide nanoparticles, which were utilized for subsequent processes ( Fig. 2 , step (b)).\n\n2.2.2. Green synthesis of ZnO@henna nanocomposite To start, ten grams of dehydrated henna leaves were ground using a coffee grinder into fine powder. The henna leaf powder received 50 milliliters of double-distilled water during one hour of heating at 60 degrees celsius. The henna extract became ready for harvesting after simple filtration of the heated solution in which it had been obtained ( Fig. 2 , step (c)). Two grams of ZnONPs were introduced into the henna extract for the following step. The solution received dark conditions with a continuous stirring operation for four hours. The centrifugation process yielded the final product of ZnO@henna nanocomposite from the solution. A deep brown color appeared in the final synthesized nanocomposite, whereas a white color appeared in unmodified ZnONPs. The appearance of the new brown color shows that nanocomposite synthesis together with conjugation has been successful ( Fig. 2 , step (d)). The synthesis of ZnO@henna nanocomposite resulted in about 2.073 g of product through the complete drying and centrifugation period. We should interpret this yield figure as an estimated value. Minor losses of nanocomposite material might occur due to multiple synthesis steps that use repeated centrifugation and washing (deionized water and EtOH) procedures. Analytical techniques, including FTIR, XRD, FESEM, EDS, TEM, UV-vis DRS, zeta potential, PL, and EBT analysis, were used to show detailed information about the synthesized nanocomposite.\n\n2.2.3. Instruments and characterizations A PANalytical X'Pert PRO equipped with Cu Kα radiation ( λ  = 1.5406 Å) operated at 40 kV and 30 mA executed X-ray diffraction (XRD) testing. The X-ray diffraction analysis through XRD required patterns from 10° to 80° degrees with a measurement step of 0.02° and a time duration of 1° per minute. The Bruker Tensor 27 FTIR spectrometer obtained FTIR spectra from the samples within the 4000–400 cm −1  wavelength range. The detailed imaging instrument featured JEOL JSM-7600F equipped with FEG optimization. The analysis of elements became possible with an EDS system integrated into FESEM—a JEOL JEM-2100F. The FEG-equipped transmission electron microscope worked as a tool for high-resolution imaging during experimental execution—sample analysis using UV-vis DRS spectroscopy conducted by PerkinElmer Lambda 750 UV-vis spectrophotometer that employed integrating sphere attachment. The Laboratory Zeta Potential Analyzer of HORIBA SZ-100 (HORIBA Scientific Japan) utilizes ELS and DLS techniques to evaluate sample zeta potential. Surface area and porosity measurement of samples took place through Micromeritics Porosity and Surface Area Analyzer (ASAP 2020, Micromeritics Instrument Corporation, USA) utilizing Brunauer–Emmett–Teller (BET) theory.\n\n2.2.4. Photocatalytic activity of ZnO@henna nanocomposite The photocatalytic degradation of 4-NP was directed using a low-intensity blue LED lamp ( λ  > 425 nm, 30 W, 166 mW cm −2 ) as the irradiation source at room temperature and atmospheric pressure. For the initial experiment, 10 mg of the ZnO@henna catalyst was dispersed in 25 mL of a 4-NP (50 ppm) aqueous solution. The reaction mixture was stirred in the dark for one hour to reach adsorption equilibrium. The solution was then continuously stirred while being irradiated. After the adsorption test, photocatalyst samples were collected and centrifuged for separative analysis. The clear supernatant was scrutinized using a PG-T80+ double-beam UV-vis Spectrophotometer (PG Instruments Ltd, UK). In keeping with the 4-NP maximum absorption wavelength, absorbance measurements were taken at 317 nm. 48  The concentration of 4-NP can efficiently and accurately be determined by the highly trusted spectrophotometric method. The photodegradation percentage of the 4-NP was calculated using the equation: degradation% = [( C o  −  C )/ C o ] × 100.  C o  is the original concentration, and  C  is the concentration at a specified time.\n\n3. Characterizations, results, and discussion 3.1. Synthesis of ZnO@henna nanocomposite and the conjugation strategy The extract of kaffir lime is known to contain polyphenols, flavonoids, and organic acids that act as reducing and stabilizing agents. 49  The most significant phytochemicals present in kaffir lime extract are terpins, citronellal, and isopulegol. 50  These compounds can make complexations with zinc ions to form intermediates with hydrogen bonding and electrostatic interaction  via  hydroxyl and carbonyl groups. 51  The possible interactions are depicted in  Fig. 3(a) . During calcination, organic moieties are oxidized to carbon dioxide and water, forming ZnONPs by calcination. 52,53  Lawsone (2-hydroxy-1,4-naphthaquinone) is the primary pigment in henna. The hydroxyl and carbonyl groups may bind onto the surface of zinc oxide nanoparticles by either chelation or bridging while releasing water molecules through dehydration ( Fig. 3(b) ). 54,55  When compared to titanium, zinc bears a greater tendency to interact with ligands because of its relatively higher electron affinity. 56  Surface complexes are known to form between phenolic compounds and ZnO; this is also expected for lawsone with the carbonyl and phenolic hydroxyl groups. 57–59 Fig. 3 (a) Synthesis protocol of ZnONPs from phytochemicals available in kaffir lime, and (b) conjugation strategy between ZnONPs and lawsone as the primary pigment in henna. 3.2. Characterizations FTIR is a highly precise technique employed to study a material's functional groups by analyzing its vibrational frequencies. It offers crucial information about molecular architecture, makeup, and chemical bonds. Functional groups of henna, pure ZnONPs, and ZnO@henna nanocomposite were characterized as displayed in  Fig. 4 . FTIR spectra depicted in  Fig. 4(a)  show the spectrum of aqueous henna extract. The spectrum has a remarkable peak at 3327 cm −1  due to the stretching of hydroxyl (O–H) bonds and shows the phenolic nature of the lawsone dye. The other peaks at 2920, 2869, and 2817 cm −1  concern the sp 2  C–H bonds associated with paraffin and aromatic rings. Later, the peak associated with the carbonyl bond stretching (C \n \n\n<svg xmlns=\"http://www.w3.org/2000/svg\" version=\"1.0\" width=\"13.200000pt\" height=\"16.000000pt\" viewBox=\"0 0 13.200000 16.000000\" preserveAspectRatio=\"xMidYMid meet\"><metadata>\nCreated by potrace 1.16, written by Peter Selinger 2001-2019\n</metadata><g transform=\"translate(1.000000,15.000000) scale(0.017500,-0.017500)\" fill=\"currentColor\" stroke=\"none\"><path d=\"M0 440 l0 -40 320 0 320 0 0 40 0 40 -320 0 -320 0 0 -40z M0 280 l0 -40 320 0 320 0 0 40 0 40 -320 0 -320 0 0 -40z\"/></g></svg>\n\n O) is supported with the peak at 1623 cm −1 , which is then linked with the band at 1500–1300 cm −1  and is affiliated with C C in the aromatic benzene ring. Also, the peaks between 1100 and 1200 cm −1  are affiliated with C–O stretching, and the bands between 800 and 950 cm −1  which goes ‘bending’ for O–H bonds. These results are consistent with the literature reports. 43,60 Fig. 4(b)  displays the FTIR spectrum for green synthesized ZnO NPs. The broad absorption band at 3401 cm −1  corresponds to O–H stretching owing to the moisture adsorption, while characteristic peaks confirming the identity of ZnONPs at 553 cm −1  are noted for the Zn–O vibrational peak. 61  The FTIR spectroscopy results concerning ZnO@henna nanocomposites show that most functional groups are retained, confirming the inclusion of henna extracts, thus proving the multifunctionality of the nanocomposite ( Fig. 4(c) ). A peak of 547 cm −1  was assigned for the Zn–O vibrational peak, demonstrating a shift from pure ZnONPs and indicating the presence of interactions between the henna extract and ZnO. Owing to C C, O–H, and C–O stretching, the spectrum suggests that the organic supports or ligands of henna and the metal oxide nanoparticles also are complexing, illustrating that the phenolic and carbonyl functional groups of henna bind to the surface of ZnO, which is likely to improve the structural stability and functionality of the composite material. Fig. 4 The functional group analysis for (a) henna aqueous extract, (b) ZnONPs, and (c) ZnO@henna nanocomposite. XRD analysis is essential for identifying material crystal structures and phases and determining their lattice parameters. This technology assists researchers in studying crystallite dimensions, crystal stress, and material purity across different uses.  Fig. 5(b)  shows the powder XRD pattern of ZnO@henna nanocomposite. The spectrum from ZnO@henna nanocomposite shows peaks at 32.06° [100], 34.70° [002], 36.53° [101], 47.82° [102], 56.82° [110], 63.11° [103], 66.60° [200], 68.16° [112], 69.31° [201], 72.74° [004] and 77.10° [202] with calculated lattice parameters  a  = 3.194 Å and  c  = 5.013 Å resulting in a  c / a  ratio of 1.570. Compared to the XRD pattern of pure ZnONPs ( Fig. 5(a) ), the XRD pattern of ZnO@henna nanocomposite displayed an identical hexagonal wurtzite crystal structure. The material structure matches precisely with established reference data as stated in JCPDS card 36-1451, which closely aligns with values reported in the literature. 62–64  The average crystallite size evaluation with the Scherrer formula revealed a value of 38.83 nm by analyzing its most intense peak at 2 θ  ≈ 36.5°, representing the (101) reflection of the ZnO crystal. A peak selection was made because of its intense signal and precise definition, which enhanced the accuracy of the measurement for crystallite size determination. XRD analysis confirms the successful production of ZnO@henna nanocomposite free from contaminants, although lawsone does not display in the pattern because organic compounds have an amorphous nature. The analysis of amorphous material content using XRD faces difficulties because its detection and measurement at low concentrations becomes complicated by broad and faint peaks in patterns. 65,66 Fig. 5 XRD analysis of the green synthesized (a) ZnONPs and (b) ZnO@henna nanocomposite. While providing surface morphology, FESEM enables high-resolution imaging, and EDS allows the analysis of the composition of nanoparticles. The internal structure, crystallinity at a nanoscale, and the nanoscale morphology of the materials can be captured in detail using a TEM. The synthesized ZnO@henna nanocomposite's particle size distribution and FESEM, TEM, and EDS analyses are illustrated in  Fig. 6 . Fig. 6 Illustration of (a) FESEM, (b) TEM, (c) EDS, and (d) particle size distribution for the green synthesized ZnO@henna nanocomposite. As illustrated in  Fig. 6(a) , particles predominantly display a spherical shape with a polydisperse nature, EDS analysis was conducted to determine the nanocomposite's elemental composition, confirming the detection of Zn, C, and O at weight portions of 60.92%, 13.67%, and 25.41%, respectively ( Fig. 6(c) ). The analysis suggests that the ZnO@henna nanocomposite was successfully synthesized without any impurities. Morphology and structural characteristics require in-depth evaluation; thus, it was essential to conduct TEM analysis. The TEM images depict a mixture of spherical particles and some nanorods.  Fig. 6(b)  shows a clear bilayer structure, which strongly supports the fact that henna extract and ZnO nanoparticles have successfully integrated.  Fig. 6(d)  shows the analysis results  via  ImageJ and OriginLab Pro software, revealing that the particles have an average size of 41.40 nm and a size distribution range from 10 nm to 95 nm. UV-vis DRS is a non-destructive tool for studying the optical features of solid materials as it measures their reflectance in the ultraviolet and visible light spectrum. It employs Tauc plot analysis, which offers insights into electronic transitions, photocatalytic activity, and the band gap energy consideration of semiconductors. The henna extract was subjected to a UV-vis spectrum analysis, and the results are illustrated in  Fig. 7(a) . The spectra reveal two notable absorption peaks: one in the UV region at 385 nm and another in the visible range at 518 nm. 67  The optical differences between pure ZnO nanoparticles and the ZnO@henna nanocomposite are illustrated in  Fig. 7(b) . The graphs depict that Pure ZnO only demonstrates activity in the ultraviolet region without significant absorption in the visible region. At the same time, ZnO@henna exhibits vigorous optical activity in a broad range of 400–700 nm, which indicates heightened light absorption. Using Tauc plots presented in  Fig. 7(c) and (d) , the band gap energies of unmodified ZnO and ZnO@henna were calculated to be 3.18 eV and 2.80 eV, respectively. Pure ZnONPs maintain a direct band gap because their wurtzite crystal structure positions both the conduction band minimum and valence band maximum at the identical  k -point in the Brillouin zone. 68  However, upon modification with the henna extract, the optical transition behavior shifts, and the band gap is more accurately represented by an indirect transition model. This shift is attributed to the introducing of surface states and localized defect levels by the organic molecules in henna, such as lawsone and other phytochemicals, which can alter the recombination pathways and the nature of electronic transitions. Fig. 7 (a) UV-visible spectra of aqueous henna extract, (b) UV-visible DRS of pure ZnONPs (black line) and ZnO@henna nanocomposite (blue line), (c) band gap energy calculation by DRS analysis for pure ZnONPs, and (d) ZnO@henna nanocomposite. Such transitions from direct to indirect band gaps upon modification have been observed in other studies. For instance, strain-induced structural transformations in ZnO nanotubes have been shown to cause a direct-to-indirect band gap transition. 69  Similarly, doping ZnO quantum dots with tin (Sn) has been reported to change the nature of the band gap from direct to indirect due to electronic structure distortion caused by surface chemistry. 70  Studies confirm that modifying ZnO surfaces and introducing dopants can alter its electronic properties noticeably. The reduction in band gap to 2.80 eV for ZnO@henna is mainly attributed to surface interactions between ZnO and lawsone, the key active compound in henna. However, other phytochemicals, such as flavonoids and phenolics, may also contribute by introducing surface states that enhance visible-light absorption. Since the XRD patterns for modified ZnONPs remained unchanged, it can be concluded that the band gap narrowing developed from surface states that were modified rather than bulk doping. The optical characteristics of synthesized ZnO@henna nanocomposite need evaluation based on the CB/VB edge potentials of ZnO and the HOMO/LUMO energy levels of lawsone. The band edge positions of ZnONPs at the point of zero charge can be theoretically calculated to evaluate the potential level of the electron acceptor. This can be done using the following equations: 71 1 E VB  =  X  −  E e  + 0.5 E g 2 E CB  =  E VB  −  E g The equations represent  X  as ZnO's absolute electronegativity at 5.89 eV, 72,73 E g  represents the optical band gap from  Fig. 7(c)  at 3.18 eV, and  E e  stands for the hydrogen scale energy of free electrons at 4.5 eV. The substitution yields +2.98 eV valence band edge potential and −0.20 eV conduction band edge potential relative to NHE. To enable efficient electron transfer, the LUMO orbital of lawsone must position at a more negative energy level than ZnO's CB level. 74  Theoretically reported that lawsone exhibits a LUMO energy measurement of −2.60 eV relative to the vacuum energy level (−1.84 eV  vs.  NHE), yet its HOMO energy shows −5.30 eV (+0.86 eV  vs.  NHE). 47  The more negative LUMO energy level of lawsone enables efficient electron donation to ZnONPs. The results confirm lawsone can be considered as a promising material for light-harvesting dye photosensitizers. The zeta potential is a core parameter for surface charge measurements in colloids since it regulates nanoparticle stability and dispersion patterns. Strong electrostatic repulsion occurs between particles when zeta potential has high absolute values regardless of its positive or negative charge state, preventing aggregation and ensuring colloidal stability. The characteristics play a vital role in photocatalysis because they determine dispersion quality and surface reactivity outcomes with reactants, directly affecting catalytic roles and pollutant breakdown rates. Evaluating these properties required zeta potential analysis combined with dynamic light scattering measurements (DLS) for colloidal suspensions, including unmodified ZnONPs and ZnO@henna nanocomposite. Zeta potential measurements on unmodified ZnONPs revealed a value of −24.3 mV, while the particles had an average diameter of 38.9 nm ( Fig. 7(b)  and  8(a) ). The ZnO@henna nanocomposite displayed a much more negative zeta potential value of −37.1 mV and a greater diameter of 42.4 nm ( Fig. 7(d)  and  8(c) ) and  Table 1 . Nanoparticle aggregation became less likely during henna presence, whereas electrostatic stabilization improved because of the significant increase in surface charge—better colloidal stability through henna modification benefits photocatalysis by improving aqueous dispersion properties and enhanced interaction with pollutants. The functional efficiency of nanocomposites in catalytic operations is enhanced through henna modification, which increases zeta potential stability. Fig. 8 Illustration of zeta potentials analysis and particle size distribution for (a and b) ZnONPs and (c and d) ZnO@henna nanocomposite. Table 1 Zeta potential values and particle size distribution of ZnONPs and ZnO@henna nanocomposite Catalyst Zeta potential (mV) Mean diameter (nm) ZnONPs −24.3 38.9 ZnO@henna −37.1 42.4 Photoluminescence (PL) spectroscopy effectively assesses material purity and crystalline quality. 75 Fig. 9  shows the PL of ZnONPs and the ZnO@henna nanocomposite, which were measured at 290 nm excitation wavelength. The emission peak of ZnONPs appears prominently at 413 nm. It features characteristics of ZnO along with assignments to exciton–exciton interactions together with zinc or oxygen interstitials in the lattice structure. Two additional peaks emerge in the emission spectrum at 483 nm that result from radiative recombination with oxygen vacancies and at 551 nm that belong to deep-level emissions from oxygen-related defect sites. 76,77  The ZnO@henna nanocomposite produces two prominent emission peaks, 483 nm and 550 nm. The nanocomposite exhibits significantly lower photo-luminescence intensity when compared with pure ZnONPs. The suppressed emission indicates reduced photoinduced electron–hole pair recombination, which improves the photocatalytic behavior of the composite material. 78  The enhanced photocatalytic performance resulted from the collaborative effect between ZnONPs and henna, which enables better charge separation and electron transfer mechanism under visible light exposure. Fig. 9 PL spectra for ZnONPs and ZnO@henna nanocomposite at the excitation wavelength of 290 nm. Calculations made using the Brunauer–Emmett–Teller (BET) method help scientists determine the specific surface area along with porosity characteristics by assessing nitrogen adsorption followed by desorption processes from materials. Catalysis performances improve through increased reactant adsorption, possibly because of the higher material surface area and porosity. The performance optimization of catalysts heavily depends on BET analysis for such procedures. We used BET analysis to analyze the specific surface area (SSA) levels, porosity values, and pore volume of unmodified ZnONPs and ZnO@henna nanocomposite. The BET surface area analysis showed 109.11 m 2  g −1  for ZnONPs and 106.41 m 2  g −1  for ZnO@henna nanocomposite. In terms of pore volume, values of 0.17433 cm 3  g −1  and 0.19761 cm 3  g −1  were obtained for ZnONPs and ZnO@henna, respectively, indicating the porous nature of both materials. Pore size distribution was analyzed using the Barrett–Joyner–Halenda (BJH) method by examining the desorption branch from the nitrogen adsorption–desorption isotherm. ZnONPs and ZnO@henna nanocomposite revealed pore sizes of 4.72 nm and 5.50 nm, respectively. The materials show type IV isotherms together with hysteresis loops that signify their mesoporous nature through characterization tests. The experimental results verify that both samples exist within the mesoporous range (2–50 nm). 79  An increase in the average pore size of the ZnO@henna nanocomposite resulted in a slight decrease in specific surface area compared to pure ZnONPs. An inverse relationship exists between surface area and crystallite or particle size since pore size enlargement causes structural densification, resulting in decreased surface area. 80  BET and BJH methods analysis verified the mesoporous structure of ZnONPs and ZnO@henna nanocomposites where the nanocomposite displayed extended pore dimensions. The material's features improve its capability for adsorption functions and surface-controlled operations (see  Fig. 10  and  Table 2 ). Fig. 10 BET analysis: N 2 -adsorption/desorption isotherms with pore size distribution (inset) of (a) ZnONPs and (b) ZnO@henna nanocomposite. Table 2 BET analysis results of ZnONPs and ZnO@henna nanocomposite Catalyst SSA (m 2  g −1 ) Pore size (nm) Pore volume (cm 3  g −1 ) ZnONPs 109.11 4.72 0.17433 ZnO@henna 106.41 5.50 0.19761\n\n3.1. Synthesis of ZnO@henna nanocomposite and the conjugation strategy The extract of kaffir lime is known to contain polyphenols, flavonoids, and organic acids that act as reducing and stabilizing agents. 49  The most significant phytochemicals present in kaffir lime extract are terpins, citronellal, and isopulegol. 50  These compounds can make complexations with zinc ions to form intermediates with hydrogen bonding and electrostatic interaction  via  hydroxyl and carbonyl groups. 51  The possible interactions are depicted in  Fig. 3(a) . During calcination, organic moieties are oxidized to carbon dioxide and water, forming ZnONPs by calcination. 52,53  Lawsone (2-hydroxy-1,4-naphthaquinone) is the primary pigment in henna. The hydroxyl and carbonyl groups may bind onto the surface of zinc oxide nanoparticles by either chelation or bridging while releasing water molecules through dehydration ( Fig. 3(b) ). 54,55  When compared to titanium, zinc bears a greater tendency to interact with ligands because of its relatively higher electron affinity. 56  Surface complexes are known to form between phenolic compounds and ZnO; this is also expected for lawsone with the carbonyl and phenolic hydroxyl groups. 57–59 Fig. 3 (a) Synthesis protocol of ZnONPs from phytochemicals available in kaffir lime, and (b) conjugation strategy between ZnONPs and lawsone as the primary pigment in henna.\n\n3.2. Characterizations FTIR is a highly precise technique employed to study a material's functional groups by analyzing its vibrational frequencies. It offers crucial information about molecular architecture, makeup, and chemical bonds. Functional groups of henna, pure ZnONPs, and ZnO@henna nanocomposite were characterized as displayed in  Fig. 4 . FTIR spectra depicted in  Fig. 4(a)  show the spectrum of aqueous henna extract. The spectrum has a remarkable peak at 3327 cm −1  due to the stretching of hydroxyl (O–H) bonds and shows the phenolic nature of the lawsone dye. The other peaks at 2920, 2869, and 2817 cm −1  concern the sp 2  C–H bonds associated with paraffin and aromatic rings. Later, the peak associated with the carbonyl bond stretching (C \n \n\n<svg xmlns=\"http://www.w3.org/2000/svg\" version=\"1.0\" width=\"13.200000pt\" height=\"16.000000pt\" viewBox=\"0 0 13.200000 16.000000\" preserveAspectRatio=\"xMidYMid meet\"><metadata>\nCreated by potrace 1.16, written by Peter Selinger 2001-2019\n</metadata><g transform=\"translate(1.000000,15.000000) scale(0.017500,-0.017500)\" fill=\"currentColor\" stroke=\"none\"><path d=\"M0 440 l0 -40 320 0 320 0 0 40 0 40 -320 0 -320 0 0 -40z M0 280 l0 -40 320 0 320 0 0 40 0 40 -320 0 -320 0 0 -40z\"/></g></svg>\n\n O) is supported with the peak at 1623 cm −1 , which is then linked with the band at 1500–1300 cm −1  and is affiliated with C C in the aromatic benzene ring. Also, the peaks between 1100 and 1200 cm −1  are affiliated with C–O stretching, and the bands between 800 and 950 cm −1  which goes ‘bending’ for O–H bonds. These results are consistent with the literature reports. 43,60 Fig. 4(b)  displays the FTIR spectrum for green synthesized ZnO NPs. The broad absorption band at 3401 cm −1  corresponds to O–H stretching owing to the moisture adsorption, while characteristic peaks confirming the identity of ZnONPs at 553 cm −1  are noted for the Zn–O vibrational peak. 61  The FTIR spectroscopy results concerning ZnO@henna nanocomposites show that most functional groups are retained, confirming the inclusion of henna extracts, thus proving the multifunctionality of the nanocomposite ( Fig. 4(c) ). A peak of 547 cm −1  was assigned for the Zn–O vibrational peak, demonstrating a shift from pure ZnONPs and indicating the presence of interactions between the henna extract and ZnO. Owing to C C, O–H, and C–O stretching, the spectrum suggests that the organic supports or ligands of henna and the metal oxide nanoparticles also are complexing, illustrating that the phenolic and carbonyl functional groups of henna bind to the surface of ZnO, which is likely to improve the structural stability and functionality of the composite material. Fig. 4 The functional group analysis for (a) henna aqueous extract, (b) ZnONPs, and (c) ZnO@henna nanocomposite. XRD analysis is essential for identifying material crystal structures and phases and determining their lattice parameters. This technology assists researchers in studying crystallite dimensions, crystal stress, and material purity across different uses.  Fig. 5(b)  shows the powder XRD pattern of ZnO@henna nanocomposite. The spectrum from ZnO@henna nanocomposite shows peaks at 32.06° [100], 34.70° [002], 36.53° [101], 47.82° [102], 56.82° [110], 63.11° [103], 66.60° [200], 68.16° [112], 69.31° [201], 72.74° [004] and 77.10° [202] with calculated lattice parameters  a  = 3.194 Å and  c  = 5.013 Å resulting in a  c / a  ratio of 1.570. Compared to the XRD pattern of pure ZnONPs ( Fig. 5(a) ), the XRD pattern of ZnO@henna nanocomposite displayed an identical hexagonal wurtzite crystal structure. The material structure matches precisely with established reference data as stated in JCPDS card 36-1451, which closely aligns with values reported in the literature. 62–64  The average crystallite size evaluation with the Scherrer formula revealed a value of 38.83 nm by analyzing its most intense peak at 2 θ  ≈ 36.5°, representing the (101) reflection of the ZnO crystal. A peak selection was made because of its intense signal and precise definition, which enhanced the accuracy of the measurement for crystallite size determination. XRD analysis confirms the successful production of ZnO@henna nanocomposite free from contaminants, although lawsone does not display in the pattern because organic compounds have an amorphous nature. The analysis of amorphous material content using XRD faces difficulties because its detection and measurement at low concentrations becomes complicated by broad and faint peaks in patterns. 65,66 Fig. 5 XRD analysis of the green synthesized (a) ZnONPs and (b) ZnO@henna nanocomposite. While providing surface morphology, FESEM enables high-resolution imaging, and EDS allows the analysis of the composition of nanoparticles. The internal structure, crystallinity at a nanoscale, and the nanoscale morphology of the materials can be captured in detail using a TEM. The synthesized ZnO@henna nanocomposite's particle size distribution and FESEM, TEM, and EDS analyses are illustrated in  Fig. 6 . Fig. 6 Illustration of (a) FESEM, (b) TEM, (c) EDS, and (d) particle size distribution for the green synthesized ZnO@henna nanocomposite. As illustrated in  Fig. 6(a) , particles predominantly display a spherical shape with a polydisperse nature, EDS analysis was conducted to determine the nanocomposite's elemental composition, confirming the detection of Zn, C, and O at weight portions of 60.92%, 13.67%, and 25.41%, respectively ( Fig. 6(c) ). The analysis suggests that the ZnO@henna nanocomposite was successfully synthesized without any impurities. Morphology and structural characteristics require in-depth evaluation; thus, it was essential to conduct TEM analysis. The TEM images depict a mixture of spherical particles and some nanorods.  Fig. 6(b)  shows a clear bilayer structure, which strongly supports the fact that henna extract and ZnO nanoparticles have successfully integrated.  Fig. 6(d)  shows the analysis results  via  ImageJ and OriginLab Pro software, revealing that the particles have an average size of 41.40 nm and a size distribution range from 10 nm to 95 nm. UV-vis DRS is a non-destructive tool for studying the optical features of solid materials as it measures their reflectance in the ultraviolet and visible light spectrum. It employs Tauc plot analysis, which offers insights into electronic transitions, photocatalytic activity, and the band gap energy consideration of semiconductors. The henna extract was subjected to a UV-vis spectrum analysis, and the results are illustrated in  Fig. 7(a) . The spectra reveal two notable absorption peaks: one in the UV region at 385 nm and another in the visible range at 518 nm. 67  The optical differences between pure ZnO nanoparticles and the ZnO@henna nanocomposite are illustrated in  Fig. 7(b) . The graphs depict that Pure ZnO only demonstrates activity in the ultraviolet region without significant absorption in the visible region. At the same time, ZnO@henna exhibits vigorous optical activity in a broad range of 400–700 nm, which indicates heightened light absorption. Using Tauc plots presented in  Fig. 7(c) and (d) , the band gap energies of unmodified ZnO and ZnO@henna were calculated to be 3.18 eV and 2.80 eV, respectively. Pure ZnONPs maintain a direct band gap because their wurtzite crystal structure positions both the conduction band minimum and valence band maximum at the identical  k -point in the Brillouin zone. 68  However, upon modification with the henna extract, the optical transition behavior shifts, and the band gap is more accurately represented by an indirect transition model. This shift is attributed to the introducing of surface states and localized defect levels by the organic molecules in henna, such as lawsone and other phytochemicals, which can alter the recombination pathways and the nature of electronic transitions. Fig. 7 (a) UV-visible spectra of aqueous henna extract, (b) UV-visible DRS of pure ZnONPs (black line) and ZnO@henna nanocomposite (blue line), (c) band gap energy calculation by DRS analysis for pure ZnONPs, and (d) ZnO@henna nanocomposite. Such transitions from direct to indirect band gaps upon modification have been observed in other studies. For instance, strain-induced structural transformations in ZnO nanotubes have been shown to cause a direct-to-indirect band gap transition. 69  Similarly, doping ZnO quantum dots with tin (Sn) has been reported to change the nature of the band gap from direct to indirect due to electronic structure distortion caused by surface chemistry. 70  Studies confirm that modifying ZnO surfaces and introducing dopants can alter its electronic properties noticeably. The reduction in band gap to 2.80 eV for ZnO@henna is mainly attributed to surface interactions between ZnO and lawsone, the key active compound in henna. However, other phytochemicals, such as flavonoids and phenolics, may also contribute by introducing surface states that enhance visible-light absorption. Since the XRD patterns for modified ZnONPs remained unchanged, it can be concluded that the band gap narrowing developed from surface states that were modified rather than bulk doping. The optical characteristics of synthesized ZnO@henna nanocomposite need evaluation based on the CB/VB edge potentials of ZnO and the HOMO/LUMO energy levels of lawsone. The band edge positions of ZnONPs at the point of zero charge can be theoretically calculated to evaluate the potential level of the electron acceptor. This can be done using the following equations: 71 1 E VB  =  X  −  E e  + 0.5 E g 2 E CB  =  E VB  −  E g The equations represent  X  as ZnO's absolute electronegativity at 5.89 eV, 72,73 E g  represents the optical band gap from  Fig. 7(c)  at 3.18 eV, and  E e  stands for the hydrogen scale energy of free electrons at 4.5 eV. The substitution yields +2.98 eV valence band edge potential and −0.20 eV conduction band edge potential relative to NHE. To enable efficient electron transfer, the LUMO orbital of lawsone must position at a more negative energy level than ZnO's CB level. 74  Theoretically reported that lawsone exhibits a LUMO energy measurement of −2.60 eV relative to the vacuum energy level (−1.84 eV  vs.  NHE), yet its HOMO energy shows −5.30 eV (+0.86 eV  vs.  NHE). 47  The more negative LUMO energy level of lawsone enables efficient electron donation to ZnONPs. The results confirm lawsone can be considered as a promising material for light-harvesting dye photosensitizers. The zeta potential is a core parameter for surface charge measurements in colloids since it regulates nanoparticle stability and dispersion patterns. Strong electrostatic repulsion occurs between particles when zeta potential has high absolute values regardless of its positive or negative charge state, preventing aggregation and ensuring colloidal stability. The characteristics play a vital role in photocatalysis because they determine dispersion quality and surface reactivity outcomes with reactants, directly affecting catalytic roles and pollutant breakdown rates. Evaluating these properties required zeta potential analysis combined with dynamic light scattering measurements (DLS) for colloidal suspensions, including unmodified ZnONPs and ZnO@henna nanocomposite. Zeta potential measurements on unmodified ZnONPs revealed a value of −24.3 mV, while the particles had an average diameter of 38.9 nm ( Fig. 7(b)  and  8(a) ). The ZnO@henna nanocomposite displayed a much more negative zeta potential value of −37.1 mV and a greater diameter of 42.4 nm ( Fig. 7(d)  and  8(c) ) and  Table 1 . Nanoparticle aggregation became less likely during henna presence, whereas electrostatic stabilization improved because of the significant increase in surface charge—better colloidal stability through henna modification benefits photocatalysis by improving aqueous dispersion properties and enhanced interaction with pollutants. The functional efficiency of nanocomposites in catalytic operations is enhanced through henna modification, which increases zeta potential stability. Fig. 8 Illustration of zeta potentials analysis and particle size distribution for (a and b) ZnONPs and (c and d) ZnO@henna nanocomposite. Table 1 Zeta potential values and particle size distribution of ZnONPs and ZnO@henna nanocomposite Catalyst Zeta potential (mV) Mean diameter (nm) ZnONPs −24.3 38.9 ZnO@henna −37.1 42.4 Photoluminescence (PL) spectroscopy effectively assesses material purity and crystalline quality. 75 Fig. 9  shows the PL of ZnONPs and the ZnO@henna nanocomposite, which were measured at 290 nm excitation wavelength. The emission peak of ZnONPs appears prominently at 413 nm. It features characteristics of ZnO along with assignments to exciton–exciton interactions together with zinc or oxygen interstitials in the lattice structure. Two additional peaks emerge in the emission spectrum at 483 nm that result from radiative recombination with oxygen vacancies and at 551 nm that belong to deep-level emissions from oxygen-related defect sites. 76,77  The ZnO@henna nanocomposite produces two prominent emission peaks, 483 nm and 550 nm. The nanocomposite exhibits significantly lower photo-luminescence intensity when compared with pure ZnONPs. The suppressed emission indicates reduced photoinduced electron–hole pair recombination, which improves the photocatalytic behavior of the composite material. 78  The enhanced photocatalytic performance resulted from the collaborative effect between ZnONPs and henna, which enables better charge separation and electron transfer mechanism under visible light exposure. Fig. 9 PL spectra for ZnONPs and ZnO@henna nanocomposite at the excitation wavelength of 290 nm. Calculations made using the Brunauer–Emmett–Teller (BET) method help scientists determine the specific surface area along with porosity characteristics by assessing nitrogen adsorption followed by desorption processes from materials. Catalysis performances improve through increased reactant adsorption, possibly because of the higher material surface area and porosity. The performance optimization of catalysts heavily depends on BET analysis for such procedures. We used BET analysis to analyze the specific surface area (SSA) levels, porosity values, and pore volume of unmodified ZnONPs and ZnO@henna nanocomposite. The BET surface area analysis showed 109.11 m 2  g −1  for ZnONPs and 106.41 m 2  g −1  for ZnO@henna nanocomposite. In terms of pore volume, values of 0.17433 cm 3  g −1  and 0.19761 cm 3  g −1  were obtained for ZnONPs and ZnO@henna, respectively, indicating the porous nature of both materials. Pore size distribution was analyzed using the Barrett–Joyner–Halenda (BJH) method by examining the desorption branch from the nitrogen adsorption–desorption isotherm. ZnONPs and ZnO@henna nanocomposite revealed pore sizes of 4.72 nm and 5.50 nm, respectively. The materials show type IV isotherms together with hysteresis loops that signify their mesoporous nature through characterization tests. The experimental results verify that both samples exist within the mesoporous range (2–50 nm). 79  An increase in the average pore size of the ZnO@henna nanocomposite resulted in a slight decrease in specific surface area compared to pure ZnONPs. An inverse relationship exists between surface area and crystallite or particle size since pore size enlargement causes structural densification, resulting in decreased surface area. 80  BET and BJH methods analysis verified the mesoporous structure of ZnONPs and ZnO@henna nanocomposites where the nanocomposite displayed extended pore dimensions. The material's features improve its capability for adsorption functions and surface-controlled operations (see  Fig. 10  and  Table 2 ). Fig. 10 BET analysis: N 2 -adsorption/desorption isotherms with pore size distribution (inset) of (a) ZnONPs and (b) ZnO@henna nanocomposite. Table 2 BET analysis results of ZnONPs and ZnO@henna nanocomposite Catalyst SSA (m 2  g −1 ) Pore size (nm) Pore volume (cm 3  g −1 ) ZnONPs 109.11 4.72 0.17433 ZnO@henna 106.41 5.50 0.19761\n\n4. Photocatalytic investigation The photodegradation reaction of 4-NP was performed under different reaction conditions. The first test was conducted in the dark under neutral pH, adding 20 mg of the catalyst and starting with 50 ppm concentration to understand how illumination would affect the reaction ( Fig. 11(a)  black curve). However, no significant degradation was achieved in 90 minutes in this reaction condition. In another test, the catalyst was removed, and the reaction was done under a blue LED, yielding neglectable improvement in the degradation of 4-NP ( Fig. 11(a)  red curve). Nevertheless, adding the catalyst under light irradiation dramatically improved the degradation efficiency ( Fig. 11(a)  blue curve). These three experiments demonstrate the significance of both the source of irradiation and catalyst, which are critical for achieving effective degradation. Fig. 11 Investigation of (a) the effect of the ZnO@henna catalyst and blue LED light ( λ  > 425 nm, 30 W); (b) different LED light illumination-blue ( λ  > 425 nm), green ( λ  > 520 nm) and red ( λ  > 620 nm); (c) the impact of pH under the following conditions: blue LED light ( λ  > 425 nm, 30 W), reaction time = 90 minutes, initial concentration = 50 ppm, and 20 mg of ZnO@henna catalyst; and (d) catalyst dosage on the degradation of 4-nitrophenol under controlled conditions (blue LED light ( λ  > 425 nm, 30 W), reaction time = 90 minutes, initial concentration = 50 ppm, pH = 10). To optimize the photocatalysis degradation by ZnO@henna nanocomposite, further parameters such as the influence of different LED lamps, pH, catalyst dosage, initial concentration of 4-NP, and the irradiation period were investigated. The photocatalytic degradation was investigated using blue, green, and red lights. Blue light proved the most effective, leading to 62% degradation after 90 minutes. In comparison, the yields under green and red light were 33% and 10%, respectively ( Fig. 11(b) ). The results align with the energy band gap for ZnO@henna ( E g  = 2.80 eV) deduced from DRS spectra and UV-vis studies, as shown in  Fig. 7(d) , confirming that ZnO@henna exhibits maximum absorption in the blue light region at a wavelength of  λ  = 443 nm (1240/2.8). The pH of the reaction medium is critical in controlling ROS formation and the efficacy of 4-NP degradation in photodegradation pathways. 81  A 50 ppm initial concentration of 4-NP was used to assess the photocatalytic degradation with 20 mg ZnO@henna, as illustrated in  Fig. 11(c) . The study findings indicated marked differences in degradation efficiency with changes in pH: neutral pH (pH 7) recorded 62% efficiency, 79% at pH 10, and pH 11 recorded 53%, while only 27% at pH 4 was observed after 90 minutes. This suggests that 4-NP degradation is best within a moderately alkaline environment (pH 8–10), while acidic, neutral, or highly alkaline conditions result in diminished efficiency. The factors mentioned above practical at pH 8–10 seem to work in synergy to further improve degradation efficiency ( eqn (3) ). At higher pH values, regions of basicity lead to more abundant hydroxyl radicals (˙OH) conducive to grinding further degradation ( eqn (4) ). 82  In addition, 4-NP has a p K a  ∼ 7.15, suggesting that it exists in a neutral, protonated form at a lower pH and in a deprotonated form at higher pH. 83  The deprotonated form is more soluble in water, enabling improved accessibility towards catalytic degradation. Furthermore, ZnO nanoparticles possess a zero point of charge (pH zpc ) within the 8.5–10.5 range. 84–86  At highly alkaline pH, charge distribution on the catalyst surface becomes predominantly negative. This can cause some degree of electrostatic repulsion between the catalyst and the anionic form of 4-NP. However, degradation remains efficient in that moderate alkaline range (pH 8–10) because enhanced radical generation outpaces consumption. At low pH values, particularly those below 6, degradation efficiency further decreases as the recombination of photogenerated electron–hole pairs increases, thus lowering ROS production. 87  Additionally, in strongly acidic conditions with pH lower than 4, the dissolution of ZnO nanoparticles occurs, leading to catalyst deactivation ( eqn (5) ). 88,89  Alternatively, when pH is greater than 11, an excess of hydroxide ions (OH − ) may act as radical scavengers, thus neutralizing hydroxyl radicals (˙OH) and degradation efficiency ( eqn (6) ). 90  It is worth noting that the possible pH effects on the henna substance were not reported as part of the study, even though the ZnO@henna composite received photocatalytic behavior analysis across diverse pH conditions. The surface characteristics of henna could change through protonation or deprotonation processes because of its phenolic and hydroxyl functional groups, which may influence the interaction with ZnO and charge separation efficiency. Future analysis of the henna component needs to study its pH-sensitive properties to determine how it impacts the photodegradation mechanism. 3 H 2 O + h +  → ˙OH + H + 4 OH −  + h +  → ˙OH 5 ZnO + 2H +  → Zn 2+  + H 2 O 6 OH −  + ˙OH → O 2−  + H 2 O Catalyst dosage is an effective factor in photocatalytic degradation, given that it has an impact on 4-NP degradation. Degradation tests were done using various catalyst amounts of 5 to 35 mg with specific conditions set as 50 ppm 4-NP, pH = 10, at 90 minute reaction time, and blue LED irradiation to determine the ideal catalyst dosage. As shown in  Fig. 11(d) , degradation efficiency increased linearly from 5 mg to 25 mg, then declined with dosage increases beyond that slightly. The increment in degrading efficiency with increased catalyst dosage up to 25 mg is explainable by the proportionate increase of active sites on the catalyst surface for higher photon absorption, accelerating 4-NP photocatalytic degradation up to 84%. 91  Decreased available surface area because of agglomeration, increased turbidity, and reduced light penetration with the catalyst suspension due to excessive catalyst dosage hinders the generation of reactive species and suffices degradation efficiency. 92,93  In the present work, optimal catalyst usage for the balance between its utilization and efficient photon absorption was found to be 25 mg. This dosage maximizes degradation efficiency while minimizing catalyst utilization, avoiding detrimental effects from catalyst aggregation. To investigate the impact of initial concentration on the photocatalytic degradation pathway, a set of solutions containing 20 to 100 ppm was made. Using 25 mg of ZnO@henna nanocatalyst resulted in the effective degradation of 4-NP in the 10 to 60 ppm range with 90 minutes of illumination using a blue LED light, as depicted in  Fig. 12(a) . However, the catalyst activity was diminished when the concentration was increased to 70 ppm or higher. As degradation efficiency is highly contingent on the ROS generation rate and their interaction with pollutant molecules, the active sites on ZnO@henna may become saturated with 4-NP on attaining higher pollutant concentration, halting further ROS production and pushing the overall degradation efficacy downward. In addition, excess 4-NP molecules may result in significant absorption of illumination light, which can further result in the catalyst losing the ability to use photons and plummeting performance. Evidence in these results suggests a range of photocatalytic degradation pollutant concentrations where optimal efficacy can be achieved. Efficiency tends to drop beyond this benchmark because of active site 4-NP saturation and increased competition for light. 94 Fig. 12 The effect of (a) initial concentration of 4-NP and (b) irradiation time on the degradation rate. The last parameter we studied for dye degradation was illumination duration, which also became a deciding factor. The performance of ZnO@henna photocatalytic activity was tested with 50 ppm initial concentration under optimal conditions (25 mg catalyst, pH 10 with blue LED illumination) over three hours to find the maximum catalytic performance peak. The results suggest that, as depicted in  Fig. 12(b) , the degradation efficiency registered improvement, whereas the peak value for the same was reached at 120 minutes at an efficiency of 93%. Past this mark, the degradation plateaued, revealing only minute changes with extended illumination. From this insight, it becomes evident that the majority of the pollutant molecules are degraded beyond this mark, and any further illumination does not significantly enhance the process. 4.1. Recovery and recycling of ZnO@henna nanocomposite Utilizing heterogeneous catalysts provides two main benefits through their simple separation method and extended lifetime. We performed an extensive study to evaluate catalyst durability and the ability to reuse. After its first photocatalytic treatment with a fresh catalyst, the degrading solution of pollutants underwent centrifugation to recover the catalyst. Multi-step purification through water and ethanol washing followed by oven drying made the isolated catalyst ready for repeated use. The testing of continuous 4-NP breakdown operations lasted through four cycles. The results established the high stability of the catalyst through its continued 85% degradation efficiency in the fourth reuse cycle ( Fig. 13(a) ). Structural stability and integrity of the ZnO@henna catalyst were evaluated through XRD and FTIR analyses after its last cycle by comparing results with fresh material. Tests determined that functional groups and crystalline stability remained consistent even after four photodegradation cycles of 4-NP ( Fig. 13(b) and (c) ). The slight decrease in performance after the photocatalysis indicates that structural degradation and leaching might have happened due to long-term alkaline condition (pH 10) exposure. Fig. 13 Representation of (a) the recycling results of ZnO@henna nanocomposite. (b and c) XRD patterns and FTIR spectra of fresh ZnO@henna (black) and after the last run (red) of the photodegradation of 4-nitrophenol under standard conditions. 4.2. Intermediates and fate of the degradation The degenerative pathway of 4-NP follows a sequence of oxidative reactions brought about by the ZnO@henna nanocomposite's provided electron–hole pairs. These charge carriers can generate reactive radicals that effectively contribute to degradation. To identify the types of reactive radicals involved in the photodegradation of 4-NP, specific free radical scavengers were introduced into the reaction system containing the 4-NP solution and the photocatalyst. A significantly reduced photodegradation rate upon the addition of a particular scavenger indicates that the corresponding radical plays a dominant role in the degradation process. 71  Initially, the role of electron transfer and the probability of contributing singlet oxygen ( 1 O 2 ) were evaluated, as shown in  Fig. 14(a) . AgNO 3,  as an electron scavenger, significantly inhibited the degradation process, thus establishing that electron transfer is required. However, when the solution was treated with DABCO ( 1 O 2  scavenger), the results were insignificant, proving that single oxygen was not a major contributor to the photodegradation pathway. The superoxide radical (O 2 ˙ − ) scavenger  p -BQ significantly slumped the photodegradation, confirming its vital role in degradation. Similarly, about complete inactivation (∼2%) by vitamin C (˙OH scavenger) proved the central role of hydroxyl radical in the degradation process ( Fig. 14(b) ). The research data indicates that 4-NP degradation occurs primarily due to two ROS agents: superoxide radicals (O 2 ˙ − ) and hydroxyl radicals (˙OH). Fig. 14 Illustration of the role of control experiments, scavengers, LC-MS analysis, and possible intermediates in the photodegradation of 4-NP: (a) DABCO as  1 O 2  scavenger has no significant effect on the photodegradation rate (black dash). In contrast, introducing AgNO 3  as an electron scavenger (red dash) has significantly affected the degradation rate. (b) Introducing  p -BQ as a O 2 ˙ −  scavenger (black dash) and vitamin C as a ˙OH scavenger to the reaction solution completely declined the degradation rate of 4-NP. (c) The reaction performed in dark (black dash) and atmospheric oxygen replaced by nitrogen (red dash). (d) LC-MS analysis after degradation of 4-NP at optimized reaction conditions after 60 minutes of reaction time. And (e) possible degradation pathway of 4-NP by ZnO@henna nanocatalyst. The generated intermediates of the degraded 4-NP were identified using LC-MS analysis, as shown in  Fig. 14(d) . Initially, the bond cleavage process begins through electrophilic attack by (˙OH), producing 4-nitrobenzene-1,2-diol, benzoquinone, and a nitrogenous compound. Some nitro moieties are also reduced to the amino form. Increased oxidating power through further para hydroxylation and subsequent oxidation of the intermediates leads to the generation of multi-hydroxy cyclic derivatives validated by compounds like benzene-1,2,3-triol alongside 2,3-dihydroxycyclohexa-2,5-diene-1,4-dione. Due to oxidative ring opening, these compounds are unstable and transformed into unsaturated dibasic acids. They also undergo more decarboxylation, which leads to short carbon chains. Finally, mineralization produces carbon dioxide and water ( Fig. 14(e) ). A deterioration process of using H 2 O 2  to oxidize 4-nitrophenol has been documented before. 95  Our proposed technique does not require an additional peroxide source, an extremely oxidizing substance, which increases its safety and sustainability. Similar degradation pathways were documented. 96–99 4.3. Proposed mechanism for the degradation of 4-nitrophenol by ZnO@henna nanocatalyst When lawsone (photosensitizer) absorbs light energy, it moves to an excited state to start the degradation cycle. 100  Lawsone does not conduct electron transfer directly since it first goes through intersystem crossing before becoming a more reactive triplet state. 101  After lawsone interacts with ZnO, electron migration to the ZnO conduction band is facilitated. The proper alignment between the ZnONPs conduction band edge position and lawsone LUMO level drives efficient electron transfer, which results in greater photogenerated electrons to drive reduction processes ( Fig. 15(a) ). The reactive radicals formed by this mechanism continuously support the photodegradation of 4-NP ( Fig. 15(b) ). Fig. 15 Illustration of (a) HOMO/LUMO and VB/CB edge potentials of lawsone and ZnONPs, respectively, which shows the favorable electron transfer from the LUMO of lawsone to the CB of ZnONPs. And (b) proposed mechanism for the degradation of 4-NP by ZnO@henna nanocomposite under blue LED illumination. Control experiments were performed under optimized conditions to validate the proposed mechanism. Light makes the degradation of the pollutant possible since the pollutant fails to degrade in the absence of light. Similarly, adding nitrogen gas that eliminates dissolved oxygen significantly declined the degradation rate (see  Fig. 14(c) ), thus establishing oxygen as essential for ROS formation. The possible degradation pathway of 4-NP occurs through a photoinduced multi-step process according to the radical scavenger experiments ( Fig. 14(a) and (b) ), control experiments, ( Fig. 14(c) ), HOMO/LUMO and VB/CB edge potentials of the electron donor (henna) and ZnO (accepter) ( Fig. 15(a) ), and previous literature. 102–104  As shown in  Fig. 15(b) , the photosensitizer substance (lawsone) receives a photochemical stimulus under blue light illumination, which causes an electron to shift from HOMO to LUMO states. After photoexcitation, lawsone enters an excited state before the self-reduction reaction produces (lawsone + ) combined with the transfer of an excited electron to the CB of ZnO. The electrons in the conduction band convert O 2  molecules into superoxide radicals (O 2 ˙ − ). The reactive species generated during the process then accept protons, leading to hydrogen peroxide (H 2 O 2 ) formation that produces highly active hydroxyl radicals (˙OH). The hydroxyl radicals are essential in degradation as they destroy 4-NP molecules adsorbed to the ZnO surface. The catalytic cycle finishes by returning (lawsone + ) to its original form by obtaining electrons from water molecules. The regeneration process maintains the creation of reactive species that maintain 4-NP degradation through photochemical methods.\n\n4.1. Recovery and recycling of ZnO@henna nanocomposite Utilizing heterogeneous catalysts provides two main benefits through their simple separation method and extended lifetime. We performed an extensive study to evaluate catalyst durability and the ability to reuse. After its first photocatalytic treatment with a fresh catalyst, the degrading solution of pollutants underwent centrifugation to recover the catalyst. Multi-step purification through water and ethanol washing followed by oven drying made the isolated catalyst ready for repeated use. The testing of continuous 4-NP breakdown operations lasted through four cycles. The results established the high stability of the catalyst through its continued 85% degradation efficiency in the fourth reuse cycle ( Fig. 13(a) ). Structural stability and integrity of the ZnO@henna catalyst were evaluated through XRD and FTIR analyses after its last cycle by comparing results with fresh material. Tests determined that functional groups and crystalline stability remained consistent even after four photodegradation cycles of 4-NP ( Fig. 13(b) and (c) ). The slight decrease in performance after the photocatalysis indicates that structural degradation and leaching might have happened due to long-term alkaline condition (pH 10) exposure. Fig. 13 Representation of (a) the recycling results of ZnO@henna nanocomposite. (b and c) XRD patterns and FTIR spectra of fresh ZnO@henna (black) and after the last run (red) of the photodegradation of 4-nitrophenol under standard conditions.\n\n4.2. Intermediates and fate of the degradation The degenerative pathway of 4-NP follows a sequence of oxidative reactions brought about by the ZnO@henna nanocomposite's provided electron–hole pairs. These charge carriers can generate reactive radicals that effectively contribute to degradation. To identify the types of reactive radicals involved in the photodegradation of 4-NP, specific free radical scavengers were introduced into the reaction system containing the 4-NP solution and the photocatalyst. A significantly reduced photodegradation rate upon the addition of a particular scavenger indicates that the corresponding radical plays a dominant role in the degradation process. 71  Initially, the role of electron transfer and the probability of contributing singlet oxygen ( 1 O 2 ) were evaluated, as shown in  Fig. 14(a) . AgNO 3,  as an electron scavenger, significantly inhibited the degradation process, thus establishing that electron transfer is required. However, when the solution was treated with DABCO ( 1 O 2  scavenger), the results were insignificant, proving that single oxygen was not a major contributor to the photodegradation pathway. The superoxide radical (O 2 ˙ − ) scavenger  p -BQ significantly slumped the photodegradation, confirming its vital role in degradation. Similarly, about complete inactivation (∼2%) by vitamin C (˙OH scavenger) proved the central role of hydroxyl radical in the degradation process ( Fig. 14(b) ). The research data indicates that 4-NP degradation occurs primarily due to two ROS agents: superoxide radicals (O 2 ˙ − ) and hydroxyl radicals (˙OH). Fig. 14 Illustration of the role of control experiments, scavengers, LC-MS analysis, and possible intermediates in the photodegradation of 4-NP: (a) DABCO as  1 O 2  scavenger has no significant effect on the photodegradation rate (black dash). In contrast, introducing AgNO 3  as an electron scavenger (red dash) has significantly affected the degradation rate. (b) Introducing  p -BQ as a O 2 ˙ −  scavenger (black dash) and vitamin C as a ˙OH scavenger to the reaction solution completely declined the degradation rate of 4-NP. (c) The reaction performed in dark (black dash) and atmospheric oxygen replaced by nitrogen (red dash). (d) LC-MS analysis after degradation of 4-NP at optimized reaction conditions after 60 minutes of reaction time. And (e) possible degradation pathway of 4-NP by ZnO@henna nanocatalyst. The generated intermediates of the degraded 4-NP were identified using LC-MS analysis, as shown in  Fig. 14(d) . Initially, the bond cleavage process begins through electrophilic attack by (˙OH), producing 4-nitrobenzene-1,2-diol, benzoquinone, and a nitrogenous compound. Some nitro moieties are also reduced to the amino form. Increased oxidating power through further para hydroxylation and subsequent oxidation of the intermediates leads to the generation of multi-hydroxy cyclic derivatives validated by compounds like benzene-1,2,3-triol alongside 2,3-dihydroxycyclohexa-2,5-diene-1,4-dione. Due to oxidative ring opening, these compounds are unstable and transformed into unsaturated dibasic acids. They also undergo more decarboxylation, which leads to short carbon chains. Finally, mineralization produces carbon dioxide and water ( Fig. 14(e) ). A deterioration process of using H 2 O 2  to oxidize 4-nitrophenol has been documented before. 95  Our proposed technique does not require an additional peroxide source, an extremely oxidizing substance, which increases its safety and sustainability. Similar degradation pathways were documented. 96–99\n\n4.3. Proposed mechanism for the degradation of 4-nitrophenol by ZnO@henna nanocatalyst When lawsone (photosensitizer) absorbs light energy, it moves to an excited state to start the degradation cycle. 100  Lawsone does not conduct electron transfer directly since it first goes through intersystem crossing before becoming a more reactive triplet state. 101  After lawsone interacts with ZnO, electron migration to the ZnO conduction band is facilitated. The proper alignment between the ZnONPs conduction band edge position and lawsone LUMO level drives efficient electron transfer, which results in greater photogenerated electrons to drive reduction processes ( Fig. 15(a) ). The reactive radicals formed by this mechanism continuously support the photodegradation of 4-NP ( Fig. 15(b) ). Fig. 15 Illustration of (a) HOMO/LUMO and VB/CB edge potentials of lawsone and ZnONPs, respectively, which shows the favorable electron transfer from the LUMO of lawsone to the CB of ZnONPs. And (b) proposed mechanism for the degradation of 4-NP by ZnO@henna nanocomposite under blue LED illumination. Control experiments were performed under optimized conditions to validate the proposed mechanism. Light makes the degradation of the pollutant possible since the pollutant fails to degrade in the absence of light. Similarly, adding nitrogen gas that eliminates dissolved oxygen significantly declined the degradation rate (see  Fig. 14(c) ), thus establishing oxygen as essential for ROS formation. The possible degradation pathway of 4-NP occurs through a photoinduced multi-step process according to the radical scavenger experiments ( Fig. 14(a) and (b) ), control experiments, ( Fig. 14(c) ), HOMO/LUMO and VB/CB edge potentials of the electron donor (henna) and ZnO (accepter) ( Fig. 15(a) ), and previous literature. 102–104  As shown in  Fig. 15(b) , the photosensitizer substance (lawsone) receives a photochemical stimulus under blue light illumination, which causes an electron to shift from HOMO to LUMO states. After photoexcitation, lawsone enters an excited state before the self-reduction reaction produces (lawsone + ) combined with the transfer of an excited electron to the CB of ZnO. The electrons in the conduction band convert O 2  molecules into superoxide radicals (O 2 ˙ − ). The reactive species generated during the process then accept protons, leading to hydrogen peroxide (H 2 O 2 ) formation that produces highly active hydroxyl radicals (˙OH). The hydroxyl radicals are essential in degradation as they destroy 4-NP molecules adsorbed to the ZnO surface. The catalytic cycle finishes by returning (lawsone + ) to its original form by obtaining electrons from water molecules. The regeneration process maintains the creation of reactive species that maintain 4-NP degradation through photochemical methods.\n\n5. Comparison to prior studies To assess the practical use and public availability of the optimally synthesized ZnO@henna nanocomposite photocatalyst, performance benchmarks of other studies were taken into account and compared to our findings, which are compiled in  Table 3 . It is evident from the literature review that existing works are abundant in the degradation of 4-NP by ZnO nanoparticles. However, most have relied on established chemical synthesis instead of green synthesis techniques. The main contributions of this study stated in  Table 3  (entry 23) include the use of henna (lawsone) as a novel photocatalyst which improves ZnO photocatalytic activity, as well as demonstrating the efficient degradation of 4-NP from high initial pollutant concentrations (20–60 ppm) under neutral and alkaline conditions using a blue LED lamp as the irradiation source. Impressively, 93 percent of the pollutant was degraded in 120 minutes, which speaks to the effectiveness of the ZnO@henna nanocomposite in outperforming alternative methods reported in the literature. Beyond the previous advantages, two essential elements must be assessed: initial concentration of pollutants and catalyst usage levels. The degradation of pollutants becomes harder as pollutant concentration increases since higher concentrations occupy more of the available active sites of the catalyst. A lower catalyst amount selection remains favored since it brings both financial benefits and environmental advantages. Our study involved adding 25 mg of catalyst into a 25 mL solution, yielding 1 mg per mL dosage while maintaining an initial pollutant level of 50 ppm. The photocatalytic system utilized in our research outperformed the conditions described in  Table 3  since the studies investigated initial pollutant levels between 4 and 30 ppm. The combination of green synthesis, practical operational conditions, and high efficiency renders the nanocomposite a prime candidate for real-life environmental remediation technologies, specifically in neutral and alkaline conditions. Table 3 Prior works for the photocatalytic degradation of 4-nitrophenol by ZnO nanoparticles under various conditions Entry Author(s)/year ZnO catalyst Synthesis method Initial concentration Catalyst dosage Irradiation source Irradiation time Degradation% 1 Khatamian  et al.  (2012) 105 ZnO/HZSM-5 Polyacrylamide pyrolysis method 20 ppm 250 mg/50 mL Ambient visible light 75 min 100% 2 Khatamian, & Alaji (2012) 106 ZnO/HZSM-5 Impregnation method 20 ppm 500 mg/100 mL 30 W UV-C lamp 90 min 91% 3 Sugiyama  et al.  (2012) 107 Bulk ZnO Commercially available 30 ppm 5000 mg/1000 mL Solar light + UV light 190 min 100% 4 Zhang  et al.  (2012) 108 TiO 2 /ZnO/Au nanofibers Electrospinning +  in situ  reduction 10 ppm 100 mg L −1 UV light 40 min 96% 5 Khatamian  et al.  (2012) 96 Ln-doped ZnO (La, Nd, Sm) Polymer pyrolysis method 10 ppm 100 mg/100 mL UV lamp (30 W, UV-C) 195 min 83.43% 6 B. Divband  et al.  (2013) 109 Ag/ZnO Polyacrylamide-gel method 10 ppm 100 mg/50 mL UV light 180 min 100% Ag/ZnO Photoreduction method 10 ppm 100 mg/50 mL UV light 180 min 92% Ag/ZnO Chemical reduction method 10 ppm 100 mg/50 mL UV light 180 min 86% 7 Ansari  et al.  (2013) 110 Modified-ZnO Biogenic synthesis using EAB 5 ppm 2 mg/20 mL Visible light ( λ  > 500 nm) 6 h 100% 8 Nezamzadeh-Ejhieh  et al.  (2014) 111 ZnO/nano-clinoptilolite zeolite Ion exchange and calcination 10 ppm 250 mg L −1 Hg-lamp (75 W, 253 nm) 180 min 100% 9 Aslam  et al.  (2014) 112 V 2 O 5 –ZnO composites Co-precipitation 30 ppm 100 mg/150 mL Sunlight (1000 × 10 2  lux) 150 min 60% 10 Hameed  et al.  (2014) 97 W 6+  impregnated ZnO Wet impregnation 50 ppm 1 g L −1 Sunlight 120 min 99% 11 Kale  et al.  (2015) 113 ZnO–graphene composites Hydrazine-assisted hydrothermal method 8.35 ppm 1 g L −1 UV irradiation 60 min 95% 12 Qamar  et al.  (2015) 114 CuO@ZnO core–shell catalysts Wet impregnation 30 ppm 150 mg/150 mL Sunlight 180 min 99% 13 Rabbani  et al.  (2016) 115 TCPP/ZnFe 2 O 4 @ZnO Hydrothermal method followed by sol–gel and immobilization of TCPP 50 ppm 100 mg/50 mL 5 W LED visible light 180 min 67% 14 Verma  et al.  (2017) 98 ZnO-reduced graphene oxide (ZGS) Solvothermal method with ammonia-modified graphene oxide 10 ppm 100 mg/50 mL 125 W high-pressure Hg lamp 240 min 96% 15 Qin  et al.  (2017) 116 Fe 3 O 4 @SiO 2 @ZnO Microwave irradiation with (DEG) as solvent 30 ppm 400 mg L −1 300 W high-pressure Hg lamp 120 min 90.5% 16 Mou  et al.  (2018) 117 Ag/ZnO nanosheets assemblies Solution method 10 ppm 30 mg/100 mL Simulated sunlight (300 W Xe lamp) 25 min 100% 17 Khairy  et al.  (2020) 118 ZnO/CNT, ZnO/GO Ultrasonic irradiation/hydrothermal 10 ppm 1750 mg L −1 Visible light (160 W), ultrasonic (60 W, 20 kHz) 15 min 98.3% 18 Kadam  et al.  (2021) 119 Biogenic ZnO nanoparticles Biological synthesis using endophytic fungi 100 ppm 100 mg L −1 UV lamp (75 W, 365 nm) 480 min 84% 19 Chakraborty  et al.  (2021) 120 Ag 2 O–ZnO Microwave-assisted synthesis 20 ppm 400 mg L −1 UV-LED (25 W, 365 nm) 60 min 99% 20 Kumar  et al.  (2021) 121 ZnO/g-C 3 N 4 Co-precipitation 10 ppm 50 mg/50 mL Visible light (250 W) 180 min 90% 21 Wang  et al.  (2021) 122 ZnO NPs Solvothermal method 20 ppm 1500 mg L −1 25 W UV lamp 180 min 56.2% 22 Usman  et al.  (2023) 123 N, S-codoped ZnO Co-precipitation 4 ppm 200 mg/100 mL 500 W high-pressure Hg lamp 100 min 99.3% \n 23 \n \n Current work \n \n ZnO@henna \n \n Green synthesis \n \n 50 ppm \n \n 25 mg/25 mL solution \n \n Blue LED (30 W) \n \n 120 min \n \n 93%\n\n6. Conclusion In summary, the research synthesized ZnO@henna nanocomposite through an environmentally friendly methodology that combined ZnONPs prepared with kaffir lime extract and henna extract as the biologically active component. Data from structural characterization showed that henna had been successfully loaded into ZnO, which reduced the band gap energy to 2.80 eV for improved visible light absorption. The nanocomposite ZnO@henna demonstrated better photocatalytic ability than ZnO alone by reaching a 93% degradation rate of 4-NP when irradiated by blue LED for 120 minutes. The nanocomposite exhibited excellent catalytic performance by systematically optimizing basic reaction parameters, including pH value, pollutant amount, and catalyst dosage. The catalyst maintained steady performance in four repeated operations while preserving its initial activity by showing negligible performance reduction. The research showed that hydroxyl radicals and superoxide radicals functioned as the central reactive intermediates that degraded 4-NP. The sustainable green production method and superior photocatalytic performance with multiple reuse possibilities transform ZnO@henna into a promising technology for wastewater purification. Despite the pros of the synthesized nanocomposite, its catalytic performance is best at neutral to alkaline reaction conditions; however, its catalytic performance declines at high alkaline media. Similarly, the catalyst has constraints in acidic conditions since ZnO dissolves partially in acidic solutions, making it inappropriate for use in such environments. Additionally, the catalyst stability needs further development for extended applications as it demonstrated sustained 85% initial performance during four reaction cycles.\n\nData availability The data supporting this article have been included in the main paper, and further data supporting this study's findings are available from the corresponding author upon reasonable request.\n\nConflicts of interest The authors declare no conflict of interest."
+}
