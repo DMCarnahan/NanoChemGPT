@@ -350,7 +350,7 @@ def add_document(text: str, *, tag: str = "upload", doc_id: Optional[str] = None
                 _get_index(embs.shape[1]).add(embs)
                 _persist()
 
-        print(f"[vector_store.v2] indexed {len(chunks)} chunks (total {len(_meta)}) tag={tag} doc_id={doc_id}")
+        print(f"[vector_store] indexed {len(chunks)} chunks (total {len(_meta)}) tag={tag} doc_id={doc_id}")
     return idxs
 
 def add_to_store(text: str, tag: str = "upload", defer_embed: Optional[bool] = None):

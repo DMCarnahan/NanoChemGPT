@@ -19,6 +19,7 @@ from werkzeug.utils import secure_filename
 
 # ──────────────── Local modules ──────────────── #
 import vector_store as vs
+from vector_store.uploads_vector import UploadsVectorSearch
 from converter import validate_step, convert_text_to_robot_ops
 from mongo_client import get_db, ping as mongo_ping
 from decider.kb import kb_search, kb_fetch
@@ -507,8 +508,6 @@ def ask():
             vector_device = "cpu"
 
         try:
-            # requires your local helper; will fallback to no-ops if missing
-            from uploads_vector import UploadsVectorSearch
             vs = UploadsVectorSearch.from_folder(uploads_dir, device=vector_device)
         except Exception as e:
             print("[/ask] Uploads VS error:", e)
