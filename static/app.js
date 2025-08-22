@@ -48,8 +48,8 @@ document.addEventListener('DOMContentLoaded', () => {
   function currentMode() {
     // If you have explicit radio/toggle controls, detect them here.
     // Fallback: "reason" unless a #modeRobot exists and is active.
-    const reasonActive = !!modeReason && modeReason.getAttribute('aria-checked') === 'true' || modeReason?.classList?.contains('active');
-    const robotActive  = !!modeRobot && modeRobot.getAttribute('aria-checked') === 'true'  || modeRobot?.classList?.contains('active');
+    const reasonActive = !!modeReason && (modeReason.getAttribute('aria-checked') === 'true' || modeReason?.classList?.contains('active'));
+    const robotActive  = !!modeRobot && (modeRobot.getAttribute('aria-checked') === 'true'  || modeRobot?.classList?.contains('active'));
     return robotActive ? 'robot' : 'reason';
   }
 
@@ -194,6 +194,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!file) return;
 
     uploadBtn.disabled = true;
+
     try {
       const fd = new FormData();
       fd.append('file', file);
@@ -247,7 +248,6 @@ document.addEventListener('DOMContentLoaded', () => {
     try {
       const res = await fetchJSON(`/api/history/${encodeURIComponent(id)}`, { method: 'GET' });
       const data = await res.json();
-
       answerPre && (answerPre.textContent = data.answer || '');
       rationalePre && (rationalePre.textContent = data.rationale || '');
       renderRefsFromData(data);
@@ -281,7 +281,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  // Default mode toggle 
+  // Default mode toggle (if you have two buttons for mode)
   modeReason?.addEventListener('click', () => {
     modeReason?.setAttribute('aria-checked', 'true');
     modeRobot?.setAttribute('aria-checked', 'false');
