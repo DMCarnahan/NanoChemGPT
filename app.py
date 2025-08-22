@@ -21,7 +21,6 @@ from werkzeug.utils import secure_filename
 import vector_store as vs
 from converter import validate_step, convert_text_to_robot_ops
 from mongo_client import get_db, ping as mongo_ping
-from decider.intent import classify_intent
 from decider.kb import kb_search, kb_fetch
 from decider.judge_sufficiency import judge_sufficiency
 from decider.miner_queue import enqueue_text_mining_job
@@ -436,25 +435,14 @@ def ask():
       • Judges sufficiency and, if thin, optionally harvests more data, reindexes, reloads retriever, and retries once.
     """
 
-    uploads_ctx = ""
-    table_ctx   = ""
-    table_refs  = []
-
-    # ---------- intent classification (with payload overrides & defaults) ----------
-    try:
-        from decider.intent import classify_intent
-        ci = classify_intent(question) or {}
-    except Exception as e:
-        print("[/ask] classify_intent warn:", e)
-        ci = {}
-
     # ---------- request payload ----------
+    from flask import request, jsonify  # ensure imported
     payload  = request.get_json(silent=True) or {}
     question = (payload.get("question") or payload.get("q") or "").strip()
     if not question:
         return jsonify({"ok": False, "error": "Missing 'question'"}), 400
 
-    # ---------- intent classification (normalize result) ----------
+    # ---------- intent classification ----------
     try:
         from decider.intent import classify_intent
         ci = classify_intent(question)
@@ -464,11 +452,11 @@ def ask():
 
     # normalize classify_intent output to a dict
     if isinstance(ci, str):
-        # treat a bare string as the intent value
         ci = {"intent": ci}
     elif not isinstance(ci, dict):
         ci = {}
 
+    # helpers to coerce types from payload/ci
     def _coerce_bool(v):
         if isinstance(v, bool): return v
         if v is None: return None
@@ -507,6 +495,66 @@ def ask():
     web_k       = _pick_int("web_k", 10)
 
     # ----------------- tiny helpers -----------------
+    # ----------------- uploads → semantic context -----------------
+    uploads_ctx = ""
+    try:
+        uploads_dir = ROOT / "uploads"
+        uploads_dir.mkdir(exist_ok=True)
+        try:
+            import torch
+            vector_device = "cuda" if torch.cuda.is_available() else "cpu"
+        except Exception:
+            vector_device = "cpu"
+
+        try:
+            # requires your local helper; will fallback to no-ops if missing
+            from uploads_vector import UploadsVectorSearch
+            vs = UploadsVectorSearch.from_folder(uploads_dir, device=vector_device)
+        except Exception as e:
+            print("[/ask] Uploads VS error:", e)
+            vs = None
+
+        if vs is not None:
+            hits = vs.search(question, k=8)
+            lines = []
+            for i, h in enumerate(hits, start=1):
+                txt = _s(h.get("text") or "")
+                title = _s(h.get("title") or "")
+                sect = _s(h.get("section") or "")
+                page = h.get("page")
+                path = _s(h.get("path") or "")
+                head = f"[U{i}] {title}" if title else f"[U{i}]"
+                if sect: head += f" — {sect}"
+                if page is not None: head += f" (p.{page})"
+                if path: head += f" — {path}"
+                if txt:
+                    lines.append(head + "\n" + txt.strip()[:1200])
+            uploads_ctx = "\n\n".join(lines)
+    except Exception as e:
+        print("[/ask] uploads_ctx warn:", e)
+
+    # ----------------- DuckDB (LOOKUP) → table context -----------------
+    table_ctx = ""
+    table_refs = []
+    if LOOKUP is not None:
+        try:
+            hits_tbl = LOOKUP.query(question, topk=5)
+            rows = hits_tbl.to_dict(orient="records")
+            lines = []
+            for i, row in enumerate(rows, start=1):
+                solvent = row.get("solvent") or row.get("solvent_system")
+                temp = row.get("temp_C") or row.get("temperature_C")
+                time_h = row.get("time_h") or row.get("duration_h")
+                note = row.get("notes") or ""
+                line = f"[T{i}] solvent={_s(solvent)}; temp_C={_s(temp)}; time_h={_s(time_h)}; {_s(note)}".strip()
+                lines.append(line)
+                url = row.get("url") or (row.get("doi") and f"https://doi.org/{row['doi']}")
+                if url:
+                    table_refs.append({"title": f"Table row {i}", "url": url})
+            table_ctx = "\n".join(lines)
+        except Exception as e:
+            print("[/ask] LOOKUP query error:", e)
+
     def _s(x):
         return _safe_text(x)
 
@@ -575,7 +623,7 @@ def ask():
         out_dir.mkdir(parents=True, exist_ok=True)
 
         # ------------- config -------------
-        max_results = os.getenv("HARVEST_MAX_RESULTS", "8")
+        max_results = os.getenv("HARVEST_MAX_RESULTS", "6")
         cfg = (
             "out_dir: {od}\n"
             "queries:\n{qs}\n"
@@ -764,7 +812,8 @@ def ask():
     )
     reasoning_rules = (
         " - Provide a mechanistic explanation and design considerations for the target.\n"
-        " - Focus on: nucleation vs growth; ligand/solvent coordination; surfactants; reduction/oxidation; temperature profile and morphology control; atmosphere; pitfalls; safety.\n"
+        " - Focus on: nucleation vs growth; ligand/solvent coordination; \n" 
+        " - IMPORTANT: why certain precursors over others; and IMPORTANT: why certain reagents over other.\n"
         " - Do NOT return a step-by-step protocol. Be concise but specific."
     )
     inline_rule = (
