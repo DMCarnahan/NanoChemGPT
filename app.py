@@ -37,8 +37,7 @@ LOOKUP_UPLOAD_DIR = Path(os.getenv("LOOKUP_UPLOAD_DIR", "/mnt/data/datasets")).r
 VECTORSTORE_DIR = Path(os.getenv("VECTORSTORE_DIR", "/mnt/data/index")).resolve()
 
 BUNDLE_AUTO   = ROOT / "harvester" / "out_auto" / "bundle.jsonl"
-BUNDLE_MERGED = ROOT / "out" / "bundle_with_methods.jsonl"
-BUNDLE_PLAIN  = ROOT / "out" / "bundle.jsonl"
+BUNDLE_MERGED = ROOT / "harvester" / "out_auto" / "bundle_with_methods.jsonl"
 INDEX_DIR     = ROOT / "retriever" / "index"
 
 for d in (BUILTIN_DIR, UPLOADS_DIR, LOOKUP_UPLOAD_DIR, VECTORSTORE_DIR):
@@ -637,18 +636,14 @@ def ask():
         elif rc != 0 and partial_ok:
             print("[harvest_reindex] harvest non-zero, but bundle exists — continuing with index.")
 
-        # --------- 2) add fallback (methods) → out/bundle_with_methods.jsonl ---------
-        methods_bundle = ROOT / "out" / "bundle_with_methods.jsonl"
+        # --------- 2) add fallback (methods) ---------
+        methods_bundle = ROOT / "harvester" / "out_auto" / "bundle_with_methods.jsonl"
         _stream([
             "python", str(ROOT/"scripts/bundle_add_fallback.py"),
             str(bundle_raw), str(methods_bundle)
         ])
 
         # --------- 3) choose freshest bundle + text_key, then index ---------
-        BUNDLE_AUTO   = out_dir / "bundle.jsonl"
-        BUNDLE_MERGED = ROOT / "out" / "bundle_with_methods.jsonl"
-        BUNDLE_PLAIN  = ROOT / "out" / "bundle.jsonl"
-        INDEX_DIR     = ROOT / "retriever" / "index"
 
         bundle_for_index = None
         text_key = "methods"
@@ -656,9 +651,6 @@ def ask():
             bundle_for_index = BUNDLE_AUTO
         elif BUNDLE_MERGED.exists():
             bundle_for_index = BUNDLE_MERGED
-        elif BUNDLE_PLAIN.exists():
-            bundle_for_index = BUNDLE_PLAIN
-            text_key = "text"  # plain bundle has 'text', not 'methods'
 
         if bundle_for_index is None:
             print("[harvest_reindex] No bundle found to index.")

@@ -63,7 +63,7 @@ def fallback_methods_from_sections(sections: List[Dict[str,Any]], top_k=5, min_s
     return [d for _, d in cands[:top_k]]
 
 try:
-    from miner.runtime import extract_procedure
+    from harvester.miner.runtime import extract_procedure
 except Exception:
     extract_procedure = None
 

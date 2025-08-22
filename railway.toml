@@ -6,7 +6,7 @@ EMBED_BACKEND = "st"
 EMBED_MODEL   = "sentence-transformers/all-MiniLM-L6-v2"
 
 INDEX_DIR     = "/data/vector_store"
-BUNDLE_PATH   = "/data/out/bundle.jsonl"
+BUNDLE_PATH   = "/data/harvester/out_auto/bundle.jsonl"
 
 LOOKUP_BACKEND = "none"
 
@@ -25,8 +25,8 @@ cmds = [
 cmd = "bash -lc ' \
   export RETRIEVER_URL=http://127.0.0.1:$PORT/retriever; \
   mkdir -p $(dirname \"$BUNDLE_PATH\") \"$INDEX_DIR\"; \
-  if [ ! -s \"$BUNDLE_PATH\" ] && [ -f \"/app/data/out/seed_bundle.jsonl\" ]; then \
-    cp /app/data/out/seed_bundle.jsonl \"$BUNDLE_PATH\"; \
+  if [ ! -s \"$BUNDLE_PATH\" ] && [ -f \"/app/data/harvester/out_auto/seed_bundle.jsonl\" ]; then \
+    cp /app/data/harvester/out_auto/seed_bundle.jsonl \"$BUNDLE_PATH\"; \
     echo \"[start] Seeded bundle -> $BUNDLE_PATH\"; \
   fi; \
   if [ -s \"$BUNDLE_PATH\" ]; then \
