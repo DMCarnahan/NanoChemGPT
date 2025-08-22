@@ -508,7 +508,7 @@ def ask():
             vector_device = "cpu"
 
         try:
-            vs = UploadsVectorSearch.from_folder(uploads_dir, device=vector_device)
+            vs = UploadsVectorSearch.from_folder(uploads_dir, device=vector_device, backend='tfidf', max_docs=1000)
         except Exception as e:
             print("[/ask] Uploads VS error:", e)
             vs = None
@@ -593,7 +593,6 @@ def ask():
             return True
         total_ctx = sum(len(_s(h.get("text",""))) for h in hits)
         return total_ctx < 800
-
     def _expand_queries(q: str) -> list[str]:
         seeds = [
             "hydrothermal","solvothermal","sol-gel","calcination","anneal",
@@ -623,7 +622,7 @@ def ask():
         out_dir.mkdir(parents=True, exist_ok=True)
 
         # ------------- config -------------
-        max_results = os.getenv("HARVEST_MAX_RESULTS", "6")
+        max_results = os.getenv("HARVEST_MAX_RESULTS", "6u")
         cfg = (
             "out_dir: {od}\n"
             "queries:\n{qs}\n"

@@ -1,5 +1,5 @@
 """
-Lightweight vector search over your uploads folder.
+Lightweight vector search over the uploads folder.
 
 Provides:
     - class UploadsVectorSearch
@@ -188,6 +188,7 @@ class _MiniTfidf:
 
 # -------------------- SentenceTransformers backend ---------------------
 
+
 class _STBackend:
     def __init__(self, model_name: str = "all-MiniLM-L6-v2", device: str = "cpu") -> None:
         self.model = _ST(model_name, device=device)  # type: ignore
@@ -195,21 +196,28 @@ class _STBackend:
         self.docs: List[_Doc] = []
 
     def fit(self, docs: List[_Doc]) -> None:
+        import numpy as np  # type: ignore
         self.docs = docs
         texts = [d.text for d in docs]
-        self.corpus_emb = self.model.encode(texts, normalize_embeddings=True, show_progress_bar=False)
+        # BATCH ENCODE PATCH APPLIED
+        batch = 64
+        embs = []
+        for i in range(0, len(texts), batch):
+            sub = texts[i:i+batch]
+            e = self.model.encode(sub, normalize_embeddings=True, show_progress_bar=False)
+            e = np.asarray(e, dtype=np.float32)
+            embs.append(e)
+        self.corpus_emb = np.vstack(embs) if embs else np.zeros((0, 384), dtype=np.float32)
 
     def query(self, q: str, top_k: int = 5) -> List[Tuple[int, float]]:
         if not self.docs:
             return []
-        q_emb = self.model.encode([q], normalize_embeddings=True, show_progress_bar=False)[0]
-        # cosine similarity == dot product due to normalization
         import numpy as np  # type: ignore
-        sims = (self.corpus_emb @ q_emb)  # type: ignore
+        q_emb = self.model.encode([q], normalize_embeddings=True, show_progress_bar=False)[0]
+        q_emb = np.asarray(q_emb, dtype=np.float32)
+        sims = (self.corpus_emb @ q_emb)  # cosine since normalized
         idxs = np.argsort(-sims)[:top_k]
         return [(int(i), float(sims[int(i)])) for i in idxs]
-
-# -------------------------- Public interface ---------------------------
 
 class UploadsVectorSearch:
     def __init__(self, docs: List[_Doc], backend: Union[_MiniTfidf, _STBackend]) -> None:
@@ -236,6 +244,7 @@ class UploadsVectorSearch:
             paths.extend(folder.rglob(patt))
         # Build docs
         docs: List[_Doc] = []
+        count = 0
         for p in sorted(set(paths)):
             try:
                 if p.is_dir():
@@ -255,18 +264,38 @@ class UploadsVectorSearch:
                     title=p.name,
                     meta={"size": int(size), "relpath": str(p.relative_to(folder))}
                 ))
+                count += 1
+                if count >= max_docs:
+                    break
             except Exception:
                 # skip unreadable files
                 continue
 
-        # Choose backend
-        if _ST is not None:
-            backend: Union[_MiniTfidf, _STBackend] = _STBackend(model_name=st_model, device=device)
-        else:
-            backend = _MiniTfidf()
+        
+        # Backend selection with environment override
+        env_choice = os.getenv("UPLOADS_VECTOR_BACKEND", "").strip().lower()
+        choice = (backend or "auto").strip().lower()
+        if env_choice in ("tfidf", "st"):
+            choice = env_choice
 
-        backend.fit(docs)  # type: ignore
-        return cls(docs, backend)
+        # Heuristic: prefer tfidf when many docs to avoid OOM on small hosts
+        use_st = (_ST is not None) and (choice == "st" or (choice == "auto" and len(docs) <= max_docs//2))
+        if use_st:
+            try:
+                backend_obj: Union[_MiniTfidf, _STBackend] = _STBackend(model_name=st_model, device=device)
+                backend_obj.fit(docs)  # type: ignore
+            except MemoryError:
+                # Fallback to TF‑IDF on memory pressure
+                backend_obj = _MiniTfidf()
+                backend_obj.fit(docs)  # type: ignore
+            except Exception:
+                backend_obj = _MiniTfidf()
+                backend_obj.fit(docs)  # type: ignore
+        else:
+            backend_obj = _MiniTfidf()
+            backend_obj.fit(docs)  # type: ignore
+
+        return cls(docs, backend_obj)
 
     def __len__(self) -> int:
         return len(self._docs)
@@ -323,9 +352,17 @@ class UploadsVectorSearch:
         snippet = _WS_RX.sub(" ", snippet)
         return snippet
 
-    def search(self, query: str, top_k: int = 5) -> List[Dict[str, Union[str, float, dict]]]:
+    def search(self, query: str, top_k: int = 5, **kwargs) -> List[Dict[str, Union[str, float, dict]]]:
         if not query or not self._docs:
             return []
+        # alias support: k -> top_k
+        if 'k' in kwargs and (top_k is None or isinstance(top_k, int) and top_k == 5):
+            try:
+                top_k = int(kwargs['k'])
+            except Exception:
+                pass
+        if top_k is None or not isinstance(top_k, int) or top_k <= 0:
+            top_k = 5
         hits: List[Tuple[int, float]]
         hits = self._backend.query(query, top_k=top_k)  # type: ignore
         results: List[Dict[str, Union[str, float, dict]]] = []
@@ -340,7 +377,7 @@ class UploadsVectorSearch:
             })
         return results
 
-# Backwards-compat simple functions (optional)
+# Backwards-compat simple functions 
 def search(query: str, top_k: int = 5, folder: Union[str, Path] = "uploads") -> List[Dict[str, Union[str, float, dict]]]:
     vs = UploadsVectorSearch.from_folder(folder)
     return vs.search(query, top_k=top_k)
