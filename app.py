@@ -871,6 +871,12 @@ def ask():
             refs.append(r)
             seen.add(key)
 
+    # ---- Build numbered REFERENCES string ----
+    refs_prompt = "\n".join(
+        f"[{i+1}] {(r.get('title') or '(no title)')} ({r.get('year') or ''}) — {_ref_url(r)}"
+        for i, r in enumerate(refs)
+    ).strip()
+    
     # ----------------- Compose CONTEXT -----------------
     ctx_parts = []
     if uploads_ctx: ctx_parts.append("<<<CTX_UPLOADS>>>\n" + uploads_ctx)
