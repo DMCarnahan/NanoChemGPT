@@ -1,20 +1,66 @@
-import httpx, xml.etree.ElementTree as ET
-from urllib.parse import urlencode
-ARXIV_API='https://export.arxiv.org/api/query'
+import httpx
+from typing import List, Dict
 
-def search_arxiv(query,max_results=100):
-    url = ARXIV_API+'?'+urlencode({'search_query':query,'start':0,'max_results':max_results})
-    r=httpx.get(url, timeout=30.0); r.raise_for_status()
-    root=ET.fromstring(r.text); ns={'a':'http://www.w3.org/2005/Atom'}
-    out=[]
-    for e in root.findall('a:entry',ns):
-        pid=e.findtext('a:id',namespaces=ns)
-        title=e.findtext('a:title',namespaces=ns) or ''
-        summary=e.findtext('a:summary',namespaces=ns) or ''
-        authors=[a.findtext('a:name',namespaces=ns) for a in e.findall('a:author',ns)]
-        pdf=None
-        for link in e.findall('a:link',ns):
-            if link.attrib.get('title')=='pdf' or link.attrib.get('type')=='application/pdf':
-                pdf=link.attrib.get('href')
-        out.append({'source':'arxiv','arxiv_id':(pid or '').split('/')[-1],'title':title.strip(),'abstract':summary.strip(),'authors':authors,'pdf_url':pdf,'access_route':'oa','license':{'type':'arXiv-OA'}})
-    return out
+ARXIV_ENDPOINT = "https://export.arxiv.org/api/query"
+
+def search_arxiv(query: str, max_results: int = 6, start: int = 0) -> List[Dict]:
+    """
+    Returns a list of entries with keys: id, title, summary, url, published, authors
+    Raises only on network errors; 400s from arXiv are handled by sanitizing params.
+    """
+    try:
+        mr = int(max_results)
+    except Exception:
+        mr = 6
+    if mr <= 0: mr = 6
+    try:
+        st = int(start)
+    except Exception:
+        st = 0
+    params = {"search_query": query or "", "start": st, "max_results": mr}
+    r = httpx.get(ARXIV_ENDPOINT, params=params, timeout=30.0)
+    try:
+        r.raise_for_status()
+    except httpx.HTTPStatusError as e:
+        # Try a safe fallback with tiny page size if arXiv rejects the request
+        if r.status_code == 400:
+            params["max_results"] = 5
+            r = httpx.get(ARXIV_ENDPOINT, params=params, timeout=30.0)
+            r.raise_for_status()
+        else:
+            raise
+
+    text = r.text or ""
+    # Parse with feedparser if available; otherwise naive parsing
+    try:
+        import feedparser  # type: ignore
+        feed = feedparser.parse(text)
+        out: List[Dict] = []
+        for e in feed.entries:
+            out.append({
+                "id": getattr(e, "id", ""),
+                "title": getattr(e, "title", ""),
+                "summary": getattr(e, "summary", ""),
+                "url": getattr(e, "link", ""),
+                "published": getattr(e, "published", ""),
+                "authors": [a.name for a in getattr(e, "authors", [])] if getattr(e, "authors", None) else [],
+            })
+        return out
+    except Exception:
+        # Naive fallback: extract <entry> blocks
+        import re, html
+        entries = re.findall(r"<entry>(.*?)</entry>", text, flags=re.S|re.I)
+        out: List[Dict] = []
+        def _tag(tag, s): 
+            m = re.search(fr"<{tag}[^>]*>(.*?)</{tag}>", s, flags=re.S|re.I)
+            return html.unescape(m.group(1).strip()) if m else ""
+        for blk in entries:
+            out.append({
+                "id": _tag("id", blk),
+                "title": _tag("title", blk),
+                "summary": _tag("summary", blk),
+                "url": _tag("link", blk) or _tag("id", blk),
+                "published": _tag("published", blk),
+                "authors": re.findall(r"<name>(.*?)</name>", blk, flags=re.S|re.I),
+            })
+        return out
