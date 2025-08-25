@@ -51,6 +51,9 @@ document.addEventListener('DOMContentLoaded', () => {
       (document.cookie.match(/(?:^|;\s*)csrf_token=([^;]+)/)?.[1]);
   }
 
+  // Small helper to sandbox optional UI so it can't crash the flow
+  function safe(fn){ try { fn(); } catch(e){ console.warn('Optional UI failed:', e); } }
+
   // Ask button
   /**
    * Handles the Ask button click: sends question to backend and updates UI.
@@ -81,48 +84,7 @@ document.addEventListener('DOMContentLoaded', () => {
       answerPre.textContent = data.answer ?? '(no answer)';
       rationalePre.textContent = data.rationale ?? '';
       renderRefsFromData(data);
-      // ----- References (used-only), with fallback to preformatted block -----
-  const usedIdxSet = new Set(
-    Array.isArray(data.used_ref_indexes) ? data.used_ref_indexes.map(Number) : []
-  );
-  const haveStructured = Array.isArray(data.refs) && data.refs.length > 0;
-  const haveBlock = typeof data.references_block === 'string' && data.references_block.trim().length > 0;
-
-  // clear any previous <pre> block if we switch back to list mode
-  refsSection.querySelector('.refs-pre')?.remove();
-
-  if (haveStructured && usedIdxSet.size > 0) {
-    refsSection.classList.remove('hidden');
-    refsList.innerHTML = data.refs
-      .map((r, i) => ({ r, i: i + 1 }))
-      .filter(x => usedIdxSet.has(x.i))
-      .map(({ r, i }) => {
-        const authors = Array.isArray(r.authors) ? r.authors.join(', ') : (r.authors || '');
-        const title = r.title || `Reference ${i}`;
-        const journal = (r.biblio && r.biblio.journal) || r.journal || '';
-        const year = r.year || (r.biblio && r.biblio.year) || '';
-        const volume = (r.biblio && r.biblio.volume) || r.volume || '';
-        const pages = (r.biblio && r.biblio.pages) || r.pages || '';
-        const doiUrl = r.doi ? `https://doi.org/${r.doi}` : '';
-        const url = r.url || doiUrl || '#';
-        const acs = `${authors}. <i>${title}</i>. <b>${journal}</b> ${year}, ${volume}, ${pages}. ` +
-                    `<a href="${url}" target="_blank" rel="noopener">${r.doi || url}</a>`;
-        return `<li>${acs}</li>`;
-      })
-      .join('');
-  } else if (haveBlock) {
-    refsSection.classList.remove('hidden');
-    refsList.innerHTML = '';
-    const pre = document.createElement('pre');
-    pre.className = 'refs-pre';
-    pre.textContent = data.references_block.trim();
-    refsSection.appendChild(pre);
-  } else {
-    refsSection.classList.add('hidden');
-    refsList.innerHTML = '';
-  }
-
-      askMsg.textContent = res.ok ? 'Done.' : `Error ${res.status}`;
+askMsg.textContent = res.ok ? 'Done.' : `Error ${res.status}`;
     } catch (err) {
       console.error(err);
       askMsg.textContent = 'Error. Check console.';
@@ -161,88 +123,103 @@ document.addEventListener('DOMContentLoaded', () => {
     const pretty = JSON.stringify(data.data, null, 2);
 
     if (jsonBlock) jsonBlock.textContent = pretty;
-    document.getElementById('jsonBlock')?.classList.remove('hidden');
+        document.getElementById('jsonBlock')?.classList.remove('hidden');
+      } catch (err) {
+        console.error(err);
+        parseBtn.textContent = 'Error';
+      } finally {
+        parseBtn.disabled = false;
+        parseBtn.textContent = 'Parse';
+      }
+    });
 
   /**
    * Renders references from data object into the UI.
    * @param {object} data
    */
+  
   function renderRefsFromData(data) {
-    // Supports either `data.references_block` (preformatted string)
-    // OR an array `data.references` of {title, url, ...}
+    // Accept multiple shapes: references/ref arrays, citations, used_refs; and blocks under reference_block/references_block
     if (!refsSection) return;
 
-    const block = data?.references_block;
-    const arr   = data?.references;
+    const block = (data && (data.reference_block || data.references_block)) || '';
+    const arrRaw = (data && (data.references || data.refs || data.citations || data.used_refs)) || null;
 
-    // Clear old
-    if (refsList) refsList.innerHTML = '';
+    // Used indexes (1-based), e.g., [1,2,5]
+    const used = Array.isArray(data?.used_ref_indexes) ? data.used_ref_indexes.map(Number).filter(n => Number.isFinite(n)) : [];
 
-    if (block && typeof block === 'string') {
-      // Render block safely inside a <pre>, but as list if it starts with "1. "
-      const lines = block.split(/\r?\n/).filter(Boolean);
-      if (refsList && lines.length) {
-        lines.forEach(line => {
+    // Clear previous content
+    refsList && (refsList.innerHTML = '');
+    refsSection?.querySelector('.refs-pre')?.remove();
+
+    // Prefer structured refs if present
+    if (Array.isArray(arrRaw) && arrRaw.length && refsList) {
+      const items = used.length
+        ? arrRaw.map((r, i) => ({ r, i: i + 1 })).filter(x => used.includes(x.i)).map(x => x.r)
+        : arrRaw;
+
+      if (items.length) {
+        items.forEach((r, idx) => {
           const li = document.createElement('li');
-          li.textContent = line.replace(/^\s*\d+\.\s*/, '');
-          refsList.appendChild(li);
-        });
-        refsSection?.classList?.remove('hidden');
-      } else {
-        refsSection?.classList?.add('hidden');
-      }
-      return;
-    }
 
-    if (Array.isArray(arr) && arr.length && refsList) {
-      arr.forEach(r => {
-        const li = document.createElement('li');
-        // Prefer title + link if available
-        if (r?.url) {
-          const a = document.createElement('a');
-          a.href = r.url;
-          a.textContent = r.title ? r.title : (r.url);
-          a.target = '_blank';
-          a.rel = 'noopener noreferrer';
-          li.appendChild(a);
-          if (r?.meta) {
+          // String reference
+          if (typeof r === 'string') {
+            li.textContent = r;
+            refsList.appendChild(li);
+            return;
+          }
+
+          const title   = r.title || r.citation || r.name || r.label || `Reference ${idx+1}`;
+          const authors = Array.isArray(r.authors) ? r.authors.join(', ') : (r.authors || '');
+          const journal = (r.biblio && r.biblio.journal) || r.journal || r.source || '';
+          const year    = r.year || (r.biblio && r.biblio.year) || '';
+          const doiUrl  = r.doi ? String(r.doi).replace(/^https?:\/\/doi\.org\//, '') : '';
+          const url     = r.url || (doiUrl ? `https://doi.org/${doiUrl}` : '');
+
+          const strong = document.createElement('strong');
+          strong.textContent = title;
+          li.appendChild(strong);
+
+          const metaBits = [authors, journal, year].filter(Boolean);
+          if (metaBits.length) {
             const small = document.createElement('small');
-            small.textContent = ' ' + r.meta;
+            small.textContent = ' — ' + metaBits.join(', ');
             li.appendChild(small);
           }
-        } else {
-          li.textContent = r?.title ? r.title : JSON.stringify(r);
-        }
-        refsList.appendChild(li);
-      });
-      refsSection?.classList?.remove('hidden');
+
+          if (url) {
+            li.appendChild(document.createTextNode(' '));
+            const a = document.createElement('a');
+            a.href = url; a.target = '_blank'; a.rel = 'noopener';
+            a.textContent = '(link)';
+            li.appendChild(a);
+          }
+
+          refsList.appendChild(li);
+        });
+
+        refsSection.classList.remove('hidden');
+        // Initialize optional toggle if available
+        safe(() => window.initRefsToggle?.({ btnSelector: '#refsToggleBtn', panelSelector: '#refsSection' }));
+        return;
+      }
+    }
+
+    // Fallback: preformatted block
+    if (typeof block === 'string' && block.trim()) {
+      refsList.innerHTML = '';
+      const pre = document.createElement('pre');
+      pre.className = 'refs-pre';
+      pre.textContent = block.trim();
+      refsSection.appendChild(pre);
+      refsSection.classList.remove('hidden');
+      safe(() => window.initRefsToggle?.({ btnSelector: '#refsToggleBtn', panelSelector: '#refsSection' }));
       return;
     }
 
     // Nothing to show
-    refsSection?.classList?.add('hidden');
+    refsSection.classList.add('hidden');
   }
-
-    // Trigger download
-    const blob = new Blob([pretty], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = (data.filename || 'converted') + '.json';
-    document.body.appendChild(a); // needed for Firefox
-    a.click();
-    a.remove();
-    URL.revokeObjectURL(url);
-
-  } catch (err) {
-    console.error(err);
-    if (jsonBlock) jsonBlock.textContent = 'Request failed';
-    document.getElementById('jsonBlock')?.classList.remove('hidden');
-  } finally {
-    parseBtn.disabled = false;
-    parseBtn.textContent = 'Convert → JSON';
-  }
-});
 
   // Upload button
   /**
@@ -398,5 +375,4 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // Auto-load history on page load
-  if (historyBtn) historyBtn.click();
-});
+if (historyBtn) historyBtn.click()});
