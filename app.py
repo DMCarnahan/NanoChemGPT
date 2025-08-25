@@ -1046,8 +1046,6 @@ def ask():
         "answer": answer,
         "rationale": rationale,
         "markers": markers,
-        "used_ref_indexes": used_idxs,
-        "references_block": references_block,
         "refs": refs,
         **payload,
         "context_present": bool(context_joined),
