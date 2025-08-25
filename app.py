@@ -88,12 +88,22 @@ def _log_req():
 for h in list(app.logger.handlers):
     app.logger.removeHandler(h)
 
-handler = logging.StreamHandler(sys.stdout)
-handler.setLevel(logging.INFO)
-handler.setFormatter(logging.Formatter('%(asctime)s %(levelname)s: %(message)s'))
+def setup_logging(app):
+    # Remove default handlers that may point to binary streams / be silent in prod
+    for h in list(app.logger.handlers):
+        app.logger.removeHandler(h)
 
-app.logger.addHandler(handler)
-app.logger.setLevel(logging.INFO)
+    h = logging.StreamHandler(sys.stdout)  # text stream
+    h.setLevel(logging.INFO)
+    h.setFormatter(logging.Formatter('%(asctime)s %(levelname)s %(message)s'))
+    app.logger.addHandler(h)
+    app.logger.setLevel(logging.INFO)
+
+    wz = logging.getLogger('werkzeug')
+    wz.setLevel(logging.INFO)
+    wz.handlers = [h]
+
+setup_logging(app)
 # ──────────────── DuckDB setup ──────────────── #
 
 def maybe_build_duckdb():
