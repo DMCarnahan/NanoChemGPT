@@ -183,6 +183,31 @@ def _doc(obj):
             out[k] = v.isoformat()
     return out
 
+# ---- Sufficiency check + enqueue mining if thin ----
+def _call_judge_sufficiency(question, context_joined, refs):
+    try:
+        return judge_sufficiency(question, context_joined, len(refs))
+    except TypeError:
+        try:
+            return judge_sufficiency(question, context_joined)
+        except TypeError:
+            try:
+                return judge_sufficiency(question)
+            except TypeError:
+                return True  # last-resort default
+
+enqueued = False
+try:
+    sufficient = _call_judge_sufficiency(question, context_joined, refs)
+    if not bool(sufficient):
+        try:
+            enqueue_text_mining_job(question)
+            enqueued = True
+        except Exception as e:
+            print("[/ask] enqueue_text_mining_job failed:", e)
+except Exception as e:
+    print("[/ask] judge/enqueue error:", e)
+
 # ---- Citation extraction and formatting helpers ----
 _CIT_RX_BRACKET = re.compile(r"\[(\d{1,4})\]")
 _CIT_RX_FULL    = re.compile(r"【(\d{1,4})】")
@@ -532,27 +557,43 @@ def ask():
     except Exception as e:
         print("[/ask] uploads_ctx warn:", e)
 
-    # ---------- DuckDB LOOKUP ----------
+    # ----------------- DuckDB (LOOKUP) → table context -----------------
     table_ctx = ""
     table_refs = []
     try:
-        if LOOKUP is not None:  # noqa: F821
-            hits_tbl = LOOKUP.query(question, topk=5)
-            rows = (hits_tbl or []).to_dict(orient="records") if hits_tbl is not None else []
+        if LOOKUP is not None:
+            try:
+                hits_tbl = LOOKUP.query(question, topk=5)
+            except TypeError:
+                hits_tbl = LOOKUP.query(question)
+
+            rows = []
+            if hits_tbl is not None:
+                # DataFrame-like
+                if hasattr(hits_tbl, "to_dict"):
+                    if not getattr(hits_tbl, "empty", False):
+                        rows = hits_tbl.to_dict(orient="records")
+                # Or already a list/iterable of rows
+                elif isinstance(hits_tbl, (list, tuple)):
+                    rows = list(hits_tbl)
+
             lines = []
             for i, row in enumerate(rows, start=1):
                 solvent = row.get("solvent") or row.get("solvent_system")
                 temp = row.get("temp_C") or row.get("temperature_C")
                 time_h = row.get("time_h") or row.get("duration_h")
                 note = row.get("notes") or ""
-                line = f"[T{i}] solvent={_safe_text(solvent)}; temp_C={_safe_text(temp)}; time_h={_safe_text(time_h)}; {_safe_text(note)}".strip()
+                line = f"[T{i}] solvent={_s(solvent)}; temp_C={_s(temp)}; time_h={_s(time_h)}; {_s(note)}".strip()
                 lines.append(line)
+
                 url = row.get("url") or (row.get("doi") and f"https://doi.org/{row['doi']}")
                 if url:
                     table_refs.append({"title": f"Table row {i}", "url": url})
+
             table_ctx = "\n".join(lines)
     except Exception as e:
         print("[/ask] LOOKUP query error:", e)
+
 
     # ---------- KB search ----------
     kb_ctx = ""
