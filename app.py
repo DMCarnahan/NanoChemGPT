@@ -1,23 +1,39 @@
+"""
+app.py
+-----
+Main Flask application for NanoChemGPT.
+Handles API endpoints, configuration, and integration with search, database, and LLM services.
+"""
+
 from __future__ import annotations
 
-import os, io, sys, json, re, glob, traceback, threading, tempfile, textwrap, subprocess
+# Standard library imports
+import os
+import io
+import sys
+import json
+import re
+import glob
+import traceback
+import threading
+import tempfile
+import textwrap
+import subprocess
 from datetime import datetime
 from pathlib import Path
 from typing import Any, Set, List, Dict, Optional
 from functools import lru_cache
 
+# Third-party imports
 import httpx
 import pandas as pd
 from dotenv import load_dotenv
-from flask import (
-    Flask, request, jsonify, abort, render_template,
-    send_file
-)
+from flask import Flask, request, jsonify, abort, render_template, send_file
 from jinja2 import TemplateNotFound
 from openai import OpenAI
 from werkzeug.utils import secure_filename
 
-# ──────────────── Local modules ──────────────── #
+# Local modules
 import vector_store as vs
 from vector_store.uploads_vector import UploadsVectorSearch
 from converter import validate_step, convert_text_to_robot_ops
@@ -27,7 +43,7 @@ from decider.judge_sufficiency import judge_sufficiency
 from decider.miner_queue import enqueue_text_mining_job
 from DuckDB.duck_searcher import get_duck_searcher
 
-# ──────────────── Paths/Config ──────────────── #
+# -------------------- Paths/Config --------------------
 ROOT = Path(__file__).resolve().parent
 TEMPLATES_DIR = ROOT / "templates"
 STATIC_DIR = ROOT / "static"
@@ -43,7 +59,7 @@ INDEX_DIR     = ROOT / "retriever" / "index"
 for d in (BUILTIN_DIR, UPLOADS_DIR, LOOKUP_UPLOAD_DIR, VECTORSTORE_DIR):
     d.mkdir(parents=True, exist_ok=True)
 
-# ──────────────── Flask app ──────────────── #
+# -------------------- Flask app setup --------------------
 app = Flask(__name__, template_folder=str(TEMPLATES_DIR), static_folder=str(STATIC_DIR))
 app.config["MAX_CONTENT_LENGTH"] = 100 * 1024 * 1024  # 100 MB
 app.config["JSON_AS_ASCII"] = False  # allow UTF-8
@@ -68,8 +84,12 @@ def _log_req():
     print(f"[req] {request.method} {request.path}")
 
 # ──────────────── DuckDB setup ──────────────── #
+
 def maybe_build_duckdb():
-    """Create a .duckdb from Parquet once if DUCKDB_BOOTSTRAP=1 and files exist."""
+    """
+    Create a .duckdb from Parquet once if DUCKDB_BOOTSTRAP=1 and files exist.
+    Initializes the DuckDB database for tabular data search.
+    """
     if os.getenv("DUCKDB_BOOTSTRAP", "0").lower() not in ("1", "true", "yes"):
         app.logger.info("[duckdb-init] skipped (DUCKDB_BOOTSTRAP not set)")
         return
@@ -92,8 +112,8 @@ def maybe_build_duckdb():
         con = duckdb.connect(db_path)
         con.execute(f"CREATE TABLE {tbl} AS SELECT * FROM read_parquet('{parq_glob}', hive_partitioning=1)")
         con.execute("CHECKPOINT")
-        rows = con.execute(f"SELECT COUNT(*) FROM {tbl}").fetchone()[0]
-        con.close()
+        result = con.execute(f"SELECT COUNT(*) FROM {tbl}").fetchone()
+        rows = result[0] if result else 0
         app.logger.info("[duckdb-init] created %s rows=%d table=%s", db_path, rows, tbl)
     except Exception as e:
         app.logger.warning("[duckdb-init] build failed: %s", e)
@@ -135,6 +155,9 @@ def retriever_search(query: str, k: int = 8, mode: str = "hybrid", alpha: float 
         return []
 
 # ──────────────── Utilities ──────────────── #
+def _s(x: Any) -> str:
+    return str(x) if x is not None else ""
+
 def _safe_text(x: Any) -> str:
     try:
         return str(x) if x is not None else ""
@@ -317,7 +340,7 @@ def upload():
     f = request.files.get("file")
     if not f or f.filename == "":
         abort(400, "No file uploaded.")
-    fname = secure_filename(f.filename)
+    fname = secure_filename(f.filename or "")
     lower = fname.lower()
 
     dest = LOOKUP_UPLOAD_DIR / fname if lower.endswith((".parquet", ".csv", ".tsv", ".xlsx")) else (UPLOADS_DIR / fname)
@@ -699,11 +722,8 @@ def ask():
             bundle_for_index = BUNDLE_AUTO
         elif (ROOT / "out" / "bundle_with_methods.jsonl").exists():
             bundle_for_index = ROOT / "out" / "bundle_with_methods.jsonl"
-        elif BUNDLE_PLAIN.exists():
-            bundle_for_index = BUNDLE_PLAIN
-            text_key = "text"
         else:
-            # fall back to the ones we just wrote in out_auto
+            # fall back to the ones wrote in out_auto
             if merged_bundle.exists():
                 bundle_for_index = merged_bundle
             elif bundle_raw.exists():
@@ -810,7 +830,7 @@ def ask():
         kb_docs = []
         if kb_ids:
             try:
-                kb_docs = kb_fetch(kb_ids) or []
+                kb_docs = [kb_fetch(kbid) for kbid in kb_ids if kbid] if kb_ids else []
             except Exception as e:
                 print("[/ask] kb_fetch failed:", e)
                 kb_docs = []
@@ -982,7 +1002,7 @@ def ask():
     enqueued = False
     try:
         try:
-            sufficient = judge_sufficiency(question, context_joined, refs_count=len(refs))
+            sufficient = judge_sufficiency(question, context_joined, len(refs))
         except TypeError:
             sufficient = judge_sufficiency(question, context_joined)
         if not bool(sufficient):

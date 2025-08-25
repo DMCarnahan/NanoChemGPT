@@ -42,12 +42,19 @@ document.addEventListener('DOMContentLoaded', () => {
     modeRobot?.classList.remove('active');
   });
 
+  /**
+   * Reads the CSRF token from meta tag or cookie.
+   * @returns {string|undefined}
+   */
   function readCsrfToken() {
     return document.querySelector('meta[name="csrf-token"]')?.content ||
       (document.cookie.match(/(?:^|;\s*)csrf_token=([^;]+)/)?.[1]);
   }
 
   // Ask button
+  /**
+   * Handles the Ask button click: sends question to backend and updates UI.
+   */
   askBtn?.addEventListener('click', async () => {
     const question = qInput?.value.trim();
     if (!question) return;
@@ -125,6 +132,9 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   // Parse button (Convert to JSON + Download)
+  /**
+   * Handles the Parse button click: converts answer to JSON and triggers download.
+   */
   parseBtn?.addEventListener('click', async () => {
   const text = answerPre?.textContent || '';
   if (!text) return;
@@ -153,7 +163,11 @@ document.addEventListener('DOMContentLoaded', () => {
     if (jsonBlock) jsonBlock.textContent = pretty;
     document.getElementById('jsonBlock')?.classList.remove('hidden');
 
-    function renderRefsFromData(data) {
+  /**
+   * Renders references from data object into the UI.
+   * @param {object} data
+   */
+  function renderRefsFromData(data) {
     // Supports either `data.references_block` (preformatted string)
     // OR an array `data.references` of {title, url, ...}
     if (!refsSection) return;
@@ -231,6 +245,9 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
   // Upload button
+  /**
+   * Handles the Upload button click: uploads a file to the backend.
+   */
   uploadBtn?.addEventListener('click', async () => {
     const file = fileInput?.files?.[0];
     if (!file) return;
@@ -273,6 +290,9 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   // History button
+  /**
+   * Handles the History button click: loads and displays previous Q&A.
+   */
   historyBtn?.addEventListener('click', async () => {
     try {
       const res = await fetch('/api/history');
@@ -305,6 +325,9 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   // Save as TXT button (Export answer)
+  /**
+   * Handles the Save as TXT button click: downloads the answer as a text file.
+   */
   saveTxtBtn?.addEventListener('click', () => {
     const text = answerPre?.textContent || '';
     if (!text) return;
@@ -344,6 +367,10 @@ document.addEventListener('DOMContentLoaded', () => {
     if (builtinFile.files.length) uploadBuiltinFiles(builtinFile.files);
   });
 
+  /**
+   * Uploads built-in files to the backend.
+   * @param {FileList|Array} files
+   */
   async function uploadBuiltinFiles(files) {
     if (!files.length) return;
     builtinMsg.textContent = 'Uploading…';
