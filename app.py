@@ -183,31 +183,6 @@ def _doc(obj):
             out[k] = v.isoformat()
     return out
 
-# ---- Sufficiency check + enqueue mining if thin ----
-def _call_judge_sufficiency(question, context_joined, refs):
-    try:
-        return judge_sufficiency(question, context_joined, len(refs))
-    except TypeError:
-        try:
-            return judge_sufficiency(question, context_joined)
-        except TypeError:
-            try:
-                return judge_sufficiency(question)
-            except TypeError:
-                return True  # last-resort default
-
-enqueued = False
-try:
-    sufficient = _call_judge_sufficiency(question, context_joined, refs)
-    if not bool(sufficient):
-        try:
-            enqueue_text_mining_job(question)
-            enqueued = True
-        except Exception as e:
-            print("[/ask] enqueue_text_mining_job failed:", e)
-except Exception as e:
-    print("[/ask] judge/enqueue error:", e)
-
 # ---- Citation extraction and formatting helpers ----
 _CIT_RX_BRACKET = re.compile(r"\[(\d{1,4})\]")
 _CIT_RX_FULL    = re.compile(r"【(\d{1,4})】")
@@ -229,7 +204,6 @@ def _extract_used_ref_indexes(*texts: str) -> list[int]:
 
 def _format_acs_reference(ref: dict) -> str:
     """Lightweight ACS-ish formatting from a heterogeneous ref dict."""
-    def _s(x): return _safe_text(x)
     # Authors
     authors = ref.get("authors") or ref.get("authorships") or []
     names = []
@@ -473,8 +447,6 @@ def _process_pdf_job(jid: str, path: Path, filename: str):
 #     return jsonify({"results": refs})
 
 # ---- Ask ---- #
-def _safe_text(x):
-    return str(x) if x is not None else ""
 
 @app.post("/ask")
 def ask():
@@ -518,10 +490,29 @@ def ask():
     context_joined = ""
     enqueued = False
 
+    # ---- Sufficiency check + enqueue mining if thin ----
+    def _call_judge_sufficiency(question, context_joined, refs):
+        try:
+            return judge_sufficiency(question, context_joined)
+        except TypeError:
+            try:
+                return judge_sufficiency(question, context_joined)
+            except TypeError:
+                return True  # last-resort default
+
+    try:
+        sufficient = _call_judge_sufficiency(question, context_joined, refs)
+        if not bool(sufficient):
+            try:
+                enqueue_text_mining_job(question)
+                enqueued = True
+            except Exception as e:
+                print("[/ask] enqueue_text_mining_job failed:", e)
+    except Exception as e:
+        print("[/ask] judge/enqueue error:", e)
     # ---------- uploads → semantic context ----------
     uploads_ctx = ""
     try:
-        # If these globals exist in your app, keep them; otherwise guard
         ROOT = Path(__file__).resolve().parent  # noqa: F821
         uploads_dir = ROOT / "uploads"
         uploads_dir.mkdir(exist_ok=True)
@@ -729,6 +720,8 @@ def ask():
         )
 
     # ---------- LLM call ----------
+    if client is None:
+        return jsonify({"ok": False, "error": "OpenAI client not configured"}), 500
     raw = client.chat.completions.create(  
         model="gpt-4o",
         messages=[{"role": "user", "content": prompt}],
@@ -770,7 +763,7 @@ def ask():
         used_idxs, references_block, markers = [], "", []
 
     try:
-        sufficient = judge_sufficiency(question, context_joined, len(refs))  # noqa: F821
+        sufficient = judge_sufficiency(question, context_joined)
         if not bool(sufficient):
             try:
                 enqueue_text_mining_job(question)  # noqa: F821
@@ -932,6 +925,8 @@ def upload_builtin():
         return jsonify({"ok": False, "error": "No files uploaded"}), 400
     saved = []
     for f in files:
+        if not f.filename:
+            continue
         fname = secure_filename(f.filename)
         dest = BUILTIN_DIR / fname
         dest.parent.mkdir(parents=True, exist_ok=True)
