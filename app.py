@@ -462,10 +462,7 @@ def ask():
 
     # ---------- request payload ----------
     from flask import request, jsonify  # ensure imported
-    # Initialize answer and refs_full before using them
-    answer = ""
-    refs_full = []
-    payload = request.get_json(silent=True) or {}
+    payload = build_references_payload(answer, refs, top_k=6)
     question = (payload.get("question") or payload.get("q") or "").strip()
     if not question:
         return jsonify({"ok": False, "error": "Missing 'question'"}), 400
@@ -540,9 +537,6 @@ def ask():
             print("[/ask] Uploads VS error:", e)
             vs = None
 
-        def _s(x):
-            return str(x) if x is not None else ""
-
         if vs is not None:
             hits = vs.search(question, k=8)
             lines = []
@@ -570,8 +564,6 @@ def ask():
             hits_tbl = LOOKUP.query(question, topk=5)
             rows = hits_tbl.to_dict(orient="records")
             lines = []
-            def _s(x):
-                return str(x) if x is not None else ""
             for i, row in enumerate(rows, start=1):
                 solvent = row.get("solvent") or row.get("solvent_system")
                 temp = row.get("temp_C") or row.get("temperature_C")
@@ -986,10 +978,6 @@ def ask():
             f"User question: {question}"
         )
 
-
-    if client is None:
-        return jsonify({"ok": False, "error": "OpenAI client not configured"}), 500
-
     raw = client.chat.completions.create(
         model="gpt-4o-mini",
         messages=[{"role": "user", "content": prompt}],
@@ -1015,7 +1003,7 @@ def ask():
     enqueued = False
     try:
         try:
-            sufficient = judge_sufficiency(question, context_joined)
+            sufficient = judge_sufficiency(question, context_joined, len(refs))
         except TypeError:
             sufficient = judge_sufficiency(question, context_joined)
         if not bool(sufficient):
@@ -1058,6 +1046,9 @@ def ask():
         "answer": answer,
         "rationale": rationale,
         "markers": markers,
+        "used_ref_indexes": used_idxs,
+        "references_block": references_block,
+        "refs": refs,
         **payload,
         "context_present": bool(context_joined),
         "mining_enqueued": enqueued,
@@ -1177,8 +1168,6 @@ def upload_builtin():
         return jsonify({"ok": False, "error": "No files uploaded"}), 400
     saved = []
     for f in files:
-        if not f.filename:
-            continue
         fname = secure_filename(f.filename)
         dest = BUILTIN_DIR / fname
         dest.parent.mkdir(parents=True, exist_ok=True)
