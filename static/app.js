@@ -51,8 +51,70 @@ document.addEventListener('DOMContentLoaded', () => {
       (document.cookie.match(/(?:^|;\s*)csrf_token=([^;]+)/)?.[1]);
   }
 
-  // Small helper to sandbox optional UI so it can't crash the flow
-  function safe(fn){ try { fn(); } catch(e){ console.warn('Optional UI failed:', e); } }
+  
+
+// ---- Harvest progress UI ----
+let lastJobId = null;
+function ensureHarvestUI(){
+  let area = document.getElementById('harvestArea');
+  if (!area){
+    area = document.createElement('div');
+    area.id = 'harvestArea';
+    area.className = ''; area.style.marginTop = '12px'; area.style.border = '1px solid #1f2937'; area.style.padding = '10px'; area.style.borderRadius = '10px'; area.style.background = 'rgba(15,21,32,0.6)';
+    area.innerHTML = `
+      <div id="harvestHeader" style="font-size:12px;color:#cfd8e3;margin-bottom:6px">Indexing evidence…</div>
+      <div style="width:100%;background:#374151;border-radius:4px;height:10px;margin-bottom:8px;"><div id="harvestBar" style="background:#3b82f6;height:10px;border-radius:4px;width:0%"></div></div>
+      <pre id="harvestLog" style="font-size:12px;background:rgba(0,0,0,0.4);padding:8px;border-radius:6px;max-height:160px;overflow:auto"></pre>
+      <div class="mt-2 flex gap-2">
+        <button id="harvestRetryBtn" style="display:none;padding:6px 10px;border-radius:8px;background:#2563eb;color:white;font-size:12px;border:0;cursor:pointer">Re-run with updated index</button>
+      </div>
+    `;
+    const mount = document.querySelector('#sec-answer') || document.body;
+    mount.parentNode.insertBefore(area, mount.nextSibling);
+  }
+  return area;
+}
+
+async function pollHarvest(jid, originalQuestion){
+  lastJobId = jid;
+  const area = ensureHarvestUI();
+  area.style.display = 'block';
+  const bar = area.querySelector('#harvestBar');
+  const logEl = area.querySelector('#harvestLog');
+  const header = area.querySelector('#harvestHeader');
+  const retry = area.querySelector('#harvestRetryBtn');
+  retry.onclick = () => {
+    if (originalQuestion){
+      (document.getElementById('question') || {}).value = originalQuestion;
+      document.getElementById('askBtn')?.click();
+    }
+  };
+  let done = false;
+  while(!done){
+    try{
+      const r = await fetch(`/status/${jid}`);
+      if (!r.ok){ throw new Error('status ' + r.status); }
+      const j = await r.json();
+      const pct = Math.max(0, Math.min(100, Number(j.progress || 0)));
+      bar.style.width = pct + '%';
+      header.textContent = `Indexing evidence… ${pct}%`;
+      if (Array.isArray(j.logs)){
+        logEl.textContent = j.logs.slice(-200).join('\n');
+        logEl.scrollTop = logEl.scrollHeight;
+      }
+      if (j.status === 'done' || j.status === 'error'){
+        done = true;
+        header.textContent = j.status === 'done' ? 'Indexing complete.' : ('Indexing error: ' + (j.error || ''));
+        retry.style.display = 'inline-block';
+      }
+    }catch(e){
+      console.warn('pollHarvest error', e);
+      done = true;
+      header.textContent = 'Indexing status unavailable.';
+    }
+    if (!done) await new Promise(r => setTimeout(r, 2000));
+  }
+}
 
   // Ask button
   /**
@@ -84,7 +146,49 @@ document.addEventListener('DOMContentLoaded', () => {
       answerPre.textContent = data.answer ?? '(no answer)';
       rationalePre.textContent = data.rationale ?? '';
       renderRefsFromData(data);
-askMsg.textContent = res.ok ? 'Done.' : `Error ${res.status}`;
+      if (data.harvest_job_id) { pollHarvest(data.harvest_job_id, q); }
+      // ----- References (used-only), with fallback to preformatted block -----
+  const usedIdxSet = new Set(
+    Array.isArray(data.used_ref_indexes) ? data.used_ref_indexes.map(Number) : []
+  );
+  const haveStructured = Array.isArray(data.refs) && data.refs.length > 0;
+  const haveBlock = typeof data.references_block === 'string' && data.references_block.trim().length > 0;
+
+  // clear any previous <pre> block if we switch back to list mode
+  refsSection.querySelector('.refs-pre')?.remove();
+
+  if (haveStructured && usedIdxSet.size > 0) {
+    refsSection.classList.remove('hidden');
+    refsList.innerHTML = data.refs
+      .map((r, i) => ({ r, i: i + 1 }))
+      .filter(x => usedIdxSet.has(x.i))
+      .map(({ r, i }) => {
+        const authors = Array.isArray(r.authors) ? r.authors.join(', ') : (r.authors || '');
+        const title = r.title || `Reference ${i}`;
+        const journal = (r.biblio && r.biblio.journal) || r.journal || '';
+        const year = r.year || (r.biblio && r.biblio.year) || '';
+        const volume = (r.biblio && r.biblio.volume) || r.volume || '';
+        const pages = (r.biblio && r.biblio.pages) || r.pages || '';
+        const doiUrl = r.doi ? `https://doi.org/${r.doi}` : '';
+        const url = r.url || doiUrl || '#';
+        const acs = `${authors}. <i>${title}</i>. <b>${journal}</b> ${year}, ${volume}, ${pages}. ` +
+                    `<a href="${url}" target="_blank" rel="noopener">${r.doi || url}</a>`;
+        return `<li>${acs}</li>`;
+      })
+      .join('');
+  } else if (haveBlock) {
+    refsSection.classList.remove('hidden');
+    refsList.innerHTML = '';
+    const pre = document.createElement('pre');
+    pre.className = 'refs-pre';
+    pre.textContent = data.references_block.trim();
+    refsSection.appendChild(pre);
+  } else {
+    refsSection.classList.add('hidden');
+    refsList.innerHTML = '';
+  }
+
+      askMsg.textContent = res.ok ? 'Done.' : `Error ${res.status}`;
     } catch (err) {
       console.error(err);
       askMsg.textContent = 'Error. Check console.';
@@ -123,103 +227,88 @@ askMsg.textContent = res.ok ? 'Done.' : `Error ${res.status}`;
     const pretty = JSON.stringify(data.data, null, 2);
 
     if (jsonBlock) jsonBlock.textContent = pretty;
-        document.getElementById('jsonBlock')?.classList.remove('hidden');
-      } catch (err) {
-        console.error(err);
-        parseBtn.textContent = 'Error';
-      } finally {
-        parseBtn.disabled = false;
-        parseBtn.textContent = 'Parse';
-      }
-    });
+    document.getElementById('jsonBlock')?.classList.remove('hidden');
 
   /**
    * Renders references from data object into the UI.
    * @param {object} data
    */
-  
   function renderRefsFromData(data) {
-    // Accept multiple shapes: references/ref arrays, citations, used_refs; and blocks under reference_block/references_block
+    // Supports either `data.references_block` (preformatted string)
+    // OR an array `data.references` of {title, url, ...}
     if (!refsSection) return;
 
-    const block = (data && (data.reference_block || data.references_block)) || '';
-    const arrRaw = (data && (data.references || data.refs || data.citations || data.used_refs)) || null;
+    const block = data?.references_block;
+    const arr   = data?.references;
 
-    // Used indexes (1-based), e.g., [1,2,5]
-    const used = Array.isArray(data?.used_ref_indexes) ? data.used_ref_indexes.map(Number).filter(n => Number.isFinite(n)) : [];
+    // Clear old
+    if (refsList) refsList.innerHTML = '';
 
-    // Clear previous content
-    refsList && (refsList.innerHTML = '');
-    refsSection?.querySelector('.refs-pre')?.remove();
-
-    // Prefer structured refs if present
-    if (Array.isArray(arrRaw) && arrRaw.length && refsList) {
-      const items = used.length
-        ? arrRaw.map((r, i) => ({ r, i: i + 1 })).filter(x => used.includes(x.i)).map(x => x.r)
-        : arrRaw;
-
-      if (items.length) {
-        items.forEach((r, idx) => {
+    if (block && typeof block === 'string') {
+      // Render block safely inside a <pre>, but as list if it starts with "1. "
+      const lines = block.split(/\r?\n/).filter(Boolean);
+      if (refsList && lines.length) {
+        lines.forEach(line => {
           const li = document.createElement('li');
-
-          // String reference
-          if (typeof r === 'string') {
-            li.textContent = r;
-            refsList.appendChild(li);
-            return;
-          }
-
-          const title   = r.title || r.citation || r.name || r.label || `Reference ${idx+1}`;
-          const authors = Array.isArray(r.authors) ? r.authors.join(', ') : (r.authors || '');
-          const journal = (r.biblio && r.biblio.journal) || r.journal || r.source || '';
-          const year    = r.year || (r.biblio && r.biblio.year) || '';
-          const doiUrl  = r.doi ? String(r.doi).replace(/^https?:\/\/doi\.org\//, '') : '';
-          const url     = r.url || (doiUrl ? `https://doi.org/${doiUrl}` : '');
-
-          const strong = document.createElement('strong');
-          strong.textContent = title;
-          li.appendChild(strong);
-
-          const metaBits = [authors, journal, year].filter(Boolean);
-          if (metaBits.length) {
-            const small = document.createElement('small');
-            small.textContent = ' — ' + metaBits.join(', ');
-            li.appendChild(small);
-          }
-
-          if (url) {
-            li.appendChild(document.createTextNode(' '));
-            const a = document.createElement('a');
-            a.href = url; a.target = '_blank'; a.rel = 'noopener';
-            a.textContent = '(link)';
-            li.appendChild(a);
-          }
-
+          li.textContent = line.replace(/^\s*\d+\.\s*/, '');
           refsList.appendChild(li);
         });
-
-        refsSection.classList.remove('hidden');
-        // Initialize optional toggle if available
-        safe(() => window.initRefsToggle?.({ btnSelector: '#refsToggleBtn', panelSelector: '#refsSection' }));
-        return;
+        refsSection?.classList?.remove('hidden');
+      } else {
+        refsSection?.classList?.add('hidden');
       }
+      return;
     }
 
-    // Fallback: preformatted block
-    if (typeof block === 'string' && block.trim()) {
-      refsList.innerHTML = '';
-      const pre = document.createElement('pre');
-      pre.className = 'refs-pre';
-      pre.textContent = block.trim();
-      refsSection.appendChild(pre);
-      refsSection.classList.remove('hidden');
-      safe(() => window.initRefsToggle?.({ btnSelector: '#refsToggleBtn', panelSelector: '#refsSection' }));
+    if (Array.isArray(arr) && arr.length && refsList) {
+      arr.forEach(r => {
+        const li = document.createElement('li');
+        // Prefer title + link if available
+        if (r?.url) {
+          const a = document.createElement('a');
+          a.href = r.url;
+          a.textContent = r.title ? r.title : (r.url);
+          a.target = '_blank';
+          a.rel = 'noopener noreferrer';
+          li.appendChild(a);
+          if (r?.meta) {
+            const small = document.createElement('small');
+            small.textContent = ' ' + r.meta;
+            li.appendChild(small);
+          }
+        } else {
+          li.textContent = r?.title ? r.title : JSON.stringify(r);
+        }
+        refsList.appendChild(li);
+      });
+      refsSection?.classList?.remove('hidden');
       return;
     }
 
     // Nothing to show
-    refsSection.classList.add('hidden');
+    refsSection?.classList?.add('hidden');
   }
+
+    // Trigger download
+    const blob = new Blob([pretty], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = (data.filename || 'converted') + '.json';
+    document.body.appendChild(a); // needed for Firefox
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+
+  } catch (err) {
+    console.error(err);
+    if (jsonBlock) jsonBlock.textContent = 'Request failed';
+    document.getElementById('jsonBlock')?.classList.remove('hidden');
+  } finally {
+    parseBtn.disabled = false;
+    parseBtn.textContent = 'Convert → JSON';
+  }
+});
 
   // Upload button
   /**
@@ -375,4 +464,5 @@ askMsg.textContent = res.ok ? 'Done.' : `Error ${res.status}`;
   }
 
   // Auto-load history on page load
-if (historyBtn) historyBtn.click()});
+  if (historyBtn) historyBtn.click();
+});
