@@ -23,6 +23,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any, Set, List, Dict, Optional
 from functools import lru_cache
+import logging
 
 # Third-party imports
 import httpx
@@ -83,6 +84,16 @@ def inject_csrf_token():
 @app.before_request
 def _log_req():
     print(f"[req] {request.method} {request.path}")
+
+for h in list(app.logger.handlers):
+    app.logger.removeHandler(h)
+
+handler = logging.StreamHandler(sys.stdout)
+handler.setLevel(logging.INFO)
+handler.setFormatter(logging.Formatter('%(asctime)s %(levelname)s: %(message)s'))
+
+app.logger.addHandler(handler)
+app.logger.setLevel(logging.INFO)
 
 # ──────────────── DuckDB setup ──────────────── #
 
