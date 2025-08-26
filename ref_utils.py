@@ -1,29 +1,29 @@
-import re
-import math
-from typing import List, Dict, Any, Tuple, Iterable
+import re, math
+from typing import List, Dict, Any, Tuple, Iterable, Optional
 
 _WORD_RX = re.compile(r"[A-Za-z0-9\-\u00C0-\u024F]+")
+CHEM_RX = re.compile(r"\b(?:[A-Z][a-z]?[\d_]*){1,}\b")  # crude formula detector: SiO2, Al2O3, TiO2, etc.
 
-SIO2_SYNONYMS = {
-    "sio2", "silica", "silicon dioxide", "amorphous silica", "quartz"
+# Morphology & process vocab (generic)
+MORPHOLOGY_SYNONYMS = {
+    "nanowire": {"nanowire","nanowires","nw","nws","nanofiber","nanofibers","nanorod","nanorods","nanowhisker","nanowhiskers"},
+    "nanotube": {"nanotube","nanotubes","cnt","cnts"},
+    "nanoparticle": {"nanoparticle","nanoparticles","np","nps","quantum dot","quantum dots","qd","qds"},
+    "nanosheet": {"nanosheet","nanosheets","nanosheeted","2d"},
 }
-NW_SYNONYMS = {
-    "nanowire", "nanowires", "nw", "nws", "nanofiber", "nanofibers", "nanorod", "nanorods", "nanowhisker", "nanowhiskers"
+PROCESS_SYNONYMS = {
+    "synthesis","synthesize","prepare","preparation","growth","fabrication","route","protocol",
+    "sol-gel","hydrothermal","solvothermal","microwave","spray pyrolysis","cvd","pvd","vls","oxide-assisted",
+    "electrospinning","anodic","template","calcination","anneal","annealing","seeded","etch","etching"
 }
-SYNTHESIS_SYNONYMS = {
-    "synthesis", "prepare", "preparation", "growth", "fabrication", "sol-gel",
-    "hydrothermal", "solvothermal", "cvd", "vls", "vapour", "vapor", "oxide-assisted",
-    "electrospinning", "anneal", "calcination", "template", "anodic", "aaO"
-}
-
-# Terms that frequently indicate the paper is about *something on SiO2 substrate* (not SiO2 NWs)
+# Broad negatives for "on a substrate" (not the target material itself)
 NEGATIVE_SUBSTRATE_CUES = {
-    "on sio2", "on silicon dioxide", "on silica", "graphene", "mos2", "gan", "ws2", "wse2", "hbn",
-    "interconnect metallization", "mems gas sensors", "micro-nanorobots",
+    "on ", "substrate", "interconnect metallization", "graphene", "mos2", "gan", "ws2", "wse2", "hbn",
+    "sapphire","mica","glass","quartz","silica","sio2","silicon wafer","si wafer"
 }
 
 def _norm(s: str) -> str:
-    return re.sub(r"\s+", " ", s or "").strip()
+    return re.sub(r"\s+", " ", (s or "").strip())
 
 def _tok(s: str) -> List[str]:
     return [t.lower() for t in _WORD_RX.findall(s or "")]
@@ -32,159 +32,168 @@ def _contains_any(text: str, terms: Iterable[str]) -> bool:
     L = text.lower()
     return any(t in L for t in terms)
 
-def expand_query_synonyms(q: str) -> List[str]:
-    qn = _norm(q).lower()
-    bag = set(_tok(qn))
-    if "sio2" in bag or "silica" in bag or "silicon" in bag:
-        bag.update(SIO2_SYNONYMS)
-    if "nanowire" in bag or "nanowires" in bag or "nanofiber" in bag or "nanorod" in bag:
-        bag.update(NW_SYNONYMS)
-    if _contains_any(qn, ("synthesis","prepare","preparation","growth","fabrication", "procedure")):
-        bag.update(SYNTHESIS_SYNONYMS)
-    return sorted(bag)
+# ---------- spaCy-powered term extraction (optional) ----------
+def _load_spacy() -> Optional[object]:
+    try:
+        import spacy
+        for name in ("en_core_web_sm",):
+            try:
+                return spacy.load(name, disable=["parser","tagger","lemmatizer"])
+            except Exception:
+                pass
+        return None
+    except Exception:
+        return None
 
-def is_probably_about_sio2_nws(ref: Dict[str, Any]) -> bool:
-    """Heuristically keep refs actually about SiO2 NWs, not 'X on SiO2'."""
-    title = _norm(ref.get("title") or ref.get("citation") or ref.get("name") or "")
-    meta  = _norm(ref.get("meta") or ref.get("journal") or ref.get("source") or "")
-    text  = f"{title} {meta}".lower()
-    # Must have SiO2/silica AND NW keywords
-    if not _contains_any(text, SIO2_SYNONYMS): 
-        return False
-    if not _contains_any(text, NW_SYNONYMS):
-        return False
-    # Should include a synthesis/growth cue
-    if not _contains_any(text, SYNTHESIS_SYNONYMS):
-        # allow purely structural SiO2 nanowires (first-principles) as weak positive
-        if "first-principles" not in text and "density functional" not in text:
-            return False
-    # Exclude obvious "on SiO2" substrate contexts
-    if _contains_any(text, NEGATIVE_SUBSTRATE_CUES):
-        # allow explicit "silica nanowires" wording to override weak negatives
-        if "silica nanowire" not in text and "silicon dioxide nanowire" not in text:
-            return False
-    return True
+_NLP = None  # lazy
+
+def extract_query_profile(question: str) -> Dict[str, set]:
+    """Extract target MATERIAL(s), MORPHOLOGY term(s), and PROCESS cue(s) from the question."""
+    global _NLP
+    q = _norm(question)
+    materials, morphs, procs = set(), set(), set()
+
+    # Try spaCy NER if available & you trained custom labels
+    try:
+        if _NLP is None:
+            _NLP = _load_spacy()
+        if _NLP is not None:
+            doc = _NLP(q)
+            for ent in getattr(doc, "ents", []):
+                label = (ent.label_ or "").upper()
+                txt = ent.text.strip()
+                if not txt: 
+                    continue
+                if label in {"MATERIAL","CHEM","CHEMICAL","COMPOUND"}:
+                    materials.add(txt.lower())
+                elif label in {"MORPHOLOGY","SHAPE","FORM"}:
+                    morphs.add(txt.lower())
+                elif label in {"PROCESS","SYNTHESIS"}:
+                    procs.add(txt.lower())
+    except Exception:
+        pass
+
+    # Heuristics: chemical formula & common words
+    for m in CHEM_RX.findall(q):
+        # Filter silly matches like single letters
+        if len(m) >= 3 and any(c.isdigit() for c in m):
+            materials.add(m.lower())
+    # common material words present in question
+    for t in _tok(q):
+        if t in {"silica","quartz","silicon","alumina","titania","zno","gan","mos2","ws2","hbn"}:
+            materials.add(t)
+
+    # Morphology synonyms from question
+    qlow = q.lower()
+    for key, syns in MORPHOLOGY_SYNONYMS.items():
+        if _contains_any(qlow, syns):
+            morphs.update(syns)
+
+    # Process cues from question
+    for w in PROCESS_SYNONYMS:
+        if w in qlow:
+            procs.add(w)
+
+    return {"materials": materials, "morphology": morphs, "process": procs}
 
 def sanitize_authors_field(ref: Dict[str, Any]) -> None:
-    """Fix cases where authors are split like 'W, a, n, g'."""
     a = ref.get("authors")
     if isinstance(a, list):
-        # If list items are single letters or contain many commas, join smartly
         if a and all(isinstance(x, str) and len(_tok(x)) <= 2 for x in a):
-            # Probably char-split; drop it
             ref["authors"] = None
     elif isinstance(a, str):
-        # If string looks like "W, a, n, g", collapse
         if re.search(r"(,\s*){3,}", a):
             ref["authors"] = re.sub(r"(?:\s*,\s*)+", " ", a).strip()
-    # else leave as-is
 
 def extract_used_ref_indexes(answer: str) -> List[int]:
-    """Return sorted unique 1-based indexes from [1], [2] markers in answer."""
-    if not answer:
-        return []
+    if not answer: return []
     idxs = set()
     for m in re.finditer(r"\[(\d+)\]", answer):
         try:
             n = int(m.group(1))
-            if n >= 1:
-                idxs.add(n)
+            if n >= 1: idxs.add(n)
         except ValueError:
             pass
     return sorted(idxs)
 
-def _score_ref_against_text(ref_text: str, text: str) -> float:
-    """Very simple relevance: weighted token overlap + cues."""
+def _score_ref_against_profile(ref_text: str, profile: Dict[str, set]) -> float:
+    """Weighted token overlap + bonuses for profile matches; penalty for substrate contexts."""
     rtoks = set(_tok(ref_text))
-    ttoks = set(_tok(text))
-    inter = rtoks & ttoks
-    base = len(inter) / (1 + math.log(1 + len(rtoks)))
-    bonus = 0.0
-    if _contains_any(ref_text, SIO2_SYNONYMS): bonus += 0.5
-    if _contains_any(ref_text, NW_SYNONYMS): bonus += 0.5
-    if _contains_any(ref_text, SYNTHESIS_SYNONYMS): bonus += 0.25
-    if _contains_any(ref_text, NEGATIVE_SUBSTRATE_CUES): bonus -= 0.6
-    return base + bonus
+    base = 0.0
+    # Generic overlap with all profile tokens
+    all_profile = set().union(profile.get("materials", set()),
+                              profile.get("morphology", set()),
+                              profile.get("process", set()))
+    base += len(rtoks & all_profile) / (1 + math.log(1 + len(rtoks)))
 
-def select_references(answer: str, refs: List[Dict[str, Any]], top_k: int = 6) -> Tuple[List[Dict[str, Any]], List[int]]:
-    """
-    Decide which references to display.
-    - If [n] markers exist: return exactly those, in numeric order intersected with available refs.
-    - Else: filter + score and return top_k most relevant to SiO2 NW synthesis.
-    Returns (selected_refs, used_ref_indexes_1based)
-    """
-    if not refs:
-        return [], []
+    # Bonuses
+    text = ref_text.lower()
+    # Strong bonus if any exact material mention (formula or name)
+    if any(m in text for m in profile.get("materials", ())): base += 0.7
+    # Morphology match
+    if any(m in text for m in profile.get("morphology", ())): base += 0.5
+    # Process cue
+    if any(p in text for p in profile.get("process", ())): base += 0.25
 
-    # Sanitize authors fields in-place
-    for r in refs:
-        sanitize_authors_field(r)
+    # Penalize classic substrate phrases (likely “X on Y” not “Y nanowires”)
+    if _contains_any(text, NEGATIVE_SUBSTRATE_CUES): base -= 0.6
 
+    return base
+
+def select_references(answer: str, refs: List[Dict[str, Any]], *, question: Optional[str], top_k: int = 6) -> Tuple[List[Dict[str, Any]], List[int]]:
+    if not refs: return [], []
+
+    for r in refs: sanitize_authors_field(r)
+
+    # If the model produced explicit [n] markers, honor those.
     used = extract_used_ref_indexes(answer)
     if used:
-        # Keep intersection within bounds
         selected = []
         for n in used:
             i = n - 1
             if 0 <= i < len(refs):
                 selected.append(refs[i])
-        # If too few (e.g., only 1), pad with best matches (but don't exceed top_k)
-        if len(selected) < min(2, top_k):
-            # score all not already selected
+        # Pad to at least 2 if needed by ranking others against question
+        if question and len(selected) < min(2, top_k):
+            prof = extract_query_profile(question)
             pool = [(i, r) for i, r in enumerate(refs) if (i+1) not in used]
-            scored = sorted(pool, key=lambda ir: _score_ref_against_text(
-                _norm(ir[1].get("title") or ir[1].get("citation") or ir[1].get("name") or "") + " " + _norm(ir[1].get("meta") or ir[1].get("journal") or ir[1].get("source") or ""),
-                answer
+            scored = sorted(pool, key=lambda ir: _score_ref_against_profile(
+                _norm(ir[1].get("title") or ir[1].get("citation") or ir[1].get("name") or "") + " " +
+                _norm(ir[1].get("meta") or ir[1].get("journal") or ir[1].get("source") or ""), prof
             ), reverse=True)
             for i, r in scored:
-                if len(selected) >= top_k:
-                    break
-                selected.append(r)
-                used.append(i+1)
+                if len(selected) >= top_k: break
+                selected.append(r); used.append(i+1)
         return selected, sorted(set(used))
 
-    # No explicit markers → filter + score
-    filtered = [r for r in refs if is_probably_about_sio2_nws(r)]
-    if not filtered:
-        filtered = refs  # fallback to all
-
-    scored = sorted(
-        enumerate(filtered),
-        key=lambda ir: _score_ref_against_text(
-            _norm(ir[1].get("title") or ir[1].get("citation") or ir[1].get("name") or "") + " " + _norm(ir[1].get("meta") or ir[1].get("journal") or ir[1].get("source") or ""),
-            answer
+    # No [n] markers → rank all against the query profile
+    prof = extract_query_profile(question or "")
+    scored_all = sorted(
+        refs,
+        key=lambda r: _score_ref_against_profile(
+            _norm(r.get("title") or r.get("citation") or r.get("name") or "") + " " +
+            _norm(r.get("meta") or r.get("journal") or r.get("source") or ""), prof
         ),
         reverse=True
     )
-    # Map back to original indexes if filtered came from subset
-    selected = [ir[1] for ir in scored[:top_k]]
-    # We don't know the original 1-based positions reliably here (due to filtering from unknown original order).
-    # For frontend display, it's fine to omit used_ref_indexes or set to 1..len(selected).
-    return selected, list(range(1, min(top_k, len(selected)) + 1))
+    chosen = scored_all[:top_k]
+    return chosen, list(range(1, min(top_k, len(chosen)) + 1))
 
-def build_references_payload(answer: str, refs_full: List[Dict[str, Any]], top_k: int = 6) -> Dict[str, Any]:
-    """
-    Returns a dict ready to jsonify:
-    { "references": [...], "used_ref_indexes": [..], "references_block": "..." }
-    """
-    chosen, used = select_references(answer, refs_full, top_k=top_k)
+def build_references_payload(answer: str, refs_full: List[Dict[str, Any]], top_k: int = 6, *, question: Optional[str] = None) -> Dict[str, Any]:
+    chosen, used = select_references(answer, refs_full, question=question, top_k=top_k)
 
-    # Build a simple block (ACS-ish) from chosen
+    # Build a simple ACS block from chosen
     lines = []
     for i, r in enumerate(chosen, 1):
         title = _norm(r.get("title") or r.get("citation") or r.get("name") or f"Reference {i}")
         journal = _norm(r.get("journal") or r.get("source") or r.get("meta") or "")
         year = str(r.get("year") or "")
         doi  = _norm(r.get("doi") or "")
-        line_parts = [title]
-        if journal: line_parts.append(journal)
-        if year: line_parts.append(year)
-        if doi: line_parts.append(doi)
-        lines.append(f"{i}. " + ", ".join([p for p in line_parts if p]))
+        parts = [title]
+        if journal: parts.append(journal)
+        if year:    parts.append(year)
+        if doi:     parts.append(doi)
+        lines.append(f"{i}. " + ", ".join([p for p in parts if p]))
     block = "\n".join(lines)
 
-    return {
-        "references": chosen,
-        "used_ref_indexes": used,
-        "references_block": block
-    }
+    return {"references": chosen, "used_ref_indexes": used, "references_block": block}

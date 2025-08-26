@@ -1005,7 +1005,7 @@ def ask():
         answer, rationale = _s(a), _s(r)
 
     # ---------- Build references payload ----------
-    refs_payload = build_references_payload(answer or "", refs or [], top_k=6)
+    refs_payload = build_references_payload(answer or "", refs or [], top_k=6, question=question)
 
     try:
         used_idxs = _extract_used_ref_indexes(answer, rationale)   # noqa: F821
