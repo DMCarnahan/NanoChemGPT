@@ -1004,14 +1004,28 @@ def ask():
         a, r = _split_reasoning(strip_references_block(_s(raw)))
         answer, rationale = _s(a), _s(r)
 
-    # ---- Build a REFERENCES block of only used items ----
-    used_idxs = _extract_used_ref_indexes(answer, rationale)
-    references_block = _format_references_block_from_used(used_idxs, refs)
+    # ---------- Build references payload ----------
+    refs_payload = build_references_payload(answer or "", refs or [], top_k=6)
 
-    # ---- Usage markers (refs + tags) ----
-    markers = _extract_used_markers(answer, rationale)
+    try:
+        used_idxs = _extract_used_ref_indexes(answer, rationale)   # noqa: F821
+        references_block = _format_references_block_from_used(used_idxs, refs)  # noqa: F821
+        markers = _extract_used_markers(answer, rationale)         # noqa: F821
+    except Exception:
+        used_idxs, references_block, markers = [], "", []
 
-    # ---- Sufficiency check + enqueue mining if thin (kept) ----
+    try:
+        sufficient = judge_sufficiency(question, context_joined)
+        if not bool(sufficient):
+            try:
+                enqueue_text_mining_job(question)  # noqa: F821
+                enqueued = True
+            except Exception as e:
+                print("[/ask] enqueue_text_mining_job failed:", e)
+    except Exception as e:
+        print("[/ask] judge/enqueue error:", e)
+
+    # ---- Sufficiency check + enqueue mining if thin ----
     enqueued = False
     try:
         try:
@@ -1041,6 +1055,7 @@ def ask():
             "used_ref_indexes": used_idxs,
             "references_block": references_block,
             "refs": refs,
+            **refs_payload,
             "kb_refs_count": len(kb_refs_raw),
             "web_refs_count": len(web_refs),
             "table_refs": table_refs,
