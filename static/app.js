@@ -1,3 +1,67 @@
+
+/* --- Global references renderer (ES5-safe) --- */
+window.renderRefsFromData = function(data){
+  try { console.debug('[refs]', { hasBlock: !!(data && data.references_block), arr: (data && data.references ? data.references.length : 0), refs: (data && data.refs ? data.refs.length : 0), used: (data && data.used_ref_indexes ? data.used_ref_indexes.length : 0) }); } catch(e){}
+  var refsSection = document.getElementById('refsSection');
+  if (!refsSection) return;
+
+  // Clear previous content
+  var preOld = refsSection.querySelector ? refsSection.querySelector('.refs-pre') : null;
+  if (preOld && preOld.parentNode) preOld.parentNode.removeChild(preOld);
+  var list = document.getElementById('refsList');
+  if (list) list.innerHTML = '';
+
+  var block = (data && data.references_block) || '';
+  var arr   = (data && data.references) || [];
+
+  // If block string present — render verbatim in #refsFullBlock and show section
+  if (typeof block === 'string' && block.replace(/\s+/g,'').length > 0) {
+    var pre = document.createElement('pre');
+    pre.className = 'refs-pre';
+    pre.textContent = block;
+    var full = document.getElementById('refsFullBlock');
+    if (full) { full.innerHTML = ''; full.appendChild(pre); }
+    if (refsSection && refsSection.classList) refsSection.classList.remove('hidden');
+    return;
+  }
+
+  // If structured array present — build list
+  if (Object.prototype.toString.call(arr) === '[object Array]' && arr.length > 0) {
+    var frag = document.createDocumentFragment();
+    for (var i = 0; i < arr.length; i++) {
+      var r = arr[i] || {};
+      var li = document.createElement('li');
+      var title = (r.title || '(no title)');
+      var year  = (r.year || '');
+      var url   = (r.url || (r.doi ? ('https://doi.org/' + r.doi) : ''));
+
+      var a = document.createElement('a');
+      a.textContent = title + (year ? (' (' + year + ')') : '');
+      a.href = url || '#';
+      a.target = '_blank';
+      a.rel = 'noopener noreferrer';
+
+      li.appendChild(a);
+      frag.appendChild(li);
+    }
+    if (list) {
+      list.appendChild(frag);
+    }
+    if (refsSection && refsSection.classList) refsSection.classList.remove('hidden');
+    return;
+  }
+
+  // Fallback: if server sent 'refs' (unfiltered), use them
+  if (data && Object.prototype.toString.call(data.refs) === '[object Array]' && data.refs.length > 0) {
+    data.references = data.refs;
+    return window.window.renderRefsFromData(data);
+  }
+
+  // Nothing to show → keep section hidden
+  if (refsSection && refsSection.classList) refsSection.classList.add('hidden');
+};
+/* --- End global references renderer --- */
+
 document.addEventListener('DOMContentLoaded', () => {
   const $ = (id) => document.getElementById(id);
 
@@ -27,19 +91,19 @@ document.addEventListener('DOMContentLoaded', () => {
   let mode = 'robot';
 
   // Mode toggle
-  if (modeRobot) modeRobot.addEventListener('click', () => {
+  modeRobot?.addEventListener('click', () => {
     mode = 'robot';
     modeRobot.setAttribute('aria-checked', 'true');
-    (modeReason ? modeReason.setAttribute : undefined)('aria-checked', 'false');
+    modeReason?.setAttribute('aria-checked', 'false');
     modeRobot.classList.add('active');
-    if (modeReason && modeReason.classList) modeReason.classList.remove('active');
+    modeReason?.classList.remove('active');
   });
-  if (modeReason) modeReason.addEventListener('click', () => {
+  modeReason?.addEventListener('click', () => {
     mode = 'reasoning';
     modeReason.setAttribute('aria-checked', 'true');
-    (modeRobot ? modeRobot.setAttribute : undefined)('aria-checked', 'false');
+    modeRobot?.setAttribute('aria-checked', 'false');
     modeReason.classList.add('active');
-    if (modeRobot && modeRobot.classList) modeRobot.classList.remove('active');
+    modeRobot?.classList.remove('active');
   });
 
   /**
@@ -47,30 +111,23 @@ document.addEventListener('DOMContentLoaded', () => {
    * @returns {string|undefined}
    */
   function readCsrfToken() {
-    var _m = document.querySelector('meta[name="csrf-token"]');
-      if (_m && _m.content) return _m.content;
-      var _cm = document.cookie.match(/(?:^|;\s*)csrf_token=([^;]+)/);
-      return (_cm && _cm[1]) || null;
+    return document.querySelector('meta[name="csrf-token"]')?.content ||
+      (document.cookie.match(/(?:^|;\s*)csrf_token=([^;]+)/)?.[1]);
   }
 
   // Ask button
   /**
    * Handles the Ask button click: sends question to backend and updates UI.
    */
-  if (askBtn) askBtn.addEventListener('click', async () => {
-    const question = ((qInput && qInput.value) ? qInput.value.trim() : '');
+  askBtn?.addEventListener('click', async () => {
+    const question = qInput?.value.trim();
     if (!question) return;
 
     askBtn.disabled = true;
     askMsg.classList.remove('hidden');
     askMsg.textContent = 'Asking…';
 
-    
-
-// Forward declare to avoid ReferenceError in some engines when called earlier in the block
-function renderRefsFromData(data) { /* stub; replaced below */ }
-
-try {
+    try {
       const headers = { 'Content-Type': 'application/json' };
       const csrf = readCsrfToken();
       if (csrf) headers['X-CSRFToken'] = csrf;
@@ -87,7 +144,7 @@ try {
 
       answerPre.textContent = data.answer ?? '(no answer)';
       rationalePre.textContent = data.rationale ?? '';
-      renderRefsFromData(data);
+      window.renderRefsFromData(data);
       // ----- References (used-only), with fallback to preformatted block -----
   const usedIdxSet = new Set(
     Array.isArray(data.used_ref_indexes) ? data.used_ref_indexes.map(Number) : []
@@ -96,7 +153,7 @@ try {
   const haveBlock = typeof data.references_block === 'string' && data.references_block.trim().length > 0;
 
   // clear any previous <pre> block if we switch back to list mode
-  var __tmp = refsSection.querySelector('.refs-pre'); if (__tmp && __tmp.remove) __tmp.remove();
+  refsSection.querySelector('.refs-pre')?.remove();
 
   if (haveStructured && usedIdxSet.size > 0) {
     refsSection.classList.remove('hidden');
@@ -142,8 +199,8 @@ try {
   /**
    * Handles the Parse button click: converts answer to JSON and triggers download.
    */
-  if (parseBtn) parseBtn.addEventListener('click', async () => {
-  const text = (answerPre ? answerPre.textContent : '') || '';
+  parseBtn?.addEventListener('click', async () => {
+  const text = answerPre?.textContent || '';
   if (!text) return;
 
   parseBtn.disabled = true;
@@ -162,13 +219,13 @@ try {
 
     const data = await res.json();
     if (!data || !data.ok || !data.data) {
-      throw new Error((data ? data.error : undefined) || 'Parse failed');
+      throw new Error(data?.error || 'Parse failed');
     }
 
     const pretty = JSON.stringify(data.data, null, 2);
 
     if (jsonBlock) jsonBlock.textContent = pretty;
-    var __el = document.getElementById('jsonBlock'); if (__el && __el.classList) __el.classList.remove('hidden');
+    document.getElementById('jsonBlock')?.classList.remove('hidden');
 
   /**
    * Renders references from data object into the UI.
@@ -179,8 +236,8 @@ try {
     // OR an array `data.references` of {title, url, ...}
     if (!refsSection) return;
 
-    const block = (data && data.references_block) || null;
-    const arr   = (data && data.references) || null;
+    const block = data?.references_block;
+    const arr   = data?.references;
 
     // Clear old
     if (refsList) refsList.innerHTML = '';
@@ -194,9 +251,9 @@ try {
           li.textContent = line.replace(/^\s*\d+\.\s*/, '');
           refsList.appendChild(li);
         });
-        if (refsSection && refsSection.classList) refsSection.classList.remove('hidden');
+        refsSection?.classList?.remove('hidden');
       } else {
-        if (refsSection && refsSection.classList) refsSection.classList.add('hidden');
+        refsSection?.classList?.add('hidden');
       }
       return;
     }
@@ -205,29 +262,29 @@ try {
       arr.forEach(r => {
         const li = document.createElement('li');
         // Prefer title + link if available
-        if ((r ? r.url : undefined)) {
+        if (r?.url) {
           const a = document.createElement('a');
           a.href = r.url;
           a.textContent = r.title ? r.title : (r.url);
           a.target = '_blank';
           a.rel = 'noopener noreferrer';
           li.appendChild(a);
-          if ((r ? r.meta : undefined)) {
+          if (r?.meta) {
             const small = document.createElement('small');
             small.textContent = ' ' + r.meta;
             li.appendChild(small);
           }
         } else {
-          li.textContent = (r ? r.title : undefined) ? r.title : JSON.stringify(r);
+          li.textContent = r?.title ? r.title : JSON.stringify(r);
         }
         refsList.appendChild(li);
       });
-      if (refsSection && refsSection.classList) refsSection.classList.remove('hidden');
+      refsSection?.classList?.remove('hidden');
       return;
     }
 
     // Nothing to show
-    if (refsSection && refsSection.classList) refsSection.classList.add('hidden');
+    refsSection?.classList?.add('hidden');
   }
 
     // Trigger download
@@ -244,7 +301,7 @@ try {
   } catch (err) {
     console.error(err);
     if (jsonBlock) jsonBlock.textContent = 'Request failed';
-    var __el = document.getElementById('jsonBlock'); if (__el && __el.classList) __el.classList.remove('hidden');
+    document.getElementById('jsonBlock')?.classList.remove('hidden');
   } finally {
     parseBtn.disabled = false;
     parseBtn.textContent = 'Convert → JSON';
@@ -255,8 +312,8 @@ try {
   /**
    * Handles the Upload button click: uploads a file to the backend.
    */
-  if (uploadBtn) uploadBtn.addEventListener('click', async () => {
-    const file = ((fileInput && fileInput.files) ? fileInput.files[0] : null);
+  uploadBtn?.addEventListener('click', async () => {
+    const file = fileInput?.files?.[0];
     if (!file) return;
     uploadBtn.disabled = true;
     uplMsg.textContent = 'Uploading…';
@@ -282,7 +339,7 @@ try {
         if (json.filename) {
           const li = document.createElement('li');
           li.textContent = json.filename;
-          (uplList ? uplList.appendChild : undefined)(li);
+          uplList?.appendChild(li);
         }
       } else {
         uplMsg.textContent = 'Upload error: ' + (json.error || 'unknown');
@@ -300,7 +357,7 @@ try {
   /**
    * Handles the History button click: loads and displays previous Q&A.
    */
-  if (historyBtn) historyBtn.addEventListener('click', async () => {
+  historyBtn?.addEventListener('click', async () => {
     try {
       const res = await fetch('/api/history');
       const data = await res.json();
@@ -320,7 +377,7 @@ try {
             const data = await res.json();
             answerPre.textContent = data.answer ?? '(no answer)';
             rationalePre.textContent = data.rationale ?? '';
-            renderRefsFromData(data);
+            window.renderRefsFromData(data);
           } catch (err) {
             console.error(err);
           }
@@ -335,8 +392,8 @@ try {
   /**
    * Handles the Save as TXT button click: downloads the answer as a text file.
    */
-  if (saveTxtBtn) saveTxtBtn.addEventListener('click', () => {
-    const text = (answerPre ? answerPre.textContent : '') || '';
+  saveTxtBtn?.addEventListener('click', () => {
+    const text = answerPre?.textContent || '';
     if (!text) return;
 
     const blob = new Blob([text], { type: 'text/plain' });
@@ -351,20 +408,18 @@ try {
   });
 
   // Built-in file upload
-  if (builtinDrop) builtinDrop.addEventListener('click', () => {
-    if (builtinFile) builtinFile.click();
+  builtinDrop?.addEventListener('click', () => builtinFile?.click());
+  builtinDrop?.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') builtinFile?.click();
   });
-  if (builtinDrop) builtinDrop.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') if (builtinFile) builtinFile.click();
-  });
-  if (builtinDrop) builtinDrop.addEventListener('dragover', (e) => {
+  builtinDrop?.addEventListener('dragover', (e) => {
     e.preventDefault();
     builtinDrop.classList.add('dragover');
   });
-  if (builtinDrop) builtinDrop.addEventListener('dragleave', () => {
+  builtinDrop?.addEventListener('dragleave', () => {
     builtinDrop.classList.remove('dragover');
   });
-  if (builtinDrop) builtinDrop.addEventListener('drop', (e) => {
+  builtinDrop?.addEventListener('drop', (e) => {
     e.preventDefault();
     builtinDrop.classList.remove('dragover');
     if (e.dataTransfer.files.length) {
@@ -372,7 +427,7 @@ try {
       uploadBuiltinFiles(e.dataTransfer.files);
     }
   });
-  if (builtinFile) builtinFile.addEventListener('change', () => {
+  builtinFile?.addEventListener('change', () => {
     if (builtinFile.files.length) uploadBuiltinFiles(builtinFile.files);
   });
 
