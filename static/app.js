@@ -1,64 +1,3 @@
-/* --- Global references renderer (ES5-safe) --- */
-window.renderRefsFromData = function(data){
-  try { console.debug('[refs]', data); } catch(e){}
-  var refsSection = document.getElementById('refsSection');
-  var refsList    = document.getElementById('refsList');
-  if (!refsSection || !refsList) return;
-
-  // clear old
-  refsList.innerHTML = '';
-  var oldPre = refsSection.querySelector ? refsSection.querySelector('.refs-pre') : null;
-  if (oldPre && oldPre.parentNode) oldPre.parentNode.removeChild(oldPre);
-
-  // Accept a handful of alias keys
-  var block = (data && (data.references_block || data.referencesBlock || data.references_str || data.referencesText || '')) || '';
-  var arr   = (data && (data.references || data.referencesAll || null)) || [];
-
-  if (typeof block === 'string' && block.trim().length > 0) {
-    var pre = document.createElement('pre');
-    pre.className = 'refs-pre';
-    pre.textContent = block.trim();
-    refsSection.appendChild(pre);
-    if (refsSection.classList) refsSection.classList.remove('hidden');
-    return;
-  }
-
-  if (Object.prototype.toString.call(arr) === '[object Array]' && arr.length > 0) {
-    var html = arr.map(function(r, i){
-      r = r || {};
-      var authors = (Array.isArray(r.authors) ? r.authors.join(', ') : (r.authors || ''));
-      var title = r.title || ('Reference ' + (i+1));
-      var journal = (r.biblio && r.biblio.journal) || r.journal || '';
-      var year = r.year || (r.biblio && r.biblio.year) || '';
-      var volume = (r.biblio && r.biblio.volume) || r.volume || '';
-      var pages = (r.biblio && r.biblio.pages) || r.pages || '';
-      var doiUrl = r.doi ? ('https://doi.org/' + r.doi) : '';
-      var url = r.url || doiUrl || '#';
-      var acs = authors + '. <i>' + title + '</i>. <b>' + journal + '</b> ' + year + ', ' + volume + ', ' + pages + '. ' +
-                '<a href="' + url + '" target="_blank" rel="noopener">' + (r.doi || url) + '</a>';
-      return '<li>' + acs + '</li>';
-    }).join('');
-    refsList.innerHTML = html;
-    if (refsSection.classList) refsSection.classList.remove('hidden');
-    return;
-  }
-
-  // fallback to data.refs
-  if (data && Object.prototype.toString.call(data.refs) === '[object Array]' && data.refs.length > 0) {
-    data.references = data.refs;
-    return window.renderRefsFromData(data);
-  }
-
-  // If nothing: show a tiny hint so you can see it's alive
-  var hint = document.createElement('div');
-  hint.className = 'small';
-  hint.textContent = 'No references in response.';
-  refsSection.appendChild(hint);
-  if (refsSection.classList) refsSection.classList.remove('hidden');
-};
-/* --- End global references renderer --- */
-
-
 document.addEventListener('DOMContentLoaded', () => {
   const $ = (id) => document.getElementById(id);
 
@@ -95,63 +34,237 @@ document.addEventListener('DOMContentLoaded', () => {
     modeRobot.classList.add('active');
     modeReason?.classList.remove('active');
   });
+  modeReason?.addEventListener('click', () => {
+    mode = 'reasoning';
+    modeReason.setAttribute('aria-checked', 'true');
+    modeRobot?.setAttribute('aria-checked', 'false');
+    modeReason.classList.add('active');
+    modeRobot?.classList.remove('active');
+  });
 
-    modeReason?.addEventListener('click', () => {
-      mode = 'reasoning';
-      modeReason.setAttribute('aria-checked', 'true');
-      modeRobot?.setAttribute('aria-checked', 'false');
-      modeReason.classList.add('active');
-      modeRobot?.classList.remove('active');
+  /**
+   * Reads the CSRF token from meta tag or cookie.
+   * @returns {string|undefined}
+   */
+  function readCsrfToken() {
+    return document.querySelector('meta[name="csrf-token"]')?.content ||
+      (document.cookie.match(/(?:^|;\s*)csrf_token=([^;]+)/)?.[1]);
+  }
+
+  // Small helper to sandbox optional UI so it can't crash the flow
+  function safe(fn){ try { fn(); } catch(e){ console.warn('Optional UI failed:', e); } }
+
+  // Ask button
+  /**
+   * Handles the Ask button click: sends question to backend and updates UI.
+   */
+  askBtn?.addEventListener('click', async () => {
+    const question = qInput?.value.trim();
+    if (!question) return;
+
+    askBtn.disabled = true;
+    askMsg.classList.remove('hidden');
+    askMsg.textContent = 'Asking…';
+
+    try {
+      const headers = { 'Content-Type': 'application/json' };
+      const csrf = readCsrfToken();
+      if (csrf) headers['X-CSRFToken'] = csrf;
+
+      const res = await fetch('/ask', {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({ question, mode })
+      });
+
+      const raw = await res.text();
+      let data;
+      try { data = JSON.parse(raw); } catch { data = { answer: raw }; }
+
+      answerPre.textContent = data.answer ?? '(no answer)';
+      rationalePre.textContent = data.rationale ?? '';
+      renderRefsFromData(data);
+askMsg.textContent = res.ok ? 'Done.' : `Error ${res.status}`;
+    } catch (err) {
+      console.error(err);
+      askMsg.textContent = 'Error. Check console.';
+    } finally {
+      askBtn.disabled = false;
+    }
+  });
+
+  // Parse button (Convert to JSON + Download)
+  /**
+   * Handles the Parse button click: converts answer to JSON and triggers download.
+   */
+  parseBtn?.addEventListener('click', async () => {
+  const text = answerPre?.textContent || '';
+  if (!text) return;
+
+  parseBtn.disabled = true;
+  parseBtn.textContent = 'Converting…';
+
+  try {
+    const headers = { 'Content-Type': 'application/json' };
+    const csrf = readCsrfToken();
+    if (csrf) headers['X-CSRFToken'] = csrf;
+
+    const res = await fetch('/parse', {
+      method: 'POST',
+      headers,
+      body: JSON.stringify({ text })
     });
 
+    const data = await res.json();
+    if (!data || !data.ok || !data.data) {
+      throw new Error(data?.error || 'Parse failed');
+    }
+
+    const pretty = JSON.stringify(data.data, null, 2);
+
+    if (jsonBlock) jsonBlock.textContent = pretty;
+        document.getElementById('jsonBlock')?.classList.remove('hidden');
+      } catch (err) {
+        console.error(err);
+        parseBtn.textContent = 'Error';
+      } finally {
+        parseBtn.disabled = false;
+        parseBtn.textContent = 'Parse';
+      }
+    });
+
+  /**
+   * Renders references from data object into the UI.
+   * @param {object} data
+   */
+  
+  function renderRefsFromData(data) {
+    // Accept multiple shapes: references/ref arrays, citations, used_refs; and blocks under reference_block/references_block
+    if (!refsSection) return;
+
+    const block = (data && (data.reference_block || data.references_block)) || '';
+    const arrRaw = (data && (data.references || data.refs || data.citations || data.used_refs)) || null;
+
+    // Used indexes (1-based), e.g., [1,2,5]
+    const used = Array.isArray(data?.used_ref_indexes) ? data.used_ref_indexes.map(Number).filter(n => Number.isFinite(n)) : [];
+
+    // Clear previous content
+    refsList && (refsList.innerHTML = '');
+    refsSection?.querySelector('.refs-pre')?.remove();
+
+    // Prefer structured refs if present
+    if (Array.isArray(arrRaw) && arrRaw.length && refsList) {
+      const items = used.length
+        ? arrRaw.map((r, i) => ({ r, i: i + 1 })).filter(x => used.includes(x.i)).map(x => x.r)
+        : arrRaw;
+
+      if (items.length) {
+        items.forEach((r, idx) => {
+          const li = document.createElement('li');
+
+          // String reference
+          if (typeof r === 'string') {
+            li.textContent = r;
+            refsList.appendChild(li);
+            return;
+          }
+
+          const title   = r.title || r.citation || r.name || r.label || `Reference ${idx+1}`;
+          const authors = Array.isArray(r.authors) ? r.authors.join(', ') : (r.authors || '');
+          const journal = (r.biblio && r.biblio.journal) || r.journal || r.source || '';
+          const year    = r.year || (r.biblio && r.biblio.year) || '';
+          const doiUrl  = r.doi ? String(r.doi).replace(/^https?:\/\/doi\.org\//, '') : '';
+          const url     = r.url || (doiUrl ? `https://doi.org/${doiUrl}` : '');
+
+          const strong = document.createElement('strong');
+          strong.textContent = title;
+          li.appendChild(strong);
+
+          const metaBits = [authors, journal, year].filter(Boolean);
+          if (metaBits.length) {
+            const small = document.createElement('small');
+            small.textContent = ' — ' + metaBits.join(', ');
+            li.appendChild(small);
+          }
+
+          if (url) {
+            li.appendChild(document.createTextNode(' '));
+            const a = document.createElement('a');
+            a.href = url; a.target = '_blank'; a.rel = 'noopener';
+            a.textContent = '(link)';
+            li.appendChild(a);
+          }
+
+          refsList.appendChild(li);
+        });
+
+        refsSection.classList.remove('hidden');
+        // Initialize optional toggle if available
+        safe(() => window.initRefsToggle?.({ btnSelector: '#refsToggleBtn', panelSelector: '#refsSection' }));
+        return;
+      }
+    }
+
+    // Fallback: preformatted block
+    if (typeof block === 'string' && block.trim()) {
+      refsList.innerHTML = '';
+      const pre = document.createElement('pre');
+      pre.className = 'refs-pre';
+      pre.textContent = block.trim();
+      refsSection.appendChild(pre);
+      refsSection.classList.remove('hidden');
+      safe(() => window.initRefsToggle?.({ btnSelector: '#refsToggleBtn', panelSelector: '#refsSection' }));
+      return;
+    }
+
     // Nothing to show
-    if (refsSection && refsSection.classList) refsSection.classList.add('hidden');
+    refsSection.classList.add('hidden');
+  }
+
   // Upload button
   /**
    * Handles the Upload button click: uploads a file to the backend.
    */
-  if (uploadBtn) {
-    uploadBtn.addEventListener('click', async () => {
-      const file = fileInput?.files?.[0];
-      if (!file) return;
-      uploadBtn.disabled = true;
-      uplMsg.textContent = 'Uploading…';
-      uplMsg.classList.remove('hidden');
+  uploadBtn?.addEventListener('click', async () => {
+    const file = fileInput?.files?.[0];
+    if (!file) return;
+    uploadBtn.disabled = true;
+    uplMsg.textContent = 'Uploading…';
+    uplMsg.classList.remove('hidden');
 
-      try {
-        const headers = {};
-        const csrf = readCsrfToken();
-        if (csrf) headers['X-CSRFToken'] = csrf;
+    try {
+      const headers = {};
+      const csrf = readCsrfToken();
+      if (csrf) headers['X-CSRFToken'] = csrf;
 
-        const fd = new FormData();
-        fd.append('file', file);
+      const fd = new FormData();
+      fd.append('file', file);
 
-        const res = await fetch('/upload', {
-          method: 'POST',
-          headers,
-          body: fd
-        });
+      const res = await fetch('/upload', {
+        method: 'POST',
+        headers,
+        body: fd
+      });
 
-        const json = await res.json();
-        if (json.ok) {
-          uplMsg.textContent = 'Uploaded OK';
-          if (json.filename) {
-            const li = document.createElement('li');
-            li.textContent = json.filename;
-            uplList?.appendChild(li);
-          }
-        } else {
-          uplMsg.textContent = 'Upload error: ' + (json.error || 'unknown');
+      const json = await res.json();
+      if (json.ok) {
+        uplMsg.textContent = 'Uploaded OK';
+        if (json.filename) {
+          const li = document.createElement('li');
+          li.textContent = json.filename;
+          uplList?.appendChild(li);
         }
-
-      } catch (err) {
-        console.error(err);
-        uplMsg.textContent = 'Upload failed';
-      } finally {
-        uploadBtn.disabled = false;
+      } else {
+        uplMsg.textContent = 'Upload error: ' + (json.error || 'unknown');
       }
-    });
-  }
+
+    } catch (err) {
+      console.error(err);
+      uplMsg.textContent = 'Upload failed';
+    } finally {
+      uploadBtn.disabled = false;
+    }
+  });
 
   // History button
   /**
@@ -177,7 +290,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const data = await res.json();
             answerPre.textContent = data.answer ?? '(no answer)';
             rationalePre.textContent = data.rationale ?? '';
-            window.renderRefsFromData(data);
+            renderRefsFromData(data);
           } catch (err) {
             console.error(err);
           }
@@ -262,5 +375,4 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // Auto-load history on page load
-  if (historyBtn) historyBtn.click();
-});
+if (historyBtn) historyBtn.click()});
