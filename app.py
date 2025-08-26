@@ -921,12 +921,13 @@ def ask():
         " - Specify temperatures (°C), ramp rates (°C/min), and hold times (min/h).\n"
         " - Include workup and purification (quench, washing/centrifugation, drying) with volumes.\n"
         " - No placeholders (avoid “e.g.”/“or”). Be decisive.\n"
-        " - Output only the final protocol in markdown. Do not include any fenced blocks named reason or rationale in the answer. Put all reasoning in the separate rationale channel."
+        " - Output only the final protocol in markdown. Do not include any fenced blocks named reason or rationale in the answer. Put all reasoning in the separate rationale channel.\n"
+        " - Avoid using Schlenk line, air-free techniques. Do not suggest inert gas."
     )
     reasoning_rules = (
         " - Provide a mechanistic explanation and design considerations for the target.\n"
         " - Focus on: nucleation vs growth; ligand/solvent coordination; " 
-        "IMPORTANT: specify why certain precursors over others; and IMPORTANT: why certain reagents over others.\n"
+        " - IMPORTANT: specify why certain precursors over others; and IMPORTANT: why certain reagents over others.\n"
         " - Do NOT say generic statements, or say you only chose things because they were in context or references. Specify your reasoning.\n"
         " - Do NOT return a step-by-step protocol. Be concise but specific."
     )
@@ -948,7 +949,7 @@ def ask():
             "Rules:\n"
             " - Prefer CONTEXT and REFERENCES over general knowledge when relevant.\n"
             " - For each bullet, quote or paraphrase a specific finding from CONTEXT or REFERENCES, and cite the source. Do not generalize or invent citations.\n"
-            " - Be specific to the question.\n"
+            " - Be very specific to the question.\n"
             f"{inline_rule}\n"
             " - If CONTEXT is insufficient, say so explicitly before generalizing.\n"
             f"{reasoning_rules}\n"
