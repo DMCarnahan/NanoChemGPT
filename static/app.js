@@ -27,19 +27,19 @@ document.addEventListener('DOMContentLoaded', () => {
   let mode = 'robot';
 
   // Mode toggle
-  modeRobot?.addEventListener('click', () => {
+  if (modeRobot) modeRobot.addEventListener('click', () => {
     mode = 'robot';
     modeRobot.setAttribute('aria-checked', 'true');
-    modeReason?.setAttribute('aria-checked', 'false');
+    (modeReason ? modeReason.setAttribute : undefined)('aria-checked', 'false');
     modeRobot.classList.add('active');
-    modeReason?.classList.remove('active');
+    if (modeReason && modeReason.classList) modeReason.classList.remove('active');
   });
-  modeReason?.addEventListener('click', () => {
+  if (modeReason) modeReason.addEventListener('click', () => {
     mode = 'reasoning';
     modeReason.setAttribute('aria-checked', 'true');
-    modeRobot?.setAttribute('aria-checked', 'false');
+    (modeRobot ? modeRobot.setAttribute : undefined)('aria-checked', 'false');
     modeReason.classList.add('active');
-    modeRobot?.classList.remove('active');
+    if (modeRobot && modeRobot.classList) modeRobot.classList.remove('active');
   });
 
   /**
@@ -47,26 +47,30 @@ document.addEventListener('DOMContentLoaded', () => {
    * @returns {string|undefined}
    */
   function readCsrfToken() {
-    return document.querySelector('meta[name="csrf-token"]')?.content ||
-      (document.cookie.match(/(?:^|;\s*)csrf_token=([^;]+)/)?.[1]);
+    var _m = document.querySelector('meta[name="csrf-token"]');
+      if (_m && _m.content) return _m.content;
+      var _cm = document.cookie.match(/(?:^|;\s*)csrf_token=([^;]+)/);
+      return (_cm && _cm[1]) || null;
   }
-
-  // Small helper to sandbox optional UI so it can't crash the flow
-  function safe(fn){ try { fn(); } catch(e){ console.warn('Optional UI failed:', e); } }
 
   // Ask button
   /**
    * Handles the Ask button click: sends question to backend and updates UI.
    */
-  askBtn?.addEventListener('click', async () => {
-    const question = qInput?.value.trim();
+  if (askBtn) askBtn.addEventListener('click', async () => {
+    const question = ((qInput && qInput.value) ? qInput.value.trim() : '');
     if (!question) return;
 
     askBtn.disabled = true;
     askMsg.classList.remove('hidden');
     askMsg.textContent = 'Asking…';
 
-    try {
+    
+
+// Forward declare to avoid ReferenceError in some engines when called earlier in the block
+function renderRefsFromData(data) { /* stub; replaced below */ }
+
+try {
       const headers = { 'Content-Type': 'application/json' };
       const csrf = readCsrfToken();
       if (csrf) headers['X-CSRFToken'] = csrf;
@@ -84,7 +88,48 @@ document.addEventListener('DOMContentLoaded', () => {
       answerPre.textContent = data.answer ?? '(no answer)';
       rationalePre.textContent = data.rationale ?? '';
       renderRefsFromData(data);
-askMsg.textContent = res.ok ? 'Done.' : `Error ${res.status}`;
+      // ----- References (used-only), with fallback to preformatted block -----
+  const usedIdxSet = new Set(
+    Array.isArray(data.used_ref_indexes) ? data.used_ref_indexes.map(Number) : []
+  );
+  const haveStructured = Array.isArray(data.refs) && data.refs.length > 0;
+  const haveBlock = typeof data.references_block === 'string' && data.references_block.trim().length > 0;
+
+  // clear any previous <pre> block if we switch back to list mode
+  var __tmp = refsSection.querySelector('.refs-pre'); if (__tmp && __tmp.remove) __tmp.remove();
+
+  if (haveStructured && usedIdxSet.size > 0) {
+    refsSection.classList.remove('hidden');
+    refsList.innerHTML = data.refs
+      .map((r, i) => ({ r, i: i + 1 }))
+      .filter(x => usedIdxSet.has(x.i))
+      .map(({ r, i }) => {
+        const authors = Array.isArray(r.authors) ? r.authors.join(', ') : (r.authors || '');
+        const title = r.title || `Reference ${i}`;
+        const journal = (r.biblio && r.biblio.journal) || r.journal || '';
+        const year = r.year || (r.biblio && r.biblio.year) || '';
+        const volume = (r.biblio && r.biblio.volume) || r.volume || '';
+        const pages = (r.biblio && r.biblio.pages) || r.pages || '';
+        const doiUrl = r.doi ? `https://doi.org/${r.doi}` : '';
+        const url = r.url || doiUrl || '#';
+        const acs = `${authors}. <i>${title}</i>. <b>${journal}</b> ${year}, ${volume}, ${pages}. ` +
+                    `<a href="${url}" target="_blank" rel="noopener">${r.doi || url}</a>`;
+        return `<li>${acs}</li>`;
+      })
+      .join('');
+  } else if (haveBlock) {
+    refsSection.classList.remove('hidden');
+    refsList.innerHTML = '';
+    const pre = document.createElement('pre');
+    pre.className = 'refs-pre';
+    pre.textContent = data.references_block.trim();
+    refsSection.appendChild(pre);
+  } else {
+    refsSection.classList.add('hidden');
+    refsList.innerHTML = '';
+  }
+
+      askMsg.textContent = res.ok ? 'Done.' : `Error ${res.status}`;
     } catch (err) {
       console.error(err);
       askMsg.textContent = 'Error. Check console.';
@@ -97,8 +142,8 @@ askMsg.textContent = res.ok ? 'Done.' : `Error ${res.status}`;
   /**
    * Handles the Parse button click: converts answer to JSON and triggers download.
    */
-  parseBtn?.addEventListener('click', async () => {
-  const text = answerPre?.textContent || '';
+  if (parseBtn) parseBtn.addEventListener('click', async () => {
+  const text = (answerPre ? answerPre.textContent : '') || '';
   if (!text) return;
 
   parseBtn.disabled = true;
@@ -117,116 +162,101 @@ askMsg.textContent = res.ok ? 'Done.' : `Error ${res.status}`;
 
     const data = await res.json();
     if (!data || !data.ok || !data.data) {
-      throw new Error(data?.error || 'Parse failed');
+      throw new Error((data ? data.error : undefined) || 'Parse failed');
     }
 
     const pretty = JSON.stringify(data.data, null, 2);
 
     if (jsonBlock) jsonBlock.textContent = pretty;
-        document.getElementById('jsonBlock')?.classList.remove('hidden');
-      } catch (err) {
-        console.error(err);
-        parseBtn.textContent = 'Error';
-      } finally {
-        parseBtn.disabled = false;
-        parseBtn.textContent = 'Parse';
-      }
-    });
+    var __el = document.getElementById('jsonBlock'); if (__el && __el.classList) __el.classList.remove('hidden');
 
   /**
    * Renders references from data object into the UI.
    * @param {object} data
    */
-  
   function renderRefsFromData(data) {
-    // Accept multiple shapes: references/ref arrays, citations, used_refs; and blocks under reference_block/references_block
+    // Supports either `data.references_block` (preformatted string)
+    // OR an array `data.references` of {title, url, ...}
     if (!refsSection) return;
 
-    const block = (data && (data.reference_block || data.references_block)) || '';
-    const arrRaw = (data && (data.references || data.refs || data.citations || data.used_refs)) || null;
+    const block = (data && data.references_block) || null;
+    const arr   = (data && data.references) || null;
 
-    // Used indexes (1-based), e.g., [1,2,5]
-    const used = Array.isArray(data?.used_ref_indexes) ? data.used_ref_indexes.map(Number).filter(n => Number.isFinite(n)) : [];
+    // Clear old
+    if (refsList) refsList.innerHTML = '';
 
-    // Clear previous content
-    refsList && (refsList.innerHTML = '');
-    refsSection?.querySelector('.refs-pre')?.remove();
-
-    // Prefer structured refs if present
-    if (Array.isArray(arrRaw) && arrRaw.length && refsList) {
-      const items = used.length
-        ? arrRaw.map((r, i) => ({ r, i: i + 1 })).filter(x => used.includes(x.i)).map(x => x.r)
-        : arrRaw;
-
-      if (items.length) {
-        items.forEach((r, idx) => {
+    if (block && typeof block === 'string') {
+      // Render block safely inside a <pre>, but as list if it starts with "1. "
+      const lines = block.split(/\r?\n/).filter(Boolean);
+      if (refsList && lines.length) {
+        lines.forEach(line => {
           const li = document.createElement('li');
-
-          // String reference
-          if (typeof r === 'string') {
-            li.textContent = r;
-            refsList.appendChild(li);
-            return;
-          }
-
-          const title   = r.title || r.citation || r.name || r.label || `Reference ${idx+1}`;
-          const authors = Array.isArray(r.authors) ? r.authors.join(', ') : (r.authors || '');
-          const journal = (r.biblio && r.biblio.journal) || r.journal || r.source || '';
-          const year    = r.year || (r.biblio && r.biblio.year) || '';
-          const doiUrl  = r.doi ? String(r.doi).replace(/^https?:\/\/doi\.org\//, '') : '';
-          const url     = r.url || (doiUrl ? `https://doi.org/${doiUrl}` : '');
-
-          const strong = document.createElement('strong');
-          strong.textContent = title;
-          li.appendChild(strong);
-
-          const metaBits = [authors, journal, year].filter(Boolean);
-          if (metaBits.length) {
-            const small = document.createElement('small');
-            small.textContent = ' — ' + metaBits.join(', ');
-            li.appendChild(small);
-          }
-
-          if (url) {
-            li.appendChild(document.createTextNode(' '));
-            const a = document.createElement('a');
-            a.href = url; a.target = '_blank'; a.rel = 'noopener';
-            a.textContent = '(link)';
-            li.appendChild(a);
-          }
-
+          li.textContent = line.replace(/^\s*\d+\.\s*/, '');
           refsList.appendChild(li);
         });
-
-        refsSection.classList.remove('hidden');
-        // Initialize optional toggle if available
-        safe(() => window.initRefsToggle?.({ btnSelector: '#refsToggleBtn', panelSelector: '#refsSection' }));
-        return;
+        if (refsSection && refsSection.classList) refsSection.classList.remove('hidden');
+      } else {
+        if (refsSection && refsSection.classList) refsSection.classList.add('hidden');
       }
+      return;
     }
 
-    // Fallback: preformatted block
-    if (typeof block === 'string' && block.trim()) {
-      refsList.innerHTML = '';
-      const pre = document.createElement('pre');
-      pre.className = 'refs-pre';
-      pre.textContent = block.trim();
-      refsSection.appendChild(pre);
-      refsSection.classList.remove('hidden');
-      safe(() => window.initRefsToggle?.({ btnSelector: '#refsToggleBtn', panelSelector: '#refsSection' }));
+    if (Array.isArray(arr) && arr.length && refsList) {
+      arr.forEach(r => {
+        const li = document.createElement('li');
+        // Prefer title + link if available
+        if ((r ? r.url : undefined)) {
+          const a = document.createElement('a');
+          a.href = r.url;
+          a.textContent = r.title ? r.title : (r.url);
+          a.target = '_blank';
+          a.rel = 'noopener noreferrer';
+          li.appendChild(a);
+          if ((r ? r.meta : undefined)) {
+            const small = document.createElement('small');
+            small.textContent = ' ' + r.meta;
+            li.appendChild(small);
+          }
+        } else {
+          li.textContent = (r ? r.title : undefined) ? r.title : JSON.stringify(r);
+        }
+        refsList.appendChild(li);
+      });
+      if (refsSection && refsSection.classList) refsSection.classList.remove('hidden');
       return;
     }
 
     // Nothing to show
-    refsSection.classList.add('hidden');
+    if (refsSection && refsSection.classList) refsSection.classList.add('hidden');
   }
+
+    // Trigger download
+    const blob = new Blob([pretty], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = (data.filename || 'converted') + '.json';
+    document.body.appendChild(a); // needed for Firefox
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+
+  } catch (err) {
+    console.error(err);
+    if (jsonBlock) jsonBlock.textContent = 'Request failed';
+    var __el = document.getElementById('jsonBlock'); if (__el && __el.classList) __el.classList.remove('hidden');
+  } finally {
+    parseBtn.disabled = false;
+    parseBtn.textContent = 'Convert → JSON';
+  }
+});
 
   // Upload button
   /**
    * Handles the Upload button click: uploads a file to the backend.
    */
-  uploadBtn?.addEventListener('click', async () => {
-    const file = fileInput?.files?.[0];
+  if (uploadBtn) uploadBtn.addEventListener('click', async () => {
+    const file = ((fileInput && fileInput.files) ? fileInput.files[0] : null);
     if (!file) return;
     uploadBtn.disabled = true;
     uplMsg.textContent = 'Uploading…';
@@ -252,7 +282,7 @@ askMsg.textContent = res.ok ? 'Done.' : `Error ${res.status}`;
         if (json.filename) {
           const li = document.createElement('li');
           li.textContent = json.filename;
-          uplList?.appendChild(li);
+          (uplList ? uplList.appendChild : undefined)(li);
         }
       } else {
         uplMsg.textContent = 'Upload error: ' + (json.error || 'unknown');
@@ -270,7 +300,7 @@ askMsg.textContent = res.ok ? 'Done.' : `Error ${res.status}`;
   /**
    * Handles the History button click: loads and displays previous Q&A.
    */
-  historyBtn?.addEventListener('click', async () => {
+  if (historyBtn) historyBtn.addEventListener('click', async () => {
     try {
       const res = await fetch('/api/history');
       const data = await res.json();
@@ -305,8 +335,8 @@ askMsg.textContent = res.ok ? 'Done.' : `Error ${res.status}`;
   /**
    * Handles the Save as TXT button click: downloads the answer as a text file.
    */
-  saveTxtBtn?.addEventListener('click', () => {
-    const text = answerPre?.textContent || '';
+  if (saveTxtBtn) saveTxtBtn.addEventListener('click', () => {
+    const text = (answerPre ? answerPre.textContent : '') || '';
     if (!text) return;
 
     const blob = new Blob([text], { type: 'text/plain' });
@@ -321,18 +351,20 @@ askMsg.textContent = res.ok ? 'Done.' : `Error ${res.status}`;
   });
 
   // Built-in file upload
-  builtinDrop?.addEventListener('click', () => builtinFile?.click());
-  builtinDrop?.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') builtinFile?.click();
+  if (builtinDrop) builtinDrop.addEventListener('click', () => {
+    if (builtinFile) builtinFile.click();
   });
-  builtinDrop?.addEventListener('dragover', (e) => {
+  if (builtinDrop) builtinDrop.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') if (builtinFile) builtinFile.click();
+  });
+  if (builtinDrop) builtinDrop.addEventListener('dragover', (e) => {
     e.preventDefault();
     builtinDrop.classList.add('dragover');
   });
-  builtinDrop?.addEventListener('dragleave', () => {
+  if (builtinDrop) builtinDrop.addEventListener('dragleave', () => {
     builtinDrop.classList.remove('dragover');
   });
-  builtinDrop?.addEventListener('drop', (e) => {
+  if (builtinDrop) builtinDrop.addEventListener('drop', (e) => {
     e.preventDefault();
     builtinDrop.classList.remove('dragover');
     if (e.dataTransfer.files.length) {
@@ -340,7 +372,7 @@ askMsg.textContent = res.ok ? 'Done.' : `Error ${res.status}`;
       uploadBuiltinFiles(e.dataTransfer.files);
     }
   });
-  builtinFile?.addEventListener('change', () => {
+  if (builtinFile) builtinFile.addEventListener('change', () => {
     if (builtinFile.files.length) uploadBuiltinFiles(builtinFile.files);
   });
 
@@ -375,4 +407,5 @@ askMsg.textContent = res.ok ? 'Done.' : `Error ${res.status}`;
   }
 
   // Auto-load history on page load
-if (historyBtn) historyBtn.click()});
+  if (historyBtn) historyBtn.click();
+});
