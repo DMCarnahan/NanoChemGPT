@@ -1,66 +1,63 @@
-
 /* --- Global references renderer (ES5-safe) --- */
 window.renderRefsFromData = function(data){
-  try { console.debug('[refs]', { hasBlock: !!(data && data.references_block), arr: (data && data.references ? data.references.length : 0), refs: (data && data.refs ? data.refs.length : 0), used: (data && data.used_ref_indexes ? data.used_ref_indexes.length : 0) }); } catch(e){}
+  try { console.debug('[refs]', data); } catch(e){}
   var refsSection = document.getElementById('refsSection');
-  if (!refsSection) return;
+  var refsList    = document.getElementById('refsList');
+  if (!refsSection || !refsList) return;
 
-  // Clear previous content
-  var preOld = refsSection.querySelector ? refsSection.querySelector('.refs-pre') : null;
-  if (preOld && preOld.parentNode) preOld.parentNode.removeChild(preOld);
-  var list = document.getElementById('refsList');
-  if (list) list.innerHTML = '';
+  // clear old
+  refsList.innerHTML = '';
+  var oldPre = refsSection.querySelector ? refsSection.querySelector('.refs-pre') : null;
+  if (oldPre && oldPre.parentNode) oldPre.parentNode.removeChild(oldPre);
 
-  var block = (data && data.references_block) || '';
-  var arr   = (data && data.references) || [];
+  // Accept a handful of alias keys
+  var block = (data && (data.references_block || data.referencesBlock || data.references_str || data.referencesText || '')) || '';
+  var arr   = (data && (data.references || data.referencesAll || null)) || [];
 
-  // If block string present — render verbatim in #refsFullBlock and show section
-  if (typeof block === 'string' && block.replace(/\s+/g,'').length > 0) {
+  if (typeof block === 'string' && block.trim().length > 0) {
     var pre = document.createElement('pre');
     pre.className = 'refs-pre';
-    pre.textContent = block;
-    var full = document.getElementById('refsFullBlock');
-    if (full) { full.innerHTML = ''; full.appendChild(pre); }
-    if (refsSection && refsSection.classList) refsSection.classList.remove('hidden');
+    pre.textContent = block.trim();
+    refsSection.appendChild(pre);
+    if (refsSection.classList) refsSection.classList.remove('hidden');
     return;
   }
 
-  // If structured array present — build list
   if (Object.prototype.toString.call(arr) === '[object Array]' && arr.length > 0) {
-    var frag = document.createDocumentFragment();
-    for (var i = 0; i < arr.length; i++) {
-      var r = arr[i] || {};
-      var li = document.createElement('li');
-      var title = (r.title || '(no title)');
-      var year  = (r.year || '');
-      var url   = (r.url || (r.doi ? ('https://doi.org/' + r.doi) : ''));
-
-      var a = document.createElement('a');
-      a.textContent = title + (year ? (' (' + year + ')') : '');
-      a.href = url || '#';
-      a.target = '_blank';
-      a.rel = 'noopener noreferrer';
-
-      li.appendChild(a);
-      frag.appendChild(li);
-    }
-    if (list) {
-      list.appendChild(frag);
-    }
-    if (refsSection && refsSection.classList) refsSection.classList.remove('hidden');
+    var html = arr.map(function(r, i){
+      r = r || {};
+      var authors = (Array.isArray(r.authors) ? r.authors.join(', ') : (r.authors || ''));
+      var title = r.title || ('Reference ' + (i+1));
+      var journal = (r.biblio && r.biblio.journal) || r.journal || '';
+      var year = r.year || (r.biblio && r.biblio.year) || '';
+      var volume = (r.biblio && r.biblio.volume) || r.volume || '';
+      var pages = (r.biblio && r.biblio.pages) || r.pages || '';
+      var doiUrl = r.doi ? ('https://doi.org/' + r.doi) : '';
+      var url = r.url || doiUrl || '#';
+      var acs = authors + '. <i>' + title + '</i>. <b>' + journal + '</b> ' + year + ', ' + volume + ', ' + pages + '. ' +
+                '<a href="' + url + '" target="_blank" rel="noopener">' + (r.doi || url) + '</a>';
+      return '<li>' + acs + '</li>';
+    }).join('');
+    refsList.innerHTML = html;
+    if (refsSection.classList) refsSection.classList.remove('hidden');
     return;
   }
 
-  // Fallback: if server sent 'refs' (unfiltered), use them
+  // fallback to data.refs
   if (data && Object.prototype.toString.call(data.refs) === '[object Array]' && data.refs.length > 0) {
     data.references = data.refs;
-    return window.window.renderRefsFromData(data);
+    return window.renderRefsFromData(data);
   }
 
-  // Nothing to show → keep section hidden
-  if (refsSection && refsSection.classList) refsSection.classList.add('hidden');
+  // If nothing: show a tiny hint so you can see it's alive
+  var hint = document.createElement('div');
+  hint.className = 'small';
+  hint.textContent = 'No references in response.';
+  refsSection.appendChild(hint);
+  if (refsSection.classList) refsSection.classList.remove('hidden');
 };
 /* --- End global references renderer --- */
+
 
 document.addEventListener('DOMContentLoaded', () => {
   const $ = (id) => document.getElementById(id);
@@ -98,165 +95,14 @@ document.addEventListener('DOMContentLoaded', () => {
     modeRobot.classList.add('active');
     modeReason?.classList.remove('active');
   });
-  modeReason?.addEventListener('click', () => {
-    mode = 'reasoning';
-    modeReason.setAttribute('aria-checked', 'true');
-    modeRobot?.setAttribute('aria-checked', 'false');
-    modeReason.classList.add('active');
-    modeRobot?.classList.remove('active');
-  });
 
-  /**
-   * Reads the CSRF token from meta tag or cookie.
-   * @returns {string|undefined}
-   */
-  function readCsrfToken() {
-    return document.querySelector('meta[name="csrf-token"]')?.content ||
-      (document.cookie.match(/(?:^|;\s*)csrf_token=([^;]+)/)?.[1]);
-  }
-
-  // Ask button
-  /**
-   * Handles the Ask button click: sends question to backend and updates UI.
-   */
-  askBtn?.addEventListener('click', async () => {
-    const question = qInput?.value.trim();
-    if (!question) return;
-
-    askBtn.disabled = true;
-    askMsg.classList.remove('hidden');
-    askMsg.textContent = 'Asking…';
-
-    try {
-      const headers = { 'Content-Type': 'application/json' };
-      const csrf = readCsrfToken();
-      if (csrf) headers['X-CSRFToken'] = csrf;
-
-      const res = await fetch('/ask', {
-        method: 'POST',
-        headers,
-        body: JSON.stringify({ question, mode })
-      });
-
-      const raw = await res.text();
-      let data;
-      try { data = JSON.parse(raw); } catch { data = { answer: raw }; }
-
-      answerPre.textContent = data.answer ?? '(no answer)';
-      rationalePre.textContent = data.rationale ?? '';
-      window.renderRefsFromData(data);
-      // ----- References (used-only), with fallback to preformatted block -----
-  const usedIdxSet = new Set(
-    Array.isArray(data.used_ref_indexes) ? data.used_ref_indexes.map(Number) : []
-  );
-  const haveStructured = Array.isArray(data.refs) && data.refs.length > 0;
-  const haveBlock = typeof data.references_block === 'string' && data.references_block.trim().length > 0;
-
-  // clear any previous <pre> block if we switch back to list mode
-  refsSection.querySelector('.refs-pre')?.remove();
-
-  if (haveStructured && usedIdxSet.size > 0) {
-    refsSection.classList.remove('hidden');
-    refsList.innerHTML = data.refs
-      .map((r, i) => ({ r, i: i + 1 }))
-      .filter(x => usedIdxSet.has(x.i))
-      .map(({ r, i }) => {
-        const authors = Array.isArray(r.authors) ? r.authors.join(', ') : (r.authors || '');
-        const title = r.title || `Reference ${i}`;
-        const journal = (r.biblio && r.biblio.journal) || r.journal || '';
-        const year = r.year || (r.biblio && r.biblio.year) || '';
-        const volume = (r.biblio && r.biblio.volume) || r.volume || '';
-        const pages = (r.biblio && r.biblio.pages) || r.pages || '';
-        const doiUrl = r.doi ? `https://doi.org/${r.doi}` : '';
-        const url = r.url || doiUrl || '#';
-        const acs = `${authors}. <i>${title}</i>. <b>${journal}</b> ${year}, ${volume}, ${pages}. ` +
-                    `<a href="${url}" target="_blank" rel="noopener">${r.doi || url}</a>`;
-        return `<li>${acs}</li>`;
-      })
-      .join('');
-  } else if (haveBlock) {
-    refsSection.classList.remove('hidden');
-    refsList.innerHTML = '';
-    const pre = document.createElement('pre');
-    pre.className = 'refs-pre';
-    pre.textContent = data.references_block.trim();
-    refsSection.appendChild(pre);
-  } else {
-    refsSection.classList.add('hidden');
-    refsList.innerHTML = '';
-  }
-
-      askMsg.textContent = res.ok ? 'Done.' : `Error ${res.status}`;
-    } catch (err) {
-      console.error(err);
-      askMsg.textContent = 'Error. Check console.';
-    } finally {
-      askBtn.disabled = false;
-    }
-  });
-
-  // Parse button (Convert to JSON + Download)
-  /**
-   * Handles the Parse button click: converts answer to JSON and triggers download.
-   */
-  parseBtn?.addEventListener('click', async () => {
-  const text = answerPre?.textContent || '';
-  if (!text) return;
-
-  parseBtn.disabled = true;
-  parseBtn.textContent = 'Converting…';
-
-  try {
-    const headers = { 'Content-Type': 'application/json' };
-    const csrf = readCsrfToken();
-    if (csrf) headers['X-CSRFToken'] = csrf;
-
-    const res = await fetch('/parse', {
-      method: 'POST',
-      headers,
-      body: JSON.stringify({ text })
+    modeReason?.addEventListener('click', () => {
+      mode = 'reasoning';
+      modeReason.setAttribute('aria-checked', 'true');
+      modeRobot?.setAttribute('aria-checked', 'false');
+      modeReason.classList.add('active');
+      modeRobot?.classList.remove('active');
     });
-
-    const data = await res.json();
-    if (!data || !data.ok || !data.data) {
-      throw new Error(data?.error || 'Parse failed');
-    }
-
-    const pretty = JSON.stringify(data.data, null, 2);
-
-    if (jsonBlock) jsonBlock.textContent = pretty;
-    document.getElementById('jsonBlock')?.classList.remove('hidden');
-
-  /**
-   * Renders references from data object into the UI.
-   * @param {object} data
-   */
-  function renderRefsFromData(data) {
-    // Supports either `data.references_block` (preformatted string)
-    // OR an array `data.references` of {title, url, ...}
-    if (!refsSection) return;
-
-    const block = data?.references_block;
-    const arr   = data?.references;
-
-    // Clear old
-    if (refsList) refsList.innerHTML = '';
-
-    if (block && typeof block === 'string') {
-      // Render block safely inside a <pre>, but as list if it starts with "1. "
-      const lines = block.split(/\r?\n/).filter(Boolean);
-      if (refsList && lines.length) {
-        lines.forEach(line => {
-          const li = document.createElement('li');
-          li.textContent = line.replace(/^\s*\d+\.\s*/, '');
-          refsList.appendChild(li);
-        });
-        refsSection?.classList?.remove('hidden');
-      } else {
-        refsSection?.classList?.add('hidden');
-      }
-      return;
-    }
 
     if (Array.isArray(arr) && arr.length && refsList) {
       arr.forEach(r => {
@@ -285,73 +131,52 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Nothing to show
     refsSection?.classList?.add('hidden');
-  }
-
-    // Trigger download
-    const blob = new Blob([pretty], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = (data.filename || 'converted') + '.json';
-    document.body.appendChild(a); // needed for Firefox
-    a.click();
-    a.remove();
-    URL.revokeObjectURL(url);
-
-  } catch (err) {
-    console.error(err);
-    if (jsonBlock) jsonBlock.textContent = 'Request failed';
-    document.getElementById('jsonBlock')?.classList.remove('hidden');
-  } finally {
-    parseBtn.disabled = false;
-    parseBtn.textContent = 'Convert → JSON';
-  }
-});
-
   // Upload button
   /**
    * Handles the Upload button click: uploads a file to the backend.
    */
-  uploadBtn?.addEventListener('click', async () => {
-    const file = fileInput?.files?.[0];
-    if (!file) return;
-    uploadBtn.disabled = true;
-    uplMsg.textContent = 'Uploading…';
-    uplMsg.classList.remove('hidden');
+  if (uploadBtn) {
+    uploadBtn.addEventListener('click', async () => {
+      const file = fileInput?.files?.[0];
+      if (!file) return;
+      uploadBtn.disabled = true;
+      uplMsg.textContent = 'Uploading…';
+      uplMsg.classList.remove('hidden');
 
-    try {
-      const headers = {};
-      const csrf = readCsrfToken();
-      if (csrf) headers['X-CSRFToken'] = csrf;
+      try {
+        const headers = {};
+        const csrf = readCsrfToken();
+        if (csrf) headers['X-CSRFToken'] = csrf;
 
-      const fd = new FormData();
-      fd.append('file', file);
+        const fd = new FormData();
+        fd.append('file', file);
 
-      const res = await fetch('/upload', {
-        method: 'POST',
-        headers,
-        body: fd
-      });
+        const res = await fetch('/upload', {
+          method: 'POST',
+          headers,
+          body: fd
+        });
 
-      const json = await res.json();
-      if (json.ok) {
-        uplMsg.textContent = 'Uploaded OK';
-        if (json.filename) {
-          const li = document.createElement('li');
-          li.textContent = json.filename;
-          uplList?.appendChild(li);
+        const json = await res.json();
+        if (json.ok) {
+          uplMsg.textContent = 'Uploaded OK';
+          if (json.filename) {
+            const li = document.createElement('li');
+            li.textContent = json.filename;
+            uplList?.appendChild(li);
+          }
+        } else {
+          uplMsg.textContent = 'Upload error: ' + (json.error || 'unknown');
         }
-      } else {
-        uplMsg.textContent = 'Upload error: ' + (json.error || 'unknown');
-      }
 
-    } catch (err) {
-      console.error(err);
-      uplMsg.textContent = 'Upload failed';
-    } finally {
-      uploadBtn.disabled = false;
-    }
-  });
+      } catch (err) {
+        console.error(err);
+        uplMsg.textContent = 'Upload failed';
+      } finally {
+        uploadBtn.disabled = false;
+      }
+    });
+  }
 
   // History button
   /**
