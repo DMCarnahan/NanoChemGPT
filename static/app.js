@@ -65,7 +65,12 @@ document.addEventListener('DOMContentLoaded', () => {
     askMsg.classList.remove('hidden');
     askMsg.textContent = 'Asking…';
 
-    try {
+    
+
+// Forward declare to avoid ReferenceError in some engines when called earlier in the block
+function renderRefsFromData(data) { /* stub; replaced below */ }
+
+try {
       const headers = { 'Content-Type': 'application/json' };
       const csrf = readCsrfToken();
       if (csrf) headers['X-CSRFToken'] = csrf;
@@ -346,9 +351,7 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   // Built-in file upload
-  if (builtinDrop) builtinDrop.addEventListener('click', () => {
-    if (builtinFile) builtinFile.click();
-  });
+  if (builtinDrop) builtinDrop.addEventListener('click', () => if (builtinFile) builtinFile.click());
   if (builtinDrop) builtinDrop.addEventListener('keydown', (e) => {
     if (e.key === 'Enter') if (builtinFile) builtinFile.click();
   });
