@@ -948,14 +948,14 @@ def ask():
             "Rules:\n"
             " - Prefer CONTEXT and REFERENCES over general knowledge when relevant.\n"
             " - For each bullet, quote or paraphrase a specific finding from CONTEXT or REFERENCES, and cite the source. Do not generalize or invent citations.\n"
-            " - If you use any content from CONTEXT, append [CTX] on that line.\n"
+            " - Be specific to the question.\n"
             f"{inline_rule}\n"
             " - If CONTEXT is insufficient, say so explicitly before generalizing.\n"
             f"{reasoning_rules}\n"
             f"{acs_rule}\n"
             "Return exactly ONE block:\n"
             "## Mechanistic reasoning\n"
-            "- bullet points with inline [n] and [CTX] where appropriate.\n\n"
+            "- bullet points with inline [n] where appropriate.\n\n"
             f"CONTEXT:\n{context_joined}\n\n"
             f"REFERENCES:\n{refs_prompt}\n\n"
             f"User question: {question}"
@@ -966,7 +966,7 @@ def ask():
             "Rules:\n"
             " - Prefer CONTEXT and REFERENCES over general knowledge when relevant.\n"
             " - For each step, quote or paraphrase a specific finding from CONTEXT or REFERENCES, and cite the source. Do not generalize or invent citations.\n"
-            " - If you use any content from CONTEXT, append [CTX] on that line.\n"
+            " - .\n"
             f"{inline_rule}\n"
             " - If CONTEXT is insufficient, say so explicitly before generalizing.\n"
             f"{robot_rules}\n"
@@ -977,8 +977,8 @@ def ask():
             "2. **Materials**:\n[]\n"
             "3. **Procedure**\n[]\n\n"
             "```reason\n"
-            "For each key justification, add inline tags: [CTX] uploaded/context hits, [PARSED] parsed protocols, [n] for numbered web REFERENCES, [GEN] if inferred.\n"
-            "Keep rationales terse.\n"
+            "For each key justification, add inline tag: [n] for numbered web REFERENCES.\n"
+            "Keep rationales terse, but specific to the question, citing references and explaining logic.\n"
             "Add NO other blocks of text.\n"
             "```\n\n"
             f"CONTEXT:\n{context_joined}\n\n"
@@ -1073,7 +1073,7 @@ def ask():
         "answer": answer,
         "rationale": rationale,
         "markers": markers,
-        **payload,
+        **refs_payload,
         "context_present": bool(context_joined),
         "mining_enqueued": enqueued,
     })
