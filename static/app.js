@@ -351,7 +351,9 @@ try {
   });
 
   // Built-in file upload
-  if (builtinDrop) builtinDrop.addEventListener('click', () => if (builtinFile) builtinFile.click());
+  if (builtinDrop) builtinDrop.addEventListener('click', () => {
+    if (builtinFile) builtinFile.click();
+  });
   if (builtinDrop) builtinDrop.addEventListener('keydown', (e) => {
     if (e.key === 'Enter') if (builtinFile) builtinFile.click();
   });
