@@ -104,33 +104,8 @@ document.addEventListener('DOMContentLoaded', () => {
       modeRobot?.classList.remove('active');
     });
 
-    if (Array.isArray(arr) && arr.length && refsList) {
-      arr.forEach(r => {
-        const li = document.createElement('li');
-        // Prefer title + link if available
-        if (r?.url) {
-          const a = document.createElement('a');
-          a.href = r.url;
-          a.textContent = r.title ? r.title : (r.url);
-          a.target = '_blank';
-          a.rel = 'noopener noreferrer';
-          li.appendChild(a);
-          if (r?.meta) {
-            const small = document.createElement('small');
-            small.textContent = ' ' + r.meta;
-            li.appendChild(small);
-          }
-        } else {
-          li.textContent = r?.title ? r.title : JSON.stringify(r);
-        }
-        refsList.appendChild(li);
-      });
-      refsSection?.classList?.remove('hidden');
-      return;
-    }
-
     // Nothing to show
-    refsSection?.classList?.add('hidden');
+    if (refsSection && refsSection.classList) refsSection.classList.add('hidden');
   // Upload button
   /**
    * Handles the Upload button click: uploads a file to the backend.
