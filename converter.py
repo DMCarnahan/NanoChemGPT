@@ -731,6 +731,158 @@ def extract_steps(markdown_text: str) -> List[str]:
     return [strip_tags(s) for s in steps if s.strip()]
 
 # -------- Main converter --------
+
+# -------- Micro-action expansion --------
+def _label_for_vessel(vid: str, vessels: 'VesselRegistry', hardware: list[dict]) -> str:
+    label = vessels.as_dict().get(vid) or vid
+    hid = vessels.vessel_hardware(vid)
+    if hid:
+        hw = next((h for h in hardware if h.get("id")==hid), None)
+        if hw and hw.get("name"):
+            return f"{hw['name']} ({label})"
+    return label
+
+def _micro_for_op(op: dict, vessels: 'VesselRegistry', hardware: list[dict]) -> list[dict]:
+    m = []
+    typ = op.get("op")
+
+    if typ == "ensure_vessel":
+        v = _label_for_vessel(op.get("vessel",""), vessels, hardware)
+        m += [{"verb":"pick_up","object":v,"from":"bench"},
+              {"verb":"place","object":v,"to":"bench"}]
+        return m
+
+    if typ == "move_to_stir_plate":
+        v = _label_for_vessel(op.get("vessel",""), vessels, hardware)
+        m += [{"verb":"pick_up","object":v,"from":"bench"},
+              {"verb":"place","object":v,"to":"stir_plate"}]
+        return m
+
+    if typ == "set_stir_rate":
+        v = _label_for_vessel(op.get("vessel",""), vessels, hardware)
+        m += [{"verb":"set","device": op.get("stir_plate_id") or "stir_plate",
+               "param":"rpm","value":op.get("rpm")},
+              {"verb":"place","object":v,"to":"stir_plate"}]
+        return m
+
+    if typ == "set_hotplate_temperature":
+        m += [{"verb":"set","device": op.get("hotplate_id") or "hotplate",
+               "param":"temperature_C","value": op.get("temperature_C")}]
+        return m
+
+    if typ == "add_solute":
+        v = _label_for_vessel(op.get("vessel",""), vessels, hardware)
+        src = op.get("reagent") or "solute"
+        m += [{"verb":"pick_up","object":src,"from":"bench"},
+              {"verb":"pour","from":src,"to":v,"amount":op.get("amount"),"units":op.get("unit")},
+              {"verb":"place","object":src,"to":"bench"}]
+        return m
+
+    if typ == "add_solvent":
+        v = _label_for_vessel(op.get("vessel",""), vessels, hardware)
+        src = op.get("solvent") or op.get("reagent") or "solvent"
+        m += [{"verb":"pick_up","object":src,"from":"bench"},
+              {"verb":"pour","from":src,"to":v,"amount":op.get("volume"),"units":op.get("volume_units")},
+              {"verb":"place","object":src,"to":"bench"}]
+        return m
+
+    if typ == "transfer":
+        src = _label_for_vessel(op.get("from",""), vessels, hardware) if op.get("from") else "source vessel"
+        dst = _label_for_vessel(op.get("to",""), vessels, hardware) if op.get("to") else op.get("to") or "target vessel"
+        rate = op.get("rate") or "normal"
+        m += [{"verb":"pick_up","object":src,"from":"stir_plate"},
+              {"verb":"pour","from":src,"to":dst,"rate":rate},
+              {"verb":"place","object":src,"to":"stir_plate"}]
+        return m
+
+    if typ == "wait":
+        m += [{"verb":"wait","minutes": op.get("minutes")}]
+        return m
+
+    if typ == "filter":
+        v = _label_for_vessel(op.get("vessel",""), vessels, hardware)
+        m += [{"verb":"place","object":"filtration setup","to":"bench"},
+              {"verb":"pick_up","object":v,"from":"bench"},
+              {"verb":"pour","from":v,"to":"filtration setup"},
+              {"verb":"place","object":v,"to":"bench"}]
+        return m
+
+    if typ == "start_vacuum":
+        m += [{"verb":"set","device": op.get("vacuum_pump_id") or "vacuum_pump","param":"power","value":"on"},
+              {"verb":"start","device": op.get("vacuum_pump_id") or "vacuum_pump"}]
+        return m
+
+    if typ == "decant_supernatant":
+        tube = op.get("tube") or "tube"
+        m += [{"verb":"pick_up","object":tube,"from":"rack"},
+              {"verb":"pour","from":tube,"to":"waste"},
+              {"verb":"place","object":tube,"to":"rack"}]
+        return m
+
+    if typ == "add_wash_solvent":
+        tube = op.get("tube") or "tube"
+        src = op.get("solvent") or "wash solvent"
+        m += [{"verb":"pick_up","object":src,"from":"bench"},
+              {"verb":"pour","from":src,"to":tube},
+              {"verb":"place","object":src,"to":"bench"}]
+        return m
+
+    if typ == "resuspend":
+        tube = op.get("tube") or "tube"
+        m += [{"verb":"pick_up","object":tube,"from":"rack"},
+              {"verb":"place","object":tube,"to":"vortex"},
+              {"verb":"wait","minutes":1},
+              {"verb":"place","object":tube,"to":"rack"}]
+        return m
+
+    if typ == "centrifuge":
+        tube = "tube"
+        m += [{"verb":"pick_up","object":tube,"from":"rack"},
+              {"verb":"place","object":tube,"to":"centrifuge"},
+              {"verb":"set","device": op.get("centrifuge_id") or "centrifuge","param":"rpm","value": op.get("rpm")},
+              {"verb":"set","device": op.get("centrifuge_id") or "centrifuge","param":"minutes","value": op.get("minutes")},
+              {"verb":"start","device": op.get("centrifuge_id") or "centrifuge"},
+              {"verb":"wait","minutes": op.get("minutes")},
+              {"verb":"stop","device": op.get("centrifuge_id") or "centrifuge"},
+              {"verb":"place","object":tube,"to":"rack"}]
+        return m
+
+    if typ == "sonicate":
+        tube = "tube"
+        m += [{"verb":"pick_up","object":tube,"from":"rack"},
+              {"verb":"place","object":tube,"to":"sonicator"},
+              {"verb":"set","device": op.get("sonicator_id") or "sonicator","param":"minutes","value": op.get("minutes")},
+              {"verb":"start","device": op.get("sonicator_id") or "sonicator"},
+              {"verb":"wait","minutes": op.get("minutes")},
+              {"verb":"stop","device": op.get("sonicator_id") or "sonicator"},
+              {"verb":"place","object":tube,"to":"rack"}]
+        return m
+
+    if typ == "move_to_oven":
+        m += [{"verb":"pick_up","object":op.get("tube") or "tube","from":"rack"},
+              {"verb":"place","object":op.get("tube") or "tube","to":"oven"}]
+        return m
+
+    if typ == "set_oven_temperature":
+        m += [{"verb":"set","device": op.get("oven_id") or "oven","param":"temperature_C","value": op.get("temperature_C")}]
+        return m
+
+    if typ == "stir":
+        v = _label_for_vessel(op.get("vessel",""), vessels, hardware)
+        m += [{"verb":"place","object":v,"to":"stir_plate"},
+              {"verb":"set","device":"stir_plate","param":"rpm","value": op.get("rpm")},
+              {"verb":"wait","minutes": op.get("minutes")}]
+        return m
+
+    m += [{"verb":"set","device":"note","param":"op","value": typ}]
+    return m
+
+def expand_ops_to_micro(ops: list[dict], vessels: 'VesselRegistry', hardware: list[dict]) -> list[dict]:
+    out = []
+    for op in ops or []:
+        out.extend(_micro_for_op(op, vessels, hardware))
+    return out
+
 def convert_text_to_robot_ops(text: str) -> Dict:
     hardware = parse_hardware(text)
     vessels = VesselRegistry(hardware)
@@ -1166,11 +1318,25 @@ def convert_text_to_robot_ops(text: str) -> Dict:
             _add_structured_reagents_inplace(record)
             records.append(record)
 
+
+    # Build micro-ops per step and a flattened micro plan
+    for rec in records:
+        rec["micro_ops"] = expand_ops_to_micro(rec.get("ops", []), vessels, hardware)
+
+    micro_plan = []
+    for i, rec in enumerate(records, 1):
+        for micro in rec.get("micro_ops", []):
+            item = dict(micro)
+            item["step_index"] = i
+            item["context_vessel"] = rec.get("vessel")
+            micro_plan.append(item)
+
     return {
         "hardware": hardware,
         "vessel_registry": vessels.as_dict(),
         "vessel_contents": vessels.contents_dict(),
         "devices": DEVICE_IDS,
+        "micro_plan": micro_plan,
         "defaults": DEFAULTS,
         "steps": records,
     }
