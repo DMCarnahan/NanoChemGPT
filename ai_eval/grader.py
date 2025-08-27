@@ -434,14 +434,6 @@ def rel_eval(gold, preds, match_mode="iou", thr=0.5):
 def struct_eval(gold, preds, schema=None):
     """Validate JSON outputs against a minimal schema and compare to gold (presence + normalized values)."""
     pred_by_id={ex["id"]:ex for ex in preds}
-    # Minimal schema format example:
-    # schema = {
-    #   "required": ["procedure","hardware"],
-    #   "types": {"procedure":"list","hardware":"list"},
-    #   "procedure_item_required":["action"],
-    #   "enums": {"action":["dissolve","heat","stir"]}
-    # }
-    # We try jsonschema if available; otherwise enforce minimal checks.
     try:
         import jsonschema  # type: ignore
         use_jsonschema=True

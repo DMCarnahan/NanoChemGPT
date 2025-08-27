@@ -45,6 +45,18 @@ PROCESS_LABELS  = {"PROCESS","SYNTHESIS","METHOD"}
 NANO_RX = re.compile(r"\bnano[\w-]*\b", re.I)
 QDOT_RX = re.compile(r"\bquantum\s+dots?\b", re.I)  # special case outside “nano*”
 
+# --------- substrate heuristics (tunable) ---------
+SUBSTRATE_PREPS = {"on", "onto", "over", "above"}
+SUBSTRATE_VERBS = {
+    "grow","grown","deposit","deposited","coat","coated","form","formed",
+    "assemble","assembled","print","printed","pattern","patterned",
+    "evaporate","evaporated","sputter","sputtered","adsorb","adsorbed",
+    "support","supported","place","placed","transfer","transferred"
+}
+SUBSTRATE_WORDS = {"substrate","wafer","support","template","seed-layer","seed","mica","sapphire","glass"}
+_SUBSTRATE_PENALTY = float(os.getenv("REF_SUBSTRATE_PENALTY", "0.75"))  # stronger default
+_SUBSTRATE_STRICT = os.getenv("REF_SUBSTRATE_STRICT", "1") not in {"0","false","False"}
+
 def _extract_query_profile(question: str) -> Dict[str, set]:
     """Use your spaCy NER (if present) to pull MATERIAL / MORPHOLOGY / PROCESS.
        Fallbacks: chemical formulas; simple 'nano*' and 'quantum dot(s)' cues."""
@@ -97,12 +109,45 @@ def _doc_matches_target(txt: str, profile: Dict[str, set]) -> Tuple[bool, bool]:
         # fallback: if a material was requested, require it; then require 'nano*' if no morphology given
         if mats and not has_mat_mention: return (False, False)
         if not morphs and not has_nano:  return (False, False)
-        # naive substrate heuristic
-        substrate_like = bool(re.search(r"\bon\s+(%s)\b" % "|".join(map(re.escape, mats)) if mats else r"$^", t, flags=re.I))
+        # fallback substrate heuristic (harsher): verbs + preps + 'on <mat> (substrate|wafer|template)'
+        if mats:
+            mat_pat = "|".join(map(re.escape, mats))
+            sub_rx = re.compile(
+                rf"(?:\\b(?:{'|'.join(SUBSTRATE_VERBS)})\\b\\s+)?\\b(?:{'|'.join(SUBSTRATE_PREPS)})\\s+(?:{mat_pat})(?:\\s+(?:{'|'.join(SUBSTRATE_WORDS)}))?\\b",
+                re.I
+            )
+            substrate_like = bool(sub_rx.search(t))
+        else:
+            substrate_like = False
+        # In fallback mode, if the only mention is substrate-like and no morphology near material, block
+        if substrate_like and _SUBSTRATE_STRICT:
+            return (False, True)
         return (True, substrate_like)
 
     # spaCy path: check proximity between material entities and morphology cues
     doc = nlp(t)
+
+    def _substrate_context(ent) -> bool:
+        # pobj of on/onto/over
+        for tok in ent:
+            if tok.dep_ == "pobj" and tok.head.lemma_.lower() in SUBSTRATE_PREPS:
+                return True
+        # verb ... on <ent>
+        for tok in doc:
+            if tok.pos_ == "VERB" and tok.lemma_.lower() in SUBSTRATE_VERBS:
+                for child in tok.children:
+                    if child.lemma_.lower() in SUBSTRATE_PREPS:
+                        pobj = next((c for c in child.children if c.dep_ == "pobj"), None)
+                        if pobj and ent.start <= pobj.i < ent.end:
+                            return True
+        # "on <ent> substrate/wafer/template"
+        after_i = ent[-1].i + 1
+        if after_i < len(doc) and doc[after_i].lemma_.lower() in SUBSTRATE_WORDS:
+            # ensure there is an 'on/onto/over' governing this span
+            for tok in ent:
+                if tok.dep_ == "pobj" and tok.head.lemma_.lower() in SUBSTRATE_PREPS:
+                    return True
+        return False
     mat_spans = []
     for ent in getattr(doc, "ents", []):
         if (ent.label_ or "").upper() in MATERIAL_LABELS:
@@ -124,6 +169,7 @@ def _doc_matches_target(txt: str, profile: Dict[str, set]) -> Tuple[bool, bool]:
     # proximity: any “nano*” or morphology term within +/- 6 tokens of a material entity
     near = False
     substrate_like = False
+    substrate_mentions = 0
 
     # collect token positions where “nano*” or morph terms appear
     morph_pos = set()
@@ -139,10 +185,14 @@ def _doc_matches_target(txt: str, profile: Dict[str, set]) -> Tuple[bool, bool]:
         for i in morph_pos:
             if abs(i - ent.start) <= 6 or abs(i - ent.end) <= 6:
                 near = True
-        # substrate: preposition 'on' whose pobj token lies inside this material span
-        for tok in ent:
-            if tok.dep_ == "pobj" and tok.head.text.lower() == "on":
-                substrate_like = True
+        # substrate grammar checks
+        if _substrate_context(ent):
+            substrate_like = True
+            substrate_mentions += 1
+
+    # If every mention is substrate-like and there is no morphology cue near the material, block it outright
+    if mat_spans and substrate_mentions == len(mat_spans) and not near and _SUBSTRATE_STRICT:
+        return (False, True)
 
     if morphs and not near:
         return (False, substrate_like)
@@ -175,9 +225,16 @@ def _score_ref(txt: str, profile: Dict[str, set]) -> float:
         except Exception:
             pass
 
-    # penalize explicit substrate phrasing a bit
-    if re.search(r"\bon\s+(%s)\b" % "|".join(map(re.escape, profile.get("materials", set()))) if profile.get("materials") else r"$^", L):
-        base -= 0.2
+    # penalize explicit substrate phrasing (harsher, tunable)
+    mats = profile.get("materials", set())
+    if mats:
+        mat_pat = "|".join(map(re.escape, mats))
+        sub_rx = re.compile(
+            rf"(?:\\b(?:{'|'.join(SUBSTRATE_VERBS)})\\b\\s+)?\\b(?:{'|'.join(SUBSTRATE_PREPS)})\\s+(?:{mat_pat})(?:\\s+(?:{'|'.join(SUBSTRATE_WORDS)}))?\\b",
+            re.I
+        )
+        if sub_rx.search(L):
+            base -= _SUBSTRATE_PENALTY
     return base
 
 # --------- main selection API ---------
@@ -204,11 +261,11 @@ def select_references(answer: str, refs: List[Dict[str, Any]], *, question: Opti
         meta  = _norm(r.get("meta") or r.get("journal") or r.get("source") or "")
         ok, substrate_like = _doc_matches_target(f"{title} {meta}", prof)
         if ok:
-            # slight downweight if substrate-only phrasing
-            r["_substrate_penalty"] = 0.15 if substrate_like else 0.0
+            # stronger downweight if substrate phrasing survived gating
+            r["_substrate_penalty"] = _SUBSTRATE_PENALTY if substrate_like else 0.0
             gated.append(r)
 
-    # Relax gate if too few candidates (
+    # Relax gate if too few candidates 
     pool = gated if len(gated) >= max(2, top_k//2) else list(refs)
 
     scored = []
