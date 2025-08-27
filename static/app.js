@@ -98,40 +98,57 @@ askMsg.textContent = res.ok ? 'Done.' : `Error ${res.status}`;
    * Handles the Parse button click: converts answer to JSON and triggers download.
    */
   parseBtn?.addEventListener('click', async () => {
-  const text = answerPre?.textContent || '';
-  if (!text) return;
+    const text = answerPre?.textContent || '';
+    if (!text) return;
 
-  parseBtn.disabled = true;
-  parseBtn.textContent = 'Converting…';
+    parseBtn.disabled = true;
+    const oldLabel = parseBtn.textContent;
+    parseBtn.textContent = 'Converting…';
 
-  try {
-    const headers = { 'Content-Type': 'application/json' };
-    const csrf = readCsrfToken();
-    if (csrf) headers['X-CSRFToken'] = csrf;
+    try {
+      const headers = { 'Content-Type': 'application/json' };
+      const csrf = readCsrfToken();
+      if (csrf) headers['X-CSRFToken'] = csrf;
 
-    const res = await fetch('/parse', {
-      method: 'POST',
-      headers,
-      body: JSON.stringify({ text })
-    });
+      const res = await fetch('/parse', {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({ text })
+      });
 
-    const data = await res.json();
-    if (!data || !data.ok || !data.data) {
-      throw new Error(data?.error || 'Parse failed');
-    }
-
-    const pretty = JSON.stringify(data.data, null, 2);
-
-    if (jsonBlock) jsonBlock.textContent = pretty;
-        document.getElementById('jsonBlock')?.classList.remove('hidden');
-      } catch (err) {
-        console.error(err);
-        parseBtn.textContent = 'Error';
-      } finally {
-        parseBtn.disabled = false;
-        parseBtn.textContent = 'Parse';
+      // Try to read JSON; if not JSON, throw
+      const data = await res.json();
+      if (!data || !data.ok || !data.data) {
+        throw new Error(data?.error || 'Parse failed');
       }
-    });
+
+      const pretty = JSON.stringify(data.data, null, 2);
+
+      // ---- DOWNLOAD ONLY (no preview) ----
+      const stamp = new Date();
+      const pad = (n)=> String(n).padStart(2,'0');
+      const fname = `answer-${stamp.getFullYear()}${pad(stamp.getMonth()+1)}${pad(stamp.getDate())}-${pad(stamp.getHours())}${pad(stamp.getMinutes())}${pad(stamp.getSeconds())}.json`;
+
+      const blob = new Blob([pretty], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = fname;
+      document.body.appendChild(a); // Required for Firefox
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      // ------------------------------------
+    } catch (err) {
+      console.error(err);
+      parseBtn.textContent = 'Error';
+      setTimeout(()=>{ parseBtn.textContent = oldLabel || 'Parse'; }, 1200);
+      return;
+    } finally {
+      parseBtn.disabled = false;
+      parseBtn.textContent = oldLabel || 'Parse';
+    }
+  });
 
   /**
    * Renders references from data object into the UI.
