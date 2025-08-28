@@ -739,7 +739,6 @@ def extract_steps(markdown_text: str) -> List[str]:
 
 # -------- Micro-action expansion --------
 def _label_for_vessel(vid: str, vessels: 'VesselRegistry', hardware: list[dict]) -> str:
-    # Never allow an empty/None vessel reference – fall back to a usable default
     if not vid:
         vid = vessels.primary_vessel or vessels.ensure_glassware("Beaker")
     label = vessels.as_dict().get(vid) or vid
@@ -764,11 +763,10 @@ def _micro_for_op(op: dict, vessels: 'VesselRegistry', hardware: list[dict]) -> 
               {"verb":"place","object":v,"to":"stir_plate"}]
         return m
     if typ == "set_stir_rate":
-        v = _label_for_vessel(op.get("vessel",""), vessels, hardware)
-        # Only set the RPM; do not emit another 'place' (it causes duplicates)
         m += [{"verb":"set","device": op.get("stir_plate_id") or "stir_plate",
-               "param":"rpm","value":op.get("rpm")}]
+            "param":"rpm","value":op.get("rpm")}]
         return m
+
     # Generic primitive ops -----------------------------------------------
     if typ == "set":
         dev = op.get("device") or op.get("hotplate_id") or op.get("oven_id") or "device"
@@ -790,20 +788,19 @@ def _micro_for_op(op: dict, vessels: 'VesselRegistry', hardware: list[dict]) -> 
         v = _label_for_vessel(op.get("vessel",""), vessels, hardware)
         m += [{"verb":"place","object":v,"to":"bench"}]
         return m
-    # ...existing code...
     if typ == "transfer":
-        src = _label_for_vessel(op.get("from",""), vessels, hardware) if op.get("from") else "source vessel"
-        dst = _label_for_vessel(op.get("to",""), vessels, hardware) if op.get("to") else op.get("to") or "target vessel"
+        src = _label_for_vessel(op.get("from", ""), vessels, hardware) if op.get("from") else "source"
+        dst = _label_for_vessel(op.get("to", ""),   vessels, hardware) if op.get("to")   else "target"
         rate = op.get("rate") or "normal"
-        m += [{"verb":"pick_up","object":src,"from":"stir_plate"},
-              {"verb":"pour","from":src,"to":dst,"rate":rate},
-              {"verb":"place","object":src,"to":"stir_plate"}]
+        m += [
+            {"verb":"pick_up","object":src,"from":"bench"},
+            {"verb":"pour","from":src,"to":dst,"rate":rate},
+            {"verb":"place","object":src,"to":"bench"},
+        ]
         return m
-
     if typ == "wait":
         m += [{"verb":"wait","minutes": op.get("minutes")}]
         return m
-
     if typ == "filter":
         v = _label_for_vessel(op.get("vessel",""), vessels, hardware)
         m += [{"verb":"place","object":"filtration setup","to":"bench"},
@@ -811,12 +808,10 @@ def _micro_for_op(op: dict, vessels: 'VesselRegistry', hardware: list[dict]) -> 
               {"verb":"pour","from":v,"to":"filtration setup"},
               {"verb":"place","object":v,"to":"bench"}]
         return m
-
     if typ == "start_vacuum":
         m += [{"verb":"set","device": op.get("vacuum_pump_id") or "vacuum_pump","param":"power","value":"on"},
               {"verb":"start","device": op.get("vacuum_pump_id") or "vacuum_pump"}]
         return m
-
     if typ == "decant_supernatant":
         tube = op.get("tube") or "tube"
         m += [{"verb":"pick_up","object":tube,"from":"rack"},
@@ -879,7 +874,6 @@ def _micro_for_op(op: dict, vessels: 'VesselRegistry', hardware: list[dict]) -> 
               {"verb":"wait","minutes": op.get("minutes")}]
         return m
 
-    m += [{"verb":"set","device":"note","param":"op","value": typ}]
     return m
 
 def expand_ops_to_micro(ops: list[dict], vessels: 'VesselRegistry', hardware: list[dict]) -> list[dict]:
@@ -934,7 +928,7 @@ def convert_text_to_robot_ops(text: str) -> Dict:
         # Dissolve
         dissolve = detect_dissolve(step)
         if dissolve:
-            target_vessel = vessels.primary_vessel or vessels.ensure_glassware("Beaker")
+            target_vessel = vessels.ensure_glassware(f"{dissolve['solute']} solution")
             record = {
                 "action": "dissolve",
                 "vessel": target_vessel,
@@ -1028,8 +1022,8 @@ def convert_text_to_robot_ops(text: str) -> Dict:
         if add:
             src_key = re.sub(r"^\bthe\b\s+","",add["source_name"], flags=re.I).strip()
             dst_key = re.sub(r"^\bthe\b\s+","",add["target_name"], flags=re.I).strip()
-            src_vid = vessels.ensure_glassware(src_key) if "beaker" in src_key.lower() or "flask" in src_key.lower() else (vessels.primary_vessel or vessels.ensure_glassware("Beaker"))
-            dst_vid = vessels.ensure_glassware(dst_key) if "beaker" in dst_key.lower() or "flask" in dst_key.lower() else (vessels.primary_vessel or vessels.ensure_glassware("Beaker"))
+            src_vid = vessels.ensure_glassware(src_key)
+            dst_vid = vessels.ensure_glassware(dst_key)
             record = {
                 "action": "add",
                 "source_vessel": src_vid,
