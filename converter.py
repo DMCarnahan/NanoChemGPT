@@ -659,7 +659,7 @@ def ops_for_add(src_v: str, dst_v: str, rate: str, rpm: Optional[int]=None, temp
         {"op":"set_stir_rate","vessel":dst_v,"rpm": rpm or DEFAULTS["stir_rpm"]},
     ]
     if temperature_C is not None:
-        ops.append({"op":"set_hotplate_temperature","hotplate_id":DEVICE_IDS["hotplate_id"],"temperature_C":temperature_C})
+        ops.append({"op":"set","device":DEVICE_IDS["hotplate_id"],"param":"temperature_C","value":temperature_C})
     ops.append({"op":"transfer","from":src_v,"to":dst_v,"rate":rate})
     if minutes:
         ops.append({"op":"wait","minutes":minutes})
@@ -669,13 +669,13 @@ def ops_for_stir(vessel: str, minutes: float, rpm: int, temp_C: float) -> List[D
     return [
         {"op":"move_to_stir_plate","vessel":vessel,"stir_plate_id":DEVICE_IDS["stir_plate_id"]},
         {"op":"set_stir_rate","vessel":vessel,"rpm":rpm},
-        {"op":"set_hotplate_temperature","hotplate_id":DEVICE_IDS["hotplate_id"],"temperature_C":temp_C},
+        {"op":"set","device":DEVICE_IDS["hotplate_id"],"param":"temperature_C","value":temp_C},
         {"op":"wait","minutes":minutes},
     ]
 
 def ops_for_heat(vessel: str, temp_C: float, minutes: float) -> List[Dict]:
     return [
-        {"op":"set_hotplate_temperature","hotplate_id":DEVICE_IDS["hotplate_id"],"temperature_C":temp_C},
+        {"op":"set","device":DEVICE_IDS["hotplate_id"],"param":"temperature_C","value":temp_C},
         {"op":"wait","minutes":minutes},
     ]
 
@@ -683,7 +683,7 @@ def ops_for_postproc(vessel: str, actions: List[Dict]) -> List[Dict]:
     ops = []
     for a in actions:
         if a["action"]=="cool_to":
-            ops.append({"op":"set_hotplate_temperature","hotplate_id":DEVICE_IDS["hotplate_id"],"temperature_C":a["temperature_C"]})
+            ops.append({"op":"set","device":DEVICE_IDS["hotplate_id"],"param":"temperature_C","value":a["temperature_C"]})
         elif a["action"]=="centrifuge":
             ops.append({"op":"transfer_to_centrifuge_tube","from":vessel,"to":f"{vessel}_tube"})
             ops.append({"op":"centrifuge","centrifuge_id":DEVICE_IDS["centrifuge_id"],"rpm":a["rpm"],"minutes":a["minutes"]})
@@ -695,12 +695,12 @@ def ops_for_postproc(vessel: str, actions: List[Dict]) -> List[Dict]:
             ops.append({"op":"resuspend","tube":f"{vessel}_tube"})
         elif a["action"]=="oven_dry":
             ops.append({"op":"move_to_oven","tube":f"{vessel}_tube","oven_id":DEVICE_IDS["oven_id"]})
-            ops.append({"op":"set_oven_temperature","oven_id":DEVICE_IDS["oven_id"],"temperature_C":a["temperature_C"]})
+            ops.append({"op":"set","device":DEVICE_IDS["oven_id"],"param":"temperature_C","value":a["temperature_C"]})
             ops.append({"op":"wait","minutes":a["minutes"]})
         elif a["action"]=="filter":
             ops.append({"op":"setup_filtration"})
         elif a["action"]=="apply_vacuum":
-            ops.append({"op":"start_vacuum","vacuum_pump_id":DEVICE_IDS["vacuum_pump_id"]})
+            ops.append({"op":"start","device":DEVICE_IDS["vacuum_pump_id"]})
         elif a["action"]=="sonicate":
             ops.append({"op":"sonicate","sonicator_id":DEVICE_IDS["sonicator_id"],"minutes":a.get("minutes",10.0)})
     return ops
@@ -734,6 +734,9 @@ def extract_steps(markdown_text: str) -> List[str]:
 
 # -------- Micro-action expansion --------
 def _label_for_vessel(vid: str, vessels: 'VesselRegistry', hardware: list[dict]) -> str:
+    # Never allow an empty/None vessel reference – fall back to a usable default
+    if not vid:
+        vid = vessels.primary_vessel or vessels.ensure_glassware("Beaker")
     label = vessels.as_dict().get(vid) or vid
     hid = vessels.vessel_hardware(vid)
     if hid:
@@ -745,47 +748,44 @@ def _label_for_vessel(vid: str, vessels: 'VesselRegistry', hardware: list[dict])
 def _micro_for_op(op: dict, vessels: 'VesselRegistry', hardware: list[dict]) -> list[dict]:
     m = []
     typ = op.get("op")
-
     if typ == "ensure_vessel":
         v = _label_for_vessel(op.get("vessel",""), vessels, hardware)
         m += [{"verb":"pick_up","object":v,"from":"bench"},
               {"verb":"place","object":v,"to":"bench"}]
         return m
-
     if typ == "move_to_stir_plate":
         v = _label_for_vessel(op.get("vessel",""), vessels, hardware)
         m += [{"verb":"pick_up","object":v,"from":"bench"},
               {"verb":"place","object":v,"to":"stir_plate"}]
         return m
-
     if typ == "set_stir_rate":
         v = _label_for_vessel(op.get("vessel",""), vessels, hardware)
+        # Only set the RPM; do not emit another 'place' (it causes duplicates)
         m += [{"verb":"set","device": op.get("stir_plate_id") or "stir_plate",
-               "param":"rpm","value":op.get("rpm")},
-              {"verb":"place","object":v,"to":"stir_plate"}]
+               "param":"rpm","value":op.get("rpm")}]
         return m
-
-    if typ == "set_hotplate_temperature":
-        m += [{"verb":"set","device": op.get("hotplate_id") or "hotplate",
-               "param":"temperature_C","value": op.get("temperature_C")}]
+    # Generic primitive ops -----------------------------------------------
+    if typ == "set":
+        dev = op.get("device") or op.get("hotplate_id") or op.get("oven_id") or "device"
+        m += [{"verb":"set","device": dev, "param": op.get("param"), "value": op.get("value")}]
         return m
-
-    if typ == "add_solute":
+    if typ == "start":
+        dev = op.get("device") or "device"
+        m += [{"verb":"start","device": dev}]
+        return m
+    if typ == "stop":
+        dev = op.get("device") or "device"
+        m += [{"verb":"stop","device": dev}]
+        return m
+    if typ == "pick_up":
         v = _label_for_vessel(op.get("vessel",""), vessels, hardware)
-        src = op.get("reagent") or "solute"
-        m += [{"verb":"pick_up","object":src,"from":"bench"},
-              {"verb":"pour","from":src,"to":v,"amount":op.get("amount"),"units":op.get("unit")},
-              {"verb":"place","object":src,"to":"bench"}]
+        m += [{"verb":"pick_up","object":v,"from":"bench"}]
         return m
-
-    if typ == "add_solvent":
+    if typ == "place":
         v = _label_for_vessel(op.get("vessel",""), vessels, hardware)
-        src = op.get("solvent") or op.get("reagent") or "solvent"
-        m += [{"verb":"pick_up","object":src,"from":"bench"},
-              {"verb":"pour","from":src,"to":v,"amount":op.get("volume"),"units":op.get("volume_units")},
-              {"verb":"place","object":src,"to":"bench"}]
+        m += [{"verb":"place","object":v,"to":"bench"}]
         return m
-
+    # ...existing code...
     if typ == "transfer":
         src = _label_for_vessel(op.get("from",""), vessels, hardware) if op.get("from") else "source vessel"
         dst = _label_for_vessel(op.get("to",""), vessels, hardware) if op.get("to") else op.get("to") or "target vessel"
@@ -1328,7 +1328,8 @@ def convert_text_to_robot_ops(text: str) -> Dict:
         for micro in rec.get("micro_ops", []):
             item = dict(micro)
             item["step_index"] = i
-            item["context_vessel"] = rec.get("vessel")
+            # Provide a sane vessel context for steps like 'add' that use source/target vessels
+            item["context_vessel"] = rec.get("vessel") or rec.get("target_vessel") or rec.get("source_vessel")
             micro_plan.append(item)
 
     return {
