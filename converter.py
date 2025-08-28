@@ -84,7 +84,7 @@ def _to_float_range(s: str) -> tuple[float, float] | tuple[float, None]:
     try:
         return (float(s), None)
     except Exception:
-        return (None, None)
+        return (0.0, None)
 
 def strip_tags(s: str) -> str:
     s = _clean_unicode(s)
@@ -360,14 +360,19 @@ class VesselRegistry:
         if explicit_hardware_hint:
             for h in self.hardware:
                 if explicit_hardware_hint.lower() in h["name"].lower():
-                    hw_id = h["id"]; preferred = h.get("type"); break
+                    hw_id = h["id"]
+                    preferred = h.get("type")
+                    break
         if hw_id is None:
             chosen = self._pick_glass_for_volume(prefer_capacity_ml, preferred)
-            if chosen: hw_id = chosen["id"]
+            if chosen:
+                hw_id = chosen["id"]
         self._vid_to_label[vid] = label
         self._label_to_vid[key] = vid
-        if hw_id: self._vid_to_hid[vid] = hw_id
-        if self.primary_vessel is None: self.primary_vessel = vid
+        if hw_id:
+            self._vid_to_hid[vid] = hw_id
+        if self.primary_vessel is None:
+            self.primary_vessel = vid
         return vid
 
     def map_contents(self, vid: str, contents: str): self._vessel_contents[vid] = contents
