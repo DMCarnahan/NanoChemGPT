@@ -1325,10 +1325,54 @@ def convert_text_to_robot_ops(text: str) -> Dict:
 
     micro_plan = []
     for i, rec in enumerate(records, 1):
+        # --- 1) Expand any material transfer into primitive robot actions ---
+        # Any 'add_*' step is already represented as an explicit 'transfer' op in rec['ops'].
+        # We convert that to: pick_up (source) → pour (source→target) → place (source down)
+        for op in rec.get("ops", []):
+            if op.get("op") == "transfer":
+                src_id = op.get("from")
+                dst_id = op.get("to")
+                if src_id and dst_id:
+                    src_label = _label_for_vessel(src_id, vessels, hardware)
+                    dst_label = _label_for_vessel(dst_id, vessels, hardware)
+                    ctx = rec.get("vessel") or rec.get("target_vessel") or rec.get("source_vessel")
+
+                    micro_plan.append({
+                        "verb": "pick_up",
+                        "object": src_label,
+                        "step_index": i,
+                        "context_vessel": ctx,
+                    })
+                    pour_item = {
+                        "verb": "pour",
+                        "from": src_label,
+                        "to": dst_label,
+                        "step_index": i,
+                        "context_vessel": ctx,
+                    }
+                    rate = op.get("rate")
+                    if rate:  # include if present
+                        pour_item["rate"] = rate
+                    micro_plan.append(pour_item)
+                    micro_plan.append({
+                        "verb": "place",
+                        "object": src_label,
+                        "to": "bench",
+                        "step_index": i,
+                        "context_vessel": ctx,
+                    })
+
+        # --- 2) Copy through any authored micro_ops EXCEPT 'note add_*' markers ---
         for micro in rec.get("micro_ops", []):
+            # Drop the diagnostic "note/op=add_*" entries so nothing shows up as a 'set'
+            if (
+                micro.get("device") == "note"
+                and micro.get("param") == "op"
+                and str(micro.get("value", "")).startswith("add_")
+            ):
+                continue
             item = dict(micro)
             item["step_index"] = i
-            # Provide a sane vessel context for steps like 'add' that use source/target vessels
             item["context_vessel"] = rec.get("vessel") or rec.get("target_vessel") or rec.get("source_vessel")
             micro_plan.append(item)
 
