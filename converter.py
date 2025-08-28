@@ -222,19 +222,57 @@ def _normalize_reagents_inplace(record: dict) -> None:
     if isinstance(solute_str, str) and solute_str.strip():
         record["solutes"] = split_reagent_phrases(solute_str)
 
+
 def _add_structured_reagents_inplace(record: dict) -> None:
     """
-    Populate record['reagents_structured'] from record['reagents'] (strings).
-    Also populate record['solutes_structured'] from record['solutes'] if present.
+    Populate record['reagents_structured'] and record['solutes_structured'].
+    If the record contains parsed solute amount/unit, propagate it to the corresponding entries.
+    Also flag solvent entries with solvent=True.
     """
     reag = record.get("reagents", []) or []
     if not isinstance(reag, list):
         reag = [reag]
-    record["reagents_structured"] = [parse_reagent_phrase_to_struct(x) for x in reag if isinstance(x, str) and x.strip()]
+
+    solute_name = record.get("solute")
+    solvent_names = set()
+    if isinstance(record.get("solvent"), str):
+        solvent_names.add(record["solvent"])
+    if isinstance(record.get("solvents"), list):
+        for comp in record["solvents"]:
+            name = comp.get("name")
+            if isinstance(name, str) and name.strip():
+                solvent_names.add(name.strip())
+
+    reag_struct = []
+    for x in reag:
+        if not (isinstance(x, str) and x.strip()):
+            continue
+        base = parse_reagent_phrase_to_struct(x)
+        if solute_name and x == solute_name:
+            if record.get("amount") is not None:
+                base["amount"] = record.get("amount")
+            if record.get("unit"):
+                base["amount_unit"] = record.get("unit")
+        if x in solvent_names:
+            base["solvent"] = True
+        reag_struct.append(base)
+    record["reagents_structured"] = reag_struct
 
     solutes = record.get("solutes", []) or []
+    sols_struct = []
     if isinstance(solutes, list) and solutes:
-        record["solutes_structured"] = [parse_reagent_phrase_to_struct(x) for x in solutes if isinstance(x, str) and x.strip()]
+        for x in solutes:
+            if not (isinstance(x, str) and x.strip()):
+                continue
+            base = parse_reagent_phrase_to_struct(x)
+            if solute_name and x == solute_name:
+                if record.get("amount") is not None:
+                    base["amount"] = record.get("amount")
+                if record.get("unit"):
+                    base["amount_unit"] = record.get("unit")
+            sols_struct.append(base)
+    if sols_struct:
+        record["solutes_structured"] = sols_struct
 
 # -------- Units parsing --------
 def find_temp_c(t: str) -> Optional[float]:
@@ -767,6 +805,32 @@ def _micro_for_op(op: dict, vessels: 'VesselRegistry', hardware: list[dict]) -> 
             "param":"rpm","value":op.get("rpm")}]
         return m
 
+    if typ == "add_solute":
+        dst = _label_for_vessel(op.get("vessel",""), vessels, hardware)
+        src_name = op.get("reagent") or op.get("solute") or "solute"
+        pour = {"verb":"pour","from":src_name,"to":dst}
+        if op.get("amount") is not None: pour["amount"] = op.get("amount")
+        if op.get("unit"): pour["unit"] = op.get("unit")
+        m += [
+            {"verb":"pick_up","object":src_name,"from":"bench"},
+            pour,
+            {"verb":"place","object":src_name,"to":"bench"},
+        ]
+        return m
+    if typ == "add_solvent":
+        dst = _label_for_vessel(op.get("vessel",""), vessels, hardware)
+        src_name = op.get("reagent") or op.get("solvent") or "solvent"
+        pour = {"verb":"pour","from":src_name,"to":dst}
+        if op.get("volume") is not None: pour["volume"] = op.get("volume")
+        if op.get("volume_units"): pour["volume_units"] = op.get("volume_units")
+        m += [
+            {"verb":"pick_up","object":src_name,"from":"bench"},
+            pour,
+            {"verb":"place","object":src_name,"to":"bench"},
+        ]
+        return m
+
+
     # Generic primitive ops -----------------------------------------------
     if typ == "set":
         dev = op.get("device") or op.get("hotplate_id") or op.get("oven_id") or "device"
@@ -1077,7 +1141,7 @@ def convert_text_to_robot_ops(text: str) -> Dict:
             record = {
                 "action":"cool_to","vessel":target_vessel,"reagents":[],
                 "temperature_C": cl["temperature_C"],
-                "ops": [{"op":"set_hotplate_temperature","hotplate_id":DEVICE_IDS["hotplate_id"],"temperature_C":cl["temperature_C"]}],
+                "ops": [{"op":"set","device":DEVICE_IDS["hotplate_id"],"param":"temperature_C","value":cl["temperature_C"]}],
                 "raw": step
             }
             _normalize_reagents_inplace(record)
