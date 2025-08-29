@@ -1,58 +1,65 @@
+# ---- Core numerics (Python 3.11) ----
+numpy==1.26.4            
+pandas>=2.0,<3
+
+# ---- ML / NLP ----
 --extra-index-url https://download.pytorch.org/whl/cpu
 torch==2.2.2+cpu
-scikit-learn
+scikit-learn==1.4.2
 
+sentence-transformers==2.6.1
+transformers==4.40.2
+tokenizers>=0.19,<0.20
+huggingface-hub==0.22.2
+
+# ---- spaCy (3.7 line) ----
 spacy==3.7.4
-spacy-legacy==3.0.12          
+spacy-legacy==3.0.12
 thinc==8.2.4
 blis==0.7.11
 en-core-web-sm @ https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.7.1/en_core_web_sm-3.7.1-py3-none-any.whl
 
-sentence-transformers==2.6.1
-transformers==4.40.2
-tokenizers>=0.19
-huggingface-hub==0.22.2
-regex
+# ---- Retrieval / RAG ----
+faiss-cpu==1.8.0.post1
+rapidfuzz==3.9.6
+tldextract>=5,<6
 
-PyYAML==6.0.1                 
-pydantic==1.10.14
-typing-extensions==4.11.0
-lxml
-pymupdf
-
+# ---- Web stack ----
 Flask==3.1.1
-flask-wtf
 Werkzeug==3.1
 Jinja2==3.1.4
 MarkupSafe==2.1.5
 itsdangerous==2.2
 gunicorn==21.2.0
 fastapi==0.95.2
-uvicorn==0.23.2
+uvicorn[standard]==0.23.2
 asgiref==3.6.0
+
+# ---- IO / parsing ----
+lxml>=5,<6
+PyPDF2==3.0.1
+pymupdf==1.24.10         
+ijson==3.2.3
+python-multipart==0.0.6
+
+# ---- Infra / utils ----
+pydantic==1.10.14
+typing-extensions==4.11.0
+python-dotenv==1.0.1
+packaging==24.0
+backoff==2.2.1
+tqdm>=4.66.4             
+requests==2.32.3
+httpx==0.27.2
+jsonschema>=4.21,<5
+regex>=2024.05.15        
 redis>=5
 rq>=1.15
 
+# ---- Domain ----
+pubchempy==1.0.4
+duckdb>=0.9              
 openai==1.30.1
 jiter==0.4.1
 tiktoken==0.6.0
-httpx==0.27.2
-
-faiss-cpu==1.8.0.post1
-numpy==1.26.4                 
-PyPDF2==3.0.1
-pymongo==4.6.3
-requests==2.32.3
-tldextract>=5,<6
-tqdm==4.42.1
-python-dotenv==1.0.1
-python-multipart==0.0.6
-ijson==3.2.3
-
-packaging==24.0
-pubchempy==1.0.4
-rapidfuzz==3.9.6      
-backoff==2.2.1 
-pandas>=2.0
-jsonschema
-duckdb>=0.9
+pymongo==4.6.3       

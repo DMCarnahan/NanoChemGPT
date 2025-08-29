@@ -1,9 +1,0 @@
-task: "entity_extraction"
-dataset: { gold_path: "datasets/gold_span.jsonl" }
-predictions: { pred_path: "datasets/preds_span.jsonl" }
-labels: [ACTION, AMOUNT, ATMOS, CONC, EQUIPMENT, MATERIAL, SPEED, TEMP, TIME, UNIT]
-matching: { mode: "iou", iou_threshold: 0.5, casefold: true, strip_punct: false }
-report: { out_path: "reports/report_span.json", errors_path: "reports/errors_span.jsonl" }
-slices:
-  - { name: "has_TEMP", pattern: "\\d+\s*°C" }
-  - { name: "has_ATMOS", pattern: "\\bnitrogen\\b|\\bargon\\b|\\bN2\\b" }

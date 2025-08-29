@@ -37,12 +37,25 @@ from werkzeug.utils import secure_filename
 import vector_store as vs
 from vector_store.uploads_vector import UploadsVectorSearch
 from converter import validate_step, convert_text_to_robot_ops
-from mongo_client import get_db, ping as mongo_ping
-from decider.kb import kb_search, kb_fetch
-from decider.judge_sufficiency import judge_sufficiency
+from mongo_client import get_db
 from decider.miner_queue import enqueue_text_mining_job
 from DuckDB.duck_searcher import get_duck_searcher
 from ref_utils import build_references_payload
+from mech_reasoning.app_extensions.mechanism_routes import mechanism_bp
+try:
+    from app_utils.helpers import (
+        classify_intent as _h_classify_intent,
+        kb_search as _h_kb_search,
+        kb_fetch as _h_kb_fetch,                  
+        judge_sufficiency as _h_judge_sufficiency,
+        _safe_text as _h_safe_text,
+        _extract_used_ref_indexes as _h_extract_used_ref_indexes,
+        Hit as _Hit,
+    )
+except Exception:
+    _h_classify_intent = _h_kb_search = _h_kb_fetch = None
+    _h_judge_sufficiency = _h_safe_text = _h_extract_used_ref_indexes = None
+    _Hit = None
 
 # -------------------- Paths/Config --------------------
 ROOT = Path(__file__).resolve().parent
@@ -156,15 +169,13 @@ def retriever_search(query: str, k: int = 8, mode: str = "hybrid", alpha: float 
         return []
 
 # ──────────────── Utilities ──────────────── #
-def _s(x: Any) -> str:
-    return str(x) if x is not None else ""
-
-def _safe_text(x: Any) -> str:
+def _s(x):
+    # Hardened sanitizer prefers helpers._safe_text
     try:
-        return str(x) if x is not None else ""
+        from app.utils.helpers import _safe_text as __h_safe_text  # local import to avoid circulars
+        return __h_safe_text(x)
     except Exception:
-        return ""
-
+        return (str(x).strip() if x is not None else "")
 def _safe_id(x):
     try:
         from bson import ObjectId
@@ -184,27 +195,9 @@ def _doc(obj):
     return out
 
 # ---- Citation extraction and formatting helpers ----
-_CIT_RX_BRACKET = re.compile(r"\[(\d{1,4})\]")
-_CIT_RX_FULL    = re.compile(r"【(\d{1,4})】")
-_CIT_RX_FOOT    = re.compile(r"\[\^(\d{1,4})\]")
-
-def _extract_used_ref_indexes(*texts: str) -> list[int]:
-    """Return sorted unique numeric citation indexes found like [1], [2], 【3】, or [^4]."""
-    seen = set()
-    for t in texts:
-        if not t:
-            continue
-        for rx in (_CIT_RX_BRACKET, _CIT_RX_FULL, _CIT_RX_FOOT):
-            for m in rx.finditer(t):
-                try:
-                    seen.add(int(m.group(1)))
-                except Exception:
-                    pass
-    return sorted(seen)
 
 def _format_acs_reference(ref: dict) -> str:
     """Lightweight ACS-ish formatting from a heterogeneous ref dict."""
-    def _s(x): return _safe_text(x)
     # Authors
     authors = ref.get("authors") or ref.get("authorships") or []
     names = []
@@ -461,7 +454,7 @@ def ask():
     """
 
     # ---------- request payload ----------
-    from flask import request, jsonify  # ensure imported
+    from flask import request, jsonify  
     # Initialize answer and refs_full before using them
     answer = ""
     refs_full = []
@@ -472,13 +465,14 @@ def ask():
 
     # ---------- intent classification ----------
     try:
-        from decider.intent import classify_intent
-        ci = classify_intent(question)
+        # Prefer decider if available
+        from decider.intent import classify_intent as _decide_intent
+        ci = _decide_intent(question)
     except Exception as e:
-        print("[/ask] classify_intent warn:", e)
-        ci = {}
+        # Fallback to helper’s heuristic
+        ci = _h_classify_intent(question) if _h_classify_intent else "reason"
 
-    # normalize classify_intent output to a dict
+    # Normalize classify_intent output to a dict
     if isinstance(ci, str):
         ci = {"intent": ci}
     elif not isinstance(ci, dict):
@@ -540,9 +534,6 @@ def ask():
             print("[/ask] Uploads VS error:", e)
             vs = None
 
-        def _s(x):
-            return str(x) if x is not None else ""
-
         if vs is not None:
             hits = vs.search(question, k=8)
             lines = []
@@ -570,8 +561,6 @@ def ask():
             hits_tbl = LOOKUP.query(question, topk=5)
             rows = hits_tbl.to_dict(orient="records")
             lines = []
-            def _s(x):
-                return str(x) if x is not None else ""
             for i, row in enumerate(rows, start=1):
                 solvent = row.get("solvent") or row.get("solvent_system")
                 temp = row.get("temp_C") or row.get("temperature_C")
@@ -585,9 +574,6 @@ def ask():
             table_ctx = "\n".join(lines)
         except Exception as e:
             print("[/ask] LOOKUP query error:", e)
-
-    def _s(x):
-        return _safe_text(x)
 
     def _split_reasoning(raw: str) -> tuple[str, str]:
         if not raw:
@@ -646,8 +632,6 @@ def ask():
         can cite them immediately (even before/independent of retriever hits).
         """
         import tempfile, os, sys, subprocess, json
-        from pathlib import Path
-        import httpx
 
         ROOT = Path(__file__).resolve().parent
         out_dir = ROOT / "harvester" / "out_auto"
@@ -807,7 +791,6 @@ def ask():
 
         harvest_refs: list[dict] = []
         try:
-            import json
             with bundle_for_index.open("r", encoding="utf-8") as f:
                 for i, line in enumerate(f):
                     if i >= 40:  # cap to keep prompt small
@@ -830,37 +813,37 @@ def ask():
     # ----------------- KB search + fetch -----------------
     kb_ctx = ""
     kb_refs_raw = []
+    kb_hits = []
+
     try:
-        try:
-            kb_hits = kb_search(question, k=kb_k) or []
-        except TypeError:
-            kb_hits = kb_search(question) or []
-        kb_ids = [h.get("id") for h in kb_hits if isinstance(h, dict) and h.get("id")]
-        kb_docs = []
-        if kb_ids:
-            try:
-                kb_docs = [kb_fetch(kbid) for kbid in kb_ids if kbid] if kb_ids else []
-            except Exception as e:
-                print("[/ask] kb_fetch failed:", e)
-                kb_docs = []
-
-        def _mk_kb_ref(d: dict) -> dict:
-            return {
-                "title": _s(d.get("title") or d.get("name") or "(KB item)"),
-                "year": _s(d.get("year") or d.get("publication_year") or ""),
-                "url": _s(d.get("url") or d.get("link") or ""),
-                "doi": _s(d.get("doi") or ""),
-                "authors": d.get("authors") or d.get("authorships") or [],
-                "biblio": d.get("biblio") or {},
-            }
-
-        items = kb_docs if kb_docs else kb_hits
-        kb_refs_raw = [_mk_kb_ref(d) for d in items if isinstance(d, dict)]
-        if kb_refs_raw:
-            kb_lines = [f"[KB{i}] {r['title']}" for i,r in enumerate(kb_refs_raw, 1)]
-            kb_ctx = "\n".join(kb_lines)
+        if _h_kb_search:
+            # helpers.kb_search returns List[Hit] (text, score, meta)
+            kb_hits = _h_kb_search(question, top_k=kb_k) or []
+        else:
+            kb_hits = []
     except Exception as e:
         print("[/ask] KB search failed:", e)
+        kb_hits = []
+
+    def _mk_kb_ref_from_hit(h) -> dict:
+        meta = getattr(h, "meta", {}) if not isinstance(h, dict) else h
+        j = meta.get("json") if isinstance(meta, dict) else None
+        title = ""
+        if isinstance(j, dict):
+            title = j.get("title") or j.get("name") or ""
+        return {
+            "title": _s(title) or _s(meta.get("title") or "(KB item)"),
+            "year": _s(meta.get("year") or ""),
+            "url": _s(meta.get("url") or ""),
+            "doi": _s(meta.get("doi") or ""),
+            "authors": meta.get("authors") or [],
+            "biblio": {},
+        }
+
+    kb_refs_raw = [_mk_kb_ref_from_hit(h) for h in kb_hits]
+    if kb_refs_raw:
+        kb_lines = [f"[KB{i}] {r['title']}" for i, r in enumerate(kb_refs_raw, 1)]
+        kb_ctx = "\n".join(kb_lines)
 
     # ----------------- Web/hybrid retriever (initial) -----------------
     hits = retriever_search(question, k=web_k, mode="hybrid", alpha=0.7) or []
@@ -1009,7 +992,10 @@ def ask():
     refs_payload = build_references_payload(answer or "", refs or [], top_k=6, question=question)
 
     try:
-        used_idxs = _extract_used_ref_indexes(answer, rationale)   # noqa: F821
+        try:
+            used_idxs = _h_extract_used_ref_indexes(answer, rationale) if _h_extract_used_ref_indexes else []
+        except Exception:
+            used_idxs = []
         references_block = _format_references_block_from_used(used_idxs, refs)  # noqa: F821
         markers = _extract_used_markers(answer, rationale)         # noqa: F821
     except Exception:
@@ -1026,16 +1012,15 @@ def ask():
     except Exception as e:
         print("[/ask] judge/enqueue error:", e)
 
-    # ---- Sufficiency check + enqueue mining if thin ----
+    # ---- Sufficiency check (KB + web) + optional mining enqueue ----
     enqueued = False
     try:
-        try:
-            sufficient = judge_sufficiency(question, context_joined)
-        except TypeError:
-            sufficient = judge_sufficiency(question, context_joined)
-        if not bool(sufficient):
+        kb_ok = _h_judge_sufficiency(kb_hits) if (_h_judge_sufficiency and kb_hits) else False
+        web_thin = _needs_more(hits)  
+        sufficient = bool(kb_ok) and not web_thin
+        if not sufficient:
             try:
-                enqueue_text_mining_job(question)
+                enqueue_text_mining_job(question)  
                 enqueued = True
             except Exception as e:
                 print("[/ask] enqueue_text_mining_job failed:", e)
@@ -1208,3 +1193,9 @@ if __name__ == "__main__":
         port=int(os.getenv("PORT", 8000)),
         debug=os.getenv("DEBUG", "0") == "1"
     )
+
+@app.get("/healthz")
+def healthz():
+    from flask import jsonify
+    return jsonify(ok=True)
+

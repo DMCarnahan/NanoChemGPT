@@ -1,7 +1,0 @@
-task: "structured_output"
-dataset: { gold_path: "datasets/gold_struct.jsonl" }
-predictions: { pred_path: "datasets/preds_struct.jsonl" }
-schema:
-  required: ["procedure","hardware"]
-  types: { procedure: "list", hardware: "list" }
-report: { out_path: "reports/report_struct.json" }

@@ -35,5 +35,6 @@ cmd = "bash -lc ' \
   else \
     echo \"[start] No bundle at $BUNDLE_PATH; skipping index\"; \
   fi; \
-  gunicorn -k uvicorn.workers.UvicornWorker -w 2 -b 0.0.0.0:$PORT main_asgi:app \
+  gunicorn -k uvicorn.workers.UvicornWorker -w 2 --threads 2 --timeout 90 \
+  --worker-tmp-dir /dev/shm -b 0.0.0.0:8000 main_asgi:app \
 '"
