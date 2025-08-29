@@ -4,6 +4,8 @@ from typing import List, Optional, Literal, Dict, Any
 import os, pickle, numpy as np
 from pathlib import Path
 from functools import lru_cache
+import joblib
+from scipy.sparse import load_npz
 
 # ---------- Paths ----------
 BASE_DIR = Path(__file__).resolve().parent
@@ -139,6 +141,45 @@ def _embed_query(q: str, backend: str, model: str) -> np.ndarray:
     v = v / (np.linalg.norm(v) + 1e-8)
     return v
 
+def _index_dir() -> Path:
+    return Path(os.getenv("RETRIEVER_INDEX_DIR") or (Path(__file__).parent / "index")).resolve()
+
+def _load_tfidf():
+    idx = _index_dir()
+    pkl  = idx / "tfidf.pkl"
+    npz  = idx / "tfidf.npz"
+    vecj = idx / "vectorizer.joblib"
+    vocab = idx / "vocab.json"
+
+    print(f"[retriever] Using INDEX_DIR={idx}")
+
+    # 1) New format: single pickle with vectorizer + matrix
+    if pkl.exists():
+        obj = joblib.load(pkl)
+        X = obj.get("matrix") or obj.get("X")
+        vectorizer = obj.get("vectorizer")
+        if X is None or vectorizer is None:
+            raise RuntimeError(f"Malformed {pkl}: expected dict with 'matrix' and 'vectorizer'")
+        return {"kind": "sklearn_pkl", "matrix": X, "vectorizer": vectorizer}
+
+    # 2) Legacy format: tfidf.npz + vectorizer.joblib (preferred)
+    if npz.exists():
+        X = load_npz(npz)
+        if vecj.exists():
+            vectorizer = joblib.load(vecj)
+            return {"kind": "sklearn_npz", "matrix": X, "vectorizer": vectorizer}
+        # 3) Last resort: vocabulary-only (works but idf_ may be missing)
+        if vocab.exists():
+            from sklearn.feature_extraction.text import TfidfVectorizer
+            vocab_list = json.loads(vocab.read_text(encoding="utf-8"))
+            vocab_map = {t: i for i, t in enumerate(vocab_list)}
+            vectorizer = TfidfVectorizer(vocabulary=vocab_map)
+            return {"kind": "vocab_only", "matrix": X, "vectorizer": vectorizer}
+
+    raise RuntimeError(
+        f"TF-IDF index missing: expected {pkl} or {npz} (+ {vecj} / {vocab}). "
+        f"Set RETRIEVER_INDEX_DIR to the folder containing your index."
+    )
 # ---------- API ----------
 @app.get("/health")
 def health():
