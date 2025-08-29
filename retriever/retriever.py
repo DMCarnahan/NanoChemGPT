@@ -20,9 +20,8 @@ CANDIDATES += [
     BASE_DIR / "index",                   
     BASE_DIR.parent / "retriever" / "index"  
 ]
-
-INDEX_DIR  = "/app/retriever/index"
-TFIDF_PATH = (INDEX_DIR / "tfidf.pkl").resolve()
+INDEX_DIR = Path(os.getenv("RETRIEVER_INDEX_DIR") or (Path(__file__).parent / "index")).resolve()
+TFIDF_PATH = Path(os.getenv("TFIDF_PATH") or (INDEX_DIR / "tfidf.pkl"))
 EMBED_PATH = (INDEX_DIR / "embed.pkl").resolve()
 
 print(f"[retriever] Using INDEX_DIR={INDEX_DIR}")
