@@ -1,0 +1,11 @@
+{
+  "task": "entity_extraction",
+  "dataset": { "gold_path": "ai_eval/datasets/solution_synth_gold_span.jsonl" },
+  "predictions": { "pred_path": "ai_eval/runs/gpt_spacy_span_1500.jsonl" },
+  "labels": ["ACTION","AMOUNT","ATMOS","CONC","EQUIPMENT","MATERIAL","SPEED","TEMP","TIME","UNIT"],
+  "matching": { "mode": "iou", "iou_threshold": 0.5, "casefold": true, "strip_punct": false },
+  "report": {
+    "out_path": "ai_eval/reports/report_span_1500.json",
+    "errors_path": "ai_eval/reports/errors_span_1500.jsonl"
+  }
+}

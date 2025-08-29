@@ -1,0 +1,12 @@
+python ai_eval/assist_runner.py `
+  --task span `
+  --gold ai_eval/datasets/solution_synth_gold_span.jsonl `
+  --out ai_eval/runs/gpt_spacy_span_1500.jsonl `
+  --spacy-model .\harvester\miner\ner_model\model-best `
+  --model gpt-4o `
+  --temperature 0 `
+  --retries 3 `
+  --fallback-spacy `
+  --resume `
+  --max-chars 2500 `
+  --limit 1500
