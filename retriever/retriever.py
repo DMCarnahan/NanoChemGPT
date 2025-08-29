@@ -21,16 +21,7 @@ CANDIDATES += [
     BASE_DIR.parent / "retriever" / "index"  
 ]
 
-# Pick the first candidate that contains tfidf.pkl; otherwise default to the first
-pick = None
-for d in CANDIDATES:
-    if d and (d / "tfidf.pkl").exists():
-        pick = d.resolve()
-        break
-if pick is None:
-    pick = (CANDIDATES[0] if CANDIDATES else (BASE_DIR / "retriever" / "index")).resolve()
-
-INDEX_DIR  = pick
+INDEX_DIR  = "/app/retriever/index"
 TFIDF_PATH = (INDEX_DIR / "tfidf.pkl").resolve()
 EMBED_PATH = (INDEX_DIR / "embed.pkl").resolve()
 

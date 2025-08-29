@@ -4,7 +4,7 @@ from pathlib import Path
 from typing import List, Dict, Any, Optional
 
 import numpy as np
-import faiss  # pip install faiss-cpu
+import faiss  
 from fastapi import FastAPI, Body
 from pydantic import BaseModel
 
