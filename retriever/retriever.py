@@ -1,76 +1,183 @@
-from fastapi import FastAPI
-from pydantic import BaseModel
-from typing import List, Optional, Literal, Dict, Any
-import os, pickle, numpy as np
-from pathlib import Path
+from __future__ import annotations
+
+import os, json, math, pickle
 from functools import lru_cache
+from pathlib import Path
+from typing import Any, Dict, List, Tuple
+
 import joblib
-from scipy.sparse import load_npz
+import numpy as np
 
-# ---------- Paths ----------
-BASE_DIR = Path(__file__).resolve().parent
-CANDIDATES = []
 
-# 1) Explicit env var takes precedence
-env_dir = os.getenv("RETRIEVER_INDEX_DIR")
-if env_dir:
-    CANDIDATES.append(Path(env_dir))
+# ------------------------- Index path helpers -------------------------
 
-# 2) Common project layouts
-CANDIDATES += [
-    BASE_DIR / "retriever" / "index",    
-    BASE_DIR / "index",                   
-    BASE_DIR.parent / "retriever" / "index"  
-]
-INDEX_DIR = Path(os.getenv("RETRIEVER_INDEX_DIR") or (Path(__file__).parent / "index")).resolve()
-TFIDF_PATH = Path(os.getenv("TFIDF_PATH") or (INDEX_DIR / "tfidf.pkl"))
-EMBED_PATH = (INDEX_DIR / "embed.pkl").resolve()
+def _index_dir() -> Path:
+    """Resolve the index dir (env first, then default to <this>/index)."""
+    env = os.getenv("RETRIEVER_INDEX_DIR")
+    if env:
+        return Path(env).resolve()
+    return (Path(__file__).parent / "index").resolve()
 
-print(f"[retriever] Using INDEX_DIR={INDEX_DIR}")
 
-app = FastAPI(title="Nanochem Retriever (Hybrid)", version="1.2.0")
+# ---------------------------- TF‑IDF loader ---------------------------
 
-# ---------- Schemas ----------
-class SearchRequest(BaseModel):
-    query: str
-    k: int = 5
-    mode: Literal["tfidf", "embed", "hybrid"] = "hybrid"
-    alpha: float = 0.7  # weight for embeddings in hybrid
+@lru_cache(maxsize=1)
+def _load_tfidf() -> Dict[str, Any]:
+    """
+    Load TF-IDF index from RETRIEVER_INDEX_DIR, accepting multiple layouts:
+      - New:   tfidf.pkl            (joblib dump of {"matrix","vectorizer", ...})
+      - Legacy:tfidf.npz+vectorizer.joblib
+      - Very legacy: tfidf.npz+vocab.json  (bare vectorizer; idf_ may be missing)
 
-class SearchHit(BaseModel):
-    score: float
-    text: str
-    paper_id: str
-    title: str
-    url: Optional[str] = None
-    license: Optional[dict] = None
-    ents: Optional[list] = None
-    links: Optional[list] = None
+    Returns a dict with at least:
+      {"kind":"matrix","matrix":X,"vectorizer":vec,"texts":[...],"metas":[...]}
+    and legacy aliases:
+      {"vec": vectorizer, "nn": matrix}
+    """
+    idx = _index_dir()
+    pkl  = idx / "tfidf.pkl"
+    npz  = idx / "tfidf.npz"
+    vecj = idx / "vectorizer.joblib"
+    vocab = idx / "vocab.json"
 
-class SearchResponse(BaseModel):
-    hits: List[SearchHit]
+    print(f"[retriever] Using INDEX_DIR={idx}")
 
+    def _ensure_texts_metas(bundle: Dict[str, Any]) -> Dict[str, Any]:
+        X = bundle.get("matrix")
+        n = int(getattr(X, "shape", (0, 0))[0]) if X is not None else 0
+
+        texts = bundle.get("texts")
+        metas = bundle.get("metas")
+
+        rows = bundle.get("rows")
+        if rows and not texts:
+            try:
+                texts = [r.get("text", "") for r in rows if isinstance(r, dict)]
+            except Exception:
+                pass
+        if rows and not metas:
+            metas = rows
+
+        if texts is None:
+            texts = [""] * n
+        if metas is None:
+            metas = [{} for _ in range(n)]
+        # Align lengths if needed
+        if len(texts) != n:
+            if len(texts) > n:
+                texts = texts[:n]
+            else:
+                texts = texts + [""] * (n - len(texts))
+        if len(metas) != n:
+            if len(metas) > n:
+                metas = metas[:n]
+            else:
+                metas = metas + [{} for _ in range(n - len(metas))]
+
+        bundle["texts"] = texts
+        bundle["metas"] = metas
+        bundle["vec"] = bundle.get("vectorizer")
+        bundle["nn"] = bundle.get("matrix")
+        return bundle
+
+    # ---- Preferred format: single pickle ----
+    if pkl.exists():
+        obj = joblib.load(pkl)
+        if isinstance(obj, dict):
+            X = obj.get("matrix") or obj.get("X") or obj.get("tfidf")
+            vectorizer = obj.get("vectorizer") or obj.get("vec")
+            if X is None or vectorizer is None:
+                raise RuntimeError(f"Malformed {pkl}: expected 'matrix' and 'vectorizer'")
+            bundle = {"kind": "matrix", "matrix": X, "vectorizer": vectorizer}
+            for k in ("texts","metas","rows","license","titles"):
+                if k in obj:
+                    bundle[k] = obj[k]
+            return _ensure_texts_metas(bundle)
+        else:
+            raise RuntimeError(f"Unsupported object in {pkl}: {type(obj)}")
+
+    # ---- Legacy format: npz + vectorizer.joblib ----
+    if npz.exists():
+        # Try SciPy sparse loader first
+        try:
+            from scipy.sparse import load_npz  # type: ignore
+            X = load_npz(npz)
+        except Exception as e:
+           
+            try:
+                f = np.load(npz)
+                key = "arr_0" if "arr_0" in f.files else next(iter(f.files))
+                X = f[key]
+            except Exception as ee:
+                raise RuntimeError(
+                    f"Found {npz} but could not load it as sparse or dense: {e} / {ee}. "
+                    f"Install SciPy or convert to tfidf.pkl."
+                )
+        if vecj.exists():
+            vectorizer = joblib.load(vecj)
+            bundle = {"kind": "matrix", "matrix": X, "vectorizer": vectorizer}
+     
+            for sidecar in ("rows.pkl","rows.jsonl","texts.jsonl","meta.json"):
+                p = idx / sidecar
+                if not p.exists():
+                    continue
+                try:
+                    if p.suffix == ".pkl":
+                        rows = joblib.load(p)
+                        if isinstance(rows, list):
+                            bundle["rows"] = rows
+                    elif p.suffix == ".json":
+                        bundle["metas"] = json.loads(p.read_text(encoding="utf-8", errors="ignore"))
+                    else:
+                        rows = []
+                        with p.open("r", encoding="utf-8", errors="ignore") as f:
+                            for line in f:
+                                try:
+                                    rows.append(json.loads(line))
+                                except Exception:
+                                    pass
+                        if rows:
+                            bundle["rows"] = rows
+                except Exception:
+                    pass
+            return _ensure_texts_metas(bundle)
+
+        # ---- Very legacy: npz + vocab.json ----
+        if vocab.exists():
+            from sklearn.feature_extraction.text import TfidfVectorizer
+            vocab_list = json.loads(vocab.read_text(encoding="utf-8", errors="ignore"))
+            vocab_map = {t: i for i, t in enumerate(vocab_list)}
+            vectorizer = TfidfVectorizer(vocabulary=vocab_map)
+            bundle = {"kind":"matrix", "matrix": X, "vectorizer": vectorizer}
+            return _ensure_texts_metas(bundle)
+
+    raise RuntimeError(
+        f"No TF-IDF index found in {_index_dir()}. Expected tfidf.pkl OR tfidf.npz(+vectorizer.joblib). "
+        f"Set RETRIEVER_INDEX_DIR appropriately."
+    )
+
+
+# ----------------------------- Compatibility -----------------------------
 
 class Embedder:
     """
-    Minimal wrapper so legacy code importing `Embedder` keeps working.
-    It uses your existing _load_embed() config and backs off to
-    sentence-transformers if no embedding store is on disk.
+    Minimal compatibility shim so legacy imports `from retriever.retriever import Embedder` work.
+    Supports two backends: 'openai' and 'sentence-transformers'.
     """
     def __init__(self, backend: str | None = None, model: str | None = None):
-        store = _load_embed()
-        self.backend = backend or (store and store.get("backend")) or "sentence-transformers"
-        self.model = model or (store and store.get("model")) or "sentence-transformers/all-MiniLM-L6-v2"
-        self._st = None  # lazy SentenceTransformer
+        cfg = _load_embed()
+        self.backend = backend or cfg.get("backend") or "sentence-transformers"
+        self.model = model or cfg.get("model") or "sentence-transformers/all-MiniLM-L6-v2"
+        self._st = None
 
-    def encode(self, texts: list[str]) -> np.ndarray:
+    def encode(self, texts: List[str]) -> np.ndarray:
         if self.backend == "openai":
-            from openai import OpenAI  
+            from openai import OpenAI  # requires OPENAI_API_KEY
             client = OpenAI()
             resp = client.embeddings.create(model=self.model, input=texts)
             arr = np.array([d.embedding for d in resp.data], dtype="float32")
-            arr /= (np.linalg.norm(arr, axis=1, keepdims=True) + 1e-8)
-            return arr
+            n = np.linalg.norm(arr, axis=1, keepdims=True) + 1e-8
+            return (arr / n).astype("float32")
         else:
             from sentence_transformers import SentenceTransformer
             if self._st is None:
@@ -81,174 +188,146 @@ class Embedder:
     def embed(self, text: str) -> np.ndarray:
         return self.encode([text])[0]
 
-# ---------- Loaders ----------
-@lru_cache(maxsize=1)
-def _load_tfidf() -> Dict[str, Any]:
-    """Load the TF-IDF index from disk."""
-    print(f"[retriever] TFIDF_PATH={TFIDF_PATH} exists={TFIDF_PATH.exists()}")
-    if not TFIDF_PATH.exists():
-        raise RuntimeError(
-            f"TF-IDF index missing at {TFIDF_PATH}. "
-            f"Build it or set RETRIEVER_INDEX_DIR to the folder containing tfidf.pkl."
-        )
-    with open(TFIDF_PATH, "rb") as f:
-        store = pickle.load(f)
-
-    # Layout A: matrix style
-    if {"vectorizer", "matrix"} <= set(store.keys()):
-        vec   = store["vectorizer"]
-        X     = store["matrix"]
-        metas = store.get("metas")
-        texts = store.get("texts")
-        if metas is None or texts is None:
-            rows = store.get("rows", [])
-            if rows and not texts:
-                texts = [r.get("text", "") for r in rows]
-            if rows and not metas:
-                metas = rows
-        return {"kind": "matrix", "vectorizer": vec, "matrix": X, "metas": metas, "texts": texts}
-
-    # Layout B: NN style
-    if {"rows", "vec", "nn"} <= set(store.keys()):
-        rows = store["rows"]
-        vec  = store["vec"]
-        nn   = store["nn"]
-        texts = [r.get("text", "") for r in rows]
-        metas = rows
-        return {"kind": "nn", "rows": rows, "vec": vec, "nn": nn, "metas": metas, "texts": texts}
-
-    raise RuntimeError(f"Unrecognized TF-IDF format keys: {list(store.keys())}")
 
 @lru_cache(maxsize=1)
-def _load_embed():
-    """Load the embedding index from disk."""
-    if not EMBED_PATH.exists():
-        return None
-    with open(EMBED_PATH, "rb") as f:
-        return pickle.load(f)  # expects {"backend","model","embeddings","metas","texts"} or similar
-
-def _embed_query(q: str, backend: str, model: str) -> np.ndarray:
-    """Embed a query string using the specified backend and model."""
-    if backend == "openai":
-        from openai import OpenAI
-        client = OpenAI()
-        resp = client.embeddings.create(model=model, input=[q])
-        v = np.array(resp.data[0].embedding, dtype="float32")
-    else:
-        from sentence_transformers import SentenceTransformer
-        m = SentenceTransformer(model)
-        v = m.encode([q], normalize_embeddings=True)[0].astype("float32")
-    v = v / (np.linalg.norm(v) + 1e-8)
-    return v
-
-def _index_dir() -> Path:
-    return Path(os.getenv("RETRIEVER_INDEX_DIR") or (Path(__file__).parent / "index")).resolve()
-
-def _load_tfidf():
+def _load_embed() -> Dict[str, Any]:
+    """Optional embed config: index/embed.json or env flags."""
+    cfg = {}
     idx = _index_dir()
-    pkl  = idx / "tfidf.pkl"
-    npz  = idx / "tfidf.npz"
-    vecj = idx / "vectorizer.joblib"
-    vocab = idx / "vocab.json"
+    j = idx / "embed.json"
+    if j.exists():
+        try:
+            cfg.update(json.loads(j.read_text(encoding="utf-8", errors="ignore")))
+        except Exception:
+            pass
+    # env overrides
+    if os.getenv("EMBED_BACKEND"):
+        cfg["backend"] = os.getenv("EMBED_BACKEND")
+    if os.getenv("EMBED_MODEL"):
+        cfg["model"] = os.getenv("EMBED_MODEL")
+    return cfg
 
-    print(f"[retriever] Using INDEX_DIR={idx}")
 
-    # 1) New format: single pickle with vectorizer + matrix
-    if pkl.exists():
-        obj = joblib.load(pkl)
-        X = obj.get("matrix") or obj.get("X")
-        vectorizer = obj.get("vectorizer")
-        if X is None or vectorizer is None:
-            raise RuntimeError(f"Malformed {pkl}: expected dict with 'matrix' and 'vectorizer'")
-        return {"kind": "sklearn_pkl", "matrix": X, "vectorizer": vectorizer}
+# ------------------------------- Search API -------------------------------
 
-    # 2) Legacy format: tfidf.npz + vectorizer.joblib (preferred)
-    if npz.exists():
-        X = load_npz(npz)
-        if vecj.exists():
-            vectorizer = joblib.load(vecj)
-            return {"kind": "sklearn_npz", "matrix": X, "vectorizer": vectorizer}
-        # 3) Last resort: vocabulary-only (works but idf_ may be missing)
-        if vocab.exists():
-            from sklearn.feature_extraction.text import TfidfVectorizer
-            vocab_list = json.loads(vocab.read_text(encoding="utf-8"))
-            vocab_map = {t: i for i, t in enumerate(vocab_list)}
-            vectorizer = TfidfVectorizer(vocabulary=vocab_map)
-            return {"kind": "vocab_only", "matrix": X, "vectorizer": vectorizer}
+def _get_vec_nn(tf: Dict[str, Any]) -> Tuple[Any, Any]:
+    """Accept both new and legacy bundle keys for vectorizer and matrix."""
+    vec = tf.get("vec") or tf.get("vectorizer")
+    nn  = tf.get("nn")  or tf.get("matrix") or tf.get("X") or tf.get("tfidf")
+    if vec is None or nn is None:
+        raise RuntimeError(f"Bad TF-IDF bundle keys: {list(tf.keys())}")
+    return vec, nn
 
-    raise RuntimeError(
-        f"TF-IDF index missing: expected {pkl} or {npz} (+ {vecj} / {vocab}). "
-        f"Set RETRIEVER_INDEX_DIR to the folder containing your index."
-    )
-# ---------- API ----------
-@app.get("/health")
-def health():
-    """Health check endpoint."""
-    return {
-        "status": "ok",
-        "tfidf_path": str(TFIDF_PATH),
-        "tfidf_exists": TFIDF_PATH.exists(),
-        "embed_path": str(EMBED_PATH),
-        "embed_exists": EMBED_PATH.exists()
-    }
 
-@app.post("/search", response_model=SearchResponse)
-def search(req: SearchRequest):
-    """Search the corpus using TF-IDF, embeddings, or hybrid."""
+def _to_csr(x):
+    """Ensure we can do efficient dot products; convert dense -> float32 array."""
+    try:
+        # SciPy sparse?
+        import scipy.sparse as sp  # type: ignore
+        if sp.issparse(x):
+            return x
+    except Exception:
+        pass
+    # Dense numpy array
+    return np.asarray(x)
+
+
+def _cosine_sim(query_vec, matrix):
+    """Compute cosine similarity scores between query_vec (1 x d) and matrix (N x d)."""
+    # If sparse:
+    try:
+        import scipy.sparse as sp  # type: ignore
+        if sp.issparse(matrix):
+            # Normalize if needed
+            q = query_vec
+            if sp.issparse(q):
+                q_norm = np.sqrt(q.multiply(q).sum())
+                if q_norm > 0:
+                    q = q / q_norm
+            # Assume matrix rows are L2-normalized if indexer did so; if not, normalize on the fly
+            scores = (matrix @ q.T).toarray().ravel()
+            m_norm = np.sqrt(matrix.multiply(matrix).sum(axis=1)).A.ravel()
+            nz = (m_norm > 0)
+            if not np.allclose(m_norm[nz], 1.0, atol=1e-2):
+                scores[nz] = scores[nz] / m_norm[nz]
+            return scores
+    except Exception:
+        pass
+
+    # Dense path
+    q = np.asarray(query_vec).astype("float32")
+    M = np.asarray(matrix).astype("float32")
+    # L2 normalize
+    qn = np.linalg.norm(q) + 1e-8
+    q = q / qn
+    mn = np.linalg.norm(M, axis=1, keepdims=True) + 1e-8
+    M = M / mn
+    return (M @ q.reshape(-1, 1)).ravel()
+
+
+def search(query: str, k: int = 5, **kwargs) -> Dict[str, Any]:
+    """
+    Basic TF‑IDF search.
+    Accepts extra kwargs (mode, alpha, etc.) to be compatible with HTTP callers.
+    Returns: {"query":..., "k":..., "hits":[{"i":idx,"score":float,"text":str,"meta":dict}, ...]}
+    """
+    if not isinstance(query, str) or not query.strip():
+        return {"query": query, "k": k, "hits": []}
+
     tf = _load_tfidf()
-    kind = tf["kind"]
+    vec, nn = _get_vec_nn(tf)
 
-    # --- TF-IDF similarity ----
-    if kind == "matrix":
-        from sklearn.metrics.pairwise import cosine_similarity
-        vec, X = tf["vectorizer"], tf["matrix"]
-        qv = vec.transform([req.query])
-        sims_tfidf = cosine_similarity(qv, X)[0]
-    else:
-        # NearestNeighbors index
-        vec, nn = tf["vec"], tf["nn"]
-        qv = vec.transform([req.query])
-        dist, idx = nn.kneighbors(qv, n_neighbors=min(req.k, len(tf["texts"])))
-        sims_nn = 1.0 - dist[0]  # convert distances to similarity
-        sims_tfidf = np.zeros(len(tf["texts"]), dtype="float32")
-        sims_tfidf[idx[0]] = sims_nn
+    # Build query vector
+    try:
+        qv = vec.transform([query])
+    except Exception:
+        # Some vectorizers expose a different API; last resort
+        if hasattr(vec, "encode"):
+            qv = vec.encode([query])
+        else:
+            raise
 
-    sims = sims_tfidf
+    # Cosine similarity
+    scores = _cosine_sim(qv, nn)
 
-    # --- Optional embeddings / hybrid ---
-    if req.mode in ("embed", "hybrid"):
-        emb_store = _load_embed()
-        if emb_store is not None:
-            backend = emb_store["backend"]
-            model = emb_store["model"]
-            E = emb_store["embeddings"]  # (N,d) L2-normalized
-            q_emb = _embed_query(req.query, backend, model)
-            sims_emb = (E @ q_emb)
-            sims = sims_emb if req.mode == "embed" else (req.alpha * sims_emb + (1.0 - req.alpha) * sims_tfidf)
+    if scores.size == 0:
+        return {"query": query, "k": k, "hits": []}
 
-    k = max(1, min(req.k, len(tf["texts"])))
-    idxs = np.argsort(-sims)[:k]
+    # Top-k
+    k = max(1, int(k))
+    k = min(k, scores.shape[0])
+    idx = np.argpartition(scores, -k)[-k:]
+    top = idx[np.argsort(scores[idx])[::-1]]
 
-    hits: List[SearchHit] = []
-    metas, texts = tf["metas"], tf["texts"]
-    for i in idxs:
-        m = metas[i] if isinstance(metas, list) else {}
-        hits.append(SearchHit(
-            score=float(sims[i]),
-            text=texts[i],
-            paper_id=str(m.get("paper_id", "")),
-            title=m.get("title", ""),
-            url=m.get("url"),
-            license=m.get("license"),
-            ents=m.get("ents"),
-            links=m.get("links")
-        ))
-    return SearchResponse(hits=hits)
+    texts = tf.get("texts", [])
+    metas = tf.get("metas", [])
+    hits = []
+    for i in top:
+        rec = {
+            "i": int(i),
+            "score": float(scores[i]),
+            "text": texts[i] if i < len(texts) else "",
+            "meta": metas[i] if i < len(metas) else {},
+        }
+        hits.append(rec)
 
-@app.post("/reload")
-def reload_indexes():
-    """Reload the TF-IDF and embedding indexes from disk."""
-    _load_tfidf.cache_clear()
-    _load_embed.cache_clear()
-    _ = _load_tfidf()
-    return {"reloaded": True, "tfidf_path": str(TFIDF_PATH)}
+    return {"query": query, "k": k, "hits": hits}
+
+
+# ------------------------------- Health helpers -------------------------------
+
+def health() -> Dict[str, Any]:
+    try:
+        tf = _load_tfidf()
+        vec, nn = _get_vec_nn(tf)
+        return {"ok": True, "docs": int(getattr(nn, "shape", (0,))[0])}
+    except Exception as e:
+        return {"ok": False, "error": str(e)}
+
+
+# ------------------------------- CLI -----------------------------------------
+
+if __name__ == "__main__":
+    print("[retriever] index dir:", _index_dir())
+    print("[retriever] health:", health())
+    print("[retriever] test:", search("cobalt nanowire synthesis", k=3))
