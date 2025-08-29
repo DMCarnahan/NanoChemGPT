@@ -17,9 +17,6 @@ app = FastAPI(title="NanoChemGPT", version="1.0")
 def healthz():
     return {"ok": True}
 
-# Mount Flask at root
-app.mount("/", WSGIMiddleware(flask_app))
-
-# Mount retriever under /retriever
 if retriever_api is not None:
     app.mount("/retriever", retriever_api)
+app.mount("/", WSGIMiddleware(flask_app))

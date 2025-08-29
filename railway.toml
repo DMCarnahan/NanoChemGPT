@@ -23,10 +23,18 @@ cmds = [
 
 [phases.start]
 cmd = "bash -lc ' \
-  export RETRIEVER_URL=http://127.0.0.1:$PORT/retriever; \
-  mkdir -p $(dirname \"$BUNDLE_PATH\") \"$INDEX_DIR\"; \
+  set -euo pipefail; \
+  : ${PORT:=8000}; \
+  : ${BUNDLE_PATH:=/app/data/harvester/out_auto/bundle.jsonl}; \
+  : ${INDEX_DIR:=/app/retriever/index}; \
+  export RETRIEVER_URL=http://127.0.0.1:${PORT}/retriever; \
+  export RETRIEVER_INDEX_DIR=\"${INDEX_DIR}\"; \
+  echo \"[start] RETRIEVER_URL=$RETRIEVER_URL\"; \
+  echo \"[start] BUNDLE_PATH=$BUNDLE_PATH\"; \
+  echo \"[start] INDEX_DIR=$INDEX_DIR\"; \
+  mkdir -p \"$(dirname \"$BUNDLE_PATH\")\" \"$INDEX_DIR\"; \
   if [ ! -s \"$BUNDLE_PATH\" ] && [ -f \"/app/data/harvester/out_auto/seed_bundle.jsonl\" ]; then \
-    cp /app/data/harvester/out_auto/seed_bundle.jsonl \"$BUNDLE_PATH\"; \
+    cp /app/data/harvester/out_auto/seed_bundle.jsonl \"$BUNDLE_PATH\" && \
     echo \"[start] Seeded bundle -> $BUNDLE_PATH\"; \
   fi; \
   if [ -s \"$BUNDLE_PATH\" ]; then \
@@ -36,5 +44,5 @@ cmd = "bash -lc ' \
     echo \"[start] No bundle at $BUNDLE_PATH; skipping index\"; \
   fi; \
   gunicorn -k uvicorn.workers.UvicornWorker -w 2 --threads 2 --timeout 90 \
-  --worker-tmp-dir /dev/shm -b 0.0.0.0:8000 main_asgi:app \
+    --worker-tmp-dir /dev/shm -b 0.0.0.0:${PORT} main_asgi:app \
 '"
