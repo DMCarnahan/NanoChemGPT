@@ -58,6 +58,37 @@ class SearchHit(BaseModel):
 class SearchResponse(BaseModel):
     hits: List[SearchHit]
 
+
+class Embedder:
+    """
+    Minimal wrapper so legacy code importing `Embedder` keeps working.
+    It uses your existing _load_embed() config and backs off to
+    sentence-transformers if no embedding store is on disk.
+    """
+    def __init__(self, backend: str | None = None, model: str | None = None):
+        store = _load_embed()
+        self.backend = backend or (store and store.get("backend")) or "sentence-transformers"
+        self.model = model or (store and store.get("model")) or "sentence-transformers/all-MiniLM-L6-v2"
+        self._st = None  # lazy SentenceTransformer
+
+    def encode(self, texts: list[str]) -> np.ndarray:
+        if self.backend == "openai":
+            from openai import OpenAI  
+            client = OpenAI()
+            resp = client.embeddings.create(model=self.model, input=texts)
+            arr = np.array([d.embedding for d in resp.data], dtype="float32")
+            arr /= (np.linalg.norm(arr, axis=1, keepdims=True) + 1e-8)
+            return arr
+        else:
+            from sentence_transformers import SentenceTransformer
+            if self._st is None:
+                self._st = SentenceTransformer(self.model)
+            vecs = self._st.encode(texts, normalize_embeddings=True)
+            return vecs.astype("float32")
+
+    def embed(self, text: str) -> np.ndarray:
+        return self.encode([text])[0]
+
 # ---------- Loaders ----------
 @lru_cache(maxsize=1)
 def _load_tfidf() -> Dict[str, Any]:
