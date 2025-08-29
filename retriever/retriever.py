@@ -42,14 +42,15 @@ def _load_tfidf() -> Dict[str, Any]:
 
     print(f"[retriever] Using INDEX_DIR={idx}")
 
-    def _ensure_texts_metas(bundle: Dict[str, Any]) -> Dict[str, Any]:
+    def _ensure_texts_metas(bundle: dict) -> dict:
         X = bundle.get("matrix")
         n = int(getattr(X, "shape", (0, 0))[0]) if X is not None else 0
 
         texts = bundle.get("texts")
         metas = bundle.get("metas")
+        rows  = bundle.get("rows")  # legacy sidecar list of dicts
 
-        rows = bundle.get("rows")
+        # If rows provided, use them as defaults
         if rows and not texts:
             try:
                 texts = [r.get("text", "") for r in rows if isinstance(r, dict)]
@@ -58,27 +59,54 @@ def _load_tfidf() -> Dict[str, Any]:
         if rows and not metas:
             metas = rows
 
-        if texts is None:
-            texts = [""] * n
-        if metas is None:
-            metas = [{} for _ in range(n)]
-        # Align lengths if needed
-        if len(texts) != n:
-            if len(texts) > n:
-                texts = texts[:n]
-            else:
-                texts = texts + [""] * (n - len(texts))
-        if len(metas) != n:
-            if len(metas) > n:
-                metas = metas[:n]
-            else:
-                metas = metas + [{} for _ in range(n - len(metas))]
+        def _as_list(x, n, fill):
+            """Coerce x -> list length n. If dict with numeric keys, scatter by index."""
+            if x is None:
+                return [fill() for _ in range(n)]
+            # tuple -> list
+            if isinstance(x, tuple):
+                x = list(x)
+            # dict handling
+            if isinstance(x, dict):
+                # If dict keys look like indices, scatter into an array
+                if all(str(k).isdigit() for k in x.keys()):
+                    arr = [fill() for _ in range(n)]
+                    for k, v in x.items():
+                        try:
+                            i = int(k)
+                            if 0 <= i < n:
+                                arr[i] = v
+                        except Exception:
+                            pass
+                    x = arr
+                else:
+                    # single metadata dict replicated
+                    x = [x] * max(1, n)
+            # scalar / other → replicate
+            if not isinstance(x, list):
+                x = [x] * max(1, n)
+            # pad/trim to length n
+            if len(x) < n:
+                x = x + [fill() for _ in range(n - len(x))]
+            elif len(x) > n:
+                x = x[:n]
+            return x
+
+        texts = _as_list(texts, n, lambda: "")
+        # ensure all texts are strings
+        texts = [t if isinstance(t, str) else str(t) for t in texts]
+
+        metas = _as_list(metas, n, lambda: {})
+        # ensure metas are dicts
+        metas = [m if isinstance(m, dict) else {"meta": m} for m in metas]
 
         bundle["texts"] = texts
         bundle["metas"] = metas
+        # legacy aliases so older code using ["vec"],["nn"] keeps working
         bundle["vec"] = bundle.get("vectorizer")
-        bundle["nn"] = bundle.get("matrix")
+        bundle["nn"]  = bundle.get("matrix")
         return bundle
+
 
     # ---- Preferred format: single pickle ----
     if pkl.exists():
