@@ -1,4 +1,4 @@
-from __future__ import annotations
+﻿from __future__ import annotations
 
 import os, json, math, pickle
 from functools import lru_cache
@@ -24,7 +24,7 @@ def _index_dir() -> Path:
     return (Path(__file__).parent / "index").resolve()
 
 
-# ---------------------------- TF‑IDF loader ---------------------------
+# ---------------------------- TFIDF loader ---------------------------
 
 @lru_cache(maxsize=1)
 def _load_tfidf() -> Dict[str, Any]:
@@ -87,7 +87,7 @@ def _load_tfidf() -> Dict[str, Any]:
                 else:
                     # single metadata dict replicated
                     x = [x] * max(1, n)
-            # scalar / other → replicate
+            # scalar / other â†’ replicate
             if not isinstance(x, list):
                 x = [x] * max(1, n)
             # pad/trim to length n
@@ -120,7 +120,8 @@ def _load_tfidf() -> Dict[str, Any]:
             X = _coalesce(obj.get("matrix"), obj.get("X"), obj.get("tfidf"))
             vectorizer = _coalesce(obj.get("vectorizer"), obj.get("vec"))
             if X is None or vectorizer is None:
-                raise RuntimeError(f"Malformed {pkl}: expected 'matrix' and 'vectorizer'")            bundle = {"kind": "matrix", "matrix": X, "vectorizer": vectorizer}
+                raise RuntimeError(f"Malformed {pkl}: expected 'matrix' and 'vectorizer'")
+            bundle = {"kind": "matrix", "matrix": X, "vectorizer": vectorizer}
             for k in ("texts","metas","rows","license","titles"):
                 if k in obj:
                     bundle[k] = obj[k]
@@ -294,7 +295,7 @@ def _cosine_sim(query_vec, matrix):
 
 def search(query: str, k: int = 5, **kwargs) -> Dict[str, Any]:
     """
-    Basic TF‑IDF search.
+    Basic TFâ€‘IDF search.
     Accepts extra kwargs (mode, alpha, etc.) to be compatible with HTTP callers.
     Returns: {"query":..., "k":..., "hits":[{"i":idx,"score":float,"text":str,"meta":dict}, ...]}
     """
