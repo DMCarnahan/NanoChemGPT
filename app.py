@@ -10,8 +10,6 @@ from __future__ import annotations
 # Standard library imports
 import os
 import io
-import sys
-import json
 import re
 import glob
 import threading
@@ -26,6 +24,7 @@ from flask import Flask, request, jsonify, abort, render_template, send_file
 from jinja2 import TemplateNotFound
 from openai import OpenAI
 from werkzeug.utils import secure_filename
+from typing import Any, Dict, List
 
 # Local modules
 import vector_store as vs
@@ -50,6 +49,27 @@ except Exception:
     _h_classify_intent = _h_kb_search = _h_kb_fetch = None
     _h_judge_sufficiency = _h_safe_text = _h_extract_used_ref_indexes = None
     _Hit = None
+    # --- Safe fallbacks so /ask never 500s if helpers are missing or envs are blank ---
+    def env_int(name: str, default: int) -> int:
+        try:
+            v = (os.getenv(name, str(default)) or "").strip()
+            return int(v)
+        except Exception:
+            return default
+    def env_float(name: str, default: float) -> float:
+        try:
+            v = (os.getenv(name, str(default)) or "").strip()
+            return float(v)
+        except Exception:
+            return default
+    def judge_hits(hits: List[Dict[str, Any]], min_hits: int = 1, min_score: float = 0.0, min_chars: int = 48) -> bool:
+        good = 0
+        for h in hits or []:
+            score = float(h.get("score", 0.0))
+            text  = (h.get("text") or "")
+            if len(text) >= min_chars and score >= min_score:
+                good += 1
+        return good >= min_hits
 
 # -------------------- Paths/Config --------------------
 ROOT = Path(__file__).resolve().parent
@@ -152,7 +172,7 @@ _no_proxy = httpx.Client(trust_env=False, timeout=120.0)
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "")
 client = OpenAI(api_key=OPENAI_API_KEY, http_client=_no_proxy) if OPENAI_API_KEY else None
 
-RETRIEVER_URL = os.getenv("RETRIEVER_URL", "http://localhost:8000")
+RETRIEVER_URL = os.getenv("RETRIEVER_URL", "http://localhost:8000/retriever")
 
 def retriever_search(query: str, k: int = 8, mode: str = "hybrid", alpha: float = 0.7) -> list[dict]:
     try:
@@ -309,7 +329,8 @@ def health():
 @app.get("/db_health")
 def db_health():
     try:
-        mongo_ping()
+        db = get_db()
+        db.command("ping")
         return {"mongo": "ok"}, 200
     except Exception as e:
         return {"mongo": "error", "detail": str(e)}, 500
@@ -425,17 +446,6 @@ def _process_pdf_job(jid: str, path: Path, filename: str):
                 pass
         _set_job(jid, status="error", error=str(e))
 
-# ---- Search API ---- #
-# @app.post("/search")
-# def search_route():
-#     payload = request.get_json(silent=True) or {}
-#     q = (payload.get("q") or payload.get("query") or "").strip()
-#     n = int(payload.get("n") or 6)
-#     if not q:
-#         abort(400, "Missing 'q' (query).")
-#     refs = basic_search(q, n)
-#     return jsonify({"results": refs})
-
 # ---- Ask ---- #
 @app.post("/ask")
 def ask():
@@ -451,9 +461,7 @@ def ask():
 
     # ---------- request payload ----------
     from flask import request, jsonify  
-    # Initialize answer and refs_full before using them
     answer = ""
-    refs_full = []
     payload = request.get_json(silent=True) or {}
     question = (payload.get("question") or payload.get("q") or "").strip()
     if not question:
@@ -519,7 +527,7 @@ def ask():
     # ----------------- uploads → semantic context -----------------
     uploads_ctx = ""
     try:
-        uploads_dir = ROOT / "uploads"
+        uploads_dir = UPLOADS_DIR
         uploads_dir.mkdir(exist_ok=True)
         try:
             import torch
@@ -528,13 +536,13 @@ def ask():
             vector_device = "cpu"
 
         try:
-            vs = UploadsVectorSearch.from_folder(uploads_dir, device=vector_device, backend='tfidf', max_docs=1000)
+            uvs = UploadsVectorSearch.from_folder(uploads_dir, device=vector_device, backend='tfidf', max_docs=1000)
         except Exception as e:
             app.logger.warning(f"[/ask] Uploads VS error: {e}")
-            vs = None
+            uvs = None
 
-        if vs is not None:
-            hits = vs.search(question, k=8)
+        if uvs is not None:
+            hits = uvs.search(question, k=8)
             lines = []
             for i, h in enumerate(hits, start=1):
                 txt = _s(h.get("text") or "")
@@ -602,8 +610,16 @@ def ask():
     def _needs_more(hits: list[dict]) -> bool:
         if not hits:
             return True
-        uniq = {h.get("paper_id") for h in hits if h.get("paper_id")}
-        if len(uniq) < 2:
+        # prefer meta identifiers (doi/url/title)
+        def _hk(h):
+            m = h.get("meta", {}) if isinstance(h, dict) else {}
+            doi = (m.get("doi") or m.get("paper_id") or "").strip().lower()
+            doi = doi if doi.startswith("10.") else ""
+            url = (m.get("url") or m.get("oa_url") or m.get("pdf_url") or "").strip().lower()
+            title = (m.get("title") or "").strip().lower()
+            return doi or url or title
+        uniq = {_hk(h) for h in hits if _hk(h)}
+        if len(uniq) < 1:
             return True
         scores = [float(h.get("score", 0.0)) for h in hits[:3]]
         if scores and sum(scores) / len(scores) < 0.18:
@@ -857,20 +873,28 @@ def ask():
             app.logger.warning(f"[/ask] auto-harvest failed: {e}")
 
     # ---- Convert hits to web_refs ----
+    def _hit_meta(h):
+        return h.get("meta", {}) if isinstance(h, dict) else {}
+
     web_refs = []
     for h in hits:
+        m = _hit_meta(h)
+        doi = (m.get("doi") or m.get("paper_id") or "")
+        if isinstance(doi, str) and not doi.startswith("10."):
+            doi = ""  # 
         web_refs.append({
-            "title": _s(h.get("title") or "(no title)"),
-            "year": "",
-            "url": _s(h.get("url") or ""),
-            "doi": _s(h.get("paper_id") if (h.get("paper_id","").startswith("10.")) else ""),
-            "authors": h.get("authors", []),
+            "title": _s(m.get("title") or "(no title)"),
+            "year":  _s(m.get("year") or ""),
+            "url":   _s(m.get("url") or m.get("oa_url") or m.get("pdf_url") or ""),
+            "doi":   _s(doi),
+            "authors": m.get("authors") or [],
             "biblio": {},
         })
 
+
     # ----------------- Deduplicate & enumerate references -----------------
     def _normkey(r: dict) -> str:
-        return (r.get("doi") or r.get("title") or "").strip().lower()
+        return (r.get("doi") or r.get("url") or r.get("title") or "").strip().lower()
 
     refs = []
     seen = set()
@@ -888,12 +912,40 @@ def ask():
 
     if not refs_prompt:
         refs_prompt = "(no references found)"
-        
+    # Map key -> reference number so snippets can cite [n]
+    def _normkey_ref(r: dict) -> str:
+        return (r.get("doi") or r.get("url") or r.get("title") or "").strip().lower()
+
+    ref_index = { _normkey_ref(r): i+1 for i, r in enumerate(refs) }
+
+    def _key_from_hit(h: dict) -> str:
+        m = h.get("meta", {}) if isinstance(h, dict) else {}
+        doi = (m.get("doi") or m.get("paper_id") or "").strip().lower()
+        if doi.startswith("10."):
+            return doi
+        url = _s(m.get("url") or m.get("oa_url") or m.get("pdf_url")).lower()
+        if url:
+            return url
+        title = _s(m.get("title") or "").lower()
+        return title
+
+    web_ctx_lines = []
+    for h in hits[:5]:
+        k = _key_from_hit(h)
+        idx = ref_index.get(k)
+        head = f"[{idx}]" if idx else "[?]"
+        title = _s(_hit_meta(h).get("title") or "(no title)")
+        snippet = _s(h.get("text") or "")
+        if snippet:
+            web_ctx_lines.append(f"{head} {title}\n{snippet[:1000]}")
+    web_ctx = "\n\n".join(web_ctx_lines)
+
     # ----------------- Compose CONTEXT -----------------
     ctx_parts = []
     if uploads_ctx: ctx_parts.append("<<<CTX_UPLOADS>>>\n" + uploads_ctx)
     if table_ctx:   ctx_parts.append("<<<CTX_TABLE>>>\n" + table_ctx)
     if kb_ctx:      ctx_parts.append("<<<CTX_KB>>>\n" + kb_ctx)
+    if web_ctx:     ctx_parts.insert(0, "<<<CTX_WEB>>>\n" + web_ctx) 
     context_joined = "\n\n---\n\n".join(ctx_parts).strip()
 
     # ----------------- Prompting -----------------
@@ -934,6 +986,7 @@ def ask():
             " - Be very specific to the question.\n"
             f"{inline_rule}\n"
             " - If CONTEXT is insufficient, say so explicitly before generalizing.\n"
+            " - Every claim that uses info from CONTEXT/REFERENCES must end with [n]. If no [n] applies, omit the claim.\n"
             f"{reasoning_rules}\n"
             f"{acs_rule}\n"
             "Return exactly ONE block:\n"
@@ -952,6 +1005,7 @@ def ask():
             " - .\n"
             f"{inline_rule}\n"
             " - If CONTEXT is insufficient, say so explicitly before generalizing.\n"
+            " - Every claim that uses info from CONTEXT/REFERENCES must end with [n]. If no [n] applies, omit the claim.\n"
             f"{robot_rules}\n"
             f"{acs_rule}\n"
             "Return two blocks exactly in this order:\n"
@@ -960,7 +1014,7 @@ def ask():
             "2. **Materials**:\n[]\n"
             "3. **Procedure**\n[]\n\n"
             "```reason\n"
-            "For each key justification, add inline tag: [n] for numbered web REFERENCES.\n"
+            "Every claim that uses info from CONTEXT/REFERENCES must end with [n]. If no [n] applies, omit the claim.\n"
             "Keep rationales terse, but specific to the question, citing references and explaining logic.\n"
             "Add NO other blocks of text.\n"
             "```\n\n"
@@ -998,7 +1052,7 @@ def ask():
         references_block = _format_references_block_from_used(used_idxs, refs)
         markers = _extract_used_markers(answer, rationale)
     except Exception:
-        used_idxs, references_block, markers = [], "", []
+        used_idxs, references_block, markers = [], "", {"refs": [], "tags": {}, "has_ctx": False}
 
     # judge based on helper if present; otherwise fall back to simple text-length rule
     try:
@@ -1061,6 +1115,7 @@ def ask():
         "answer": answer,
         "rationale": rationale,
         "markers": markers,
+        "references_block": references_block,
         **refs_payload,
         "context_present": bool(context_joined),
         "mining_enqueued": enqueued,

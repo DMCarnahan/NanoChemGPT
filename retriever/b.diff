@@ -1,0 +1,79 @@
+--- a/app.py
++++ b/app.py
+@@ -140,7 +140,7 @@
+ _no_proxy = httpx.Client(trust_env=False, timeout=120.0)
+ OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "")
+ client = OpenAI(api_key=OPENAI_API_KEY, http_client=_no_proxy) if OPENAI_API_KEY else None
+ 
+-RETRIEVER_URL = os.getenv("RETRIEVER_URL", "http://localhost:8000")
++RETRIEVER_URL = os.getenv("RETRIEVER_URL", "http://localhost:8000/retriever")
+ 
+ def retriever_search(query: str, k: int = 8, mode: str = "hybrid", alpha: float = 0.7) -> list[dict]:
+     try:
+@@ -206,10 +206,11 @@
+ def health():
+     return "ok", 200
+ 
+ @app.get("/db_health")
+ def db_health():
+     try:
+-        mongo_ping()
+-        return {"mongo": "ok"}, 200
++        db = get_db()
++        db.command("ping")
++        return {"mongo": "ok"}, 200
+     except Exception as e:
+         return {"mongo": "error", "detail": str(e)}, 500
+ 
+@@ -284,7 +285,7 @@
+     # ----------------- uploads → semantic context -----------------
+     uploads_ctx = ""
+     try:
+-        uploads_dir = ROOT / "uploads"
++        uploads_dir = UPLOADS_DIR
+         uploads_dir.mkdir(exist_ok=True)
+         try:
+             import torch
+@@ -357,13 +358,27 @@
+ 
+     # --------------- on-demand harvest helpers (inner) ---------------
+     def _needs_more(hits: list[dict]) -> bool:
+         if not hits:
+             return True
+-        uniq = {h.get("paper_id") for h in hits if h.get("paper_id")}
+-        if len(uniq) < 2:
++        # prefer meta identifiers (doi/url/title)
++        def _hk(h):
++            m = h.get("meta", {}) if isinstance(h, dict) else {}
++            doi = (m.get("doi") or m.get("paper_id") or "").strip().lower()
++            doi = doi if doi.startswith("10.") else ""
++            url = (m.get("url") or m.get("oa_url") or m.get("pdf_url") or "").strip().lower()
++            title = (m.get("title") or "").strip().lower()
++            return doi or url or title
++        uniq = {_hk(h) for h in hits if _hk(h)}
++        if len(uniq) < 1:
+             return True
+-        scores = [float(h.get("score", 0.0)) for h in hits[:3]]
++        scores = [float(h.get("score", 0.0)) for h in hits[:3]]
+         if scores and sum(scores) / len(scores) < 0.18:
+             return True
+         total_ctx = sum(len(_s(h.get("text",""))) for h in hits)
+         return total_ctx < 800
+@@ -613,7 +628,7 @@
+         references_block = _format_references_block_from_used(used_idxs, refs)
+         markers = _extract_used_markers(answer, rationale)
+     except Exception:
+-        used_idxs, references_block, markers = [], "", []
++        used_idxs, references_block, markers = [], "", {"refs": [], "tags": {}, "has_ctx": False}
+ 
+     # judge based on helper if present; otherwise fall back to simple text-length rule
+     try:
+@@ -652,6 +667,7 @@
+         "answer": answer,
+         "rationale": rationale,
+         "markers": markers,
++        "references_block": references_block,
+         **refs_payload,
+         "context_present": bool(context_joined),
+         "mining_enqueued": enqueued,
+     })
