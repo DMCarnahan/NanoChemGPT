@@ -14,6 +14,16 @@ def _coalesce(*vals):
             return v
     return None
 
+_BUNDLE_CACHE = None      # dict with {"matrix": X, "vectorizer": vec, "texts": [...], "metas": [...]}
+_VEC_CACHE = None         # tuple(vectorizer, matrix)
+
+def reload_caches():
+    """Clear in-process caches so the next call will reload from disk."""
+    global _BUNDLE_CACHE, _VEC_CACHE
+    _BUNDLE_CACHE = None
+    _VEC_CACHE = None
+    return True
+
 # ------------------------- Index path helpers -------------------------
 
 def _index_dir() -> Path:
@@ -26,8 +36,7 @@ def _index_dir() -> Path:
 
 # ---------------------------- TFIDF loader ---------------------------
 
-@lru_cache(maxsize=1)
-def _load_tfidf() -> Dict[str, Any]:
+def _load_tfidf(force: bool = False) -> Dict[str, Any]:
     """
     Load TF-IDF index from RETRIEVER_INDEX_DIR, accepting multiple layouts:
       - New:   tfidf.pkl            (joblib dump of {"matrix","vectorizer", ...})
@@ -44,6 +53,10 @@ def _load_tfidf() -> Dict[str, Any]:
     npz  = idx / "tfidf.npz"
     vecj = idx / "vectorizer.joblib"
     vocab = idx / "vocab.json"
+
+    global _BUNDLE_CACHE
+    if _BUNDLE_CACHE is not None and not force:
+        return _BUNDLE_CACHE
 
     print(f"[retriever] Using INDEX_DIR={idx}")
 
@@ -155,7 +168,9 @@ def _load_tfidf() -> Dict[str, Any]:
             for k in ("texts", "metas", "rows", "license", "titles"):
                 if k in obj:
                     bundle[k] = obj[k]
-            return _ensure_texts_metas(bundle)
+            bundle = _ensure_texts_metas(bundle)
+            _BUNDLE_CACHE = bundle
+            return bundle
         else:
             raise RuntimeError(f"Unsupported object in {pkl}: {type(obj)}")
 
@@ -204,7 +219,9 @@ def _load_tfidf() -> Dict[str, Any]:
                             bundle["rows"] = rows
                 except Exception:
                     pass
-            return _ensure_texts_metas(bundle)
+            bundle = _ensure_texts_metas(bundle)
+            _BUNDLE_CACHE = bundle
+            return bundle
 
         # ---- Very legacy: npz + vocab.json ----
         if vocab.exists():
@@ -213,7 +230,9 @@ def _load_tfidf() -> Dict[str, Any]:
             vocab_map = {t: i for i, t in enumerate(vocab_list)}
             vectorizer = TfidfVectorizer(vocabulary=vocab_map)
             bundle = {"kind":"matrix", "matrix": X, "vectorizer": vectorizer}
-            return _ensure_texts_metas(bundle)
+            bundle = _ensure_texts_metas(bundle)
+            _BUNDLE_CACHE = bundle
+            return bundle
 
     raise RuntimeError(
         f"No TF-IDF index found in {_index_dir()}. Expected tfidf.pkl OR tfidf.npz(+vectorizer.joblib). "
@@ -274,22 +293,19 @@ def _load_embed() -> Dict[str, Any]:
 
 # ------------------------------- Search API -------------------------------
 
-def _get_vec_nn(tf: dict):
-    vec = tf.get("vec")
-    if vec is None:
-        vec = tf.get("vectorizer")
-
-    nn = tf.get("nn")
-    if nn is None:
-        nn = tf.get("matrix")
-    if nn is None:
-        nn = tf.get("X")
-    if nn is None:
-        nn = tf.get("tfidf")
-
-    if vec is None or nn is None:
-        raise RuntimeError(f"Bad TF-IDF bundle keys: {list(tf.keys())}")
-    return vec, nn
+def _get_vec_nn(bundle: dict | None = None):
+    """
+    Returns (vectorizer, matrix) with a tiny cache, since these are used on every query.
+    """
+    global _VEC_CACHE
+    if _VEC_CACHE is not None:
+        return _VEC_CACHE
+    if bundle is None:
+        bundle = _load_tfidf()
+    vec = bundle.get("vectorizer")
+    nn  = bundle.get("matrix")
+    _VEC_CACHE = (vec, nn)
+    return _VEC_CACHE
 
 def _cosine_sim(query_vec, matrix):
     """Compute cosine similarity scores between query_vec (1 x d) and matrix (N x d)."""
@@ -358,8 +374,9 @@ def search(query: str, k: int = 5, **kwargs) -> Dict[str, Any]:
     idx = np.argpartition(scores, -k)[-k:]
     top = idx[np.argsort(scores[idx])[::-1]]
 
-    texts = bundle.get("texts") or []
-    metas = bundle.get("metas") or [{}] * len(texts)
+    # Use the loaded bundle (tf) for snippets & metadata
+    texts = tf.get("texts") or []
+    metas = tf.get("metas") or [{}] * len(texts)
 
     hits = []
     for i, s in zip(top, scores[top]):

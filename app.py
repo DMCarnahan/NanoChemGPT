@@ -176,11 +176,14 @@ RETRIEVER_URL = os.getenv("RETRIEVER_URL", "http://localhost:8000/retriever")
 
 def retriever_search(query: str, k: int = 8, mode: str = "hybrid", alpha: float = 0.7) -> list[dict]:
     try:
-        r = _no_proxy.post(f"{RETRIEVER_URL}/search", json={"query": query, "k": k, "mode": mode, "alpha": alpha}, timeout=60)
+        r = _no_proxy.post(f"{RETRIEVER_URL.rstrip('/')}/search",
+                           json={"query": query, "k": k, "mode": mode, "alpha": alpha},
+                           timeout=60)
         r.raise_for_status()
-        return r.json().get("hits", [])
+        data = r.json()
+        return data.get("hits", []) if isinstance(data, dict) else []
     except Exception as e:
-        app.logger.warning("[retriever] search failed: %s", e)
+        print("[retriever] search failed:", e)
         return []
 
 # ──────────────── Utilities ──────────────── #
