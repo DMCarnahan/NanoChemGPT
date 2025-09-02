@@ -14,19 +14,13 @@ import sys
 import json
 import re
 import glob
-import traceback
 import threading
-import tempfile
-import textwrap
-import subprocess
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Set, List, Dict, Optional
 from functools import lru_cache
 
 # Third-party imports
 import httpx
-import pandas as pd
 from dotenv import load_dotenv
 from flask import Flask, request, jsonify, abort, render_template, send_file
 from jinja2 import TemplateNotFound
@@ -41,15 +35,15 @@ from mongo_client import get_db
 from decider.miner_queue import enqueue_text_mining_job
 from DuckDB.duck_searcher import get_duck_searcher
 from ref_utils import build_references_payload
-from mech_reasoning.app_extensions.mechanism_routes import mechanism_bp
 try:
     from app_utils.helpers import (
         classify_intent as _h_classify_intent,
         kb_search as _h_kb_search,
-        kb_fetch as _h_kb_fetch,                  
+        kb_fetch as _h_kb_fetch,
         judge_sufficiency as _h_judge_sufficiency,
         _safe_text as _h_safe_text,
         _extract_used_ref_indexes as _h_extract_used_ref_indexes,
+        env_float, env_int, judge_hits,
         Hit as _Hit,
     )
 except Exception:
@@ -70,6 +64,7 @@ BUNDLE_AUTO   = ROOT / "harvester" / "out_auto" / "bundle.jsonl"
 BUNDLE_MERGED = ROOT / "harvester" / "out_auto" / "bundle_with_methods.jsonl"
 INDEX_DIR     = ROOT / "retriever" / "index"
 
+# Ensure required directories exist
 for d in (BUILTIN_DIR, UPLOADS_DIR, LOOKUP_UPLOAD_DIR, VECTORSTORE_DIR):
     d.mkdir(parents=True, exist_ok=True)
 
@@ -95,7 +90,7 @@ def inject_csrf_token():
 
 @app.before_request
 def _log_req():
-    print(f"[req] {request.method} {request.path}")
+    app.logger.info(f"[req] {request.method} {request.path}")
 
 # ──────────────── DuckDB setup ──────────────── #
 
@@ -165,17 +160,18 @@ def retriever_search(query: str, k: int = 8, mode: str = "hybrid", alpha: float 
         r.raise_for_status()
         return r.json().get("hits", [])
     except Exception as e:
-        print("[retriever] search failed:", e)
+        app.logger.warning("[retriever] search failed: %s", e)
         return []
 
 # ──────────────── Utilities ──────────────── #
 def _s(x):
     # Hardened sanitizer prefers helpers._safe_text
     try:
-        from app.utils.helpers import _safe_text as __h_safe_text  # local import to avoid circulars
+        from app_utils.helpers import _safe_text as __h_safe_text  # local import to avoid circulars
         return __h_safe_text(x)
     except Exception:
-        return (str(x).strip() if x is not None else "")
+        return str(x).strip() if x is not None else ""
+
 def _safe_id(x):
     try:
         from bson import ObjectId
@@ -189,7 +185,7 @@ def _doc(obj):
     out = dict(obj)
     if "_id" in out:
         out["_id"] = str(out["_id"])
-    for k, v in list(out.items()):
+    for k, v in out.items():
         if hasattr(v, "isoformat"):
             out[k] = v.isoformat()
     return out
@@ -349,7 +345,7 @@ def upload():
             upsert=True,
         )
     except Exception as e:
-        print("[/upload] DB receipt warn:", e)
+        app.logger.warning(f"[/upload] DB receipt warn: {e}")
 
     jid = os.urandom(8).hex()
     _set_job(jid, status="processing", progress=0, filename=fname)
@@ -383,7 +379,7 @@ def _mark_uploaded(fname: str, *, kind: str, status: str):
             upsert=True,
         )
     except Exception as e:
-        print("[/upload] DB update warn:", e)
+        app.logger.warning(f"[/upload] DB update warn: {e}")
 
 @app.get("/status/<jid>")
 def status(jid: str):
@@ -399,7 +395,7 @@ def _process_pdf_job(jid: str, path: Path, filename: str):
         try:
             db = get_db()
         except Exception as e:
-            print("[/upload] get_db failed (continuing without DB):", e)
+            app.logger.warning(f"[/upload] get_db failed (continuing without DB): {e}")
         reader = PdfReader(str(path))
         n = len(reader.pages) or 1
         texts = []
@@ -462,6 +458,9 @@ def ask():
     question = (payload.get("question") or payload.get("q") or "").strip()
     if not question:
         return jsonify({"ok": False, "error": "Missing 'question'"}), 400
+    MIN_HITS  = env_int("JUDGE_MIN_HITS", 1)
+    MIN_SCORE = env_float("JUDGE_MIN_SCORE", 0.15)
+    MIN_CHARS = env_int("JUDGE_MIN_CHARS", 64)
 
     # ---------- intent classification ----------
     try:
@@ -531,7 +530,7 @@ def ask():
         try:
             vs = UploadsVectorSearch.from_folder(uploads_dir, device=vector_device, backend='tfidf', max_docs=1000)
         except Exception as e:
-            print("[/ask] Uploads VS error:", e)
+            app.logger.warning(f"[/ask] Uploads VS error: {e}")
             vs = None
 
         if vs is not None:
@@ -551,7 +550,7 @@ def ask():
                     lines.append(head + "\n" + txt.strip()[:1200])
             uploads_ctx = "\n\n".join(lines)
     except Exception as e:
-        print("[/ask] uploads_ctx warn:", e)
+        app.logger.warning(f"[/ask] uploads_ctx warn: {e}")
 
     # ----------------- DuckDB (LOOKUP) → table context -----------------
     table_ctx = ""
@@ -573,7 +572,7 @@ def ask():
                     table_refs.append({"title": f"Table row {i}", "url": url})
             table_ctx = "\n".join(lines)
         except Exception as e:
-            print("[/ask] LOOKUP query error:", e)
+            app.logger.warning(f"[/ask] LOOKUP query error: {e}")
 
     def _split_reasoning(raw: str) -> tuple[str, str]:
         if not raw:
@@ -659,7 +658,7 @@ def ask():
             env.setdefault(var, "1")
 
         def _stream(cmd: list[str]) -> int:
-            print(f"[harvest_reindex] running: {' '.join(cmd)}")
+            app.logger.info(f"[harvest_reindex] running: {' '.join(cmd)}")
             p = subprocess.Popen(
                 cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
                 text=True, env=env, cwd=str(ROOT)
@@ -669,9 +668,9 @@ def ask():
                 sys.stdout.write(line)
             rc = p.wait()
             if rc == 0:
-                print(f"[harvest_reindex] {' '.join(cmd)} OK")
+                app.logger.info(f"[harvest_reindex] {' '.join(cmd)} OK")
             else:
-                print(f"[harvest_reindex] {' '.join(cmd)} EXIT {rc}")
+                app.logger.warning(f"[harvest_reindex] {' '.join(cmd)} EXIT {rc}")
             return rc
 
         def _file_has_lines(path: Path, min_lines: int = 1) -> bool:
@@ -694,11 +693,11 @@ def ask():
         partial_ok = _file_has_lines(bundle_raw, 1)
 
         if rc != 0 and not partial_ok:
-            print("[harvest_reindex] harvest failed and no bundle produced; skipping index.")
+            app.logger.warning("[harvest_reindex] harvest failed and no bundle produced; skipping index.")
             return []
 
         if rc != 0 and partial_ok:
-            print("[harvest_reindex] harvest non-zero, but bundle exists — continuing with index.")
+            app.logger.info("[harvest_reindex] harvest non-zero, but bundle exists — continuing with index.")
 
         # --------- 2) add fallback (methods) ---------
         merged_bundle = out_dir / "bundle_with_methods.jsonl"
@@ -723,7 +722,7 @@ def ask():
                 bundle_for_index = bundle_raw
 
         if bundle_for_index is None:
-            print("[harvest_reindex] No bundle found to index.")
+            app.logger.warning("[harvest_reindex] No bundle found to index.")
             return []
 
         # --------- 4) index ---------
@@ -733,7 +732,7 @@ def ask():
             "--index_dir", str(INDEX_DIR),
             "--text-key", text_key,
         ])
-        print(f"[harvest_reindex] indexed {bundle_for_index} (text_key={text_key}) → {INDEX_DIR}")
+        app.logger.info(f"[harvest_reindex] indexed {bundle_for_index} (text_key={text_key}) → {INDEX_DIR}")
 
         # --------- 5) ping retriever ---------
         try:
@@ -806,7 +805,7 @@ def ask():
                     if ref.get("title"):
                         harvest_refs.append(ref)
         except Exception as e:
-            print("[harvest_reindex] refs build warn:", e)
+            app.logger.warning(f"[/harvest_reindex] refs build warn: {e}")
 
         return harvest_refs
 
@@ -822,7 +821,7 @@ def ask():
         else:
             kb_hits = []
     except Exception as e:
-        print("[/ask] KB search failed:", e)
+        app.logger.warning(f"[/ask] KB search failed: {e}")
         kb_hits = []
 
     def _mk_kb_ref_from_hit(h) -> dict:
@@ -855,7 +854,7 @@ def ask():
             harvest_refs = _harvest_reindex(_expand_queries(question)) or []   # <— collect refs
             hits = retriever_search(question, k=web_k, mode="hybrid", alpha=0.7) or []
         except Exception as e:
-            print("[/ask] auto-harvest failed:", e)
+            app.logger.warning(f"[/ask] auto-harvest failed: {e}")
 
     # ---- Convert hits to web_refs ----
     web_refs = []
@@ -996,36 +995,39 @@ def ask():
             used_idxs = _h_extract_used_ref_indexes(answer, rationale) if _h_extract_used_ref_indexes else []
         except Exception:
             used_idxs = []
-        references_block = _format_references_block_from_used(used_idxs, refs)  # noqa: F821
-        markers = _extract_used_markers(answer, rationale)         # noqa: F821
+        references_block = _format_references_block_from_used(used_idxs, refs)
+        markers = _extract_used_markers(answer, rationale)
     except Exception:
         used_idxs, references_block, markers = [], "", []
 
+    # judge based on helper if present; otherwise fall back to simple text-length rule
     try:
-        sufficient = _h_judge_sufficiency(question, context_joined)
-        if not bool(sufficient):
-            try:
-                enqueue_text_mining_job(question)  # noqa: F821
-                enqueued = True
-            except Exception as e:
-                print("[/ask] enqueue_text_mining_job failed:", e)
+        if callable(_h_judge_sufficiency):
+            sufficient = bool(_h_judge_sufficiency(question, context_joined))
+        else:
+            sufficient = len(context_joined) >= MIN_CHARS
     except Exception as e:
-        print("[/ask] judge/enqueue error:", e)
+        app.logger.warning(f"[/ask] judge/enqueue error (helper): {e}")
+        sufficient = len(context_joined) >= MIN_CHARS
 
-    # ---- Sufficiency check (KB + web) + optional mining enqueue ----
     enqueued = False
     try:
-        kb_ok = _h_judge_sufficiency(kb_hits) if (_h_judge_sufficiency and kb_hits) else False
-        web_thin = _needs_more(hits)  
-        sufficient = bool(kb_ok) and not web_thin
-        if not sufficient:
-            try:
-                enqueue_text_mining_job(question)  
-                enqueued = True
-            except Exception as e:
-                print("[/ask] enqueue_text_mining_job failed:", e)
+        if kb_hits:
+            kb_ok = judge_hits(kb_hits, min_hits=MIN_HITS, min_score=MIN_SCORE, min_chars=MIN_CHARS)
+        else:
+            kb_ok = False
     except Exception as e:
-        print("[/ask] judge/enqueue error:", e)
+        app.logger.warning(f"[/ask] judge kb_hits error: {e}")
+        kb_ok = False
+
+    web_thin = _needs_more(hits)
+    sufficient = bool(kb_ok) and not web_thin
+    if not sufficient:
+        try:
+            enqueue_text_mining_job(question)
+            enqueued = True
+        except Exception as e:
+            app.logger.warning(f"[/ask] enqueue_text_mining_job failed: {e}")
 
     # ---- Save best-effort to DB ----
     try:
@@ -1049,7 +1051,7 @@ def ask():
             "mining_enqueued": enqueued,
         })
     except Exception as e:
-        print("[/ask] DB save warn:", e)
+        app.logger.warning(f"[/ask] DB save warn: {e}")
 
     return jsonify({
         "ok": True,
@@ -1076,7 +1078,7 @@ def parse_route():
     except ValueError as ve:
         return jsonify({"ok": False, "error": str(ve)}), 422
     except Exception as e:
-        traceback.print_exc()
+        app.logger.error(f"parse failed: {e}")
         return jsonify({"ok": False, "error": f"parse failed: {e}"}), 500
 
 @app.post("/save_txt")
@@ -1108,7 +1110,7 @@ def parse_upload():
     except ValueError as ve:
         return jsonify({"ok": False, "error": str(ve)}), 422
     except Exception as e:
-        traceback.print_exc()
+        app.logger.error(f"parse_upload failed: {e}")
         return jsonify({"ok": False, "error": f"parse_upload failed: {e}"}), 500
 
 @app.post("/clear_uploads")
@@ -1116,7 +1118,7 @@ def clear_uploads_route():
     try:
         vs.clear_uploads()
     except Exception as e:
-        print("clear_uploads error:", e)
+        app.logger.warning(f"clear_uploads error: {e}")
     return {"status": "uploads cleared"}
 
 @app.get("/api/history")

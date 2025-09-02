@@ -1,148 +1,114 @@
-﻿"""Minimal helper implementations to stop 500s and enable measurement."""
+﻿# app_utils/helpers.py
 from __future__ import annotations
-import html, json, re
+import os, re
 from dataclasses import dataclass, asdict
-from glob import glob
-from pathlib import Path
-from typing import Iterable, Optional, List
+from typing import List, Dict, Any, Iterable, Optional
 
-def classify_intent(q: str) -> str:
-    if not q: return "reason"
-    ql = q.lower()
-    robot_kw = ["make","synthesize","synthesis","protocol","procedure","recipe","step-by-step","robot mode","robot-mode","structured json"]
-    reason_kw = ["why","how","mechanism","explain","rationale","compare","tradeoff"]
-    admin_kw = ["rebuild","index","harvest","admin","healthz","status"]
-    convert_kw = ["convert","to json","export","download","schema"]
-    eval_kw = ["eval","evaluate","score","precision","recall","f1"]
-    viz_kw = ["figure","graphic","image","diagram","plot"]
-    def any_in(t, keys): return any(k in t for k in keys)
-    if any_in(ql, robot_kw):  return "robot"
-    if any_in(ql, admin_kw):  return "admin"
-    if any_in(ql, convert_kw):return "convert"
-    if any_in(ql, eval_kw):   return "eval"
-    if any_in(ql, viz_kw):    return "viz"
-    if any_in(ql, reason_kw): return "reason"
-    return "reason"
+# ---------- small utils ----------
+def env_int(name: str, default: int) -> int:
+    try:
+        return int(os.getenv(name, str(default)).strip())
+    except Exception:
+        return default
 
-STOPWORDS = {"the","a","an","and","or","of","in","on","for","to","with","by","at","as","is","are","was","were","be","been","it","that","this","these","those","from","we","our","their","into","over","under","about","after","before","between"}
+def env_float(name: str, default: float) -> float:
+    try:
+        return float(os.getenv(name, str(default)).strip())
+    except Exception:
+        return default
 
+def _to_float(x, default: float = 0.0) -> float:
+    try:
+        return float(x)
+    except Exception:
+        return default
+
+def _to_str(x) -> str:
+    if x is None: return ""
+    return x if isinstance(x, str) else str(x)
+
+# ---------- public helper API ----------
 @dataclass
 class Hit:
-    text: str
+    i: int
     score: float
-    meta: dict
-    def asdict(self): return asdict(self)
+    text: str
+    meta: Dict[str, Any]
 
-def _tokenize(s: str) -> List[str]:
-    return [w for w in re.findall(r"[A-Za-z0-9_]+", s.lower()) if w not in STOPWORDS]
+    def asdict(self):
+        return asdict(self)
 
-def _yield_jsonl_chunks(path: Path):
-    try:
-        with path.open("r", encoding="utf-8", errors="ignore") as f:
-            for i, line in enumerate(f, start=1):
-                try:
-                    obj = json.loads(line)
-                    if isinstance(obj, dict):
-                        fields = [obj[k] for k in ("title","abstract","content","text","body","raw") if isinstance(obj.get(k), str)]
-                        txt = "\n".join(fields) if fields else json.dumps(obj, ensure_ascii=False)
-                    else:
-                        txt = json.dumps(obj, ensure_ascii=False)
-                except Exception:
-                    txt = line.strip(); obj = {"raw": txt}
-                meta = {"source_file": str(path), "line_no": i, "json": obj}
-                yield txt, meta
-    except Exception:
-        return
+def classify_intent(q: str) -> str:
+    """Very cheap keyword classifier to unblock routing; extend later."""
+    s = (q or "").lower()
+    if any(k in s for k in ("how to", "steps", "procedure", "synthesize", "synthesis")):
+        return "qa"
+    if any(k in s for k in ("search", "find", "look up", "reference", "cite")):
+        return "search"
+    if any(k in s for k in ("summar", "abstract", "overview")):
+        return "summary"
+    return "qa"
 
-def _yield_txt_chunks(path: Path, para_sep: str = "\n\n"):
-    try:
-        data = path.read_text(encoding="utf-8", errors="ignore")
-        paras = [p.strip() for p in data.split(para_sep) if p.strip()]
-        for i, p in enumerate(paras, start=1):
-            yield p, {"source_file": str(path), "para_no": i}
-    except Exception:
-        return
+def kb_search(q: str, top_k: int = 6) -> List[Hit]:
+    """Minimal no-op search to avoid 500s if your real retriever isn't wired here."""
+    return [] 
 
-def kb_search(query: str, top_k: int = 8, index_dirs: Optional[list[str]] = None) -> List[Hit]:
-    if not query or not query.strip(): return []
-    index_dirs = index_dirs or ["data/harvest", "data/miner", "data"]
-    q_terms = list(dict.fromkeys(_tokenize(query)))
-    if not q_terms: return []
-    MAX_FILES = 60
-    candidates: List[Hit] = []
-    def _score(text: str) -> float:
-        tl = text.lower(); L = max(50, len(tl)); hits = 0
-        for t in q_terms: hits += min(tl.count(t), 10)
-        return hits / (L ** 0.5)
-    files = []
-    for d in index_dirs:
-        p = Path(d)
-        if not p.exists(): continue
-        files += [Path(x) for x in glob(str(p / "*.jsonl"))]
-        files += [Path(x) for x in glob(str(p / "*.txt"))]
-    files = files[:MAX_FILES]
-    for fp in files:
-        gen = _yield_jsonl_chunks(fp) if fp.suffix == ".jsonl" else _yield_txt_chunks(fp)
-        for text, meta in gen:
-            s = _score(text)
-            if s > 0: candidates.append(Hit(text=text, score=s, meta=meta))
-    candidates.sort(key=lambda h: h.score, reverse=True)
-    return candidates[:top_k]
+def kb_fetch(metas: Iterable[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    return list(metas)
 
-def kb_fetch(items):
-    out = []
-    for it in items or []:
-        meta = dict(it); src = meta.get("source_file")
-        if not src: out.append({"meta": meta, "text": "", "ok": False}); continue
-        path = Path(src)
-        if not path.exists(): out.append({"meta": meta, "text": "", "ok": False}); continue
-        if path.suffix == ".jsonl" and "line_no" in meta:
-            try:
-                with path.open("r", encoding="utf-8", errors="ignore") as f:
-                    for i, line in enumerate(f, start=1):
-                        if i == int(meta["line_no"]):
-                            try: obj = json.loads(line)
-                            except Exception: obj = {"raw": line.strip()}
-                            out.append({"meta": meta, "json": obj, "ok": True})
-                            break
-                    else:
-                        out.append({"meta": meta, "text": "", "ok": False})
-            except Exception:
-                out.append({"meta": meta, "text": "", "ok": False})
+def judge_sufficiency(
+    hits: Iterable[Any],
+    min_hits: Optional[int] = None,
+    min_score: Optional[float] = None,
+    min_chars: Optional[int] = None
+) -> bool:
+    """Return True if we have enough good hits. Robust to str/float/int inputs."""
+    # allow per-call overrides, otherwise read env (and CAST!)
+    min_hits  = int(min_hits) if min_hits is not None else env_int("JUDGE_MIN_HITS", 1)
+    min_chars = int(min_chars) if min_chars is not None else env_int("JUDGE_MIN_CHARS", 48)
+    min_score = float(min_score) if min_score is not None else env_float("JUDGE_MIN_SCORE", 0.0)
+
+    good = 0
+    for h in hits or []:
+        if isinstance(h, dict):
+            score = _to_float(h.get("score"), -1.0)
+            text  = _to_str(h.get("text"))
         else:
-            out.append({"meta": meta, "text": meta.get("text",""), "ok": True})
-    return out
+            score = _to_float(getattr(h, "score", -1.0), -1.0)
+            text  = _to_str(getattr(h, "text", ""))
+        if len(text) >= min_chars and score >= min_score:
+            good += 1
+    return good >= min_hits
 
-def judge_sufficiency(hits, min_hits: int = 3, min_score: float = 0.2, min_chars: int = 500) -> bool:
-    if not hits or len(hits) < min_hits: return False
-    core = hits[:min_hits]
-    avg_score = sum(h.score for h in core) / max(1, len(core))
-    total_chars = sum(len(h.text) for h in core)
-    return (avg_score >= min_score) and (total_chars >= min_chars)
+def judge_hits(hits, min_hits=1, min_score=0.0, min_chars=48):
+    good = 0
+    for h in hits or []:
+        score = float(h.get("score", 0.0)) if isinstance(h, dict) else float(getattr(h, "score", 0.0))
+        text  = (h.get("text", "") if isinstance(h, dict) else getattr(h, "text", "")) or ""
+        if len(text) >= min_chars and score >= min_score:
+            good += 1
+    return good >= min_hits
 
-_CTRL_RX = re.compile(r"[\x00-\x08\x0B\x0C\x0E-\x1F]")
-def _safe_text(text: str, max_len: int = 5000) -> str:
-    if text is None: return ""
-    t = str(text)
-    t = _CTRL_RX.sub("", t)
-    t = re.sub(r"\s+", " ", t).strip()
-    t = html.escape(t, quote=False)
-    if len(t) > max_len: t = t[: max_len - 1] + "…"
-    return t
+# Trim answer safely
+def _safe_text(s: str, max_chars: int = 8000) -> str:
+    s = _to_str(s)
+    if max_chars and max_chars > 0:
+        return s[:max_chars]
+    return s
 
-_REF_RX = re.compile(r"\[(\d+(?:\s*[-–]\s*\d+)?)\]")
-def _extract_used_ref_indexes(answer: str, rationale: str):
-    txt = f"{answer or ''}\n{rationale or ''}"
-    nums = _REF_RX.findall(txt); out = set()
-    for n in nums:
-        if "-" in n or "–" in n:
-            import re as _re2
-            a, b = _re2.split(r"[-–]", n)
-            try:
-                ai, bi = int(a.strip()), int(b.strip())
-                if ai <= bi: out.update(range(ai, bi + 1))
-            except ValueError: pass
-        else:
-            try: out.add(int(n.strip()))
-            except ValueError: pass
-    return sorted(out)
+# Extract citation indexes like [1], [2–3], etc.
+_CIT_RX = re.compile(r"\[(\d+)(?:\s*[-–]\s*(\d+))?\]")
+def _extract_used_ref_indexes(answer: str, default: Any = None) -> List[int]:
+    s = _to_str(answer)
+    found = []
+    for m in _CIT_RX.finditer(s):
+        a = int(m.group(1))
+        b = int(m.group(2)) if m.group(2) else a
+        if a <= b:
+            found.extend(range(a, b+1))
+    # dedupe, preserve order
+    seen, out = set(), []
+    for i in found:
+        if i not in seen:
+            seen.add(i); out.append(i)
+    return out if out else ([] if default is None else default)
