@@ -872,16 +872,14 @@ def ask():
         except Exception as e:
             app.logger.warning(f"[/ask] auto-harvest failed: {e}")
 
-    # ---- Convert hits to web_refs ----
-    def _hit_meta(h):
-        return h.get("meta", {}) if isinstance(h, dict) else {}
-
+    # A) Build web_refs from hit.meta (not top-level)
+    def _hit_meta(h): return h.get("meta", {}) if isinstance(h, dict) else {}
     web_refs = []
     for h in hits:
         m = _hit_meta(h)
         doi = (m.get("doi") or m.get("paper_id") or "")
-        if isinstance(doi, str) and not doi.startswith("10."):
-            doi = ""  # 
+        if not (isinstance(doi, str) and doi.startswith("10.")):
+            doi = ""
         web_refs.append({
             "title": _s(m.get("title") or "(no title)"),
             "year":  _s(m.get("year") or ""),
@@ -891,53 +889,45 @@ def ask():
             "biblio": {},
         })
 
-
-    # ----------------- Deduplicate & enumerate references -----------------
-    def _normkey(r: dict) -> str:
-        return (r.get("doi") or r.get("url") or r.get("title") or "").strip().lower()
-
-    refs = []
-    seen = set()
-    for r in (web_refs + kb_refs_raw + (harvest_refs or [])):   
-        key = _normkey(r)
-        if key and key not in seen:
-            refs.append(r)
-            seen.add(key)
-
-    # ---- Build numbered REFERENCES string ----
-    refs_prompt = "\n".join(
-        f"[{i+1}] {(r.get('title') or '(no title)')} ({r.get('year') or ''}) — {_ref_url(r)}"
-        for i, r in enumerate(refs)
-    ).strip()
-
-    if not refs_prompt:
-        refs_prompt = "(no references found)"
-    # Map key -> reference number so snippets can cite [n]
+    # B) Stable dedup: web first, then KB, then harvest
     def _normkey_ref(r: dict) -> str:
         return (r.get("doi") or r.get("url") or r.get("title") or "").strip().lower()
 
+    refs, seen = [], set()
+    def _add(rs):
+        for r in rs:
+            k = _normkey_ref(r)
+            if k and k not in seen:
+                refs.append(r); seen.add(k)
+    _add(web_refs)
+    _add(kb_refs_raw)
+    _add(harvest_refs)
+
+    # C) Numbered REFERENCES string
+    refs_prompt = "\n".join(
+        f"[{i+1}] {(r.get('title') or '(no title)')} ({r.get('year') or ''}) — {_ref_url(r)}"
+        for i, r in enumerate(refs)
+    ).strip() or "(no references found)"
+
+    # D) CTX_WEB with snippets aligned to the same numbers
     ref_index = { _normkey_ref(r): i+1 for i, r in enumerate(refs) }
 
     def _key_from_hit(h: dict) -> str:
-        m = h.get("meta", {}) if isinstance(h, dict) else {}
+        m = _hit_meta(h)
         doi = (m.get("doi") or m.get("paper_id") or "").strip().lower()
-        if doi.startswith("10."):
-            return doi
+        if doi.startswith("10."): return doi
         url = _s(m.get("url") or m.get("oa_url") or m.get("pdf_url")).lower()
-        if url:
-            return url
-        title = _s(m.get("title") or "").lower()
-        return title
+        if url: return url
+        return _s(m.get("title") or "").lower()
 
     web_ctx_lines = []
     for h in hits[:5]:
-        k = _key_from_hit(h)
-        idx = ref_index.get(k)
+        idx = ref_index.get(_key_from_hit(h))
         head = f"[{idx}]" if idx else "[?]"
         title = _s(_hit_meta(h).get("title") or "(no title)")
-        snippet = _s(h.get("text") or "")
-        if snippet:
-            web_ctx_lines.append(f"{head} {title}\n{snippet[:1000]}")
+        snip  = _s(h.get("text") or "")
+        if snip:
+            web_ctx_lines.append(f"{head} {title}\n{snip[:1000]}")
     web_ctx = "\n\n".join(web_ctx_lines)
 
     # ----------------- Compose CONTEXT -----------------
@@ -1044,15 +1034,52 @@ def ask():
     # ---------- Build references payload ----------
     refs_payload = build_references_payload(answer or "", refs or [], top_k=6, question=question)
 
+    # 1) Extract cited indexes (best-effort)
     try:
+        used_idxs = _h_extract_used_ref_indexes(answer, rationale) if _h_extract_used_ref_indexes else []
+    except Exception:
+        used_idxs = []
+    # Coerce to ints
+    used_idxs = [int(i) for i in used_idxs if isinstance(i, (int, str)) and str(i).isdigit()]
+
+    # 2) If none, ask the model to add [n] without changing content
+    if not used_idxs and answer:
+        fix_prompt = (
+            "Add numeric citations [n] to the answer using the numbered REFERENCES. "
+            "Do not change wording; only append [n] to sentences that use info from CONTEXT/REFERENCES. "
+            "If you cannot justify a sentence by CONTEXT/REFERENCES, leave it without [n].\n\n"
+            f"REFERENCES:\n{refs_prompt}\n\n"
+            f"ANSWER:\n{answer}"
+        )
         try:
-            used_idxs = _h_extract_used_ref_indexes(answer, rationale) if _h_extract_used_ref_indexes else []
-        except Exception:
-            used_idxs = []
+            fixed = client.chat_completions.create(
+                model="gpt-4o-mini",
+                messages=[{"role": "user", "content": fix_prompt}],
+                temperature=0.0
+            ).choices[0].message.content
+        except AttributeError:
+            fixed = client.chat.completions.create(
+                model="gpt-4o-mini",
+                messages=[{"role": "user", "content": fix_prompt}],
+                temperature=0.0
+            ).choices[0].message.content
+        if isinstance(fixed, str) and fixed.strip():
+            answer = fixed
+            try:
+                used_idxs = _h_extract_used_ref_indexes(answer, "") if _h_extract_used_ref_indexes else []
+            except Exception:
+                used_idxs = []
+            used_idxs = [int(i) for i in used_idxs if isinstance(i, (int, str)) and str(i).isdigit()]
+
+    # 3) Build references block and markers (don’t fail the request)
+    try:
         references_block = _format_references_block_from_used(used_idxs, refs)
+    except Exception:
+        references_block = ""
+    try:
         markers = _extract_used_markers(answer, rationale)
     except Exception:
-        used_idxs, references_block, markers = [], "", {"refs": [], "tags": {}, "has_ctx": False}
+        markers = {"refs": [], "tags": {}, "has_ctx": False}
 
     # judge based on helper if present; otherwise fall back to simple text-length rule
     try:

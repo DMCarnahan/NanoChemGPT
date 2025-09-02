@@ -358,20 +358,20 @@ def search(query: str, k: int = 5, **kwargs) -> Dict[str, Any]:
     idx = np.argpartition(scores, -k)[-k:]
     top = idx[np.argsort(scores[idx])[::-1]]
 
-    texts = tf.get("texts", [])
-    metas = tf.get("metas", [])
+    texts = bundle.get("texts") or []
+    metas = bundle.get("metas") or [{}] * len(texts)
+
     hits = []
-    for i in top:
-        rec = {
+    for i, s in zip(top, scores[top]):
+        meta = metas[i] if i < len(metas) else {}
+        txt  = (texts[i] if i < len(texts) else "") or ""
+        hits.append({
             "i": int(i),
-            "score": float(scores[i]),
-            "text": texts[i] if i < len(texts) else "",
-            "meta": metas[i] if i < len(metas) else {},
-        }
-        hits.append(rec)
-
-    return {"query": query, "k": k, "hits": hits}
-
+            "score": float(s),
+            "text": txt[:1200],    # keep snippets short
+            "meta": meta,         
+        })
+    return {"hits": hits}
 
 # ------------------------------- Health helpers -------------------------------
 
