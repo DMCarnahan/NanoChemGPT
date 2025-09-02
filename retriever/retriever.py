@@ -112,7 +112,7 @@ def _load_tfidf() -> Dict[str, Any]:
         bundle["nn"]  = bundle.get("matrix")
         return bundle
 
-    # ---- Preferred format: single pickle ----
+# ---- Preferred format: single pickle ----
     if pkl.exists():
         obj = joblib.load(pkl)
         if isinstance(obj, dict):
@@ -120,41 +120,47 @@ def _load_tfidf() -> Dict[str, Any]:
             vectorizer = _coalesce(obj.get("vectorizer"), obj.get("vec"))
             if X is None or vectorizer is None:
                 raise RuntimeError(f"Malformed {pkl}: expected 'matrix' and 'vectorizer'")
-            
+
+            # check if vectorizer is actually fitted (scikit-learn)
             def _is_vec_fitted(v):
                 try:
                     return hasattr(v, "_tfidf") and hasattr(v._tfidf, "idf_")
                 except Exception:
                     return False
 
-            if not _is_vec_fitted(vec):
-                npz, vecj = idx / "tfidf.npz", idx / "vectorizer.joblib"
-                if npz.exists() and vecj.exists():
+            if not _is_vec_fitted(vectorizer):
+                # Prefer falling back to npz+joblib if present
+                npz_path  = idx / "tfidf.npz"
+                vecj_path = idx / "vectorizer.joblib"
+                if npz_path.exists() and vecj_path.exists():
                     from scipy.sparse import load_npz
-                    X = load_npz(npz)
-                    vec = joblib.load(vecj)
+                    X = load_npz(npz_path)
+                    vectorizer = joblib.load(vecj_path)
                 else:
                     texts = obj.get("texts") or obj.get("rows")
-                    vocab = getattr(vec, "vocabulary_", None)
+                    vocab = getattr(vectorizer, "vocabulary_", None)
                     if texts and vocab:
                         from sklearn.feature_extraction.text import TfidfVectorizer
                         tmp = TfidfVectorizer(vocabulary=vocab)
-                        tmp.fit(texts if isinstance(texts, list) else [t["text"] for t in texts if isinstance(t, dict)])
-                        vec = tmp
+                        if isinstance(texts, list):
+                            tmp.fit(texts)
+                        else:
+                            # rows case: list of dicts with "text"
+                            tmp.fit([t.get("text", "") for t in texts if isinstance(t, dict)])
+                        vectorizer = tmp
                     else:
                         raise RuntimeError(f"{pkl} vectorizer is not fitted and no fallback available")
-            bundle = {"kind": "matrix", "matrix": X, "vectorizer": vec}
 
-            
             bundle = {"kind": "matrix", "matrix": X, "vectorizer": vectorizer}
-            for k in ("texts","metas","rows","license","titles"):
+            for k in ("texts", "metas", "rows", "license", "titles"):
                 if k in obj:
                     bundle[k] = obj[k]
             return _ensure_texts_metas(bundle)
         else:
             raise RuntimeError(f"Unsupported object in {pkl}: {type(obj)}")
 
-    # ---- Legacy format: npz + vectorizer.joblib ----
+
+    # ---- npz + vectorizer.joblib ----
     if npz.exists():
         # Try SciPy sparse loader first
         try:
