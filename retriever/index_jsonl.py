@@ -130,35 +130,24 @@ def main():
     if X.shape[1] == 0:
         raise SystemExit("[index_jsonl] 0 features — inputs likely too short/empty.")
 
-    # Minimal metas (so loaders can show sources)
+    # Minimal metas 
     metas = [{"id": i} for i in ids]
 
-    # Write artifacts (legacy + new), with atomic replace for the big npz
     from scipy.sparse import save_npz
     import joblib, json, os
 
-    tmp_npz = out / ".tfidf.npz.tmp"
-    save_npz(tmp_npz, X)
-    os.replace(tmp_npz, out / "tfidf.npz")
+    npz_final = out / "tfidf.npz"
+    tmp_npz   = out / "tfidf.npz.tmp"     
+
+    try:
+        save_npz(tmp_npz, X)              # write tmp
+        os.replace(tmp_npz, npz_final)    # atomic move if tmp exists
+    except FileNotFoundError:
+        save_npz(npz_final, X)
 
     joblib.dump(vectorizer, out / "vectorizer.joblib")
-
-    # Single-file convenience (note: still pickles a sparse matrix)
-    joblib.dump(
-        {"matrix": X, "vectorizer": vectorizer, "texts": texts, "metas": metas},
-        out / "tfidf.pkl"
-    )
-
-    # Sidecars for robustness across sklearn versions
-    vocab = {str(k): int(v) for k, v in vectorizer.vocabulary_.items()}
-    (out / "vocab.json").write_text(json.dumps(vocab, ensure_ascii=False), encoding="utf-8")
-    (out / "meta.json").write_text(json.dumps({"ids": ids, "count": len(ids)}), encoding="utf-8")
-
-    with (out / "rows.jsonl").open("w", encoding="utf-8") as f:
-        for t, m in zip(texts, metas):
-            f.write(json.dumps({"text": t, **m}, ensure_ascii=False) + "\n")
-
-    print(f"[index_jsonl] OK. docs={len(ids)} terms={X.shape[1]} → {out}")
+    joblib.dump({"matrix": X, "vectorizer": vectorizer, "texts": texts,
+                "metas": [{"id": i} for i in ids]}, out / "tfidf.pkl")
 
 if __name__ == "__main__":
     main()

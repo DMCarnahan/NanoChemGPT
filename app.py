@@ -1002,7 +1002,7 @@ def ask():
         used_idxs, references_block, markers = [], "", []
 
     try:
-        sufficient = judge_sufficiency(question, context_joined)
+        sufficient = _h_judge_sufficiency(question, context_joined)
         if not bool(sufficient):
             try:
                 enqueue_text_mining_job(question)  # noqa: F821
