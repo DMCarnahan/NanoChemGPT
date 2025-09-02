@@ -8,6 +8,11 @@ from typing import Any, Dict, List, Tuple
 import joblib
 import numpy as np
 
+def _coalesce(*vals):
+    for v in vals:
+        if v is not None:
+            return v
+    return None
 
 # ------------------------- Index path helpers -------------------------
 
@@ -112,11 +117,10 @@ def _load_tfidf() -> Dict[str, Any]:
     if pkl.exists():
         obj = joblib.load(pkl)
         if isinstance(obj, dict):
-            X = obj.get("matrix") or obj.get("X") or obj.get("tfidf")
-            vectorizer = obj.get("vectorizer") or obj.get("vec")
+            X = _coalesce(obj.get("matrix"), obj.get("X"), obj.get("tfidf"))
+            vectorizer = _coalesce(obj.get("vectorizer"), obj.get("vec"))
             if X is None or vectorizer is None:
-                raise RuntimeError(f"Malformed {pkl}: expected 'matrix' and 'vectorizer'")
-            bundle = {"kind": "matrix", "matrix": X, "vectorizer": vectorizer}
+                raise RuntimeError(f"Malformed {pkl}: expected 'matrix' and 'vectorizer'")            bundle = {"kind": "matrix", "matrix": X, "vectorizer": vectorizer}
             for k in ("texts","metas","rows","license","titles"):
                 if k in obj:
                     bundle[k] = obj[k]
@@ -238,27 +242,22 @@ def _load_embed() -> Dict[str, Any]:
 
 # ------------------------------- Search API -------------------------------
 
-def _get_vec_nn(tf: Dict[str, Any]) -> Tuple[Any, Any]:
-    """Accept both new and legacy bundle keys for vectorizer and matrix."""
-    vec = tf.get("vec") or tf.get("vectorizer")
-    nn  = tf.get("nn")  or tf.get("matrix") or tf.get("X") or tf.get("tfidf")
+def _get_vec_nn(tf: dict):
+    vec = tf.get("vec")
+    if vec is None:
+        vec = tf.get("vectorizer")
+
+    nn = tf.get("nn")
+    if nn is None:
+        nn = tf.get("matrix")
+    if nn is None:
+        nn = tf.get("X")
+    if nn is None:
+        nn = tf.get("tfidf")
+
     if vec is None or nn is None:
         raise RuntimeError(f"Bad TF-IDF bundle keys: {list(tf.keys())}")
     return vec, nn
-
-
-def _to_csr(x):
-    """Ensure we can do efficient dot products; convert dense -> float32 array."""
-    try:
-        # SciPy sparse?
-        import scipy.sparse as sp  # type: ignore
-        if sp.issparse(x):
-            return x
-    except Exception:
-        pass
-    # Dense numpy array
-    return np.asarray(x)
-
 
 def _cosine_sim(query_vec, matrix):
     """Compute cosine similarity scores between query_vec (1 x d) and matrix (N x d)."""

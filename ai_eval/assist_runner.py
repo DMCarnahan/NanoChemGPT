@@ -1,5 +1,3 @@
-# ai_eval/assist_runner.py
-#!/usr/bin/env python3
 import os, sys, json, argparse, time, re, random
 from pathlib import Path
 
