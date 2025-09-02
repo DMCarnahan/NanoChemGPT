@@ -103,6 +103,11 @@ def main():
     ap.add_argument("--min-chars", type=int, default=MIN_CHARS_DEFAULT)
     args = ap.parse_args()
 
+    # Create output dir first
+    out = args.index_dir.resolve()
+    out.mkdir(parents=True, exist_ok=True)
+
+    # Load texts
     ids, texts = load_texts(args.bundle, args.text_key, args.min_chars)
     if args.max_docs:
         ids, texts = ids[:args.max_docs], texts[:args.max_docs]
@@ -110,7 +115,9 @@ def main():
     if not texts:
         raise SystemExit(f"[index_jsonl] No documents to index from {args.bundle} (source='{args.text_key}').")
 
-    vec = TfidfVectorizer(
+    # Vectorize
+    from sklearn.feature_extraction.text import TfidfVectorizer
+    vectorizer = TfidfVectorizer(
         lowercase=True,
         strip_accents="unicode",
         token_pattern=r"(?u)\b[\w-]{2,}\b",
@@ -119,19 +126,38 @@ def main():
         max_df=0.99,
         max_features=250_000,
     )
-    X = vec.fit_transform(texts)
+    X = vectorizer.fit_transform(texts)
     if X.shape[1] == 0:
         raise SystemExit("[index_jsonl] 0 features — inputs likely too short/empty.")
 
-    out = args.index_dir
-    out.mkdir(parents=True, exist_ok=True)
-    sparse.save_npz(out / "tfidf.npz", X)
-    vocab = {str(k): int(v) for k, v in vec.vocabulary_.items()}  # cast np.int32 -> int
-    (out / "vocab.json").write_text(
-        json.dumps(vocab, ensure_ascii=False),
-        encoding="utf-8")
+    # Minimal metas (so loaders can show sources)
+    metas = [{"id": i} for i in ids]
+
+    # Write artifacts (legacy + new), with atomic replace for the big npz
+    from scipy.sparse import save_npz
+    import joblib, json, os
+
+    tmp_npz = out / ".tfidf.npz.tmp"
+    save_npz(tmp_npz, X)
+    os.replace(tmp_npz, out / "tfidf.npz")
+
+    joblib.dump(vectorizer, out / "vectorizer.joblib")
+
+    # Single-file convenience (note: still pickles a sparse matrix)
+    joblib.dump(
+        {"matrix": X, "vectorizer": vectorizer, "texts": texts, "metas": metas},
+        out / "tfidf.pkl"
+    )
+
+    # Sidecars for robustness across sklearn versions
+    vocab = {str(k): int(v) for k, v in vectorizer.vocabulary_.items()}
+    (out / "vocab.json").write_text(json.dumps(vocab, ensure_ascii=False), encoding="utf-8")
     (out / "meta.json").write_text(json.dumps({"ids": ids, "count": len(ids)}), encoding="utf-8")
-    dump(vec, out / "vectorizer.joblib")
+
+    with (out / "rows.jsonl").open("w", encoding="utf-8") as f:
+        for t, m in zip(texts, metas):
+            f.write(json.dumps({"text": t, **m}, ensure_ascii=False) + "\n")
+
     print(f"[index_jsonl] OK. docs={len(ids)} terms={X.shape[1]} → {out}")
 
 if __name__ == "__main__":

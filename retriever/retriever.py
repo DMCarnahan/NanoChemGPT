@@ -112,7 +112,6 @@ def _load_tfidf() -> Dict[str, Any]:
         bundle["nn"]  = bundle.get("matrix")
         return bundle
 
-
     # ---- Preferred format: single pickle ----
     if pkl.exists():
         obj = joblib.load(pkl)
@@ -121,6 +120,32 @@ def _load_tfidf() -> Dict[str, Any]:
             vectorizer = _coalesce(obj.get("vectorizer"), obj.get("vec"))
             if X is None or vectorizer is None:
                 raise RuntimeError(f"Malformed {pkl}: expected 'matrix' and 'vectorizer'")
+            
+            def _is_vec_fitted(v):
+                try:
+                    return hasattr(v, "_tfidf") and hasattr(v._tfidf, "idf_")
+                except Exception:
+                    return False
+
+            if not _is_vec_fitted(vec):
+                npz, vecj = idx / "tfidf.npz", idx / "vectorizer.joblib"
+                if npz.exists() and vecj.exists():
+                    from scipy.sparse import load_npz
+                    X = load_npz(npz)
+                    vec = joblib.load(vecj)
+                else:
+                    texts = obj.get("texts") or obj.get("rows")
+                    vocab = getattr(vec, "vocabulary_", None)
+                    if texts and vocab:
+                        from sklearn.feature_extraction.text import TfidfVectorizer
+                        tmp = TfidfVectorizer(vocabulary=vocab)
+                        tmp.fit(texts if isinstance(texts, list) else [t["text"] for t in texts if isinstance(t, dict)])
+                        vec = tmp
+                    else:
+                        raise RuntimeError(f"{pkl} vectorizer is not fitted and no fallback available")
+            bundle = {"kind": "matrix", "matrix": X, "vectorizer": vec}
+
+            
             bundle = {"kind": "matrix", "matrix": X, "vectorizer": vectorizer}
             for k in ("texts","metas","rows","license","titles"):
                 if k in obj:
