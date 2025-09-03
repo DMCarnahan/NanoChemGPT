@@ -1,7 +1,10 @@
+# retriever/api.py
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 import traceback
-from retriever import retriever as R
+
+# Import the retriever implementation module
+from retriever import retriever as R  
 
 app = FastAPI()
 
@@ -15,24 +18,28 @@ def search(req: SearchRequest):
         return R.search(query=req.query, k=req.k)
     except Exception as e:
         traceback.print_exc()
-        raise HTTPException(500, f"retriever.search error: {e}")
+        raise HTTPException(status_code=500, detail=f"retriever.search error: {e}")
 
 @app.get("/healthz")
 def healthz():
     try:
         b = R._load_tfidf()
         X = b.get("matrix")
-        return {"ok": True, "docs": int(X.shape[0]), "terms": int(X.shape[1])}
+        docs = int(getattr(X, "shape", [0, 0])[0]) if X is not None else 0
+        terms = int(getattr(X, "shape", [0, 0])[1]) if X is not None else 0
+        return {"ok": True, "docs": docs, "terms": terms}
     except Exception as e:
         return {"ok": False, "error": str(e)}
 
 @app.post("/reload")
 def reload():
     try:
-        R.reload_caches()
-        b = R._load_tfidf()
+        R.reload_caches()          
+        b = R._load_tfidf()        
         X = b.get("matrix")
-        return {"ok": True, "docs": int(X.shape[0]), "terms": int(X.shape[1])}
+        docs = int(getattr(X, "shape", [0, 0])[0]) if X is not None else 0
+        terms = int(getattr(X, "shape", [0, 0])[1]) if X is not None else 0
+        return {"ok": True, "docs": docs, "terms": terms}
     except Exception as e:
         traceback.print_exc()
-        raise HTTPException(500, f"reload error: {e}")
+        raise HTTPException(status_code=500, detail=f"reload error: {e}")

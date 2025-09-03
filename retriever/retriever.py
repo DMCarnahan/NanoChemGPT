@@ -224,15 +224,23 @@ def _load_tfidf(force: bool = False) -> Dict[str, Any]:
             return bundle
 
         # ---- Very legacy: npz + vocab.json ----
-        if vocab.exists():
-            from sklearn.feature_extraction.text import TfidfVectorizer
-            vocab_list = json.loads(vocab.read_text(encoding="utf-8", errors="ignore"))
-            vocab_map = {t: i for i, t in enumerate(vocab_list)}
-            vectorizer = TfidfVectorizer(vocabulary=vocab_map)
-            bundle = {"kind":"matrix", "matrix": X, "vectorizer": vectorizer}
-            bundle = _ensure_texts_metas(bundle)
-            _BUNDLE_CACHE = bundle
-            return bundle
+        from sklearn.feature_extraction.text import TfidfVectorizer
+        vocab_list = json.loads(vocab.read_text(encoding="utf-8", errors="ignore"))
+        vocab_map = {t: i for i, t in enumerate(vocab_list)}
+        vectorizer = TfidfVectorizer(vocabulary=vocab_map)
+
+        bundle = {"kind":"matrix", "matrix": X, "vectorizer": vectorizer}
+        bundle = _ensure_texts_metas(bundle)
+
+        texts_to_fit = bundle.get("texts") or [r.get("text","") for r in bundle.get("rows", []) if isinstance(r, dict)]
+        if texts_to_fit:
+            try:
+                vectorizer.fit(texts_to_fit)
+            except Exception:
+                pass
+
+        _BUNDLE_CACHE = bundle
+        return bundle
 
     raise RuntimeError(
         f"No TF-IDF index found in {_index_dir()}. Expected tfidf.pkl OR tfidf.npz(+vectorizer.joblib). "
@@ -342,7 +350,7 @@ def _cosine_sim(query_vec, matrix):
 
 def search(query: str, k: int = 5, **kwargs) -> Dict[str, Any]:
     """
-    Basic TFâ€‘IDF search.
+    Basic TF-IDF search.
     Accepts extra kwargs (mode, alpha, etc.) to be compatible with HTTP callers.
     Returns: {"query":..., "k":..., "hits":[{"i":idx,"score":float,"text":str,"meta":dict}, ...]}
     """

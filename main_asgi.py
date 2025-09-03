@@ -1,19 +1,13 @@
 from fastapi import FastAPI
 from starlette.middleware.wsgi import WSGIMiddleware
-from app import app as flask_app
 
-try:
-    from retriever.api import api as retriever_api
-except Exception:
-    retriever_api = None
+from app import app as flask_app              
+from retriever.api import app as retr_app     
 
-app = FastAPI(title="NanoChemGPT ASGI")
+app = FastAPI()
 
-@app.get("/healthz")
-def healthz():
-    return {"ok": True}
+# Mount the retriever FIRST so /retriever/* routes are handled there
+app.mount("/retriever", retr_app)
 
-if retriever_api is not None:
-    app.mount("/retriever", retriever_api)
-
+# Then mount Flask at the root
 app.mount("/", WSGIMiddleware(flask_app))

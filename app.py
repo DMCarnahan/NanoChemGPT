@@ -42,34 +42,41 @@ try:
         judge_sufficiency as _h_judge_sufficiency,
         _safe_text as _h_safe_text,
         _extract_used_ref_indexes as _h_extract_used_ref_indexes,
-        env_float, env_int, judge_hits,
-        Hit as _Hit,
+        judge_hits, Hit as _Hit,
     )
 except Exception:
     _h_classify_intent = _h_kb_search = _h_kb_fetch = None
     _h_judge_sufficiency = _h_safe_text = _h_extract_used_ref_indexes = None
     _Hit = None
     # --- Safe fallbacks so /ask never 500s if helpers are missing or envs are blank ---
-    def env_int(name: str, default: int) -> int:
-        try:
-            v = (os.getenv(name, str(default)) or "").strip()
-            return int(v)
-        except Exception:
-            return default
-    def env_float(name: str, default: float) -> float:
-        try:
-            v = (os.getenv(name, str(default)) or "").strip()
-            return float(v)
-        except Exception:
-            return default
-    def judge_hits(hits: List[Dict[str, Any]], min_hits: int = 1, min_score: float = 0.0, min_chars: int = 48) -> bool:
-        good = 0
-        for h in hits or []:
-            score = float(h.get("score", 0.0))
-            text  = (h.get("text") or "")
-            if len(text) >= min_chars and score >= min_score:
-                good += 1
-        return good >= min_hits
+def _env_int(name: str, default: int) -> int:
+    try:
+        from app_utils.helpers import env_int as __env_int  
+        return __env_int(name, default)
+    except Exception:
+        v = os.getenv(name, "")
+        v = "" if v is None else v.strip()
+        try:    return default if v == "" else int(v)
+        except: return default
+
+def _env_float(name: str, default: float) -> float:
+    try:
+        from app_utils.helpers import env_float as __env_float  
+        return __env_float(name, default)
+    except Exception:
+        v = os.getenv(name, "")
+        v = "" if v is None else v.strip()
+        try:    return default if v == "" else float(v)
+        except: return default
+
+def judge_hits(hits: List[Dict[str, Any]], min_hits: int = 1, min_score: float = 0.0, min_chars: int = 48) -> bool:
+    good = 0
+    for h in hits or []:
+        score = float(h.get("score", 0.0))
+        text  = (h.get("text") or "")
+        if len(text) >= min_chars and score >= min_score:
+            good += 1
+    return good >= min_hits
 
 # -------------------- Paths/Config --------------------
 ROOT = Path(__file__).resolve().parent
@@ -172,13 +179,12 @@ _no_proxy = httpx.Client(trust_env=False, timeout=120.0)
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "")
 client = OpenAI(api_key=OPENAI_API_KEY, http_client=_no_proxy) if OPENAI_API_KEY else None
 
-RETRIEVER_URL = os.getenv("RETRIEVER_URL", "http://localhost:8000/retriever")
+RETRIEVER_URL = os.getenv("RETRIEVER_URL", f"http://localhost:{os.getenv('PORT','8000')}/retriever")
 
 def retriever_search(query: str, k: int = 8, mode: str = "hybrid", alpha: float = 0.7) -> list[dict]:
     try:
-        r = _no_proxy.post(f"{RETRIEVER_URL.rstrip('/')}/search",
-                           json={"query": query, "k": k, "mode": mode, "alpha": alpha},
-                           timeout=60)
+        payload = {"query": query, "k": k}
+        r = _no_proxy.post(f"{RETRIEVER_URL.rstrip('/')}/search", json=payload, timeout=60)
         r.raise_for_status()
         data = r.json()
         return data.get("hits", []) if isinstance(data, dict) else []
@@ -190,8 +196,8 @@ def retriever_search(query: str, k: int = 8, mode: str = "hybrid", alpha: float 
 def _s(x):
     # Hardened sanitizer prefers helpers._safe_text
     try:
-        from app_utils.helpers import _safe_text as __h_safe_text  # local import to avoid circulars
-        return __h_safe_text(x)
+        from app_utils.helpers import _safe_text as _h_safe_text  # local import to avoid circulars
+        return _h_safe_text(x)
     except Exception:
         return str(x).strip() if x is not None else ""
 
@@ -469,9 +475,9 @@ def ask():
     question = (payload.get("question") or payload.get("q") or "").strip()
     if not question:
         return jsonify({"ok": False, "error": "Missing 'question'"}), 400
-    MIN_HITS  = env_int("JUDGE_MIN_HITS", 1)
-    MIN_SCORE = env_float("JUDGE_MIN_SCORE", 0.15)
-    MIN_CHARS = env_int("JUDGE_MIN_CHARS", 64)
+    MIN_HITS  = _env_int("JUDGE_MIN_HITS", 1)
+    MIN_SCORE = _env_float("JUDGE_MIN_SCORE", 0.15)
+    MIN_CHARS = _env_int("JUDGE_MIN_CHARS", 64)
 
     # ---------- intent classification ----------
     try:
@@ -756,7 +762,7 @@ def ask():
         # --------- 5) ping retriever ---------
         try:
             with httpx.Client(timeout=20) as s:
-                s.post("http://127.0.0.1:8000/reload")
+                s.post(f"{RETRIEVER_URL.rstrip('/')}/reload")
         except Exception:
             pass
 
