@@ -1,4 +1,10 @@
 document.addEventListener('DOMContentLoaded', () => {
+  // Spinner element for long-running requests
+  const spinner = document.createElement('div');
+  spinner.id = 'globalSpinner';
+  spinner.style = 'display:none;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:9999;font-size:2em;background:#fff;padding:1em;border-radius:8px;box-shadow:0 0 8px #aaa;';
+  spinner.textContent = 'Loading…';
+  document.body.appendChild(spinner);
   const $ = (id) => document.getElementById(id);
 
   // Elements
@@ -26,7 +32,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   let mode = 'robot';
 
-  // Mode toggle
+  // Mode toggle (accessibility: ARIA attributes, keyboard)
   modeRobot?.addEventListener('click', () => {
     mode = 'robot';
     modeRobot.setAttribute('aria-checked', 'true');
@@ -35,6 +41,13 @@ document.addEventListener('DOMContentLoaded', () => {
     modeReason?.classList.remove('active');
   });
   modeReason?.addEventListener('click', () => {
+  // Keyboard accessibility for mode toggles
+  [modeRobot, modeReason].forEach(el => {
+    el?.setAttribute('tabindex', '0');
+    el?.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') el.click();
+    });
+  });
     mode = 'reasoning';
     modeReason.setAttribute('aria-checked', 'true');
     modeRobot?.setAttribute('aria-checked', 'false');
@@ -58,15 +71,17 @@ document.addEventListener('DOMContentLoaded', () => {
   /**
    * Handles the Ask button click: sends question to backend and updates UI.
    */
+  // Ask button
   askBtn?.addEventListener('click', async () => {
     const question = qInput?.value.trim();
     if (!question) return;
 
-    askBtn.disabled = true;
-    askMsg.classList.remove('hidden');
-    askMsg.textContent = 'Asking…';
+  askBtn.disabled = true;
+  askMsg.classList.remove('hidden');
+  askMsg.textContent = 'Asking…';
+  spinner.style.display = 'block';
 
-    try {
+  try {
       const headers = { 'Content-Type': 'application/json' };
       const csrf = readCsrfToken();
       if (csrf) headers['X-CSRFToken'] = csrf;
@@ -83,13 +98,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
       answerPre.textContent = data.answer ?? '(no answer)';
       rationalePre.textContent = data.rationale ?? '';
-      renderRefsFromData(data);
-askMsg.textContent = res.ok ? 'Done.' : `Error ${res.status}`;
+      renderRefsFromData(json);
+      if (!res.ok) {
+        askMsg.textContent = `Error ${res.status}: ${data.error || raw}`;
+      } else if (data.answer && data.answer.toLowerCase().includes('error')) {
+        askMsg.textContent = `Backend error: ${data.answer}`;
+      } else {
+        askMsg.textContent = 'Done.';
+      }
     } catch (err) {
       console.error(err);
-      askMsg.textContent = 'Error. Check console.';
+      askMsg.textContent = `Error: ${err.message || err}`;
     } finally {
       askBtn.disabled = false;
+      spinner.style.display = 'none';
     }
   });
 
@@ -97,6 +119,7 @@ askMsg.textContent = res.ok ? 'Done.' : `Error ${res.status}`;
   /**
    * Handles the Parse button click: converts answer to JSON and triggers download.
    */
+  // Parse button (Convert to JSON + Download)
   parseBtn?.addEventListener('click', async () => {
     const text = answerPre?.textContent || '';
     if (!text) return;
@@ -105,7 +128,7 @@ askMsg.textContent = res.ok ? 'Done.' : `Error ${res.status}`;
     const oldLabel = parseBtn.textContent;
     parseBtn.textContent = 'Converting…';
 
-    try {
+  try {
       const headers = { 'Content-Type': 'application/json' };
       const csrf = readCsrfToken();
       if (csrf) headers['X-CSRFToken'] = csrf;
@@ -119,7 +142,9 @@ askMsg.textContent = res.ok ? 'Done.' : `Error ${res.status}`;
       // Try to read JSON; if not JSON, throw
       const data = await res.json();
       if (!data || !data.ok || !data.data) {
-        throw new Error(data?.error || 'Parse failed');
+        parseBtn.textContent = `Error: ${data?.error || 'Parse failed'}`;
+        setTimeout(()=>{ parseBtn.textContent = oldLabel || 'Parse'; }, 2000);
+        return;
       }
 
       const pretty = JSON.stringify(data.data, null, 2);
@@ -141,8 +166,8 @@ askMsg.textContent = res.ok ? 'Done.' : `Error ${res.status}`;
       // ------------------------------------
     } catch (err) {
       console.error(err);
-      parseBtn.textContent = 'Error';
-      setTimeout(()=>{ parseBtn.textContent = oldLabel || 'Parse'; }, 1200);
+      parseBtn.textContent = `Error: ${err.message || err}`;
+      setTimeout(()=>{ parseBtn.textContent = oldLabel || 'Parse'; }, 2000);
       return;
     } finally {
       parseBtn.disabled = false;
@@ -155,39 +180,53 @@ askMsg.textContent = res.ok ? 'Done.' : `Error ${res.status}`;
    * @param {object} data
    */
   
+  /**
+   * Renders references from data object into the UI.
+   * Accepts multiple shapes, prefers ACS block, falls back to structured list.
+   * @param {object} data
+   */
   function renderRefsFromData(data) {
-    // Elements
     const refsSection = document.getElementById('refsSection');
-    const refsList    = document.getElementById('refsList');
+    const refsList    = document.getElementById('refsList');      // candidates list (debug)
     if (!refsSection) return;
 
     // Accept multiple shapes
-    const block  = (data && (data.reference_block || data.references_block)) || '';
-    const arrRaw = (data && (data.references || data.refs || data.citations || data.used_refs)) || null;
-    const used   = Array.isArray(data?.used_ref_indexes) ? data.used_ref_indexes.map(Number).filter(Number.isFinite) : [];
+    const block  = (data?.reference_block || data?.references_block || '').trim();
+    const arrRaw = (data?.references || data?.refs || data?.citations || data?.used_refs) || null;
+    const used   = Array.isArray(data?.used_ref_indexes)
+      ? data.used_ref_indexes.map(Number).filter(Number.isFinite)
+      : [];
 
-    // Reset
-    refsList && (refsList.innerHTML = '');
+    // Debug: what did backend return?
+    try {
+      console.debug('[refs] blockLen=', block.length,
+                    'used=', used,
+                    'candidates=', Array.isArray(arrRaw) ? arrRaw.length : 0);
+    } catch {}
+
+    // Reset UI
+    if (refsList) refsList.innerHTML = '';
     refsSection.querySelector('.refs-pre')?.remove();
     refsSection.classList.add('hidden');
 
-    // 1) Prefer the used-only ACS block
-    if (typeof block === 'string' && block.trim()) {
+    // 1) Prefer the used-only ACS block from backend
+    if (block) {
       const pre = document.createElement('pre');
       pre.className = 'refs-pre';
-      pre.textContent = block.trim();
+      pre.textContent = block;
       refsSection.appendChild(pre);
       refsSection.classList.remove('hidden');
-      // Toggle (if you use it elsewhere)
-      safe?.(() => window.initRefsToggle?.({ btnSelector: '#refsToggleBtn', panelSelector: '#refsSection' }));
-      return;
+      try { window.initRefsToggle?.({ btnSelector: '#refsToggleBtn', panelSelector: '#refsSection' }); } catch {}
+      return; // short-circuit so we do NOT render candidates
     }
 
-    // 2) Fallback: show structured candidates (optionally filtered by used indexes)
+    // 2) Fallback: structured candidates (optionally filter to "used" if indexes present)
     if (Array.isArray(arrRaw) && arrRaw.length && refsList) {
       const items = used.length
-        ? arrRaw.map((r, i) => ({ r, i: i + 1 })).filter(x => used.includes(x.i)).map(x => x.r)
-        : arrRaw;
+        ? arrRaw.map((r, i) => ({ r, i: i + 1 }))
+              .filter(x => used.includes(x.i))
+              .map(x => x.r)
+        : arrRaw.slice(0, 6); // cap to top-6 to keep UI tidy when no block
 
       if (items.length) {
         items.forEach((r, idx) => {
@@ -201,10 +240,10 @@ askMsg.textContent = res.ok ? 'Done.' : `Error ${res.status}`;
 
           const title   = r.title || r.citation || r.name || r.label || `Reference ${idx+1}`;
           const authors = Array.isArray(r.authors) ? r.authors.join(', ') : (r.authors || '');
-          const journal = (r.biblio && r.biblio.journal) || r.journal || r.source || '';
-          const year    = r.year || (r.biblio && r.biblio.year) || '';
-          const doiUrl  = r.doi ? String(r.doi).replace(/^https?:\/\/doi\.org\//, '') : '';
-          const url     = r.url || (doiUrl ? `https://doi.org/${doiUrl}` : '');
+          const journal = (r.biblio?.journal) || r.journal || r.source || '';
+          const year    = r.year || r.biblio?.year || '';
+          const doi     = r.doi ? String(r.doi).replace(/^https?:\/\/doi\.org\//, '') : '';
+          const url     = r.url || (doi ? `https://doi.org/${doi}` : '');
 
           const strong = document.createElement('strong');
           strong.textContent = title;
@@ -229,7 +268,7 @@ askMsg.textContent = res.ok ? 'Done.' : `Error ${res.status}`;
         });
 
         refsSection.classList.remove('hidden');
-        safe?.(() => window.initRefsToggle?.({ btnSelector: '#refsToggleBtn', panelSelector: '#refsSection' }));
+        try { window.initRefsToggle?.({ btnSelector: '#refsToggleBtn', panelSelector: '#refsSection' }); } catch {}
         return;
       }
     }
@@ -239,10 +278,12 @@ askMsg.textContent = res.ok ? 'Done.' : `Error ${res.status}`;
   }
 
 
+
   // Upload button
   /**
    * Handles the Upload button click: uploads a file to the backend.
    */
+  // Upload button
   uploadBtn?.addEventListener('click', async () => {
     const file = fileInput?.files?.[0];
     if (!file) return;
@@ -250,7 +291,7 @@ askMsg.textContent = res.ok ? 'Done.' : `Error ${res.status}`;
     uplMsg.textContent = 'Uploading…';
     uplMsg.classList.remove('hidden');
 
-    try {
+  try {
       const headers = {};
       const csrf = readCsrfToken();
       if (csrf) headers['X-CSRFToken'] = csrf;
@@ -273,12 +314,12 @@ askMsg.textContent = res.ok ? 'Done.' : `Error ${res.status}`;
           uplList?.appendChild(li);
         }
       } else {
-        uplMsg.textContent = 'Upload error: ' + (json.error || 'unknown');
+        uplMsg.textContent = `Upload error: ${json.error || 'unknown'}`;
       }
 
     } catch (err) {
       console.error(err);
-      uplMsg.textContent = 'Upload failed';
+      uplMsg.textContent = `Upload failed: ${err.message || err}`;
     } finally {
       uploadBtn.disabled = false;
     }
@@ -288,9 +329,14 @@ askMsg.textContent = res.ok ? 'Done.' : `Error ${res.status}`;
   /**
    * Handles the History button click: loads and displays previous Q&A.
    */
+  // History button
   historyBtn?.addEventListener('click', async () => {
-    try {
+  try {
       const res = await fetch('/api/history');
+      if (!res.ok) {
+        historyList.innerHTML = `<li>Error loading history: ${res.status}</li>`;
+        return;
+      }
       const data = await res.json();
       const items = data.items || [];
       historyList.innerHTML = items.map(r =>
@@ -305,16 +351,24 @@ askMsg.textContent = res.ok ? 'Done.' : `Error ${res.status}`;
           if (!id) return;
           try {
             const res = await fetch(`/api/history/${id}`);
+            if (!res.ok) {
+              answerPre.textContent = `Error loading answer: ${res.status}`;
+              rationalePre.textContent = '';
+              return;
+            }
             const data = await res.json();
             answerPre.textContent = data.answer ?? '(no answer)';
             rationalePre.textContent = data.rationale ?? '';
             renderRefsFromData(data);
           } catch (err) {
+            answerPre.textContent = `Error: ${err.message || err}`;
+            rationalePre.textContent = '';
             console.error(err);
           }
         });
       });
     } catch (err) {
+      historyList.innerHTML = `<li>Error: ${err.message || err}</li>`;
       console.error(err);
     }
   });
@@ -323,6 +377,7 @@ askMsg.textContent = res.ok ? 'Done.' : `Error ${res.status}`;
   /**
    * Handles the Save as TXT button click: downloads the answer as a text file.
    */
+  // Save as TXT button (Export answer)
   saveTxtBtn?.addEventListener('click', () => {
     const text = answerPre?.textContent || '';
     if (!text) return;
@@ -339,9 +394,10 @@ askMsg.textContent = res.ok ? 'Done.' : `Error ${res.status}`;
   });
 
   // Built-in file upload
+  // Built-in file upload (drag & drop, keyboard, click)
   builtinDrop?.addEventListener('click', () => builtinFile?.click());
   builtinDrop?.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') builtinFile?.click();
+    if (e.key === 'Enter' || e.key === ' ') builtinFile?.click();
   });
   builtinDrop?.addEventListener('dragover', (e) => {
     e.preventDefault();
@@ -362,6 +418,10 @@ askMsg.textContent = res.ok ? 'Done.' : `Error ${res.status}`;
     if (builtinFile.files.length) uploadBuiltinFiles(builtinFile.files);
   });
 
+  /**
+   * Uploads built-in files to the backend.
+   * @param {FileList|Array} files
+   */
   /**
    * Uploads built-in files to the backend.
    * @param {FileList|Array} files
@@ -387,10 +447,11 @@ askMsg.textContent = res.ok ? 'Done.' : `Error ${res.status}`;
       const json = await res.json();
       builtinMsg.textContent = json.ok ? 'Uploaded OK' : 'Error: ' + (json.error || 'unknown');
     } catch (err) {
-      builtinMsg.textContent = 'Upload failed';
-      console.error(err);
+  builtinMsg.textContent = `Upload failed: ${err.message || err}`;
+  console.error(err);
     }
   }
 
   // Auto-load history on page load
-if (historyBtn) historyBtn.click()});
+  if (historyBtn) historyBtn.click();
+});
