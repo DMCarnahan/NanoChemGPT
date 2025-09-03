@@ -1,11 +1,4 @@
 document.addEventListener('DOMContentLoaded', () => {
-  // Spinner element for long-running requests
-  const spinner = document.createElement('div');
-  spinner.id = 'globalSpinner';
-  spinner.style = 'display:none;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:9999;font-size:2em;background:#fff;padding:1em;border-radius:8px;box-shadow:0 0 8px #aaa;';
-  spinner.textContent = 'Loading…';
-  document.body.appendChild(spinner);
-  const $ = (id) => document.getElementById(id);
 
   // Elements
   const askBtn = $('askBtn');
@@ -16,9 +9,6 @@ document.addEventListener('DOMContentLoaded', () => {
   const askMsg = $('askMsg');
   const answerPre = $('answerPre');
   const rationalePre = $('rationalePre');
-  const refsSection = $('refsSection');
-  const refsList = $('refsList');
-  const jsonBlock = $('jsonPre');
   const uplList = $('uplList');
   const uplMsg = $('uplMsg');
   const historyBtn = $('historyBtn');
@@ -65,7 +55,6 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // Small helper to sandbox optional UI so it can't crash the flow
-  function safe(fn){ try { fn(); } catch(e){ console.warn('Optional UI failed:', e); } }
 
   // Ask button
   /**
@@ -81,39 +70,23 @@ document.addEventListener('DOMContentLoaded', () => {
   askMsg.textContent = 'Asking…';
   spinner.style.display = 'block';
 
-  try {
-      const headers = { 'Content-Type': 'application/json' };
-      const csrf = readCsrfToken();
-      if (csrf) headers['X-CSRFToken'] = csrf;
-
-      const res = await fetch('/ask', {
-        method: 'POST',
-        headers,
-        body: JSON.stringify({ question, mode })
-      });
-
-      const raw = await res.text();
-      let data;
-      try { data = JSON.parse(raw); } catch { data = { answer: raw }; }
-
-      answerPre.textContent = data.answer ?? '(no answer)';
-      rationalePre.textContent = data.rationale ?? '';
-      renderRefsFromData(json);
-      if (!res.ok) {
-        askMsg.textContent = `Error ${res.status}: ${data.error || raw}`;
-      } else if (data.answer && data.answer.toLowerCase().includes('error')) {
-        askMsg.textContent = `Backend error: ${data.answer}`;
-      } else {
-        askMsg.textContent = 'Done.';
-      }
-    } catch (err) {
-      console.error(err);
-      askMsg.textContent = `Error: ${err.message || err}`;
-    } finally {
-      askBtn.disabled = false;
-      spinner.style.display = 'none';
-    }
+try {
+  const res  = await fetch('/ask', {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify(payload),
   });
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  const data = await res.json();
+
+  answerPre.textContent    = data.answer ?? '(no answer)';
+  rationalePre.textContent = data.rationale ?? '';
+  renderRefsFromData(data);
+} catch (err) {
+  answerPre.textContent    = `Error: ${err.message || err}`;
+  rationalePre.textContent = '';
+  console.error(err);
+}
 
   // Parse button (Convert to JSON + Download)
   /**
