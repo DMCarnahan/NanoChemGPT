@@ -294,8 +294,6 @@ document.addEventListener('DOMContentLoaded', () => {
     refsSection.classList.add('hidden');
   }
 
-
-
   // Upload button
   /**
    * Handles the Upload button click: uploads a file to the backend.
@@ -574,7 +572,6 @@ function renderRefsFromData(data) {
     }
     const refsSection = document.getElementById('refsSection');
     const refsList    = document.getElementById('refsList');
-    const candPanel   = document.getElementById('candPanel'); // optional <details>
     if (!refsSection) return;
 
     const block  = (data.reference_block || data.references_block || '').trim?.() || '';
@@ -590,22 +587,23 @@ function renderRefsFromData(data) {
     const oldPre = refsSection.querySelector('.refs-pre');
     if (oldPre) oldPre.remove();
     refsSection.classList.add('hidden');
-    if (candPanel) candPanel.classList.add('hidden');
 
-    // If we have a block, render it first
+    // 1) Prefer used-only ACS block
     if (block) {
       const pre = document.createElement('pre');
       pre.className = 'refs-pre';
       pre.textContent = block;
       refsSection.appendChild(pre);
       refsSection.classList.remove('hidden');
+      try { window.initRefsToggle?.({ btnSelector: '#refsToggleBtn', panelSelector: '#refsSection' }); } catch {}
+      return;
     }
 
-    // Populate candidates (even if block exists), keep panel collapsed by default
+    // 2) Fallback: structured candidates (optionally filtered by used)
     if (Array.isArray(arrRaw) && arrRaw.length && refsList) {
       const items = used.length
         ? arrRaw.map((r, i) => ({ r, i: i + 1 })).filter(x => used.includes(x.i)).map(x => x.r)
-        : arrRaw.slice(0, 8);
+        : arrRaw.slice(0, 6); // cap to keep tidy when no block
 
       if (items.length) {
         items.forEach((r, idx) => {
@@ -646,13 +644,14 @@ function renderRefsFromData(data) {
           refsList.appendChild(li);
         });
 
-        if (candPanel) candPanel.classList.remove('hidden');
         refsSection.classList.remove('hidden');
+        try { window.initRefsToggle?.({ btnSelector: '#refsToggleBtn', panelSelector: '#refsSection' }); } catch {}
+        return;
       }
     }
 
-    // If neither block nor candidates, keep hidden
-    try { window.initRefsToggle?.({ btnSelector: '#refsToggleBtn', panelSelector: '#refsSection' }); } catch {}
+    // 3) Nothing to show
+    refsSection.classList.add('hidden');
   } catch (e) {
     try { console.error('renderRefsFromData error:', e); } catch {}
   }
