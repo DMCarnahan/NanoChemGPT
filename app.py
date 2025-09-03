@@ -220,83 +220,31 @@ def _doc(obj):
     return out
 
 # ---- Citation extraction and formatting helpers ----
+def _format_references_block_from_used(used_idxs, refs):
+    """Return an ACS-style block using the ORIGINAL indices (so [3] stays [3])."""
+    def fmt_acs(r: dict) -> str:
+        # very light ACS-ish formatter
+        authors = r.get("authors") or []
+        if isinstance(authors, list):
+            authors = ", ".join([a if isinstance(a, str) else str(a) for a in authors])[:200]
+        title   = r.get("title") or "(no title)"
+        journal = r.get("biblio", {}).get("journal") or r.get("journal") or r.get("source") or ""
+        year    = str(r.get("year") or "").strip()
+        doi     = str(r.get("doi") or "").strip()
+        url     = r.get("url") or (f"https://doi.org/{doi}" if doi and not doi.startswith("10.") else "")
+        tail    = f"{journal} {year}".strip()
+        core    = f"{authors}. {title}" if authors else title
+        line    = f"{core}"
+        if tail: line += f"; {tail}"
+        if doi and doi.startswith("10."): line += f". https://doi.org/{doi}"
+        elif url: line += f". {url}"
+        return line
 
-def _format_acs_reference(ref: dict) -> str:
-    """Lightweight ACS-ish formatting from a heterogeneous ref dict."""
-    # Authors
-    authors = ref.get("authors") or ref.get("authorships") or []
-    names = []
-    for a in authors:
-        if isinstance(a, dict):
-            nm = a.get("name") or a.get("author", {}).get("display_name") or a.get("display_name") or a.get("last_name")
-            if nm: names.append(_s(nm))
-        elif isinstance(a, str):
-            names.append(_s(a))
-    if len(names) > 6:
-        names = names[:6] + ["et al."]
-    authors_str = "; ".join([n for n in names if n])
-
-    # Title
-    title = _s(ref.get("title") or ref.get("display_name") or ref.get("paper_title") or "(no title)")
-
-    # Journal / Venue
-    journal = ref.get("journal") or ref.get("venue") or ref.get("host_venue") or ref.get("container_title") or ""
-    if isinstance(journal, dict):
-        journal = journal.get("display_name") or journal.get("name") or journal.get("title") or ""
-    journal = _s(journal)
-
-    # Year (derive from date if missing)
-    year = ref.get("year") or ref.get("published_year") or ref.get("publication_year")
-    if not year:
-        pubdate = _s(ref.get("publication_date") or ref.get("published_date"))
-        if len(pubdate) >= 4 and pubdate[:4].isdigit():
-            year = pubdate[:4]
-    year = _s(year)
-
-    # Volume / Issue / Pages
-    biblio = ref.get("biblio") or {}
-    volume = _s(ref.get("volume") or biblio.get("volume"))
-    issue  = _s(ref.get("issue")  or biblio.get("issue"))
-    fp     = _s(ref.get("first_page") or biblio.get("first_page") or ref.get("page_start"))
-    lp     = _s(ref.get("last_page")  or biblio.get("last_page")  or ref.get("page_end"))
-    pages  = ""
-    if fp and lp:
-        pages = f"{fp}-{lp}"
-    elif fp:
-        pages = fp
-
-    # DOI/URL
-    doi = _s(ref.get("doi"))
-    url = _s(ref.get("url"))
-    tail = ""
-    if doi:
-        tail = f"DOI: {doi}"
-    elif url:
-        tail = url
-
-    parts = []
-    if authors_str: parts.append(authors_str + ".")
-    if title:       parts.append(title + ".")
-    trailer = []
-    if journal:     trailer.append(journal)
-    if year:        trailer.append(year)
-    if volume:      trailer.append(volume if not issue else f"{volume}({issue})")
-    if pages:       trailer.append(pages)
-    if trailer:
-        parts.append(", ".join(trailer) + ".")
-    if tail:
-        parts.append(tail)
-    return " ".join(p for p in parts if p).strip()
-
-def _format_references_block_from_used(used_indexes: list[int], refs: list[dict]) -> str:
-    """Create a numbered reference block (1-based) for only the cited refs present in `refs`."""
-    if not used_indexes or not refs:
-        return ""
+    toks = sorted({int(i) for i in used_idxs if isinstance(i, (int, str)) and str(i).isdigit()})
     lines = []
-    for idx in sorted(set(used_indexes)):
-        if not isinstance(idx, int) or idx < 1 or idx > len(refs):
-            continue
-        lines.append(f"{idx}. " + _format_acs_reference(refs[idx-1]))
+    for n in toks:
+        if 1 <= n <= len(refs):
+            lines.append(f"[{n}] {fmt_acs(refs[n-1])}")
     return "\n".join(lines)
 
 def _extract_used_markers(*texts: str) -> dict:
@@ -1152,6 +1100,8 @@ def ask():
         "rationale": rationale,
         "markers": markers,
         "references_block": references_block,
+        "used_ref_indexes": used_idxs,
+        "refs": refs,
         **refs_payload,
         "context_present": bool(context_joined),
         "mining_enqueued": enqueued,

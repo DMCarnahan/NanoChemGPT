@@ -96,7 +96,7 @@ document.addEventListener('DOMContentLoaded', () => {
   askBtn.disabled = true;
   askMsg.classList.remove('hidden');
   askMsg.textContent = 'Asking…';
-  spinnerOverlay.style.display = 'flex';
+  spinner.style.display = 'block';
 
   try {
       const headers = { 'Content-Type': 'application/json' };
@@ -128,7 +128,7 @@ document.addEventListener('DOMContentLoaded', () => {
       askMsg.textContent = `Error: ${err.message || err}`;
     } finally {
       askBtn.disabled = false;
-  spinnerOverlay.style.display = 'none';
+      spinner.style.display = 'none';
     }
   });
 
@@ -202,31 +202,31 @@ document.addEventListener('DOMContentLoaded', () => {
    * Accepts multiple shapes, prefers ACS block, falls back to structured list.
    * @param {object} data
    */
-function renderRefsFromData(data) {
-  try {
-    if (!data || typeof data !== 'object') {
-      console.warn('renderRefsFromData: expected object, got', data);
-      return;
-    }
+  function renderRefsFromData(data) {
     const refsSection = document.getElementById('refsSection');
-    const refsList    = document.getElementById('refsList');
+    const refsList    = document.getElementById('refsList');      // candidates list (debug)
     if (!refsSection) return;
 
-    const block  = (data.reference_block || data.references_block || '').trim?.() || '';
-    const arrRaw = (data.references || data.refs || data.citations || data.used_refs) || null;
-    const used   = Array.isArray(data.used_ref_indexes) ? data.used_ref_indexes.map(Number).filter(Number.isFinite) : [];
+    // Accept multiple shapes
+    const block  = (data?.reference_block || data?.references_block || '').trim();
+    const arrRaw = (data?.references || data?.refs || data?.citations || data?.used_refs) || null;
+    const used   = Array.isArray(data?.used_ref_indexes)
+      ? data.used_ref_indexes.map(Number).filter(Number.isFinite)
+      : [];
 
+    // Debug: what did backend return?
     try {
-      console.debug('[refs] blockLen=', block.length, 'used=', used, 'candidates=', Array.isArray(arrRaw) ? arrRaw.length : 0);
+      console.debug('[refs] blockLen=', block.length,
+                    'used=', used,
+                    'candidates=', Array.isArray(arrRaw) ? arrRaw.length : 0);
     } catch {}
 
     // Reset UI
     if (refsList) refsList.innerHTML = '';
-    const oldPre = refsSection.querySelector('.refs-pre');
-    if (oldPre) oldPre.remove();
+    refsSection.querySelector('.refs-pre')?.remove();
     refsSection.classList.add('hidden');
 
-    // 1) Prefer used-only ACS block
+    // 1) Prefer the used-only ACS block from backend
     if (block) {
       const pre = document.createElement('pre');
       pre.className = 'refs-pre';
@@ -234,14 +234,16 @@ function renderRefsFromData(data) {
       refsSection.appendChild(pre);
       refsSection.classList.remove('hidden');
       try { window.initRefsToggle?.({ btnSelector: '#refsToggleBtn', panelSelector: '#refsSection' }); } catch {}
-      return;
+      return; // short-circuit so we do NOT render candidates
     }
 
-    // 2) Fallback: structured candidates (optionally filtered by used)
+    // 2) Fallback: structured candidates (optionally filter to "used" if indexes present)
     if (Array.isArray(arrRaw) && arrRaw.length && refsList) {
       const items = used.length
-        ? arrRaw.map((r, i) => ({ r, i: i + 1 })).filter(x => used.includes(x.i)).map(x => x.r)
-        : arrRaw.slice(0, 6); // cap to keep tidy when no block
+        ? arrRaw.map((r, i) => ({ r, i: i + 1 }))
+              .filter(x => used.includes(x.i))
+              .map(x => x.r)
+        : arrRaw.slice(0, 6); // cap to top-6 to keep UI tidy when no block
 
       if (items.length) {
         items.forEach((r, idx) => {
@@ -255,8 +257,8 @@ function renderRefsFromData(data) {
 
           const title   = r.title || r.citation || r.name || r.label || `Reference ${idx+1}`;
           const authors = Array.isArray(r.authors) ? r.authors.join(', ') : (r.authors || '');
-          const journal = (r.biblio && r.biblio.journal) || r.journal || r.source || '';
-          const year    = r.year || (r.biblio && r.biblio.year) || '';
+          const journal = (r.biblio?.journal) || r.journal || r.source || '';
+          const year    = r.year || r.biblio?.year || '';
           const doi     = r.doi ? String(r.doi).replace(/^https?:\/\/doi\.org\//, '') : '';
           const url     = r.url || (doi ? `https://doi.org/${doi}` : '');
 
@@ -290,10 +292,9 @@ function renderRefsFromData(data) {
 
     // 3) Nothing to show
     refsSection.classList.add('hidden');
-  } catch (e) {
-    try { console.error('renderRefsFromData error:', e); } catch {}
   }
-}
+
+
 
   // Upload button
   /**
@@ -471,3 +472,188 @@ function renderRefsFromData(data) {
   // Auto-load history on page load
   if (historyBtn) historyBtn.click();
 });
+
+function renderRefsFromData(data) {
+  try {
+    if (!data || typeof data !== 'object') {
+      console.warn('renderRefsFromData: expected object, got', data);
+      return;
+    }
+    const refsSection = document.getElementById('refsSection');
+    const refsList    = document.getElementById('refsList');
+    if (!refsSection) return;
+
+    const block  = (data.reference_block || data.references_block || '').trim?.() || '';
+    const arrRaw = (data.references || data.refs || data.citations || data.used_refs) || null;
+    const used   = Array.isArray(data.used_ref_indexes) ? data.used_ref_indexes.map(Number).filter(Number.isFinite) : [];
+
+    try {
+      console.debug('[refs] blockLen=', block.length, 'used=', used, 'candidates=', Array.isArray(arrRaw) ? arrRaw.length : 0);
+    } catch {}
+
+    // Reset UI
+    if (refsList) refsList.innerHTML = '';
+    const oldPre = refsSection.querySelector('.refs-pre');
+    if (oldPre) oldPre.remove();
+    refsSection.classList.add('hidden');
+
+    // 1) Prefer used-only ACS block
+    if (block) {
+      const pre = document.createElement('pre');
+      pre.className = 'refs-pre';
+      pre.textContent = block;
+      refsSection.appendChild(pre);
+      refsSection.classList.remove('hidden');
+      try { window.initRefsToggle?.({ btnSelector: '#refsToggleBtn', panelSelector: '#refsSection' }); } catch {}
+      return;
+    }
+
+    // 2) Fallback: structured candidates (optionally filtered by used)
+    if (Array.isArray(arrRaw) && arrRaw.length && refsList) {
+      const items = used.length
+        ? arrRaw.map((r, i) => ({ r, i: i + 1 })).filter(x => used.includes(x.i)).map(x => x.r)
+        : arrRaw.slice(0, 6); // cap to keep tidy when no block
+
+      if (items.length) {
+        items.forEach((r, idx) => {
+          const li = document.createElement('li');
+
+          if (typeof r === 'string') {
+            li.textContent = r;
+            refsList.appendChild(li);
+            return;
+          }
+
+          const title   = r.title || r.citation || r.name || r.label || `Reference ${idx+1}`;
+          const authors = Array.isArray(r.authors) ? r.authors.join(', ') : (r.authors || '');
+          const journal = (r.biblio && r.biblio.journal) || r.journal || r.source || '';
+          const year    = r.year || (r.biblio && r.biblio.year) || '';
+          const doi     = r.doi ? String(r.doi).replace(/^https?:\/\/doi\.org\//, '') : '';
+          const url     = r.url || (doi ? `https://doi.org/${doi}` : '');
+
+          const strong = document.createElement('strong');
+          strong.textContent = title;
+          li.appendChild(strong);
+
+          const metaBits = [authors, journal, year].filter(Boolean);
+          if (metaBits.length) {
+            const small = document.createElement('small');
+            small.textContent = ' — ' + metaBits.join(', ');
+            li.appendChild(small);
+          }
+
+          if (url) {
+            li.appendChild(document.createTextNode(' '));
+            const a = document.createElement('a');
+            a.href = url; a.target = '_blank'; a.rel = 'noopener';
+            a.textContent = '(link)';
+            li.appendChild(a);
+          }
+
+          refsList.appendChild(li);
+        });
+
+        refsSection.classList.remove('hidden');
+        try { window.initRefsToggle?.({ btnSelector: '#refsToggleBtn', panelSelector: '#refsSection' }); } catch {}
+        return;
+      }
+    }
+
+    // 3) Nothing to show
+    refsSection.classList.add('hidden');
+  } catch (e) {
+    try { console.error('renderRefsFromData error:', e); } catch {}
+  }
+}
+
+function renderRefsFromData(data) {
+  try {
+    if (!data || typeof data !== 'object') {
+      console.warn('renderRefsFromData: expected object, got', data);
+      return;
+    }
+    const refsSection = document.getElementById('refsSection');
+    const refsList    = document.getElementById('refsList');
+    const candPanel   = document.getElementById('candPanel'); // optional <details>
+    if (!refsSection) return;
+
+    const block  = (data.reference_block || data.references_block || '').trim?.() || '';
+    const arrRaw = (data.references || data.refs || data.citations || data.used_refs) || null;
+    const used   = Array.isArray(data.used_ref_indexes) ? data.used_ref_indexes.map(Number).filter(Number.isFinite) : [];
+
+    try {
+      console.debug('[refs] blockLen=', block.length, 'used=', used, 'candidates=', Array.isArray(arrRaw) ? arrRaw.length : 0);
+    } catch {}
+
+    // Reset UI
+    if (refsList) refsList.innerHTML = '';
+    const oldPre = refsSection.querySelector('.refs-pre');
+    if (oldPre) oldPre.remove();
+    refsSection.classList.add('hidden');
+    if (candPanel) candPanel.classList.add('hidden');
+
+    // If we have a block, render it first
+    if (block) {
+      const pre = document.createElement('pre');
+      pre.className = 'refs-pre';
+      pre.textContent = block;
+      refsSection.appendChild(pre);
+      refsSection.classList.remove('hidden');
+    }
+
+    // Populate candidates (even if block exists), keep panel collapsed by default
+    if (Array.isArray(arrRaw) && arrRaw.length && refsList) {
+      const items = used.length
+        ? arrRaw.map((r, i) => ({ r, i: i + 1 })).filter(x => used.includes(x.i)).map(x => x.r)
+        : arrRaw.slice(0, 8);
+
+      if (items.length) {
+        items.forEach((r, idx) => {
+          const li = document.createElement('li');
+
+          if (typeof r === 'string') {
+            li.textContent = r;
+            refsList.appendChild(li);
+            return;
+          }
+
+          const title   = r.title || r.citation || r.name || r.label || `Reference ${idx+1}`;
+          const authors = Array.isArray(r.authors) ? r.authors.join(', ') : (r.authors || '');
+          const journal = (r.biblio && r.biblio.journal) || r.journal || r.source || '';
+          const year    = r.year || (r.biblio && r.biblio.year) || '';
+          const doi     = r.doi ? String(r.doi).replace(/^https?:\/\/doi\.org\//, '') : '';
+          const url     = r.url || (doi ? `https://doi.org/${doi}` : '');
+
+          const strong = document.createElement('strong');
+          strong.textContent = title;
+          li.appendChild(strong);
+
+          const metaBits = [authors, journal, year].filter(Boolean);
+          if (metaBits.length) {
+            const small = document.createElement('small');
+            small.textContent = ' — ' + metaBits.join(', ');
+            li.appendChild(small);
+          }
+
+          if (url) {
+            li.appendChild(document.createTextNode(' '));
+            const a = document.createElement('a');
+            a.href = url; a.target = '_blank'; a.rel = 'noopener';
+            a.textContent = '(link)';
+            li.appendChild(a);
+          }
+
+          refsList.appendChild(li);
+        });
+
+        if (candPanel) candPanel.classList.remove('hidden');
+        refsSection.classList.remove('hidden');
+      }
+    }
+
+    // If neither block nor candidates, keep hidden
+    try { window.initRefsToggle?.({ btnSelector: '#refsToggleBtn', panelSelector: '#refsSection' }); } catch {}
+  } catch (e) {
+    try { console.error('renderRefsFromData error:', e); } catch {}
+  }
+}
