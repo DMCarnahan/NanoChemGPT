@@ -177,31 +177,16 @@
 
         <section id="refsSection" class="mt-4 hidden" aria-labelledby="sec-refs">
           <h3 id="sec-refs" class="subhead">References</h3>
-          <ol id="refsList" class="small"></ol>
-        </section>
 
-        <section class="mt-4" aria-labelledby="sec-sources">
-          <details id="sourcesPanel" class="clean">
-            <summary class="subhead">Sources used (debug)</summary>
-            <div class="small muted mt-2">
-              <p>This shows the context chunks that were sent to the model for the last answer.</p>
-              <div class="small mt-2"><strong>Usage summary</strong>: <span id="srcUsedSummary" class="muted">(pending)</span></div>
-            </div>
-            <div class="mt-2">
-              <h4 class="subhead">Uploaded context <span class="badge badge-ctx">[CTX]</span></h4>
-              <pre id="srcCtxVs" class="pre small" tabindex="0"></pre>
-            </div>
-            <div class="mt-2">
-              <h4 class="subhead">Parsed protocols <span class="badge badge-parsed">[PARSED]</span></h4>
-              <pre id="srcCtxParsed" class="pre small" tabindex="0"></pre>
-            </div>
-            <div class="mt-2">
-              <h4 class="subhead">Mongo Q&amp;A matches <span class="badge badge-db">[DB]</span></h4>
-              <pre id="srcCtxDb" class="pre small" tabindex="0"></pre>
-            </div>
+          <!-- Used-only ACS block -->
+          <pre id="refsBlock" class="pre small hidden" tabindex="0" aria-label="Formatted references (used only)"></pre>
+
+          <!-- Candidates (debug) -->
+          <details id="candPanel" class="clean mt-2">
+            <summary class="subhead">Candidate references (debug)</summary>
+            <ol id="refsList" class="small"></ol>
           </details>
         </section>
-      </section>
 
       <!-- Sidebar -->
       <aside class="card span-4" aria-labelledby="sec-quick">

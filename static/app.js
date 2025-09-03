@@ -156,20 +156,34 @@ askMsg.textContent = res.ok ? 'Done.' : `Error ${res.status}`;
    */
   
   function renderRefsFromData(data) {
-    // Accept multiple shapes: references/ref arrays, citations, used_refs; and blocks under reference_block/references_block
+    // Elements
+    const refsSection = document.getElementById('refsSection');
+    const refsList    = document.getElementById('refsList');
     if (!refsSection) return;
 
-    const block = (data && (data.reference_block || data.references_block)) || '';
+    // Accept multiple shapes
+    const block  = (data && (data.reference_block || data.references_block)) || '';
     const arrRaw = (data && (data.references || data.refs || data.citations || data.used_refs)) || null;
+    const used   = Array.isArray(data?.used_ref_indexes) ? data.used_ref_indexes.map(Number).filter(Number.isFinite) : [];
 
-    // Used indexes (1-based), e.g., [1,2,5]
-    const used = Array.isArray(data?.used_ref_indexes) ? data.used_ref_indexes.map(Number).filter(n => Number.isFinite(n)) : [];
-
-    // Clear previous content
+    // Reset
     refsList && (refsList.innerHTML = '');
-    refsSection?.querySelector('.refs-pre')?.remove();
+    refsSection.querySelector('.refs-pre')?.remove();
+    refsSection.classList.add('hidden');
 
-    // Prefer structured refs if present
+    // 1) Prefer the used-only ACS block
+    if (typeof block === 'string' && block.trim()) {
+      const pre = document.createElement('pre');
+      pre.className = 'refs-pre';
+      pre.textContent = block.trim();
+      refsSection.appendChild(pre);
+      refsSection.classList.remove('hidden');
+      // Toggle (if you use it elsewhere)
+      safe?.(() => window.initRefsToggle?.({ btnSelector: '#refsToggleBtn', panelSelector: '#refsSection' }));
+      return;
+    }
+
+    // 2) Fallback: show structured candidates (optionally filtered by used indexes)
     if (Array.isArray(arrRaw) && arrRaw.length && refsList) {
       const items = used.length
         ? arrRaw.map((r, i) => ({ r, i: i + 1 })).filter(x => used.includes(x.i)).map(x => x.r)
@@ -179,7 +193,6 @@ askMsg.textContent = res.ok ? 'Done.' : `Error ${res.status}`;
         items.forEach((r, idx) => {
           const li = document.createElement('li');
 
-          // String reference
           if (typeof r === 'string') {
             li.textContent = r;
             refsList.appendChild(li);
@@ -216,27 +229,15 @@ askMsg.textContent = res.ok ? 'Done.' : `Error ${res.status}`;
         });
 
         refsSection.classList.remove('hidden');
-        // Initialize optional toggle if available
-        safe(() => window.initRefsToggle?.({ btnSelector: '#refsToggleBtn', panelSelector: '#refsSection' }));
+        safe?.(() => window.initRefsToggle?.({ btnSelector: '#refsToggleBtn', panelSelector: '#refsSection' }));
         return;
       }
     }
 
-    // Fallback: preformatted block
-    if (typeof block === 'string' && block.trim()) {
-      refsList.innerHTML = '';
-      const pre = document.createElement('pre');
-      pre.className = 'refs-pre';
-      pre.textContent = block.trim();
-      refsSection.appendChild(pre);
-      refsSection.classList.remove('hidden');
-      safe(() => window.initRefsToggle?.({ btnSelector: '#refsToggleBtn', panelSelector: '#refsSection' }));
-      return;
-    }
-
-    // Nothing to show
+    // 3) Nothing to show
     refsSection.classList.add('hidden');
   }
+
 
   // Upload button
   /**
