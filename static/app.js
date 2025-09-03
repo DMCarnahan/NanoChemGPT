@@ -1,4 +1,31 @@
 document.addEventListener('DOMContentLoaded', () => {
+  // Spinner overlay for long-running requests
+  const spinnerOverlay = document.createElement('div');
+  spinnerOverlay.id = 'globalSpinnerOverlay';
+  spinnerOverlay.style = `
+    display: none;
+    position: fixed;
+    top: 0; left: 0; width: 100vw; height: 100vh;
+    background: rgba(255,255,255,0.5);
+    z-index: 9999;
+    justify-content: center;
+    align-items: center;
+  `;
+  const spinner = document.createElement('div');
+  spinner.style = `
+    width: 48px; height: 48px;
+    border: 6px solid #ccc;
+    border-top: 6px solid #1976d2;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+  `;
+  spinnerOverlay.appendChild(spinner);
+  document.body.appendChild(spinnerOverlay);
+  // Add spinner animation CSS
+  const style = document.createElement('style');
+  style.textContent = `@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }`;
+  document.head.appendChild(style);
+  const $ = (id) => document.getElementById(id);
 
   // Elements
   const askBtn = $('askBtn');
@@ -55,6 +82,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // Small helper to sandbox optional UI so it can't crash the flow
+  function safe(fn){ try { fn(); } catch(e){ console.warn('Optional UI failed:', e); } }
 
   // Ask button
   /**
@@ -68,25 +96,41 @@ document.addEventListener('DOMContentLoaded', () => {
   askBtn.disabled = true;
   askMsg.classList.remove('hidden');
   askMsg.textContent = 'Asking…';
-  spinner.style.display = 'block';
+  spinnerOverlay.style.display = 'flex';
 
-try {
-  const res  = await fetch('/ask', {
-    method: 'POST',
-    headers: { 'content-type': 'application/json' },
-    body: JSON.stringify(payload),
+  try {
+      const headers = { 'Content-Type': 'application/json' };
+      const csrf = readCsrfToken();
+      if (csrf) headers['X-CSRFToken'] = csrf;
+
+      const res = await fetch('/ask', {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({ question, mode })
+      });
+
+      const raw = await res.text();
+      let data;
+      try { data = JSON.parse(raw); } catch { data = { answer: raw }; }
+
+      answerPre.textContent = data.answer ?? '(no answer)';
+      rationalePre.textContent = data.rationale ?? '';
+      renderRefsFromData(data);
+      if (!res.ok) {
+        askMsg.textContent = `Error ${res.status}: ${data.error || raw}`;
+      } else if (data.answer && data.answer.toLowerCase().includes('error')) {
+        askMsg.textContent = `Backend error: ${data.answer}`;
+      } else {
+        askMsg.textContent = 'Done.';
+      }
+    } catch (err) {
+      console.error(err);
+      askMsg.textContent = `Error: ${err.message || err}`;
+    } finally {
+      askBtn.disabled = false;
+  spinnerOverlay.style.display = 'none';
+    }
   });
-  if (!res.ok) throw new Error(`HTTP ${res.status}`);
-  const data = await res.json();
-
-  answerPre.textContent    = data.answer ?? '(no answer)';
-  rationalePre.textContent = data.rationale ?? '';
-  renderRefsFromData(data);
-} catch (err) {
-  answerPre.textContent    = `Error: ${err.message || err}`;
-  rationalePre.textContent = '';
-  console.error(err);
-}
 
   // Parse button (Convert to JSON + Download)
   /**
@@ -158,31 +202,31 @@ try {
    * Accepts multiple shapes, prefers ACS block, falls back to structured list.
    * @param {object} data
    */
-  function renderRefsFromData(data) {
+function renderRefsFromData(data) {
+  try {
+    if (!data || typeof data !== 'object') {
+      console.warn('renderRefsFromData: expected object, got', data);
+      return;
+    }
     const refsSection = document.getElementById('refsSection');
-    const refsList    = document.getElementById('refsList');      // candidates list (debug)
+    const refsList    = document.getElementById('refsList');
     if (!refsSection) return;
 
-    // Accept multiple shapes
-    const block  = (data?.reference_block || data?.references_block || '').trim();
-    const arrRaw = (data?.references || data?.refs || data?.citations || data?.used_refs) || null;
-    const used   = Array.isArray(data?.used_ref_indexes)
-      ? data.used_ref_indexes.map(Number).filter(Number.isFinite)
-      : [];
+    const block  = (data.reference_block || data.references_block || '').trim?.() || '';
+    const arrRaw = (data.references || data.refs || data.citations || data.used_refs) || null;
+    const used   = Array.isArray(data.used_ref_indexes) ? data.used_ref_indexes.map(Number).filter(Number.isFinite) : [];
 
-    // Debug: what did backend return?
     try {
-      console.debug('[refs] blockLen=', block.length,
-                    'used=', used,
-                    'candidates=', Array.isArray(arrRaw) ? arrRaw.length : 0);
+      console.debug('[refs] blockLen=', block.length, 'used=', used, 'candidates=', Array.isArray(arrRaw) ? arrRaw.length : 0);
     } catch {}
 
     // Reset UI
     if (refsList) refsList.innerHTML = '';
-    refsSection.querySelector('.refs-pre')?.remove();
+    const oldPre = refsSection.querySelector('.refs-pre');
+    if (oldPre) oldPre.remove();
     refsSection.classList.add('hidden');
 
-    // 1) Prefer the used-only ACS block from backend
+    // 1) Prefer used-only ACS block
     if (block) {
       const pre = document.createElement('pre');
       pre.className = 'refs-pre';
@@ -190,16 +234,14 @@ try {
       refsSection.appendChild(pre);
       refsSection.classList.remove('hidden');
       try { window.initRefsToggle?.({ btnSelector: '#refsToggleBtn', panelSelector: '#refsSection' }); } catch {}
-      return; // short-circuit so we do NOT render candidates
+      return;
     }
 
-    // 2) Fallback: structured candidates (optionally filter to "used" if indexes present)
+    // 2) Fallback: structured candidates (optionally filtered by used)
     if (Array.isArray(arrRaw) && arrRaw.length && refsList) {
       const items = used.length
-        ? arrRaw.map((r, i) => ({ r, i: i + 1 }))
-              .filter(x => used.includes(x.i))
-              .map(x => x.r)
-        : arrRaw.slice(0, 6); // cap to top-6 to keep UI tidy when no block
+        ? arrRaw.map((r, i) => ({ r, i: i + 1 })).filter(x => used.includes(x.i)).map(x => x.r)
+        : arrRaw.slice(0, 6); // cap to keep tidy when no block
 
       if (items.length) {
         items.forEach((r, idx) => {
@@ -213,8 +255,8 @@ try {
 
           const title   = r.title || r.citation || r.name || r.label || `Reference ${idx+1}`;
           const authors = Array.isArray(r.authors) ? r.authors.join(', ') : (r.authors || '');
-          const journal = (r.biblio?.journal) || r.journal || r.source || '';
-          const year    = r.year || r.biblio?.year || '';
+          const journal = (r.biblio && r.biblio.journal) || r.journal || r.source || '';
+          const year    = r.year || (r.biblio && r.biblio.year) || '';
           const doi     = r.doi ? String(r.doi).replace(/^https?:\/\/doi\.org\//, '') : '';
           const url     = r.url || (doi ? `https://doi.org/${doi}` : '');
 
@@ -248,9 +290,10 @@ try {
 
     // 3) Nothing to show
     refsSection.classList.add('hidden');
+  } catch (e) {
+    try { console.error('renderRefsFromData error:', e); } catch {}
   }
-
-
+}
 
   // Upload button
   /**
