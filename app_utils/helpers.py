@@ -97,18 +97,43 @@ def _safe_text(s: str, max_chars: int = 8000) -> str:
     return s
 
 # Extract citation indexes like [1], [2–3], etc.
-_CIT_RX = re.compile(r"\[(\d+)(?:\s*[-–]\s*(\d+))?\]")
-def _extract_used_ref_indexes(answer: str, default: Any = None) -> List[int]:
-    s = _to_str(answer)
-    found = []
-    for m in _CIT_RX.finditer(s):
-        a = int(m.group(1))
-        b = int(m.group(2)) if m.group(2) else a
-        if a <= b:
-            found.extend(range(a, b+1))
-    # dedupe, preserve order
-    seen, out = set(), []
-    for i in found:
-        if i not in seen:
-            seen.add(i); out.append(i)
-    return out if out else ([] if default is None else default)
+_CITE_RX = re.compile(r'\[(\d+(?:\s*[-–]\s*\d+)?(?:\s*,\s*\d+(?:\s*[-–]\s*\d+)?)*)\]')
+
+def extract_used_ref_indexes(*texts):
+    used = set()
+    for t in texts:
+        if not t: continue
+        for m in _CITE_RX.finditer(t):
+            chunk = m.group(1)
+            for part in re.split(r'\s*,\s*', chunk):
+                if re.search(r'[-–]', part):
+                    a, b = re.split(r'[-–]', part)
+                    for i in range(int(a), int(b) + 1):
+                        used.add(i)
+                else:
+                    used.add(int(part))
+    return sorted(used)
+
+def renumber_citations(text, mapping):
+    def _rewrite(match):
+        raw = match.group(1)
+        out = []
+        for part in re.split(r'\s*,\s*', raw):
+            if re.search(r'[-–]', part):
+                a, b = re.split(r'[-–]', part)
+                rng = range(int(a), int(b) + 1)
+                mapped = [str(mapping.get(i, i)) for i in rng]
+                # compress back to a range if contiguous
+                try:
+                    nums = list(map(int, mapped))
+                    if nums == list(range(nums[0], nums[-1] + 1)):
+                        out.append(f"{nums[0]}–{nums[-1]}")
+                    else:
+                        out.extend(map(str, mapped))
+                except ValueError:
+                    out.extend(mapped)
+            else:
+                i = int(part)
+                out.append(str(mapping.get(i, i)))
+        return "[" + ", ".join(out) + "]"
+    return _CITE_RX.sub(_rewrite, text or "")

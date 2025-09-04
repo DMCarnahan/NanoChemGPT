@@ -33,7 +33,10 @@ from converter import validate_step, convert_text_to_robot_ops
 from mongo_client import get_db
 from decider.miner_queue import enqueue_text_mining_job
 from DuckDB.duck_searcher import get_duck_searcher
-from ref_utils import build_references_payload
+from ref_utils import (
+    dedupe_and_rerank, extract_used_ref_indexes, renumber_citations,
+    split_used_refs, DEFAULT_NANOCHEM_TERMS, format_references_block
+)
 try:
     from app_utils.helpers import (
         classify_intent as _h_classify_intent,
@@ -42,41 +45,29 @@ try:
         judge_sufficiency as _h_judge_sufficiency,
         _safe_text as _h_safe_text,
         _extract_used_ref_indexes as _h_extract_used_ref_indexes,
-        judge_hits, Hit as _Hit,
+        judge_hits, Hit as _Hit, renumber_citations as _h_renumber_citations,
     )
 except Exception:
     _h_classify_intent = _h_kb_search = _h_kb_fetch = None
     _h_judge_sufficiency = _h_safe_text = _h_extract_used_ref_indexes = None
+    _h_renumber_citations = None
     _Hit = None
     # --- Safe fallbacks so /ask never 500s if helpers are missing or envs are blank ---
-def _env_int(name: str, default: int) -> int:
-    try:
-        from app_utils.helpers import env_int as __env_int  
-        return __env_int(name, default)
-    except Exception:
+    def _env_int(name: str, default: int) -> int:
         v = os.getenv(name, "")
         v = "" if v is None else v.strip()
-        try:    return default if v == "" else int(v)
-        except: return default
+        try:
+            return default if v == "" else int(v)
+        except Exception:
+            return default
 
-def _env_float(name: str, default: float) -> float:
-    try:
-        from app_utils.helpers import env_float as __env_float  
-        return __env_float(name, default)
-    except Exception:
+    def _env_float(name: str, default: float) -> float:
         v = os.getenv(name, "")
         v = "" if v is None else v.strip()
-        try:    return default if v == "" else float(v)
-        except: return default
-
-def judge_hits(hits: List[Dict[str, Any]], min_hits: int = 1, min_score: float = 0.0, min_chars: int = 48) -> bool:
-    good = 0
-    for h in hits or []:
-        score = float(h.get("score", 0.0))
-        text  = (h.get("text") or "")
-        if len(text) >= min_chars and score >= min_score:
-            good += 1
-    return good >= min_hits
+        try:
+            return default if v == "" else float(v)
+        except Exception:
+            return default
 
 # -------------------- Paths/Config --------------------
 ROOT = Path(__file__).resolve().parent
@@ -189,7 +180,7 @@ def retriever_search(query: str, k: int = 8, mode: str = "hybrid", alpha: float 
         data = r.json()
         return data.get("hits", []) if isinstance(data, dict) else []
     except Exception as e:
-        print("[retriever] search failed:", e)
+        app.logger.warning(f"[retriever] search failed: {e}")
         return []
 
 # ──────────────── Utilities ──────────────── #
@@ -264,6 +255,46 @@ def _extract_used_markers(*texts: str) -> dict:
         for tag in TAGS:
             tag_counts[tag] += len(re.findall(rf"\[{tag}\]", t))
     return {"refs": sorted(seen), "tags": tag_counts, "has_ctx": any(tag_counts[k] > 0 for k in ("CTX", "PARSED", "DB"))}
+
+def build_references_payload(
+    answer_text: str,
+    refs_input: list[dict],
+    *,
+    question: str = "",
+    top_k: int = 40
+) -> dict:
+    """
+    Build a consistent references payload using ref_utils:
+    - dedupe + rerank
+    - extract used refs
+    - produce refs_all/refs_used/index_map/candidates
+    """
+    try:
+        refs_all = dedupe_and_rerank(
+            question or "",
+            refs_input or [],
+            domain_terms=DEFAULT_NANOCHEM_TERMS,
+            top_k=max(top_k, len(refs_input or []))
+        )
+    except Exception:
+        refs_all = list(refs_input or [])
+
+    try:
+        used = extract_used_ref_indexes(answer_text or "")
+    except Exception:
+        used = []
+
+    try:
+        refs_used, index_map = split_used_refs(refs_all, used)
+    except Exception:
+        refs_used, index_map = list(refs_all), {i+1: i+1 for i in range(len(refs_all))}
+
+    return {
+        "refs_all": refs_all,
+        "refs_used": refs_used,
+        "index_map": index_map,
+        "candidates": refs_all,
+    }
 
 @lru_cache(maxsize=128)
 def cached_vs_search(q):
@@ -493,7 +524,14 @@ def ask():
             vector_device = "cpu"
 
         try:
-            uvs = UploadsVectorSearch.from_folder(uploads_dir, device=vector_device, backend='tfidf', max_docs=1000)
+            uvs = UploadsVectorSearch.from_folder(uploads_dir, device=vector_device, max_docs=1000)
+        except TypeError:
+            # Fallback: attempt without max_docs if the signature differs.
+            try:
+                uvs = UploadsVectorSearch.from_folder(uploads_dir, device=vector_device)
+            except Exception as e2:
+                app.logger.warning(f"[/ask] Uploads VS error: {e2}")
+                uvs = None
         except Exception as e:
             app.logger.warning(f"[/ask] Uploads VS error: {e}")
             uvs = None
@@ -610,7 +648,11 @@ def ask():
         out_dir.mkdir(parents=True, exist_ok=True)
 
         # ------------- config -------------
-        max_results = os.getenv("HARVEST_MAX_RESULTS", "6u")
+        raw = os.getenv("HARVEST_MAX_RESULTS", "6")
+        try:
+            max_results = int(raw)
+        except ValueError:
+            max_results = 6
         cfg = (
             "out_dir: {od}\n"
             "queries:\n{qs}\n"
@@ -846,28 +888,30 @@ def ask():
             "biblio": {},
         })
 
-    # B) Stable dedup: web first, then KB, then harvest
+    # B) Collect raw references from web, KB, and harvest, then deduplicate and rerank them using ref_utils.
+    raw_refs = web_refs + kb_refs_raw + harvest_refs
+
+    # Deduplicate + rerank with ref_utils
+    try:
+        refs_all = dedupe_and_rerank(
+            question, raw_refs, domain_terms=DEFAULT_NANOCHEM_TERMS, top_k=max(40, len(raw_refs))
+        )
+        if not refs_all:
+            refs_all = list(raw_refs)
+    except Exception:
+        refs_all = list(raw_refs)
+
+    # Numbered REFERENCES string shown to the LLM
+    refs_prompt = "\n".join(
+        f"[{i+1}] {r.get('title') or '(no title)'} ({r.get('year') or ''}) — {_ref_url(r)}"
+        for i, r in enumerate(refs_all)
+    ) or "(no references found)"
+
+    # Index references for aligning web snippets
     def _normkey_ref(r: dict) -> str:
         return (r.get("doi") or r.get("url") or r.get("title") or "").strip().lower()
 
-    refs, seen = [], set()
-    def _add(rs):
-        for r in rs:
-            k = _normkey_ref(r)
-            if k and k not in seen:
-                refs.append(r); seen.add(k)
-    _add(web_refs)
-    _add(kb_refs_raw)
-    _add(harvest_refs)
-
-    # C) Numbered REFERENCES string
-    refs_prompt = "\n".join(
-        f"[{i+1}] {(r.get('title') or '(no title)')} ({r.get('year') or ''}) — {_ref_url(r)}"
-        for i, r in enumerate(refs)
-    ).strip() or "(no references found)"
-
-    # D) CTX_WEB with snippets aligned to the same numbers
-    ref_index = { _normkey_ref(r): i+1 for i, r in enumerate(refs) }
+    ref_index = { _normkey_ref(r): i+1 for i, r in enumerate(refs_all) }
 
     def _key_from_hit(h: dict) -> str:
         m = _hit_meta(h)
@@ -886,6 +930,7 @@ def ask():
         if snip:
             web_ctx_lines.append(f"{head} {title}\n{snip[:1000]}")
     web_ctx = "\n\n".join(web_ctx_lines)
+
 
     # ----------------- Compose CONTEXT -----------------
     ctx_parts = []
@@ -949,7 +994,6 @@ def ask():
             "Rules:\n"
             " - Prefer CONTEXT and REFERENCES over general knowledge when relevant.\n"
             " - For each step, quote or paraphrase a specific finding from CONTEXT or REFERENCES, and cite the source. Do not generalize or invent citations.\n"
-            " - .\n"
             f"{inline_rule}\n"
             " - If CONTEXT is insufficient, say so explicitly before generalizing.\n"
             " - Every claim that uses info from CONTEXT/REFERENCES must end with [n]. If no [n] applies, omit the claim.\n"
@@ -970,12 +1014,11 @@ def ask():
             f"User question: {question}"
         )
 
-
     if client is None:
         return jsonify({"ok": False, "error": "OpenAI client not configured"}), 500
 
     raw = client.chat.completions.create(
-        model="gpt-4o-mini",
+        model="gpt-4o",
         messages=[{"role": "user", "content": prompt}],
         temperature=0.2
     ).choices[0].message.content
@@ -988,18 +1031,32 @@ def ask():
         a, r = _split_reasoning(strip_references_block(_s(raw)))
         answer, rationale = _s(a), _s(r)
 
-    # ---------- Build references payload ----------
-    refs_payload = build_references_payload(answer or "", refs or [], top_k=6, question=question)
+    # ---------- Build references payload (using deduped refs_all) ----------
+    refs_payload = build_references_payload(answer or "", refs_all or [], top_k=6, question=question)
+    refs_all  = refs_payload.get("refs_all", [])   # ensure bound locally
+    refs_used = refs_payload.get("refs_used", [])
+    index_map = refs_payload.get("index_map", {})
 
-    # 1) Extract cited indexes (best-effort)
+    # Extract cited indexes (robust)
     try:
-        used_idxs = _h_extract_used_ref_indexes(answer, rationale) if _h_extract_used_ref_indexes else []
+        used_idxs = extract_used_ref_indexes(answer, rationale)
     except Exception:
         used_idxs = []
-    # Coerce to ints
-    used_idxs = [int(i) for i in used_idxs if isinstance(i, (int, str)) and str(i).isdigit()]
+    # Normalize within the range
+    used_idxs = [i for i in (int(x) for x in used_idxs if str(x).isdigit()) if 1 <= i <= len(refs_all)]
 
-    # 2) If none, ask the model to add [n] without changing content
+    # Normalize and coerce to integers within range.
+    norm_used = []
+    for i in used_idxs or []:
+        try:
+            j = int(i)
+            if 1 <= j <= len(refs_all):
+                norm_used.append(j)
+        except Exception:
+            continue
+    used_idxs = norm_used
+
+    # 2) If no citations detected but answer is non-empty, ask the model to add [n].
     if not used_idxs and answer:
         fix_prompt = (
             "Add numeric citations [n] to the answer using the numbered REFERENCES. "
@@ -1020,23 +1077,55 @@ def ask():
                 messages=[{"role": "user", "content": fix_prompt}],
                 temperature=0.0
             ).choices[0].message.content
+
         if isinstance(fixed, str) and fixed.strip():
             answer = fixed
             try:
-                used_idxs = _h_extract_used_ref_indexes(answer, "") if _h_extract_used_ref_indexes else []
+                used_idxs = extract_used_ref_indexes(answer, "")
             except Exception:
                 used_idxs = []
-            used_idxs = [int(i) for i in used_idxs if isinstance(i, (int, str)) and str(i).isdigit()]
+            used_idxs = [i for i in (int(x) for x in used_idxs if str(x).isdigit()) if 1 <= i <= len(refs_all)]
 
-    # 3) Build references block and markers (don’t fail the request)
+            norm_used = []
+            for i in used_idxs or []:
+                try:
+                    j = int(i)
+                    if 1 <= j <= len(refs_all):
+                        norm_used.append(j)
+                except Exception:
+                    continue
+            used_idxs = norm_used
+    # Split to used refs and renumber the in-text citations
     try:
-        references_block = _format_references_block_from_used(used_idxs, refs)
+        refs_used, index_map = split_used_refs(refs_all, used_idxs)
+    except Exception:
+        refs_used, index_map = list(refs_all), {i+1: i+1 for i in range(len(refs_all))}
+
+    try:
+        answer    = renumber_citations(answer, index_map)
+        rationale = renumber_citations(rationale, index_map)
+    except Exception:
+        pass
+
+    # Build ACS-ish block from the used list
+    try:
+        references_block = format_references_block(refs_used)
     except Exception:
         references_block = ""
+
+
+    # Extract marker counts (citations, CTX tags etc.) using existing helper.
     try:
         markers = _extract_used_markers(answer, rationale)
     except Exception:
         markers = {"refs": [], "tags": {}, "has_ctx": False}
+
+    # Normalize used indexes to the new numbering for persistence and response.
+    try:
+        updated_used = sorted({ index_map.get(i, i) for i in used_idxs })
+        used_idxs = updated_used
+    except Exception:
+        pass
 
     # judge based on helper if present; otherwise fall back to simple text-length rule
     try:
@@ -1078,9 +1167,15 @@ def ask():
             "answer": answer,
             "rationale": rationale,
             "markers": markers,
+            # Persist only the updated citation indices, reflecting the renumbered list
             "used_ref_indexes": used_idxs,
             "references_block": references_block,
-            "refs": refs,
+            # Store the full deduped list and the subset actually used for each QA pair
+            "refs": refs_all,
+            "refs_all": refs_all,
+            "refs_used": refs_used,
+            "index_map": index_map,
+            "candidates": refs_all,
             **refs_payload,
             "kb_refs_count": len(kb_refs_raw),
             "web_refs_count": len(web_refs),
@@ -1100,8 +1195,15 @@ def ask():
         "rationale": rationale,
         "markers": markers,
         "references_block": references_block,
+        # Updated list of citation indices using the renumbered scheme
         "used_ref_indexes": used_idxs,
-        "refs": refs,
+        # Provide both the full deduped list and the subset of references actually cited. The
+        # frontend uses these to populate candidate dropdowns and to render the references.
+        "refs": refs_all,
+        "refs_all": refs_all,
+        "refs_used": refs_used,
+        "candidates": refs_all,
+        "index_map": index_map,
         **refs_payload,
         "context_present": bool(context_joined),
         "mining_enqueued": enqueued,
@@ -1241,4 +1343,3 @@ if __name__ == "__main__":
 def healthz():
     from flask import jsonify
     return jsonify(ok=True)
-

@@ -1,292 +1,469 @@
-import os, re, math
-from typing import List, Dict, Any, Optional, Tuple
+from __future__ import annotations
 
-# --------- small helpers ---------
-_WORD_RX = re.compile(r"[A-Za-z0-9\-\u00C0-\u024F]+")
-CHEM_RX  = re.compile(r"\b(?:[A-Z][a-z]?[\d_]*){2,}\b")  # generic formula (e.g., SiO2, Al2O3, MoS2)
+import math
+import re
+import unicodedata
+from html import unescape as _html_unescape
+from typing import Dict, List, Tuple, Set, Optional
 
-def _tok(s: str) -> List[str]: return [t.lower() for t in _WORD_RX.findall(s or "")]
-def _norm(s: str) -> str: return re.sub(r"\s+", " ", (s or "").strip())
+# ------------------------
+# Text utilities
+# ------------------------
 
-def sanitize_authors_field(ref: Dict[str, Any]) -> None:
-    a = ref.get("authors")
-    if isinstance(a, list) and a and all(isinstance(x, str) and len(_tok(x)) <= 2 for x in a):
-        ref["authors"] = None
+_WS_RX = re.compile(r"\\s+")
+_PUNCT_RX = re.compile(r"[\\u2010\\u2011\\u2012\\u2013\\u2014\\u2015\\-\\p{P}]", re.UNICODE)
 
-def extract_used_ref_indexes(answer: str) -> List[int]:
-    out = set()
-    for m in re.finditer(r"\[(\d+)\]", answer or ""):
-        try: out.add(int(m.group(1)))
-        except: pass
-    return sorted(out)
+def _lower(s: Optional[str]) -> str:
+    return s.lower() if isinstance(s, str) else ""
 
-# --------- spaCy pipeline ---------
-_SPACY_MODEL = os.getenv("SPACY_MODEL")  
-_NLP = None
-def _nlp():
-    global _NLP
-    if _NLP is not None: return _NLP
+def _strip(s: Optional[str]) -> str:
+    return s.strip() if isinstance(s, str) else ""
+
+def _norm_space(s: str) -> str:
+    return _WS_RX.sub(" ", s).strip()
+
+def _fold(s: str) -> str:
+    # NFKD fold to strip accents; keep ASCII
     try:
-        import spacy
-        if _SPACY_MODEL:
-            _NLP = spacy.load(_SPACY_MODEL)
-        else:
-            _NLP = spacy.load("en_core_web_sm", disable=["lemmatizer"])
+        return unicodedata.normalize("NFKD", s).encode("ascii", "ignore").decode("ascii")
     except Exception:
-        _NLP = None
-    return _NLP
+        return s
 
-# Label sets — adjust if your model uses different names
-MATERIAL_LABELS = {"MATERIAL","CHEM","CHEMICAL","COMPOUND"}
-MORPH_LABELS    = {"MORPHOLOGY","SHAPE","FORM"}
-PROCESS_LABELS  = {"PROCESS","SYNTHESIS","METHOD"}
+def _clean_text(s: Optional[str]) -> str:
+    if not s:
+        return ""
+    s = _html_unescape(s)
+    s = _norm_space(s)
+    return s
 
-# generic “nano-ness” detector (no long synonym lists)
-NANO_RX = re.compile(r"\bnano[\w-]*\b", re.I)
-QDOT_RX = re.compile(r"\bquantum\s+dots?\b", re.I)  # special case outside “nano*”
-
-# --------- substrate heuristics (tunable) ---------
-SUBSTRATE_PREPS = {"on", "onto", "over", "above"}
-SUBSTRATE_VERBS = {
-    "grow","grown","deposit","deposited","coat","coated","form","formed",
-    "assemble","assembled","print","printed","pattern","patterned",
-    "evaporate","evaporated","sputter","sputtered","adsorb","adsorbed",
-    "support","supported","place","placed","transfer","transferred"
-}
-SUBSTRATE_WORDS = {"substrate","wafer","support","template","seed-layer","seed","mica","sapphire","glass"}
-_SUBSTRATE_PENALTY = float(os.getenv("REF_SUBSTRATE_PENALTY", "0.75"))  # stronger default
-_SUBSTRATE_STRICT = os.getenv("REF_SUBSTRATE_STRICT", "1") not in {"0","false","False"}
-
-def _extract_query_profile(question: str) -> Dict[str, set]:
-    """Use your spaCy NER (if present) to pull MATERIAL / MORPHOLOGY / PROCESS.
-       Fallbacks: chemical formulas; simple 'nano*' and 'quantum dot(s)' cues."""
-    q = _norm(question)
-    mats, morphs, procs = set(), set(), set()
-
-    nlp = _nlp()
-    if nlp:
-        doc = nlp(q)
-        for ent in getattr(doc, "ents", []):
-            L = (ent.label_ or "").upper()
-            if L in MATERIAL_LABELS: mats.add(ent.text.lower())
-            elif L in MORPH_LABELS:  morphs.add(ent.text.lower())
-            elif L in PROCESS_LABELS: procs.add(ent.text.lower())
-        # if the model didn’t tag morphology, infer generic nanomorph cues from tokens
-        if not morphs:
-            text = doc.text
-            if NANO_RX.search(text): morphs.add("nano*")
-            if QDOT_RX.search(text): morphs.add("quantum dot")
-    else:
-        # minimal fallback without spaCy
-        for m in CHEM_RX.findall(q): mats.add(m.lower())
-        if NANO_RX.search(q): morphs.add("nano*")
-        if QDOT_RX.search(q): morphs.add("quantum dot")
-        for w in ("synthesis","prepare","preparation","growth","fabrication","sol-gel","hydrothermal","solvothermal","cvd","pvd","anneal","calcination"):
-            if w in q.lower(): procs.add(w)
-
-    # always add formula-like tokens from the question
-    for m in CHEM_RX.findall(q):
-        mats.add(m.lower())
-
-    return {"materials": mats, "morphology": morphs, "process": procs}
-
-def _doc_matches_target(txt: str, profile: Dict[str, set]) -> Tuple[bool, bool]:
-    """
-    Returns (match_ok, substrate_like).
-    match_ok: text looks about the requested material/morphology (or generic 'nano*')
-    substrate_like: text likely uses the material as a substrate (e.g., 'X grown on SiO2')
-    """
-    t = _norm(txt)
-    nlp = _nlp()
-    mats = set(m.lower() for m in profile.get("materials") or [])
-    morphs = set(m.lower() for m in profile.get("morphology") or [])
-
-    # trivial quick checks
-    has_nano = bool(NANO_RX.search(t) or QDOT_RX.search(t))
-    has_mat_mention = any(m in t.lower() for m in mats) if mats else True  # allow if no explicit material asked
-
-    if not nlp:
-        # fallback: if a material was requested, require it; then require 'nano*' if no morphology given
-        if mats and not has_mat_mention: return (False, False)
-        if not morphs and not has_nano:  return (False, False)
-        # fallback substrate heuristic (harsher): verbs + preps + 'on <mat> (substrate|wafer|template)'
-        if mats:
-            mat_pat = "|".join(map(re.escape, mats))
-            sub_rx = re.compile(
-                rf"(?:\\b(?:{'|'.join(SUBSTRATE_VERBS)})\\b\\s+)?\\b(?:{'|'.join(SUBSTRATE_PREPS)})\\s+(?:{mat_pat})(?:\\s+(?:{'|'.join(SUBSTRATE_WORDS)}))?\\b",
-                re.I
-            )
-            substrate_like = bool(sub_rx.search(t))
+def _tokenize(s: str) -> List[str]:
+    out = []
+    token = []
+    for ch in s:
+        if ch.isalnum():
+            token.append(ch.lower())
         else:
-            substrate_like = False
-        # In fallback mode, if the only mention is substrate-like and no morphology near material, block
-        if substrate_like and _SUBSTRATE_STRICT:
-            return (False, True)
-        return (True, substrate_like)
+            if token:
+                out.append("".join(token))
+                token = []
+    if token:
+        out.append("".join(token))
+    return out
 
-    # spaCy path: check proximity between material entities and morphology cues
-    doc = nlp(t)
+def _shingles(s: str, k: int = 3) -> Set[str]:
+    if len(s) < k:
+        return {s} if s else set()
+    return {s[i:i+k] for i in range(len(s)-k+1)}
 
-    def _substrate_context(ent) -> bool:
-        # pobj of on/onto/over
-        for tok in ent:
-            if tok.dep_ == "pobj" and tok.head.lemma_.lower() in SUBSTRATE_PREPS:
-                return True
-        # verb ... on <ent>
-        for tok in doc:
-            if tok.pos_ == "VERB" and tok.lemma_.lower() in SUBSTRATE_VERBS:
-                for child in tok.children:
-                    if child.lemma_.lower() in SUBSTRATE_PREPS:
-                        pobj = next((c for c in child.children if c.dep_ == "pobj"), None)
-                        if pobj and ent.start <= pobj.i < ent.end:
-                            return True
-        # "on <ent> substrate/wafer/template"
-        after_i = ent[-1].i + 1
-        if after_i < len(doc) and doc[after_i].lemma_.lower() in SUBSTRATE_WORDS:
-            # ensure there is an 'on/onto/over' governing this span
-            for tok in ent:
-                if tok.dep_ == "pobj" and tok.head.lemma_.lower() in SUBSTRATE_PREPS:
-                    return True
-        return False
-    mat_spans = []
-    for ent in getattr(doc, "ents", []):
-        if (ent.label_ or "").upper() in MATERIAL_LABELS:
-            mat_spans.append(ent)
-        elif mats and any(m in ent.text.lower() for m in mats):
-            mat_spans.append(ent)
+def _jaccard_trigram(a: str, b: str) -> float:
+    a = _fold(_clean_text(a.lower()))
+    b = _fold(_clean_text(b.lower()))
+    if not a or not b:
+        return 0.0
+    A = _shingles(a, 3)
+    B = _shingles(b, 3)
+    if not A or not B:
+        return 0.0
+    inter = len(A & B)
+    union = len(A | B)
+    return inter / union if union else 0.0
 
-    if not mats:
-        if morphs:
-            # look for any token span overlapping a morph term from profile
-            has_morph_from_profile = any(m in t.lower() for m in morphs) or has_nano
-            return (has_morph_from_profile, False)
-        return (has_nano, False)
+# ------------------------
+# ID normalization
+# ------------------------
 
-    # Require at least one material mention when a material was asked
-    if mats and not (mat_spans or has_mat_mention):
-        return (False, False)
+def _norm_doi(x: Optional[str]) -> str:
+    if not x:
+        return ""
+    s = _lower(x)
+    s = s.replace("https://doi.org/", "").replace("http://doi.org/", "")
+    s = s.replace("doi:", "").strip()
+    return s
 
-    # proximity: any “nano*” or morphology term within +/- 6 tokens of a material entity
-    near = False
-    substrate_like = False
-    substrate_mentions = 0
+def _norm_pmid(x: Optional[str]) -> str:
+    if not x:
+        return ""
+    s = "".join(ch for ch in str(x) if ch.isdigit())
+    return s
 
-    # collect token positions where “nano*” or morph terms appear
-    morph_pos = set()
-    for i, tok in enumerate(doc):
-        L = tok.text.lower()
-        if NANO_RX.match(L) or QDOT_RX.match(doc.text[max(0, tok.idx-8): tok.idx+len(tok)]):
-            morph_pos.add(i)
-        if morphs and any(m in L for m in morphs):
-            morph_pos.add(i)
+def _norm_arxiv(x: Optional[str]) -> str:
+    if not x:
+        return ""
+    s = _lower(x).replace("arxiv:", "").replace("https://arxiv.org/abs/", "").strip()
+    return s
 
-    # Evaluate proximity and “on <material>” prepositional objects
-    for ent in mat_spans:
-        for i in morph_pos:
-            if abs(i - ent.start) <= 6 or abs(i - ent.end) <= 6:
-                near = True
-        # substrate grammar checks
-        if _substrate_context(ent):
-            substrate_like = True
-            substrate_mentions += 1
+def _title_key(title: Optional[str]) -> str:
+    if not title:
+        return ""
+    s = _fold(_clean_text(title)).lower()
+    # strip most punctuation and collapse whitespace
+    s = re.sub(r"[^a-z0-9\\s]+", " ", s)
+    s = _norm_space(s)
+    return s
 
-    # If every mention is substrate-like and there is no morphology cue near the material, block it outright
-    if mat_spans and substrate_mentions == len(mat_spans) and not near and _SUBSTRATE_STRICT:
-        return (False, True)
+# ------------------------
+# Citation parsing & renumbering
+# ------------------------
 
-    if morphs and not near:
-        return (False, substrate_like)
+# Matches [1], [1, 2, 5], [3–7], [3-7], and mixed combos like [2, 4–6, 9]
+_CITE_RX = re.compile(r"\\[(\\d+(?:\\s*[-–]\\s*\\d+)?(?:\\s*,\\s*\\d+(?:\\s*[-–]\\s*\\d+)?)*)\\]")
 
-    if (near or has_nano or bool(morphs)) and (mat_spans or has_mat_mention):
-        return (True, substrate_like)
+def extract_used_ref_indexes(*texts: Optional[str]) -> List[int]:
+    """
+    Extract unique citation indexes from any number of strings.
+    Supports single, comma, and range citations inside square brackets.
+    Returns sorted unique list of ints.
+    """
+    used = set()
+    for t in texts:
+        if not t:
+            continue
+        for m in _CITE_RX.finditer(t):
+            chunk = m.group(1)
+            for part in re.split(r"\\s*,\\s*", chunk):
+                if re.search(r"[-–]", part):
+                    a, b = re.split(r"[-–]", part)
+                    try:
+                        a_i = int(a.strip()); b_i = int(b.strip())
+                    except Exception:
+                        continue
+                    if a_i <= b_i:
+                        for i in range(a_i, b_i + 1):
+                            used.add(i)
+                    else:
+                        for i in range(b_i, a_i + 1):
+                            used.add(i)
+                else:
+                    try:
+                        used.add(int(part.strip()))
+                    except Exception:
+                        pass
+    return sorted(used)
 
-    return (False, substrate_like)
+def renumber_citations(text: Optional[str], index_map: Dict[int, int]) -> str:
+    """
+    Rewrite bracketed citations using index_map (old->new). Keeps ranges when contiguous.
+    """
+    if not text:
+        return ""
+    def _rewrite(match: re.Match) -> str:
+        raw = match.group(1)
+        out = []
+        for part in re.split(r"\\s*,\\s*", raw):
+            if re.search(r"[-–]", part):
+                a, b = re.split(r"[-–]", part)
+                try:
+                    a_i = int(a.strip()); b_i = int(b.strip())
+                except Exception:
+                    continue
+                lo, hi = (a_i, b_i) if a_i <= b_i else (b_i, a_i)
+                mapped = [index_map.get(i, i) for i in range(lo, hi + 1)]
+                # Compress if contiguous
+                if mapped and mapped == list(range(mapped[0], mapped[0] + len(mapped))):
+                    out.append(f"{mapped[0]}–{mapped[-1]}")
+                else:
+                    out.extend(str(x) for x in mapped)
+            else:
+                try:
+                    i = int(part.strip())
+                    out.append(str(index_map.get(i, i)))
+                except Exception:
+                    pass
+        return "[" + ", ".join(out) + "]"
+    return _CITE_RX.sub(_rewrite, text)
 
-def _score_ref(txt: str, profile: Dict[str, set]) -> float:
-    """Rank by entity/cue overlap + optional vector similarity; mild penalty for pure substrate context."""
-    L = txt.lower()
-    base = 0.0
-    if any(m in L for m in profile.get("materials", set())): base += 0.7
-    if any(p in L for p in profile.get("process", set())):   base += 0.3
-    if NANO_RX.search(L) or QDOT_RX.search(L):               base += 0.3
-    if profile.get("morphology"):
-        if any(m in L for m in profile["morphology"]):       base += 0.3
+# ------------------------
+# Dedupe
+# ------------------------
 
-    nlp = _nlp()
-    if nlp and nlp.vocab.vectors_length:
-        try:
-            qtxt = " ".join(list(profile.get("materials", set()) |
-                                 profile.get("morphology", set()) |
-                                 profile.get("process", set())))
-            if qtxt.strip():
-                qdoc = nlp(_norm(qtxt))
-                tdoc = nlp(_norm(txt))
-                base += 0.5 * float(qdoc.similarity(tdoc))
-        except Exception:
-            pass
+def _choose_primary(a: dict, b: dict) -> dict:
+    """Heuristic: prefer entry with DOI; else longer abstract; else has year; else 'a'."""
+    a_doi = bool(_norm_doi(a.get("doi")))
+    b_doi = bool(_norm_doi(b.get("doi")))
+    if a_doi != b_doi:
+        return a if a_doi else b
+    a_abs = len(_clean_text(a.get("abstract", "")))
+    b_abs = len(_clean_text(b.get("abstract", "")))
+    if a_abs != b_abs:
+        return a if a_abs > b_abs else b
+    a_year = _strip(str(a.get("year", "")))
+    b_year = _strip(str(b.get("year", "")))
+    if bool(a_year) != bool(b_year):
+        return a if a_year else b
+    return a  # stable
 
-    # penalize explicit substrate phrasing (harsher, tunable)
-    mats = profile.get("materials", set())
-    if mats:
-        mat_pat = "|".join(map(re.escape, mats))
-        sub_rx = re.compile(
-            rf"(?:\\b(?:{'|'.join(SUBSTRATE_VERBS)})\\b\\s+)?\\b(?:{'|'.join(SUBSTRATE_PREPS)})\\s+(?:{mat_pat})(?:\\s+(?:{'|'.join(SUBSTRATE_WORDS)}))?\\b",
-            re.I
-        )
-        if sub_rx.search(L):
-            base -= _SUBSTRATE_PENALTY
-    return base
+def dedupe_refs(refs: List[dict], title_sim_threshold: float = 0.85
+               ) -> Tuple[List[dict], Dict[int, int], List[List[int]]]:
+    """
+    Deduplicate by DOI/PMID/arXiv; else fuzzy by title (trigram Jaccard).
+    Returns:
+      unique_refs: list with preserved essential fields; assigned 'index' if missing.
+      merge_map:   {old_index -> kept_index}
+      groups:      list of groups of merged original indexes
+    """
+    # ensure every ref has an 'index' (1-based)
+    for i, r in enumerate(refs, 1):
+        if "index" not in r or r.get("index") is None:
+            r["index"] = i
 
-# --------- main selection API ---------
-def select_references(answer: str, refs: List[Dict[str, Any]], *, question: Optional[str], top_k: int = 6) -> Tuple[List[Dict[str, Any]], List[int]]:
-    if not refs: return [], []
+        # clean some fields
+        r["title"] = _clean_text(r.get("title", ""))
+        r["abstract"] = _clean_text(r.get("abstract", ""))
+        if isinstance(r.get("authors"), list):
+            r["authors"] = ", ".join(r["authors"])
 
-    for r in refs: sanitize_authors_field(r)
+    by_key = {}  # (doi|pmid|arxiv|titlekey) -> kept_ref
+    kept = []
+    merge_map: Dict[int, int] = {}
+    groups: List[List[int]] = []
 
-    # If the answer has explicit [n] citations, honor them exactly
-    used = extract_used_ref_indexes(answer)
-    if used:
-        chosen = []
-        for n in used:
-            i = n - 1
-            if 0 <= i < len(refs): chosen.append(refs[i])
-        return chosen[:top_k], used[:top_k]
-
-    # Otherwise: spaCy-driven gating + ranking
-    prof = _extract_query_profile(question or "")
-
-    gated = []
+    # First pass: IDs (doi/pmid/arxiv) exact
+    id_buckets: Dict[str, List[dict]] = {}
     for r in refs:
-        title = _norm(r.get("title") or r.get("citation") or r.get("name") or "")
-        meta  = _norm(r.get("meta") or r.get("journal") or r.get("source") or "")
-        ok, substrate_like = _doc_matches_target(f"{title} {meta}", prof)
-        if ok:
-            # stronger downweight if substrate phrasing survived gating
-            r["_substrate_penalty"] = _SUBSTRATE_PENALTY if substrate_like else 0.0
-            gated.append(r)
+        keys = []
+        doi = _norm_doi(r.get("doi"))
+        pmid = _norm_pmid(r.get("pmid"))
+        arx = _norm_arxiv(r.get("arxiv_id"))
+        if doi: keys.append(("doi", doi))
+        if pmid: keys.append(("pmid", pmid))
+        if arx: keys.append(("arxiv", arx))
+        if not keys:
+            # temporary title key bucket
+            tkey = _title_key(r.get("title"))
+            if tkey:
+                keys.append(("tkey", tkey))
+        # use first available key to bucket (we'll fuzzy within title-buckets later)
+        if keys:
+            k = f"{keys[0][0]}:{keys[0][1]}"
+        else:
+            k = f"idx:{r['index']}"
+        id_buckets.setdefault(k, []).append(r)
 
-    # Relax gate if too few candidates 
-    pool = gated if len(gated) >= max(2, top_k//2) else list(refs)
+    # Resolve buckets
+    for bucket in id_buckets.values():
+        if len(bucket) == 1:
+            r = bucket[0]
+            kept.append(r)
+            merge_map[r["index"]] = r["index"]
+            groups.append([r["index"]])
+        else:
+            # prefer by IDs; if same title-key bucket, choose primary and map others
+            base = bucket[0]
+            for r in bucket[1:]:
+                base = _choose_primary(base, r)
+            kept.append(base)
+            grp = []
+            for r in bucket:
+                merge_map[r["index"]] = base["index"]
+                grp.append(r["index"])
+            groups.append(sorted(set(grp)))
 
-    scored = []
-    for r in pool:
-        title = _norm(r.get("title") or r.get("citation") or r.get("name") or "")
-        meta  = _norm(r.get("meta") or r.get("journal") or r.get("source") or "")
-        s = _score_ref(f"{title} {meta}", prof) - float(r.get("_substrate_penalty", 0.0))
-        scored.append((s, r))
-    scored.sort(key=lambda x: x[0], reverse=True)
+    # Second pass: fuzzy between kept title-similar entries without IDs
+    # Build list of entries without DOI/PMID/arXiv
+    no_id = [r for r in kept if not (_norm_doi(r.get("doi")) or _norm_pmid(r.get("pmid")) or _norm_arxiv(r.get("arxiv_id")))]
+    used = set()
+    final_kept = []
+    # Simple O(n^2) since n is typically small (<200)
+    for i, r in enumerate(no_id):
+        if r["index"] in used:
+            continue
+        group = [r]
+        used.add(r["index"])
+        for j in range(i+1, len(no_id)):
+            s = no_id[j]
+            if s["index"] in used:
+                continue
+            sim = _jaccard_trigram(r.get("title",""), s.get("title",""))
+            if sim >= title_sim_threshold:
+                group.append(s)
+                used.add(s["index"])
+        # choose primary
+        base = group[0]
+        for g in group[1:]:
+            base = _choose_primary(base, g)
+        final_kept.append(base)
+        # update groups + merge_map
+        gidx = []
+        for g in group:
+            merge_map[g["index"]] = base["index"]
+            gidx.append(g["index"])
+        groups.append(sorted(set(gidx)))
 
-    chosen = [r for _, r in scored[:top_k]]
-    return chosen, list(range(1, min(top_k, len(chosen)) + 1))
+    # Add back those with IDs which were not in no_id list
+    with_id = [r for r in kept if r not in no_id]
+    all_kept = with_id + [r for r in final_kept if r not in with_id]
 
-def build_references_payload(answer: str, refs_full: List[Dict[str, Any]], top_k: int = 6, *, question: Optional[str] = None) -> Dict[str, Any]:
-    chosen, used = select_references(answer, refs_full, question=question, top_k=top_k)
+    # Deduplicate 'all_kept' by base index (some overlap may occur)
+    unique_seen = set()
+    unique_refs = []
+    for r in all_kept:
+        if r["index"] in unique_seen:
+            continue
+        unique_seen.add(r["index"])
+        unique_refs.append(r)
+
+    # Reassign contiguous 'index' for presentation? No: preserve original 'index' for mapping stability.
+    return unique_refs, merge_map, groups
+
+# ------------------------
+# BM25 reranking (+ optional embedding cosine + domain boosts)
+# ------------------------
+
+def _idf(N: int, df: int) -> float:
+    # BM25 idf variant; add small epsilon to avoid div by zero
+    return math.log((N - df + 0.5) / (df + 0.5) + 1e-9)
+
+def _bm25_scores(query: str, docs: List[str], k1: float = 1.5, b: float = 0.75) -> List[float]:
+    q_tokens = _tokenize(_fold(_clean_text(query)))
+    if not q_tokens:
+        return [0.0] * len(docs)
+    doc_tokens = [ _tokenize(_fold(_clean_text(d))) for d in docs ]
+    N = len(docs)
+    avgdl = sum(len(t) for t in doc_tokens) / float(N or 1)
+    # document frequencies
+    df: Dict[str, int] = {}
+    for toks in doc_tokens:
+        for t in set(toks):
+            df[t] = df.get(t, 0) + 1
+    scores = []
+    for toks in doc_tokens:
+        score = 0.0
+        dl = len(toks) or 1
+        tf: Dict[str, int] = {}
+        for t in toks:
+            tf[t] = tf.get(t, 0) + 1
+        for t in q_tokens:
+            if t not in tf:
+                continue
+            idf = _idf(N, df.get(t, 0))
+            denom = tf[t] + k1 * (1 - b + b * dl / (avgdl or 1))
+            score += idf * (tf[t] * (k1 + 1)) / (denom or 1)
+        scores.append(score)
+    return scores
+
+def _cosine(a: List[float], b: List[float]) -> float:
+    if not a or not b or len(a) != len(b):
+        return 0.0
+    dot = sum(x*y for x, y in zip(a, b))
+    na = math.sqrt(sum(x*x for x in a))
+    nb = math.sqrt(sum(y*y for y in b))
+    if na == 0.0 or nb == 0.0:
+        return 0.0
+    return dot / (na * nb)
+
+def rerank_refs(query: str,
+                refs: List[dict],
+                domain_terms: Optional[Set[str]] = None,
+                embeddings: Optional[Dict[str, List[float]]] = None,
+                query_embedding: Optional[List[float]] = None,
+                top_k: int = 50
+                ) -> List[dict]:
+    """
+    Combine BM25(title+abstract) with optional embedding cosine and domain-term boosts.
+    - If 'embeddings' provided, key them by a stable ID per ref (e.g., DOI or fallback to str(index)).
+    - If 'query_embedding' provided, cosine is added (weight 0.4).
+    - Domain boost: +0.5 if >=2 domain terms present; +0.2 if 1 term.
+    Returns top_k refs sorted by 'score' desc, with 'score' attached.
+    """
+    texts = [ (r.get("title","") + " " + r.get("abstract","")).strip() for r in refs ]
+    bm25 = _bm25_scores(query, texts)
+    # Precompute domain presence
+    domain_terms = set(t.lower() for t in (domain_terms or set()))
+    def domain_hits(txt: str) -> int:
+        if not domain_terms or not txt:
+            return 0
+        T = set(_tokenize(_fold(_clean_text(txt))))
+        return sum(1 for t in domain_terms if t in T)
+
+    # Compute final
+    out = []
+    for i, r in enumerate(refs):
+        score = 0.6 * bm25[i]
+        # embedding cosine
+        if embeddings and query_embedding:
+            # pick a stable key
+            key = _norm_doi(r.get("doi")) or _norm_pmid(r.get("pmid")) or _norm_arxiv(r.get("arxiv_id")) or str(r.get("index"))
+            vec = embeddings.get(key)
+            if vec:
+                score += 0.4 * _cosine(query_embedding, vec)
+        # domain boost
+        hits = domain_hits(texts[i])
+        if hits >= 2:
+            score += 0.5
+        elif hits == 1:
+            score += 0.2
+        # penalty if clearly off-topic (no shared tokens at all)
+        if bm25[i] == 0.0 and hits == 0:
+            score -= 0.25
+        r2 = dict(r)
+        r2["score"] = float(score)
+        out.append(r2)
+
+    out.sort(key=lambda r: r.get("score", 0.0), reverse=True)
+    return out[:top_k]
+
+# ------------------------
+# High-level helpers
+# ------------------------
+
+def dedupe_and_rerank(query: str, refs: List[dict],
+                      domain_terms: Optional[Set[str]] = None,
+                      embeddings: Optional[Dict[str, List[float]]] = None,
+                      query_embedding: Optional[List[float]] = None,
+                      top_k: int = 50) -> List[dict]:
+    unique, merge_map, _ = dedupe_refs(refs)
+    ranked = rerank_refs(query, unique, domain_terms=domain_terms,
+                         embeddings=embeddings, query_embedding=query_embedding, top_k=top_k)
+    return ranked
+
+def split_used_refs(refs_all: List[dict], used_indexes: List[int]
+                   ) -> Tuple[List[dict], Dict[int, int]]:
+    """
+    Given full (ranked) refs with original 'index' values,
+    return (refs_used_renumbered, index_map) where index_map maps old->new (1-based).
+    """
+    used_set = set(used_indexes or [])
+    selected = [r for r in refs_all if r.get("index") in used_set]
+    # Preserve order as in refs_all
+    new_list = []
+    index_map: Dict[int, int] = {}
+    for i, r in enumerate(selected, 1):
+        r2 = dict(r)
+        old = r.get("index")
+        r2["old_index"] = old
+        r2["index"] = i  # renumbered for display
+        index_map[old] = i
+        new_list.append(r2)
+    return new_list, index_map
+
+def format_references_block(refs_used: List[dict]) -> str:
+    """
+    Render ACS-ish block from used refs (expected to be renumbered 1..m).
+    Tries DOI first; falls back to URL.
+    """
     lines = []
-    for i, r in enumerate(chosen, 1):
-        title = _norm(r.get("title") or r.get("citation") or r.get("name") or f"Reference {i}")
-        journal = _norm(r.get("journal") or r.get("source") or r.get("meta") or "")
-        year = str(r.get("year") or "")
-        doi  = _norm(r.get("doi") or "")
-        line = f"{i}. " + ", ".join([p for p in (title, journal, year, doi) if p])
-        lines.append(line)
-    return {"references": chosen, "used_ref_indexes": used, "references_block": "\n".join(lines)}
+    for r in refs_used:
+        idx = r.get("index", "?")
+        authors = r.get("authors") or ""
+        title = r.get("title") or ""
+        venue = r.get("venue") or ""
+        year  = str(r.get("year") or "").strip()
+        doi   = _norm_doi(r.get("doi"))
+        url   = _strip(r.get("url") or "")
+        link  = f"https://doi.org/{doi}" if doi else url
+        piece = f"[{idx}] {authors}. {title}. {venue} {year}. {link}".strip()
+        # tidy spaces
+        piece = re.sub(r"\\s+\\.", ".", piece)
+        piece = re.sub(r"\\s{2,}", " ", piece)
+        lines.append(piece)
+    return "\\n".join(lines)
+
+# A reasonable default domain-term set for nanochem / synthesis
+DEFAULT_NANOCHEM_TERMS: Set[str] = set(map(str.lower, [
+    "synthesis","solvothermal","hydrothermal","autoclave","nanocrystal","nanoparticle","nanowire",
+    "nanorod","nanocube","seed","precursor","ligand","surfactant","oleylamine","oleic","PVP",
+    "ethylene","glycol","polyol","reduction","nucleation","growth","facet","{111}","{100}",
+    "HCl","NaCl","AgNO3","Ag+","AuCl3","Fe(acac)3","Ni(acac)2","TOP","TOPO","HDA","HDD","OA",
+    "reaction","anneal","calcination","microwave","stirring","injection","temperature","time",
+    "monodisperse","monodispersity","facet-selective","shape-control","capping","cetyltrimethylammonium",
+]))
