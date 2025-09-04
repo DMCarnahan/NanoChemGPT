@@ -106,7 +106,9 @@ def _title_key(title: Optional[str]) -> str:
 # ------------------------
 
 # Matches [1], [1, 2, 5], [3–7], [3-7], and mixed combos like [2, 4–6, 9]
-_CITE_RX = re.compile(r"\\[(\\d+(?:\\s*[-–]\\s*\\d+)?(?:\\s*,\\s*\\d+(?:\\s*[-–]\\s*\\d+)?)*)\\]")
+_CITE_RX = re.compile(
+    r"\[(\d+(?:\s*[-–]\s*\d+)?(?:\s*,\s*\d+(?:\s*[-–]\s*\d+)?)*)\]"
+)
 
 def extract_used_ref_indexes(*texts: Optional[str]) -> List[int]:
     """

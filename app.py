@@ -16,6 +16,8 @@ import threading
 from datetime import datetime
 from pathlib import Path
 from functools import lru_cache
+import dotenv
+load_dotenv()
 
 # Third-party imports
 import httpx
@@ -903,9 +905,9 @@ def ask():
 
     # Numbered REFERENCES string shown to the LLM
     refs_prompt = "\n".join(
-        f"[{i+1}] {r.get('title') or '(no title)'} ({r.get('year') or ''}) — {_ref_url(r)}"
+        f"[{i+1}] {(r.get('title') or '(no title)')} ({r.get('year') or ''}) — {_ref_url(r)}"
         for i, r in enumerate(refs_all)
-    ) or "(no references found)"
+    ).strip() or "(no references found)"
 
     # Index references for aligning web snippets
     def _normkey_ref(r: dict) -> str:

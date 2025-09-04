@@ -1,7 +1,8 @@
 from __future__ import annotations
 
-import re, json, pathlib, unicodedata
+import re, json, pathlib, unicodedata,
 from typing import List, Dict, Optional, Any, Tuple
+from app_utils.converter_h import apply_postprocessing
 
 DEFAULTS = {
     "stir_rpm": 700,
@@ -640,47 +641,8 @@ def detect_dissolve(line: str) -> Optional[Dict]:
     }
     if extras:
         result["solvents"] = [{"name": solvent1, "volume": vol1, "volume_units": vunit1}] + extras
+    result = apply_postprocessing(result)
     return result
-
-    solute = m.group("solute").strip()
-    solvent1 = _clean_solvent_tail(m.group("solvent").strip())
-    # handle inline extra solvents like "ethylene glycol and 5 mL of water"
-    extras = []
-    inline = solvent1
-    # repeatedly peel off trailing ", and 5 mL of X" or "and 5 mL of X"
-    while True:
-        exm = re.search(r"(.*?)(?:,\s*)?(?:and\s+)([\d\.]+)\s*(µ?u?L|mL|ml|l|L)\s+of\s+([^,;]+)$", inline, re.I)
-        if not exm:
-            break
-        base = exm.group(1).strip()
-        vol2 = float(exm.group(2)); vunit2 = exm.group(3)
-        solv2 = _clean_solvent_tail(exm.group(4).strip())
-        extras.insert(0, {"name": solv2, "volume": vol2, "volume_units": vunit2})
-        inline = base
-    solvent1 = inline
-
-    vol1 = float(m.group("vol"))
-    vunit1 = m.group("vunit")
-
-    hint = None
-    mh = re.search(r"in\s+(?:a|the)\s+(\d+\s*(?:µ?u?L|mL|L)\s+(?:glass\s+)?(?:beaker|flask|round-?bottom\s+flask))", s, re.I)
-    if mh:
-        hint = mh.group(1)
-
-    result = {
-        "action": "dissolve",
-        "solute": solute,
-        "amount": float(m.group("amount")),
-        "unit": m.group("unit"),
-        "solvent": solvent1 if not extras else solvent1 + " + " + " + ".join(e["name"] for e in extras),
-        "volume": vol1,
-        "volume_units": vunit1,
-        "hardware_hint": hint,
-    }
-    if extras:
-        result["solvents"] = [{"name": solvent1, "volume": vol1, "volume_units": vunit1}] + extras
-    return result
-
 
 def detect_filter_isolate(line: str) -> Optional[Dict]:
     s = strip_tags(_clean_unicode(line.strip()))
