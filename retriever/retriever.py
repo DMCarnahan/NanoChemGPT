@@ -3,7 +3,7 @@
 import os, json, math, pickle
 from functools import lru_cache
 from pathlib import Path
-from typing import Any, Dict, List, Tuple
+from typing import Any, Dict, List, Tuple, Optional, Union
 
 import joblib
 import numpy as np
@@ -249,35 +249,100 @@ def _load_tfidf(force: bool = False) -> Dict[str, Any]:
 
 
 # ----------------------------- Compatibility -----------------------------
+def _load_embed():
+    return {
+        "backend": os.getenv("EMBED_BACKEND", "sentence-transformers"),
+        "model":   os.getenv("EMBED_MODEL",   "sentence-transformers/allenai-specter"),
+    }
+
+_OPENAI_DIMS = {
+    "text-embedding-3-small": 1536,
+    "text-embedding-3-large": 3072,
+}
 
 class Embedder:
     """
-    Minimal compatibility shim so legacy imports `from retriever.retriever import Embedder` work.
+    Minimal compatibility shim so legacy imports work.
     Supports two backends: 'openai' and 'sentence-transformers'.
     """
-    def __init__(self, backend: str | None = None, model: str | None = None):
+    def __init__(self, backend: Optional[str] = None, model: Optional[str] = None, device: Optional[str] = None):
         cfg = _load_embed()
         self.backend = backend or cfg.get("backend") or "sentence-transformers"
-        self.model = model or cfg.get("model") or "sentence-transformers/all-MiniLM-L6-v2"
+        self.model   = model   or cfg.get("model")   or "sentence-transformers/allenai-specter"
+        self.device  = device
         self._st = None
+        self._openai_client = None
+        self._dim: Optional[int] = None
+        self._init_model()
 
-    def encode(self, texts: List[str]) -> np.ndarray:
-        if self.backend == "openai":
-            from openai import OpenAI  # requires OPENAI_API_KEY
-            client = OpenAI()
-            resp = client.embeddings.create(model=self.model, input=texts)
-            arr = np.array([d.embedding for d in resp.data], dtype="float32")
-            n = np.linalg.norm(arr, axis=1, keepdims=True) + 1e-8
-            return (arr / n).astype("float32")
-        else:
+    # --- Public API ---
+    @property
+    def dim(self) -> int:
+        if self._dim is not None:
+            return self._dim
+        # Best-effort detection
+        if self.backend == "sentence-transformers" and self._st is not None:
+            self._dim = int(self._st.get_sentence_embedding_dimension())
+        elif self.backend == "openai":
+            self._dim = _OPENAI_DIMS.get(self.model, None)
+            if self._dim is None:
+                # Fallback: probe with a tiny encode
+                self._dim = self.encode(["_probe_"], normalize=False).shape[1]
+        return self._dim
+
+    def encode(
+        self,
+        texts: Union[str, List[str]],
+        batch_size: int = 32,
+        normalize: bool = True,
+    ) -> np.ndarray:
+        if isinstance(texts, str):
+            texts = [texts]
+
+        if self.backend == "sentence-transformers":
+            vecs = self._st.encode(
+                texts,
+                batch_size=batch_size,
+                convert_to_numpy=True,
+                normalize_embeddings=normalize,
+                show_progress_bar=False,
+            )
+            # ST already normalized if requested
+            return vecs
+
+        elif self.backend == "openai":
+            # Lazy import to avoid hard dep if not used
+            try:
+                from openai import OpenAI
+            except Exception as e:
+                raise RuntimeError("openai package not installed") from e
+            if self._openai_client is None:
+                self._openai_client = OpenAI()
+            out = self._openai_client.embeddings.create(model=self.model, input=texts)
+            vecs = np.array([d.embedding for d in out.data], dtype=np.float32)
+            if normalize:
+                vecs = _l2norm(vecs)
+            return vecs
+
+        raise ValueError(f"Unsupported backend: {self.backend}")
+
+    # --- Internals ---
+    def _init_model(self):
+        if self.backend == "sentence-transformers":
             from sentence_transformers import SentenceTransformer
-            if self._st is None:
-                self._st = SentenceTransformer(self.model)
-            vecs = self._st.encode(texts, normalize_embeddings=True)
-            return vecs.astype("float32")
+            self._st = SentenceTransformer(self.model, device=self.device)
+            self._dim = int(self._st.get_sentence_embedding_dimension())
+        elif self.backend == "openai":
+            # defer client init to first encode
+            self._dim = _OPENAI_DIMS.get(self.model)
+        else:
+            raise ValueError(f"Unsupported backend: {self.backend}")
 
-    def embed(self, text: str) -> np.ndarray:
-        return self.encode([text])[0]
+def _l2norm(x: np.ndarray, eps: float = 1e-12) -> np.ndarray:
+    n = np.linalg.norm(x, axis=1, keepdims=True)
+    n = np.maximum(n, eps)
+    return x / n
+
 
 
 @lru_cache(maxsize=1)

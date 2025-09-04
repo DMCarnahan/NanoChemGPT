@@ -56,13 +56,47 @@ def _embed_openai(texts: List[str], model: str) -> np.ndarray:
             vecs.append(np.array(d.embedding, dtype="float32"))
     return np.vstack(vecs)
 
-def _embed_st(texts: List[str], model: str) -> np.ndarray:
+from typing import List, Optional
+import numpy as np
+
+def _embed_st(
+    texts: List[str],
+    model: str,
+    batch_size: int = 64,             
+    device: Optional[str] = None,      # e.g. "cuda" / "cpu"
+    normalize: bool = True,
+) -> np.ndarray:
+    """
+    Works with:
+      • ST-packaged models: "sentence-transformers/all-MiniLM-L6-v2", "sentence-transformers/allenai-specter", ...
+      • Plain HF checkpoints: "pranav-s/MaterialsBERT", "m3rg-iitd/matscibert"
+    """
     try:
-        from sentence_transformers import SentenceTransformer
+        from sentence_transformers import SentenceTransformer, models
     except Exception as e:
         raise RuntimeError("sentence-transformers not installed. `pip install sentence-transformers`") from e
-    m = SentenceTransformer(model or "sentence-transformers/all-MiniLM-L6-v2")
-    emb = m.encode(texts, batch_size=256, show_progress_bar=True, convert_to_numpy=True, normalize_embeddings=True)
+
+    # Try loading as a ready-made ST model first
+    try:
+        st = SentenceTransformer(model or "sentence-transformers/all-MiniLM-L6-v2", device=device)
+    except Exception:
+        # Fallback: build an ST pipeline from a plain HF model (adds mean pooling)
+        tr = models.Transformer(model, max_seq_length=512)  # BERT-base length
+        pool = models.Pooling(
+            tr.get_word_embedding_dimension(),
+            pooling_mode_mean_tokens=True,   # mean pooling usually best for sentences
+            pooling_mode_cls_token=False,
+            pooling_mode_max_tokens=False,
+        )
+        st = SentenceTransformer(modules=[tr, pool], device=device)
+
+    emb = st.encode(
+        texts,
+        batch_size=batch_size,
+        show_progress_bar=True,
+        convert_to_numpy=True,
+        normalize_embeddings=normalize,   # cosine-ready if True
+    )
     return emb.astype("float32")
 
 def _build_faiss(emb: np.ndarray, metric: str, out_path: Path):

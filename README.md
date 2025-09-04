@@ -409,3 +409,4 @@ PRs and issues welcome! Please:
 - Run formatters (`ruff`, `black`) and tests (`pytest`) before submitting.
 - Keep configs and CLI help up‑to‑date.
 - Include small gold examples when adding new extractors.
+```

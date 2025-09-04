@@ -24,7 +24,7 @@ COPY . /app
 ENV APP_HOST=0.0.0.0 \
     APP_PORT=8000 \
     EMBED_BACKEND=openai \
-    EMBED_MODEL=sentence-transformers/all-MiniLM-L6-v2 \
+    EMBED_MODEL=pranav-s/MaterialsBERT \
     OPENAI_EMB=text-embedding-3-small \
     SPACY_MODEL=/app/harvester/miner/ner_model/model-best \
     ADMIN_TOKEN=changeme

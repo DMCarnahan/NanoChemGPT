@@ -2,7 +2,7 @@
 
 This is a drop‑in upgrade of the earlier retriever. It adds **semantic embeddings** with two backends:
 - **OpenAI** (`text-embedding-3-large` by default)
-- **Sentence‑Transformers** (local, default `all-MiniLM-L6-v2`)
+- **Sentence‑Transformers** (local, default `allenai-specter`)
 
 You can run **TF‑IDF**, **Embeddings**, or a **Hybrid** (alpha*embedding + (1-alpha)*tfidf).
 
@@ -16,7 +16,7 @@ pip install sentence-transformers   # for local embeddings
 
 ## 1) Build the index from your harvested bundle
 ```bash
-python index_jsonl.py --bundle ../nanochem_harvester/out/bundle.jsonl --index_dir ./index   --embed-backend openai --embed-model text-embedding-3-large   # or: sentence-transformers all-MiniLM-L6-v2
+python index_jsonl.py --bundle ../nanochem_harvester/out/bundle.jsonl --index_dir ./index   --embed-backend openai --embed-model text-embedding-3-large   
 ```
 
 Environment (if using OpenAI):

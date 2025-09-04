@@ -9,7 +9,7 @@ from grobid_client import pdf_to_tei
 from tei_utils import tei_to_sections, filter_methods_sections as filt_tei
 from jats_utils import jats_to_sections, filter_methods_sections as filt_jats
 from miner.runtime import get_miner, extract_procedure
-from harvester.oa_resolver import resolve_oa
+from oa_resolver import resolve_oa
 
 miner = get_miner()
 

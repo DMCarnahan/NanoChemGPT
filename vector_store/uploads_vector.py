@@ -1,7 +1,7 @@
 """
 Lightweight vector search over an uploads folder.
 
-- Works with your existing call:
+- Works with existing call:
     UploadsVectorSearch.from_folder(uploads_dir, device=vector_device)
 - ALSO accepts extra kwargs like backend='tfidf' and max_docs via **kwargs (ignored if unknown).
 
@@ -26,6 +26,44 @@ try:
     _ST = SentenceTransformer
 except Exception:
     _ST = None
+
+# --- Sentence-Transformers loader that also works for plain HF models ---
+try:
+    from sentence_transformers import SentenceTransformer, models as st_models
+except Exception:
+    SentenceTransformer = None
+    st_models = None
+
+def _st_available() -> bool:
+    return SentenceTransformer is not None
+
+def _load_st_model(model_name: str, device: str = "cpu"):
+    """
+    Try to load a Sentence-Transformers model; if that fails, build an ST pipeline
+    from a plain HF checkpoint (e.g., pranav-s/MaterialsBERT, m3rg-iitd/matscibert).
+    """
+    if not _st_available():
+        return None
+
+    # Allow short names like "all-MiniLM-L6-v2"
+    if "/" not in model_name and not model_name.startswith("sentence-transformers/"):
+        model_name = f"sentence-transformers/{model_name}"
+
+    # 1) Try as ready-made ST model
+    try:
+        return SentenceTransformer(model_name, device=device)
+    except Exception:
+        # 2) Fallback: build ST pipeline from plain HF
+        if st_models is None:
+            raise
+        tr = st_models.Transformer(model_name, max_seq_length=512)
+        pool = st_models.Pooling(
+            tr.get_word_embedding_dimension(),
+            pooling_mode_mean_tokens=True,
+            pooling_mode_cls_token=False,
+            pooling_mode_max_tokens=False,
+        )
+        return SentenceTransformer(modules=[tr, pool], device=device)
 
 # ---------------- simple text I/O ---------------------
 _HTML_TAG_RX = re.compile(r"<[^>]+>")
@@ -140,29 +178,43 @@ class _MiniTfidf:
 
 # ---------------- ST backend (batched) ---------------
 class _STBackend:
-    def __init__(self, model_name: str="all-MiniLM-L6-v2", device: str="cpu") -> None:
-        self.model = _ST(model_name, device=device)  # type: ignore
+    def __init__(self, model_name: str = "all-MiniLM-L6-v2", device: str = "cpu") -> None:
+        m = _load_st_model(model_name, device=device)
+        if m is None:
+            raise RuntimeError("sentence-transformers not installed. `pip install sentence-transformers`")
+        self.model = m
         self.docs: List["_Doc"] = []
         self.corpus_emb = None
 
+        try:
+            dim = int(self.model.get_sentence_embedding_dimension())
+        except Exception:
+            dim = 768
+        self._bs = 32 if dim >= 700 or "bert" in model_name.lower() else 128
+
     def fit(self, docs: List["_Doc"]) -> None:
-        import numpy as np  # type: ignore
+        import numpy as np
         self.docs = docs
         texts = [d.text for d in docs]
         embs = []
-        bs = 64
+        bs = self._bs
         for i in range(0, len(texts), bs):
-            e = self.model.encode(texts[i:i+bs], normalize_embeddings=True, show_progress_bar=False)
+            e = self.model.encode(
+                texts[i:i+bs],
+                normalize_embeddings=True,
+                show_progress_bar=False,
+                convert_to_numpy=True,
+            )
             embs.append(np.asarray(e, dtype=np.float32))
         self.corpus_emb = np.vstack(embs) if embs else None
 
-    def query(self, q: str, top_k: int = 5) -> List[Tuple[int,float]]:
+    def query(self, q: str, top_k: int = 5) -> List[Tuple[int, float]]:
         if not self.docs or self.corpus_emb is None:
             return []
-        import numpy as np  # type: ignore
-        q_emb = self.model.encode([q], normalize_embeddings=True, show_progress_bar=False)[0]
+        import numpy as np
+        q_emb = self.model.encode([q], normalize_embeddings=True, show_progress_bar=False, convert_to_numpy=True)[0]
         q_emb = np.asarray(q_emb, dtype=np.float32)
-        sims = (self.corpus_emb @ q_emb)
+        sims = (self.corpus_emb @ q_emb)  
         idxs = np.argsort(-sims)[:top_k]
         return [(int(i), float(sims[int(i)])) for i in idxs]
 
@@ -229,7 +281,7 @@ class UploadsVectorSearch:
                 continue
 
         # choose backend safely
-        use_st = (_ST is not None) and (backend == "st" or (backend == "auto" and len(docs) <= max_docs//2))
+        use_st = _st_available() and (backend == "st" or (backend == "auto" and len(docs) <= max_docs//2))
         if use_st:
             try:
                 be: Union[_MiniTfidf,_STBackend] = _STBackend(model_name=st_model, device=device)
@@ -279,7 +331,7 @@ class UploadsVectorSearch:
 
 # Compat helpers (optional)
 def search(query: str, top_k: int = 5, folder: Union[str,Path] = "uploads") -> List[Dict[str, Union[str,float,dict]]]:
-    return UploadsVectorSearch.from_folder(folder).search(query, top_k=top_k)
+    return UploadsVectorSearch.from_folder(folder=folder, device="cpu", st_model="pranav-s/MaterialsBERT", backend="st").search(query, top_k=top_k)
 
 def rebuild() -> bool:
     return True
