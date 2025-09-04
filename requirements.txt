@@ -42,6 +42,7 @@ PyPDF2==3.0.1
 pymupdf==1.24.10         
 ijson==3.2.3
 python-multipart==0.0.6
+pdfminer.six==20250506
 
 # ---- Infra / utils ----
 pydantic==1.10.14

@@ -1,4 +1,4 @@
-import argparse, json, yaml, httpx, re, os, sys
+import argparse, json, yaml, httpx, re, os, sys, html_text
 from pathlib import Path
 from tqdm import tqdm
 from utils import ensure_dir, write_json, safe_slug
@@ -9,30 +9,79 @@ from grobid_client import pdf_to_tei
 from tei_utils import tei_to_sections, filter_methods_sections as filt_tei
 from jats_utils import jats_to_sections, filter_methods_sections as filt_jats
 from miner.runtime import get_miner, extract_procedure
+from harvester.oa_resolver import resolve_oa
 
 miner = get_miner()
 
 import logging
 logger = logging.getLogger(__name__)
 
-# Toggle with env: USE_GROBID=0 to bypass
-USE_GROBID = os.getenv("USE_GROBID", "1") not in {"0", "false", "False"}
+UA = "NanoChemGPT-Harvester/1.0 (+https://nanochemgpt-production.up.railway.app/)"
+TIMEOUT = float(os.getenv("OA_TIMEOUT", "12"))
+
+
+def harvest_one_record(rec):
+    """
+    rec should contain at least: title, authors, year, doi
+    """
+    doi = (rec.get("doi") or "").strip().lower()
+    meta = {"doi": doi, "title": rec.get("title"), "year": rec.get("year"), "authors": rec.get("authors")}
+
+    # Resolve OA copy
+    oa = resolve_oa(doi)
+    meta.update({"oa": oa})
+    if not oa.get("is_oa"):
+        return {"meta": meta, "text": None, "why": "no_oa"}
+
+    # Fetch
+    url = oa.get("pdf_url") or oa.get("url")
+    if not url:
+        return {"meta": meta, "text": None, "why": "oa_url_missing"}
+
+    text = fetch_and_extract_text(url, license_hint=oa.get("license"))
+    return {"meta": meta, "text": text, "why": "ok"}
+
+def fetch_and_extract_text(url: str, license_hint: str | None = None) -> str:
+    import requests
+    from pdfminer.high_level import extract_text as pdf_extract_text
+    headers = {"User-Agent": UA, "Referer": "https://example.org"}
+    with requests.get(url, headers=headers, timeout=TIMEOUT, stream=True) as r:
+        r.raise_for_status()
+        ctype = r.headers.get("Content-Type", "").lower()
+        if "pdf" in ctype or url.lower().endswith(".pdf"):
+            # Write to tmp + parse PDF
+            import tempfile, os
+            with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as f:
+                for chunk in r.iter_content(1<<16):
+                    f.write(chunk)
+                fname = f.name
+            try:
+                txt = pdf_extract_text(fname) or ""
+            finally:
+                try: os.remove(fname)
+                except Exception: pass
+            return txt
+        else:
+            # HTML article page (publisher OA or repo): extract readable text
+            html = r.text
+            return html_text.extract_text(html)  
+
 
 def extract_plain_text_from_pdf(pdf_bytes: bytes) -> str:
-    if not fitz:
-        logger.warning("PyMuPDF not installed; skipping PDF plain-text extraction.")
+    # pdfminer-only fallback, no fitz and no is_pdf_bytes
+    if not isinstance(pdf_bytes, (bytes, bytearray)) or len(pdf_bytes) < 5:
         return ""
-    if not is_pdf_bytes(pdf_bytes):
-        return ""
+    from pdfminer.high_level import extract_text as pdf_extract_text
+    import tempfile, os
+    with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as f:
+        f.write(pdf_bytes)
+        fname = f.name
     try:
-        doc = fitz.open(stream=pdf_bytes, filetype="pdf")
-        try:
-            return "\n".join(page.get_text() for page in doc)
-        finally:
-            doc.close()
-    except Exception as e:
-        logger.warning("MuPDF failed: %s", e)
-        return ""
+        return pdf_extract_text(fname) or ""
+    finally:
+        try: os.remove(fname)
+        except Exception: pass
+
 
 
 ACTION_WORDS = [
@@ -158,7 +207,9 @@ def main():
     cfg = yaml.safe_load(Path(args.config).read_text(encoding="utf-8"))
     out_dir = Path(cfg['out_dir'])
     ensure_dir(out_dir)
-
+    # Coerce types for numeric config values
+    cfg['max_results_per_source'] = int(cfg.get('max_results_per_source', 50))
+    cfg['since_year'] = int(cfg.get('since_year', 2000))
     all_meta = []
     for q in cfg['queries']:
         all_meta += search_arxiv(q, cfg['max_results_per_source'])
@@ -201,13 +252,18 @@ def main():
 
             # --- Unpaywall -> PDF -> (GROBID or plain-text fallback)
             if not methods:
-                # Try to improve PDF URL via Unpaywall
-                if rec.get('doi') and cfg.get('unpaywall_email'):
-                    up = unpaywall_lookup(rec['doi'], cfg['unpaywall_email'])
-                    if up and up.get('oa_locations'):
-                        paper['license'] = {'type': (up.get('best_oa_location') or {}).get('license') or 'oa'}
-                        loc = up.get('best_oa_location') or up['oa_locations'][0]
-                        rec['pdf_url'] = rec.get('pdf_url') or loc.get('url_for_pdf') or loc.get('url')
+                # Try to improve PDF URL via Unpaywallk
+                if rec.get('doi'):
+                    try:
+                        oa = resolve_oa(rec['doi'])
+                        # annotate record/paper with OA facts
+                        rec['access_route'] = (oa.get('host_type') or 'unknown')
+                        rec['license'] = oa.get('license') or rec.get('license')
+                        # set a usable URL if we don't have one yet
+                        if oa.get('is_oa'):
+                            rec['pdf_url'] = rec.get('pdf_url') or oa.get('pdf_url') or oa.get('url')
+                    except Exception:
+                        pass
 
                 if rec.get('pdf_url'):
                     # fetch PDF or discover it from a landing page
@@ -290,6 +346,7 @@ def main():
                 paper['extractions']['methods_paragraphs'] = []
 
             if not paper.get("raw"):
+                raw_source = ""  
                 if all_sections:
                     raw_source = "\n\n".join(sec.get("text", "") for sec in all_sections if sec.get("text"))
                 if not raw_source:
