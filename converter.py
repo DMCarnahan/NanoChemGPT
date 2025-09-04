@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-import re, json, pathlib, unicodedata,
+import re, json, pathlib, unicodedata
 from typing import List, Dict, Optional, Any, Tuple
 from app_utils.converter_h import apply_postprocessing
 
