@@ -16,12 +16,11 @@ import threading
 from datetime import datetime
 from pathlib import Path
 from functools import lru_cache
-import dotenv
+from dotenv import load_dotenv
 load_dotenv()
 
 # Third-party imports
 import httpx
-from dotenv import load_dotenv
 from flask import Flask, request, jsonify, abort, render_template, send_file
 from jinja2 import TemplateNotFound
 from openai import OpenAI
