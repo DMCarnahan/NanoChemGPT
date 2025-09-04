@@ -641,7 +641,6 @@ def detect_dissolve(line: str) -> Optional[Dict]:
     }
     if extras:
         result["solvents"] = [{"name": solvent1, "volume": vol1, "volume_units": vunit1}] + extras
-    result = apply_postprocessing(result)
     return result
 
 def detect_filter_isolate(line: str) -> Optional[Dict]:
@@ -895,9 +894,12 @@ def _micro_for_op(op: dict, vessels: 'VesselRegistry', hardware: list[dict]) -> 
 
     if typ == "stir":
         v = _label_for_vessel(op.get("vessel",""), vessels, hardware)
-        m += [{"verb":"place","object":v,"to":"stir_plate"},
-              {"verb":"set","device":"stir_plate","param":"rpm","value": op.get("rpm")},
-              {"verb":"wait","minutes": op.get("minutes")}]
+        m += [
+            {"verb":"pick_up","object":v,"from":"bench"},
+            {"verb":"place","object":v,"to":"stir_plate"},
+            {"verb":"set","device":"stir_plate","param":"rpm","value": op.get("rpm")},
+            {"verb":"wait","minutes": op.get("minutes")}
+        ]
         return m
 
     return m
@@ -1401,7 +1403,7 @@ def convert_text_to_robot_ops(text: str) -> Dict:
             item["context_vessel"] = rec.get("vessel") or rec.get("target_vessel") or rec.get("source_vessel")
             micro_plan.append(item)
 
-    return {
+    result = {
         "hardware": hardware,
         "vessel_registry": vessels.as_dict(),
         "vessel_contents": vessels.contents_dict(),
@@ -1410,6 +1412,8 @@ def convert_text_to_robot_ops(text: str) -> Dict:
         "defaults": DEFAULTS,
         "steps": records,
     }
+    result = apply_postprocessing(result)
+    return result
 # -------- Validation helpers (unchanged API) --------
 def validate_step(text: str) -> Dict[str, Any]:
     if not isinstance(text, str): raise ValueError("input must be a string")
