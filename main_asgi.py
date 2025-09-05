@@ -5,15 +5,15 @@ from starlette.responses import RedirectResponse
 from app import app as flask_app
 from retriever.api import app as retr_app
 
-app = FastAPI()  # keep default docs at /docs
+app = FastAPI(docs_url="/_docs", redoc_url="/_redoc", openapi_url="/_openapi.json")
 
 # retriever first
 app.mount("/retriever", retr_app)
 
-# put Flask under /app
+# Flask UI under /app
 app.mount("/app", WSGIMiddleware(flask_app))
 
-# optional: redirect / → /app
+# redirect root to Flask UI
 @app.get("/", include_in_schema=False)
 def _root():
     return RedirectResponse(url="/app")
