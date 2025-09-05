@@ -68,7 +68,7 @@ def _embed_st(
 ) -> np.ndarray:
     """
     Works with:
-      • ST-packaged models: "sentence-transformers/all-MiniLM-L6-v2", "sentence-transformers/allenai-specter", ...
+      • ST-packaged models: "sentence-transformers/allenai-specter", "sentence-transformers/allenai-specter", ...
       • Plain HF checkpoints: "pranav-s/MaterialsBERT", "m3rg-iitd/matscibert"
     """
     try:
@@ -78,7 +78,7 @@ def _embed_st(
 
     # Try loading as a ready-made ST model first
     try:
-        st = SentenceTransformer(model or "sentence-transformers/all-MiniLM-L6-v2", device=device)
+        st = SentenceTransformer(model or "sentence-transformers/allenai-specter", device=device)
     except Exception:
         # Fallback: build an ST pipeline from a plain HF model (adds mean pooling)
         tr = models.Transformer(model, max_seq_length=512)  # BERT-base length
@@ -124,7 +124,7 @@ def main(argv: Optional[List[str]] = None):
     p.add_argument("--text-key", type=str, default=None, help="Preferred key for text (else auto: text/content/abstract/body/title)")
     p.add_argument("--limit", type=int, default=None, help="Limit number of records for indexing (debug)")
     p.add_argument("--backend", type=str, default=os.getenv("EMBED_BACKEND", "st"), help="st | openai")
-    p.add_argument("--model", type=str, default=None, help="Embedding model. For openai, defaults to text-embedding-3-small; for st, all-MiniLM-L6-v2.")
+    p.add_argument("--model", type=str, default=None, help="Embedding model. For openai, defaults to text-embedding-3-small; for st, allenai-specter.")
     p.add_argument("--metric", type=str, default="ip", help="FAISS metric: ip or l2")
     args = p.parse_args(argv)
 
@@ -137,7 +137,7 @@ def main(argv: Optional[List[str]] = None):
 
     backend = (args.backend or "st").lower()
     model = args.model or (os.getenv("OPENAI_EMB") if backend == "openai" else os.getenv("EMBED_MODEL")) \
-            or ("text-embedding-3-small" if backend == "openai" else "sentence-transformers/all-MiniLM-L6-v2")
+            or ("text-embedding-3-small" if backend == "openai" else "sentence-transformers/allenai-specter")
 
     print(f"[build] EMBED_BACKEND={backend} | MODEL={model} | N={len(texts)}")
     if backend == "openai":
