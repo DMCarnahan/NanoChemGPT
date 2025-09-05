@@ -1,3 +1,17 @@
+
+// --- Mount prefix autodetect (works even if index.html didn't inject BASE_PATH) ---
+(function(){
+  if (typeof window.BASE_PATH !== 'string') {
+    try {
+      var p = window.location.pathname || '';
+      // If the app is served under /app or a deeper /app/... path, default to '/app'
+      window.BASE_PATH = (p === '/app' || p.indexOf('/app/') === 0) ? '/app' : '';
+    } catch (e) {
+      window.BASE_PATH = '';
+    }
+  }
+})();
+
 document.addEventListener('DOMContentLoaded', () => {
   // Spinner overlay for long-running requests
   const spinnerOverlay = document.createElement('div');
@@ -103,7 +117,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const csrf = readCsrfToken();
       if (csrf) headers['X-CSRFToken'] = csrf;
 
-      const res = await fetch(`${window.BASE_PATH}/ask`, {
+      const res = await fetch(`${(window.BASE_PATH||'')}/ask`, {
         method: 'POST',
         headers,
         body: JSON.stringify({ question, mode })
@@ -150,7 +164,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const csrf = readCsrfToken();
       if (csrf) headers['X-CSRFToken'] = csrf;
 
-      const res = await fetch(`${window.BASE_PATH}/parse`, {
+      const res = await fetch('/parse', {
         method: 'POST',
         headers,
         body: JSON.stringify({ text })
@@ -314,7 +328,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const fd = new FormData();
       fd.append('file', file);
 
-      const res = await fetch(`${window.BASE_PATH}/upload`, {
+      const res = await fetch('/upload', {
         method: 'POST',
         headers,
         body: fd
@@ -347,7 +361,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // History button
   historyBtn?.addEventListener('click', async () => {
   try {
-      const res = await fetch(`${window.BASE_PATH}/api/history`);
+      const res = await fetch('/api/history');
       if (!res.ok) {
         historyList.innerHTML = `<li>Error loading history: ${res.status}</li>`;
         return;
