@@ -293,6 +293,24 @@ def health() -> Dict[str, Any]:
     if not info["indexes"]: return {"ok": False, "error": "no index dirs found"}
     return info
 
+# --------- Backward-compat shim for retriever.api.reload() ---------
+
+def _load_tfidf(force: bool = False) -> List[Dict[str, Any]]:
+    """
+    Back-compat: warm all configured indexes into memory and return a summary.
+    api.py used to call this when /retriever/reload is hit.
+    """
+    warmed = []
+    for label, path in _labels_and_paths():
+        try:
+            tf = _load_tfidf_for(path, force=force)
+            nn = tf.get("matrix")
+            docs = int(getattr(nn, "shape", (0,))[0]) if nn is not None else 0
+            warmed.append({"label": label, "path": str(path), "docs": docs})
+        except Exception as e:
+            warmed.append({"label": label, "path": str(path), "error": str(e)})
+    return warmed
+
 if __name__ == "__main__":
     print("[retriever] indexes:", _env_paths())
     print("[retriever] health:", json.dumps(health(), indent=2))

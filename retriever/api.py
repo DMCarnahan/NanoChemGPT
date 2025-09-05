@@ -1,45 +1,40 @@
-# retriever/api.py
 from fastapi import FastAPI, HTTPException
-from pydantic import BaseModel
-import traceback
+from pydantic import BaseModel, Field
+from typing import Optional, Any, Dict, List
 
-# Import the retriever implementation module
-from retriever import retriever as R  
+# Import your retriever module
+from . import retriever as R
 
-app = FastAPI()
+app = FastAPI(title="Retriever API", version="1.0.0")
 
 class SearchRequest(BaseModel):
     query: str
-    k: int = 8
+    k: int = 5
+    level: Optional[str] = None
+    k_doc: Optional[int] = None
+    k_passage: Optional[int] = None
+    w_doc: Optional[float] = None
+    w_passage: Optional[float] = None
 
-@app.post("/search")
-def search(req: SearchRequest):
-    try:
-        return R.search(query=req.query, k=req.k)
-    except Exception as e:
-        traceback.print_exc()
-        raise HTTPException(status_code=500, detail=f"retriever.search error: {e}")
-
-@app.get("/healthz")
-def healthz():
-    try:
-        b = R._load_tfidf()
-        X = b.get("matrix")
-        docs = int(getattr(X, "shape", [0, 0])[0]) if X is not None else 0
-        terms = int(getattr(X, "shape", [0, 0])[1]) if X is not None else 0
-        return {"ok": True, "docs": docs, "terms": terms}
-    except Exception as e:
-        return {"ok": False, "error": str(e)}
+@app.get("/health")
+def health() -> Dict[str, Any]:
+    return R.health()
 
 @app.post("/reload")
-def reload():
+def reload() -> Dict[str, Any]:
     try:
-        R.reload_caches()          
-        b = R._load_tfidf()        
-        X = b.get("matrix")
-        docs = int(getattr(X, "shape", [0, 0])[0]) if X is not None else 0
-        terms = int(getattr(X, "shape", [0, 0])[1]) if X is not None else 0
-        return {"ok": True, "docs": docs, "terms": terms}
+        R.reload_caches()
+        warmed = R._load_tfidf(force=True)  # back-compat shim
+        return {"ok": True, "warmed": warmed}
     except Exception as e:
-        traceback.print_exc()
-        raise HTTPException(status_code=500, detail=f"reload error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/search")
+def search(req: SearchRequest) -> Dict[str, Any]:
+    try:
+        res = R.search(query=req.query, k=req.k,
+                       level=req.level, k_doc=req.k_doc, k_passage=req.k_passage,
+                       w_doc=req.w_doc, w_passage=req.w_passage)
+        return res
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))

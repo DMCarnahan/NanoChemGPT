@@ -178,7 +178,7 @@ class _MiniTfidf:
 
 # ---------------- ST backend (batched) ---------------
 class _STBackend:
-    def __init__(self, model_name: str = "all-MiniLM-L6-v2", device: str = "cpu") -> None:
+    def __init__(self, model_name: str = "allenai-specter", device: str = "cpu") -> None:
         m = _load_st_model(model_name, device=device)
         if m is None:
             raise RuntimeError("sentence-transformers not installed. `pip install sentence-transformers`")
