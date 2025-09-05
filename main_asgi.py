@@ -1,13 +1,19 @@
 from fastapi import FastAPI
 from starlette.middleware.wsgi import WSGIMiddleware
+from starlette.responses import RedirectResponse
 
-from app import app as flask_app              
-from retriever.api import app as retr_app     
+from app import app as flask_app
+from retriever.api import app as retr_app
 
-app = FastAPI()
+app = FastAPI()  # keep default docs at /docs
 
-# Mount the retriever FIRST so /retriever/* routes are handled there
+# retriever first
 app.mount("/retriever", retr_app)
 
-# Then mount Flask at the root
-app.mount("/", WSGIMiddleware(flask_app))
+# put Flask under /app
+app.mount("/app", WSGIMiddleware(flask_app))
+
+# optional: redirect / → /app
+@app.get("/", include_in_schema=False)
+def _root():
+    return RedirectResponse(url="/app")

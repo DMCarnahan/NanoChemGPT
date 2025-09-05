@@ -16,12 +16,15 @@ import threading
 from datetime import datetime
 from pathlib import Path
 from functools import lru_cache
-from dotenv import load_dotenv
-load_dotenv()
+try:
+    from dotenv import load_dotenv
+    load_dotenv()
+except Exception:
+    pass
 
 # Third-party imports
 import httpx
-from flask import Flask, request, jsonify, abort, render_template, send_file
+from flask import Flask, request, jsonify, abort, render_template, send_file, g
 from jinja2 import TemplateNotFound
 from openai import OpenAI
 from werkzeug.utils import secure_filename
@@ -108,8 +111,9 @@ def inject_csrf_token():
     return dict(csrf_token=generate_csrf)
 
 @app.before_request
-def _log_req():
-    app.logger.info(f"[req] {request.method} {request.path}")
+def _inject_base_path():
+    # request.script_root will be "/app" when mounted at /app, else ""
+    g.base_path = request.script_root or ""
 
 # ──────────────── DuckDB setup ──────────────── #
 
@@ -166,16 +170,23 @@ except Exception as e:
     app.logger.warning("[dataset_search] init failed: %s", e)
 
 # ──────────────── OpenAI client ──────────────── #
-load_dotenv()
 _no_proxy = httpx.Client(trust_env=False, timeout=120.0)
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "")
 client = OpenAI(api_key=OPENAI_API_KEY, http_client=_no_proxy) if OPENAI_API_KEY else None
 
 RETRIEVER_URL = os.getenv("RETRIEVER_URL", f"http://localhost:{os.getenv('PORT','8000')}/retriever")
 
-def retriever_search(query: str, k: int = 8, mode: str = "hybrid", alpha: float = 0.7) -> list[dict]:
+def retriever_search(query: str, k: int = 8, level: str|None = None,
+                    k_doc: int|None = None, k_passage: int|None = None,
+                    w_doc: float|None = None, w_passage: float|None = None,
+                    **_: dict) -> list[dict]:
     try:
-        payload = {"query": query, "k": k}
+        payload = {"query": query, "k": int(k)}
+        if level: payload["level"] = str(level)
+        if k_doc is not None: payload["k_doc"] = int(k_doc)
+        if k_passage is not None: payload["k_passage"] = int(k_passage)
+        if w_doc is not None: payload["w_doc"] = float(w_doc)
+        if w_passage is not None: payload["w_passage"] = float(w_passage)
         r = _no_proxy.post(f"{RETRIEVER_URL.rstrip('/')}/search", json=payload, timeout=60)
         r.raise_for_status()
         data = r.json()
@@ -511,6 +522,18 @@ def ask():
     allow_fetch = _pick_bool("allow_fetch", True)
     kb_k        = _pick_int("kb_k", 5)
     web_k       = _pick_int("web_k", 10)
+
+    # Choose retriever level and knobs
+    retriever_level = (payload.get("retrieval") or payload.get("retriever_level") or
+                       os.getenv("RETRIEVER_LEVEL_DEFAULT") or
+                       ("both" if (mode == "protocol" or intent in {"protocol","synthesis","methods"}) else "doc"))
+    k_doc_default = min(web_k, 6)
+    k_pass_default = max(web_k, 10)
+    k_doc = int(payload.get("k_doc", k_doc_default))
+    k_passage = int(payload.get("k_passage", k_pass_default))
+    w_doc = float(payload.get("w_doc", os.getenv("WEIGHT_DOC", 0.6)))
+    w_passage = float(payload.get("w_passage", os.getenv("WEIGHT_PASSAGE", 0.4)))
+
 
     # ----------------- tiny helpers -----------------
     # ----------------- uploads → semantic context -----------------
@@ -861,14 +884,14 @@ def ask():
         kb_ctx = "\n".join(kb_lines)
 
     # ----------------- Web/hybrid retriever (initial) -----------------
-    hits = retriever_search(question, k=web_k, mode="hybrid", alpha=0.7) or []
+    hits = retriever_search(question, k=web_k, level=retriever_level, k_doc=k_doc, k_passage=k_passage, w_doc=w_doc, w_passage=w_passage) or []
 
     # If evidence thin, optionally auto-harvest -> reindex -> reload -> retry once
     harvest_refs = []  
     if allow_fetch and _needs_more(hits):
         try:
             harvest_refs = _harvest_reindex(_expand_queries(question)) or []   # <— collect refs
-            hits = retriever_search(question, k=web_k, mode="hybrid", alpha=0.7) or []
+            hits = retriever_search(question, k=web_k, level=retriever_level, k_doc=k_doc, k_passage=k_passage, w_doc=w_doc, w_passage=w_passage) or []
         except Exception as e:
             app.logger.warning(f"[/ask] auto-harvest failed: {e}")
 

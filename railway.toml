@@ -2,16 +2,29 @@
 builder = "NIXPACKS"
 
 [env]
-EMBED_BACKEND = "st"
-EMBED_MODEL   = "sentence-transformers/all-MiniLM-L6-v2"
+# --- Embedding configs ---
+EMBED_BACKEND            = "st"
 
-INDEX_DIR     = "/data/vector_store"
-BUNDLE_PATH   = "/data/harvester/out_auto/bundle.jsonl"
+# doc-level (papers) → SPECTER
+EMBED_MODEL_DOC          = "allenai/specter"
+INDEX_DIR_DOC            = "/data/vector_store_doc"
+
+# passage-level (methods paragraphs) → MPNet QA
+EMBED_MODEL_PASSAGE      = "multi-qa-mpnet-base-dot-v1"
+INDEX_DIR_PASSAGE        = "/data/vector_store_passage"
+
+# existing paths
+INDEX_DIR                = "/data/vector_store"                      # kept for backward-compat; points to DOC
+BUNDLE_PATH              = "/data/harvester/out_auto/bundle.jsonl"
+
+# retriever envs (your app can read these to choose an index)
+RETRIEVER_INDEX_DIR_DOC      = "/data/vector_store_doc"
+RETRIEVER_INDEX_DIR_PASSAGE  = "/data/vector_store_passage"
+# Optional: colon-separated list if your retriever supports multiple
+RETRIEVER_INDEX_DIRS         = "/data/vector_store_doc:/data/vector_store_passage"
 
 LOOKUP_BACKEND = "none"
-
-PYTHONPATH = "/app"
-
+PYTHONPATH     = "/app"
 
 [phases.install]
 cmds = [
@@ -26,20 +39,30 @@ cmd = "bash -lc ' \
   set -euo pipefail; \
   : ${PORT:=8000}; \
   : ${BUNDLE_PATH:=/app/data/harvester/out_auto/bundle.jsonl}; \
-  : ${INDEX_DIR:=/app/retriever/index}; \
+  : ${INDEX_DIR_DOC:=/app/retriever/index_doc}; \
+  : ${INDEX_DIR_PASSAGE:=/app/retriever/index_passage}; \
   export RETRIEVER_URL=http://127.0.0.1:${PORT}/retriever; \
-  export RETRIEVER_INDEX_DIR=\"${INDEX_DIR}\"; \
+  # Keep RETRIEVER_INDEX_DIR for legacy callers → point to DOC index by default \
+  export RETRIEVER_INDEX_DIR=\"${INDEX_DIR_DOC}\"; \
+  export RETRIEVER_INDEX_DIR_DOC=\"${INDEX_DIR_DOC}\"; \
+  export RETRIEVER_INDEX_DIR_PASSAGE=\"${INDEX_DIR_PASSAGE}\"; \
+  export RETRIEVER_INDEX_DIRS=\"${INDEX_DIR_DOC}:${INDEX_DIR_PASSAGE}\"; \
   echo \"[start] RETRIEVER_URL=$RETRIEVER_URL\"; \
   echo \"[start] BUNDLE_PATH=$BUNDLE_PATH\"; \
-  echo \"[start] INDEX_DIR=$INDEX_DIR\"; \
-  mkdir -p \"$(dirname \"$BUNDLE_PATH\")\" \"$INDEX_DIR\"; \
+  echo \"[start] INDEX_DIR_DOC=$INDEX_DIR_DOC\"; \
+  echo \"[start] INDEX_DIR_PASSAGE=$INDEX_DIR_PASSAGE\"; \
+  mkdir -p \"$(dirname \"$BUNDLE_PATH\")\" \"$INDEX_DIR_DOC\" \"$INDEX_DIR_PASSAGE\"; \
   if [ ! -s \"$BUNDLE_PATH\" ] && [ -f \"/app/data/harvester/out_auto/seed_bundle.jsonl\" ]; then \
     cp /app/data/harvester/out_auto/seed_bundle.jsonl \"$BUNDLE_PATH\" && \
     echo \"[start] Seeded bundle -> $BUNDLE_PATH\"; \
   fi; \
   if [ -s \"$BUNDLE_PATH\" ]; then \
-    echo \"[start] Building index...\"; \
-    python retriever/index_jsonl.py --bundle \"$BUNDLE_PATH\" --index_dir \"$INDEX_DIR\" || true; \
+    echo \"[start] Building DOC index (SPECTER)...\"; \
+    EMBED_BACKEND=st EMBED_MODEL=\"${EMBED_MODEL_DOC:-allenai/specter}\" \
+      python retriever/index_jsonl.py --bundle \"$BUNDLE_PATH\" --index_dir \"$INDEX_DIR_DOC\" || true; \
+    echo \"[start] Building PASSAGE index (MPNet)...\"; \
+    EMBED_BACKEND=st EMBED_MODEL=\"${EMBED_MODEL_PASSAGE:-multi-qa-mpnet-base-dot-v1}\" \
+      python retriever/index_jsonl.py --bundle \"$BUNDLE_PATH\" --index_dir \"$INDEX_DIR_PASSAGE\" || true; \
   else \
     echo \"[start] No bundle at $BUNDLE_PATH; skipping index\"; \
   fi; \

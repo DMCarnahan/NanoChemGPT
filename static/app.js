@@ -103,7 +103,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const csrf = readCsrfToken();
       if (csrf) headers['X-CSRFToken'] = csrf;
 
-      const res = await fetch('/ask', {
+      const res = await fetch(`${window.BASE_PATH}/ask`, {
         method: 'POST',
         headers,
         body: JSON.stringify({ question, mode })
@@ -150,7 +150,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const csrf = readCsrfToken();
       if (csrf) headers['X-CSRFToken'] = csrf;
 
-      const res = await fetch('/parse', {
+      const res = await fetch(`${window.BASE_PATH}/parse`, {
         method: 'POST',
         headers,
         body: JSON.stringify({ text })
@@ -314,7 +314,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const fd = new FormData();
       fd.append('file', file);
 
-      const res = await fetch('/upload', {
+      const res = await fetch(`${window.BASE_PATH}/upload`, {
         method: 'POST',
         headers,
         body: fd
@@ -347,7 +347,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // History button
   historyBtn?.addEventListener('click', async () => {
   try {
-      const res = await fetch('/api/history');
+      const res = await fetch(`${window.BASE_PATH}/api/history`);
       if (!res.ok) {
         historyList.innerHTML = `<li>Error loading history: ${res.status}</li>`;
         return;
