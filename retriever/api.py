@@ -1,6 +1,8 @@
 from fastapi import FastAPI, HTTPException, Request
+from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 from typing import Optional, Any, Dict
+import os, traceback
 
 from . import retriever as R
 
@@ -57,18 +59,33 @@ def search(req: SearchRequest, request: Request):
                         level=req.level, k_doc=req.k_doc, k_passage=req.k_passage,
                         w_doc=req.w_doc, w_passage=req.w_passage)
     except Exception as e:
-        if request.query_params.get("debug") == "1":
-            import traceback, os
-            return {
-                "ok": False,
-                "error": str(e),
-                "traceback": "".join(traceback.format_exc()),
-                "paths": [(lab, str(p)) for lab, p in getattr(R, "_labels_and_paths")()],
-                "env": {
-                    "RETRIEVER_INDEX_DIRS": os.getenv("RETRIEVER_INDEX_DIRS"),
-                    "RETRIEVER_INDEX_DIR_DOC": os.getenv("RETRIEVER_INDEX_DIR_DOC"),
-                    "RETRIEVER_INDEX_DIR_PASSAGE": os.getenv("RETRIEVER_INDEX_DIR_PASSAGE"),
-                    "RETRIEVER_INDEX_DIR": os.getenv("RETRIEVER_INDEX_DIR"),
+        debug = (
+            request.query_params.get("debug") == "1" or
+            request.headers.get("X-Debug") == "1" or
+            os.getenv("RETRIEVER_DEBUG", "").lower() in {"1","true","yes"}
+        )
+        tb = "".join(traceback.format_exc())
+
+        # Always log the error so you can see it in container logs
+        print(f"[retriever][error] {e}\n{tb}")
+
+        if debug:
+            # Return JSON with traceback so you can see it from any client
+            return JSONResponse(
+                status_code=500,
+                content={
+                    "ok": False,
+                    "error": str(e),
+                    "traceback": tb,
+                    "paths": [(lab, str(p)) for lab, p in getattr(R, "_labels_and_paths")()],
+                    "env": {
+                        "RETRIEVER_INDEX_DIRS": os.getenv("RETRIEVER_INDEX_DIRS"),
+                        "RETRIEVER_INDEX_DIR_DOC": os.getenv("RETRIEVER_INDEX_DIR_DOC"),
+                        "RETRIEVER_INDEX_DIR_PASSAGE": os.getenv("RETRIEVER_INDEX_DIR_PASSAGE"),
+                        "RETRIEVER_INDEX_DIR": os.getenv("RETRIEVER_INDEX_DIR"),
+                    },
                 },
-            }
-        raise HTTPException(status_code=500, detail=str(e))
+            )
+
+        # Generic detail to avoid leaking internals in prod
+        raise HTTPException(status_code=500, detail="retriever_search_failed")

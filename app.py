@@ -48,7 +48,6 @@ try:
         kb_fetch as _h_kb_fetch,
         judge_sufficiency as _h_judge_sufficiency,
         _safe_text as _h_safe_text,
-        _extract_used_ref_indexes as _h_extract_used_ref_indexes,
         judge_hits, Hit as _Hit, renumber_citations as _h_renumber_citations,
     )
 except Exception:

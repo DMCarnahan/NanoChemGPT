@@ -96,9 +96,8 @@ def health():
     return {"ok": True, "ntotal": ntotal, "texts": len(_state["texts"])}
 
 @app.post("/reindex")
-def reindex(bundle_path: Optional[str] = None):
-    p = Path(bundle_path) if bundle_path else BUNDLE_PATH
-    _build_index_from_bundle(p)
+def reindex(bundle_path: Optional[str] = None, text_key: str = "text"):
+    _build_index_from_bundle(Path(bundle_path) if bundle_path else BUNDLE_PATH, text_key=text_key)
     return {"ok": True, "ntotal": int(_state['index'].ntotal)}
 
 # Accept missing body without 422 by making it Optional w/ default None
