@@ -48,6 +48,8 @@ try:
         kb_fetch as _h_kb_fetch,
         judge_sufficiency as _h_judge_sufficiency,
         _safe_text as _h_safe_text,
+        env_int as _env_int,
+        env_float as _env_float,
         judge_hits, Hit as _Hit, renumber_citations as _h_renumber_citations,
     )
 except Exception:
