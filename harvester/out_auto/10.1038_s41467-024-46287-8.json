@@ -1,0 +1,844 @@
+{
+  "paper_id": "10.1038/s41467-024-46287-8",
+  "title": "Water-dispersible X-ray scintillators enabling coating and blending with polymer materials for multiple applications.",
+  "authors": [
+    {
+      "name": "Zhang H"
+    },
+    {
+      "name": "Zhang B"
+    },
+    {
+      "name": "Cai C"
+    },
+    {
+      "name": "Zhang K"
+    },
+    {
+      "name": "Wang Y"
+    },
+    {
+      "name": "Yang Y"
+    },
+    {
+      "name": "Wu Y"
+    },
+    {
+      "name": "Ba X"
+    },
+    {
+      "name": "Hoogenboom R."
+    }
+  ],
+  "doi": "10.1038/s41467-024-46287-8",
+  "source": "eupmc",
+  "urls": {
+    "pdf": ""
+  },
+  "license": null,
+  "access_route": "unknown",
+  "sections": [
+    {
+      "heading": "(fallback)",
+      "text": "Methods\nThe description of materials and characterization is included in the\nSupplementary Note 1 and Supplementary Note 2, respectively.\n\nSynthesis of citric acid-modiﬁed halloysite nanotubes\n5.0 g HNTs-NH2 was added into the DMSO solution containing citric\nacid (1.92 g, 10 mmol), 1-(3-dimethylaminopropyl)-3-ethylcarbodiimide\n\nNature Communications |  \n\n (2024) 15:2055 \n\n8\n\n \n \n \n \n \n \n\fArticle\n\nhttps://doi.org/10.1038/s41467-024-46287-8\n\nhydrochloride (6.2 g, 34.5 mmol),\n1-hydroxybenzotriazole (4.05 g,\n30 mmol), and N,N-diisopropylethylamine (3.9 g, 30 mmol). Then the\nsolution was stirred at room temperature for 48 h. The residue was\ncollected by centrifugation and then washed with 5% HCl solution,\nsaturated Na2CO3 solution, saturated NaCl solution, ethanol, and acet-\none in sequence. The obtained solid was dried in vacuum to give HNTs-\nCA as a white solid.\n\nSynthesis of water-dispersible X-ray scintillator\n1.50 g HNTs-CA was accurately weighed and added to an aqueous\nsolution containing NaNO3 (0.51 g, 6.0 mmol), Lu(NO3)3·6H2O (4.69 g,\n10.0 mmol), and Tb(NO3)3·6H2O (0.45 g, 1.0 mmol). The system was\nstirred at a low speed of 200 rpm for 30 min to achieve a homo-\ngeneous suspension. 1.48 g NH4F was added into the mixture. After\nbeing regulated to weak acid with a pH value of 5.0 by nitric acid, the\nsuspension was stirred for another 30 min and then transferred into a\nhydrothermal reactor with a ﬁlling rate of 70%. The hydrothermal\nreactor was heated at 180 °C for 24 h. After cooling to room tem-\nperature, the suspension was picked out and subjected to centrifuga-\ntion. The collected residue was thoroughly washed with water and\nethanol\nvacuum to afford\nHNTs@Na5Lu9F32:Tb3+ as a white solid.\n\nfollowed by being dried in\n\nand then dried under\n\nPreparation of X-ray-sensitive polyurethane foam\nPUF pieces (3.5 cm × 2.5 cm × 1.5 cm) were rinsed thoroughly with\nreduced pressure overnight.\nwater\nHNTs@Na5Lu9F32:Tb3+ was\nachieve\nadded\nHNTs@Na5Lu9F32:Tb3+ aqueous suspension (ca. 100 mg mL−1). The PUF\npieces were immersed in the suspension, thoroughly compressed\nthree times, and soaked for 3 min. Then the foam was picked out from\nthe suspension and wrung out by using mechanical rollers. After drying\nin vacuum, the composite foam HNTs@Na5Lu9F32:Tb3+@PUF was\nobtained and stored in a dry box before use.\n\ninto water\n\nto\n\nPreparation of X-ray-sensitive epoxy resin composite\n20 mg HNTs@Na5Lu9F32:Tb3+ were dispersed in 10 mL of anhydrous\nethanol and then added into the E51 solution (2 g in anhydrous etha-\nnol). The mixture was sonicated for 5 min and then stirred at 70 °C for\n2 h to obtain a well-dispersed suspension. The anhydrous ethanol was\nremoved by rotary evaporation. The sample was weighted and the\npolyamide curing agent was added to the solution with a weight ratio\nof 1:1. The system was mixed by thorough agitation and then poured\ninto the drop-shaped mold. The liquid-ﬁlled mold was degassed in a\nvacuum oven for 10 min and then placed at room temperature for 24 h\nto afford the HNTs@Na5Lu9F32:Tb3+@epoxy resin composite.\n\nPreparation of X-ray scintillator screens\nThe HNTs@Na5Lu9F32:Tb3+ powders were ﬁltered by a 200-mesh sieve.\n2.0 g ﬁltered powders were added into a 0.5 wt% CMC-Na solution\n(20 mL). Vigorous stirring was continued to afford a uniform suspen-\nsion. This suspension was poured onto a glass plate (7.6 cm × 2.5 cm)\nand then spread uniformly via a mild shock by using a shaker rotating\nwith the agitation rate at 100 rpm. The samples were placed in an oven\nat 105 °C for 2 h and then carefully polished. The obtained screens\nwere stored in a dry box before used.\n\nThe ﬂexible screen is prepared following another method. PVA\nsolution was prepared by adding 1.35 g PVA in 12.0 mL water. Intense\nstirring is conducted at 80°C until it is completely dissolved. 65 mg\nHNTs@Na5Lu9F32:Tb3+ was then added and the stirring is continued to\nafford a uniform suspension. The mixture was poured into the mold\nwith the addition of 1,4-phenyldiboronic acid-containing NaOH solu-\ntion (4.8 × 10−3 mmol mL−1) under argon and then heated at 80 °C for\n1 h. After cooling to room temperature, the gel was picked out from the\nmold and cut into demanded sizes for imaging studies.\n\nPreparation of multilayer hydrogels\nPVA solution was prepared according to the above-mentioned\nmethod. 130 mg HNTs@Na5Lu9F32:Tb3+ was then added and intense\nstirring was employed to afford a uniform suspension. 1.5 mL of a M3-\ncontaining NaOH solution (4.8×10−3 mmol mL−1, pH = 10.5) was poured\ninto the HNTs@Na5Lu9F32:Tb3+-containing suspension with stirring for\n5 min. The mixture was transferred into tailor-made molds and then\nfrozen at −20 °C for 2 h. After defrosting at room temperature for 1 h,\nthe self-standing hydrogel (Gel-1) can be obtained with letter shapes\n(H, B, and U). Gel-2 was also prepared in letter-like molds following a\nsimilar procedure with the replacement of HNTs@Na5Lu9F32:Tb3+ to\npristine HNTs to give the hydrogels with shape for the letter E and T.\nGel-0 was prepared in a rectangular mold (7.5 cm × 2.5 cm) by\nusing PVA and HNTs as substrate material. 1,4-phenyldiboronic acid\nwas used as the crosslinking agent. To prepare the multilayer\nhydrogel, the Gel-0 was placed on the bottom of the rectangular\nmold. Then Gel-1 and Gel-2 samples were added onto Gel-0 piece\nfollowing the sequence: E-H-B-U-T. Another layer of Gel-0 was pre-\npared in situ on the top of the layer containing Gel-1 and Gel-2 to give\nthe hydrogel multilayer system. Then the overlaid samples were\nheated at 80 °C for 30 min to give the sandwich-like multilayer\nhydrogels.\n\nReporting summary\nFurther information on research design is available in the Nature\nPortfolio Reporting Summary linked to this article.\n\nData availability\nThe data generated in this study are provided in Supplementary\nInformation/Source Data ﬁle.\n\nReferences\n1. Wang, X. et al. Organic phosphors with bright triplet excitons for\n\n2.\n\nefﬁcient X-ray-excited luminescence. Nat. Photonics 15,\n187–192 (2021).\nLi, M. et al. Circularly polarized radioluminescence from chiral\nperovskite scintillators for improved X-ray imaging. Angew. Chem.\nInt. Ed. 134, e202208440 (2022).\n\n3. Hong, Z. Z., Chen, Z. W., Chen, Q. S. & Yang, H. H. Advancing X-ray\nluminescence for imaging, biosensing, and theragnostics. Acc.\nChem. Res. 56, 37–51 (2023).\n\n4. Ma, W. et al. Thermally activated delayed ﬂuorescence (TADF)\n\norganic molecules for efﬁcient X-ray scintillation and imaging. Nat.\nMater. 21, 210–216 (2022).\n\n5. He, T. Y. et al. High-performance copper-doped perovskite-related\n\n6.\n\nsilver halide X-ray imaging scintillator. ACS Energy Lett. 7,\n2753–2760 (2022).\nZhang, M. et al. Metal halide scintillators with fast and self-\nabsorption-free defect-bound excitonic radioluminescence for\ndynamic X-ray Imaging. Adv. Funct. Mater. 31, 2007921 (2021).\n\n7. Chen, Q. et al. All-inorganic perovskite nanocrystal scintillators.\n\n8.\n\nNature 561, 88–93 (2018).\nZhao, X. et al. Embedding Cs3Cu2I5 scintillators into anodic alumi-\nnum oxide matrix for high-resolution X-ray imaging. Adv. Opt.\nMater. 9, 2101194 (2021).\n\n9. Gandini, M. et al. Efﬁcient, fast and reabsorption-free perovskite\n\nnanocrystal-based sensitized plastic scintillators. Nat. Nanotech. 15,\n462–468 (2020).\n\n10. Zaffalon, M. L. et al. Extreme γ-ray radiation hardness and high\nscintillation yield in perovskite nanocrystals. Nat. Photonics 16,\n860–868 (2022).\n\n11. Xia, K. et al. In situ preparation of high-quality ﬂexible manganese-\nhalide scintillator ﬁlms for X-ray imaging. Adv. Opt. Mater. 10,\n2201028 (2022).\n\nNature Communications |  \n\n (2024) 15:2055 \n\n9\n\n \n \n \n \n \n \n\fArticle\n\nhttps://doi.org/10.1038/s41467-024-46287-8\n\n12. Zhang, H. et al. Reproducible X-ray imaging with a perovskite\nnanocrystal scintillator embedded in a transparent amorphous\nnetwork structure. Adv. Mater. 33, 2102529 (2021).\n\n13. Wu, X. C. et al. Ultrathin, transparent, and high density perovskite\nscintillator ﬁlm for high resolution X-ray microscopic imaging. Adv.\nSci. 9, 2200831 (2022).\n\n14. Wang, S. et al. Ruddlesden–popper perovskite nanocrystals stabi-\nlized in mesoporous silica with efﬁcient carrier dynamics for ﬂexible\nX-ray scintillator. Adv. Funct. Mater. 33, 2210765 (2023).\nJana, A. et al. Perovskite: Scintillators, direct detectors, and X-ray\nimagers. Mater. Today 55, 110–136 (2022).\n\n15.\n\n16. Mykhaylyk, V. B. et al. Bright and fast scintillations of an inorganic\nhalide perovskite CsPbBr3 crystal at cryogenic temperatures. Sci.\nRep. 10, 8601 (2020).\n\n17. Babayigit, A., Ethirajan, A., Muller, M. & Conings, B. Toxicity of\norganometal halide perovskite solar cells. Nat. Mater. 15,\n247–251 (2016).\n\n18. Kowal, D. et al. PEA2PbI4: fast two-dimensional lead iodide per-\n\novskite scintillator with green and red emission. Mater. Today\nChem. 29, 101455 (2023).\n\n19. Wang, J. X. et al. Heavy-atom engineering of thermally activated\ndelayed ﬂuorophores for high-performance X-ray imaging scintil-\nlators. Nat. Photonics 16, 869–875 (2022).\n\n20. Wang, J.-X. et al. Nearly 100% energy transfer at the interface of\n\nmetal-organic frameworks for X-ray imaging scintillators. Matter 5,\n253–265 (2022).\n\n21. Chen, J.-K., Shirahata, N. & Sun, H.-T. Metal-free scintillators excite\n\nX-ray community. Nat. Photonics 15, 171–172 (2021).\n\n22. Xu, L.-J., Lin, X., He, Q., Worku, M. & Ma, B. Highly efﬁcient eco-\n\nfriendly X-ray scintillators based on an organic manganese halide.\nNat. Commun. 11, 4329 (2020).\n\n34. Zhao, Y. F. et al. Storing solar energy within Ag-parafﬁn@halloysite\nmicrospheres as a novel self-heating catalyst. Appl. Energy 222,\n180–188 (2018).\n\n35. Karolina Pierchala, M. et al. Soft electronic materials with combi-\nnatorial properties generated via mussel-inspired chemistry and\nhalloysite nanotube reinforcement. ACS Nano 15,\n9531–9549 (2021).\n\n36. Feng, X. et al. Highly active PdO/Mn3O4/CeO2 nanocomposites\nsupported on one dimensional halloysite nanotubes for photo-\nassisted thermal catalytic methane combustion. Angew. Chem. Int.\nEd. 133, 18700–18704 (2021).\n\n37. Sawicka, D., Zapor, L., Chojnacka-Puchta, L. & Miranowicz-\nDzierzawska, K. The in vitro toxicity evaluation of halloysite\nnanotubes (HNTs) in human lung cells. Toxicol. Res. 37,\n301–310 (2021).\n\n38. Feng, Y. et al. A ferroptosis-targeting ceria anchored halloysite as\norally drug delivery system for radiation colitis therapy. Nat. Com-\nmun. 14, 5083 (2023).\n\n39. Wei, Y. et al. Activation of natural halloysite nanotubes by introdu-\ncing lanthanum oxycarbonate nanoparticles via co-calcination for\noutstanding phosphate removal. Chem. Commun. 55,\n2110–2113 (2019).\n\n40. Lvov, Y. & Abdullayev, E. Functional polymer-clay nanotube com-\nposites with sustained release of chemical agents. Prog. Polym. Sci.\n38, 1690–1719 (2013).\n\n41. Zhang, F. et al. Thermally activated delayed ﬂuorescence\n\nzirconium-based perovskites for large-area and ultraﬂexible X-ray\nscintillator screens. Adv. Mater. 34, 2204801 (2022).\n\n42. Li, Y. et al. Solution-processed one-dimensional CsCu2I3 nanowires\nfor polarization-sensitive and ﬂexible ultraviolet photodetectors.\nMater. Horiz. 7, 1613–1622 (2020).\n\n23. Gan, N. et al. Organic phosphorescent scintillation from copoly-\n\n43. Ou, X. et al. High-resolution X-ray luminescence extension imaging.\n\nmers by X-ray irradiation. Nat. Commun. 13, 3995 (2022).\n\nNature 590, 410–415 (2021).\n\n24. Glotov, A., Vutolkina, A., Pimerzin, A., Vinokurov, V. & Lvov, Y. Clay\nnanotube-metal core/shell catalysts for hydroprocesses. Chem.\nSoc. Rev. 50, 9240–9277 (2021).\n\n44. Yang, J. F. et al. A novel synthesis route to monodisperse\n\nNa5Lu9F32:Tb3+ phosphors with superior thermal stability. J. Lumin.\n204, 533–538 (2018).\n\n25. Peixoto, D. et al. Emerging role of nanoclays in cancer research,\ndiagnosis, and therapy. Coord. Chem. Rev. 440, 213956 (2021).\n26. Lazzara, G. et al. An assembly of organic-inorganic composites\n\n45. Zhu, S. J., Zhao, X. H., Song, Y. B., Lu, S. Y. & Yang, B. Beyond\nbottom-up carbon nanodots: Citric-acid derived organic mole-\ncules. Nano Today 11, 128–132 (2016).\n\nusing halloysite clay nanotubes. Curr. Opin. Colloid Interface Sci.\n35, 42–50 (2018).\n\n27. Zhao, S. L. et al. A dual-surface amidoximated halloysite nanotube\nfor high-efﬁciency economical uranium extraction from seawater.\nAngew. Chem. Int. Ed. 58, 14979–14985 (2019).\n\n28. Li, L.-Y. et al. Naturally occurring nanotube with surface modiﬁca-\ntion as biocompatible, target-speciﬁc nanocarrier for cancer pho-\ntotherapy. Biomaterials 190, 86–96 (2019).\n\n29. Lisuzzo, L., Cavallaro, G., Pasbakh, P., Milioto, S. & Lazzara, G. Why\ndoes vacuum drive to the loading of halloysite nanotubes? The key\nrole of water conﬁnement. J. Colloid Interface Sci. 547,\n361–369 (2019).\n\n30. Zhao, P. X., Feng, Y., Zhou, Y. Q., Tan, C. Y. & Liu, M. X. Gold@-\n\n46. Lu, Y. L. et al. Exploring maleimide-anchored halloysites as nano-\n\nphotoinitiators for surface-initiated photografting strategies. Chem.\nCommun. 58, 13636–13639 (2022).\n\n47. Sternberg, J., Sequerth, O. & Pilla, S. Green chemistry design in\n\npolymers derived from lignin: review and perspective. Prog. Polym.\nSci. 113, 101344 (2021).\n\n48. Gérard, J.-P. et al. Contact X-ray therapy for rectal cancer: experi-\nence in centre antoine-lacassagne, nice, 2002–2006. Int. J. Radiat.\nOncol. 72, 665–670 (2008).\n\n49. Benezery, K. et al. Clinical response assessment after contact X-Ray\n\nbrachytherapy and chemoradiotherapy for organ preservation in\nrectal cancer T2-T3 M0: The time/dose factor inﬂuence. Clin. Transl.\nRadiat. Oncol. 24, 92–98 (2020).\n\nhalloysite nanotubes-chitin composite hydrogel with antibacterial\nand hemostatic activity for wound healing. Bioac. Mater. 20,\n355–367 (2023).\n\n50. Zhu, C. N. et al. Dual-encryption in a shape-memory hydrogel with\ntunable ﬂuorescence and reconﬁgurable architecture. Adv. Mater.\n33, 2102023 (2021).\n\n31. Zhao, X., Zhou, C. & Liu, M. Self-assembled structures of halloysite\nnanotubes: towards the development of high-performance bio-\nmedical materials. J. Mater. Chem. B 8, 838–851 (2020).\n\n32. Liao, J. et al. Surface modiﬁed halloysite nanotubes with different\nlumen diameters as drug carriers for cancer therapy. Chem. Com-\nmun. 57, 9470–9473 (2021).\n\n33. Smith, R. J. et al. Environmentally benign halloysite nanotube\n\nmultilayer assembly signiﬁcantly reduces polyurethane Flamm-\nability. Adv. Funct. Mater. 28, 1703289 (2018).\n\n51. Yang, H. L. et al. Erasable, rewritable, and reprogrammable dual\ninformation encryption based on photoluminescent supramole-\ncular host-guest recognition and hydrogel shape memory. Adv.\nMater. 35, 2301300 (2023).\n\n52. Lou, D. et al. Double lock label based on thermosensitive polymer\nhydrogels for information camouﬂage and multilevel encryption.\nAngew. Chem. Int. Ed. 61, e202117066 (2022).\n\n53. Hajagos, T. J., Liu, C., Cherepy, N. J. & Pei, Q. High-Z sensitized\n\nplastic scintillators: a review. Adv. Mater. 30, 1706956 (2018).\n\nNature Communications |  \n\n (2024) 15:2055 \n\n10\n\n \n \n \n \n \n \n\fArticle\n\nhttps://doi.org/10.1038/s41467-024-46287-8\n\n54. Xu, R. H. et al. AIE nanocrystals: emerging nanolights with ultra-high\nbrightness for biological application. Coordin. Chem. Rev. 477,\n214944 (2023).\n\n55. Li, H. X. et al. As ﬁber meets with AIE: opening a wonderland for\n\nsmart ﬂexible materials. Adv. Mater. 35, 2210085 (2023)."
+    }
+  ],
+  "extractions": {
+    "methods_paragraphs": [
+      {
+        "text": "Methods\nThe description of materials and characterization is included in the\nSupplementary Note 1 and Supplementary Note 2, respectively.\n\nSynthesis of citric acid-modiﬁed halloysite nanotubes\n5.0 g HNTs-NH2 was added into the DMSO solution containing citric\nacid (1.92 g, 10 mmol), 1-(3-dimethylaminopropyl)-3-ethylcarbodiimide\n\nNature Communications |  \n\n (2024) 15:2055 \n\n8\n\n \n \n \n \n \n \n\fArticle\n\nhttps://doi.org/10.1038/s41467-024-46287-8\n\nhydrochloride (6.2 g, 34.5 mmol),\n1-hydroxybenzotriazole (4.05 g,\n30 mmol), and N,N-diisopropylethylamine (3.9 g, 30 mmol). Then the\nsolution was stirred at room temperature for 48 h. The residue was\ncollected by centrifugation and then washed with 5% HCl solution,\nsaturated Na2CO3 solution, saturated NaCl solution, ethanol, and acet-\none in sequence. The obtained solid was dried in vacuum to give HNTs-\nCA as a white solid.\n\nSynthesis of water-dispersible X-ray scintillator\n1.50 g HNTs-CA was accurately weighed and added to an aqueous\nsolution containing NaNO3 (0.51 g, 6.0 mmol), Lu(NO3)3·6H2O (4.69 g,\n10.0 mmol), and Tb(NO3)3·6H2O (0.45 g, 1.0 mmol). The system was\nstirred at a low speed of 200 rpm for 30 min to achieve a homo-\ngeneous suspension. 1.48 g NH4F was added into the mixture. After\nbeing regulated to weak acid with a pH value of 5.0 by nitric acid, the\nsuspension was stirred for another 30 min and then transferred into a\nhydrothermal reactor with a ﬁlling rate of 70%. The hydrothermal\nreactor was heated at 180 °C for 24 h. After cooling to room tem-\nperature, the suspension was picked out and subjected to centrifuga-\ntion. The collected residue was thoroughly washed with water and\nethanol\nvacuum to afford\nHNTs@Na5Lu9F32:Tb3+ as a white solid.\n\nfollowed by being dried in\n\nand then dried under\n\nPreparation of X-ray-sensitive polyurethane foam\nPUF pieces (3.5 cm × 2.5 cm × 1.5 cm) were rinsed thoroughly with\nreduced pressure overnight.\nwater\nHNTs@Na5Lu9F32:Tb3+ was\nachieve\nadded\nHNTs@Na5Lu9F32:Tb3+ aqueous suspension (ca. 100 mg mL−1). The PUF\npieces were immersed in the suspension, thoroughly compressed\nthree times, and soaked for 3 min. Then the foam was picked out from\nthe suspension and wrung out by using mechanical rollers. After drying\nin vacuum, the composite foam HNTs@Na5Lu9F32:Tb3+@PUF was\nobtained and stored in a dry box before use.\n\ninto water\n\nto\n\nPreparation of X-ray-sensitive epoxy resin composite\n20 mg HNTs@Na5Lu9F32:Tb3+ were dispersed in 10 mL of anhydrous\nethanol and then added into the E51 solution (2 g in anhydrous etha-\nnol). The mixture was sonicated for 5 min and then stirred at 70 °C for\n2 h to obtain a well-dispersed suspension. The anhydrous ethanol was\nremoved by rotary evaporation. The sample was weighted and the\npolyamide curing agent was added to the solution with a weight ratio\nof 1:1. The system was mixed by thorough agitation and then poured\ninto the drop-shaped mold. The liquid-ﬁlled mold was degassed in a\nvacuum oven for 10 min and then placed at room temperature for 24 h\nto afford the HNTs@Na5Lu9F32:Tb3+@epoxy resin composite.\n\nPreparation of X-ray scintillator screens\nThe HNTs@Na5Lu9F32:Tb3+ powders were ﬁltered by a 200-mesh sieve.\n2.0 g ﬁltered powders were added into a 0.5 wt% CMC-Na solution\n(20 mL). Vigorous stirring was continued to afford a uniform suspen-\nsion. This suspension was poured onto a glass plate (7.6 cm × 2.5 cm)\nand then spread uniformly via a mild shock by using a shaker rotating\nwith the agitation rate at 100 rpm. The samples were placed in an oven\nat 105 °C for 2 h and then carefully polished. The obtained screens\nwere stored in a dry box before used.\n\nThe ﬂexible screen is prepared following another method. PVA\nsolution was prepared by adding 1.35 g PVA in 12.0 mL water. Intense\nstirring is conducted at 80°C until it is completely dissolved. 65 mg\nHNTs@Na5Lu9F32:Tb3+ was then added and the stirring is continued to\nafford a uniform suspension. The mixture was poured into the mold\nwith the addition of 1,4-phenyldiboronic acid-containing NaOH solu-\ntion (4.8 × 10−3 mmol mL−1) under argon and then heated at 80 °C for\n1 h. After cooling to room temperature, the gel was picked out from the\nmold and cut into demanded sizes for imaging studies.\n\nPreparation of multilayer hydrogels\nPVA solution was prepared according to the above-mentioned\nmethod. 130 mg HNTs@Na5Lu9F32:Tb3+ was then added and intense\nstirring was employed to afford a uniform suspension. 1.5 mL of a M3-\ncontaining NaOH solution (4.8×10−3 mmol mL−1, pH = 10.5) was poured\ninto the HNTs@Na5Lu9F32:Tb3+-containing suspension with stirring for\n5 min. The mixture was transferred into tailor-made molds and then\nfrozen at −20 °C for 2 h. After defrosting at room temperature for 1 h,\nthe self-standing hydrogel (Gel-1) can be obtained with letter shapes\n(H, B, and U). Gel-2 was also prepared in letter-like molds following a\nsimilar procedure with the replacement of HNTs@Na5Lu9F32:Tb3+ to\npristine HNTs to give the hydrogels with shape for the letter E and T.\nGel-0 was prepared in a rectangular mold (7.5 cm × 2.5 cm) by\nusing PVA and HNTs as substrate material. 1,4-phenyldiboronic acid\nwas used as the crosslinking agent. To prepare the multilayer\nhydrogel, the Gel-0 was placed on the bottom of the rectangular\nmold. Then Gel-1 and Gel-2 samples were added onto Gel-0 piece\nfollowing the sequence: E-H-B-U-T. Another layer of Gel-0 was pre-\npared in situ on the top of the layer containing Gel-1 and Gel-2 to give\nthe hydrogel multilayer system. Then the overlaid samples were\nheated at 80 °C for 30 min to give the sandwich-like multilayer\nhydrogels.\n\nReporting summary\nFurther information on research design is available in the Nature\nPortfolio Reporting Summary linked to this article.\n\nData availability\nThe data generated in this study are provided in Supplementary\nInformation/Source Data ﬁle.\n\nReferences\n1. Wang, X. et al. Organic phosphors with bright triplet excitons for\n\n2.\n\nefﬁcient X-ray-excited luminescence. Nat. Photonics 15,\n187–192 (2021).\nLi, M. et al. Circularly polarized radioluminescence from chiral\nperovskite scintillators for improved X-ray imaging. Angew. Chem.\nInt. Ed. 134, e202208440 (2022).\n\n3. Hong, Z. Z., Chen, Z. W., Chen, Q. S. & Yang, H. H. Advancing X-ray\nluminescence for imaging, biosensing, and theragnostics. Acc.\nChem. Res. 56, 37–51 (2023).\n\n4. Ma, W. et al. Thermally activated delayed ﬂuorescence (TADF)\n\norganic molecules for efﬁcient X-ray scintillation and imaging. Nat.\nMater. 21, 210–216 (2022).\n\n5. He, T. Y. et al. High-performance copper-doped perovskite-related\n\n6.\n\nsilver halide X-ray imaging scintillator. ACS Energy Lett. 7,\n2753–2760 (2022).\nZhang, M. et al. Metal halide scintillators with fast and self-\nabsorption-free defect-bound excitonic radioluminescence for\ndynamic X-ray Imaging. Adv. Funct. Mater. 31, 2007921 (2021).\n\n7. Chen, Q. et al. All-inorganic perovskite nanocrystal scintillators.\n\n8.\n\nNature 561, 88–93 (2018).\nZhao, X. et al. Embedding Cs3Cu2I5 scintillators into anodic alumi-\nnum oxide matrix for high-resolution X-ray imaging. Adv. Opt.\nMater. 9, 2101194 (2021).\n\n9. Gandini, M. et al. Efﬁcient, fast and reabsorption-free perovskite\n\nnanocrystal-based sensitized plastic scintillators. Nat. Nanotech. 15,\n462–468 (2020).\n\n10. Zaffalon, M. L. et al. Extreme γ-ray radiation hardness and high\nscintillation yield in perovskite nanocrystals. Nat. Photonics 16,\n860–868 (2022).\n\n11. Xia, K. et al. In situ preparation of high-quality ﬂexible manganese-\nhalide scintillator ﬁlms for X-ray imaging. Adv. Opt. Mater. 10,\n2201028 (2022).\n\nNature Communications |  \n\n (2024) 15:2055 \n\n9\n\n \n \n \n \n \n \n\fArticle\n\nhttps://doi.org/10.1038/s41467-024-46287-8\n\n12. Zhang, H. et al. Reproducible X-ray imaging with a perovskite\nnanocrystal scintillator embedded in a transparent amorphous\nnetwork structure. Adv. Mater. 33, 2102529 (2021).\n\n13. Wu, X. C. et al. Ultrathin, transparent, and high density perovskite\nscintillator ﬁlm for high resolution X-ray microscopic imaging. Adv.\nSci. 9, 2200831 (2022).\n\n14. Wang, S. et al. Ruddlesden–popper perovskite nanocrystals stabi-\nlized in mesoporous silica with efﬁcient carrier dynamics for ﬂexible\nX-ray scintillator. Adv. Funct. Mater. 33, 2210765 (2023).\nJana, A. et al. Perovskite: Scintillators, direct detectors, and X-ray\nimagers. Mater. Today 55, 110–136 (2022).\n\n15.\n\n16. Mykhaylyk, V. B. et al. Bright and fast scintillations of an inorganic\nhalide perovskite CsPbBr3 crystal at cryogenic temperatures. Sci.\nRep. 10, 8601 (2020).\n\n17. Babayigit, A., Ethirajan, A., Muller, M. & Conings, B. Toxicity of\norganometal halide perovskite solar cells. Nat. Mater. 15,\n247–251 (2016).\n\n18. Kowal, D. et al. PEA2PbI4: fast two-dimensional lead iodide per-\n\novskite scintillator with green and red emission. Mater. Today\nChem. 29, 101455 (2023).\n\n19. Wang, J. X. et al. Heavy-atom engineering of thermally activated\ndelayed ﬂuorophores for high-performance X-ray imaging scintil-\nlators. Nat. Photonics 16, 869–875 (2022).\n\n20. Wang, J.-X. et al. Nearly 100% energy transfer at the interface of\n\nmetal-organic frameworks for X-ray imaging scintillators. Matter 5,\n253–265 (2022).\n\n21. Chen, J.-K., Shirahata, N. & Sun, H.-T. Metal-free scintillators excite\n\nX-ray community. Nat. Photonics 15, 171–172 (2021).\n\n22. Xu, L.-J., Lin, X., He, Q., Worku, M. & Ma, B. Highly efﬁcient eco-\n\nfriendly X-ray scintillators based on an organic manganese halide.\nNat. Commun. 11, 4329 (2020).\n\n34. Zhao, Y. F. et al. Storing solar energy within Ag-parafﬁn@halloysite\nmicrospheres as a novel self-heating catalyst. Appl. Energy 222,\n180–188 (2018).\n\n35. Karolina Pierchala, M. et al. Soft electronic materials with combi-\nnatorial properties generated via mussel-inspired chemistry and\nhalloysite nanotube reinforcement. ACS Nano 15,\n9531–9549 (2021).\n\n36. Feng, X. et al. Highly active PdO/Mn3O4/CeO2 nanocomposites\nsupported on one dimensional halloysite nanotubes for photo-\nassisted thermal catalytic methane combustion. Angew. Chem. Int.\nEd. 133, 18700–18704 (2021).\n\n37. Sawicka, D., Zapor, L., Chojnacka-Puchta, L. & Miranowicz-\nDzierzawska, K. The in vitro toxicity evaluation of halloysite\nnanotubes (HNTs) in human lung cells. Toxicol. Res. 37,\n301–310 (2021).\n\n38. Feng, Y. et al. A ferroptosis-targeting ceria anchored halloysite as\norally drug delivery system for radiation colitis therapy. Nat. Com-\nmun. 14, 5083 (2023).\n\n39. Wei, Y. et al. Activation of natural halloysite nanotubes by introdu-\ncing lanthanum oxycarbonate nanoparticles via co-calcination for\noutstanding phosphate removal. Chem. Commun. 55,\n2110–2113 (2019).\n\n40. Lvov, Y. & Abdullayev, E. Functional polymer-clay nanotube com-\nposites with sustained release of chemical agents. Prog. Polym. Sci.\n38, 1690–1719 (2013).\n\n41. Zhang, F. et al. Thermally activated delayed ﬂuorescence\n\nzirconium-based perovskites for large-area and ultraﬂexible X-ray\nscintillator screens. Adv. Mater. 34, 2204801 (2022).\n\n42. Li, Y. et al. Solution-processed one-dimensional CsCu2I3 nanowires\nfor polarization-sensitive and ﬂexible ultraviolet photodetectors.\nMater. Horiz. 7, 1613–1622 (2020).\n\n23. Gan, N. et al. Organic phosphorescent scintillation from copoly-\n\n43. Ou, X. et al. High-resolution X-ray luminescence extension imaging.\n\nmers by X-ray irradiation. Nat. Commun. 13, 3995 (2022).\n\nNature 590, 410–415 (2021).\n\n24. Glotov, A., Vutolkina, A., Pimerzin, A., Vinokurov, V. & Lvov, Y. Clay\nnanotube-metal core/shell catalysts for hydroprocesses. Chem.\nSoc. Rev. 50, 9240–9277 (2021).\n\n44. Yang, J. F. et al. A novel synthesis route to monodisperse\n\nNa5Lu9F32:Tb3+ phosphors with superior thermal stability. J. Lumin.\n204, 533–538 (2018).\n\n25. Peixoto, D. et al. Emerging role of nanoclays in cancer research,\ndiagnosis, and therapy. Coord. Chem. Rev. 440, 213956 (2021).\n26. Lazzara, G. et al. An assembly of organic-inorganic composites\n\n45. Zhu, S. J., Zhao, X. H., Song, Y. B., Lu, S. Y. & Yang, B. Beyond\nbottom-up carbon nanodots: Citric-acid derived organic mole-\ncules. Nano Today 11, 128–132 (2016).\n\nusing halloysite clay nanotubes. Curr. Opin. Colloid Interface Sci.\n35, 42–50 (2018).\n\n27. Zhao, S. L. et al. A dual-surface amidoximated halloysite nanotube\nfor high-efﬁciency economical uranium extraction from seawater.\nAngew. Chem. Int. Ed. 58, 14979–14985 (2019).\n\n28. Li, L.-Y. et al. Naturally occurring nanotube with surface modiﬁca-\ntion as biocompatible, target-speciﬁc nanocarrier for cancer pho-\ntotherapy. Biomaterials 190, 86–96 (2019).\n\n29. Lisuzzo, L., Cavallaro, G., Pasbakh, P., Milioto, S. & Lazzara, G. Why\ndoes vacuum drive to the loading of halloysite nanotubes? The key\nrole of water conﬁnement. J. Colloid Interface Sci. 547,\n361–369 (2019).\n\n30. Zhao, P. X., Feng, Y., Zhou, Y. Q., Tan, C. Y. & Liu, M. X. Gold@-\n\n46. Lu, Y. L. et al. Exploring maleimide-anchored halloysites as nano-\n\nphotoinitiators for surface-initiated photografting strategies. Chem.\nCommun. 58, 13636–13639 (2022).\n\n47. Sternberg, J., Sequerth, O. & Pilla, S. Green chemistry design in\n\npolymers derived from lignin: review and perspective. Prog. Polym.\nSci. 113, 101344 (2021).\n\n48. Gérard, J.-P. et al. Contact X-ray therapy for rectal cancer: experi-\nence in centre antoine-lacassagne, nice, 2002–2006. Int. J. Radiat.\nOncol. 72, 665–670 (2008).\n\n49. Benezery, K. et al. Clinical response assessment after contact X-Ray\n\nbrachytherapy and chemoradiotherapy for organ preservation in\nrectal cancer T2-T3 M0: The time/dose factor inﬂuence. Clin. Transl.\nRadiat. Oncol. 24, 92–98 (2020).\n\nhalloysite nanotubes-chitin composite hydrogel with antibacterial\nand hemostatic activity for wound healing. Bioac. Mater. 20,\n355–367 (2023).\n\n50. Zhu, C. N. et al. Dual-encryption in a shape-memory hydrogel with\ntunable ﬂuorescence and reconﬁgurable architecture. Adv. Mater.\n33, 2102023 (2021).\n\n31. Zhao, X., Zhou, C. & Liu, M. Self-assembled structures of halloysite\nnanotubes: towards the development of high-performance bio-\nmedical materials. J. Mater. Chem. B 8, 838–851 (2020).\n\n32. Liao, J. et al. Surface modiﬁed halloysite nanotubes with different\nlumen diameters as drug carriers for cancer therapy. Chem. Com-\nmun. 57, 9470–9473 (2021).\n\n33. Smith, R. J. et al. Environmentally benign halloysite nanotube\n\nmultilayer assembly signiﬁcantly reduces polyurethane Flamm-\nability. Adv. Funct. Mater. 28, 1703289 (2018).\n\n51. Yang, H. L. et al. Erasable, rewritable, and reprogrammable dual\ninformation encryption based on photoluminescent supramole-\ncular host-guest recognition and hydrogel shape memory. Adv.\nMater. 35, 2301300 (2023).\n\n52. Lou, D. et al. Double lock label based on thermosensitive polymer\nhydrogels for information camouﬂage and multilevel encryption.\nAngew. Chem. Int. Ed. 61, e202117066 (2022).\n\n53. Hajagos, T. J., Liu, C., Cherepy, N. J. & Pei, Q. High-Z sensitized\n\nplastic scintillators: a review. Adv. Mater. 30, 1706956 (2018).\n\nNature Communications |  \n\n (2024) 15:2055 \n\n10\n\n \n \n \n \n \n \n\fArticle\n\nhttps://doi.org/10.1038/s41467-024-46287-8\n\n54. Xu, R. H. et al. AIE nanocrystals: emerging nanolights with ultra-high\nbrightness for biological application. Coordin. Chem. Rev. 477,\n214944 (2023).\n\n55. Li, H. X. et al. As ﬁber meets with AIE: opening a wonderland for\n\nsmart ﬂexible materials. Adv. Mater. 35, 2210085 (2023).",
+        "operations": [
+          {
+            "op_type": "add",
+            "sentence": "\n\nSynthesis of citric acid-modiﬁed halloysite nanotubes\n5.0 g HNTs-NH2 was added into the DMSO solution containing citric\nacid (1.92 g, 10 mmol), 1-(3-dimethylaminopropyl)-3-ethylcarbodiimide\n\nNature Communications |  \n\n (2024) 15:2055 \n\n8\n\n \n \n \n \n \n \n\fArticle\n\nhttps://doi.org/10.1038/s41467-024-46287-8\n\nhydrochloride (6.2 g, 34.5 mmol),\n1-hydroxybenzotriazole (4.05 g,\n30 mmol), and N,N-diisopropylethylamine (3.9 g, 30 mmol).",
+            "start_char": 212,
+            "end_char": 217,
+            "materials": [
+              "NH2",
+              "HNTs",
+              "HNTs-NH2",
+              "the DMSO solution containing citric"
+            ],
+            "params": {
+              "amounts": [
+                "5.0 g",
+                "1.92 g",
+                "10 mmol",
+                "6.2 g",
+                "34.5 mmol",
+                "4.05 g",
+                "30 mmol",
+                "3.9 g",
+                "30 mmol"
+              ]
+            }
+          },
+          {
+            "op_type": "stir",
+            "sentence": "Then the\nsolution was stirred at room temperature for 48 h. The residue was\ncollected by centrifugation and then washed with 5% HCl solution,\nsaturated Na2CO3 solution, saturated NaCl solution, ethanol, and acet-\none in sequence.",
+            "start_char": 590,
+            "end_char": 597,
+            "materials": [
+              "Na2CO3",
+              "% HCl solution,\n",
+              "the\nsolution was stirred",
+              "saturated NaCl solution, ethanol",
+              "saturated Na2CO3 solution, saturated"
+            ],
+            "params": {
+              "time": "48 h"
+            }
+          },
+          {
+            "op_type": "centrifuge",
+            "sentence": "Then the\nsolution was stirred at room temperature for 48 h. The residue was\ncollected by centrifugation and then washed with 5% HCl solution,\nsaturated Na2CO3 solution, saturated NaCl solution, ethanol, and acet-\none in sequence.",
+            "start_char": 657,
+            "end_char": 671,
+            "materials": [
+              "Na2CO3",
+              "% HCl solution,\n",
+              "the\nsolution was stirred",
+              "saturated NaCl solution, ethanol",
+              "saturated Na2CO3 solution, saturated"
+            ],
+            "params": {
+              "time": "48 h"
+            }
+          },
+          {
+            "op_type": "wash",
+            "sentence": "Then the\nsolution was stirred at room temperature for 48 h. The residue was\ncollected by centrifugation and then washed with 5% HCl solution,\nsaturated Na2CO3 solution, saturated NaCl solution, ethanol, and acet-\none in sequence.",
+            "start_char": 681,
+            "end_char": 687,
+            "materials": [
+              "Na2CO3",
+              "% HCl solution,\n",
+              "the\nsolution was stirred",
+              "saturated NaCl solution, ethanol",
+              "saturated Na2CO3 solution, saturated"
+            ],
+            "params": {
+              "time": "48 h"
+            }
+          },
+          {
+            "op_type": "dry",
+            "sentence": "The obtained solid was dried in vacuum to give HNTs-\nCA as a white solid.",
+            "start_char": 821,
+            "end_char": 826,
+            "materials": [],
+            "params": {}
+          },
+          {
+            "op_type": "add",
+            "sentence": "\n\nSynthesis of water-dispersible X-ray scintillator\n1.50 g HNTs-CA was accurately weighed and added to an aqueous\nsolution containing NaNO3 (0.51 g, 6.0 mmol), Lu(NO3)3·6H2O (4.69 g,\n10.0 mmol), and Tb(NO3)3·6H2O (0.45 g, 1.0 mmol).",
+            "start_char": 965,
+            "end_char": 970,
+            "materials": [
+              "NO3",
+              "NaNO3",
+              "water",
+              "Lu(NO3)3·6H2O",
+              "Tb(NO3)3·6H2O",
+              "aqueous\nsolution containing NaNO3"
+            ],
+            "params": {
+              "amounts": [
+                "1.50 g",
+                "0.51 g",
+                "6.0 mmol",
+                "4.69 g",
+                "10.0 mmol",
+                "0.45 g",
+                "1.0 mmol"
+              ]
+            }
+          },
+          {
+            "op_type": "stir",
+            "sentence": "The system was\nstirred at a low speed of 200 rpm for 30 min to achieve a homo-\ngeneous suspension.",
+            "start_char": 1119,
+            "end_char": 1126,
+            "materials": [],
+            "params": {
+              "time": "30 min",
+              "speed": "200 rpm"
+            }
+          },
+          {
+            "op_type": "add",
+            "sentence": "1.48 g NH4F was added into the mixture.",
+            "start_char": 1219,
+            "end_char": 1224,
+            "materials": [
+              "NH4F"
+            ],
+            "params": {
+              "amounts": [
+                "1.48 g"
+              ]
+            }
+          },
+          {
+            "op_type": "stir",
+            "sentence": "After\nbeing regulated to weak acid with a pH value of 5.0 by nitric acid, the\nsuspension was stirred for another 30 min and then transferred into a\nhydrothermal reactor with a ﬁlling rate of 70%.",
+            "start_char": 1336,
+            "end_char": 1343,
+            "materials": [],
+            "params": {
+              "time": "30 min"
+            }
+          },
+          {
+            "op_type": "heat",
+            "sentence": "The hydrothermal\nreactor was heated at 180 °C for 24 h. After cooling to room tem-\nperature, the suspension was picked out and subjected to centrifuga-\ntion.",
+            "start_char": 1468,
+            "end_char": 1474,
+            "materials": [],
+            "params": {
+              "temp": "180°C",
+              "time": "24 h"
+            }
+          },
+          {
+            "op_type": "wash",
+            "sentence": "The collected residue was thoroughly washed with water and\nethanol\nvacuum to afford\nHNTs@Na5Lu9F32:Tb3+ as a white solid.",
+            "start_char": 1634,
+            "end_char": 1640,
+            "materials": [
+              "HNTs",
+              "water",
+              "Na5Lu9F32"
+            ],
+            "params": {}
+          },
+          {
+            "op_type": "dry",
+            "sentence": "\n\nfollowed by being dried in\n\nand then dried under\n\nPreparation of X-ray-sensitive polyurethane foam\nPUF pieces (3.5 cm × 2.5 cm × 1.5 cm) were rinsed thoroughly with\nreduced pressure overnight.",
+            "start_char": 1738,
+            "end_char": 1743,
+            "materials": [
+              "PUF"
+            ],
+            "params": {}
+          },
+          {
+            "op_type": "dry",
+            "sentence": "\n\nfollowed by being dried in\n\nand then dried under\n\nPreparation of X-ray-sensitive polyurethane foam\nPUF pieces (3.5 cm × 2.5 cm × 1.5 cm) were rinsed thoroughly with\nreduced pressure overnight.",
+            "start_char": 1757,
+            "end_char": 1762,
+            "materials": [
+              "PUF"
+            ],
+            "params": {}
+          },
+          {
+            "op_type": "wash",
+            "sentence": "\n\nfollowed by being dried in\n\nand then dried under\n\nPreparation of X-ray-sensitive polyurethane foam\nPUF pieces (3.5 cm × 2.5 cm × 1.5 cm) were rinsed thoroughly with\nreduced pressure overnight.",
+            "start_char": 1862,
+            "end_char": 1868,
+            "materials": [
+              "PUF"
+            ],
+            "params": {}
+          },
+          {
+            "op_type": "add",
+            "sentence": "\nwater\nHNTs@Na5Lu9F32:Tb3+ was\nachieve\nadded\nHNTs@Na5Lu9F32:Tb3+ aqueous suspension (ca.",
+            "start_char": 1951,
+            "end_char": 1956,
+            "materials": [
+              "HNTs",
+              "water",
+              "Na5Lu9F32"
+            ],
+            "params": {}
+          },
+          {
+            "op_type": "dry",
+            "sentence": "After drying\nin vacuum, the composite foam HNTs@Na5Lu9F32:Tb3+@PUF was\nobtained and stored in a dry box before use.",
+            "start_char": 2218,
+            "end_char": 2224,
+            "materials": [
+              "HNTs",
+              "Na5Lu9F32",
+              ", the composite foam HNTs@Na5Lu9F32"
+            ],
+            "params": {}
+          },
+          {
+            "op_type": "dry",
+            "sentence": "After drying\nin vacuum, the composite foam HNTs@Na5Lu9F32:Tb3+@PUF was\nobtained and stored in a dry box before use.",
+            "start_char": 2308,
+            "end_char": 2311,
+            "materials": [
+              "HNTs",
+              "Na5Lu9F32",
+              ", the composite foam HNTs@Na5Lu9F32"
+            ],
+            "params": {}
+          },
+          {
+            "op_type": "add",
+            "sentence": "\n\ninto water\n\nto\n\nPreparation of X-ray-sensitive epoxy resin composite\n20 mg HNTs@Na5Lu9F32:Tb3+ were dispersed in 10 mL of anhydrous\nethanol and then added into the E51 solution (2 g in anhydrous etha-\nnol).",
+            "start_char": 2478,
+            "end_char": 2483,
+            "materials": [
+              "HNTs",
+              "water",
+              "Na5Lu9F32",
+              "HNTs@Na5Lu9F32:Tb3+",
+              "the E51 solution (2",
+              "epoxy resin composite\n20"
+            ],
+            "params": {
+              "amounts": [
+                "20 mg",
+                "10 mL",
+                "2 g"
+              ]
+            }
+          },
+          {
+            "op_type": "sonicate",
+            "sentence": "The mixture was sonicated for 5 min and then stirred at 70 °C for\n2 h to obtain a well-dispersed suspension.",
+            "start_char": 2552,
+            "end_char": 2561,
+            "materials": [],
+            "params": {
+              "temp": "70°C",
+              "time": "5 min"
+            }
+          },
+          {
+            "op_type": "stir",
+            "sentence": "The mixture was sonicated for 5 min and then stirred at 70 °C for\n2 h to obtain a well-dispersed suspension.",
+            "start_char": 2581,
+            "end_char": 2588,
+            "materials": [],
+            "params": {
+              "temp": "70°C",
+              "time": "5 min"
+            }
+          },
+          {
+            "op_type": "add",
+            "sentence": "The sample was weighted and the\npolyamide curing agent was added to the solution with a weight ratio\nof 1:1.",
+            "start_char": 2761,
+            "end_char": 2766,
+            "materials": [
+              "to the solution with a"
+            ],
+            "params": {}
+          },
+          {
+            "op_type": "stir",
+            "sentence": "The system was mixed by thorough agitation and then poured\ninto the drop-shaped mold.",
+            "start_char": 2826,
+            "end_char": 2831,
+            "materials": [],
+            "params": {}
+          },
+          {
+            "op_type": "degas",
+            "sentence": "The liquid-ﬁlled mold was degassed in a\nvacuum oven for 10 min and then placed at room temperature for 24 h\nto afford the HNTs@Na5Lu9F32:Tb3+@epoxy resin composite.",
+            "start_char": 2923,
+            "end_char": 2931,
+            "materials": [
+              "HNTs",
+              "Na5Lu9F32",
+              "Tb3+@epoxy resin composite."
+            ],
+            "params": {
+              "time": "10 min"
+            }
+          },
+          {
+            "op_type": "add",
+            "sentence": "\n2.0 g ﬁltered powders were added into a 0.5 wt% CMC-Na solution\n(20 mL).",
+            "start_char": 3198,
+            "end_char": 3203,
+            "materials": [
+              "-Na solution\n("
+            ],
+            "params": {
+              "amounts": [
+                "2.0 g",
+                "20 mL"
+              ]
+            }
+          },
+          {
+            "op_type": "stir",
+            "sentence": "Vigorous stirring was continued to afford a uniform suspen-\nsion.",
+            "start_char": 3253,
+            "end_char": 3261,
+            "materials": [],
+            "params": {}
+          },
+          {
+            "op_type": "dry",
+            "sentence": "The obtained screens\nwere stored in a dry box before used.",
+            "start_char": 3600,
+            "end_char": 3603,
+            "materials": [],
+            "params": {}
+          },
+          {
+            "op_type": "add",
+            "sentence": "PVA\nsolution was prepared by adding 1.35 g PVA in 12.0 mL water.",
+            "start_char": 3708,
+            "end_char": 3714,
+            "materials": [
+              "PVA",
+              "water",
+              "PVA\nsolution was prepared"
+            ],
+            "params": {
+              "amounts": [
+                "1.35 g",
+                "12.0 mL"
+              ]
+            }
+          },
+          {
+            "op_type": "stir",
+            "sentence": "Intense\nstirring is conducted at 80°C until it is completely dissolved.",
+            "start_char": 3752,
+            "end_char": 3760,
+            "materials": [],
+            "params": {
+              "temp": "80°C"
+            }
+          },
+          {
+            "op_type": "add",
+            "sentence": "65 mg\nHNTs@Na5Lu9F32:Tb3+ was then added and the stirring is continued to\nafford a uniform suspension.",
+            "start_char": 3851,
+            "end_char": 3856,
+            "materials": [
+              "HNTs",
+              "Na5Lu9F32"
+            ],
+            "params": {
+              "amounts": [
+                "65 mg"
+              ]
+            }
+          },
+          {
+            "op_type": "stir",
+            "sentence": "65 mg\nHNTs@Na5Lu9F32:Tb3+ was then added and the stirring is continued to\nafford a uniform suspension.",
+            "start_char": 3865,
+            "end_char": 3873,
+            "materials": [
+              "HNTs",
+              "Na5Lu9F32"
+            ],
+            "params": {
+              "amounts": [
+                "65 mg"
+              ]
+            }
+          },
+          {
+            "op_type": "heat",
+            "sentence": "The mixture was poured into the mold\nwith the addition of 1,4-phenyldiboronic acid-containing NaOH solu-\ntion (4.8 × 10−3 mmol mL−1) under argon and then heated at 80 °C for\n1 h. After cooling to room temperature, the gel was picked out from the\nmold and cut into demanded sizes for imaging studies.",
+            "start_char": 4073,
+            "end_char": 4079,
+            "materials": [],
+            "params": {
+              "temp": "80°C",
+              "time": "1 h",
+              "amounts": [
+                "3 mmol"
+              ]
+            }
+          },
+          {
+            "op_type": "add",
+            "sentence": "130 mg HNTs@Na5Lu9F32:Tb3+ was then added and intense\nstirring was employed to afford a uniform suspension.",
+            "start_char": 4359,
+            "end_char": 4364,
+            "materials": [
+              "HNTs",
+              "Na5Lu9F32",
+              "HNTs@Na5Lu9F32:Tb3+"
+            ],
+            "params": {
+              "amounts": [
+                "130 mg"
+              ]
+            }
+          },
+          {
+            "op_type": "stir",
+            "sentence": "130 mg HNTs@Na5Lu9F32:Tb3+ was then added and intense\nstirring was employed to afford a uniform suspension.",
+            "start_char": 4377,
+            "end_char": 4385,
+            "materials": [
+              "HNTs",
+              "Na5Lu9F32",
+              "HNTs@Na5Lu9F32:Tb3+"
+            ],
+            "params": {
+              "amounts": [
+                "130 mg"
+              ]
+            }
+          },
+          {
+            "op_type": "stir",
+            "sentence": "1.5 mL of a M3-\ncontaining NaOH solution (4.8×10−3 mmol mL−1, pH = 10.5) was poured\ninto the HNTs@Na5Lu9F32:Tb3+-containing suspension with stirring for\n5 min.",
+            "start_char": 4571,
+            "end_char": 4579,
+            "materials": [
+              "HNTs",
+              "NaOH",
+              "Na5Lu9F32",
+              "containing NaOH solution (4.8×10−3"
+            ],
+            "params": {
+              "time": "5 min",
+              "amounts": [
+                "1.5 mL",
+                "3 mmol"
+              ]
+            }
+          },
+          {
+            "op_type": "add",
+            "sentence": "Then Gel-1 and Gel-2 samples were added onto Gel-0 piece\nfollowing the sequence: E-H-B-U-T. Another layer of Gel-0 was pre-\npared in situ on the top of the layer containing Gel-1 and Gel-2 to give\nthe hydrogel multilayer system.",
+            "start_char": 5296,
+            "end_char": 5301,
+            "materials": [],
+            "params": {}
+          },
+          {
+            "op_type": "heat",
+            "sentence": "Then the overlaid samples were\nheated at 80 °C for 30 min to give the sandwich-like multilayer\nhydrogels.",
+            "start_char": 5522,
+            "end_char": 5528,
+            "materials": [],
+            "params": {
+              "temp": "80°C",
+              "time": "30 min"
+            }
+          },
+          {
+            "op_type": "heat",
+            "sentence": "Storing solar energy within Ag-parafﬁn@halloysite\nmicrospheres as a novel self-heating catalyst.",
+            "start_char": 9547,
+            "end_char": 9554,
+            "materials": [],
+            "params": {}
+          }
+        ],
+        "expanded": [
+          {
+            "op_type": "add",
+            "steps": [
+              "Ensure reaction vessel is present and empty.",
+              "Place a clean stir bar in the vessel.",
+              "Measure 5.0 g of NH2.",
+              "Transfer NH2 into the vessel."
+            ]
+          },
+          {
+            "op_type": "stir",
+            "steps": [
+              "Place the reaction vessel on a stir plate.",
+              "Set the stirrer to an appropriate speed.",
+              "Stir for 48 h."
+            ]
+          },
+          {
+            "op_type": "centrifuge",
+            "steps": [
+              "Perform operation 'centrifuge' as described: Then the\nsolution was stirred at room temperature for 48 h. The residue was\ncollected by centrifugation and then washed with 5% HCl solution,\nsaturated Na2CO3 solution, saturated NaCl solution, ethanol, and acet-\none in sequence."
+            ]
+          },
+          {
+            "op_type": "wash",
+            "steps": [
+              "Perform operation 'wash' as described: Then the\nsolution was stirred at room temperature for 48 h. The residue was\ncollected by centrifugation and then washed with 5% HCl solution,\nsaturated Na2CO3 solution, saturated NaCl solution, ethanol, and acet-\none in sequence."
+            ]
+          },
+          {
+            "op_type": "dry",
+            "steps": [
+              "Perform operation 'dry' as described: The obtained solid was dried in vacuum to give HNTs-\nCA as a white solid."
+            ]
+          },
+          {
+            "op_type": "add",
+            "steps": [
+              "Ensure reaction vessel is present and empty.",
+              "Place a clean stir bar in the vessel.",
+              "Measure 1.50 g of NO3.",
+              "Transfer NO3 into the vessel."
+            ]
+          },
+          {
+            "op_type": "stir",
+            "steps": [
+              "Place the reaction vessel on a stir plate.",
+              "Set the stirrer to 200 rpm.",
+              "Stir for 30 min."
+            ]
+          },
+          {
+            "op_type": "add",
+            "steps": [
+              "Ensure reaction vessel is present and empty.",
+              "Place a clean stir bar in the vessel.",
+              "Measure 1.48 g of NH4F.",
+              "Transfer NH4F into the vessel."
+            ]
+          },
+          {
+            "op_type": "stir",
+            "steps": [
+              "Place the reaction vessel on a stir plate.",
+              "Set the stirrer to an appropriate speed.",
+              "Stir for 30 min."
+            ]
+          },
+          {
+            "op_type": "heat",
+            "steps": [
+              "Place the reaction vessel on a hotplate.",
+              "Ramp to 180°C.",
+              "Maintain 180°C for 24 h."
+            ]
+          },
+          {
+            "op_type": "wash",
+            "steps": [
+              "Perform operation 'wash' as described: The collected residue was thoroughly washed with water and\nethanol\nvacuum to afford\nHNTs@Na5Lu9F32:Tb3+ as a white solid."
+            ]
+          },
+          {
+            "op_type": "dry",
+            "steps": [
+              "Perform operation 'dry' as described: \n\nfollowed by being dried in\n\nand then dried under\n\nPreparation of X-ray-sensitive polyurethane foam\nPUF pieces (3.5 cm × 2.5 cm × 1.5 cm) were rinsed thoroughly with\nreduced pressure overnight."
+            ]
+          },
+          {
+            "op_type": "dry",
+            "steps": [
+              "Perform operation 'dry' as described: \n\nfollowed by being dried in\n\nand then dried under\n\nPreparation of X-ray-sensitive polyurethane foam\nPUF pieces (3.5 cm × 2.5 cm × 1.5 cm) were rinsed thoroughly with\nreduced pressure overnight."
+            ]
+          },
+          {
+            "op_type": "wash",
+            "steps": [
+              "Perform operation 'wash' as described: \n\nfollowed by being dried in\n\nand then dried under\n\nPreparation of X-ray-sensitive polyurethane foam\nPUF pieces (3.5 cm × 2.5 cm × 1.5 cm) were rinsed thoroughly with\nreduced pressure overnight."
+            ]
+          },
+          {
+            "op_type": "add",
+            "steps": [
+              "Ensure reaction vessel is present and empty.",
+              "Place a clean stir bar in the vessel.",
+              "Measure the specified amount of HNTs.",
+              "Transfer HNTs into the vessel."
+            ]
+          },
+          {
+            "op_type": "dry",
+            "steps": [
+              "Perform operation 'dry' as described: After drying\nin vacuum, the composite foam HNTs@Na5Lu9F32:Tb3+@PUF was\nobtained and stored in a dry box before use."
+            ]
+          },
+          {
+            "op_type": "dry",
+            "steps": [
+              "Perform operation 'dry' as described: After drying\nin vacuum, the composite foam HNTs@Na5Lu9F32:Tb3+@PUF was\nobtained and stored in a dry box before use."
+            ]
+          },
+          {
+            "op_type": "add",
+            "steps": [
+              "Ensure reaction vessel is present and empty.",
+              "Place a clean stir bar in the vessel.",
+              "Measure 20 mg of HNTs.",
+              "Transfer HNTs into the vessel."
+            ]
+          },
+          {
+            "op_type": "sonicate",
+            "steps": [
+              "Perform operation 'sonicate' as described: The mixture was sonicated for 5 min and then stirred at 70 °C for\n2 h to obtain a well-dispersed suspension."
+            ]
+          },
+          {
+            "op_type": "stir",
+            "steps": [
+              "Place the reaction vessel on a stir plate.",
+              "Set the stirrer to an appropriate speed.",
+              "Stir for 5 min."
+            ]
+          },
+          {
+            "op_type": "add",
+            "steps": [
+              "Ensure reaction vessel is present and empty.",
+              "Place a clean stir bar in the vessel.",
+              "Measure the specified amount of to the solution with a.",
+              "Transfer to the solution with a into the vessel."
+            ]
+          },
+          {
+            "op_type": "stir",
+            "steps": [
+              "Place the reaction vessel on a stir plate.",
+              "Set the stirrer to an appropriate speed.",
+              "Stir for the specified time."
+            ]
+          },
+          {
+            "op_type": "degas",
+            "steps": [
+              "Perform operation 'degas' as described: The liquid-ﬁlled mold was degassed in a\nvacuum oven for 10 min and then placed at room temperature for 24 h\nto afford the HNTs@Na5Lu9F32:Tb3+@epoxy resin composite."
+            ]
+          },
+          {
+            "op_type": "add",
+            "steps": [
+              "Ensure reaction vessel is present and empty.",
+              "Place a clean stir bar in the vessel.",
+              "Measure 2.0 g of -Na solution\n(.",
+              "Transfer -Na solution\n( into the vessel."
+            ]
+          },
+          {
+            "op_type": "stir",
+            "steps": [
+              "Place the reaction vessel on a stir plate.",
+              "Set the stirrer to an appropriate speed.",
+              "Stir for the specified time."
+            ]
+          },
+          {
+            "op_type": "dry",
+            "steps": [
+              "Perform operation 'dry' as described: The obtained screens\nwere stored in a dry box before used."
+            ]
+          },
+          {
+            "op_type": "add",
+            "steps": [
+              "Ensure reaction vessel is present and empty.",
+              "Place a clean stir bar in the vessel.",
+              "Measure 1.35 g of PVA.",
+              "Transfer PVA into the vessel."
+            ]
+          },
+          {
+            "op_type": "stir",
+            "steps": [
+              "Place the reaction vessel on a stir plate.",
+              "Set the stirrer to an appropriate speed.",
+              "Stir for the specified time."
+            ]
+          },
+          {
+            "op_type": "add",
+            "steps": [
+              "Ensure reaction vessel is present and empty.",
+              "Place a clean stir bar in the vessel.",
+              "Measure 65 mg of HNTs.",
+              "Transfer HNTs into the vessel."
+            ]
+          },
+          {
+            "op_type": "stir",
+            "steps": [
+              "Place the reaction vessel on a stir plate.",
+              "Set the stirrer to an appropriate speed.",
+              "Stir for the specified time."
+            ]
+          },
+          {
+            "op_type": "heat",
+            "steps": [
+              "Place the reaction vessel on a hotplate.",
+              "Ramp to 80°C.",
+              "Maintain 80°C for 1 h."
+            ]
+          },
+          {
+            "op_type": "add",
+            "steps": [
+              "Ensure reaction vessel is present and empty.",
+              "Place a clean stir bar in the vessel.",
+              "Measure 130 mg of HNTs.",
+              "Transfer HNTs into the vessel."
+            ]
+          },
+          {
+            "op_type": "stir",
+            "steps": [
+              "Place the reaction vessel on a stir plate.",
+              "Set the stirrer to an appropriate speed.",
+              "Stir for the specified time."
+            ]
+          },
+          {
+            "op_type": "stir",
+            "steps": [
+              "Place the reaction vessel on a stir plate.",
+              "Set the stirrer to an appropriate speed.",
+              "Stir for 5 min."
+            ]
+          },
+          {
+            "op_type": "add",
+            "steps": [
+              "Ensure reaction vessel is present and empty.",
+              "Place a clean stir bar in the vessel.",
+              "Measure the specified amount of reagent.",
+              "Transfer reagent into the vessel."
+            ]
+          },
+          {
+            "op_type": "heat",
+            "steps": [
+              "Place the reaction vessel on a hotplate.",
+              "Ramp to 80°C.",
+              "Maintain 80°C for 30 min."
+            ]
+          },
+          {
+            "op_type": "heat",
+            "steps": [
+              "Place the reaction vessel on a hotplate.",
+              "Ramp to the target temperature.",
+              "Maintain the target temperature for the specified time."
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "meta": {
+    "title": "Water-dispersible X-ray scintillators enabling coating and blending with polymer materials for multiple applications.",
+    "doi": "10.1038/s41467-024-46287-8",
+    "url": "",
+    "pdf_url": "",
+    "year": "2024",
+    "authors": [
+      "Zhang H",
+      "Zhang B",
+      "Cai C",
+      "Zhang K",
+      "Wang Y",
+      "Yang Y",
+      "Wu Y",
+      "Ba X",
+      "Hoogenboom R."
+    ]
+  },
+  "raw": "Article\n\nhttps://doi.org/10.1038/s41467-024-46287-8\n\nWater-dispersible X-ray scintillators enabling\ncoating and blending with polymer materials\nfor multiple applications\n\nReceived: 6 June 2023\n\nAccepted: 21 February 2024\n\nCheck for updates\n\n;\n,\n:\n)\n(\n\n0\n9\n8\n7\n6\n5\n4\n3\n2\n1\n\n;\n,\n:\n)\n(\n\n0\n9\n8\n7\n6\n5\n4\n3\n2\n1\n\nHailei Zhang 1,2\nYuan Wang1, Yanmin Yang3\nRichard Hoogenboom 2\n\n, Bo Zhang1, Chongyang Cai3, Kaiming Zhang 2, Yu Wang1,\n\n, Yonggang Wu 1, Xinwu Ba1 &\n\nDeveloping X-ray scintillators that are water-dispersible, compatible with\npolymeric matrices, and processable to ﬂexible substrates is an important\nchallenge. Herein, Tb3+-doped Na5Lu9F32 is introduced as an X-ray scintillating\nmaterial with steady-state X-ray light yields of 15,800 photons MeV−1, which is\ngenerated as nanocrystals on halloysite nanotubes. The obtained product\nexhibits good water-dispersibility and highly sensitive luminescence to X-rays.\nIt is deposited onto a polyurethane foam to afford a composite foam material\nwith dose-dependent radioluminescence. Moreover, the product is dispersed\ninto polymer matrixes in aqueous solution to prepare rigid or ﬂexible scintil-\nlator screen for X-ray imaging. As a third example, it is incorporated multilayer\nhydrogels for information camouﬂage and multilevel encryption. Encrypted\ninformation can be recognized only by X-ray irradiation, while the false\ninformation is read out under UV light. Altogether, we demonstrate that the\nwater-dispersible scintillators are highly promising for aqueous processing of\nradioluminescent, X-ray imaging, and information encrypting materials.\n\nX-ray scintillators have emerged as excellent light emitting radi-\noluminescent materials, which can convert high energy X-ray radia-\ntions into visible or near visible light that may be further captured and\nconverted into visual\ninformation or electrical signals by a\nphotomultiplier1–3. Such attractive characteristics make X-ray scintil-\nlators promising materials for applications in the ﬁelds of X-ray\ndetectors4, space exploration5, medical\nlight-emitting\ndiodes7, and radiation exposure monitoring8. Straightforward incor-\nporation of X-ray scintillators into polymeric materials would repre-\nsent a huge breakthrough in organic-inorganic composite materials,\nwhich is quite beneﬁcial to mount multi-components9, satisfy the\nrequirement of ﬂexible screens10, and extend their application in a\nwider range of ﬁelds11,12. Despite many kinds of X-ray scintillators have\nbeen reported in past decades13,14 and the light yield has been\n\nimaging6,\n\nimproved to a great extent (Supplementary Tables 1 and 2), developing\nX-ray scintillators as polymer composite materials is still full of difﬁ-\nculties and challenges. Even though some single crystals exhibit high\nlight yields (Supplementary Table 1), the harsh growth conditions, non-\nﬂexibility, and high fabrication cost limited their application to con-\nventional hard devices. The poor water-dispersibility of X-ray scintil-\nlating crystals and particles also results in limited processability in\nwater. Moreover, aggregation of inorganic particles is commonly\nobserved leading to microphase separation and inhomogeneous\ncomposites with compromised performance. The toxicity of lead and\nunpredicted thermal quenching effects of perovskite-based X-ray\nscintillators (Supplementary Table 2) are remaining challenges15–18.\nOrganic X-ray scintillators have also been developed in recent\nresearch19, but usually suffer from a limited effective atomic number20\n\n1College of Chemistry & Materials Science, Hebei University, 180 Wusi Road, 071002 Baoding, China. 2Supramolecular Chemistry Group, Centre of Macro-\nmolecular Chemistry (CMaC), Department of Organic and Macromolecular Chemistry, Ghent University, Krijgslaan, 281-S4, 9000 Gent, Belgium. 3College of\nPhysics Science and Technology, Hebei University, 180 Wusi Road, 071002 Baoding, China.\nrichard.hoogenboom@ugent.be\n\ne-mail: zhanghailei@hbu.edu.cn; mihuyym@163.com;\n\nNature Communications |  \n\n (2024) 15:2055 \n\n1\n\n \n \n \n \n \n \n\fArticle\n\nhttps://doi.org/10.1038/s41467-024-46287-8\n\nand inefﬁcient excitation efﬁciency21. Therefore, the development of\nX-ray scintillator materials that are water-dispersible, low-toxic, highly\nsensitive to X-rays under room temperature, compatible with polymer\nmatrices, and processable to ﬂexible substrates remains an unmet\nchallenge22,23.\n\nHalloysite nanotubes (HNTs), with the chemical composition of\nAl2Si2O5(OH)4·nH2O, are a naturally occurring tubular product and\nhave raised people’s attention in recent years24,25. The large cavity\nresults in deduced density, which is beneﬁcial for achieving good\ndispersibility in water26,27. The HNTs exhibit different surface charge on\nthe outer (Si-O-Si) and inner (Al-OH) surfaces28, whereby the stable\nnegative charge on the outer surface can prevent aggregation of the\nnanotubes29. Other attractive properties of HNTs include their good\nbiocompatibility30,31, low toxicity32, high stability33, hydrophilicity34,\nprocessability35, and low-cost36 making HNTs promising candidates for\nthe fabricating of composite materials. Though there is still some\ncontroversy on the potential toxicity upon some special items37, HNTs\nremain a popular topic in material science including biomedical uses\nwith a growing trend of attention38. The existence of silanol groups on\nthe surface allows straightforward surface functionalization36,39. These\nfavourable properties of HNTs inspired us to explore them as a sub-\nstrate to prepare lead-free nanocomposites with X-ray scintillating\nabilities, which may have good water-dispersibility and desirable\ncompatibility in polymeric matrices. Though numerous methods for\nsurface modiﬁcation of nanoscintillators have already been reported,\nanchoring nanoscintillators on HNTs with large length-diameter ratios\nis expected to improve the tensile strength of X-ray-sensitive compo-\nsite materials40, which is quite important for emerging ﬂexible scin-\ntillator devices41,42.\n\nIn this work, we aim to develop water-dispersible X-ray scintilla-\ntors based on HNTs modiﬁed with lead-free X-ray scintillator nano-\nparticles. Tb3+ has been demonstrated to be a promising doping ion in\nluminescent crystals. Liu et al. synthesized a series of Tb3+-doped\nNaLuF4 nanoparticles which can emit more than 30 days of persistent\nradioluminescence43. Another kind of nanocrystal, Tb3+-doped\nNa5Lu9F32 (Na5Lu9F32:Tb3+), bearing the same elements in different\nratios has also been reported44, but their X-ray scintillator properties\nhave not been reported. Fortunately, we discovered that\nthe\nNa5Lu9F32:Tb3+ nanocrystals can emit strong green luminescence upon\nexposure to X-ray irradiation and, hence, exhibit X-ray scintillator\nbehavior (Supplementary Fig. 1). In contrast to the persistent radi-\n2),\noluminescence\nNa5Lu9F32:Tb3+ shows a synchronous radioluminescence (RL) behavior\nfollowing the on-off switching of X-ray irradiation and is suitable to be\napplied in the ﬁelds of X-ray monitoring, imaging, and other X-ray-\nsensitive materials. To generate Na5Lu9F32:Tb3+ on the surface of the\nHNTs, the outer surface is modiﬁed with citric acid (CA) as a chelating\nagent by a typical condensation reaction with the amino groups of\n\nfrom NaLuF4:Tb3+\n\n(Supplementary\n\nFig.\n\naminated HNTs (HNTs-NH2). The CA modiﬁcation of the HNTs directs\nthe nanoparticle crystal growth onto the surface rather than in the\nmedium. Following this way, Na5Lu9F32:Tb3+ nanocrstyals are success-\nfully anchored on the surface of the nanotube with well-controlled\nparticle size to afford the obtained product Na5Lu9F32:Tb3+-anchored\nhalloysite nanotubes (HNTs@Na5Lu9F32:Tb3+) with X-ray scintillating\nabilities, good dispersibility (Supplementary Fig. 3), and desirable\ncompatible with the polymeric matrices as will be demonstrated in this\nwork. Furthermore, three kinds of materials are developed targeting\nincluding HNTs@Na5Lu9F32:Tb3+ adsorption\ndifferent applications,\nonto the surface of polyurethane foam (PUF) resulting in a composite\nfoam with radioluminescent properties that may be utilized for\nradiation exposure monitoring, HNTs@Na5Lu9F32:Tb3+ dispersion into\na carboxymethylcellulose sodium (CMC-Na) solution or chemically-\ncrosslinked hydrogel to prepare a rigid or ﬂexible scintillator screen\nfor X-ray imaging, HNTs@Na5Lu9F32:Tb3+ incorporation into hydrogels\nto fabricate multilayer hydrogels that can be used for information\nencryption. True information can only be identiﬁed under X-rays, while\nfalse information can be detected when exposed to UV light, which has\nthe potential for information encryption and personal recognition.\n\nResults and discussion\nSynthesis and characterization\nCA is a commonly-used chelating agent to fabricate nanocrystal\nscintillators45. In our strategy, CA is coupled to the outer surface of\nHNTs-NH2 (Fig. 1). The obtained citric acid-modiﬁed halloysite nano-\ntubes (HNTs-CA) are thoroughly washed to ensure the absence of free\nCA, which is an important precondition for generating the X-ray scin-\ntillator on the surface of nanotubes. The HNTs-CA are found to have\ngood dispersibility in water and are favored by solid-state 13C NMR,\nFTIR, and TGA (Supplementary Figs. 4–6). Detailed results and dis-\ncussion on the synthesis of HNTs-CA are included in the Supplemen-\ntary Discussion 1.\n\nAfter conﬁrming the successful preparation of the HNTs-CA, they\nare used to template the growth of the X-ray scintillator nanoparticles\nusing a hydrothermal reactor to prepare HNTs@Na5Lu9F32:Tb3+ as\ndepicted in Fig. 1. Therefore, the HNTs-CA are added to an aqueous\nsolution of NaNO3, Lu(NO3)3·6H2O, and Tb(NO3)3·6H2O with the molar\nratio of 6: 10: 1. Subsequently, NH4F is added and the medium is slightly\nacidiﬁed with nitric acid to pH 5, which is a crucial factor to prepare the\nnanocomposite, followed by hydrothermal treatment at 180 °C. A\nneutral environment can give rise to the formation of NaLuF4:Tb3+,\nrather than Na5Lu9F32:Tb3+.\n\nThe mixture of NaNO3, NH4F, and Lu(NO3)3·6H2O can afford the\nNa5Lu9F32 as luminescent host materials, while the Tb3+ served as an\nactivator that is excited upon X-ray irradiation. The as-obtained pro-\nduct, HNTs@Na5Lu9F32:Tb3+, is carefully characterized by XPS to reveal\nthe chemical compositions.\n\na\n\nb\n\nc\n\nd\n\nFig. 1 | Synthesis of water-dispersible X-ray scintillator. a Aminated halloysite\nnanotubes (HNTs-NH2). b Chemical structure of citric acid (CA). c Citric acid-\nmodiﬁed halloysite nanotubes (HNTs-CA). HNTs-CA is synthesized by treating\nHNTs-NH2 with CA, 1-(3-dimethylaminopropyl)−3-ethylcarbodiimide hydro-\nchloride, 1-hydroxybenzotriazole, and N,N-diisopropylethylamine in\n\ndimethylsulfoxide (DMSO) at room temperature (r.t.) for 48 h. d Tb3+-doped\nNa5Lu9F32 anchored halloysite nanotubes (HNTs@Na5Lu9F32:Tb3+).\nHNTs@Na5Lu9F32:Tb3+ is synthesized by placing HNTs-CA, NaNO3, Lu(NO3)3·6H2O,\nTb(NO3)3·6H2O, nitric acid, NH4F, and water in a hydrothermal reactor with a ﬁlling\nrate of 70% and then heated at 180 °C for 24 h.\n\nNature Communications |  \n\n (2024) 15:2055 \n\n2\n\n \n \n \n \n \n \n\fArticle\n\nhttps://doi.org/10.1038/s41467-024-46287-8\n\nin\n\nthe\n\nXPS\n\npattern\n\nincreases\n\nsigniﬁcantly\n\nSilicon, aluminum, and oxygen are the main elements detected in\nthe X-ray photoelectron spectroscopy (XPS) pattern of\nthe\nHNTs@Na5Lu9F32:Tb3+ (Fig. 2). The Si 2 s, Al 2 s, Si 2p, and Al 2p peaks\ncan be observed at 153, 118, 102, and 73 eV, respectively (Fig. 2a–c).\nEach silicon or aluminum atom in the halloysite is coordinated to 3 ~ 4\noxygen atoms. As a result, the O 1 s peak at a binding energy of 531 eV is\nsigniﬁcantly higher than the others (Fig. 2a). The intensity of the C 1 s\nof\npeak\nHNTs@Na5Lu9F32:Tb3+ as compared to that of pristine HNTs46. A newly\nemerged N 1 s peak is observed at a binding energy of 400.9 eV cor-\nresponding to the amide nitrogens of the (modiﬁed) HNT-NH2. To\nfurther characterize the composition, the regions relating to C 1 s are\nexpanded as shown in Fig. 2d. The peaks at 284.8 eV and 289.0 eV\nshould be attributed to the carbons in C–C bonds and C = O groups,\nrespectively. The appearance of C = O groups conﬁrms the presence of\nCA moieties and matches well with FTIR ﬁndings. The presence of\nsodium and ﬂuorine is demonstrated by the Na 1 s and F 1 s peaks at\n1,071.3 and 684.4 ppm, respectively (Fig. 2e, f). The existence of lute-\ncium in the HNTs@Na5Lu9F32:Tb3+ is conﬁrmed by the Lu 4d5 peak at\nbinding energies of 206.3 and 196.7 eV (Fig. 2g). The doublet at 1,276.8\nand 1,243.3 eV can be assigned to the Tb 3d signals (Fig. 2h), conﬁrming\nthe presence of terbium. The chemical composition resulting from XPS\nis in accordance with the expected product. Moreover, the presence of\nNa5Lu9F32:Tb3+ (JCPDF no. 27-0725) and halloysite (JCPDF no. 09-0453)\nin the obtained product can be evidenced by the powder X-ray dif-\nfractogram (PXRD) (Fig. 2i and Supplementary Fig. 7).\n\nThe micromorphology of the HNTs@Na5Lu9F32:Tb3+ is analyzed\nusing scanning transmission electron microscopy (STEM) coupled\nwith energy-dispersive X-ray spectroscopy (EDX). The pristine HNTs\ndepicted in Supplementary Fig. 8 show a smooth external surface,\nwhile the obtained HNTs@Na5Lu9F32:Tb3+ displays distinct differences:\nsome newly emerged nanoparticles generated from the nanotube’s\nexternal surface can be observed (Fig. 2j, k). The high-magniﬁcation\nTEM image of HNTs@Na5Lu9F32:Tb3+ shown in Fig. 2l and XRD results\nsuggest that the lattice of the attached nanoparticles is in accordance\nwith the isometric system (a = b = c). The high-angle annular dark-ﬁeld\n(HAADF) STEM images in Supplementary Fig. 9 shows an obvious\ncontrast between the nanotubes and the attached particles, suggesting\nthat the anchored particles consist of elements with higher atomic\nnumbers than those of pristine HNTs (Si, Al, and O). Figure 2m–r shows\nthe STEM-energy dispersive X-ray (STEM-EDX) elemental mapping of\nHNTs@Na5Lu9F32:Tb3+. The Al and Si plots can only be detected on the\nnanotubes, in agreement with the character of aluminosilicate. On\nthe contrary, the plots from Na, Lu, F, and Tb show their distribution on\nthe newly generated nanoparticles. The high coincidence of Tb with\nNa, Lu, and F also indicates that Tb should be effectively doped into the\nhost\nlattices. The XPS, XRD, and TEM results indicate that\nNa5Lu9F32:Tb3+ nanoparticles are generated onto the nanotubes, and\nthereby the expected product HNTs@Na5Lu9F32:Tb3+ is obtained.\n\nAs\n\nX-ray\n\nexposed\n\nirradiation.\n\nThe emission properties of pristine HNTs, HNTs-CA, and\nHNTs@Na5Lu9F32:Tb3+ are investigated by X-ray irradiation (RL spec-\ntra, Fig. 3a), which yields completely different luminescence emission\nbehaviors. The pristine HNTs and HNTs-CA exhibit no luminescence\nproperties when\nfor\nto\nHNTs@Na5Lu9F32:Tb3+, the RL spectrum features four emission peaks\nat 489, 544, 585, and 620 nm, in which the intensity of the peak at\n544 nm is much higher\nthe\nHNTs@Na5Lu9F32:Tb3+ exhibit strong green luminescence when\nexposed to X-ray irradiation. The peak positions are exactly the same\nto the RL spectrum from Na5Lu9F32:Tb3+. The light yields of\nNa5Lu9F32:Tb3+ and HNTs@Na5Lu9F32:Tb3+ are calculated to be 15,800\nand 12,300 photons MeV−1, respectively (Supplementary Fig. 10). Then\nthe sensitivity of HNTs@Na5Lu9F32:Tb3+ towards X-ray is evaluated\nbased on on-off cycles (Fig. 3b). The HNTs@Na5Lu9F32:Tb3+ exhibits a\nsynchronous RL behavior following the on-off switching of X-ray\n\nthan the others. As a result,\n\nirradiation. Importantly, the developed HNTs@Na5Lu9F32:Tb3+ can also\nbe stable isolated in a dry state and redispersed in water for further\nprocessing (Supplementary Fig. 3).\n\nfurniture,\n\nX-ray-sensitive polyurethane foam\nPUF is a commonly-used and commercially available polymeric\nmaterial, which is widely used in textile,\nand\nconstruction47. Hence, the ability to functionalize preformed PUF\nwith X-ray scintillators would provide straightforward access to\nﬂexible polymer products with X-ray scintillating properties. There-\nfore, we hypothesize that it might be able to coat a PUF with an\naqueous dispersion of the developed HNTs@Na5Lu9F32:Tb3+. For this\npurpose, the PUF sample is immersed in an aqueous dispersion of the\nHNTs@Na5Lu9F32:Tb3+ X-ray scintillator followed by removal of\nexcess water via thorough compressing (Fig. 4). This procedure is\nrepeated for three cycles to obtain a homogeneous coating. Bene-\nﬁting from the presence of hydroxyl groups on the surface, the HNTs\nare easily adsorbed onto the polymeric matrix providing a good\nadhesion between HNTs@Na5Lu9F32:Tb3+ and the PUF, since very\nlittle powder peeled off from the HNTs@Na5Lu9F32:Tb3+ coated PUF\n(HNTs@Na5Lu9F32:Tb3+@PUF) during use. The soak time for\nadsorption is limited to 3 min because a longer time cannot afford\nbetter adhesion behavior as determined by a gravimetrical method\n(Supplementary Fig. 11).\n\nPUF\n\nthe pristine\n\nThe micromorphology of\n\nand the\nHNTs@Na5Lu9F32:Tb3+@PUF is investigated by SEM (Fig. 5a–g). The\nPUF exhibits open-cell structures with smooth pore walls (Fig. 5a–c).\nThe framework can also be observed without damage in the SEM\nimage of HNTs@Na5Lu9F32:Tb3+@PUF shown in Fig. 5d. It should be\nnoted that the surface of the pore walls turns to be rougher in Fig. 5e, f,\nindicative of successful adsorption of the HNTs@Na5Lu9F32:Tb3+ X-ray\nscintillators. In fact, the nanotubes can be observed in the SEM image\nunder higher magniﬁcation times (Fig. 5g). SEM image in Fig. 5h is\nfurther analyzed by elemental mapping. Elemental mapping of\nHNTs@Na5Lu9F32:Tb3+@PUF indicates the distribution of Al, Si, Na,\nand F at the pore walls (Fig. 5i–l). Owing to the low content of Tb in the\ncomposite, the signal of Tb3+ is much lower than the others (Fig. 5m).\nNonetheless, the presence of Tb3+ conﬁrms the successful adsorption\nof the HNTs@Na5Lu9F32:Tb3+ as it matches well with elemental dis-\ntributions of Al, Si, Na, and F present in the HNTs. To further demon-\nstrate the uniformity of the coating, ﬁve sites in the obtained\nHNTs@Na5Lu9F32:Tb3+@PUF sample are randomly selected and the\npeak intensity at 544 nm in the RL spectra of each site is recorded. The\nrelative standard deviation (RSD) value of the results from the intensity\nvalues is 4.8%, suggesting a uniform coating of HNTs@Na5Lu9F32:Tb3+\non the PUF surface. A good penetration ability of the obtained\nHNTs@Na5Lu9F32:Tb3+ into the pores of the PUF is demonstrated by\nelemental analysis on the cross-section (shown in Supplementary\nFig. 12 and Supplementary Table. 3). The results of a 30 day stability\ntest show that the obtained HNTs@Na5Lu9F32:Tb3+@PUF exhibits good\nstability to heat and good light stability (Supplementary Fig. 13).\n\nWhen exposed to X-rays, the obtained HNTs@Na5Lu9F32:Tb3+@PUF\n(Supplementary Fig. 14a) can emit visible green light (Supplementary\nFig. 14b–f), which matches well with the X-ray-excited RL emission\nspectrum. Moreover, the luminescence intensity enhances with the\nincrease of the X-ray dose from 3.1 to 9.2 cGy s−1. This developed aqu-\neous coating of the HNTs@Na5Lu9F32:Tb3+ X-ray scintillators on PUF\nprovides opportunities for fabrication of protective clothing, surgical\ngowns, or even a protective wall for an X-ray room, for in-situ radiation\nexposure monitoring.\n\nTo achieve this, the obtained HNTs@Na5Lu9F32:Tb3+@PUF sam-\nples (Fig. 5n) are cut to the required shapes (Fig. 5o) and then attached\nto a lab coat via typical sewing operations (Fig. 5p). We also incorpo-\nrate the obtained HNTs@Na5Lu9F32:Tb3+ into an epoxy resin (Fig. 5q)\nand fabricate it into a drop-shaped pendant with good transparency\n\nNature Communications |  \n\n (2024) 15:2055 \n\n3\n\n \n \n \n \n \n \n\fArticle\n\nhttps://doi.org/10.1038/s41467-024-46287-8\n\nFig. 2 | Structural and micromorphology characterizations. a X-ray photoelec-\ntron spectroscopy (XPS) pattern of Tb3+-doped Na5Lu9F32 anchored halloysite\nnanotubes (HNTs@Na5Lu9F32:Tb3+). b Si 2p region. c Al 2p region. d C 1 s region.\ne Na 1 s region. f F 1 s region. g Lu 4d5 region. h Tb 3d region. i X-ray powder\ndiffraction (XRD) pattern of halloysite, HNTs@Na5Lu9F32:Tb3+, and standards.\n\nj Transmission electron microscopy (TEM) image of HNTs@Na5Lu9F32:Tb3+ (bar:\n200 nm). k TEM image of HNTs@Na5Lu9F32:Tb3+ (bar: 50 nm). l High resolution\nTEM image of HNTs@Na5Lu9F32:Tb3+ (bar: 10 nm). m–r Elemental mapping analysis\nof HNTs@Na5Lu9F32:Tb3+ (m Al. n Lu. o F. p Na. q Tb. r Si; bar: 100 nm). Source data\nin a-i are provided as Source Data ﬁles.\n\nFig. 3 | Optical property. a X-ray-excited radioluminescence (RL) spectrum of Tb3+-\ndoped Na5Lu9F32 anchored halloysite nanotubes (HNTs@Na5Lu9F32:Tb3+) and the\nphotographic image of HNTs@Na5Lu9F32:Tb3+ taken under X-ray. b In situ\n\nmeasurement of the luminescence intensity of HNTs@Na5Lu9F32:Tb3+ under X-ray\nwith on-off cycles. Source data in (a) and (b) are provided as Source Data ﬁles.\n\n(Fig. 5r). The obtained HNTs@Na5Lu9F32:Tb3+@PUF-bearing lab coat\nand drop shape pendant are dressed on a full-length mannequin. We\napply the obtained materials in radiological laboratories. The results\nindicated that both the foams (Fig. 5s) and drop-shaped pendant\n(Fig. 5t) can emit visible green light under low dose X-ray (3.1 cGy s−1)\nwhich is much lower than that used in brachytherapy48,49.\n\nRigid and ﬂexible X-ray scintillator screens\nThin-layer chromatographical plates (TLCP) are commercially avail-\nable and commonly used materials in the ﬁeld of organic chemistry.\nTypically, TLCP is prepared by mixing silica gel or Al2O3 with CMC-Na\nfollowed by coating on a glass slide. As the surface of HNTs mainly\nconsists of Si-O-Si and Al-OH groups, which is chemically similar to that\n\nNature Communications |  \n\n (2024) 15:2055 \n\n4\n\n \n \n \n \n \n \n\fArticle\n\nhttps://doi.org/10.1038/s41467-024-46287-8\n\na\n\nb\n\nc\n\n+\n\n1) Immerse in water\n\n2) Dry\n\nPUF\n\nHNTs@Na5Lu9F32:Tb3+\n\nHNTs@Na5Lu9F32:Tb3+@PUF\n\nFig. 4 | Preparation of X-ray-sensitive polyurethane foam. a Polyurethane foam\n(PUF); b Tb3+-doped Na5Lu9F32 anchored halloysite nanotubes\n(HNTs@Na5Lu9F32:Tb3+); c Tb3+-doped Na5Lu9F32 anchored halloysite nanotubes\n\ncoated polyurethane foam (HNTs@Na5Lu9F32:Tb3+@PUF).\nHNTs@Na5Lu9F32:Tb3+@PUF is prepared by immersing PUF in the\nHNTs@Na5Lu9F32:Tb3+ aqueous dispersion by fully compressing and soaking.\n\nthe\n\nscreen\n\nscintillator\n\nby mixing\n\nof Al2O3 and silica gel, respectively, it inspires us to develop a solid-\nstate X-ray\nobtained\nHNTs@Na5Lu9F32:Tb3+ with CMC-Na following a similar preparation\nprocedure as used for production of TLCP (Fig. 6). The schematic\ndiagram for the preparation of the X-ray scintillator screen is shown in\nFig. 7a based on the coating of a glass plate with the CMC-Na solution\ncontaining the dispersed HNTs@Na5Lu9F32:Tb3+. The resulting TLCP-\nlike solid-state X-ray scintillator screen is found to have a macro-\nscopically smooth and uniform surface resulting from the good\ncoating properties of the CMC-Na combined with the good water-\ndispersibility of the HNTs@Na5Lu9F32:Tb3+ (Fig. 7b), which provides\nstrong green RL under low-dose X-ray irradiation.\n\nThe feasibility of X-ray imaging is investigated by using a capsule\nmodel (Fig. 7c) and a self-made imaging apparatus (Fig. 7d). A metal-\nbased spring is loaded in a non-transparent capsule and the obtained\ncapsule model is used as the test sample. The as-prepared solid-state\nX-ray scintillator screen is placed in front of the X-ray beam path\n(30 kV, 20 mA) and a digital camera is employed to record the gra-\nphic information on the screen. The inside content cannot be dis-\nclosed by the naked eye, while a clear image reﬂecting a spring-like\nform can be observed on the HNTs@Na5Lu9F32:Tb3+-based X-ray\nscintillator screen and can be recorded on the digital camera.\nMeanwhile, the outline of the capsule can also be monitored in the\nrecorded image (Fig. 7e). Moreover, the stability test showed the\nobtained HNTs@Na5Lu9F32:Tb3+-based X-ray scintillator\nscreen\nexhibits good stability to heat and good light stability (Supplemen-\ntary Fig. 13). Even though similar high-resolution X-ray imaging is\npreviously demonstrated using other X-ray scintillators, especially\nperovskite-based, under lower X-ray doses, the developed lead-free\ncomposite X-ray imaging ﬁlm in this study can be prepared in a much\nsimpler water-based procedure that is similar to the fabrication of\nTLCP, which is already performed in mass production indicating the\nscalability of the HNTs@Na5Lu9F32:Tb3+ based X-ray imaging screen.\nTo overcome the restrictions of rigid scintillator screens, we\ndemonstrate a facile approach to prepare a ﬂexible scintillator screen\nby incorporating HNTs@Na5Lu9F32:Tb3+ into a chemically crosslinked\nhydrogel (Supplementary Fig. 15). Flexible scintillator screens are\nfavored to be used to accommodate non-ﬂat objects by stretching or\nbending into required shapes41,42. Therefore, the tensile strength is a\nvery important property for ﬂexible scintillator screens and should be\ncarefully evaluated. Additionally, we also made attempts to modify the\nsurface of Na5Lu9F32:Tb3+ by oleic acid (OA) to give the product\n\nOA@Na5Lu9F32:Tb3+ (Supplementary Fig. 16) resulting in improved\nwater dispersibility. The incorporation of OA@Na5Lu9F32:Tb3+ in the\nhydrogel is, however, found to lower the tensile strength compared to\nthe pristine hydrogel. Anchoring of the Na5Lu9F32:Tb3+ on the surface\nof HNTs is found to overcome this. The HNTs@Na5Lu9F32:Tb3+-con-\ntaining hydrogel shows a much better tensile strength than the\nOA@Na5Lu9F32:Tb3+-containing one, and even higher than the pristine\nan HNTs@Na5Lu9F32:Tb3+-containing\nhydrogel. Comparatively,\nhydrogel should have a better application potential in X-ray scintillator\nscreens than the OA@Na5Lu9F32:Tb3+-based analogues.\n\nSupplementary Fig. 15 displays a series of photographs of the\nHNTs@Na5Lu9F32:Tb3+-containing hydrogel under different tensile\nstrains and bending angles. It can be bent to 90° without any\nbreaking and the elongation can be increased from 0% to 250%\nwithout rupture. Moreover, the feasibility of X-ray imaging by the\nHNTs@Na5Lu9F32:Tb3+-containing hydrogel\nis also demonstrated\nbased on the capsule model. Anchoring nanoscintillators onto the\nsurface of HNTs may pave an alternative path in developing ﬂexible\nscintillator materials with good mechanical properties.\n\nInformation encryption in multilayer hydrogels\nHydrogels that can changing their color in response to external stimuli\nsuch as UV, heat, and pH have been proposed for storing of\ninformation50,51. However, information decryption under single sti-\nmulation is easy to be decoded, stolen, and faked52, which inspires us\nto explore multilevel encryption hydrogels based on the different\nemission behaviors between X-ray-excited RL and photoluminescence\n(PL) (Supplementary Table 4). Some organic materials composed of\nlight atoms exhibit weak X-ray absorption, which can only generate\nluminescence under UV light and cannot emit light under X-ray\nirradiation1,23,53. Such differences in emission behavior inspired us to\ncombine an anti-counterfeiting technology and multilevel encryption\ninto the hybrid hydrogel with encrypted information.\n\nTo implement this, three kinds of hydrogels are synthesized and\nthe schematic diagram is shown in Fig. 8. Gel-0 is prepared by using\n1,4-phenyldiboronic as the crosslinker for polyvinyl alcohol (PVA)\nand is used as the substrate to prepare multilayer hydrogels, which\ncannot\nX-ray.\nHNTs@Na5Lu9F32:Tb3+-containing hydrogels (Gel-1) are prepared in\nletter-type molds. The boronic\nacid functionalized tetra-\nphenylethylene (M3) is employed, which gives rise to the three-\nboth\ndimensional\n\nluminescence\n\nin Gel-1.\n\npresence\n\nnetwork\n\nunder\n\nemit\n\nThe\n\nany\n\nUV\n\nor\n\nof\n\nNature Communications |  \n\n (2024) 15:2055 \n\n5\n\n \n \n \n \n \n \n\fArticle\n\nhttps://doi.org/10.1038/s41467-024-46287-8\n\na\n\nd\n\nh\n\nt\n\ng\n\nn\n\nb\n\ne\n\nc\n\nf\n\ni\n\nj\n\nq\n\nr\n\nk\n\np\n\nl\n\nm\n\no\n\ns\n\nFig. 5 | Micromorphology results and application in monitoring X-ray.\na Scanning electron microscope (SEM) images of pristine polyurethane foam\n(PUF) (bar: 200 μm). b SEM images of pristine PUF (bar: 20 μm). c SEM images of\npristine PUF (bar: 5 μm). d SEM images of Tb3+-doped Na5Lu9F32 anchored hal-\nloysite nanotubes coated polyurethane foam (HNTs@Na5Lu9F32:Tb3+@PUF)\n(bar: 200 μm). e SEM images of HNTs@Na5Lu9F32:Tb3+@PUF (bar: 20 μm). f SEM\nimages of HNTs@Na5Lu9F32:Tb3+@PUF (bar: 5 μm). g SEM images of\nHNTs@Na5Lu9F32:Tb3+@PUF (bar: 500 nm). h SEM images of\nHNTs@Na5Lu9F32:Tb3+@PUF (bar: 100 μm). i–m Elemental mapping images of\n\nHNTs@Na5Lu9F32:Tb3+@PUF (i Al, m Si, k Na, l F, and m Tb; bar: 100 μm).\nn Photograph of HNTs@Na5Lu9F32:Tb3+@PUF taken under normal light.\no Photograph of HNTs@Na5Lu9F32:Tb3+@PUF fabricated into desired shapes.\np Photograph of the mannequin wearing special-made lab coat and drop shape\npendant. q Photograph of the drop shape pendant under normal light.\nr Illustration of the transparency of the drop shape pendant. s Photograph of\nHNTs@Na5Lu9F32:Tb3+@PUF taken under X-ray (3.1 cGy s−1). t Photograph of the\ndrop shape pendant taken under X-ray (3.1 cGy s−1).\n\ntetraphenylethylene (TPE) units and HNTs@Na5Lu9F32:Tb3+ makes\nGel-1 exhibit a strong blue luminescence due to the aggregation-\ninduced emission (AIE) effect54,55, and also endows RL behavior to\nGel-1. Gel-2 is prepared in a similar manner without the addition of\nHNTs@Na5Lu9F32:Tb3+ making Gel-2 only photoluminescent. Gel-1\nand Gel-2 are prepared in letter shapes to compose the information\nlayer. The presence of boronic ester crosslinks and potential residual\narylboronic acid in the hydrogels induce self-healing properties and\ndynamic exchange behavior, leading to merging of the individual\nhydrogel layers. Herein, the design of a sandwich-like multilayer\nhydrogel with encrypted information is proposed (Fig. 9a), which\nconsists of two outer non-luminescence layers (Gel-0) and an inner\ninformation layer (sequence: Gel-0/ information layer /Gel-0).\n\nThe obtained multilayer hydrogel (Fig. 9b) can be folded or bent\ninto nearly a U-shape without any detachment of the hydrogel layers\nindicating efﬁcient crosslinking between the layers (Fig. 9c, d). Rheo-\nlogical investigations reveal that the storage modulus exceeded the\nloss modulus an angular frequency ranging from 0 to 100 rad s−1\n(Supplementary Fig. 17), also suggesting efﬁcient dynamic exchange of\nboronic ester crosslinks between the hydrogel layers.\n\nThe obtained multilayer hydrogel cannot show any information\nunder normal light conditions (Fig. 9b). When exposed to UV light, the\nletters EHBUT illuminate and can be clearly observed in Fig. 9e. No\ndifferences can be found among the luminescence from the ﬁve let-\nters. The information recognized from UV light is deﬁned as false\ninformation. The encrypted letters (HBU shown in Fig. 9f) can only be\nidentiﬁed with exposure to X-ray.\n\nTo the best of our knowledge, there is no report on hydrogels for\ninformation encryption by using X-ray as the decoding tool. Besides\nthis, the multilayer hydrogels support an extra safety encryption\ntechnology to prevent information leakage and combat fakes, because\nthe false information can be read from multilayer hydrogels under UV\nlight that serves as a commonly-used decoding tool in conventional\nanti-counterfeiting and encryption technologies. The multilayer\nhydrogels are assembled based on the dynamic covalent bonds rather\nthan physically attached, which can afford uniform hydrogels and\nfurther allows more complicated programming for information\ncamouﬂage and multilevel encryption based on the three different\ntypes component hydrogels: non-emission (Gel-0), only PL (Gel-2),\nand PL&RL (Gel-1). The presence of dynamic covalent bonds in the\n\nNature Communications |  \n\n (2024) 15:2055 \n\n6\n\n \n \n \n \n \n \n\fArticle\n\nhttps://doi.org/10.1038/s41467-024-46287-8\n\na\n\nb\n\nc\n\ne\n\nCMC-Na\n\nX-ray scintillator screen\n\nHNTs@Na5Lu9F32:Tb3+\n\nd\n\n105  C, 2 h\n\nGlassy plate\n\nFig. 6 | Preparation of rigid X-ray scintillator screen. a Chemical structure of\ncarboxymethylcellulose sodium (CMC-Na); b Tb3+-doped Na5Lu9F32 anchored hal-\nloysite nanotubes (HNTs@Na5Lu9F32:Tb3+); c HNTs@Na5Lu9F32:Tb3+-contained\n\nCMC-Na solution; d Glass plate (7.6 cm × 2.5 cm); e X-ray scintillator screen\nobtained by dropping HNTs@Na5Lu9F32:Tb3+-contained CMC-Na solution onto the\nglass plate and then dried at 105 °C.\n\nHNTs@Na5Lu9F32:Tb3+\n\n+\n\nCMC-Na\n\nGlass plate\n\nX-ray scintillator screen\n\nd\n\nX-ray scintillator screen\n\nspring in capsule\n\nX-ray\n\ne\n\na\n\nb\n\nc\n\nFig. 7 | X-ray imaging studies. a Scheme of the production and composition of the\nX-ray scintillator screen (CMC-Na is abbreviated from carboxymethylcellulose\nsodium; HNTs@Na5Lu9F32:Tb3+ is abbreviated from Tb3+-doped Na5Lu9F32\nanchored halloysite nanotubes). b Photograph of the as-prepared X-ray scintillator\nscreen (Thickness: ca.1 mm; bar: 2 cm). c Fabrication of the spring-containing\n\ncapsule model (bar: 1 cm). d Schematic diagram of the X-ray imaging system based\non the as-prepared X-ray scintillator screen. e The image relating to the capsule\nmodel taken from the digital camera (X-ray: 30 kV, 20 mA; Power: 600 W;\nbar: 2 mm).\n\ndigital camera\n\nobtained multilayer hydrogels would also contribute to potential self-\nhealing properties.\n\nIn summary, Na5Lu9F32:Tb3+ is successfully generated on the\nsurface of HNTs-CA to afford HNTs@Na5Lu9F32:Tb3+ an X-ray scin-\ntillator with good water-dispersibility, high sensitivity to X-ray irra-\ndiation,\nlow toxicity, and desirable compatibility with various\npolymer matrixes. The HNTs@Na5Lu9F32:Tb3+ exhibits a typical X-\nray-responsive scintillator behavior and displays a strong emission\n\npeak at 544 nm upon exposure to X-ray irradiation, enabling on-off\nswitching of the RL by on-off switching of the X-ray irradiation. The\napplication potential and aqueous processability of the obtained\nHNTs@Na5Lu9F32:Tb3+ is demonstrated by water-based fabrication\ninto an X-ray-sensitive polyurethane foam, X-ray-sensitive transpar-\nent composite, rigid and ﬂexible X-ray imaging screens, and multi-\nlayer hydrogels for information encryption, which can only be read-\nout by X-ray irradiation.\n\nNature Communications |  \n\n (2024) 15:2055 \n\n7\n\n \n \n \n \n \n \n\fArticle\n\nhttps://doi.org/10.1038/s41467-024-46287-8\n\na\n\nb\n\nc\n\nHO\n\nB OH\n\n+\n\n+\n\nn\n\nOH\n\nHO\n\nB\n\nOH\n\nPVA\n\n1,4-phenyldiboronic acid\n\nHO\n\nHO\n\nOH\n\nOH\n\nOH\n\nOH\n\nOH\n\nOH\n\nHNTs\n\nHO\n\nB OH\n\n+\n\nHO\n\nHO\n\nOH\n\nOH\n\nOH\n\nOH\n\nOH\n\nOH\n\n+\n\nn\n\nOH\n\nHO\n\nB\n\nPVA\n\nOH\n\nM3\n\nHNTs@Na5Lu9F32:Tb3+\n\nHO\n\nB OH\n\n+\n\nHO\n\nHO\n\nOH\n\nOH\n\nOH\n\nOH\n\nOH\n\nOH\n\nHNTs\n\n+\n\nn\n\nOH\n\nHO\n\nB\n\nOH\n\nPVA\n\nM3\n\nOH\n\nOH\n\nHO\n\nHO\n\nO\n\nOH\n\nB\n\nO\n\nHO\n\nHO\n\nB\n\nO\n\nO\n\nOH\n\nOH\n\nGel-0\n\nOH\n\nO\n\nB\n\nO\n\nOH\n\nHO\n\nOH\n\nB\n\nOH\n\nHO\n\nHO\n\nOH\n\nOH\n\nOH\n\nOH\n\nGel-1\n\nO\n\nOH\n\nB\n\nO\n\nO\n\nOH\n\nB\n\nO\n\nHO\n\nHO\n\nOH\n\nOH\n\nOH\n\nOH\n\nGel-2\n\nHO\n\nHO\n\nB\n\nO\n\nO\n\nHO\n\nHO\n\nB\n\nO\n\nO\n\nOH\n\nO\n\nB\n\nO\n\nOH\n\nOH\n\nO\n\nB\n\nO\n\nOH\n\nHO\n\nOH\n\nB\n\nOH\n\nHO\n\nOH\n\nB\n\nOH\n\nFig. 8 | Synthesis of hydrogels in information encryption study. a Gel-0 is pre-\npared in cuboid and exhibits no emission (PVA is abbreviated from polyvinyl\nalcohol; HNTs is abbreviated from halloysite nanotubes). b Gel-1 is prepared in\nletter sharp (HBU), which can emit blue luminescence under UV light (365 nm) and\n\ngreen luminescence under X-ray, respectively (HNTs@Na5Lu9F32:Tb3+ is abbre-\nviated from Tb3+-doped Na5Lu9F32 anchored halloysite nanotubes; M3 represents\nboronic acid functionalized tetraphenylethylene). c Gel-2 is prepared in letter sharp\n(ET) and emit blue luminescence under UV light (365 nm).\n\na\n\ni) fabricate Gel-0 on \nthe mold bottom \n\nii) information layer\nadded\n\niii) in-situ prepare \nanother piece of Gel-0\non the top\n\nmultilayer hydrogel\n\nb\n\nno information\n\nc\n\nd\n\nnormal \nlight\n\nUV\n\ne\n\nf\n\nfalse information\n\nencrypted information\n\nFig. 9 | Information encryption studies. a Scheme of preparation of multilayer\nhydrogels. b Normal version of the prepared multilayer hydrogel. c Bended\nhydrogel sample. d Twisted hydrogel sample. e Photograph of the false information\n\nEHBUT in the prepared multilayer hydrogel under UV light (365 nm). f Photograph\nof the encrypted information HBU in the multilayer hydrogel after exposure to\nX-ray (30 kV, 20 mA).\n\nit\n\nis\n\nthe\n\nthat\n\nAltogether\n\ndeveloped\ndemonstrated\nHNTs@Na5Lu9F32:Tb3+ nanocrystals are efﬁcient X-ray scintillators\nthat are easily processable as aqueous dispersion to develop X-ray\nsensitive ﬂexible substrates, coatings, and hydrogels. Hence the\nreported work provides insights for X-ray-sensitive soft materials,\nwhile also demonstrates the application potential of clay-based\nnanomaterials as support for functional nanoparticles.\n\nMethods\nThe description of materials and characterization is included in the\nSupplementary Note 1 and Supplementary Note 2, respectively.\n\nSynthesis of citric acid-modiﬁed halloysite nanotubes\n5.0 g HNTs-NH2 was added into the DMSO solution containing citric\nacid (1.92 g, 10 mmol), 1-(3-dimethylaminopropyl)-3-ethylcarbodiimide\n\nNature Communications |  \n\n (2024) 15:2055 \n\n8\n\n \n \n \n \n \n \n\fArticle\n\nhttps://doi.org/10.1038/s41467-024-46287-8\n\nhydrochloride (6.2 g, 34.5 mmol),\n1-hydroxybenzotriazole (4.05 g,\n30 mmol), and N,N-diisopropylethylamine (3.9 g, 30 mmol). Then the\nsolution was stirred at room temperature for 48 h. The residue was\ncollected by centrifugation and then washed with 5% HCl solution,\nsaturated Na2CO3 solution, saturated NaCl solution, ethanol, and acet-\none in sequence. The obtained solid was dried in vacuum to give HNTs-\nCA as a white solid.\n\nSynthesis of water-dispersible X-ray scintillator\n1.50 g HNTs-CA was accurately weighed and added to an aqueous\nsolution containing NaNO3 (0.51 g, 6.0 mmol), Lu(NO3)3·6H2O (4.69 g,\n10.0 mmol), and Tb(NO3)3·6H2O (0.45 g, 1.0 mmol). The system was\nstirred at a low speed of 200 rpm for 30 min to achieve a homo-\ngeneous suspension. 1.48 g NH4F was added into the mixture. After\nbeing regulated to weak acid with a pH value of 5.0 by nitric acid, the\nsuspension was stirred for another 30 min and then transferred into a\nhydrothermal reactor with a ﬁlling rate of 70%. The hydrothermal\nreactor was heated at 180 °C for 24 h. After cooling to room tem-\nperature, the suspension was picked out and subjected to centrifuga-\ntion. The collected residue was thoroughly washed with water and\nethanol\nvacuum to afford\nHNTs@Na5Lu9F32:Tb3+ as a white solid.\n\nfollowed by being dried in\n\nand then dried under\n\nPreparation of X-ray-sensitive polyurethane foam\nPUF pieces (3.5 cm × 2.5 cm × 1.5 cm) were rinsed thoroughly with\nreduced pressure overnight.\nwater\nHNTs@Na5Lu9F32:Tb3+ was\nachieve\nadded\nHNTs@Na5Lu9F32:Tb3+ aqueous suspension (ca. 100 mg mL−1). The PUF\npieces were immersed in the suspension, thoroughly compressed\nthree times, and soaked for 3 min. Then the foam was picked out from\nthe suspension and wrung out by using mechanical rollers. After drying\nin vacuum, the composite foam HNTs@Na5Lu9F32:Tb3+@PUF was\nobtained and stored in a dry box before use.\n\ninto water\n\nto\n\nPreparation of X-ray-sensitive epoxy resin composite\n20 mg HNTs@Na5Lu9F32:Tb3+ were dispersed in 10 mL of anhydrous\nethanol and then added into the E51 solution (2 g in anhydrous etha-\nnol). The mixture was sonicated for 5 min and then stirred at 70 °C for\n2 h to obtain a well-dispersed suspension. The anhydrous ethanol was\nremoved by rotary evaporation. The sample was weighted and the\npolyamide curing agent was added to the solution with a weight ratio\nof 1:1. The system was mixed by thorough agitation and then poured\ninto the drop-shaped mold. The liquid-ﬁlled mold was degassed in a\nvacuum oven for 10 min and then placed at room temperature for 24 h\nto afford the HNTs@Na5Lu9F32:Tb3+@epoxy resin composite.\n\nPreparation of X-ray scintillator screens\nThe HNTs@Na5Lu9F32:Tb3+ powders were ﬁltered by a 200-mesh sieve.\n2.0 g ﬁltered powders were added into a 0.5 wt% CMC-Na solution\n(20 mL). Vigorous stirring was continued to afford a uniform suspen-\nsion. This suspension was poured onto a glass plate (7.6 cm × 2.5 cm)\nand then spread uniformly via a mild shock by using a shaker rotating\nwith the agitation rate at 100 rpm. The samples were placed in an oven\nat 105 °C for 2 h and then carefully polished. The obtained screens\nwere stored in a dry box before used.\n\nThe ﬂexible screen is prepared following another method. PVA\nsolution was prepared by adding 1.35 g PVA in 12.0 mL water. Intense\nstirring is conducted at 80°C until it is completely dissolved. 65 mg\nHNTs@Na5Lu9F32:Tb3+ was then added and the stirring is continued to\nafford a uniform suspension. The mixture was poured into the mold\nwith the addition of 1,4-phenyldiboronic acid-containing NaOH solu-\ntion (4.8 × 10−3 mmol mL−1) under argon and then heated at 80 °C for\n1 h. After cooling to room temperature, the gel was picked out from the\nmold and cut into demanded sizes for imaging studies.\n\nPreparation of multilayer hydrogels\nPVA solution was prepared according to the above-mentioned\nmethod. 130 mg HNTs@Na5Lu9F32:Tb3+ was then added and intense\nstirring was employed to afford a uniform suspension. 1.5 mL of a M3-\ncontaining NaOH solution (4.8×10−3 mmol mL−1, pH = 10.5) was poured\ninto the HNTs@Na5Lu9F32:Tb3+-containing suspension with stirring for\n5 min. The mixture was transferred into tailor-made molds and then\nfrozen at −20 °C for 2 h. After defrosting at room temperature for 1 h,\nthe self-standing hydrogel (Gel-1) can be obtained with letter shapes\n(H, B, and U). Gel-2 was also prepared in letter-like molds following a\nsimilar procedure with the replacement of HNTs@Na5Lu9F32:Tb3+ to\npristine HNTs to give the hydrogels with shape for the letter E and T.\nGel-0 was prepared in a rectangular mold (7.5 cm × 2.5 cm) by\nusing PVA and HNTs as substrate material. 1,4-phenyldiboronic acid\nwas used as the crosslinking agent. To prepare the multilayer\nhydrogel, the Gel-0 was placed on the bottom of the rectangular\nmold. Then Gel-1 and Gel-2 samples were added onto Gel-0 piece\nfollowing the sequence: E-H-B-U-T. Another layer of Gel-0 was pre-\npared in situ on the top of the layer containing Gel-1 and Gel-2 to give\nthe hydrogel multilayer system. Then the overlaid samples were\nheated at 80 °C for 30 min to give the sandwich-like multilayer\nhydrogels.\n\nReporting summary\nFurther information on research design is available in the Nature\nPortfolio Reporting Summary linked to this article.\n\nData availability\nThe data generated in this study are provided in Supplementary\nInformation/Source Data ﬁle.\n\nReferences\n1. Wang, X. et al. Organic phosphors with bright triplet excitons for\n\n2.\n\nefﬁcient X-ray-excited luminescence. Nat. Photonics 15,\n187–192 (2021).\nLi, M. et al. Circularly polarized radioluminescence from chiral\nperovskite scintillators for improved X-ray imaging. Angew. Chem.\nInt. Ed. 134, e202208440 (2022).\n\n3. Hong, Z. Z., Chen, Z. W., Chen, Q. S. & Yang, H. H. Advancing X-ray\nluminescence for imaging, biosensing, and theragnostics. Acc.\nChem. Res. 56, 37–51 (2023).\n\n4. Ma, W. et al. Thermally activated delayed ﬂuorescence (TADF)\n\norganic molecules for efﬁcient X-ray scintillation and imaging. Nat.\nMater. 21, 210–216 (2022).\n\n5. He, T. Y. et al. High-performance copper-doped perovskite-related\n\n6.\n\nsilver halide X-ray imaging scintillator. ACS Energy Lett. 7,\n2753–2760 (2022).\nZhang, M. et al. Metal halide scintillators with fast and self-\nabsorption-free defect-bound excitonic radioluminescence for\ndynamic X-ray Imaging. Adv. Funct. Mater. 31, 2007921 (2021).\n\n7. Chen, Q. et al. All-inorganic perovskite nanocrystal scintillators.\n\n8.\n\nNature 561, 88–93 (2018).\nZhao, X. et al. Embedding Cs3Cu2I5 scintillators into anodic alumi-\nnum oxide matrix for high-resolution X-ray imaging. Adv. Opt.\nMater. 9, 2101194 (2021).\n\n9. Gandini, M. et al. Efﬁcient, fast and reabsorption-free perovskite\n\nnanocrystal-based sensitized plastic scintillators. Nat. Nanotech. 15,\n462–468 (2020).\n\n10. Zaffalon, M. L. et al. Extreme γ-ray radiation hardness and high\nscintillation yield in perovskite nanocrystals. Nat. Photonics 16,\n860–868 (2022).\n\n11. Xia, K. et al. In situ preparation of high-quality ﬂexible manganese-\nhalide scintillator ﬁlms for X-ray imaging. Adv. Opt. Mater. 10,\n2201028 (2022).\n\nNature Communications |  \n\n (2024) 15:2055 \n\n9\n\n \n \n \n \n \n \n\fArticle\n\nhttps://doi.org/10.1038/s41467-024-46287-8\n\n12. Zhang, H. et al. Reproducible X-ray imaging with a perovskite\nnanocrystal scintillator embedded in a transparent amorphous\nnetwork structure. Adv. Mater. 33, 2102529 (2021).\n\n13. Wu, X. C. et al. Ultrathin, transparent, and high density perovskite\nscintillator ﬁlm for high resolution X-ray microscopic imaging. Adv.\nSci. 9, 2200831 (2022).\n\n14. Wang, S. et al. Ruddlesden–popper perovskite nanocrystals stabi-\nlized in mesoporous silica with efﬁcient carrier dynamics for ﬂexible\nX-ray scintillator. Adv. Funct. Mater. 33, 2210765 (2023).\nJana, A. et al. Perovskite: Scintillators, direct detectors, and X-ray\nimagers. Mater. Today 55, 110–136 (2022).\n\n15.\n\n16. Mykhaylyk, V. B. et al. Bright and fast scintillations of an inorganic\nhalide perovskite CsPbBr3 crystal at cryogenic temperatures. Sci.\nRep. 10, 8601 (2020).\n\n17. Babayigit, A., Ethirajan, A., Muller, M. & Conings, B. Toxicity of\norganometal halide perovskite solar cells. Nat. Mater. 15,\n247–251 (2016).\n\n18. Kowal, D. et al. PEA2PbI4: fast two-dimensional lead iodide per-\n\novskite scintillator with green and red emission. Mater. Today\nChem. 29, 101455 (2023).\n\n19. Wang, J. X. et al. Heavy-atom engineering of thermally activated\ndelayed ﬂuorophores for high-performance X-ray imaging scintil-\nlators. Nat. Photonics 16, 869–875 (2022).\n\n20. Wang, J.-X. et al. Nearly 100% energy transfer at the interface of\n\nmetal-organic frameworks for X-ray imaging scintillators. Matter 5,\n253–265 (2022).\n\n21. Chen, J.-K., Shirahata, N. & Sun, H.-T. Metal-free scintillators excite\n\nX-ray community. Nat. Photonics 15, 171–172 (2021).\n\n22. Xu, L.-J., Lin, X., He, Q., Worku, M. & Ma, B. Highly efﬁcient eco-\n\nfriendly X-ray scintillators based on an organic manganese halide.\nNat. Commun. 11, 4329 (2020).\n\n34. Zhao, Y. F. et al. Storing solar energy within Ag-parafﬁn@halloysite\nmicrospheres as a novel self-heating catalyst. Appl. Energy 222,\n180–188 (2018).\n\n35. Karolina Pierchala, M. et al. Soft electronic materials with combi-\nnatorial properties generated via mussel-inspired chemistry and\nhalloysite nanotube reinforcement. ACS Nano 15,\n9531–9549 (2021).\n\n36. Feng, X. et al. Highly active PdO/Mn3O4/CeO2 nanocomposites\nsupported on one dimensional halloysite nanotubes for photo-\nassisted thermal catalytic methane combustion. Angew. Chem. Int.\nEd. 133, 18700–18704 (2021).\n\n37. Sawicka, D., Zapor, L., Chojnacka-Puchta, L. & Miranowicz-\nDzierzawska, K. The in vitro toxicity evaluation of halloysite\nnanotubes (HNTs) in human lung cells. Toxicol. Res. 37,\n301–310 (2021).\n\n38. Feng, Y. et al. A ferroptosis-targeting ceria anchored halloysite as\norally drug delivery system for radiation colitis therapy. Nat. Com-\nmun. 14, 5083 (2023).\n\n39. Wei, Y. et al. Activation of natural halloysite nanotubes by introdu-\ncing lanthanum oxycarbonate nanoparticles via co-calcination for\noutstanding phosphate removal. Chem. Commun. 55,\n2110–2113 (2019).\n\n40. Lvov, Y. & Abdullayev, E. Functional polymer-clay nanotube com-\nposites with sustained release of chemical agents. Prog. Polym. Sci.\n38, 1690–1719 (2013).\n\n41. Zhang, F. et al. Thermally activated delayed ﬂuorescence\n\nzirconium-based perovskites for large-area and ultraﬂexible X-ray\nscintillator screens. Adv. Mater. 34, 2204801 (2022).\n\n42. Li, Y. et al. Solution-processed one-dimensional CsCu2I3 nanowires\nfor polarization-sensitive and ﬂexible ultraviolet photodetectors.\nMater. Horiz. 7, 1613–1622 (2020).\n\n23. Gan, N. et al. Organic phosphorescent scintillation from copoly-\n\n43. Ou, X. et al. High-resolution X-ray luminescence extension imaging.\n\nmers by X-ray irradiation. Nat. Commun. 13, 3995 (2022).\n\nNature 590, 410–415 (2021).\n\n24. Glotov, A., Vutolkina, A., Pimerzin, A., Vinokurov, V. & Lvov, Y. Clay\nnanotube-metal core/shell catalysts for hydroprocesses. Chem.\nSoc. Rev. 50, 9240–9277 (2021).\n\n44. Yang, J. F. et al. A novel synthesis route to monodisperse\n\nNa5Lu9F32:Tb3+ phosphors with superior thermal stability. J. Lumin.\n204, 533–538 (2018).\n\n25. Peixoto, D. et al. Emerging role of nanoclays in cancer research,\ndiagnosis, and therapy. Coord. Chem. Rev. 440, 213956 (2021).\n26. Lazzara, G. et al. An assembly of organic-inorganic composites\n\n45. Zhu, S. J., Zhao, X. H., Song, Y. B., Lu, S. Y. & Yang, B. Beyond\nbottom-up carbon nanodots: Citric-acid derived organic mole-\ncules. Nano Today 11, 128–132 (2016).\n\nusing halloysite clay nanotubes. Curr. Opin. Colloid Interface Sci.\n35, 42–50 (2018).\n\n27. Zhao, S. L. et al. A dual-surface amidoximated halloysite nanotube\nfor high-efﬁciency economical uranium extraction from seawater.\nAngew. Chem. Int. Ed. 58, 14979–14985 (2019).\n\n28. Li, L.-Y. et al. Naturally occurring nanotube with surface modiﬁca-\ntion as biocompatible, target-speciﬁc nanocarrier for cancer pho-\ntotherapy. Biomaterials 190, 86–96 (2019).\n\n29. Lisuzzo, L., Cavallaro, G., Pasbakh, P., Milioto, S. & Lazzara, G. Why\ndoes vacuum drive to the loading of halloysite nanotubes? The key\nrole of water conﬁnement. J. Colloid Interface Sci. 547,\n361–369 (2019).\n\n30. Zhao, P. X., Feng, Y., Zhou, Y. Q., Tan, C. Y. & Liu, M. X. Gold@-\n\n46. Lu, Y. L. et al. Exploring maleimide-anchored halloysites as nano-\n\nphotoinitiators for surface-initiated photografting strategies. Chem.\nCommun. 58, 13636–13639 (2022).\n\n47. Sternberg, J., Sequerth, O. & Pilla, S. Green chemistry design in\n\npolymers derived from lignin: review and perspective. Prog. Polym.\nSci. 113, 101344 (2021).\n\n48. Gérard, J.-P. et al. Contact X-ray therapy for rectal cancer: experi-\nence in centre antoine-lacassagne, nice, 2002–2006. Int. J. Radiat.\nOncol. 72, 665–670 (2008).\n\n49. Benezery, K. et al. Clinical response assessment after contact X-Ray\n\nbrachytherapy and chemoradiotherapy for organ preservation in\nrectal cancer T2-T3 M0: The time/dose factor inﬂuence. Clin. Transl.\nRadiat. Oncol. 24, 92–98 (2020).\n\nhalloysite nanotubes-chitin composite hydrogel with antibacterial\nand hemostatic activity for wound healing. Bioac. Mater. 20,\n355–367 (2023).\n\n50. Zhu, C. N. et al. Dual-encryption in a shape-memory hydrogel with\ntunable ﬂuorescence and reconﬁgurable architecture. Adv. Mater.\n33, 2102023 (2021).\n\n31. Zhao, X., Zhou, C. & Liu, M. Self-assembled structures of halloysite\nnanotubes: towards the development of high-performance bio-\nmedical materials. J. Mater. Chem. B 8, 838–851 (2020).\n\n32. Liao, J. et al. Surface modiﬁed halloysite nanotubes with different\nlumen diameters as drug carriers for cancer therapy. Chem. Com-\nmun. 57, 9470–9473 (2021).\n\n33. Smith, R. J. et al. Environmentally benign halloysite nanotube\n\nmultilayer assembly signiﬁcantly reduces polyurethane Flamm-\nability. Adv. Funct. Mater. 28, 1703289 (2018).\n\n51. Yang, H. L. et al. Erasable, rewritable, and reprogrammable dual\ninformation encryption based on photoluminescent supramole-\ncular host-guest recognition and hydrogel shape memory. Adv.\nMater. 35, 2301300 (2023).\n\n52. Lou, D. et al. Double lock label based on thermosensitive polymer\nhydrogels for information camouﬂage and multilevel encryption.\nAngew. Chem. Int. Ed. 61, e202117066 (2022).\n\n53. Hajagos, T. J., Liu, C., Cherepy, N. J. & Pei, Q. High-Z sensitized\n\nplastic scintillators: a review. Adv. Mater. 30, 1706956 (2018).\n\nNature Communications |  \n\n (2024) 15:2055 \n\n10\n\n \n \n \n \n \n \n\fArticle\n\nhttps://doi.org/10.1038/s41467-024-46287-8\n\n54. Xu, R. H. et al. AIE nanocrystals: emerging nanolights with ultra-high\nbrightness for biological application. Coordin. Chem. Rev. 477,\n214944 (2023).\n\n55. Li, H. X. et al. As ﬁber meets with AIE: opening a wonderland for\n\nsmart ﬂexible materials. Adv. Mater. 35, 2210085 (2023).\n\nAcknowledgements\nH.Z. acknowledges the support from National Natural Science Founda-\ntion of China (Grant No. 22102045) and the Chinese Scholarship Council\n(No. 202108130104). R.H. acknowledges continuous ﬁnancial support\nfrom Ghent University and the Research Foundation - Flanders (FWO). Y.\nY. acknowledges the support from National Natural Science Foundation\nof China (Grant No. 12374373).\n\nAuthor contributions\nR.H., H.Z., and Y.Y. conceived and supervised the project. H.Z., X.B., and\nY.W. designed the synthesis. B.Z. synthesized the materials. Y.Y. and\nC.C. performed radioluminescence measurement. Yu Wang and Yuan\nWang performed the additional work on synthesis and characterizations\nduring the revision stage. R.H. and H.Z. wrote the manuscript. H.Z., B.Z.,\nand K.Z. participated in data analysis. All authors participated in the\ndiscussion and analysis of the manuscript.\n\nCompeting interests\nThe authors declare no competing interests.\n\nCorrespondence and requests for materials should be addressed to\nHailei Zhang, Yanmin Yang or Richard Hoogenboom.\n\nPeer review information Nature Communications thanks Zhitao Kang\nand the other anonymous reviewers for their contribution to the peer\nreview of this work. A peer review ﬁle is available.\n\nReprints and permissions information is available at\nhttp://www.nature.com/reprints\n\nPublisher’s note Springer Nature remains neutral with regard to jur-\nisdictional claims in published maps and institutional afﬁliations.\n\nOpen Access This article is licensed under a Creative Commons\nAttribution 4.0 International License, which permits use, sharing,\nadaptation, distribution and reproduction in any medium or format, as\nlong as you give appropriate credit to the original author(s) and the\nsource, provide a link to the Creative Commons licence, and indicate if\nchanges were made. The images or other third party material in this\narticle are included in the article’s Creative Commons licence, unless\nindicated otherwise in a credit line to the material. If material is not\nincluded in the article’s Creative Commons licence and your intended\nuse is not permitted by statutory regulation or exceeds the permitted\nuse, you will need to obtain permission directly from the copyright\nholder. To view a copy of this licence, visit http://creativecommons.org/\nlicenses/by/4.0/.\n\nAdditional information\nSupplementary information The online version contains supplementary\nmaterial available at\nhttps://doi.org/10.1038/s41467-024-46287-8.\n\n© The Author(s) 2024\n\nNature Communications |  \n\n (2024) 15:2055 \n\n11\n\n \n \n \n \n \n \n\f"
+}

@@ -16,6 +16,12 @@ import threading
 from datetime import datetime
 from pathlib import Path
 from functools import lru_cache
+import os
+import re
+import sys
+import tempfile
+import subprocess
+import threading
 import json
 import difflib as _difflib
 try:

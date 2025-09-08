@@ -1,0 +1,63 @@
+{
+  "paper_id": "10.1111/1750-3841.70339",
+  "title": "Synthesis and Characterization of Cationic and Non-Ionic Surfactant Added Organomodified Montmorillonite and the Effect on Migration Characteristics for Starch-Based Film Materials.",
+  "authors": [
+    {
+      "name": "Çavuş S, Arıcı M."
+    }
+  ],
+  "doi": "10.1111/1750-3841.70339",
+  "source": "eupmc",
+  "urls": {
+    "pdf": ""
+  },
+  "license": null,
+  "access_route": "unknown",
+  "sections": [
+    {
+      "heading": "metadata",
+      "text": "Synthesis and Characterization of Cationic and Non-Ionic Surfactant Added Organomodified Montmorillonite and the Effect on Migration Characteristics for Starch-Based Film Materials."
+    }
+  ],
+  "extractions": {
+    "methods_paragraphs": [
+      {
+        "text": "Synthesis and Characterization of Cationic and Non-Ionic Surfactant Added Organomodified Montmorillonite and the Effect on Migration Characteristics for Starch-Based Film Materials.",
+        "operations": [
+          {
+            "op_type": "add",
+            "sentence": "Synthesis and Characterization of Cationic and Non-Ionic Surfactant Added Organomodified Montmorillonite and the Effect on Migration Characteristics for Starch-Based Film Materials.",
+            "start_char": 68,
+            "end_char": 73,
+            "materials": [
+              "-Based Film Materials."
+            ],
+            "params": {}
+          }
+        ],
+        "expanded": [
+          {
+            "op_type": "add",
+            "steps": [
+              "Ensure reaction vessel is present and empty.",
+              "Place a clean stir bar in the vessel.",
+              "Measure the specified amount of -Based Film Materials..",
+              "Transfer -Based Film Materials. into the vessel."
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "meta": {
+    "title": "Synthesis and Characterization of Cationic and Non-Ionic Surfactant Added Organomodified Montmorillonite and the Effect on Migration Characteristics for Starch-Based Film Materials.",
+    "doi": "10.1111/1750-3841.70339",
+    "url": "",
+    "pdf_url": "",
+    "year": "2025",
+    "authors": [
+      "Çavuş S, Arıcı M."
+    ]
+  },
+  "raw": "Synthesis and Characterization of Cationic and Non-Ionic Surfactant Added Organomodified Montmorillonite and the Effect on Migration Characteristics for Starch-Based Film Materials."
+}

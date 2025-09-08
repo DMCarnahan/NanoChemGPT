@@ -1,0 +1,1000 @@
+{
+  "paper_id": "10.1038/s41598-025-07270-5",
+  "title": "Fabrication of biodegradable nanocomposite scaffolds with hydroxyapatite, magnetic clay, and graphene oxide for bone tissue engineering.",
+  "authors": [
+    {
+      "name": "Babakhani A"
+    },
+    {
+      "name": "Peighambardoust SJ, Ghahremani-Nasab M"
+    },
+    {
+      "name": "Peighambardoust NS."
+    }
+  ],
+  "doi": "10.1038/s41598-025-07270-5",
+  "source": "eupmc",
+  "urls": {
+    "pdf": ""
+  },
+  "license": null,
+  "access_route": "unknown",
+  "sections": [
+    {
+      "heading": "(fallback)",
+      "text": "method), clay, and Fe3O4 nanoparticles. Nanocomposite scaffolds were prepared using the freeze-\ndrying process, incorporating 10 wt. % HAp and 2 wt. % CGF as optimal additives. Comprehensive \ncharacterization, including XRD, FT-IR, TGA, SEM, and analysis of porosity, swelling, degradation, \nand biomineralization, confirmed the formation of a porous polymer matrix with favorable properties. \nThe optimal PVA/CMC/HAp/CGF scaffold demonstrated compressive strength of 12 MPa, porosity \nof 72%, swelling of 1860%, and biodegradation of 43% over 21 days, while the PVA/Alg/HAp/CGF \nscaffold exhibited a compressive strength of 8.1 MPa and porosity of 79%. Both scaffolds showed good \nbiomineralization in SBF and a favorable cell viability rate (OD) in MTT toxicity tests, with an OD of \n1.483 and 1.451 for PVA/CMC/HAp/CGF and PVA/Alg/HAp/CGF scaffolds, respectively. These findings \nsuggest that the PVA/CMC/HAp/CGF nanocomposite scaffold is a promising candidate for bone tissue \nengineering applications. By adding hydroxyapatite and magnetic clay modified with graphene oxide \nto the polymer scaffold, the mechanical properties of the scaffold are increased, appropriate porosity \nand swelling values are obtained, and desirable cell viability is achieved.\n\nKeywords  Magnetic nanoclay, Hydroxyapatite, Nanocomposite scaffold, Graphene oxide, Bone tissue \nengineering\n\nFailure  of  tissues  and  organs  due  to  damage,  congenital  disabilities,  and  aging  is  becoming  the  main  issue \nof  human  body  health  all  over  the  world.  Bones  are  one  of  the  strongest  and  primary  tissues  of  the  body, \nmaintaining  the  surrounding  soft  tissues1.  Regarding  synthetic  scaffolds  that  promote  bone  tissue  repair,  the \ndual role of bone tissue engineering (BTE) scaffolds in interacting with the extracellular matrix and providing \nload-bearing capacity is a challenge. This research aims to investigate the use and processing of several materials \nand  hierarchical  architectures  to  simulate  the  structure  of  natural  bone  tissues  so  that  they  may  function  as \nbioactive artificial scaffolds2. It is widely believed that designing and preparing new tissues is one of the most \n\n1Faculty  of Chemical  and  Petroleum  Engineering,  University  of Tabriz, Tabriz  5166616471,  Iran.  2Stem Cell  and \nRegenerative Medicine Innovation Center, Tabriz University of Medical Sciences, Tabriz, Iran. 3Koç University Boron \nand Advanced Materials Application and Research Center (KUBAM), 34450 Sariyer, Istanbul, Turkey. 4Department \nof Tissue Engineering, Faculty of Advanced Medical Sciences, Tabriz University of Medical Sciences, Tabriz, Iran. \nemail: j.peighambardoust@tabrizu.ac.ir\n\nScientific Reports |        (2025) 15:22235 \n\n| https://doi.org/10.1038/s41598-025-07270-5\n\n1\n\nOPEN\fwww.nature.com/scientificreports/\n\neffective and efficient ways that tissue engineering can accelerate bone regeneration during the healing process3. \nA new strategy for repairing bones has emerged that is based on tissue engineering. As a result of its use of \nbiomaterial scaffolds along with cells and growth factors, it can induce the formation of new bone tissues while \nreducing the risks associated with autologous bone grafts4. Bone tissue is a composite of approximately 70% \nnano-hydroxyapatite and 30% collagen. Wet collagen and the accumulation of mineral crystals penetrate each \nother and form a mineral fiber on a scale of several hundred nanometers. The primary role of bone is to provide \na  structural  framework  and  mechanical  strength,  regulate  blood  pH,  and  maintain  calcium  and  phosphate \nlevels for metabolic processes5. It is desirable to design a biocompatible composite that can mimic the natural \nextracellular bone matrix and accelerate new bone regeneration6. If the dispersed phase used in the composite is \nnanoparticles, the composite material will be a nanocomposite. Natural bone is an example of a nanocomposite \ncomposed of two major phases, organic and inorganic, at the nanoscale7. Polymer-based nanocomposites are \nattractive  due  to  their  ability  to  create  porous  architectures  and  biodegradability.  The  ease  of  manipulating \nstructures  with  precise  tuning  of  physicochemical  properties  is  an  advantage  of  polymer  nanocomposites \nfor  tissue  engineering  applications  such  as  dental,  bone,  and  neural  engineering8.  Nanocomposites  made  of \npolymeric materials and additives are potential materials for constructing bone scaffolds9.\n\nPolymers for making hydrogels include natural and synthetic polymers. Natural polymers are mainly natural \ncomponents  that  prepare  scaffolds  with  high  biocompatibility,  biodegradability,  and  natural  cell  adhesion. \nRecently, synthetic polymers have been widely used to make bone tissue engineering scaffolds because they have \nhigh mechanical properties and long life. Carboxymethyl cellulose is a biocompatible and biodegradable anionic \npolymer that can create a strong ionic cross-link in the scaffold10 and increase the biochemical characteristics \nof porosity, swelling, and degradation. Cellulose is mainly used for various biomedical applications11. Among \nnatural polysaccharides, alginate biopolymer is also widely used as a biomaterial for bone tissue engineering. \nAlginate is one of the most well-known substances, and it has the property of forming a suitable scaffold that can \nbe useful for the treatment of organ failure and loss. Alginate consists of guluronic acid and mannuronic acid \nand is used in tissue engineering due to its biocompatibility, non-toxicity, abundance, and low price12. Alginate \nhydrogels can increase minimal protein absorption due to their hydrophilic property13. Sodium alginate is anionic \nand can be dissolved in water. Hydroxyl groups can cause strong interactions between sodium alginate and other \npolymers through hydrogen bonding14. Alginate benefits osteoblast growth due to its functional groups, such \nas hydroxyl and carboxyl, and increases the efficiency of implant substrates. Due to its high degradation rate in \ncell culture, its use in biomedical applications is limited. To improve alginate’s biocompatibility and mechanical \nproperties, its combination with synthetic polymers and clay minerals was investigated15. Given the disadvantages \nof  natural  polymers,  such  as  poor  solubility  in  common  solvents,  their  low  mechanical  properties,  and  poor \nstability in physiological environments, There have been numerous studies conducted on the physicochemical \nproperties of composite polymers, which have proven to be effective in overcoming the disadvantages of natural \npolymers16. Blending polymers is a potential method for improving mechanical flexibility17. Polyvinyl alcohol \nis a hydrophilic semi-crystalline synthetic biopolymer containing many hydroxyl groups, and it can also form \nhydrogen  bonds  with  free  water  molecules18.  Polyvinyl  alcohol  is  biocompatible  and  has  high  mechanical \nstrength, low toxicity, large surface area, and good chemical stability; in a clinical setting, its use is possible to \nconstruct membranes, repair tissues, and construct biomaterials16. By synergistically combining the bioactive \nproperties of nanoparticles and the properties of polymers, composite materials create scaffolds that provide an \noptimal environment for cell proliferation, differentiation, and cell adhesion19. Various natural and synthetic \nfillers  are  used  as  strengthening  agents  to  improve  polymer  scaffolds’  mechanical  properties  and  bioactivity. \nClay is considered one of the mineral fillers that will enhance the biological and mechanical properties of the \nscaffold  significantly,  and  it  has  already  been  studied  in  bone  cement  processing20.  Clay  can  be  essential  in \nbone regeneration and repair, increasing osteoblast differentiation and apatite deposition20. Also, the graphene \noxide filler is highly compatible with the polymer matrix due to the attendance of polar groups on the surface \nof  this  material. The  high  exceptional  area  ratio  and  antibacterial  properties  make  GO  a  promising  material \nfor developing bone tissue’s antimicrobial and antiviral surface21. GO is exfoliated from graphite and contains \nepoxide, carboxylic, and carbonyl ketone groups in its structural plane. Graphene and graphene-based materials \nhave been investigated in various fields, such as bioimaging, biosensors, cancer treatment, drug delivery, and \ntissue engineering. Unique properties such as thermal conductivity, mechanical strength, high surface area, ease \nof operation, flexibility, biocompatibility, and antibacterial activity make it suitable for biological applications. \nGO has osteoconductive and osteoinductive ability to regulate osteoblast differentiation22,23. Also, this substance \ncan force stem cells to undergo osteogenic differentiation even without adding a growth factor24. Hydroxyapatite \ncontains basic elements such as calcium and phosphate, essential for bone growth. HAp particles increase cell \nproliferation and adhesion and improve bone tissue conduction23. Hydroxyapatite has unique properties, such \nas excellent biocompatibility and low toxicity25. Combining ceramic filler and polymer matrix in one material \nproduces  composites  with  polymer  plasticity  and  calcium  phosphate  bioactivity26.  Scaffolds  containing  HAp \nhave stronger mechanical properties and higher cell proliferation than scaffolds containing TCP, which gives \nthem a better function in bone regeneration in the early stages27. Nanoparticle content can be used to modify the \nproperties of polymer nanocomposites28. Various magnetic nanoparticles have been developed recently for use \nin biological applications. Among these nanoparticles, iron oxide nanoparticles (Fe3O4) have biocompatibility \nand  good  performance  for  medical  applications.  Many  researchers  have  shown  that  the  magnetic  properties \nof Fe3O4 nanoparticles make it an ideal material for cell isolation and drug delivery, which also increases the \neffect of bone induction. Several studies have shown that integrating Fe3O4 nanoparticles with polymer fibers \nsolves the compaction problem and improves their stability in biological applications29. The research fabricates \nnanocomposite  scaffolds  using  CMC,  Alg,  PVA,  magnetic  clay  nanoparticles  modified  with  graphene  oxide \n(CGF), and natural hydroxyapatite (HAp) to enhance mechanical properties. Characterization involved XRD, \nFT-IR, TGA, and SEM analyses, assessing porosity, swelling, degradation, and biomineralization, and the MTT \n\nScientific Reports |        (2025) 15:22235 \n\n| https://doi.org/10.1038/s41598-025-07270-5\n\n2\n\n\fwww.nature.com/scientificreports/\n\ntest  evaluated  cell  viability.  In  bone  tissue  research,  the  composites  studied  mainly  combine  a  natural  and \nsynthetic polymer and an additive, each of which can only be used to improve one property. In this study, two \nbiopolymers are compared in terms of the composition of scaffolds. Two additives are also used: HAp can be \nused to improve biomineralization, and CGF is a combination of several materials that can give many favorable \nproperties to the polymer composite for use as a polymer scaffold.\n\nHaving  the  required  mechanical  properties  is  one  of  the  most  important  properties  that  bone  tissue \nreplacement  scaffolds  must  possess.  In  addition  to  having  the  required  mechanical  properties,  the  scaffolds \nshould possess other characteristics required by bone tissue, such as porosity, biocompatibility, swelling, and \nnon-toxicity. A significant aspect of the research is that in addition to increasing compressive strength, attention \nhas been paid to maintaining the required porosity of the bone tissue. A combination of graphene oxide, clay, \nhydroxyapatite, and the magnetic material Fe3O4 has been used in this research as a new material. As a result of \nthe combination of graphene oxide with clay, the compressive strength of the scaffold was increased significantly, \nand the presence of HAp led to an increase in biomineralization of the scaffold, whereas Fe3O4 had a positive \neffect on the viability of the cells. The properties of natural bone differ significantly based on its type. For example, \nthe compressive strength of cancellous bone ranges from 2 to 20 MPa. As a result, it is important to consider \nthe scaffold’s mechanical properties when designing scaffolds for bone reconstruction and fracture healing to \nensure a successful outcome30. It has been found that the scaffold that was prepared in this study has compressive \nstrength within the acceptable range for cancellous bone. It is important to  emphasize that the porosity of a \nhydrogel is a significant factor that profoundly affects the fate of bone cells31. A series of interconnected pores \nin this hydrogel facilitate the migration of cells, the permeability of nutrients, the removal of waste materials, \nand the penetration of blood vessels and nerves32. The porosity of cancellous bone ranges from 30 to 70%33. The \nporosity of the scaffolds prepared for this study is within an appropriate range for cancellous bone scaffolds. \nThe prepared scaffolds had appropriate degradation rates because replacing the manufactured tissue with the \noriginal tissue would have to occur within a proper biodegradation range. Also, they exhibited a high degree of \ncell viability.\n\nMaterials and methods\nMaterials\nSodium alginate (Na-Alg) polymer with a molecular weight of 12,000–40,000 Da from Sigma Aldrich, sodium \ncarboxymethyl  cellulose  with  a  molecular  weight  of  70,000  g/mol  and  a  deacetylation  degree  of  90%  from \nSamchun, Korea, and polyvinyl alcohol with a molecular weight of 72,000 g/mol and a hydrolysis degree of 95% \nfrom  Merck  were  used  in  this  study.  Potassium  hydrogen  phosphate  (KH2PO4),  sodium  hydroxide  (NaOH), \nand  25%  glutaraldehyde  as  cross-linkers  were  obtained  from  Merck.  The  acids  used  in  this  study,  including \nhydrochloric  acid  (HCl)  37%,  phosphoric  acid  (H3PO4),  acetic  acid  (CH3COOH)  100%,  and  sulfuric  acid \n(H2SO4) 98%, were all obtained from Merck. Cloisite 30B clay was organically modified to be the clay used in \nthe study, obtained from Southern Clay Company. K2HPO4.3H2O, KCl, NaCl, Na2SO4, MgCl2.6H2O, NaHCO3, \nCaCl2.2H2O, and TRIS salts prepared simulated body fluid purchased from Merck. Iron (II) chloride, Iron (III) \nchloride, KMnO4, and H2O2 were used to modify clay.\n\nSynthesis of graphene oxide\nTo prepare graphene oxide using the modified Hummer method. First, 3 g of graphite powder was added to \nthe H2SO4/H3PO4 mixture (40:360 ml), and then 18 g of KMnO4 was added and stirred at 50 °C for 14 h with \n100 rpm by a magnetic stirrer. The temperature of the resulting mixture was reduced to 25 °C, and then 30% \nH2O2 was added to it, making the mixture light brown and stirred for 20 min. A centrifuge was used to separate \nthe mixture, and several washes were done with distilled water to reach a neutral pH. In a vacuum oven, 24 h of \ndrying time was spent at 70 °C on the synthesized graphene oxide34. Graphene oxide was synthesized in black \nand in powder form.\n\nPreparation of magnetically modified clay\nTo prepare magnetically modified clay, 1 g of synthesized graphene oxide (GO) was sonicated in 100 mL of water \nfor 35 min, while 2 g of Cloisite 30B clay was sonicated in 100 mL of water for 20 min. A solution of iron(III) \nchloride and iron(II) chloride in a 1:2 molar ratio was then added to the GO-clay mixture, which was heated \nand stirred at 90 °C for 20 min. The resulting mixture was gradually combined with a 4 M sodium hydroxide \nsolution and stirred for 50 min. Finally, the modified clay was separated from the solution, washed several times \nwith distilled water, and baked at 105 °C for 4 h.\n\nPreparation of natural hydroxyapatite (HAp) powder\nThe  chicken  femur  was  cleaned  entirely  of  meat  and  remaining  materials  to  prepare  natural  hydroxyapatite \npowder  and  then  boiled  for  45  min  in  boiling  water.  The  cleaned  bones  were  placed  in  a  furnace  for  3  h  at \n900 °C with a nitrogen atmosphere. After the set time, the bones are removed from the oven, cooled to room \ntemperature,  and  then  powdered  once  they  are  at  room  temperature.  The  production  efficiency  of  natural \nhydroxyapatite powder is 58%, and the product is white35.\n\nPreparation of nanocomposite scaffold\nThe  nanocomposite  scaffolds  were  prepared  using  natural  polymer  materials,  PVA,  hydroxyapatite  extracted \nfrom  natural  bone,  and  modified  clay  using  a  simple  mixing  method.  For  the  preparation  of  the  scaffold,  a \nsolution of 2 wt. in the first step. % of a natural polymer in distilled water was prepared by dissolving the polymer \nin the water and stirring the solution until the polymer was fully dissolved. It was also possible to prepare a \nsolution of polyvinyl alcohol by dissolving PVA in distilled water at a temperature of 70 °C to prepare a solution \n\nScientific Reports |        (2025) 15:22235 \n\n| https://doi.org/10.1038/s41598-025-07270-5\n\n3\n\n\fwww.nature.com/scientificreports/\n\nof 0.2 wt. % of polyvinyl alcohol. HAp was dispersed in 1 v/v % acetic acid for 24 h to obtain a solution of 2 wt. \n% of hydroxyapatite. As soon as the materials had been prepared, they were added in the correct proportions, \nand the mixer was turned on for 12 h. 0.5 v/v % of glutaraldehyde was added to the prepped solution in 5% \nof the total solution volume to cross-link the polymer solution. The solution needs to be mixed for 20 min. A \nsuspension was obtained by dispersing the modified clay in distilled water. In this method, the last step of adding \nCGF is included. The particles were evenly dispersed in the solution after adding CGF and then subjected to \nultrasonic treatment for two hours. The solution was transferred into a falcon tube and dried using a freeze-\ndryer. After drying, the samples were washed with a 2 wt. % NaBH4 solution and a 2 wt. % NaOH solution to \nneutralize any unreacted glutaraldehyde and excess acetic acid. The samples were then dried once more. The \nschematic representation of the PVA/Alg/Hap/CGF nanocomposite formation has been shown in the Scheme 1.\n\nCharacterization of scaffolds\nFourier transform infrared spectroscopy (FTIR) study\nTo examine the functional and chemical properties of HAp, Fe3O4, GO, clay, Cloisite 30B/GO/Fe3O4, Alg, CMC, \nPVA, and their interactions, we performed FTIR analysis on the prepared nanocomposite scaffolds. Infrared \nspectra of the samples, mixed with KBr powder, were recorded using a Bruker Tensor 27 spectrophotometer \n(Germany). This FTIR instrument offers a measurement resolution of 0.1 cm⁻1, and its readings are based on \nabsorbance.\n\nX-ray diffraction (XRD) study\nXRD  analysis  evaluated  the  crystallinity  of  PVA,  CMC,  Alg,  HAp,  clay,  and  C30B/GO/Fe3O4  samples  and \nthe  prepared  nanocomposite  scaffolds.  The  analysis  was  performed  using  a  Krisallofex  D500  diffractometer \n(Siemens, Germany), which employed Cu-Kα radiation at 25 mA, operating at 40 kV, and scanned over a range \nof 4–80°. The device had a scan step of 0.05° and a measurement accuracy of 0.04 deg/sec.\n\nMorphology study of scaffold samples by SEM analysis\nThe  scaffolds  were  prepared  by  freeze-drying  and  then  coated  with  a  thin  layer  of  gold  after  being  cut  into \nthin sheets. Once the samples were positioned in the microscope, scanning electron microscopy (SEM) images \n(MIRA3, TESCAN, Brno, Czech Republic) were used to examine the morphology of the scaffolds. Furthermore, \nthe  presence  and  distribution  of  phosphorus  and  calcium  elements  within  the  nanocomposite  scaffold  were \nanalyzed using energy-dispersive X-ray (EDX)  mapping. A voltage  of 30  kV was applied to the SEM device. \nAlso, to image the amount of cell culture by SEM, uniform pieces of the scaffolds were cut and immersed in 70% \nethanol solution for 30 min for sterilization. In the next step, the samples were washed three times with PBS to \nremove excess ethanol and then transferred to a 6-well cell culture plate. A cell plate with a density of 50,000 cells \nper cell plate was then used to culture the MSCs on scaffolds. As a final step, the samples were cultured in an \nFBS medium with 1% penicillin–streptomycin and 10% DMEM in an incubator for 72 h. They were incubated \nfor 72 h at 37 °C. After this time, the supernatant of all the wells of the 6-well plate was removed, and after \nwashing with PBS, they were fixed with 2.5% glutaraldehyde for 20 min. After removing the fixative solution, \n\nScheme 1.  Schematic representation of the formation of PVA/Alg/Hap/CGF nanocomposite scaffolds.\n\nScientific Reports |        (2025) 15:22235 \n\n| https://doi.org/10.1038/s41598-025-07270-5\n\n4\n\n \n\fwww.nature.com/scientificreports/\n\nthey  were  dried  under  the  hood  and  in  the  environment.  Finally,  the  morphological  images  of  the  samples \nprepared according to this section were examined by SEM.\n\nMechanical properties study\nThe  mechanical  properties  of  the  scaffold  samples  were  evaluated  by  measuring  the  compressive  strength \nprepared by freeze-drying. To assess the material’s compressive strength, cylinder samples measuring 12 mm in \nheight and 6 mm in diameter were cut. During a compression test, a force with 0.5 mm per minute speed and \npower of 25 kN was used to test the material’s compressive strength at 25 °C. A universal machine model was \nused to carry out mechanical tests, Al-7000-Taiwand. Three samples of each scaffold were prepared to perform \nthe compressive strength test, and all three samples were tested. Their average compressive strength was reported \nas the compressive strength of the polymer scaffold. The error value was 0.1 MPa.\n\nMeasuring the porosity of scaffolds\nUsing the liquid displacement method, we could determine the porosity of scaffolds36. Scaffolds were cut into \none cubic cm square piece. A displacement liquid was employed in this case, and it was ethanol because it does \nnot dissolve the scaffolds while it is being used. To determine the porosity of the cut scaffolds, the scaffolds were \nplaced in a graduated container containing ethanol with volume (V1) to measure the porosity. Using the total \nvolume of ethanol and scaffold (V2), we calculated the volume difference V2-V1. After exiting the scaffold from \nthe cylinder containing ethanol, the remaining volume of the ethanol in the cylinder was measured by using \nthe following formula: V3. According to the equation below, the scaffold porosity could be estimated using the \nfollowing equation:\n\nε =\n\n(V1 −\n(V2 −\n\nV2)\nV3)\n\n(1)\n\nSwelling test of scaffolds\nInitially, the cut scaffolds were weighed (Winitial) and then immersed in PBS phosphate buffer solution for 24 h \nfor incubation. After incubation, the samples were removed from the buffer solution, and any excess water was \nblotted off with filter paper. The swelling test was repeated three times for each sample. The swelling ratio for \neach sample was calculated using the following equation37:\n\nSwelling Ratio =\n\n(Wﬁnal −\n\nWinitial)\n\nWinitial\n\n(2)\n\nBiodegradation test of scaffolds\nScaffolds were given the exact dimensions and weighed. Then, the scaffold samples were incubated in a phosphate \nbuffer solution for 21, 14, and 7 days at 37 °C with pH = 7.4. After the specified time, the samples were dried using \nthe freeze-drying method and weighed. The scaffold destruction rate was obtained by the following equation37:\n\nBiodegradation Ratio =\n\n(Initial weight of sample\n\nWeight of sample in time T)\n\n−\n\nInitial weight of sample\n\n(3)\n\nThermogravimetric analysis (TGA) study\nThe  thermal  stability  of  the  polymer  raw  materials  and  nanocomposite  scaffolds  was  assessed  using  TGA.  A \nthermogravimetric  analyzer  (TGA-PL,  TGA  1500,  Canada)  was  employed  for  this  analysis,  conducted  in  a \nnitrogen atmosphere within the 25–600°C temperature range.\n\nInvestigation of scaffold biomineralization using simulated body fluid (SBF)\nThe performance of the scaffold bone graft was assessed using simulated body fluid (SBF), which was prepared \nfollowing  established  protocols  with  chemical  reagents.  SBF  is  essential  for  examining  the  formation  of \nbiomaterials on polymer scaffolds. To prepare the solution, 1000 mL of SBF was made by adding 700 mL of \ndeionized water into a plastic container in a water bath. It is recommended to cover the container with either \na glass or plastic lid while stirring; for the process to be successful, the solution should be kept at a consistent \ntemperature of 36.5 °C throughout. Adding the ingredients in order is essential; once each ingredient is dissolved \ncompletely, the next one should be added, and so on. As soon as the ingredients were added, hydrochloric acid \nwas used in the amount of 0–5 ml with an additive solution to achieve a pH of 7.4 in the resulting solution after \nadding the ingredients. A total of 1000 mL of solution was prepared by adding water to a flask and shaking it \nat 20 °C to reach the desired volume. The solution was then transferred to a polyethylene container and stored \nin a refrigerator at 5–10 °C. Scaffold samples were immersed in the SBF solution and incubated at 37 °C for 14 \ndays. After incubation, the samples were removed, rinsed with distilled water, and dried using the freeze-drying \nmethod. Finally, EDX and SEM techniques were employed to evaluate the biomineralization capability of the \nscaffold samples38.\n\nAssessment of toxicity and cell viability\nFirst, uniform pieces of scaffolds were cut and immersed in 70% ethanol solution for 30 min to sterilize them. \nEventually, we must continue using PBS to remove any remaining ethanol from the system and transfer it to a \n96-well cell culture plate. Then, mesenchymal stem cells were cultured on the scaffolds with a cell density of 1 × \n104 cells per cell plate. After collecting the samples, they were cultured inside the incubator in a DMEM medium \n\nScientific Reports |        (2025) 15:22235 \n\n| https://doi.org/10.1038/s41598-025-07270-5\n\n5\n\n \n \n \n \n \n \n\fwww.nature.com/scientificreports/\n\ncontaining 1% penicillin–streptomycin and 10% FBS. They were incubated for 72 h at 37 °C. After 72 h, the \nsupernatant of all the wells of the 96-well plate was removed, and after washing with PBS to each well, 0.2 ml of \nMTT solution (5 mg/mm) was added, and the wells were kept in the incubator for four hours. It was incubated at \n37 °C. A solution of 0.1 mL DMSO was then substituted for the MTT solution for 30 min. Finally, the absorbance \nwas measured by an ELISA reader at a wavelength of 570 nm to determine cell viability."
+    }
+  ],
+  "extractions": {
+    "methods_paragraphs": [
+      {
+        "text": "method), clay, and Fe3O4 nanoparticles. Nanocomposite scaffolds were prepared using the freeze-\ndrying process, incorporating 10 wt. % HAp and 2 wt. % CGF as optimal additives. Comprehensive \ncharacterization, including XRD, FT-IR, TGA, SEM, and analysis of porosity, swelling, degradation, \nand biomineralization, confirmed the formation of a porous polymer matrix with favorable properties. \nThe optimal PVA/CMC/HAp/CGF scaffold demonstrated compressive strength of 12 MPa, porosity \nof 72%, swelling of 1860%, and biodegradation of 43% over 21 days, while the PVA/Alg/HAp/CGF \nscaffold exhibited a compressive strength of 8.1 MPa and porosity of 79%. Both scaffolds showed good \nbiomineralization in SBF and a favorable cell viability rate (OD) in MTT toxicity tests, with an OD of \n1.483 and 1.451 for PVA/CMC/HAp/CGF and PVA/Alg/HAp/CGF scaffolds, respectively. These findings \nsuggest that the PVA/CMC/HAp/CGF nanocomposite scaffold is a promising candidate for bone tissue \nengineering applications. By adding hydroxyapatite and magnetic clay modified with graphene oxide \nto the polymer scaffold, the mechanical properties of the scaffold are increased, appropriate porosity \nand swelling values are obtained, and desirable cell viability is achieved.\n\nKeywords  Magnetic nanoclay, Hydroxyapatite, Nanocomposite scaffold, Graphene oxide, Bone tissue \nengineering\n\nFailure  of  tissues  and  organs  due  to  damage,  congenital  disabilities,  and  aging  is  becoming  the  main  issue \nof  human  body  health  all  over  the  world.  Bones  are  one  of  the  strongest  and  primary  tissues  of  the  body, \nmaintaining  the  surrounding  soft  tissues1.  Regarding  synthetic  scaffolds  that  promote  bone  tissue  repair,  the \ndual role of bone tissue engineering (BTE) scaffolds in interacting with the extracellular matrix and providing \nload-bearing capacity is a challenge. This research aims to investigate the use and processing of several materials \nand  hierarchical  architectures  to  simulate  the  structure  of  natural  bone  tissues  so  that  they  may  function  as \nbioactive artificial scaffolds2. It is widely believed that designing and preparing new tissues is one of the most \n\n1Faculty  of Chemical  and  Petroleum  Engineering,  University  of Tabriz, Tabriz  5166616471,  Iran.  2Stem Cell  and \nRegenerative Medicine Innovation Center, Tabriz University of Medical Sciences, Tabriz, Iran. 3Koç University Boron \nand Advanced Materials Application and Research Center (KUBAM), 34450 Sariyer, Istanbul, Turkey. 4Department \nof Tissue Engineering, Faculty of Advanced Medical Sciences, Tabriz University of Medical Sciences, Tabriz, Iran. \nemail: j.peighambardoust@tabrizu.ac.ir\n\nScientific Reports |        (2025) 15:22235 \n\n| https://doi.org/10.1038/s41598-025-07270-5\n\n1\n\nOPEN\fwww.nature.com/scientificreports/\n\neffective and efficient ways that tissue engineering can accelerate bone regeneration during the healing process3. \nA new strategy for repairing bones has emerged that is based on tissue engineering. As a result of its use of \nbiomaterial scaffolds along with cells and growth factors, it can induce the formation of new bone tissues while \nreducing the risks associated with autologous bone grafts4. Bone tissue is a composite of approximately 70% \nnano-hydroxyapatite and 30% collagen. Wet collagen and the accumulation of mineral crystals penetrate each \nother and form a mineral fiber on a scale of several hundred nanometers. The primary role of bone is to provide \na  structural  framework  and  mechanical  strength,  regulate  blood  pH,  and  maintain  calcium  and  phosphate \nlevels for metabolic processes5. It is desirable to design a biocompatible composite that can mimic the natural \nextracellular bone matrix and accelerate new bone regeneration6. If the dispersed phase used in the composite is \nnanoparticles, the composite material will be a nanocomposite. Natural bone is an example of a nanocomposite \ncomposed of two major phases, organic and inorganic, at the nanoscale7. Polymer-based nanocomposites are \nattractive  due  to  their  ability  to  create  porous  architectures  and  biodegradability.  The  ease  of  manipulating \nstructures  with  precise  tuning  of  physicochemical  properties  is  an  advantage  of  polymer  nanocomposites \nfor  tissue  engineering  applications  such  as  dental,  bone,  and  neural  engineering8.  Nanocomposites  made  of \npolymeric materials and additives are potential materials for constructing bone scaffolds9.\n\nPolymers for making hydrogels include natural and synthetic polymers. Natural polymers are mainly natural \ncomponents  that  prepare  scaffolds  with  high  biocompatibility,  biodegradability,  and  natural  cell  adhesion. \nRecently, synthetic polymers have been widely used to make bone tissue engineering scaffolds because they have \nhigh mechanical properties and long life. Carboxymethyl cellulose is a biocompatible and biodegradable anionic \npolymer that can create a strong ionic cross-link in the scaffold10 and increase the biochemical characteristics \nof porosity, swelling, and degradation. Cellulose is mainly used for various biomedical applications11. Among \nnatural polysaccharides, alginate biopolymer is also widely used as a biomaterial for bone tissue engineering. \nAlginate is one of the most well-known substances, and it has the property of forming a suitable scaffold that can \nbe useful for the treatment of organ failure and loss. Alginate consists of guluronic acid and mannuronic acid \nand is used in tissue engineering due to its biocompatibility, non-toxicity, abundance, and low price12. Alginate \nhydrogels can increase minimal protein absorption due to their hydrophilic property13. Sodium alginate is anionic \nand can be dissolved in water. Hydroxyl groups can cause strong interactions between sodium alginate and other \npolymers through hydrogen bonding14. Alginate benefits osteoblast growth due to its functional groups, such \nas hydroxyl and carboxyl, and increases the efficiency of implant substrates. Due to its high degradation rate in \ncell culture, its use in biomedical applications is limited. To improve alginate’s biocompatibility and mechanical \nproperties, its combination with synthetic polymers and clay minerals was investigated15. Given the disadvantages \nof  natural  polymers,  such  as  poor  solubility  in  common  solvents,  their  low  mechanical  properties,  and  poor \nstability in physiological environments, There have been numerous studies conducted on the physicochemical \nproperties of composite polymers, which have proven to be effective in overcoming the disadvantages of natural \npolymers16. Blending polymers is a potential method for improving mechanical flexibility17. Polyvinyl alcohol \nis a hydrophilic semi-crystalline synthetic biopolymer containing many hydroxyl groups, and it can also form \nhydrogen  bonds  with  free  water  molecules18.  Polyvinyl  alcohol  is  biocompatible  and  has  high  mechanical \nstrength, low toxicity, large surface area, and good chemical stability; in a clinical setting, its use is possible to \nconstruct membranes, repair tissues, and construct biomaterials16. By synergistically combining the bioactive \nproperties of nanoparticles and the properties of polymers, composite materials create scaffolds that provide an \noptimal environment for cell proliferation, differentiation, and cell adhesion19. Various natural and synthetic \nfillers  are  used  as  strengthening  agents  to  improve  polymer  scaffolds’  mechanical  properties  and  bioactivity. \nClay is considered one of the mineral fillers that will enhance the biological and mechanical properties of the \nscaffold  significantly,  and  it  has  already  been  studied  in  bone  cement  processing20.  Clay  can  be  essential  in \nbone regeneration and repair, increasing osteoblast differentiation and apatite deposition20. Also, the graphene \noxide filler is highly compatible with the polymer matrix due to the attendance of polar groups on the surface \nof  this  material. The  high  exceptional  area  ratio  and  antibacterial  properties  make  GO  a  promising  material \nfor developing bone tissue’s antimicrobial and antiviral surface21. GO is exfoliated from graphite and contains \nepoxide, carboxylic, and carbonyl ketone groups in its structural plane. Graphene and graphene-based materials \nhave been investigated in various fields, such as bioimaging, biosensors, cancer treatment, drug delivery, and \ntissue engineering. Unique properties such as thermal conductivity, mechanical strength, high surface area, ease \nof operation, flexibility, biocompatibility, and antibacterial activity make it suitable for biological applications. \nGO has osteoconductive and osteoinductive ability to regulate osteoblast differentiation22,23. Also, this substance \ncan force stem cells to undergo osteogenic differentiation even without adding a growth factor24. Hydroxyapatite \ncontains basic elements such as calcium and phosphate, essential for bone growth. HAp particles increase cell \nproliferation and adhesion and improve bone tissue conduction23. Hydroxyapatite has unique properties, such \nas excellent biocompatibility and low toxicity25. Combining ceramic filler and polymer matrix in one material \nproduces  composites  with  polymer  plasticity  and  calcium  phosphate  bioactivity26.  Scaffolds  containing  HAp \nhave stronger mechanical properties and higher cell proliferation than scaffolds containing TCP, which gives \nthem a better function in bone regeneration in the early stages27. Nanoparticle content can be used to modify the \nproperties of polymer nanocomposites28. Various magnetic nanoparticles have been developed recently for use \nin biological applications. Among these nanoparticles, iron oxide nanoparticles (Fe3O4) have biocompatibility \nand  good  performance  for  medical  applications.  Many  researchers  have  shown  that  the  magnetic  properties \nof Fe3O4 nanoparticles make it an ideal material for cell isolation and drug delivery, which also increases the \neffect of bone induction. Several studies have shown that integrating Fe3O4 nanoparticles with polymer fibers \nsolves the compaction problem and improves their stability in biological applications29. The research fabricates \nnanocomposite  scaffolds  using  CMC,  Alg,  PVA,  magnetic  clay  nanoparticles  modified  with  graphene  oxide \n(CGF), and natural hydroxyapatite (HAp) to enhance mechanical properties. Characterization involved XRD, \nFT-IR, TGA, and SEM analyses, assessing porosity, swelling, degradation, and biomineralization, and the MTT \n\nScientific Reports |        (2025) 15:22235 \n\n| https://doi.org/10.1038/s41598-025-07270-5\n\n2\n\n\fwww.nature.com/scientificreports/\n\ntest  evaluated  cell  viability.  In  bone  tissue  research,  the  composites  studied  mainly  combine  a  natural  and \nsynthetic polymer and an additive, each of which can only be used to improve one property. In this study, two \nbiopolymers are compared in terms of the composition of scaffolds. Two additives are also used: HAp can be \nused to improve biomineralization, and CGF is a combination of several materials that can give many favorable \nproperties to the polymer composite for use as a polymer scaffold.\n\nHaving  the  required  mechanical  properties  is  one  of  the  most  important  properties  that  bone  tissue \nreplacement  scaffolds  must  possess.  In  addition  to  having  the  required  mechanical  properties,  the  scaffolds \nshould possess other characteristics required by bone tissue, such as porosity, biocompatibility, swelling, and \nnon-toxicity. A significant aspect of the research is that in addition to increasing compressive strength, attention \nhas been paid to maintaining the required porosity of the bone tissue. A combination of graphene oxide, clay, \nhydroxyapatite, and the magnetic material Fe3O4 has been used in this research as a new material. As a result of \nthe combination of graphene oxide with clay, the compressive strength of the scaffold was increased significantly, \nand the presence of HAp led to an increase in biomineralization of the scaffold, whereas Fe3O4 had a positive \neffect on the viability of the cells. The properties of natural bone differ significantly based on its type. For example, \nthe compressive strength of cancellous bone ranges from 2 to 20 MPa. As a result, it is important to consider \nthe scaffold’s mechanical properties when designing scaffolds for bone reconstruction and fracture healing to \nensure a successful outcome30. It has been found that the scaffold that was prepared in this study has compressive \nstrength within the acceptable range for cancellous bone. It is important to  emphasize that the porosity of a \nhydrogel is a significant factor that profoundly affects the fate of bone cells31. A series of interconnected pores \nin this hydrogel facilitate the migration of cells, the permeability of nutrients, the removal of waste materials, \nand the penetration of blood vessels and nerves32. The porosity of cancellous bone ranges from 30 to 70%33. The \nporosity of the scaffolds prepared for this study is within an appropriate range for cancellous bone scaffolds. \nThe prepared scaffolds had appropriate degradation rates because replacing the manufactured tissue with the \noriginal tissue would have to occur within a proper biodegradation range. Also, they exhibited a high degree of \ncell viability.\n\nMaterials and methods\nMaterials\nSodium alginate (Na-Alg) polymer with a molecular weight of 12,000–40,000 Da from Sigma Aldrich, sodium \ncarboxymethyl  cellulose  with  a  molecular  weight  of  70,000  g/mol  and  a  deacetylation  degree  of  90%  from \nSamchun, Korea, and polyvinyl alcohol with a molecular weight of 72,000 g/mol and a hydrolysis degree of 95% \nfrom  Merck  were  used  in  this  study.  Potassium  hydrogen  phosphate  (KH2PO4),  sodium  hydroxide  (NaOH), \nand  25%  glutaraldehyde  as  cross-linkers  were  obtained  from  Merck.  The  acids  used  in  this  study,  including \nhydrochloric  acid  (HCl)  37%,  phosphoric  acid  (H3PO4),  acetic  acid  (CH3COOH)  100%,  and  sulfuric  acid \n(H2SO4) 98%, were all obtained from Merck. Cloisite 30B clay was organically modified to be the clay used in \nthe study, obtained from Southern Clay Company. K2HPO4.3H2O, KCl, NaCl, Na2SO4, MgCl2.6H2O, NaHCO3, \nCaCl2.2H2O, and TRIS salts prepared simulated body fluid purchased from Merck. Iron (II) chloride, Iron (III) \nchloride, KMnO4, and H2O2 were used to modify clay.\n\nSynthesis of graphene oxide\nTo prepare graphene oxide using the modified Hummer method. First, 3 g of graphite powder was added to \nthe H2SO4/H3PO4 mixture (40:360 ml), and then 18 g of KMnO4 was added and stirred at 50 °C for 14 h with \n100 rpm by a magnetic stirrer. The temperature of the resulting mixture was reduced to 25 °C, and then 30% \nH2O2 was added to it, making the mixture light brown and stirred for 20 min. A centrifuge was used to separate \nthe mixture, and several washes were done with distilled water to reach a neutral pH. In a vacuum oven, 24 h of \ndrying time was spent at 70 °C on the synthesized graphene oxide34. Graphene oxide was synthesized in black \nand in powder form.\n\nPreparation of magnetically modified clay\nTo prepare magnetically modified clay, 1 g of synthesized graphene oxide (GO) was sonicated in 100 mL of water \nfor 35 min, while 2 g of Cloisite 30B clay was sonicated in 100 mL of water for 20 min. A solution of iron(III) \nchloride and iron(II) chloride in a 1:2 molar ratio was then added to the GO-clay mixture, which was heated \nand stirred at 90 °C for 20 min. The resulting mixture was gradually combined with a 4 M sodium hydroxide \nsolution and stirred for 50 min. Finally, the modified clay was separated from the solution, washed several times \nwith distilled water, and baked at 105 °C for 4 h.\n\nPreparation of natural hydroxyapatite (HAp) powder\nThe  chicken  femur  was  cleaned  entirely  of  meat  and  remaining  materials  to  prepare  natural  hydroxyapatite \npowder  and  then  boiled  for  45  min  in  boiling  water.  The  cleaned  bones  were  placed  in  a  furnace  for  3  h  at \n900 °C with a nitrogen atmosphere. After the set time, the bones are removed from the oven, cooled to room \ntemperature,  and  then  powdered  once  they  are  at  room  temperature.  The  production  efficiency  of  natural \nhydroxyapatite powder is 58%, and the product is white35.\n\nPreparation of nanocomposite scaffold\nThe  nanocomposite  scaffolds  were  prepared  using  natural  polymer  materials,  PVA,  hydroxyapatite  extracted \nfrom  natural  bone,  and  modified  clay  using  a  simple  mixing  method.  For  the  preparation  of  the  scaffold,  a \nsolution of 2 wt. in the first step. % of a natural polymer in distilled water was prepared by dissolving the polymer \nin the water and stirring the solution until the polymer was fully dissolved. It was also possible to prepare a \nsolution of polyvinyl alcohol by dissolving PVA in distilled water at a temperature of 70 °C to prepare a solution \n\nScientific Reports |        (2025) 15:22235 \n\n| https://doi.org/10.1038/s41598-025-07270-5\n\n3\n\n\fwww.nature.com/scientificreports/\n\nof 0.2 wt. % of polyvinyl alcohol. HAp was dispersed in 1 v/v % acetic acid for 24 h to obtain a solution of 2 wt. \n% of hydroxyapatite. As soon as the materials had been prepared, they were added in the correct proportions, \nand the mixer was turned on for 12 h. 0.5 v/v % of glutaraldehyde was added to the prepped solution in 5% \nof the total solution volume to cross-link the polymer solution. The solution needs to be mixed for 20 min. A \nsuspension was obtained by dispersing the modified clay in distilled water. In this method, the last step of adding \nCGF is included. The particles were evenly dispersed in the solution after adding CGF and then subjected to \nultrasonic treatment for two hours. The solution was transferred into a falcon tube and dried using a freeze-\ndryer. After drying, the samples were washed with a 2 wt. % NaBH4 solution and a 2 wt. % NaOH solution to \nneutralize any unreacted glutaraldehyde and excess acetic acid. The samples were then dried once more. The \nschematic representation of the PVA/Alg/Hap/CGF nanocomposite formation has been shown in the Scheme 1.\n\nCharacterization of scaffolds\nFourier transform infrared spectroscopy (FTIR) study\nTo examine the functional and chemical properties of HAp, Fe3O4, GO, clay, Cloisite 30B/GO/Fe3O4, Alg, CMC, \nPVA, and their interactions, we performed FTIR analysis on the prepared nanocomposite scaffolds. Infrared \nspectra of the samples, mixed with KBr powder, were recorded using a Bruker Tensor 27 spectrophotometer \n(Germany). This FTIR instrument offers a measurement resolution of 0.1 cm⁻1, and its readings are based on \nabsorbance.\n\nX-ray diffraction (XRD) study\nXRD  analysis  evaluated  the  crystallinity  of  PVA,  CMC,  Alg,  HAp,  clay,  and  C30B/GO/Fe3O4  samples  and \nthe  prepared  nanocomposite  scaffolds.  The  analysis  was  performed  using  a  Krisallofex  D500  diffractometer \n(Siemens, Germany), which employed Cu-Kα radiation at 25 mA, operating at 40 kV, and scanned over a range \nof 4–80°. The device had a scan step of 0.05° and a measurement accuracy of 0.04 deg/sec.\n\nMorphology study of scaffold samples by SEM analysis\nThe  scaffolds  were  prepared  by  freeze-drying  and  then  coated  with  a  thin  layer  of  gold  after  being  cut  into \nthin sheets. Once the samples were positioned in the microscope, scanning electron microscopy (SEM) images \n(MIRA3, TESCAN, Brno, Czech Republic) were used to examine the morphology of the scaffolds. Furthermore, \nthe  presence  and  distribution  of  phosphorus  and  calcium  elements  within  the  nanocomposite  scaffold  were \nanalyzed using energy-dispersive X-ray (EDX)  mapping. A voltage  of 30  kV was applied to the SEM device. \nAlso, to image the amount of cell culture by SEM, uniform pieces of the scaffolds were cut and immersed in 70% \nethanol solution for 30 min for sterilization. In the next step, the samples were washed three times with PBS to \nremove excess ethanol and then transferred to a 6-well cell culture plate. A cell plate with a density of 50,000 cells \nper cell plate was then used to culture the MSCs on scaffolds. As a final step, the samples were cultured in an \nFBS medium with 1% penicillin–streptomycin and 10% DMEM in an incubator for 72 h. They were incubated \nfor 72 h at 37 °C. After this time, the supernatant of all the wells of the 6-well plate was removed, and after \nwashing with PBS, they were fixed with 2.5% glutaraldehyde for 20 min. After removing the fixative solution, \n\nScheme 1.  Schematic representation of the formation of PVA/Alg/Hap/CGF nanocomposite scaffolds.\n\nScientific Reports |        (2025) 15:22235 \n\n| https://doi.org/10.1038/s41598-025-07270-5\n\n4\n\n \n\fwww.nature.com/scientificreports/\n\nthey  were  dried  under  the  hood  and  in  the  environment.  Finally,  the  morphological  images  of  the  samples \nprepared according to this section were examined by SEM.\n\nMechanical properties study\nThe  mechanical  properties  of  the  scaffold  samples  were  evaluated  by  measuring  the  compressive  strength \nprepared by freeze-drying. To assess the material’s compressive strength, cylinder samples measuring 12 mm in \nheight and 6 mm in diameter were cut. During a compression test, a force with 0.5 mm per minute speed and \npower of 25 kN was used to test the material’s compressive strength at 25 °C. A universal machine model was \nused to carry out mechanical tests, Al-7000-Taiwand. Three samples of each scaffold were prepared to perform \nthe compressive strength test, and all three samples were tested. Their average compressive strength was reported \nas the compressive strength of the polymer scaffold. The error value was 0.1 MPa.\n\nMeasuring the porosity of scaffolds\nUsing the liquid displacement method, we could determine the porosity of scaffolds36. Scaffolds were cut into \none cubic cm square piece. A displacement liquid was employed in this case, and it was ethanol because it does \nnot dissolve the scaffolds while it is being used. To determine the porosity of the cut scaffolds, the scaffolds were \nplaced in a graduated container containing ethanol with volume (V1) to measure the porosity. Using the total \nvolume of ethanol and scaffold (V2), we calculated the volume difference V2-V1. After exiting the scaffold from \nthe cylinder containing ethanol, the remaining volume of the ethanol in the cylinder was measured by using \nthe following formula: V3. According to the equation below, the scaffold porosity could be estimated using the \nfollowing equation:\n\nε =\n\n(V1 −\n(V2 −\n\nV2)\nV3)\n\n(1)\n\nSwelling test of scaffolds\nInitially, the cut scaffolds were weighed (Winitial) and then immersed in PBS phosphate buffer solution for 24 h \nfor incubation. After incubation, the samples were removed from the buffer solution, and any excess water was \nblotted off with filter paper. The swelling test was repeated three times for each sample. The swelling ratio for \neach sample was calculated using the following equation37:\n\nSwelling Ratio =\n\n(Wﬁnal −\n\nWinitial)\n\nWinitial\n\n(2)\n\nBiodegradation test of scaffolds\nScaffolds were given the exact dimensions and weighed. Then, the scaffold samples were incubated in a phosphate \nbuffer solution for 21, 14, and 7 days at 37 °C with pH = 7.4. After the specified time, the samples were dried using \nthe freeze-drying method and weighed. The scaffold destruction rate was obtained by the following equation37:\n\nBiodegradation Ratio =\n\n(Initial weight of sample\n\nWeight of sample in time T)\n\n−\n\nInitial weight of sample\n\n(3)\n\nThermogravimetric analysis (TGA) study\nThe  thermal  stability  of  the  polymer  raw  materials  and  nanocomposite  scaffolds  was  assessed  using  TGA.  A \nthermogravimetric  analyzer  (TGA-PL,  TGA  1500,  Canada)  was  employed  for  this  analysis,  conducted  in  a \nnitrogen atmosphere within the 25–600°C temperature range.\n\nInvestigation of scaffold biomineralization using simulated body fluid (SBF)\nThe performance of the scaffold bone graft was assessed using simulated body fluid (SBF), which was prepared \nfollowing  established  protocols  with  chemical  reagents.  SBF  is  essential  for  examining  the  formation  of \nbiomaterials on polymer scaffolds. To prepare the solution, 1000 mL of SBF was made by adding 700 mL of \ndeionized water into a plastic container in a water bath. It is recommended to cover the container with either \na glass or plastic lid while stirring; for the process to be successful, the solution should be kept at a consistent \ntemperature of 36.5 °C throughout. Adding the ingredients in order is essential; once each ingredient is dissolved \ncompletely, the next one should be added, and so on. As soon as the ingredients were added, hydrochloric acid \nwas used in the amount of 0–5 ml with an additive solution to achieve a pH of 7.4 in the resulting solution after \nadding the ingredients. A total of 1000 mL of solution was prepared by adding water to a flask and shaking it \nat 20 °C to reach the desired volume. The solution was then transferred to a polyethylene container and stored \nin a refrigerator at 5–10 °C. Scaffold samples were immersed in the SBF solution and incubated at 37 °C for 14 \ndays. After incubation, the samples were removed, rinsed with distilled water, and dried using the freeze-drying \nmethod. Finally, EDX and SEM techniques were employed to evaluate the biomineralization capability of the \nscaffold samples38.\n\nAssessment of toxicity and cell viability\nFirst, uniform pieces of scaffolds were cut and immersed in 70% ethanol solution for 30 min to sterilize them. \nEventually, we must continue using PBS to remove any remaining ethanol from the system and transfer it to a \n96-well cell culture plate. Then, mesenchymal stem cells were cultured on the scaffolds with a cell density of 1 × \n104 cells per cell plate. After collecting the samples, they were cultured inside the incubator in a DMEM medium \n\nScientific Reports |        (2025) 15:22235 \n\n| https://doi.org/10.1038/s41598-025-07270-5\n\n5\n\n \n \n \n \n \n \n\fwww.nature.com/scientificreports/\n\ncontaining 1% penicillin–streptomycin and 10% FBS. They were incubated for 72 h at 37 °C. After 72 h, the \nsupernatant of all the wells of the 96-well plate was removed, and after washing with PBS to each well, 0.2 ml of \nMTT solution (5 mg/mm) was added, and the wells were kept in the incubator for four hours. It was incubated at \n37 °C. A solution of 0.1 mL DMSO was then substituted for the MTT solution for 30 min. Finally, the absorbance \nwas measured by an ELISA reader at a wavelength of 570 nm to determine cell viability.",
+        "operations": [
+          {
+            "op_type": "dry",
+            "sentence": "Nanocomposite scaffolds were prepared using the freeze-\ndrying process, incorporating 10 wt. %",
+            "start_char": 96,
+            "end_char": 102,
+            "materials": [],
+            "params": {}
+          },
+          {
+            "op_type": "add",
+            "sentence": "By adding hydroxyapatite and magnetic clay modified with graphene oxide \nto the polymer scaffold, the mechanical properties of the scaffold are increased, appropriate porosity \nand swelling values are obtained, and desirable cell viability is achieved.",
+            "start_char": 1010,
+            "end_char": 1016,
+            "materials": [
+              "to the polymer scaffold,",
+              "modified with graphene oxide \n"
+            ],
+            "params": {}
+          },
+          {
+            "op_type": "heat",
+            "sentence": "The primary role of bone is to provide \na  structural  framework  and  mechanical  strength,  regulate  blood  pH,  and  maintain  calcium  and  phosphate \nlevels for metabolic processes5.",
+            "start_char": 3610,
+            "end_char": 3618,
+            "materials": [
+              "and  phosphate \nlevels"
+            ],
+            "params": {}
+          },
+          {
+            "op_type": "add",
+            "sentence": "Also, this substance \ncan force stem cells to undergo osteogenic differentiation even without adding a growth factor24.",
+            "start_char": 8965,
+            "end_char": 8971,
+            "materials": [],
+            "params": {}
+          },
+          {
+            "op_type": "add",
+            "sentence": "First, 3 g of graphite powder was added to \nthe H2SO4/H3PO4 mixture (40:360 ml), and then 18 g of KMnO4 was added and stirred at 50 °C for 14 h with \n100 rpm by a magnetic stirrer.",
+            "start_char": 14744,
+            "end_char": 14749,
+            "materials": [
+              "rpm",
+              "H2SO4",
+              "H3PO4",
+              "KMnO4",
+              "of graphite powder was added"
+            ],
+            "params": {
+              "temp": "50 °C",
+              "time": "14 h",
+              "speed": "100 rpm",
+              "amounts": [
+                "3 g",
+                "360 ml",
+                "18 g"
+              ]
+            }
+          },
+          {
+            "op_type": "add",
+            "sentence": "First, 3 g of graphite powder was added to \nthe H2SO4/H3PO4 mixture (40:360 ml), and then 18 g of KMnO4 was added and stirred at 50 °C for 14 h with \n100 rpm by a magnetic stirrer.",
+            "start_char": 14818,
+            "end_char": 14823,
+            "materials": [
+              "rpm",
+              "H2SO4",
+              "H3PO4",
+              "KMnO4",
+              "of graphite powder was added"
+            ],
+            "params": {
+              "temp": "50 °C",
+              "time": "14 h",
+              "speed": "100 rpm",
+              "amounts": [
+                "3 g",
+                "360 ml",
+                "18 g"
+              ]
+            }
+          },
+          {
+            "op_type": "stir",
+            "sentence": "First, 3 g of graphite powder was added to \nthe H2SO4/H3PO4 mixture (40:360 ml), and then 18 g of KMnO4 was added and stirred at 50 °C for 14 h with \n100 rpm by a magnetic stirrer.",
+            "start_char": 14828,
+            "end_char": 14835,
+            "materials": [
+              "rpm",
+              "H2SO4",
+              "H3PO4",
+              "KMnO4",
+              "of graphite powder was added"
+            ],
+            "params": {
+              "temp": "50 °C",
+              "time": "14 h",
+              "speed": "100 rpm",
+              "amounts": [
+                "3 g",
+                "360 ml",
+                "18 g"
+              ]
+            }
+          },
+          {
+            "op_type": "add",
+            "sentence": "The temperature of the resulting mixture was reduced to 25 °C, and then 30% \nH2O2 was added to it, making the mixture light brown and stirred for 20 min.",
+            "start_char": 14977,
+            "end_char": 14982,
+            "materials": [
+              "H2O2"
+            ],
+            "params": {
+              "temp": "25 °C",
+              "time": "20 min"
+            }
+          },
+          {
+            "op_type": "stir",
+            "sentence": "The temperature of the resulting mixture was reduced to 25 °C, and then 30% \nH2O2 was added to it, making the mixture light brown and stirred for 20 min.",
+            "start_char": 15025,
+            "end_char": 15032,
+            "materials": [
+              "H2O2"
+            ],
+            "params": {
+              "temp": "25 °C",
+              "time": "20 min"
+            }
+          },
+          {
+            "op_type": "centrifuge",
+            "sentence": "A centrifuge was used to separate \nthe mixture, and several washes were done with distilled water to reach a neutral pH. In a vacuum oven, 24 h of \ndrying time was spent at 70 °C on the synthesized graphene oxide34.",
+            "start_char": 15047,
+            "end_char": 15057,
+            "materials": [
+              "the synthesized graphene oxide34."
+            ],
+            "params": {
+              "temp": "70 °C",
+              "time": "24 h"
+            }
+          },
+          {
+            "op_type": "dry",
+            "sentence": "A centrifuge was used to separate \nthe mixture, and several washes were done with distilled water to reach a neutral pH. In a vacuum oven, 24 h of \ndrying time was spent at 70 °C on the synthesized graphene oxide34.",
+            "start_char": 15193,
+            "end_char": 15199,
+            "materials": [
+              "the synthesized graphene oxide34."
+            ],
+            "params": {
+              "temp": "70 °C",
+              "time": "24 h"
+            }
+          },
+          {
+            "op_type": "sonicate",
+            "sentence": "\n\nPreparation of magnetically modified clay\nTo prepare magnetically modified clay, 1 g of synthesized graphene oxide (GO) was sonicated in 100 mL of water \nfor 35 min, while 2 g of Cloisite 30B clay was sonicated in 100 mL of water for 20 min.",
+            "start_char": 15447,
+            "end_char": 15456,
+            "materials": [
+              "GO",
+              "water",
+              "of synthesized graphene oxide ("
+            ],
+            "params": {
+              "time": "35 min",
+              "amounts": [
+                "1 g",
+                "100 mL",
+                "2 g",
+                "100 mL"
+              ]
+            }
+          },
+          {
+            "op_type": "sonicate",
+            "sentence": "\n\nPreparation of magnetically modified clay\nTo prepare magnetically modified clay, 1 g of synthesized graphene oxide (GO) was sonicated in 100 mL of water \nfor 35 min, while 2 g of Cloisite 30B clay was sonicated in 100 mL of water for 20 min.",
+            "start_char": 15524,
+            "end_char": 15533,
+            "materials": [
+              "GO",
+              "water",
+              "of synthesized graphene oxide ("
+            ],
+            "params": {
+              "time": "35 min",
+              "amounts": [
+                "1 g",
+                "100 mL",
+                "2 g",
+                "100 mL"
+              ]
+            }
+          },
+          {
+            "op_type": "add",
+            "sentence": "A solution of iron(III) \nchloride and iron(II) chloride in a 1:2 molar ratio was then added to the GO-clay mixture, which was heated \nand stirred at 90 °C for 20 min.",
+            "start_char": 15651,
+            "end_char": 15656,
+            "materials": [
+              "II",
+              "A solution of iron(III",
+              "iron(II) chloride in a",
+              ") \nchloride and iron(II"
+            ],
+            "params": {
+              "temp": "90 °C",
+              "time": "20 min"
+            }
+          },
+          {
+            "op_type": "heat",
+            "sentence": "A solution of iron(III) \nchloride and iron(II) chloride in a 1:2 molar ratio was then added to the GO-clay mixture, which was heated \nand stirred at 90 °C for 20 min.",
+            "start_char": 15691,
+            "end_char": 15697,
+            "materials": [
+              "II",
+              "A solution of iron(III",
+              "iron(II) chloride in a",
+              ") \nchloride and iron(II"
+            ],
+            "params": {
+              "temp": "90 °C",
+              "time": "20 min"
+            }
+          },
+          {
+            "op_type": "stir",
+            "sentence": "A solution of iron(III) \nchloride and iron(II) chloride in a 1:2 molar ratio was then added to the GO-clay mixture, which was heated \nand stirred at 90 °C for 20 min.",
+            "start_char": 15703,
+            "end_char": 15710,
+            "materials": [
+              "II",
+              "A solution of iron(III",
+              "iron(II) chloride in a",
+              ") \nchloride and iron(II"
+            ],
+            "params": {
+              "temp": "90 °C",
+              "time": "20 min"
+            }
+          },
+          {
+            "op_type": "stir",
+            "sentence": "The resulting mixture was gradually combined with a 4 M sodium hydroxide \nsolution and stirred for 50 min.",
+            "start_char": 15819,
+            "end_char": 15826,
+            "materials": [
+              "M sodium hydroxide \nsolution"
+            ],
+            "params": {
+              "time": "50 min",
+              "amounts": [
+                "4 M"
+              ],
+              "concs": [
+                "4 M"
+              ]
+            }
+          },
+          {
+            "op_type": "wash",
+            "sentence": "Finally, the modified clay was separated from the solution, washed several times \nwith distilled water, and baked at 105 °C for 4 h.\n\nPreparation of natural hydroxyapatite (HAp) powder\nThe  chicken  femur  was  cleaned  entirely  of  meat  and  remaining  materials  to  prepare  natural  hydroxyapatite \npowder  and  then  boiled  for  45  min  in  boiling  water.",
+            "start_char": 15899,
+            "end_char": 15905,
+            "materials": [
+              "water",
+              "HAp) powder\nThe",
+              "from the solution, washed",
+              "hydroxyapatite \npowder  and"
+            ],
+            "params": {
+              "temp": "105 °C",
+              "time": "4 h"
+            }
+          },
+          {
+            "op_type": "stir",
+            "sentence": "of a natural polymer in distilled water was prepared by dissolving the polymer \nin the water and stirring the solution until the polymer was fully dissolved.",
+            "start_char": 16972,
+            "end_char": 16980,
+            "materials": [
+              "water",
+              "dissolving the polymer \nin",
+              "until the polymer was fully",
+              "a natural polymer in distilled",
+              "stirring the solution until the"
+            ],
+            "params": {}
+          },
+          {
+            "op_type": "add",
+            "sentence": "As soon as the materials had been prepared, they were added in the correct proportions, \nand the mixer was turned on for 12 h. 0.5 v/v % of glutaraldehyde was added to the prepped solution in 5% \nof the total solution volume to cross-link the polymer solution.",
+            "start_char": 17507,
+            "end_char": 17512,
+            "materials": [
+              "the prepped solution in 5",
+              "link the polymer solution.",
+              "the total solution volume to"
+            ],
+            "params": {
+              "time": "12 h"
+            }
+          },
+          {
+            "op_type": "add",
+            "sentence": "As soon as the materials had been prepared, they were added in the correct proportions, \nand the mixer was turned on for 12 h. 0.5 v/v % of glutaraldehyde was added to the prepped solution in 5% \nof the total solution volume to cross-link the polymer solution.",
+            "start_char": 17612,
+            "end_char": 17617,
+            "materials": [
+              "the prepped solution in 5",
+              "link the polymer solution.",
+              "the total solution volume to"
+            ],
+            "params": {
+              "time": "12 h"
+            }
+          },
+          {
+            "op_type": "stir",
+            "sentence": "The solution needs to be mixed for 20 min.",
+            "start_char": 17739,
+            "end_char": 17744,
+            "materials": [
+              "The solution needs to"
+            ],
+            "params": {
+              "time": "20 min"
+            }
+          },
+          {
+            "op_type": "add",
+            "sentence": "In this method, the last step of adding \nCGF is included.",
+            "start_char": 17869,
+            "end_char": 17875,
+            "materials": [],
+            "params": {}
+          },
+          {
+            "op_type": "add",
+            "sentence": "The particles were evenly dispersed in the solution after adding CGF and then subjected to \nultrasonic treatment for two hours.",
+            "start_char": 17952,
+            "end_char": 17958,
+            "materials": [
+              "in the solution after adding"
+            ],
+            "params": {}
+          },
+          {
+            "op_type": "dry",
+            "sentence": "The solution was transferred into a falcon tube and dried using a freeze-\ndryer.",
+            "start_char": 18074,
+            "end_char": 18079,
+            "materials": [
+              "The solution was transferred"
+            ],
+            "params": {}
+          },
+          {
+            "op_type": "dry",
+            "sentence": "After drying, the samples were washed with a 2 wt. %",
+            "start_char": 18109,
+            "end_char": 18115,
+            "materials": [],
+            "params": {}
+          },
+          {
+            "op_type": "wash",
+            "sentence": "After drying, the samples were washed with a 2 wt. %",
+            "start_char": 18134,
+            "end_char": 18140,
+            "materials": [],
+            "params": {}
+          },
+          {
+            "op_type": "dry",
+            "sentence": "The samples were then dried once more.",
+            "start_char": 18289,
+            "end_char": 18294,
+            "materials": [],
+            "params": {}
+          },
+          {
+            "op_type": "stir",
+            "sentence": "Infrared \nspectra of the samples, mixed with KBr powder, were recorded using a Bruker Tensor 27 spectrophotometer \n(Germany).",
+            "start_char": 18739,
+            "end_char": 18744,
+            "materials": [
+              "KBr",
+              "with KBr powder, were"
+            ],
+            "params": {}
+          },
+          {
+            "op_type": "dry",
+            "sentence": "\n\nMorphology study of scaffold samples by SEM analysis\nThe  scaffolds  were  prepared  by  freeze-drying  and  then  coated  with  a  thin  layer  of  gold  after  being  cut  into \nthin sheets.",
+            "start_char": 19498,
+            "end_char": 19504,
+            "materials": [],
+            "params": {}
+          },
+          {
+            "op_type": "wash",
+            "sentence": "In the next step, the samples were washed three times with PBS to \nremove excess ethanol and then transferred to a 6-well cell culture plate.",
+            "start_char": 20216,
+            "end_char": 20222,
+            "materials": [],
+            "params": {}
+          },
+          {
+            "op_type": "dry",
+            "sentence": "\n\nScientific Reports |        (2025) 15:22235 \n\n| https://doi.org/10.1038/s41598-025-07270-5\n\n4\n\n \n\fwww.nature.com/scientificreports/\n\nthey  were  dried  under  the  hood  and  in  the  environment.",
+            "start_char": 21051,
+            "end_char": 21056,
+            "materials": [],
+            "params": {}
+          },
+          {
+            "op_type": "dry",
+            "sentence": "\n\nMechanical properties study\nThe  mechanical  properties  of  the  scaffold  samples  were  evaluated  by  measuring  the  compressive  strength \nprepared by freeze-drying.",
+            "start_char": 21382,
+            "end_char": 21388,
+            "materials": [],
+            "params": {}
+          },
+          {
+            "op_type": "filter",
+            "sentence": "After incubation, the samples were removed from the buffer solution, and any excess water was \nblotted off with filter paper.",
+            "start_char": 23141,
+            "end_char": 23147,
+            "materials": [
+              "water",
+              "the buffer solution, and"
+            ],
+            "params": {}
+          },
+          {
+            "op_type": "dry",
+            "sentence": "After the specified time, the samples were dried using \nthe freeze-drying method and weighed.",
+            "start_char": 23605,
+            "end_char": 23610,
+            "materials": [],
+            "params": {}
+          },
+          {
+            "op_type": "dry",
+            "sentence": "After the specified time, the samples were dried using \nthe freeze-drying method and weighed.",
+            "start_char": 23629,
+            "end_char": 23635,
+            "materials": [],
+            "params": {}
+          },
+          {
+            "op_type": "add",
+            "sentence": "To prepare the solution, 1000 mL of SBF was made by adding 700 mL of \ndeionized water into a plastic container in a water bath.",
+            "start_char": 24570,
+            "end_char": 24576,
+            "materials": [
+              "SBF",
+              "water",
+              "prepare the solution, 1000"
+            ],
+            "params": {
+              "amounts": [
+                "1000 mL",
+                "700 mL"
+              ]
+            }
+          },
+          {
+            "op_type": "stir",
+            "sentence": "It is recommended to cover the container with either \na glass or plastic lid while stirring; for the process to be successful, the solution should be kept at a consistent \ntemperature of 36.5 °C throughout.",
+            "start_char": 24729,
+            "end_char": 24737,
+            "materials": [
+              ", the solution should be"
+            ],
+            "params": {
+              "temp": "36.5°C"
+            }
+          },
+          {
+            "op_type": "add",
+            "sentence": "Adding the ingredients in order is essential; once each ingredient is dissolved \ncompletely, the next one should be added, and so on.",
+            "start_char": 24853,
+            "end_char": 24859,
+            "materials": [],
+            "params": {}
+          },
+          {
+            "op_type": "add",
+            "sentence": "Adding the ingredients in order is essential; once each ingredient is dissolved \ncompletely, the next one should be added, and so on.",
+            "start_char": 24969,
+            "end_char": 24974,
+            "materials": [],
+            "params": {}
+          },
+          {
+            "op_type": "add",
+            "sentence": "As soon as the ingredients were added, hydrochloric acid \nwas used in the amount of 0–5 ml with an additive solution to achieve a pH of 7.4 in the resulting solution after \nadding the ingredients.",
+            "start_char": 25019,
+            "end_char": 25024,
+            "materials": [
+              "the resulting solution after \n",
+              "an additive solution to achieve"
+            ],
+            "params": {
+              "amounts": [
+                "5 ml"
+              ]
+            }
+          },
+          {
+            "op_type": "add",
+            "sentence": "As soon as the ingredients were added, hydrochloric acid \nwas used in the amount of 0–5 ml with an additive solution to achieve a pH of 7.4 in the resulting solution after \nadding the ingredients.",
+            "start_char": 25160,
+            "end_char": 25166,
+            "materials": [
+              "the resulting solution after \n",
+              "an additive solution to achieve"
+            ],
+            "params": {
+              "amounts": [
+                "5 ml"
+              ]
+            }
+          },
+          {
+            "op_type": "add",
+            "sentence": "A total of 1000 mL of solution was prepared by adding water to a flask and shaking it \nat 20 °C to reach the desired volume.",
+            "start_char": 25231,
+            "end_char": 25237,
+            "materials": [
+              "water",
+              "mL of solution was prepared"
+            ],
+            "params": {
+              "temp": "20°C",
+              "amounts": [
+                "1000 mL"
+              ]
+            }
+          },
+          {
+            "op_type": "wash",
+            "sentence": "After incubation, the samples were removed, rinsed with distilled water, and dried using the freeze-drying \nmethod.",
+            "start_char": 25545,
+            "end_char": 25551,
+            "materials": [
+              "water"
+            ],
+            "params": {}
+          },
+          {
+            "op_type": "dry",
+            "sentence": "After incubation, the samples were removed, rinsed with distilled water, and dried using the freeze-drying \nmethod.",
+            "start_char": 25578,
+            "end_char": 25583,
+            "materials": [
+              "water"
+            ],
+            "params": {}
+          },
+          {
+            "op_type": "dry",
+            "sentence": "After incubation, the samples were removed, rinsed with distilled water, and dried using the freeze-drying \nmethod.",
+            "start_char": 25601,
+            "end_char": 25607,
+            "materials": [
+              "water"
+            ],
+            "params": {}
+          },
+          {
+            "op_type": "add",
+            "sentence": "After 72 h, the \nsupernatant of all the wells of the 96-well plate was removed, and after washing with PBS to each well, 0.2 ml of \nMTT solution (5 mg/mm) was added, and the wells were kept in the incubator for four hours.",
+            "start_char": 26623,
+            "end_char": 26628,
+            "materials": [
+              "MTT",
+              "PBS",
+              "\nMTT solution (5"
+            ],
+            "params": {
+              "time": "72 h",
+              "amounts": [
+                "0.2 ml",
+                "5 mg"
+              ]
+            }
+          }
+        ],
+        "expanded": [
+          {
+            "op_type": "dry",
+            "steps": [
+              "Perform operation 'dry' as described: Nanocomposite scaffolds were prepared using the freeze-\ndrying process, incorporating 10 wt. %"
+            ]
+          },
+          {
+            "op_type": "add",
+            "steps": [
+              "Ensure reaction vessel is present and empty.",
+              "Place a clean stir bar in the vessel.",
+              "Measure the specified amount of to the polymer scaffold,.",
+              "Transfer to the polymer scaffold, into the vessel."
+            ]
+          },
+          {
+            "op_type": "heat",
+            "steps": [
+              "Place the reaction vessel on a hotplate.",
+              "Ramp to the target temperature.",
+              "Maintain the target temperature for the specified time."
+            ]
+          },
+          {
+            "op_type": "add",
+            "steps": [
+              "Ensure reaction vessel is present and empty.",
+              "Place a clean stir bar in the vessel.",
+              "Measure the specified amount of reagent.",
+              "Transfer reagent into the vessel."
+            ]
+          },
+          {
+            "op_type": "add",
+            "steps": [
+              "Ensure reaction vessel is present and empty.",
+              "Place a clean stir bar in the vessel.",
+              "Measure 3 g of rpm.",
+              "Transfer rpm into the vessel."
+            ]
+          },
+          {
+            "op_type": "add",
+            "steps": [
+              "Ensure reaction vessel is present and empty.",
+              "Place a clean stir bar in the vessel.",
+              "Measure 3 g of rpm.",
+              "Transfer rpm into the vessel."
+            ]
+          },
+          {
+            "op_type": "stir",
+            "steps": [
+              "Place the reaction vessel on a stir plate.",
+              "Set the stirrer to 100 rpm.",
+              "Stir for 14 h."
+            ]
+          },
+          {
+            "op_type": "add",
+            "steps": [
+              "Ensure reaction vessel is present and empty.",
+              "Place a clean stir bar in the vessel.",
+              "Measure the specified amount of H2O2.",
+              "Transfer H2O2 into the vessel."
+            ]
+          },
+          {
+            "op_type": "stir",
+            "steps": [
+              "Place the reaction vessel on a stir plate.",
+              "Set the stirrer to an appropriate speed.",
+              "Stir for 20 min."
+            ]
+          },
+          {
+            "op_type": "centrifuge",
+            "steps": [
+              "Perform operation 'centrifuge' as described: A centrifuge was used to separate \nthe mixture, and several washes were done with distilled water to reach a neutral pH. In a vacuum oven, 24 h of \ndrying time was spent at 70 °C on the synthesized graphene oxide34."
+            ]
+          },
+          {
+            "op_type": "dry",
+            "steps": [
+              "Perform operation 'dry' as described: A centrifuge was used to separate \nthe mixture, and several washes were done with distilled water to reach a neutral pH. In a vacuum oven, 24 h of \ndrying time was spent at 70 °C on the synthesized graphene oxide34."
+            ]
+          },
+          {
+            "op_type": "sonicate",
+            "steps": [
+              "Perform operation 'sonicate' as described: \n\nPreparation of magnetically modified clay\nTo prepare magnetically modified clay, 1 g of synthesized graphene oxide (GO) was sonicated in 100 mL of water \nfor 35 min, while 2 g of Cloisite 30B clay was sonicated in 100 mL of water for 20 min."
+            ]
+          },
+          {
+            "op_type": "sonicate",
+            "steps": [
+              "Perform operation 'sonicate' as described: \n\nPreparation of magnetically modified clay\nTo prepare magnetically modified clay, 1 g of synthesized graphene oxide (GO) was sonicated in 100 mL of water \nfor 35 min, while 2 g of Cloisite 30B clay was sonicated in 100 mL of water for 20 min."
+            ]
+          },
+          {
+            "op_type": "add",
+            "steps": [
+              "Ensure reaction vessel is present and empty.",
+              "Place a clean stir bar in the vessel.",
+              "Measure the specified amount of II.",
+              "Transfer II into the vessel."
+            ]
+          },
+          {
+            "op_type": "heat",
+            "steps": [
+              "Place the reaction vessel on a hotplate.",
+              "Ramp to 90 °C.",
+              "Maintain 90 °C for 20 min."
+            ]
+          },
+          {
+            "op_type": "stir",
+            "steps": [
+              "Place the reaction vessel on a stir plate.",
+              "Set the stirrer to an appropriate speed.",
+              "Stir for 20 min."
+            ]
+          },
+          {
+            "op_type": "stir",
+            "steps": [
+              "Place the reaction vessel on a stir plate.",
+              "Set the stirrer to an appropriate speed.",
+              "Stir for 50 min."
+            ]
+          },
+          {
+            "op_type": "wash",
+            "steps": [
+              "Perform operation 'wash' as described: Finally, the modified clay was separated from the solution, washed several times \nwith distilled water, and baked at 105 °C for 4 h.\n\nPreparation of natural hydroxyapatite (HAp) powder\nThe  chicken  femur  was  cleaned  entirely  of  meat  and  remaining  materials  to  prepare  natural  hydroxyapatite \npowder  and  then  boiled  for  45  min  in  boiling  water."
+            ]
+          },
+          {
+            "op_type": "stir",
+            "steps": [
+              "Place the reaction vessel on a stir plate.",
+              "Set the stirrer to an appropriate speed.",
+              "Stir for the specified time."
+            ]
+          },
+          {
+            "op_type": "add",
+            "steps": [
+              "Ensure reaction vessel is present and empty.",
+              "Place a clean stir bar in the vessel.",
+              "Measure the specified amount of the prepped solution in 5.",
+              "Transfer the prepped solution in 5 into the vessel."
+            ]
+          },
+          {
+            "op_type": "add",
+            "steps": [
+              "Ensure reaction vessel is present and empty.",
+              "Place a clean stir bar in the vessel.",
+              "Measure the specified amount of the prepped solution in 5.",
+              "Transfer the prepped solution in 5 into the vessel."
+            ]
+          },
+          {
+            "op_type": "stir",
+            "steps": [
+              "Place the reaction vessel on a stir plate.",
+              "Set the stirrer to an appropriate speed.",
+              "Stir for 20 min."
+            ]
+          },
+          {
+            "op_type": "add",
+            "steps": [
+              "Ensure reaction vessel is present and empty.",
+              "Place a clean stir bar in the vessel.",
+              "Measure the specified amount of reagent.",
+              "Transfer reagent into the vessel."
+            ]
+          },
+          {
+            "op_type": "add",
+            "steps": [
+              "Ensure reaction vessel is present and empty.",
+              "Place a clean stir bar in the vessel.",
+              "Measure the specified amount of in the solution after adding.",
+              "Transfer in the solution after adding into the vessel."
+            ]
+          },
+          {
+            "op_type": "dry",
+            "steps": [
+              "Perform operation 'dry' as described: The solution was transferred into a falcon tube and dried using a freeze-\ndryer."
+            ]
+          },
+          {
+            "op_type": "dry",
+            "steps": [
+              "Perform operation 'dry' as described: After drying, the samples were washed with a 2 wt. %"
+            ]
+          },
+          {
+            "op_type": "wash",
+            "steps": [
+              "Perform operation 'wash' as described: After drying, the samples were washed with a 2 wt. %"
+            ]
+          },
+          {
+            "op_type": "dry",
+            "steps": [
+              "Perform operation 'dry' as described: The samples were then dried once more."
+            ]
+          },
+          {
+            "op_type": "stir",
+            "steps": [
+              "Place the reaction vessel on a stir plate.",
+              "Set the stirrer to an appropriate speed.",
+              "Stir for the specified time."
+            ]
+          },
+          {
+            "op_type": "dry",
+            "steps": [
+              "Perform operation 'dry' as described: \n\nMorphology study of scaffold samples by SEM analysis\nThe  scaffolds  were  prepared  by  freeze-drying  and  then  coated  with  a  thin  layer  of  gold  after  being  cut  into \nthin sheets."
+            ]
+          },
+          {
+            "op_type": "wash",
+            "steps": [
+              "Perform operation 'wash' as described: In the next step, the samples were washed three times with PBS to \nremove excess ethanol and then transferred to a 6-well cell culture plate."
+            ]
+          },
+          {
+            "op_type": "dry",
+            "steps": [
+              "Perform operation 'dry' as described: \n\nScientific Reports |        (2025) 15:22235 \n\n| https://doi.org/10.1038/s41598-025-07270-5\n\n4\n\n \n\fwww.nature.com/scientificreports/\n\nthey  were  dried  under  the  hood  and  in  the  environment."
+            ]
+          },
+          {
+            "op_type": "dry",
+            "steps": [
+              "Perform operation 'dry' as described: \n\nMechanical properties study\nThe  mechanical  properties  of  the  scaffold  samples  were  evaluated  by  measuring  the  compressive  strength \nprepared by freeze-drying."
+            ]
+          },
+          {
+            "op_type": "filter",
+            "steps": [
+              "Perform operation 'filter' as described: After incubation, the samples were removed from the buffer solution, and any excess water was \nblotted off with filter paper."
+            ]
+          },
+          {
+            "op_type": "dry",
+            "steps": [
+              "Perform operation 'dry' as described: After the specified time, the samples were dried using \nthe freeze-drying method and weighed."
+            ]
+          },
+          {
+            "op_type": "dry",
+            "steps": [
+              "Perform operation 'dry' as described: After the specified time, the samples were dried using \nthe freeze-drying method and weighed."
+            ]
+          },
+          {
+            "op_type": "add",
+            "steps": [
+              "Ensure reaction vessel is present and empty.",
+              "Place a clean stir bar in the vessel.",
+              "Measure 1000 mL of SBF.",
+              "Transfer SBF into the vessel."
+            ]
+          },
+          {
+            "op_type": "stir",
+            "steps": [
+              "Place the reaction vessel on a stir plate.",
+              "Set the stirrer to an appropriate speed.",
+              "Stir for the specified time."
+            ]
+          },
+          {
+            "op_type": "add",
+            "steps": [
+              "Ensure reaction vessel is present and empty.",
+              "Place a clean stir bar in the vessel.",
+              "Measure the specified amount of reagent.",
+              "Transfer reagent into the vessel."
+            ]
+          },
+          {
+            "op_type": "add",
+            "steps": [
+              "Ensure reaction vessel is present and empty.",
+              "Place a clean stir bar in the vessel.",
+              "Measure the specified amount of reagent.",
+              "Transfer reagent into the vessel."
+            ]
+          },
+          {
+            "op_type": "add",
+            "steps": [
+              "Ensure reaction vessel is present and empty.",
+              "Place a clean stir bar in the vessel.",
+              "Measure 5 ml of the resulting solution after \n.",
+              "Transfer the resulting solution after \n into the vessel."
+            ]
+          },
+          {
+            "op_type": "add",
+            "steps": [
+              "Ensure reaction vessel is present and empty.",
+              "Place a clean stir bar in the vessel.",
+              "Measure 5 ml of the resulting solution after \n.",
+              "Transfer the resulting solution after \n into the vessel."
+            ]
+          },
+          {
+            "op_type": "add",
+            "steps": [
+              "Ensure reaction vessel is present and empty.",
+              "Place a clean stir bar in the vessel.",
+              "Measure 1000 mL of water.",
+              "Transfer water into the vessel."
+            ]
+          },
+          {
+            "op_type": "wash",
+            "steps": [
+              "Perform operation 'wash' as described: After incubation, the samples were removed, rinsed with distilled water, and dried using the freeze-drying \nmethod."
+            ]
+          },
+          {
+            "op_type": "dry",
+            "steps": [
+              "Perform operation 'dry' as described: After incubation, the samples were removed, rinsed with distilled water, and dried using the freeze-drying \nmethod."
+            ]
+          },
+          {
+            "op_type": "dry",
+            "steps": [
+              "Perform operation 'dry' as described: After incubation, the samples were removed, rinsed with distilled water, and dried using the freeze-drying \nmethod."
+            ]
+          },
+          {
+            "op_type": "add",
+            "steps": [
+              "Ensure reaction vessel is present and empty.",
+              "Place a clean stir bar in the vessel.",
+              "Measure 0.2 ml of MTT.",
+              "Transfer MTT into the vessel."
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "meta": {
+    "title": "Fabrication of biodegradable nanocomposite scaffolds with hydroxyapatite, magnetic clay, and graphene oxide for bone tissue engineering.",
+    "doi": "10.1038/s41598-025-07270-5",
+    "url": "",
+    "pdf_url": "",
+    "year": "2025",
+    "authors": [
+      "Babakhani A",
+      "Peighambardoust SJ, Ghahremani-Nasab M",
+      "Peighambardoust NS."
+    ]
+  },
+  "raw": "www.nature.com/scientificreports\n\nFabrication of biodegradable \nnanocomposite scaffolds with \nhydroxyapatite, magnetic clay, \nand graphene oxide for bone tissue \nengineering\n\nAkram Babakhani1, Seyed Jamaleddin Peighambardoust1, Maryam Ghahremani-Nasab2,4 \n& Naeimeh Sadat Peighambardoust3\n\nBone tissue engineering offers an alternative approach to producing scaffolds using biodegradable \nmaterials. The extracellular matrix of bone tissue comprises collagen and hydroxyapatite so that \nregenerated scaffolds can be a combination of polymeric materials and hydroxyapatite. Additives \nare also used to improve the properties and bring the properties of the regenerated scaffold closer to \nbone tissue. This study focuses on developing nanocomposite scaffolds composed of natural polymers \ncarboxymethyl cellulose (CMC) and alginate (Alg), combined with the synthetic polymer polyvinyl \nalcohol (PVA) as the polymer matrix. The mechanical properties of these biopolymers were enhanced \nusing magnetic clay nanoparticles modified with graphene oxide (CGF) and natural hydroxyapatite \n(HAp). Modified clay was synthesized by adding graphene oxide (via the modified Hummer’s \nmethod), clay, and Fe3O4 nanoparticles. Nanocomposite scaffolds were prepared using the freeze-\ndrying process, incorporating 10 wt. % HAp and 2 wt. % CGF as optimal additives. Comprehensive \ncharacterization, including XRD, FT-IR, TGA, SEM, and analysis of porosity, swelling, degradation, \nand biomineralization, confirmed the formation of a porous polymer matrix with favorable properties. \nThe optimal PVA/CMC/HAp/CGF scaffold demonstrated compressive strength of 12 MPa, porosity \nof 72%, swelling of 1860%, and biodegradation of 43% over 21 days, while the PVA/Alg/HAp/CGF \nscaffold exhibited a compressive strength of 8.1 MPa and porosity of 79%. Both scaffolds showed good \nbiomineralization in SBF and a favorable cell viability rate (OD) in MTT toxicity tests, with an OD of \n1.483 and 1.451 for PVA/CMC/HAp/CGF and PVA/Alg/HAp/CGF scaffolds, respectively. These findings \nsuggest that the PVA/CMC/HAp/CGF nanocomposite scaffold is a promising candidate for bone tissue \nengineering applications. By adding hydroxyapatite and magnetic clay modified with graphene oxide \nto the polymer scaffold, the mechanical properties of the scaffold are increased, appropriate porosity \nand swelling values are obtained, and desirable cell viability is achieved.\n\nKeywords  Magnetic nanoclay, Hydroxyapatite, Nanocomposite scaffold, Graphene oxide, Bone tissue \nengineering\n\nFailure  of  tissues  and  organs  due  to  damage,  congenital  disabilities,  and  aging  is  becoming  the  main  issue \nof  human  body  health  all  over  the  world.  Bones  are  one  of  the  strongest  and  primary  tissues  of  the  body, \nmaintaining  the  surrounding  soft  tissues1.  Regarding  synthetic  scaffolds  that  promote  bone  tissue  repair,  the \ndual role of bone tissue engineering (BTE) scaffolds in interacting with the extracellular matrix and providing \nload-bearing capacity is a challenge. This research aims to investigate the use and processing of several materials \nand  hierarchical  architectures  to  simulate  the  structure  of  natural  bone  tissues  so  that  they  may  function  as \nbioactive artificial scaffolds2. It is widely believed that designing and preparing new tissues is one of the most \n\n1Faculty  of Chemical  and  Petroleum  Engineering,  University  of Tabriz, Tabriz  5166616471,  Iran.  2Stem Cell  and \nRegenerative Medicine Innovation Center, Tabriz University of Medical Sciences, Tabriz, Iran. 3Koç University Boron \nand Advanced Materials Application and Research Center (KUBAM), 34450 Sariyer, Istanbul, Turkey. 4Department \nof Tissue Engineering, Faculty of Advanced Medical Sciences, Tabriz University of Medical Sciences, Tabriz, Iran. \nemail: j.peighambardoust@tabrizu.ac.ir\n\nScientific Reports |        (2025) 15:22235 \n\n| https://doi.org/10.1038/s41598-025-07270-5\n\n1\n\nOPEN\fwww.nature.com/scientificreports/\n\neffective and efficient ways that tissue engineering can accelerate bone regeneration during the healing process3. \nA new strategy for repairing bones has emerged that is based on tissue engineering. As a result of its use of \nbiomaterial scaffolds along with cells and growth factors, it can induce the formation of new bone tissues while \nreducing the risks associated with autologous bone grafts4. Bone tissue is a composite of approximately 70% \nnano-hydroxyapatite and 30% collagen. Wet collagen and the accumulation of mineral crystals penetrate each \nother and form a mineral fiber on a scale of several hundred nanometers. The primary role of bone is to provide \na  structural  framework  and  mechanical  strength,  regulate  blood  pH,  and  maintain  calcium  and  phosphate \nlevels for metabolic processes5. It is desirable to design a biocompatible composite that can mimic the natural \nextracellular bone matrix and accelerate new bone regeneration6. If the dispersed phase used in the composite is \nnanoparticles, the composite material will be a nanocomposite. Natural bone is an example of a nanocomposite \ncomposed of two major phases, organic and inorganic, at the nanoscale7. Polymer-based nanocomposites are \nattractive  due  to  their  ability  to  create  porous  architectures  and  biodegradability.  The  ease  of  manipulating \nstructures  with  precise  tuning  of  physicochemical  properties  is  an  advantage  of  polymer  nanocomposites \nfor  tissue  engineering  applications  such  as  dental,  bone,  and  neural  engineering8.  Nanocomposites  made  of \npolymeric materials and additives are potential materials for constructing bone scaffolds9.\n\nPolymers for making hydrogels include natural and synthetic polymers. Natural polymers are mainly natural \ncomponents  that  prepare  scaffolds  with  high  biocompatibility,  biodegradability,  and  natural  cell  adhesion. \nRecently, synthetic polymers have been widely used to make bone tissue engineering scaffolds because they have \nhigh mechanical properties and long life. Carboxymethyl cellulose is a biocompatible and biodegradable anionic \npolymer that can create a strong ionic cross-link in the scaffold10 and increase the biochemical characteristics \nof porosity, swelling, and degradation. Cellulose is mainly used for various biomedical applications11. Among \nnatural polysaccharides, alginate biopolymer is also widely used as a biomaterial for bone tissue engineering. \nAlginate is one of the most well-known substances, and it has the property of forming a suitable scaffold that can \nbe useful for the treatment of organ failure and loss. Alginate consists of guluronic acid and mannuronic acid \nand is used in tissue engineering due to its biocompatibility, non-toxicity, abundance, and low price12. Alginate \nhydrogels can increase minimal protein absorption due to their hydrophilic property13. Sodium alginate is anionic \nand can be dissolved in water. Hydroxyl groups can cause strong interactions between sodium alginate and other \npolymers through hydrogen bonding14. Alginate benefits osteoblast growth due to its functional groups, such \nas hydroxyl and carboxyl, and increases the efficiency of implant substrates. Due to its high degradation rate in \ncell culture, its use in biomedical applications is limited. To improve alginate’s biocompatibility and mechanical \nproperties, its combination with synthetic polymers and clay minerals was investigated15. Given the disadvantages \nof  natural  polymers,  such  as  poor  solubility  in  common  solvents,  their  low  mechanical  properties,  and  poor \nstability in physiological environments, There have been numerous studies conducted on the physicochemical \nproperties of composite polymers, which have proven to be effective in overcoming the disadvantages of natural \npolymers16. Blending polymers is a potential method for improving mechanical flexibility17. Polyvinyl alcohol \nis a hydrophilic semi-crystalline synthetic biopolymer containing many hydroxyl groups, and it can also form \nhydrogen  bonds  with  free  water  molecules18.  Polyvinyl  alcohol  is  biocompatible  and  has  high  mechanical \nstrength, low toxicity, large surface area, and good chemical stability; in a clinical setting, its use is possible to \nconstruct membranes, repair tissues, and construct biomaterials16. By synergistically combining the bioactive \nproperties of nanoparticles and the properties of polymers, composite materials create scaffolds that provide an \noptimal environment for cell proliferation, differentiation, and cell adhesion19. Various natural and synthetic \nfillers  are  used  as  strengthening  agents  to  improve  polymer  scaffolds’  mechanical  properties  and  bioactivity. \nClay is considered one of the mineral fillers that will enhance the biological and mechanical properties of the \nscaffold  significantly,  and  it  has  already  been  studied  in  bone  cement  processing20.  Clay  can  be  essential  in \nbone regeneration and repair, increasing osteoblast differentiation and apatite deposition20. Also, the graphene \noxide filler is highly compatible with the polymer matrix due to the attendance of polar groups on the surface \nof  this  material. The  high  exceptional  area  ratio  and  antibacterial  properties  make  GO  a  promising  material \nfor developing bone tissue’s antimicrobial and antiviral surface21. GO is exfoliated from graphite and contains \nepoxide, carboxylic, and carbonyl ketone groups in its structural plane. Graphene and graphene-based materials \nhave been investigated in various fields, such as bioimaging, biosensors, cancer treatment, drug delivery, and \ntissue engineering. Unique properties such as thermal conductivity, mechanical strength, high surface area, ease \nof operation, flexibility, biocompatibility, and antibacterial activity make it suitable for biological applications. \nGO has osteoconductive and osteoinductive ability to regulate osteoblast differentiation22,23. Also, this substance \ncan force stem cells to undergo osteogenic differentiation even without adding a growth factor24. Hydroxyapatite \ncontains basic elements such as calcium and phosphate, essential for bone growth. HAp particles increase cell \nproliferation and adhesion and improve bone tissue conduction23. Hydroxyapatite has unique properties, such \nas excellent biocompatibility and low toxicity25. Combining ceramic filler and polymer matrix in one material \nproduces  composites  with  polymer  plasticity  and  calcium  phosphate  bioactivity26.  Scaffolds  containing  HAp \nhave stronger mechanical properties and higher cell proliferation than scaffolds containing TCP, which gives \nthem a better function in bone regeneration in the early stages27. Nanoparticle content can be used to modify the \nproperties of polymer nanocomposites28. Various magnetic nanoparticles have been developed recently for use \nin biological applications. Among these nanoparticles, iron oxide nanoparticles (Fe3O4) have biocompatibility \nand  good  performance  for  medical  applications.  Many  researchers  have  shown  that  the  magnetic  properties \nof Fe3O4 nanoparticles make it an ideal material for cell isolation and drug delivery, which also increases the \neffect of bone induction. Several studies have shown that integrating Fe3O4 nanoparticles with polymer fibers \nsolves the compaction problem and improves their stability in biological applications29. The research fabricates \nnanocomposite  scaffolds  using  CMC,  Alg,  PVA,  magnetic  clay  nanoparticles  modified  with  graphene  oxide \n(CGF), and natural hydroxyapatite (HAp) to enhance mechanical properties. Characterization involved XRD, \nFT-IR, TGA, and SEM analyses, assessing porosity, swelling, degradation, and biomineralization, and the MTT \n\nScientific Reports |        (2025) 15:22235 \n\n| https://doi.org/10.1038/s41598-025-07270-5\n\n2\n\n\fwww.nature.com/scientificreports/\n\ntest  evaluated  cell  viability.  In  bone  tissue  research,  the  composites  studied  mainly  combine  a  natural  and \nsynthetic polymer and an additive, each of which can only be used to improve one property. In this study, two \nbiopolymers are compared in terms of the composition of scaffolds. Two additives are also used: HAp can be \nused to improve biomineralization, and CGF is a combination of several materials that can give many favorable \nproperties to the polymer composite for use as a polymer scaffold.\n\nHaving  the  required  mechanical  properties  is  one  of  the  most  important  properties  that  bone  tissue \nreplacement  scaffolds  must  possess.  In  addition  to  having  the  required  mechanical  properties,  the  scaffolds \nshould possess other characteristics required by bone tissue, such as porosity, biocompatibility, swelling, and \nnon-toxicity. A significant aspect of the research is that in addition to increasing compressive strength, attention \nhas been paid to maintaining the required porosity of the bone tissue. A combination of graphene oxide, clay, \nhydroxyapatite, and the magnetic material Fe3O4 has been used in this research as a new material. As a result of \nthe combination of graphene oxide with clay, the compressive strength of the scaffold was increased significantly, \nand the presence of HAp led to an increase in biomineralization of the scaffold, whereas Fe3O4 had a positive \neffect on the viability of the cells. The properties of natural bone differ significantly based on its type. For example, \nthe compressive strength of cancellous bone ranges from 2 to 20 MPa. As a result, it is important to consider \nthe scaffold’s mechanical properties when designing scaffolds for bone reconstruction and fracture healing to \nensure a successful outcome30. It has been found that the scaffold that was prepared in this study has compressive \nstrength within the acceptable range for cancellous bone. It is important to  emphasize that the porosity of a \nhydrogel is a significant factor that profoundly affects the fate of bone cells31. A series of interconnected pores \nin this hydrogel facilitate the migration of cells, the permeability of nutrients, the removal of waste materials, \nand the penetration of blood vessels and nerves32. The porosity of cancellous bone ranges from 30 to 70%33. The \nporosity of the scaffolds prepared for this study is within an appropriate range for cancellous bone scaffolds. \nThe prepared scaffolds had appropriate degradation rates because replacing the manufactured tissue with the \noriginal tissue would have to occur within a proper biodegradation range. Also, they exhibited a high degree of \ncell viability.\n\nMaterials and methods\nMaterials\nSodium alginate (Na-Alg) polymer with a molecular weight of 12,000–40,000 Da from Sigma Aldrich, sodium \ncarboxymethyl  cellulose  with  a  molecular  weight  of  70,000  g/mol  and  a  deacetylation  degree  of  90%  from \nSamchun, Korea, and polyvinyl alcohol with a molecular weight of 72,000 g/mol and a hydrolysis degree of 95% \nfrom  Merck  were  used  in  this  study.  Potassium  hydrogen  phosphate  (KH2PO4),  sodium  hydroxide  (NaOH), \nand  25%  glutaraldehyde  as  cross-linkers  were  obtained  from  Merck.  The  acids  used  in  this  study,  including \nhydrochloric  acid  (HCl)  37%,  phosphoric  acid  (H3PO4),  acetic  acid  (CH3COOH)  100%,  and  sulfuric  acid \n(H2SO4) 98%, were all obtained from Merck. Cloisite 30B clay was organically modified to be the clay used in \nthe study, obtained from Southern Clay Company. K2HPO4.3H2O, KCl, NaCl, Na2SO4, MgCl2.6H2O, NaHCO3, \nCaCl2.2H2O, and TRIS salts prepared simulated body fluid purchased from Merck. Iron (II) chloride, Iron (III) \nchloride, KMnO4, and H2O2 were used to modify clay.\n\nSynthesis of graphene oxide\nTo prepare graphene oxide using the modified Hummer method. First, 3 g of graphite powder was added to \nthe H2SO4/H3PO4 mixture (40:360 ml), and then 18 g of KMnO4 was added and stirred at 50 °C for 14 h with \n100 rpm by a magnetic stirrer. The temperature of the resulting mixture was reduced to 25 °C, and then 30% \nH2O2 was added to it, making the mixture light brown and stirred for 20 min. A centrifuge was used to separate \nthe mixture, and several washes were done with distilled water to reach a neutral pH. In a vacuum oven, 24 h of \ndrying time was spent at 70 °C on the synthesized graphene oxide34. Graphene oxide was synthesized in black \nand in powder form.\n\nPreparation of magnetically modified clay\nTo prepare magnetically modified clay, 1 g of synthesized graphene oxide (GO) was sonicated in 100 mL of water \nfor 35 min, while 2 g of Cloisite 30B clay was sonicated in 100 mL of water for 20 min. A solution of iron(III) \nchloride and iron(II) chloride in a 1:2 molar ratio was then added to the GO-clay mixture, which was heated \nand stirred at 90 °C for 20 min. The resulting mixture was gradually combined with a 4 M sodium hydroxide \nsolution and stirred for 50 min. Finally, the modified clay was separated from the solution, washed several times \nwith distilled water, and baked at 105 °C for 4 h.\n\nPreparation of natural hydroxyapatite (HAp) powder\nThe  chicken  femur  was  cleaned  entirely  of  meat  and  remaining  materials  to  prepare  natural  hydroxyapatite \npowder  and  then  boiled  for  45  min  in  boiling  water.  The  cleaned  bones  were  placed  in  a  furnace  for  3  h  at \n900 °C with a nitrogen atmosphere. After the set time, the bones are removed from the oven, cooled to room \ntemperature,  and  then  powdered  once  they  are  at  room  temperature.  The  production  efficiency  of  natural \nhydroxyapatite powder is 58%, and the product is white35.\n\nPreparation of nanocomposite scaffold\nThe  nanocomposite  scaffolds  were  prepared  using  natural  polymer  materials,  PVA,  hydroxyapatite  extracted \nfrom  natural  bone,  and  modified  clay  using  a  simple  mixing  method.  For  the  preparation  of  the  scaffold,  a \nsolution of 2 wt. in the first step. % of a natural polymer in distilled water was prepared by dissolving the polymer \nin the water and stirring the solution until the polymer was fully dissolved. It was also possible to prepare a \nsolution of polyvinyl alcohol by dissolving PVA in distilled water at a temperature of 70 °C to prepare a solution \n\nScientific Reports |        (2025) 15:22235 \n\n| https://doi.org/10.1038/s41598-025-07270-5\n\n3\n\n\fwww.nature.com/scientificreports/\n\nof 0.2 wt. % of polyvinyl alcohol. HAp was dispersed in 1 v/v % acetic acid for 24 h to obtain a solution of 2 wt. \n% of hydroxyapatite. As soon as the materials had been prepared, they were added in the correct proportions, \nand the mixer was turned on for 12 h. 0.5 v/v % of glutaraldehyde was added to the prepped solution in 5% \nof the total solution volume to cross-link the polymer solution. The solution needs to be mixed for 20 min. A \nsuspension was obtained by dispersing the modified clay in distilled water. In this method, the last step of adding \nCGF is included. The particles were evenly dispersed in the solution after adding CGF and then subjected to \nultrasonic treatment for two hours. The solution was transferred into a falcon tube and dried using a freeze-\ndryer. After drying, the samples were washed with a 2 wt. % NaBH4 solution and a 2 wt. % NaOH solution to \nneutralize any unreacted glutaraldehyde and excess acetic acid. The samples were then dried once more. The \nschematic representation of the PVA/Alg/Hap/CGF nanocomposite formation has been shown in the Scheme 1.\n\nCharacterization of scaffolds\nFourier transform infrared spectroscopy (FTIR) study\nTo examine the functional and chemical properties of HAp, Fe3O4, GO, clay, Cloisite 30B/GO/Fe3O4, Alg, CMC, \nPVA, and their interactions, we performed FTIR analysis on the prepared nanocomposite scaffolds. Infrared \nspectra of the samples, mixed with KBr powder, were recorded using a Bruker Tensor 27 spectrophotometer \n(Germany). This FTIR instrument offers a measurement resolution of 0.1 cm⁻1, and its readings are based on \nabsorbance.\n\nX-ray diffraction (XRD) study\nXRD  analysis  evaluated  the  crystallinity  of  PVA,  CMC,  Alg,  HAp,  clay,  and  C30B/GO/Fe3O4  samples  and \nthe  prepared  nanocomposite  scaffolds.  The  analysis  was  performed  using  a  Krisallofex  D500  diffractometer \n(Siemens, Germany), which employed Cu-Kα radiation at 25 mA, operating at 40 kV, and scanned over a range \nof 4–80°. The device had a scan step of 0.05° and a measurement accuracy of 0.04 deg/sec.\n\nMorphology study of scaffold samples by SEM analysis\nThe  scaffolds  were  prepared  by  freeze-drying  and  then  coated  with  a  thin  layer  of  gold  after  being  cut  into \nthin sheets. Once the samples were positioned in the microscope, scanning electron microscopy (SEM) images \n(MIRA3, TESCAN, Brno, Czech Republic) were used to examine the morphology of the scaffolds. Furthermore, \nthe  presence  and  distribution  of  phosphorus  and  calcium  elements  within  the  nanocomposite  scaffold  were \nanalyzed using energy-dispersive X-ray (EDX)  mapping. A voltage  of 30  kV was applied to the SEM device. \nAlso, to image the amount of cell culture by SEM, uniform pieces of the scaffolds were cut and immersed in 70% \nethanol solution for 30 min for sterilization. In the next step, the samples were washed three times with PBS to \nremove excess ethanol and then transferred to a 6-well cell culture plate. A cell plate with a density of 50,000 cells \nper cell plate was then used to culture the MSCs on scaffolds. As a final step, the samples were cultured in an \nFBS medium with 1% penicillin–streptomycin and 10% DMEM in an incubator for 72 h. They were incubated \nfor 72 h at 37 °C. After this time, the supernatant of all the wells of the 6-well plate was removed, and after \nwashing with PBS, they were fixed with 2.5% glutaraldehyde for 20 min. After removing the fixative solution, \n\nScheme 1.  Schematic representation of the formation of PVA/Alg/Hap/CGF nanocomposite scaffolds.\n\nScientific Reports |        (2025) 15:22235 \n\n| https://doi.org/10.1038/s41598-025-07270-5\n\n4\n\n \n\fwww.nature.com/scientificreports/\n\nthey  were  dried  under  the  hood  and  in  the  environment.  Finally,  the  morphological  images  of  the  samples \nprepared according to this section were examined by SEM.\n\nMechanical properties study\nThe  mechanical  properties  of  the  scaffold  samples  were  evaluated  by  measuring  the  compressive  strength \nprepared by freeze-drying. To assess the material’s compressive strength, cylinder samples measuring 12 mm in \nheight and 6 mm in diameter were cut. During a compression test, a force with 0.5 mm per minute speed and \npower of 25 kN was used to test the material’s compressive strength at 25 °C. A universal machine model was \nused to carry out mechanical tests, Al-7000-Taiwand. Three samples of each scaffold were prepared to perform \nthe compressive strength test, and all three samples were tested. Their average compressive strength was reported \nas the compressive strength of the polymer scaffold. The error value was 0.1 MPa.\n\nMeasuring the porosity of scaffolds\nUsing the liquid displacement method, we could determine the porosity of scaffolds36. Scaffolds were cut into \none cubic cm square piece. A displacement liquid was employed in this case, and it was ethanol because it does \nnot dissolve the scaffolds while it is being used. To determine the porosity of the cut scaffolds, the scaffolds were \nplaced in a graduated container containing ethanol with volume (V1) to measure the porosity. Using the total \nvolume of ethanol and scaffold (V2), we calculated the volume difference V2-V1. After exiting the scaffold from \nthe cylinder containing ethanol, the remaining volume of the ethanol in the cylinder was measured by using \nthe following formula: V3. According to the equation below, the scaffold porosity could be estimated using the \nfollowing equation:\n\nε =\n\n(V1 −\n(V2 −\n\nV2)\nV3)\n\n(1)\n\nSwelling test of scaffolds\nInitially, the cut scaffolds were weighed (Winitial) and then immersed in PBS phosphate buffer solution for 24 h \nfor incubation. After incubation, the samples were removed from the buffer solution, and any excess water was \nblotted off with filter paper. The swelling test was repeated three times for each sample. The swelling ratio for \neach sample was calculated using the following equation37:\n\nSwelling Ratio =\n\n(Wﬁnal −\n\nWinitial)\n\nWinitial\n\n(2)\n\nBiodegradation test of scaffolds\nScaffolds were given the exact dimensions and weighed. Then, the scaffold samples were incubated in a phosphate \nbuffer solution for 21, 14, and 7 days at 37 °C with pH = 7.4. After the specified time, the samples were dried using \nthe freeze-drying method and weighed. The scaffold destruction rate was obtained by the following equation37:\n\nBiodegradation Ratio =\n\n(Initial weight of sample\n\nWeight of sample in time T)\n\n−\n\nInitial weight of sample\n\n(3)\n\nThermogravimetric analysis (TGA) study\nThe  thermal  stability  of  the  polymer  raw  materials  and  nanocomposite  scaffolds  was  assessed  using  TGA.  A \nthermogravimetric  analyzer  (TGA-PL,  TGA  1500,  Canada)  was  employed  for  this  analysis,  conducted  in  a \nnitrogen atmosphere within the 25–600°C temperature range.\n\nInvestigation of scaffold biomineralization using simulated body fluid (SBF)\nThe performance of the scaffold bone graft was assessed using simulated body fluid (SBF), which was prepared \nfollowing  established  protocols  with  chemical  reagents.  SBF  is  essential  for  examining  the  formation  of \nbiomaterials on polymer scaffolds. To prepare the solution, 1000 mL of SBF was made by adding 700 mL of \ndeionized water into a plastic container in a water bath. It is recommended to cover the container with either \na glass or plastic lid while stirring; for the process to be successful, the solution should be kept at a consistent \ntemperature of 36.5 °C throughout. Adding the ingredients in order is essential; once each ingredient is dissolved \ncompletely, the next one should be added, and so on. As soon as the ingredients were added, hydrochloric acid \nwas used in the amount of 0–5 ml with an additive solution to achieve a pH of 7.4 in the resulting solution after \nadding the ingredients. A total of 1000 mL of solution was prepared by adding water to a flask and shaking it \nat 20 °C to reach the desired volume. The solution was then transferred to a polyethylene container and stored \nin a refrigerator at 5–10 °C. Scaffold samples were immersed in the SBF solution and incubated at 37 °C for 14 \ndays. After incubation, the samples were removed, rinsed with distilled water, and dried using the freeze-drying \nmethod. Finally, EDX and SEM techniques were employed to evaluate the biomineralization capability of the \nscaffold samples38.\n\nAssessment of toxicity and cell viability\nFirst, uniform pieces of scaffolds were cut and immersed in 70% ethanol solution for 30 min to sterilize them. \nEventually, we must continue using PBS to remove any remaining ethanol from the system and transfer it to a \n96-well cell culture plate. Then, mesenchymal stem cells were cultured on the scaffolds with a cell density of 1 × \n104 cells per cell plate. After collecting the samples, they were cultured inside the incubator in a DMEM medium \n\nScientific Reports |        (2025) 15:22235 \n\n| https://doi.org/10.1038/s41598-025-07270-5\n\n5\n\n \n \n \n \n \n \n\fwww.nature.com/scientificreports/\n\ncontaining 1% penicillin–streptomycin and 10% FBS. They were incubated for 72 h at 37 °C. After 72 h, the \nsupernatant of all the wells of the 96-well plate was removed, and after washing with PBS to each well, 0.2 ml of \nMTT solution (5 mg/mm) was added, and the wells were kept in the incubator for four hours. It was incubated at \n37 °C. A solution of 0.1 mL DMSO was then substituted for the MTT solution for 30 min. Finally, the absorbance \nwas measured by an ELISA reader at a wavelength of 570 nm to determine cell viability.\n\nResults and discussion\nFourier transform infrared spectroscopy (FTIR) analysis\nIn  the  structure  of  HAp  prepared  from  the  chicken  thigh  in  Fig.  1a,  the  peak  in  the  wave  number  range  of \n1090–1045 cm-1 indicates the vibrations of PO4\n3- in the structure of HAp, and the vibration of -OH is observed \nin 3570 cm-139,40. The 568 cm-1 and 600–640 cm-1 peaks correspond to the bending and stretching vibrations of \n3- ions41. Meanwhile, the vibrations at 1400 cm-1 indicate the presence of carbonate, which influences the \nPO4\nbioactive characteristics of HAp. HAp forms peaks that contain cations of Ca2+, which are associated with HAp42. \nFigure 1a shows a spectrum of graphene oxide with peaks at 2920 and 2800 cm-1, which correspond to the peaks \nof the -CH2 group in graphene oxide. 3400 cm-1 peak is related with the OH group, 1574 cm-1 peak with C=C \nbond, and 1711 cm-1 peak with C=O bond43,44. The 1160 and 1050 cm-1 peaks in the diagram above correspond \nto the vibrations of C-OH and C-O, respectively45,46. The FT-IR spectrum of Fe3O4 material, shown in Fig. 1a, \nfeatures characteristic bands at 3430 cm-1 and 1611 cm-1 associated with hydroxyl groups. The 590 cm-1 peak \nrepresents Fe-O vibrations, while the 3421 and 1569 cm-1 peaks are also attributed to hydroxyl groups in the \n\nFig. 1.  FT-IR spectra (a) HAp, CGF, Cloisite 30B, Fe3O4, GO, (b) CMC, Alg and, PVA biopolymers, (c) PVA/\nAlg/HAp/CGF, PVA/Alg/HAp and PVA/Alg scaffolds, and (d) PVA/CMC/HAp/CGF, PVA/CMC/HAp and \nPVA/CMC nanocomposite scaffolds.\n\nScientific Reports |        (2025) 15:22235 \n\n| https://doi.org/10.1038/s41598-025-07270-5\n\n6\n\n \n\fwww.nature.com/scientificreports/\n\nFe3O4 compound47,48. The 2920 and 2850 cm-1 peaks are also linked to C-H stretching49. The FT-IR spectrum \nof the clay is shown in Fig. 1a, where the peak at 1040 cm-1 is assigned to Si vibrations in the Si-O band. In the \n3634–3393 cm-1 region of the FTIR spectrum, there is a broad absorption peak assigned to the OH stretching \nvibration. Two peaks at 2920 and 2854 cm-1 have been assigned to compounds that contain linear aliphatic chains \nand are indicative of clay’s organic modification18. Absorption peaks at 525, 460, and 1470 cm-1 were identified, \ncorresponding to the vibrations of Si-O-Al, Si-O-Mg, and carbonate (CaCO3 or Mg(CO3)2), respectively50. In \nthe FT-IR spectrum of the C30B/GO/Fe3O4 (CGF) material, a peak at 12,920 cm-1 was observed, attributed to \nC-H vibrations in graphene oxide51. Additionally, the absorption peak at 1460 cm-1 is linked to the C-O bond \nin graphene oxide52, while the peak at 1040 cm-1 corresponds to silicon in Cloisite 30B-modified clay18. After \nplacing Fe3O4 nanoparticles and graphene oxide in the clay structure, the intensity and range of the absorption \npeaks in the clay structure changed significantly, which can be caused by the interaction between the functional \ngroups of the clay surface, the iron, and graphene oxide nanoparticles. In addition, absorption vibrations in the \nsaid magnetic structure composites originating from Fe-O vibrations have been seen, confirming the presence \nof Fe3O4 nanoparticles in the structure52.\n\nThe FT-IR spectrum of the alginate biopolymer, shown in Fig. 1b, includes peaks at 2920, 883, and 12,109 \ncm-1,  corresponding  to  the  -OH  group53.  Peaks  at  1418  and  1627  cm-1  are  associated  with  the  symmetric \nstretching  of  the  carboxyl  group  and  the  carboxylate  group  (C=O)54,  while  the  peak  at  1125  cm-1  relates  to \nC-O  and  C-C  bonds55.  The  FT-IR  spectrum  of  carboxymethyl  cellulose,  also  depicted  in  Fig.  1b,  displays  a \nstrong, broad absorption band at 13,439 cm-1 due to -OH group stretching. The peak at 2919 cm-1 corresponds \nto C-H stretching vibrations56,57, the strong band at 1609 cm-1 indicates the presence of the -COO- group, and \nabsorption bands at 11,423 and 1328 cm-1 are attributed to -CH2 and -OH vibrations. The peak at 11,059 cm-1 is \nalso linked to CH-O-CH2 bond stretching57. The FT-IR spectrum of the scaffold, composed of polyvinyl alcohol \nand sodium alginate, is shown in Fig. 1c, highlighting the scaffold’s structural features. In this spectrum, the peak \nat 3423 cm-1 corresponds to OH present in sodium alginate and PVA, and the peak at 1628 cm-1 is assigned to \nthe presence of -COO- in alginate. The 850 and 1108 cm-1 peaks can be related to C-C and C-O of alginate and \nPVA53,58,59. The 1431 and 2923 cm-1 peaks represent CH-OH and CH in PVA or OH of alginate, respectively60,61. \nAll the peaks of both PVA and alginate biopolymers were also present in the scaffold of the combination of these \ntwo biopolymers, and they show a slight shift, which indicates the mixing of materials and the formation of a \npolymer blend. In the FT-IR spectrum of the PVA/Alg/HAp scaffold shown in Fig. 1c, the new peak appearing at \n1569 cm-1 is assigned to the presence of the -PO4\n3- group. The peak in 1043 cm-1 also indicates the attendance of \n3- in the scaffold. The peak at 609 cm-1 corresponds to the -OH group associated with hydroxyapatite, while \n-PO4\nthe peak at 1425 cm-1 represents -CO3\n2⁻ related to HAp35. The presence of these new peaks in the PVA/Alg/HAp \nscaffold, compared to the PVA/Alg scaffold, confirms the incorporation of HAp. In the FT-IR spectrum of the \nPVA/Alg/HAp/CGF scaffold, additional peaks have emerged alongside those from the previous scaffold. Peaks \nat 431 and 471 cm-1 are attributed to Si-O-Mg and Si-O-Al vibrations50, indicating the formation of Cloisite 30B \nclay bonds within the new scaffold structure. Vibrations around 571 cm-1 correspond to the Fe-O bond, while \npeaks at 1429 and 2935 cm-1 are associated with C-O and C-H vibrations in graphene oxide (GO), confirming \nthe presence of polymers52. These observations verify the incorporation of CGF into the PVA/Alg/HAp/CGF \nnanocomposite scaffold. Additionally, slight shifts in the PVA, Alg, and HAp peaks suggest effective integration \nof the materials within the scaffold. Since no new peaks appeared in the PVA/Alg/HAp/CGF scaffold compared \nto the PVA/Alg/HAp scaffold, it can be inferred that CGF was incorporated into the polymer matrix through \nphysical interactions.\n\nFigure 1d presents the FT-IR spectra of PVA/CMC/HAp/CGF, PVA/CMC/HAp, and PVA/CMC scaffolds. In \nthe PVA/CMC scaffold spectrum, the broad peak at 3420 cm-1 corresponds to the -OH stretching vibrations of \nthe hydroxyl groups in PVA and CMC. In contrast, the peak around 1330 cm-1 is associated with C-O vibrations \nof the acetyl groups in PVA56,57,62. The peak in the 1603 cm-1 region is associated with the symmetrical bending \nof the C-O bond in PVA and CMC62,63, and the C-O absorption band in the 1096 cm-1 region is due to the \nattendance of CMC and PVA. The 846, 1426, and 2938 cm-1 peaks show C-C, CH-OH, and CH in PVA and \nCMC, respectively64,65. The displacement of the peaks compared to the peak of the original samples shows the \ncombination of materials and the formation of a polymer blend. It is expected that hydrogen bonding will occur \nbetween PVA and CMC, and these forces occur in the bending region of OH and -COO- functional group66. \nComparing the FT-IR spectrum of the PVA/CMC/HAp scaffold with that of the PVA/CMC scaffold reveals that \nthe peak at 1603 cm-1 becomes sharper, and a new peak appears around 570 cm-1, corresponding to the bending \n3⁻  group41.  These  peaks  confirm  the  presence  of  HAp  in  the  scaffold. \nand  stretching  vibrations  of  the  -PO4\nFurthermore, the FT-IR spectrum of the PVA/CMC/HAp/CGF scaffold shows the emergence of a new peak at \n496 cm-1, attributed to the vibrations of Si bonds in Cloisite 30B clay, indicating the incorporation of CGF into \nthe final PVA/CMC/HAp/CGF nanocomposite scaffold50. The mixing of CGF into the polymer matrix of this \nnanocomposite scaffold was achieved through physical interactions.\n\nX-ray diffraction (XRD) analysis\nXRD  analysis  was  done  to  identify  the  crystal  structure  of  the  samples,  including  the  different  phases  of  the \ncrystal regions. In Fig. 2a, the XRD spectrum shows the structure of natural HAp, in which peaks with different \nintensities appear and shows that the natural HAp powder has a crystalline structure. The crystalline phases “102” \nand “002” of hydroxyapatite were identified at 2θ angles of 26.28 and 26.02°, respectively42. Also, other peaks of \ncrystalline phases of this material include “211”, “112”, “300”, “202”, “310”, “222”, “312”, “213”, “321”, “410”, “402”, \nand “004” respectively in the values of the 2θ angles 31.9, 23.3, 33.06, 34.26, 39.9, 46.8, 48.2, 49.6, 50.6, and 51.4. \n52.2 and 53.3° are visible41. The index peak of GO material is created at the 2θ angle of 12.3°44,67, which indicates \nthe “001” crystal phase68. In the XRD spectrum of Fe3O4, the peak at a 2θ angle of 30° corresponds to the crystal \nphase “220”, while peaks at 2θ angles of 37.7, 54.6, 57.16, 74.2, 63.3, and 42.8° represent the crystal phases “311”, \n\nScientific Reports |        (2025) 15:22235 \n\n| https://doi.org/10.1038/s41598-025-07270-5\n\n7\n\n\fwww.nature.com/scientificreports/\n\nFig. 2.  XRD diagrams of (a) HAp, CGF, C30B, Fe3O4, and GO, (b) CMC, ALg, and PVA biopolymers, (c) PVA/\nAlg/HAp/CGF, PVA/Alg/HAp and PVA/Alg scaffolds, and d) PVA/CMC/HAp/CGF, PVA/CMC/HAp and \nPVA/CMC scaffolds.\n\n“422”, “511”, “533”, “440”, and '“400”, respectively56. The XRD spectrum of Cloisite 30B clay, the characteristic \npeak at a 2θ angle of 5.02°, corresponds to the ‘001’ crystalline phase69,70. There are peaks in the structure of \nthe  C30B/GO/Fe3O4  magnetic  composite  with  different  intensities,  and  these  peaks  match  those  seen  in  the \nstructure  of  the  components.  This  indicates  that  the  components  are  correctly  interrelated  in  the  composite \nstructure. In the composite structure, the peaks observed at 2θ angles of 63.1, 53.8, and 35.7° correspond to \nFe3O4 particles, while the peak at 11.84° is associated with graphene oxide. The peak at the 2θ angle of 6° is \nrelated to the attendance of Cloisite 30B clay in the composite. In the XRD spectrum of the C30B/GO/Fe3O4 \nmaterial, the peak of the GO index is significantly weakened, which is caused by the separation of the GO layers \nand the placement of Fe3O4 particles between its layers, which indicates the successful preparation of the C30B/\nGO/Fe3O4 composite52. Also, the peak indicating Cloisite 30B clay has weakened, suggesting that its layers are \nseparated. The XRD spectrum of alginate can be seen in Fig. 2b. Alginate index peaks have appeared in the 2θ \nrange of 19.08, 32.2, 33.9, 36, and 48.84°71,72. The X-ray diffraction of CMC biopolymer is shown in Fig. 2b, and \nthe main diffraction of this material is observed at 2θ of 20.04°63. As can be seen in this figure, alginate polymer \nhas sharper peaks than CMC polymer. Figure 2c shows the XRD spectrum of PVA/Alg/HAp/CGF, PVA/Alg/\nHAp, and PVA/Alg scaffolds. In the spectrum of the PVA/Alg scaffold, the index peak appeared in this scaffold in \nthe range of 2θ of 19.8°; both biopolymers from PVA and Alg were found to be present in the scaffold structure. \nAlso, the peaks at 2θ of 22.56, 31.8, 33.86, and 46.2° are due to alginate biopolymer63,71. By comparing the peak of \nthe PVA/Alg scaffold with the peaks of PVA and Alg, it can be seen that the peaks of the polymer blend scaffold \nhave  been  slightly  shifted  and  reduced  in  intensity  compared  to  the  original  samples,  which  shows  that  the \nbiopolymers of this scaffold have interacted well and a suitable polymer blend has been created. XRD spectrum \n\nScientific Reports |        (2025) 15:22235 \n\n| https://doi.org/10.1038/s41598-025-07270-5\n\n8\n\n \n\fwww.nature.com/scientificreports/\n\nof the PVA/Alg/HAp scaffold is shown in Fig. 2b. By comparing this spectrum with the spectrum of the PVA/Alg \nscaffold, it can be seen that the peak at the 2θ angle of 31.8° has become much sharper, which shows the effective \npresence of HAp in the PVA/Alg/HAp scaffold. Also, a new peak has been created at the 2θ angle of 49.5°, which \nwas absent in the PVA/Alg scaffold73. In the XRD spectrum of the PVA/Alg/HAp/CGF nanocomposite scaffold, \na new peak at a 2θ angle of 5° is observed, indicating the presence of Cloisite 30B clay69. Additionally, the peak \nat 11.4° corresponds to graphene oxide (GO)44, while the peaks at 42.02, 57.9, 63.4, and 74.8° are associated with \nthe Fe3O4 crystalline structure74. These peaks confirm the inclusion of CGF material components in the PVA/\nAlg/HAp/CGF nanocomposite scaffold. However, the slight weakening of the Cloisite 30B clay peak suggests \nthe formation of an exfoliated structure within the nanocomposite scaffold. The XRD spectra of the PVA and \nCMC scaffolds are shown in Fig. 2d. The peak of the PVA/CMC scaffold appears at 19.78°, which confirms the \npresence of both PVA and CMC polymers, but the peak that appears is broader than the PVA and CMC peaks \nand also shifts concerning both materials, which indicates a strong interaction between PVA and CMC. In the \nXRD spectrum of the PVA/CMC/HAp scaffold, the peaks that appear at 08.32, 8.33, 9.46, 56.40, and 5.49° are \nrelated to the presence and effect of hydroxyapatite in the scaffold39. By comparing the XRD spectra of the PVA/\nCMC/HAp/CGF scaffold with the PVA/CMC/HAp scaffold, it is observed that the small peak that appears at 5° \nis affected by the presence of C30B, and the peak at 8.11° is related to GO. These newly formed peaks confirm \nthe presence of CGF in the scaffold, but compared to CGF, the peak corresponding to Cloisite 30B has almost \ndisappeared,  indicating  the  separation  of  the  clay  layers  and  the  formation  of  the  exfoliated  structure  of  the \nnanocomposite.\n\nScanning electron microscopy (SEM) and energy-dispersive X-ray spectroscopy (EDX) \nanalysis\nThe  morphological  properties  of  HAp  obtained  from  the  femur  of  chicken,  modified  clay,  and  synthesized \nscaffolds have been evaluated using FESEM analysis and EDX analysis. As seen in Fig. 3a, the produced HAp \nhas a crystalline structure. In Fig. 3b, as seen in the EDX analysis of HAp, the elements Mg, Na, and Zn are \nobserved in addition to the main elements P and Ca. Magnesium, sodium, and zinc elements in the structure of \nhydroxyapatite can play a very important role in influencing its biological function. Magnesium impurities in \nHAp can promote osteoblast growth and multiplication in bone tissue. Zinc incorporation into the HAp structure \nis highly beneficial for bone regeneration, as it promotes the proliferation of osteoclasts and osteoblasts while \nenhancing bone formation. The attendance of Na improves the biocompatibility and cellular characteristics of \nHAp41. As it is clear from the SEM images and EDX analysis of clay modified with Fe3O4 and GO in Fig. 3c–d, \nclay and graphene oxide have a layered structure, and after adding and changing it with compounds containing \nFe (II) and Fe (III), Fe3O4 nanoparticles with different sizes and spherical morphology have been created on the \nclay surface. Therefore, Cloisite 30B particles, graphene oxide, and Fe3O4 have adequate and proper interaction, \nand the peaks belonging to O, Fe, Si, and C elements show the modification of clay with graphene oxide and \nFe3O4.\n\nAlginate biopolymer is suitable for hard tissue engineering, has no toxic properties, and is biocompatible75. \nFigure 4a shows the scaffold morphology produced from the PVA/Alg polymer blend. This scaffold has a proper \nporosity distribution, and large and small porosity can be seen in the image. Figure 4b illustrates the morphology \nof the PVA/Alg/HAp polymer scaffold, showing that adding HAp slightly reduces its porosity. The SEM image \nof  the  PVA/Alg/HAp/CGF  scaffold  in  Fig.  4c  reveals  a  further  reduction  in  porosity  and  a  denser  structure \nattributed to the inclusion of GO nanoparticles and Cloisite 30B clay. Additionally, CMC, a biopolymer with \nhigh water absorption and biodegradable bonds, plays a role in adjusting the scaffold’s porous structure and \nenhancing  its  swelling  capacity76.  Figure  4d  displays  the  morphology  of  the  PVA/CMC  blend  scaffold.  As  is \napparent in the image, this scaffold has a perfect distribution of porosity, which is very suitable for the stage \nof  cell  culture  and  bone  tissue  regeneration.  Large  and  small  pores  are  seen  simultaneously  in  this  scaffold. \nCMC biopolymer in a hydrogel blend with PVA has increased the pore size of scaffold pores. The presence of \nCMC in the hydrogel absorbs water, resulting in the formation of more ice crystals in the scaffolds, and after \nsublimation, larger voids are formed in the scaffold76. Figure 4e also shows the morphology of the PVA/CMC/\nHAp scaffold, whose porosity has been reduced due to the addition of hydroxyapatite. Finally, Fig. 4f shows the \nscaffold  morphology  from  adding  CGF  nanoparticles  to  the  PVA/CMC/HAp  scaffold.  The  increase  of  these \nnanoparticles causes a slight reduction in the porosity of the nanocomposite scaffold, and a suitable distribution \nof the size of the pores can be seen. By comparing the prepared PVA/Alg and PVA/CMC scaffolds, it can be seen \nthat the porosity distribution in the PVA/CMC scaffold is higher, which shows the suitability of this scaffold for \ncell growth and proliferation. Porosity is one of the important factors in determining mechanical properties. \nReducing the porosity significantly enhanced the scaffold’s mechanical properties77,78. Therefore, the PVA/Alg/\nHAp/CGF and PVA/CMC/HAp/CGF nanocomposite scaffolds have higher mechanical properties than those \nwithout CGF nanoparticles. As stated in the XRD analysis, the alginate polymer had sharper peaks than the \nCMC  polymer,  and  the  composites  containing  the  alginate  biopolymer  also  showed  sharper  peaks  than  the \nscaffolds containing the CMC biopolymer, which caused more pores in the scaffolds containing alginate, which \ncan also be seen in the SEM images in Fig. 4.\n\nOne of the essential parameters of an ideal scaffold is its porosity so that nutrients and oxygen can easily pass \nthrough its pores and reach the cells, and waste products can pass through them and be excreted. The size of the \npores should not be so large that they impair mechanical strength nor so small that they become blocked by cells \nand prevent the penetration of cells and vessels into the interior of the scaffold.\n\nFigure 5a–c shows the microstructure and dot-mapping of PVA/Alg, PVA/Alg/HAp, and PVA/Alg/HAp/CGF \nscaffolds. Figure 5a shows the scaffold morphology with large pores; this scaffold comprises only two polymers: \nPVA and Alg. Figure 5b presents the morphology of the PVA/Alg/HAp scaffold. As it is clear by comparing this \nscaffold with the scaffold of the previous form, the scaffold’s porosity is reduced, and the accumulation of white \n\nScientific Reports |        (2025) 15:22235 \n\n| https://doi.org/10.1038/s41598-025-07270-5\n\n9\n\n\fwww.nature.com/scientificreports/\n\nFig. 3.  (a) SEM image of hydroxyapatite prepared from the chicken femur, (b) EDX analysis results of natural \nhydroxyapatite, (c) SEM image of C30B/GO/Fe3O4, and (d) EDX analysis result of C30B/GO/Fe3O4.\n\nmaterial indicates hydroxyapatite particles on the surface of this polymer scaffold. Also, this figure shows the \ndistribution of the elements from the EDX analysis in the PVA/Alg/HAp scaffold. Ca (green dots) and P (red \ndots) elements are seen due to the attendance of HAp in the scaffold, which shows a uniform distribution of these \nelements in the scaffolding. Figure 5c shows the microstructure of the PVA/Alg/HAp/CGF scaffold, which is still \nporous. However, it has relatively low porosity, and HAp and CGF nanoparticles are visible. In this figure, the \ndistribution of various elements in the microstructure of the PVA/Alg/HAp/CGF nanocomposite scaffold can \nbe seen, where Fe and Si elements indicate the attendance of CGF nanomaterial in the scaffold, and P and Ca \nelements indicate the HAp material, which has a uniform distribution.\n\nFigure 6 shows the SEM microstructure and dot-mapping of scaffolds containing PVA and CMC biopolymers. \nFigure 6a shows the structure and the distribution of elements of the PVA/CMC scaffold, and Fig. 6b shows \ndistribution of elements of the PVA/CMC/HAp scaffold. As it is clear from these figures, this scaffold appeared \nto have less porosity than the previous scaffold due to the presence of HAp. Also, in the distribution of elements \nin this scaffold presented in these figures, the presence of Ca and P elements was proof of the presence of HAp \nin this scaffold. The uniform distribution of calcium and phosphorus elements is also observed, showing the \nhomogenous HAp dispersion in the scaffold. The last SEM image is the microstructure of the PVA/CMC/HAp/\nCGF  scaffold.  The  uniform  distribution  of  P,  Ca,  Fe,  and  Si  elements  in  this  scaffold  in  Fig.  6c  indicates  the \neffective  presence  of  CGF  and  HAp  nanoparticles  and  their  homogeneous  distribution  within  the  polymer \nmatrix of this scaffold. As seen in Fig. 6b and c, there is no accumulation of nanomaterials in these scaffolds, \n\nScientific Reports |        (2025) 15:22235 \n\n| https://doi.org/10.1038/s41598-025-07270-5\n\n10\n\n \n\fwww.nature.com/scientificreports/\n\nFig. 4.  SEM images of various scaffolds: (a) PVA/Alg, (b) PVA/Alg/HAp, (c) PVA/Alg/HAp/CGF, (d) PVA/\nCMC, (e) PVA/CMC/HAp, and (f) PVA/CMC/HAp/CGF.\n\nScientific Reports |        (2025) 15:22235 \n\n| https://doi.org/10.1038/s41598-025-07270-5\n\n11\n\n \n\fwww.nature.com/scientificreports/\n\nFig. 5.  (a–c) SEM with dot-mapping images of the PVA/Alg, PVA/Alg/HAp, and PVA/Alg/HAp/CGF \nscaffolds.\n\nwhich  indicates  a  very  homogeneous  distribution  of  HAp  particles  and  CGF  nanoparticles  in  the  scaffolds, \nwhich can cause higher mechanical properties due to the reduction of stress concentration points. Also, in this \nscaffold, due to the homogeneous distribution of HAp particles in its polymer matrix, we will witness more and \nmore homogeneous biomineralization.\n\nCompariosn of the compressive strength, porosity, and swelling of scaffold samples\nA  scaffold  ideal  for  bone  tissue  engineering  must  have  appropriate  mechanical  properties  to  support  tissue \ngrowth  when  subjected  to  mechanical  loading79.  GO-containing  scaffolds  have  excellent  thermal  and \nmechanical properties because GO is well dispersed in the polymer scaffold80,81. The wrinkled surface of GO \nsheets leads to high entanglement and adhesion between the polymer matrix and GO82. The presence of GO \nin  nanocomposites  significantly  improves  their  tensile  strength,  Young’s  modulus,  and  compressive  strength. \nImproving the nanocomposite’s mechanical properties can be attributed to the interaction between the carboxyl \n\nScientific Reports |        (2025) 15:22235 \n\n| https://doi.org/10.1038/s41598-025-07270-5\n\n12\n\n \n\fwww.nature.com/scientificreports/\n\nFig. 6.  (a–c) SEM microstructures and dot-mapping results of PVA/CMC, PVA/CMC/HAp and PVA/CMC/\nHAp/CGF scaffolds.\n\ngroups in GO and the groups in polysaccharides83. Therefore, the weak mechanical properties of the polymer \nmatrix  can  be  increased  by  adding  GO84.  Hydrogen  bonding  between  the  hydroxyl  and  carbonyl  groups  on \nthe GO sheets and the oxygen-containing functional groups of the polymer chains is possible, increasing the \nscaffold’s mechanical strength. The presence of GO/Fe3O4 in the scaffold can improve the strain and stress of the \nscaffold52. The presence of graphene oxide in the nanocomposite enables it to absorb more energy before failure, \nenhance  toughness,  and  lead  to  improved  structural  integrity85.  Increased  pore  wall  thickness  and  reduced \nporosity improve the mechanical properties of scaffolds, as Clay reduces porosity86. Clay’s presence causes the \npolymer scaffold’s cell pores to collapse. After the complete collapse of the cell pores, the walls of the opposite \ncell  pores  come  into  contact  with  each  other  and  compress  the  solid  more,  creating  a  denser  region,  which \nultimately addition the scaffold’s mechanical properties87. The results show that the incorporation of C30B/GO/\nFe3O4, with the combined presence of graphene oxide, Clay, and Fe3O4, has enhanced the compressive strength \n\nScientific Reports |        (2025) 15:22235 \n\n| https://doi.org/10.1038/s41598-025-07270-5\n\n13\n\n \n\fwww.nature.com/scientificreports/\n\nof the scaffold. Figure 7a–b shows the maximum compressive strength values of the scaffolds containing Alg \nand  CMC  biopolymers,  and  based  on  these  results,  the  PVA/CMC/HAp/CGF  scaffold  with  12  MPa  has  the \nhighest mechanical strength. The SEM images from this scaffold showed it had the least porosity. CGF and HAp \nnanoparticles were well distributed in this scaffold, which reduced the stress concentration points to the lowest \nvalue and increased the scaffold’s mechanical properties. The maximum compressive strength values reported \nfor scaffold CS-Gel/nHA-PANi were 5.06 MPa88, for scaffold BC-g(Fe3O4/GO) were 11.6 MPa52, and for scaffold \n\nFig. 7.  (a–b) Results of compressive strength, (c–d) porosity, and (e–f) percentage of water absorption in \ndifferent prepared scaffolds.\n\nScientific Reports |        (2025) 15:22235 \n\n| https://doi.org/10.1038/s41598-025-07270-5\n\n14\n\n \n\fwww.nature.com/scientificreports/\n\nPLA/HA,  about  12  MPa  were  obtained89.  For  the  scaffold,  CS-Gel/nHA/MMT,  5.11  MPa  were  obtained86. \nThese cases indicate that the maximum compressive strength value obtained in this study is a suitable number \ncompared to similar works and is also within the range of cancellous bone (2–20 MPa).\n\nPorosity  is  an  important  factor  when  using  polymer  scaffolds  to  enhance  cell  culture.  Porosity  is  helpful \nfor blood vessels and cell growth. Still, if there are many macropores in the scaffold, it will cause a noticeable \ndrop in its mechanical properties. Therefore, choosing a scaffold with a suitable ratio of large and small pores is \nessential for bone tissue regeneration90. For bone defects, polymer scaffolds with a porosity higher than 80% are \nunsuitable91,92. According to the results shown in Fig. 7c–d, the porosity of the final PVA/Alg/HAp/CGF and \nPVA/CMC/HAp/CGF scaffolds was 79 and 72%, respectively, which is to provide an opportunity for nutrient \ntransport and cell migration is sufficient84. As stated in the previous section, the attendance of clay in the scaffold \nreduces its porosity93. It is possible to occupy the free -OH groups in the polymer matrix by adding GO, which \nincreases the hydrophobicity of the nanocomposite scaffold and, as a result, reduces the percentage of porosity94.\nThe control of the swelling behavior of the scaffolds, just like the control of the porosity parameter, is also \nof utmost importance if the scaffolds are to maintain their integrity in interaction with biological fluids. Thus, \nthe swelling of the scaffolds can be attributed to the properties inherent in the constituent materials, which are \nresponsible for causing the swelling. This allows control of swelling ability at the level of material selection11. \nThe overall porosity and pore size are increased by swelling, resulting in the maximum possible surface area \nof the scaffold. When a sample shows a high degree of swelling, it can accept the maximum cell injection into \nthe scaffold and create the maximum cell growth on the surface of the scaffold95. A proper interaction between \nthe scaffold and the physiological fluid is essential for initial cell attachment, ultimately leading to better cell \nproliferation91.  As  shown  in  Fig.  7e–f,  the  most  swelling  was  obtained  in  CMC  scaffolds.  Considering  that \nonly the type of biopolymer used was different in the prepared polymer scaffolds, the results of Fig. 7e–f show \nthat the scaffold containing alginate biopolymer has the lowest amount of water absorption, and the scaffold \ncontaining  CMC  achieves  higher  swelling.  CMC  has  exceptional  water  absorption  properties,  the  bonds  of \nwhich  are  biodegradable,  and  is  derived  from  carbohydrate  sources76;  therefore,  due  to  its  very  hydrophilic \nnature, it increases the size of scaffold pores in a hydrogel-containing PVA, which, in turn, increases the amount \nof scaffold swelling. In PVA/CMC scaffolds, negatively charged carbonyl groups (CH2COO-) from CMC and \nuncharged  carboxyl  groups  on  PVA  are  expected  to  contribute  to  the  hydrophilicity  of  the  scaffolds76.  The \nincorporation of HAp reduces the hydrophilicity of the scaffolds through the binding of calcium and phosphate \nwith the –COOH and –NH2 groups of the polymers. Also, due to the addition of clay, the interaction between \npolymer macromolecules and water molecules is limited, reducing the water content absorbed by the scaffold. \nScaffolds containing GO can absorb more water than scaffolds containing only polymer. High water absorption \nin  scaffolds  containing  GO  is  due  to  many  oxygen  functional  groups  on  GO;  this  process  forms  a  hydrogen \nbond  between  the  water  and  the  GO.  Incorporation  of  GO  into  polymer  scaffolds  is  desirable  to  improve \nwater  absorption,  which  can  help  the  absorption  of  drugs  or  nutrients  into  porous  scaffolds84.  The  swelling \nvalues obtained in this study for scaffolds PVA/Alg/HAp/CGF and PVA/CMC/HAp/CGF are 2056 and 2412, \nrespectively, compared to scaffold gelatin/chitosan/polyvinyl alcohol/nano-hydroxyapatite, where the swelling \nvalue was reported to be 70090 which is a suitable value for bone substitute tissue. For scaffold chitosan/cellulose \nnanocrystals/halloysite nanotubes, the swelling value is reported to be 220091.\n\nBiodegradation measurements, and Thermogravimetric (TGA) analysis\nThe disintegration behavior of a scaffold is an essential factor in achieving a successful regeneration process, as \nit must match the rate of tissue formation. Scaffold samples must be stable enough to withstand regeneration67. \nPolyvinyl alcohol is a synthetic biodegradable polymer96. When composite scaffolds are soaked in PBS solution, \nthey hydrolyze chemical bonds within them, causing weight loss due to the hydrolysis90. As a function of the \ntime the scaffolds were submerged in PBS solution, the weight loss of the scaffolds was determined, as shown in \nFig. 8a–b. As shown in this figure, in the first week, all scaffolds had a higher degradation rate, but after that, their \ndegradation rate decreased. PBS medium reduces the weight of the scaffolds rapidly since physical and hydrogen \nbonds  mainly  connect  them.  HAp  synthesized  from  chicken  femur  is  crystalline,  as  shown  in  the  results  of \nSEM  analysis.  This  high  crystallization  of  HAp  can  reduce  its  degradation  kinetics,  and  therefore,  HAp  can \nhelp maintain the scaffold’s stability97. Adding HAp to the polymer scaffold containing polysaccharides reduces \nthe buffer access to the sites of the polysaccharide molecules, which reduces the degradation of the scaffold88. \nTherefore,  scaffolds  made  of  different  biopolymers  containing  HAp  show  low  degradation11.  The  results  for \nthe  PVA/CMC/HAp  scaffold  show  that  adding  HAp  has  reduced  the  degradation  rate  of  the  scaffold.  The \nions released from HAp can reduce the rate of the degradation process and thus increase the bioactivity of the \npolymer scaffold98. Adding clay to the nanocomposite scaffold improves the degradation rate of the scaffold, and \nincreasing the hydrophilicity of the scaffolds containing clay increases the diffusion of PBS inside the scaffolds \nand causes hydrolytic degradation20. Adding clay modified with Fe3O4 and GO reduces the degradation rate of \nthe final scaffold. The clay plates form a strong interaction with the macromolecular chains of the biopolymer \nscaffold, which causes the hydrophilic groups to be consumed and the amount of solvent absorption to decrease, \nwhich protects the macromolecules from the hydrolysis process. Also, clay increases the stability of the polymer \nnetwork67. Adding GO reduces the scaffold degradation rate92,99. The decrease in degradation of the polymer \nscaffold when adding GO is probably because GO sheets prevent the penetration of destructive substances in the \nphosphate buffer solution. In addition, the polymer matrix can have a more regular arrangement in the presence \nof GO, which is desirable for less penetration of destructive substances99. The increase of Fe3O4/GO reduces the \ndegradation of the porous scaffold52. Alginate biopolymer has high biodegradability and is used as a drug and \ngrowth factor carrier13. Therefore, the PVA/Alg scaffold showed high biodegradability, which was reduced by \nadding HAp and CGF; however, for the final PVA/Alg/HAp/CGF nanocomposite scaffold, the biodegradation \nrate  is  in  the  appropriate  range.  Because  CMC  biopolymer  has  high  water  absorption  ability  and  suitable \n\nScientific Reports |        (2025) 15:22235 \n\n| https://doi.org/10.1038/s41598-025-07270-5\n\n15\n\n\fwww.nature.com/scientificreports/\n\nFig. 8.  (a–b) Degradation amount of scaffolds containing Alg and CMC under laboratory conditions in PBS in \nperiods of 7, 14, and 21 days, (c–e) TGA curves of polymer and nanocomposite scaffolds.\n\nbiodegradable  links76,  the  highest  degradation  was  obtained  in  the  PVA/CMC/HAp/CGF  nanocomposite \nscaffold.\n\nThermograms of PVA, CMC, and Alg polymer materials are given in Fig. 8c. The alginate thermogram shows \nthat alginate decomposition started at around 25 °C, followed by weight loss due to the degrading of alginate \nchains  and  its  monomers  at  203  and  552  °C,  respectively100,101.  In  the  203  to  256  °C  temperature  range,  the \nweight loss is due to removing the -COO groups. The residue consists of elements that decompose above 900 \n\nScientific Reports |        (2025) 15:22235 \n\n| https://doi.org/10.1038/s41598-025-07270-5\n\n16\n\n \n\fwww.nature.com/scientificreports/\n\n°C100. In the TGA diagram  related to polyvinyl  alcohol in Fig. 8c,  the  weight  loss below  100  °C is related  to \nremoving physically absorbed water. Due to this polymer’s ease of absorption, a relatively significant amount of \nwater has been absorbed. The main weight loss occurs in the second stage within the 211 to 331 °C temperature \nrange, associated with the breakdown of PVA polymer side chains. The third stage of weight loss occurs between \n400 and 490 °C, corresponding to the degradation of the polymer’s main chains102. Weight loss is also shown \non TGA diagrams related to CMC in three stages; when the temperature ranged from 25 to 140 °C, the first \nstage of weight loss was estimated to be 7.8%., which is due to the presence of moisture in the relevant scaffold \nbecause  polysaccharides  have  a  strong  ability  to  absorb  water  (moisture)  from  have  their  surroundings.  The \nsecond weight loss is 39% in the temperature range of 245 to 299 °C; that’s because of the loss of -COO groups \nin the sample, and the final demotion of 20% in the temperature range of 542 to 600 °C is due to the degradation \nof the polymer backbone103. Figure 8d shows the TGA curves of scaffolds containing PVA/Alg. Again, according \nto the previous examples, the scaffold containing PVA and Alg shows three stages of weight loss; the first stage, \nbelow 110 °C, is related to the presence of physically absorbed water. At temperatures between 225 and 310 °C, \nthe weight loss is about 48% due to the destruction of chains and side groups in both PVA and Alg polymers, \nand in the third stage of weight loss, the main chains are destroyed between 403 and 435 °C. At a temperature \nof 600 °C, almost all of the existing PVA decomposes and disappears, while alginate shows a 40% weight loss at \nthis temperature. Of course, 15.6% of the material’s weight remains due to three times more PVA than Alg in the \nPVA and Alg scaffold.\n\nThe  thermal  properties  of  polyvinyl  alcohol  and  alginate  increase  during  mixing104.  In  the  PVA/Alg/\nHAp scaffold, the same three main stages of weight loss are observed, with the difference that the presence of \nHAp increases the thermal stability of the scaffold. In the end, 24% of the scaffold’s weight remains at 600 °C. \nAll  three  stages  of  weight  loss  are  observed  in  the  PVA/Alg/Hap/CGF  nanocomposite  scaffold.  Still,  in  this \nscaffold, the third stage of weight loss begins at a temperature of 420 °C, which shows the positive effect of CGF \nnanoparticles in increasing the thermal stability of the nanocomposite scaffold and the uniform broadcasting of \nthese nanoparticles in the inside of the polymer matrix shows the scaffold. Figure 8e shows the TGA diagram \nof scaffolds containing PVA and CMC. These scaffolds also show three stages of weight loss related to physically \nabsorbed water, the degradation of polymer chains and side groups of the scaffold, and the degradation of main \npolymer chains. The weight loss with a high slope at around 400 °C in the PVA-CMC-HAp scaffold is related \nto the water absorbed in the HAp network105. Also, HAp particles in the polymer scaffold have increased its \nthermal stability106,107. As a result of the uniform distribution of CGF nanoparticles in the PVA-CMC-HAp-CGF \nscaffold, a weight loss with a lower slope is observed at the last stage. Also, the attendance of clay can increase \nthe thermal stability of the scaffold. As observed, in both polymer matrices, the polymer composite’s thermal \nstability  increased  with  the  addition  of  additives,  which  may  be  caused  by  increasing  the  polymer  matrix’s \nphysical and chemical bond density. Physical bond density is the amount of non-electronic interactions between \natoms, such as ion-based or volume-based interactions, and chemical bond density is related to the number of \nbonds, such as covalent or electron-sharing, among the atoms of the polymer matrix28. Furthermore, compared \nto the pure mixture, the nanocomposite has a lower tendency to decompose104.\n\nBiomineralization of scaffolds in SBF analysis\nAs shown in Fig. 9a–f, after immersing the PVA/Alg/HAp/CGF and PVA/Alg/HAp and PVA/Alg nanocomposite \nscaffolds in SBF solution for 14 days, SEM images and EDX patterns were obtained. As it is clear from Fig. 9a–f, \nthe hydroxyapatite layer is formed on the surface of scaffolds containing Alg and PVA. Following the immersion \nof the scaffold in SBF solution for 14 days, HAp is precipitated as unique spherical particles by accumulating high \nconcentrations of Ca2+ and PO4\n3- and forming on the surface of the scaffold108. Alginate as a biopolymer shows \ngood  biomineralization;  adding  HAp  to  it  also  creates  an  organic–inorganic  compound,  similar  to  the  bone \nstructure, which increases the biomineralization of the resulting scaffold109. By adding HAp to the raw materials \nof the scaffold, there is a noticeable increase in the formation of apatite crystals in the sample; according to the \ntheory, this phenomenon occurs when Ca2+ ions are released from the scaffold structure and form an ionic bond \nwith the SBF solution, which in turn leads to a more saturated concentration of Ca2+ ions and a higher pH value for \nthe SBF solution, and as a result, apatite crystallization increases on the scaffold surface110. GO material facilitates \nspontaneous osteogenic differentiation and improvement of the biomineralization process23,111. The negatively \ncharged carboxyl groups in GO interact with the Ca2+ cation in hydroxyapatite, thus facilitating hydroxyapatite \nformation. Also, scaffolds containing clay, using the nucleation site for hydroxyapatite deposition, show a high \nability to induce the formation of hydroxyapatite because clay has a negative charge on its surface, which, like \nGO, can improve the hydroxyapatite precipitation on the surface of the scaffold67. As a result, according to the \nreasons explained, by adding CGF nanoparticles, the biomineralization of nanocomposite scaffolds increases. \nFigure  9g–l  shows  mineralization  on  the  surfaces  of  scaffolds  containing  CMC  biopolymer.  Adding  CMC  to \na scaffold also increases its biomineralization; the higher the amount of CMC inside a scaffold, the higher the \nformation  of  HAp  on  its  surface112,113.  The  carboxyl  groups  that  make  up  CMC  have  a  negative  charge,  and \nthis  causes  them  to  interact  with  the  calcium  ions,  which  have  a  positive  charge.  To  increase  the  adsorption \nof  phosphate  ions,  calcium  ions  are  bound  to  the  carboxyl  group  in  SBF,  and  this  causes  the  adsorption  of \nhydroxyapatite particles to grow on the nanocomposite scaffold that was prepared114. As seen in Fig. 9g–l, both \nPVA/Alg/HAp/CGF and PVA/CMC/HAp/CGF nanocomposite scaffolds showed good biomineralization, and \nthere was an increase in biomineralization with the increase in CGF and HAp levels.\n\nThe distribution of phosphorus and calcium elements in PVA/Alg/HAp/CGF, PVA/Alg/HAp, and PVA/Alg \nnanocomposite scaffolds is shown in Fig. 10. According to the results shown in this figure, as increasing CGF \nand HAp, the amount of mineralization has also increased, so the density of phosphorus and calcium elements \nhas also increased. Apatite mineralization of bioactive substances is essential in tissue formation, growth, and \n\nScientific Reports |        (2025) 15:22235 \n\n| https://doi.org/10.1038/s41598-025-07270-5\n\n17\n\n\fwww.nature.com/scientificreports/\n\nFig. 9.  SEM images showing mineralization on the surface of scaffolds (a–c) PVA/Alg, PVA/Alg/HAp, and \nPVA/Alg/HAp/CGF after 14 days of exposure in SBF solution, and EDX analysis results for (d–f) PVA/Alg, \nPVA/Alg/HAp, and PVA/Alg/HAp/CGF nanocomposite scaffolds during the biomineralization process, (g–i) \nSEM images of PVA/CMC, PVA/CMC/HAp, and PVA/CMC/HAp/CGF nanocomposite scaffolds after 14 days \nin SBF solution, and EDX analysis results for (j–l) PVA/CMC, PVA/CMC/HAp, and PVA/CMC/HAp/CGF \nnanocomposite scaffolds during biomineralization.\n\nmaintenance. In addition, a mineral apatite layer can increase osteoblastic activity, which probably stimulates cell \nproliferation and activates cell differentiation by binding serum proteins and growth factors to the substrate115.\nFigure 11 shows the distribution of calcium and phosphorus elements on the surfaces of scaffolds containing \nCMC. As you can see in the figure, the uniform dispensation of elements can be seen on the surfaces of the \nscaffolds.  As  a  result,  apatite  is  uniformly  formed  at  the  surface  of  the  scaffolds.  Also,  compared  to  scaffolds \ncontaining  Alg,  scaffolds  containing  CMC  showed  denser  distribution  values  of  calcium  and  phosphorus \nelements,  indicating  more  mineralization  on  scaffolds  made  of  CMC  biopolymer.  Figure  11  also  shows  the \ndistribution of calcium and phosphorus elements in the PVA/CMC/HAp/CGF nanocomposite scaffold, which, \ncompared to the PVA/Alg/HAp/CGF, obtains a more homogeneous and denser distribution of phosphorus and \nCa2+ elements due to the distribution The homogeneity of the fillers inside the matrix contains CMC biopolymer \nand this indicates the absence of nanoparticle aggregation in both nanocomposite scaffolds.\n\nScientific Reports |        (2025) 15:22235 \n\n| https://doi.org/10.1038/s41598-025-07270-5\n\n18\n\n \n\fwww.nature.com/scientificreports/\n\nFig. 9.  (continued)\n\nCell viability and toxicity test in laboratory conditions\nOne of the important features of scaffolds designed for tissue engineering is biocompatibility, which indicates \nthat they are non-toxic to cells for in vivo applications. A toxicity test called MTT was performed to examine the \neffect of biocompatibility proliferation and cell survival on the scaffolds. As a control sample, no scaffolds were \nused in the culture, and the toxicity test was performed in 72 h. The cell viability results in the scaffolds using \nthe MTT toxicity test are shown in Fig. 12. When comparing the control sample to the existing scaffolds, it is \nevident that all the scaffolds exhibit greater cell viability than the control, suggesting that the prepared polymeric \nscaffolds are non-toxic. In addition to increasing mechanical properties, polymer composites can create a suitable \nenvironment for cell adhesion and growth. As shown in Fig. 12a, the PVA/Alg/HAp/CGF and PVA/CMC/HAp/\nCGF nanocomposite scaffolds demonstrated the highest cell viability. This may be due to the added amount \nof Fe3O4 and GO to the polymeric matrix of the porous nanocomposite scaffold. Different functional groups \nof the polymeric matrix also increase cell survival due to more excellent cell adhesion. Hence, the synergistic \neffect of Fe3O4 and GO increases cell survival due to the cell compatibility nature of porous scaffolds44. One of \nthe applications of GO in bone regeneration has been to construct a conductive bone scaffold to increase cell \nadhesion and provide a matrix for cell proliferation. The mechanical strength and tunable surface chemistry \nof GO have made it appear a promising platform for achieving the goal of cell proliferation116. Also, the CMC \nenhances the incorporation of hydrated media into the scaffolds to enhance cell adhesion without cytotoxicity76. \n\nScientific Reports |        (2025) 15:22235 \n\n| https://doi.org/10.1038/s41598-025-07270-5\n\n19\n\n \n\fwww.nature.com/scientificreports/\n\nFig. 9.  (continued)\n\nThe  scaffolds’  high  swelling  ratio  and  heterogeneous  porous  structure  enable  efficient  exchange  of  nutrients \nand waste materials, thereby enhancing cell growth117. According to the results of the swelling section, it was \nobserved that the PVA/CMC/HAp/CGF scaffold had the highest swelling rate, and it was also seen in the SEM \nsection that this scaffold had heterogeneous porosity, so the highest amount of cell viability was also observed \nin this scaffold. According to the results of the toxicity test of the scaffolds using the MTT method, good cell \nviability  was  observed  on  the  scaffolds.  To  observe  the  survival  of  cells  on  the  prepared  scaffolds,  the  PVA/\nCMC/HAp/CGF nanocomposite scaffold, after cell culture using the method described in Section “Assessment \nof toxicity and cell viability”, was dried and subjected to SEM imaging and its SEM images are shown in Fig. 12b–\nc.  As  shown  in  Fig.  12b,  the  PVA/CMC/HAp/CGF  nanocomposite  scaffold  has  large  and  small  pores  in  its \nstructure, which is a suitable porous scaffold for bone tissue engineering. Also, Fig. 12c shows the SEM image of \nthe PVA/CMC/HAp/CGF nanocomposite scaffold after 72 h of cell culture using the MTT toxicity test, which \nshows that all the pores in the appearance have disappeared. This indicates that over the 72-h cell culture period, \nthe cells have proliferated on the scaffold and populated all of its pores, which aligns with the findings in Fig. 11, \nshowing the highest cell growth and survival in the PVA/CMC/HAp/CGF nanocomposite scaffold.\n\nConclusion\nNanocomposite scaffolds composed of natural biopolymers and additives were fabricated using freeze-drying. \nThe optimal formulation incorporated 10 wt.% hydroxyapatite (HAp) and 2 wt. % modified magnetic clay (CGF) \nas fillers. The characterization results confirmed the development of a porous polymer matrix with desirable \nmechanical and physical properties. Among the tested scaffolds, PVA/CMC/HAp/CGF and PVA/Alg/HAp/CGF \n\nScientific Reports |        (2025) 15:22235 \n\n| https://doi.org/10.1038/s41598-025-07270-5\n\n20\n\n \n\fwww.nature.com/scientificreports/\n\nFig. 10.  The distribution of phosphorus (P) on the surface of (a–c) PVA/Alg, PVA/Alg/HAp, and PVA/Alg/\nHAp/CGF nanocomposite scaffolds, as well as the distribution of calcium (Ca) in (d–f) PVA/Alg, PVA/Alg/\nHAp, and PVA/Alg/HAp/CGF nanocomposite scaffolds after immersing in SBF solution for 14 days.\n\nemerged as optimal candidates, demonstrating compressive strengths of 12 MPa and 8.1 MPa, and porosities of \n72% and 79%, respectively, which fall within acceptable ranges for cancellous bone applications. Adding CGF to \nthe polymer scaffold, a combination of clay modified with Fe3O4 and graphene oxide, increased the compressive \nstrength of the scaffold. Adding HAp and CGF enhanced the thermal stability of the polymer composites. Both \nscaffolds exhibited suitable biodegradability and swelling properties for bone tissue engineering, with the PVA/\nCMC/HAp/CGF scaffold showing a biodegradation rate of 43% over 21 days. The swelling ratios of the PVA/\nAlg/HAp/CGF  and  PVA/CMC/HAp/CGF  scaffolds  were  1586%  and  1860%,  respectively.  Furthermore,  good \nbiomineralization was observed in simulated body fluid (SBF). The presence of Fe3O4 in the CGF additive had \n\nScientific Reports |        (2025) 15:22235 \n\n| https://doi.org/10.1038/s41598-025-07270-5\n\n21\n\n \n\fwww.nature.com/scientificreports/\n\nFig. 11.  Distribution of phosphorus element (P) on the surface of (a–c) PVA/CMC and PVA/CMC/HAp and \nPVA/CMC/HAp/CGF nanocomposite scaffolds, and distribution of calcium element (Ca) on the surface of \n(d–f) PVA/CMC and PVA/CMC/HAp and PVA/CMC/HAp/CGF nanocomposite scaffolds which were placed \nin SBF solution for 14 days.\n\nScientific Reports |        (2025) 15:22235 \n\n| https://doi.org/10.1038/s41598-025-07270-5\n\n22\n\n \n\fwww.nature.com/scientificreports/\n\nFig. 12.  (a) The impact of scaffold biocompatibility on cell culture and cell viability using the MTT test after \n72 h of cell culture, with SEM images of the PVA/CMC/HAp/CGF scaffold in (b) before and (c) after 72 h of \ncell culture.\n\na  positive  effect  on  increasing  cell  culture  in  polymer  scaffolds.  Cell  culture  studies,  including  MTT  toxicity \ntests over 72 h, revealed favorable cell viability, with optical density (OD) values of 1.451 and 1.483 for PVA/\nAlg/HAp/CGF and PVA/CMC/HAp/CGF scaffolds. Overall, the PVA/CMC/HAp/CGF nanocomposite scaffold, \ncontaining  optimal  additive  concentrations,  demonstrates  significant  potential  as  an  alternative  material  for \nbone tissue engineering applications.\n\nData availability\nData availability All data generated or analyzed during this study are included in this published article.\n\nReceived: 4 February 2025; Accepted: 13 June 2025\n\nReferences\n  1.  Hakimi, F. et al. Chitosan-polyethylene oxide/clay-alginate nanofiber hydrogel scaffold for bone tissue engineering: Preparation, \n\nphysical characterization, and biomimetic mineralization. Int. J. Biol. Macromol. 233, 123453 (2023).\n\n  2.  Koushik, T. M., Miller, C. M. & Antunes, E. Bone tissue engineering scaffolds: Function of multi-material hierarchically structured \n\nscaffolds. Adv. Healthc. Mater. 12, 2202766 (2023).\n\n  3.  Ansari, M. Bone tissue regeneration: Biology, strategies, and interface studies. Prog. Biomater. 8(4), 223–237 (2019).\n  4.  Alonzo, M. et al. Bone tissue engineering techniques, advances, and scaffolds for treatment of bone defects. Curr. Opin. Biomed. \n\nEng. 17, 100248 (2021).\n\n  5.  Iswarya, S. et al. Sodium alginate/hydroxyapatite/graphene nanoplatelets composites for bone tissue engineering. Appl. Nanosci. \n\n14(1), 109–122 (2024).\n\nScientific Reports |        (2025) 15:22235 \n\n| https://doi.org/10.1038/s41598-025-07270-5\n\n23\n\n \n\fwww.nature.com/scientificreports/\n\n  6.  Bhowmick, A. et al. Mechanical and biological investigations of chitosan–polyvinyl alcohol-based ZrO2 doped porous hybrid \n\ncomposites for bone tissue engineering applications. New J. Chem. 41(15), 7524–7530 (2017).\n\n  7.  Ali Akbari Ghavimi, S., Solati Hashjin, M. & Ebrahimzadeh, M. H. An introduction on tissue engineering. Iran. J. Orthop. Surg. \n\n9(4), 185–190 (2020).\n\n  8.  Sagadevan, S. et al. Recent advancements in polymer matrix nanocomposites for bone tissue engineering applications. J. Drug \n\nDeliv. Sci. Technol. 1(82), 104313 (2023).\n\n  9.  Idumah, C. I. Progress in polymer nanocomposites for bone regeneration and engineering. Polym. Polym. Compos. 29(5), 509–\n\n527 (2021).\n\n  10.  Barbucci, R., Magnani, A. & Consumi, M. Swelling behavior of carboxymethylcellulose hydrogels in relation to cross-linking, pH, \n\nand charge density. Macromolecules 33(20), 7475–7480 (2000).\n\n  11.  Saxena, V., Hasan, A. & Pandey, L. M. Antibacterial nano-biocomposite scaffolds of Chitosan, Carboxymethyl Cellulose and Zn \n\n& Fe integrated Hydroxyapatite (Chitosan-CMC-FZO@ HAp) for bone tissue engineering. Cellulose 28(14), 9207–9226 (2021).\n\n  12.  Eskandani, M. et al. Biomimetic alginate-based electroconductive nanofibrous scaffolds for bone tissue engineering application. \n\nInt. J. Biol. Macromol. 249, 125991 (2023).\n\n  13.  Sahoo, D. R. & Biswal, T. Alginate and its application to tissue engineering. SN Appl. Sci. 3(1), 30 (2021).\n  14.  Abutalib, M. M. & Rajeh, A. Preparation and characterization of polyaniline/sodium alginate-doped TiO2 nanoparticles with \npromising mechanical and electrical properties and antimicrobial activity for food packaging applications. J. Mater. Sci. Mater. \nElectron. 31(12), 9430–9442 (2020).\n\n  15.  Chozhanathmisra, M., Murugesan, L., Murugesan, A., Palanisamy, G. & Rajavel, R. Enhancement on physical, chemical, and \nbiological properties of HNT-PVA-ALG-HAp biocomposite coating on implant substrate for biomedical application. Ceram. Int. \n48(12), 16868–16876 (2022).\n\n  16.  Ruiz,  S.  et  al.  Antimicrobial  films  based  on  nanocomposites  of  chitosan/poly  (vinyl  alcohol)/graphene  oxide  for  biomedical \n\napplications. Biomolecules 9(3), 109 (2019).\n\n  17.  Alsalmah, H. A., Rajeh, A. & Nur, O. Optical, conductivity, dielectric, and magnetic properties of polymer nanocomposite based \non  PAM/cs  matrix  and  ZnFe2O4  NPs  for  use  in  magneto-electronic  and  energy  storage  capacitor  devices.  Ceram.  Int.  50(7), \n12167–12174 (2024).\n\n  18.  Părpăriţă,  E.  et  al.  Polyvinyl  alcohol/chitosan/montmorillonite  nanocomposites  preparation  by  freeze/thaw  cycles  and \n\ncharacterization. Acta Chem. Iasi 22(2), 75–96 (2014).\n\n  19.  Álvarez-Chimal,  R.,  Arenas-Alatorre,  J.  Á.  &  Álvarez-Pérez,  M.  A.  Nanoparticle-polymer  composite  scaffolds  for  bone  tissue \n\nengineering. A review. Eur. Polym. J. 7, 113093 (2024).\n\n  20.  Ullah, A. et al. “Clay-corn-caprolactone” a novel bioactive clay polymer nanofibrous scaffold for bone tissue engineering. Appl. \n\nClay Sci. 220, 106455 (2022).\n\n  21.  Wang,  Y.  et  al.  Fiber  optic  humidity  sensor  based  on  the  graphene  oxide/PVA  composite  film.  Opt.  Commun.  372,  229–234 \n\n(2016).\n\n  22.  Di Crescenzo, A. et al. Graphene oxide foils as an osteoinductive stem cell substrate. ACS Appl. Bio Mater. 2(4), 1643–1651 (2019).\n  23.  Prakash, J. et al. Nanocomposite chitosan film containing graphene oxide/hydroxyapatite/gold for bone tissue engineering. Int. J. \n\nBiol. Macromol. 154, 62–71 (2020).\n\n  24.  Elkhenany, H. et al. Graphene supports in vitro proliferation and osteogenic differentiation of goat adult mesenchymal stem cells: \n\nPotential for bone tissue engineering. J. Appl. Toxicol. 35(4), 367–374 (2015).\n\n  25.  Ragunathan,  S.,  Govindasamy,  G.,  Raghul,  D.  R.,  Karuppaswamy,  M.  &  VijayachandraTogo,  R.  K.  Hydroxyapatite  reinforced \n\nnatural polymer scaffold for bone tissue regeneration. Mater. Today Proc. 1(23), 111–118 (2020).\n\n  26.  Asran,  A.  S.,  Henning,  S.  &  Michler,  G.  H.  Polyvinyl  alcohol–collagen–hydroxyapatite  biocomposite  nanofibrous  scaffold: \n\nMimicking the key features of natural bone at the nanoscale level. Polymer 51(4), 868–876 (2010).\n\n  27.  Xu, S. et al. Effects of HAp and TCP in constructing tissue engineering scaffolds for bone repair. J. Mater. Chem. B 5(30), 6110–\n\n6118 (2017).\n\n  28.  Alhussain, H., Alghamdi, A. M., Elamin, N. Y. & Rajeh, A. Recent progress in enhanced optical, mechanical, thermal properties, \nand antibacterial activity of the chitosan/polyvinylalcohol/Co3O4 nanocomposites for optoelectronics and biological applications. \nJ. Polym. Environ. 19, 1–4 (2024).\n\n  29.  Lai,  W.  Y.  et  al.  In  vivo  investigation  into  effectiveness  of  Fe3O4/PLLA  nanofibers  for  bone  tissue  engineering  applications. \n\nPolymers 10(7), 804 (2018).\n\n  30.  Babis, G. C. & Soucacos, P. N. Bone scaffolds: The role of mechanical stability and instrumentation. Injury 36(4), S38–S44 (2005).\n  31.  Maisani, M. et al. Cellularizing hydrogel-based scaffolds to repair bone tissue: How to create a physiologically relevant micro-\n\nenvironment?. J. Tissue Eng. 8, 2041731417712073 (2017).\n\n  32.  El-Sherbiny, I. M. & Yacoub, M. H. Hydrogel scaffolds for tissue engineering: Progress and challenges. Glob. Cardiol. Sci. Pract. \n\n2013(3), 38 (2013).\n\n  33.  Tran, H. D. et al. A comprehensive review on polymeric hydrogel and its composite: Matrices of choice for bone and cartilage \n\ntissue engineering. J. Ind. Eng. Chem. 89, 58–82 (2020).\n\n  34.  Hajjar, Z. et al. Optimizing parameters affecting synthesis of a novel Co–Mo/GO catalyst in a Naphtha HDS reaction utilizing \n\nD-optimal experimental design method. J. Taiwan Inst. Chem. Eng. 78, 566–575 (2017).\n\n  35.  Sobczak, A., Kowalski, Z. & Wzorek, Z. Preparation of hydroxyapatite from animal bones. Acta Bioeng. Biomech. 11(4), 23–28 \n\n(2009).\n\n  36.  Chakraborty, S. et al. Reduced graphene oxide-loaded nanocomposite scaffolds for enhancing angiogenesis in tissue engineering \n\napplications. R. Soc. Open Sci. 5(5), 172017 (2018).\n\n  37.  Ahmadian,  Z.  et  al.  A  hydrogen-bonded  extracellular  matrix-mimicking  bactericidal  hydrogel  with  radical  scavenging  and \n\nhemostatic function for pH-responsive wound healing acceleration. Adv. Healthc. Mater. 10(3), 2001122 (2021).\n\n  38.  Babakhani, A., Peighambardoust, S. J. & Olad, A. Fabrication of magnetic nanocomposite scaffolds based on polyvinyl(alcohol)-\nchitosan  containing  hydroxyapatite  and  clay  modified  with  graphene  oxide:  Evaluation  of  their  properties  for  bone  tissue \nengineering applications. J. Mech. Behav. Biomed. Mater. 150, 106263 (2024).\n\n  39.  Esfahani,  H.  et  al.  Influence  of  zinc  incorporation  on  microstructure  of  hydroxyapatite  to  characterize  the  effect  of  pH  and \n\ncalcination temperatures. J. Asian Ceram. Soc. 2(3), 248–252 (2014).\n\n  40.  Kim, H. et al. Biomimetic synthesis of metal–hydroxyapatite (Au-HAp, Ag-HAp, Au-Ag-HAp): Structural analysis, spectroscopic \n\ncharacterization and biomedical application. Ceram. Int. 44(16), 20490–20500 (2018).\n\n  41.  Bee, S. L. et al. Effect of the calcination temperature on the properties of natural hydroxyapatite derived from chicken bone wastes. \n\nMater. Today Proc. 16, 1876–1885 (2019).\n\n  42.  Foroutan, R. et al. Hydroxyapatite biomaterial production from chicken (femur and beak) and fishbone waste through a chemical \n\nless method for Cd2+ removal from shipbuilding wastewater. J. Hazard. Mater. 413, 125428 (2021).\n\n  43.  Paulchamy, B., Arthi, G. & Lignesh, B. A simple approach to stepwise synthesis of graphene oxide nanomaterial. J. Nanomed. \n\nNanotechnol. 6(1), 1 (2015).\n\n  44.  Song, J., Wang, X. & Chang, C. T. Preparation and characterization of graphene oxide. J. Nanomater. 2014, 276143 (2014).\n  45.  Zhang, L. et al. Decontamination of U (VI) on graphene oxide/Al2O3 composites investigated by XRD, FT-IR and XPS techniques. \n\nEnviron. Pollut. 248, 332–338 (2019).\n\nScientific Reports |        (2025) 15:22235 \n\n| https://doi.org/10.1038/s41598-025-07270-5\n\n24\n\n\fwww.nature.com/scientificreports/\n\n  46.  Wadhwa,  H.  et  al.  Thermal  stability  and  dielectric  relaxation  behavior  of  in  situ  prepared  poly(vinyl  alcohol)(PVA)-reduced \n\ngraphene oxide (RGO) composites. Colloid Polym. Sci. 298, 1319–1333 (2020).\n\n  47.  Kamakshi, T. et al. Synthesis and characterization of graphene based iron oxide (Fe3O4) nanocomposites. Rasayan J. Chem. 11(3), \n\n1113–1119 (2018).\n\n  48.  Yang, K. et al. Re-examination of characteristic FTIR spectrum of secondary layer in bilayer oleic acid-coated Fe3O4 nanoparticles. \n\nAppl. Surf. Sci. 256(10), 3093–3097 (2010).\n\n  49.  Malega, F., Indrayana, I. P. T. & Suharyadi, E. Synthesis, and characterization of the microstructure and functional group bond of \nFe3O4 nanoparticles from natural iron sand in Tobelo North Halmahera. J. Ilm. Pendidik. Fis. Al-Biruni 7(2), 13–22 (2018).\n  50.  Eloussaief, M. et al. Mineralogical identification, spectroscopic characterization, and potential environmental use of natural clay \n\nmaterials on chromate removal from aqueous solutions. Chem. Eng. J. 168(3), 1024–1031 (2011).\n\n  51.  Tayyebi, A. et al. Synthesis and characterization of ultrasound-assisted “graphene oxide–magnetite” hybrid, and investigation of \n\nits adsorption properties for Sr (II) and Co (II) ions. Appl. Surf. Sci. 353, 350–362 (2015).\n\n  52.  Khan, M. U. A. et al. Electroactive polymeric nanocomposite BC-g-(Fe3O4/GO) materials for bone tissue engineering: in vitro \n\nevaluations. J. Biomater. Sci. Polym. Ed. 33(11), 1349–1368 (2022).\n\n  53.  Venkatasubbu, G. D. et al. Hydroxyapatite-alginate nanocomposite as drug delivery matrix for sustained release of ciprofloxacin. \n\nJ. Biomed. Nanotechnol. 7(6), 759–767 (2011).\n\n  54.  Venkatesan, J., Bhatnagar, I. & Kim, S. K. Chitosan-alginate biocomposite containing fucoidan for bone tissue engineering. Mar. \n\nDrugs 12(1), 300–316 (2014).\n\n  55.  Ribeiro, C. C., Barrias, C. & Barbosa, M. Calcium phosphate-alginate microspheres as enzyme delivery matrices. Biomaterials \n\n25(18), 4363–4373 (2004).\n\n  56.  Habibi, N. Preparation of biocompatible magnetite-carboxymethyl cellulose nanocomposite: Characterization of nanocomposite \n\nby FTIR, XRD, FESEM and TEM. Spectrochim. Acta Part A Mol. Biomol. Spectrosc. 131, 55–58 (2014).\n\n  57.  Haleem, N. et al. Synthesis of carboxymethyl cellulose from waste of cotton ginning industry. Carbohydr. Polym. 113, 249–255 \n\n(2014).\n\n  58.  Derkach, S. R. et al. Interactions between gelatin and sodium alginate: UV and FTIR studies. J. Dispers. Sci. Technol. 41(5), 1–9 \n\n(2019).\n\n  59.  Pineda-Castillo,  S.  et  al.  Synthesis  and  characterization  of  poly(vinyl  alcohol)-chitosan-hydroxyapatite  scaffolds:  A  promising \n\nalternative for bone tissue regeneration. Molecules 23(10), 2414 (2018).\n\n  60.  Christy, P. N., Basha, S. K. & Kumari, V. S. Nano zinc oxide and nano bioactive glass reinforced chitosan/poly(vinyl alcohol) \n\nscaffolds for bone tissue engineering application. Mater. Today Commun. 31, 103429 (2022).\n\n  61.  Jia, Y. T. et al. Fabrication and characterization of poly(vinyl alcohol)/chitosan blend nanofibers produced by electrospinning \n\nmethod. Carbohydr. Polym. 67(3), 403–409 (2007).\n\n  62.  Chaudhuri,  B.  et  al.  A  novel  biocompatible  conducting  polyvinyl  alcohol  (PVA)-polyvinylpyrrolidone  (PVP)-hydroxyapatite \n\n(HAp) composite scaffolds for probable biological application. Colloids Surf. B 143, 71–80 (2016).\n\n  63.  Wongsawichai, K. et al. Porous hydroxyapatite/chitosan/carboxymethyl cellulose scaffolds with tunable microstructures for bone \n\ntissue engineering. Key Eng. Mater. 819, 9–14 (2019).\n\n  64.  He, X. et al. A porous collagen-carboxymethyl cellulose/hydroxyapatite composite for bone tissue engineering by bi-molecular \n\ntemplate method. Int. J. Biol. Macromol. 137, 45–53 (2019).\n\n  65.  Islam, M. S. & Karim, M. R. Fabrication and characterization of poly(vinyl alcohol)/alginate blend nanofibers by electrospinning \n\nmethod. Colloids Surf. A 366(1–3), 135–140 (2010).\n\n  66.  Nasrallah, D. A. & Ibrahim, M. A. Enhancement of physicochemical, optical, dielectric and antimicrobial properties of polyvinyl \nalcohol/carboxymethyl cellulose blend films by addition of silver doped hydroxyapatite nanoparticles. J. Polym. Res. 29(3), 86 \n(2022).\n\n  67.  Olad, A. et al. Graphene oxide and montmorillonite enriched natural polymeric scaffold for bone tissue engineering. Ceram. Int. \n\n45(12), 15609–15619 (2019).\n\n  68.  Surekha, G. et al. FTIR, Raman, and XRD analysis of graphene oxide films prepared by modified Hummers method. In Journal of \n\nPhysics: Conference Series (IOP Publishing, 2020).\n\n  69.  Zolghadri, M. et  al.  Synthesis and characterization  of  porous  cytocompatible scaffolds from polyvinyl alcohol–chitosan.  Bull. \n\nMater. Sci. 42, 1–9 (2019).\n\n  70.  Filippi, S. et al. On the interlayer spacing collapse of Cloisite® 30B organoclay. Polym. Degrad. Stab. 96(5), 823–832 (2011).\n  71.  Foroutan, S. et al. A porous sodium alginate-CaSiO3 polymer reinforced with graphene nanosheet: Fabrication and optimality \n\nanalysis. Fibers Polym. 22, 540–549 (2021).\n\n  72.  Larosa, C. et al. Characterisation of bare and tannase-loaded calcium alginate beads by microscopic, thermogravimetric, FTIR \n\nand XRD analyses. Int. J. Biol. Macromol. 115, 900–906 (2018).\n\n  73.  Rabiei,  M.  et  al.  Comparing  methods  for  calculating  nanocrystal  size  of  natural  hydroxyapatite  using  X-ray  diffraction. \n\nNanomaterials 10(9), 1627 (2020).\n\n  74.  Sohrabi, N. et al. Equilibrium, kinetic and thermodynamic study of diazinon adsorption from water by clay/GO/Fe3O4: Modeling \n\nand optimization based on response surface methodology and artificial neural network. J. Mol. Liq. 328, 115384 (2021).\n\n  75.  Venkatesan, J. et al. Alginate composites for bone tissue engineering: A review. Int. J. Biol. Macromol. 72, 269–281 (2015).\n  76.  Namkaew, J. et al. Carboxymethyl cellulose entrapped in a poly(vinyl) alcohol network: Plant-based scaffolds for cartilage tissue \n\nengineering. Molecules 26(3), 578 (2021).\n\n  77.  Georgieva, N., Bryaskova, R. & Tzoneva, R. New Polyvinyl alcohol-based hybrid materials for biomedical application. Mater. Lett. \n\n88, 19–22 (2012).\n\n  78.  Marín Cardona, E. S., Rojas Camargo, J. & Ciro Monsalve, Y. A. A review of polyvinyl alcohol derivatives: promising materials for \n\npharmaceutical & biomedical applications (2014).\n\n  79.  Bhowmick,  A.  et  al.  Organically  modified  clay  supported  chitosan/hydroxyapatite-zinc  oxide  nanocomposites  with  enhanced \nmechanical and biological properties for the application in bone tissue engineering. Int. J. Biol. Macromol. 106, 11–19 (2018).\n  80.  Verma, A. & Parashar, A. Molecular dynamics based simulations to study the fracture strength of monolayer graphene oxide. \n\nNanotechnology 29(11), 115706 (2018).\n\n  81.  Yadav, M. et al. Mechanical properties of Fe3O4/GO/chitosan composites. Compos. B Eng. 66, 89–96 (2014).\n  82.  Pahlevanzadeh, F., Bakhsheshi-Rad, H. & Hamzah, E. In-vitro biocompatibility, bioactivity, and mechanical strength of PMMA-\nPCL polymer containing fluorapatite and graphene oxide bone cements. J. Mech. Behav. Biomed. Mater. 82, 257–267 (2018).\n  83.  Tavakoli,  M.,  Karbasi,  S.  &  Soleymani  Eil  Bakhtiari,  S.  Evaluation  of  physical,  mechanical,  and  biodegradation  of  chitosan/\n\ngraphene oxide composite as bone substitutes. Polym. Plast. Technol. Mater. 59(4), 430–440 (2020).\n\n  84.  Narimani, M., Teimouri, A. & Shahbazarab, Z. Synthesis, characterization and biocompatible properties of novel silk fibroin/\n\ngraphene oxide nanocomposite scaffolds for bone tissue engineering application. Polym. Bull. 76, 725–745 (2019).\n\n  85.  Verma, A., Parashar, A. & Packirisamy, M. Tailoring the failure morphology of 2D bicrystalline graphene oxide. J. Appl. Phys. 124, \n\n015102 (2018).\n\n  86.  Olad,  A.  &  Azhar,  F.  F.  The  synergetic  effect  of  bioactive  ceramic  and  nanoclay  on  the  properties  of  chitosan–gelatin/\n\nnanohydroxyapatite–montmorillonite scaffold for bone tissue engineering. Ceram. Int. 40(7), 10061–10072 (2014).\n\n  87.  Ambre, A. H., Katti, K. S. & Katti, D. R. Nanoclay based composite scaffolds for bone tissue engineering applications (2010).\n\nScientific Reports |        (2025) 15:22235 \n\n| https://doi.org/10.1038/s41598-025-07270-5\n\n25\n\n\fwww.nature.com/scientificreports/\n\n  88.  Farshi  Azhar,  F.,  Olad,  A.  &  Salehi,  R.  Fabrication  and  characterization  of  chitosan–gelatin/nanohydroxyapatite–polyaniline \n\ncomposite with potential application in tissue engineering scaffolds. Des. Monomers Polym. 17(7), 654–667 (2014).\n\n  89.  Zhang, B. et al. 3D printed bone tissue regenerative PLA/HA scaffolds with comprehensive performance optimizations. Mater. \n\nDes. 201, 109490 (2021).\n\n  90.  Ma, P. et al. Biomimetic gelatin/chitosan/polyvinyl alcohol/nano-hydroxyapatite scaffolds for bone tissue engineering. Mater. Des. \n\n207, 109865 (2021).\n\n  91.  Doustdar,  F.,  Olad,  A.  &  Ghorbani,  M.  Development  of  a  novel  reinforced  scaffold  based  on  chitosan/cellulose  nanocrystals/\n\nhalloysite nanotubes for curcumin delivery. Carbohydr. Polym. 282, 119127 (2022).\n\n  92.  Dridi, A., Riahi, K. Z. & Somrani, S. Mechanism of apatite formation on a poorly crystallized calcium phosphate in a simulated \n\nbody fluid (SBF) at 37 C. J. Phys. Chem. Solids 156, 110122 (2021).\n\n  93.  Chen, H., Wu, M. & Li, C. Structural integrity versus lateral size: Enhancing graphene-based film materials by reducing planar \n\ndefects rather than flake boundary. Carbon 139, 216–225 (2018).\n\n  94.  Khan,  M.  U.  A.  et  al.  Development  of  porous,  antibacterial  and  biocompatible  GO/n-HAp/bacterial  cellulose/β-glucan \n\nbiocomposite scaffold for bone tissue engineering. Arab. J. Chem. 14(2), 102924 (2021).\n\n  95.  Peter,  M.  et  al.  Preparation  and  characterization  of  chitosan–gelatin/nanohydroxyapatite  composite  scaffolds  for  tissue \n\nengineering applications. Carbohyd. Polym. 80(3), 687–694 (2010).\n\n  96.  Hasnain, M. S. et al. Biodegradable polymer matrix nanocomposites for bone tissue engineering. In Applications of Nanocomposite \n\nMaterials in Orthopedics 1–37 (Elsevier, 2019).\n\n  97.  Tajvar,  S.,  Hadjizadeh,  A.  &  Samandari,  S.  S.  Scaffold  degradation  in  bone  tissue  engineering:  An  overview.  Int.  Biodeterior. \n\nBiodegrad. 180, 105599 (2023).\n\n  98.  Li, Y., Liao, C. & Tjong, S. C. Synthetic biodegradable aliphatic polyester nanocomposites reinforced with nanohydroxyapatite \n\nand/or graphene oxide for bone tissue engineering applications. Nanomaterials 9(4), 590 (2019).\n\n  99.  Pandele,  A.  M.  et  al.  Porous  chitosan/graphene  oxide  biocomposites  for  tissue  engineering.  Polym.  Compos.  38(2),  363–370 \n\n(2017).\n\n 100.  Bendtsen, S. T., Quinnell, S. P. & Wei, M. Development of a novel alginate-polyvinyl alcohol-hydroxyapatite hydrogel for 3D \n\nbioprinting bone tissue engineered scaffolds. J. Biomed. Mater. Res. Part A 105(5), 1457–1468 (2017).\n\n 101.  Bendtsen, S. T. & Wei, M. Synthesis and characterization of a novel injectable alginate–collagen–hydroxyapatite hydrogel for bone \n\ntissue regeneration. J. Mater. Chem. B 3(15), 3081–3090 (2015).\n\n 102.  Yang,  Z.  et  al.  Poly(vinyl  alcohol)/chitosan-based  high-strength,  fire-retardant  and  smoke-suppressant  composite  aerogels \n\nincorporating aluminum species via freeze drying. Compos. B Eng. 219, 108919 (2021).\n\n 103.  Badry, R. et al. Spectroscopic and thermal analyses for the effect of acetic acid on the plasticized sodium carboxymethyl cellulose. \n\nJ. Mol. Struct. 1224, 129013 (2021).\n\n 104.  Alghamdi, A. M. et al. Optical, thermal, mechanical, and antibacterial properties of polyvinyl alcohol/sodium alginate/ZnMn2O4 \nnanocomposites films for various optical devices and food packaging applications. Int. J. Biol. Macromol. 27, 132689 (2024).\n 105.  Descamps, M., Hornez, J. & Leriche, A. Manufacture of hydroxyapatite beads for medical applications. J. Eur. Ceram. Soc. 29(3), \n\n369–375 (2009).\n\n 106.  Hassan,  M.  et  al.  Biomimetic  PLGA/strontium-zinc  nano-hydroxyapatite  composite  scaffolds  for  bone  regeneration.  J.  Funct. \n\nBiomater. 13(1), 13 (2022).\n\n 107.  Kodali, D. et al. Influence of fish scale-based hydroxyapatite on force spun polycaprolactone fiber scaffolds. ACS Omega 7(10), \n\n8323–8335 (2022).\n\n 108.  Sathain,  A.,  Monvisade,  P.  &  Siriphannon,  P.  Bioactive  alginate/carrageenan/calcium  silicate  porous  scaffolds  for  bone  tissue \n\nengineering. Mater. Today Commun. 26, 102165 (2021).\n\n 109.  Hernández-González, A. C., Téllez-Jurado, L. & Rodríguez-Lorenzo, L. M. Alginate hydrogels for bone tissue engineering, from \n\ninjectables to bioprinting: A review. Carbohyd. Polym. 229, 115514 (2020).\n\n 110.  Kim, I. Y. et al. Thermoreversible behavior of κ-carrageenan and its apatite-forming ability in simulated body fluid. Mater. Sci. \n\nEng. C 31(7), 1472–1476 (2011).\n\n 111.  Nair, M. et al. Graphene oxide nanoflakes incorporated gelatin–hydroxyapatite scaffolds enhance osteogenic differentiation of \n\nhuman mesenchymal stem cells. Nanotechnology 26(16), 161001 (2015).\n\n 112.  Priya, G. et al. In vitro and in vivo evaluation of carboxymethyl cellulose scaffolds for bone tissue engineering applications. ACS \n\nOmega 6(2), 1246–1253 (2021).\n\n 113.  Singh, B. et al. Carboxymethyl cellulose enables silk fibroin nanofibrous scaffold with enhanced biomimetic potential for bone \n\ntissue engineering application. Carbohyd. Polym. 151, 335–347 (2016).\n\n 114.  Singh, B. & Pramanik, K. Generation of bioactive nano-composite scaffold of nanobioglass/silk fibroin/carboxymethyl cellulose \n\nfor bone tissue engineering. J. Biomater. Sci. Polym. Ed. 29(16), 2011–2034 (2018).\n\n 115.  Yongxiang, L. et al. Hierarchical mesoporous bioactive glass/alginate composite scaffolds fabricated by three-dimensional plotting \n\nfor bone tissue engineering. Biofabrication 5, 015005 (2013).\n\n 116.  Maleki, M. et al. Graphene oxide: A promising material for regenerative medicine and tissue engineering. Biomol. Concepts 11(1), \n\n182–200 (2020).\n\n 117.  Seifi, S. et al. Engineering biomimetic scaffolds for bone regeneration: Chitosan/alginate/polyvinyl alcohol-based double-network \n\nhydrogels with carbon nanomaterials. Carbohyd. Polym. 1(339), 122232 (2024).\n\nAuthor contributions\nA.B. performed the samples’ synthesis and collected test data; S.J.P. designed the study, interpreted the results, \nand revised the manuscript critically for important intellectual content; M.G.-N., advised on Conceptualization \nin MTT tests, and N.S.P. advised interpreted the results. All authors approve the final version of the manuscript \nand agree to be accountable for all aspects of the work.\n\nDeclarations\n\nCompeting interests\nThe authors declare no competing interests.\n\nAdditional information\nCorrespondence and requests for materials should be addressed to S.J.P.\n\nReprints and permissions information is available at www.nature.com/reprints.\n\nPublisher’s note  Springer Nature remains neutral with regard to jurisdictional claims in published maps and \ninstitutional affiliations.\n\nScientific Reports |        (2025) 15:22235 \n\n| https://doi.org/10.1038/s41598-025-07270-5\n\n26\n\n\fwww.nature.com/scientificreports/\n\nOpen Access   This article is licensed under a Creative Commons Attribution-NonCommercial-NoDerivatives \n4.0 International License, which permits any non-commercial use, sharing, distribution and reproduction in \nany medium or format, as long as you give appropriate credit to the original author(s) and the source, provide \na link to the Creative Commons licence, and indicate if you modified the licensed material. You do not have \npermission under this licence to share adapted material derived from this article or parts of it. The images or \nother third party material in this article are included in the article’s Creative Commons licence, unless indicated \notherwise in a credit line to the material. If material is not included in the article’s Creative Commons licence \nand your intended use is not permitted by statutory regulation or exceeds the permitted use, you will need to \nobtain permission directly from the copyright holder. To view a copy of this licence, visit  h t t p : / / c r e a t i v e c o m m o \nn s . o r g / l i c e n s e s / b y - n c - n d / 4 . 0 /     .  \n\n© The Author(s) 2025 \n\nScientific Reports |        (2025) 15:22235 \n\n| https://doi.org/10.1038/s41598-025-07270-5\n\n27\n\n\f"
+}

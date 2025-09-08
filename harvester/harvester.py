@@ -8,10 +8,10 @@ from unpaywall_api import unpaywall_lookup
 from grobid_client import pdf_to_tei
 from tei_utils import tei_to_sections, filter_methods_sections as filt_tei
 from jats_utils import jats_to_sections, filter_methods_sections as filt_jats
-from miner.runtime import get_miner, extract_procedure
+from miner.runtime import get_miner
 from oa_resolver import resolve_oa
 
-miner = get_miner()
+miner = get_miner(nlp_model= "SPACY_MODEL")
 
 import logging
 logger = logging.getLogger(__name__)
@@ -22,7 +22,9 @@ TIMEOUT = float(os.getenv("OA_TIMEOUT", "12"))
 _DOI_RX = re.compile(r'(10\.\d{4,9}/[-._;()/:A-Z0-9]+)', re.I)
 
 def _norm_str(x):
-    return (x or "").strip()
+    if x is None:
+        return ""
+    return str(x).strip()
 
 def _norm_doi(x) -> str:
     s = _norm_str(x)
@@ -67,7 +69,9 @@ def _authors_to_list(authors_field):
 
 def _year_from(*vals):
     for v in vals:
-        s = _norm_str(v)
+        if v is None:
+            continue
+        s = str(v).strip()           
         if len(s) >= 4 and s[:4].isdigit():
             return s[:4]
         m = re.search(r'(\d{4})', s)
@@ -291,49 +295,63 @@ def main():
         if not m:
             return None
         return urljoin(base_url, m.group(1))
-
     # -----------------------------------------
 
     ap = argparse.ArgumentParser()
     ap.add_argument('--config', required=True)
     args = ap.parse_args()
     cfg = yaml.safe_load(Path(args.config).read_text(encoding="utf-8"))
+
     out_dir = Path(cfg['out_dir'])
     ensure_dir(out_dir)
+
     # Coerce types for numeric config values
     cfg['max_results_per_source'] = int(cfg.get('max_results_per_source', 50))
     cfg['since_year'] = int(cfg.get('since_year', 2000))
+
     all_meta = []
-for q in cfg['queries']:
-    for r in search_arxiv(q, cfg['max_results_per_source']):
-        r['source'] = 'arxiv'; all_meta.append(r)
-    for r in search_eupmc(q, cfg['since_year'], cfg['max_results_per_source']):
-        r['source'] = 'eupmc'; all_meta.append(r)
+    for q in cfg['queries']:
+        for r in search_arxiv(q, cfg['max_results_per_source']):
+            r['source'] = 'arxiv'; all_meta.append(r)
+        for r in search_eupmc(q, cfg['since_year'], cfg['max_results_per_source']):
+            r['source'] = 'eupmc'; all_meta.append(r)
 
-# Normalize all records to a common schema
-canon = [_canon_rec(r) for r in all_meta]
+    # Normalize all records to a common schema
+    canon = [_canon_rec(r) for r in all_meta]
 
-# De-duplicate by DOI → PMCID → arXiv ID → title
-seen, dedup = set(), []
-for c in canon:
-    key = _dedup_key(c)
-    if key and key not in seen:
-        seen.add(key)
-        dedup.append(c)
+    # De-duplicate by DOI → PMCID → arXiv ID → title
+    seen, dedup = set(), []
+    for c in canon:
+        key = _dedup_key(c)
+        if key and key not in seen:
+            seen.add(key)
+            dedup.append(c)
 
-for rec in tqdm(dedup, desc='Processing'):
+    # Prepare bundle file
+    bundle = Path(cfg.get("out_bundle", out_dir / "bundle.jsonl"))
+    written = 0
+    with open(bundle, "w", encoding="utf-8") as fout:
+        for rec in tqdm(dedup, desc='Processing'):
             paper = {
-    'paper_id': rec.get('doi') or rec.get('arxiv_id') or rec.get('pmcid') or rec.get('title','')[:40],
-    'title': rec.get('title', ''),
-    'authors': [{'name': a} for a in (rec.get('authors_list') or [])],
-    'doi': rec.get('doi'),
-    'source': rec.get('source'),
-    'urls': {'pdf': rec.get('pdf_url') or ''},
-    'license': rec.get('license'),
-    'access_route': rec.get('access_route', 'unknown'),
-    'sections': [],
-    'extractions': {'methods_paragraphs': []}
-}
+                'paper_id': rec.get('doi') or rec.get('arxiv_id') or rec.get('pmcid') or rec.get('title','')[:40],
+                'title': rec.get('title', ''),
+                'authors': [{'name': a} for a in (rec.get('authors_list') or [])],
+                'doi': rec.get('doi'),
+                'source': rec.get('source'),
+                'urls': {'pdf': rec.get('pdf_url') or ''},
+                'license': rec.get('license'),
+                'access_route': rec.get('access_route', 'unknown'),
+                'sections': [],
+                'extractions': {'methods_paragraphs': []},
+                'meta': {
+                    'title': rec.get('title', ''),
+                    'doi': rec.get('doi') or '',
+                    'url': rec.get('url') or '',
+                    'pdf_url': rec.get('pdf_url') or '',
+                    'year': rec.get('year') or '',
+                    'authors': rec.get('authors_list') or []
+                }
+            }
 
             methods: list[dict] = []
             all_sections: list[dict] = []
@@ -349,7 +367,7 @@ for rec in tqdm(dedup, desc='Processing'):
 
             # --- Unpaywall -> PDF -> (GROBID or plain-text fallback)
             if not methods:
-                # Try to improve PDF URL via Unpaywallk
+                # Try to improve PDF URL via Unpaywall
                 if rec.get('doi'):
                     try:
                         oa = resolve_oa(rec['doi'])
@@ -371,10 +389,6 @@ for rec in tqdm(dedup, desc='Processing'):
                         if alt_pdf:
                             k2, p2, _ = fetch_pdf_or_html(alt_pdf)
                             if k2 == 'pdf':
-                                pdf_bytes = p2
-
-                            k2, p2, _ = fetch_pdf_or_html(alt_pdf)
-                            if k2 == "pdf":
                                 pdf_bytes = p2
 
                     if pdf_bytes and is_pdf_bytes(pdf_bytes):
@@ -434,7 +448,7 @@ for rec in tqdm(dedup, desc='Processing'):
             if paras:
                 mp = []
                 for ptxt in paras:
-                    ann = extract_procedure(ptxt)
+                    ann = miner.extract_procedure(ptxt)
                     mp.append({
                         "text": ptxt,
                         "operations": ann.get("operations", []),
@@ -445,7 +459,7 @@ for rec in tqdm(dedup, desc='Processing'):
                 paper['extractions']['methods_paragraphs'] = []
 
             if not paper.get("raw"):
-                raw_source = ""  
+                raw_source = ""
                 if all_sections:
                     raw_source = "\n\n".join(sec.get("text", "") for sec in all_sections if sec.get("text"))
                 if not raw_source:
@@ -458,8 +472,9 @@ for rec in tqdm(dedup, desc='Processing'):
             pid = safe_slug(paper['paper_id'] or paper['title'][:40])
             write_json(out_dir / f'{pid}.json', paper)
             fout.write(json.dumps(paper, ensure_ascii=False) + '\n')
+            written += 1
 
-    print(f'Done. Bundle: {bundle}')
+    print(f'Done. Bundle: {bundle} (wrote {written} records)')  
 
 if __name__ == '__main__':
     main()

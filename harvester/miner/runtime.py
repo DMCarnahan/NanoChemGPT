@@ -20,41 +20,16 @@ def feats(s: str) -> Dict[str, Any]:
         **{f"c3={tl[i:i+3]}": 1 for i in range(len(tl)-2)}
     }
 
-def _locate_BasicMiner():
-    """Find and return the BasicMiner class inside the miner package."""
-    # common filenames to try first
-    candidates = ["miner.basic_miner", "miner.BasicMiner", "miner.basic", "miner.miner"]
-    for mn in candidates:
-        try:
-            mod = importlib.import_module(mn)
-            cls = getattr(mod, "BasicMiner", None)
-            if cls:
-                return cls
-        except ModuleNotFoundError:
-            continue
-        except Exception:
-            continue
-    # last resort: scan all non-package modules in this package
-    pkgdir = os.path.dirname(__file__)
-    for _, name, ispkg in pkgutil.iter_modules([pkgdir]):
-        if ispkg:
-            continue
-        try:
-            mod = importlib.import_module(f"{__package__}.{name}")
-            cls = getattr(mod, "BasicMiner", None)
-            if cls:
-                return cls
-        except Exception:
-            pass
-    raise ImportError(
-        "Could not locate class 'BasicMiner' in the 'miner' package. "
-        "Put it in miner/basic_miner.py (class BasicMiner) or adjust _locate_BasicMiner()."
-    )
+import logging
 
-@lru_cache(maxsize=1)
-def get_miner():
-    BM = _locate_BasicMiner()
-    return BM()
+try:
+    from .basic_miner import BasicMiner
+except Exception as e:
+    logging.getLogger(__name__).error("Cannot import BasicMiner from .basic_miner: %s", e)
+    raise
+
+def get_miner(nlp_model: str | None = None, **kwargs):
+    return BasicMiner(nlp_model=nlp_model, **kwargs)
 
 @lru_cache(maxsize=1)
 def get_material_filter():

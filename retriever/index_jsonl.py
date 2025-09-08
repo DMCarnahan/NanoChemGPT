@@ -3,12 +3,23 @@ import argparse
 import json
 from pathlib import Path
 from typing import List, Tuple, Iterable, Dict
+import re
 
 from sklearn.feature_extraction.text import TfidfVectorizer
 from scipy import sparse
 from joblib import dump
 
 MIN_CHARS_DEFAULT = 40
+
+_DOI_RX = re.compile(r'(10\.\d{4,9}/[-._;()/:A-Z0-9]+)', re.I)
+
+def _norm_doi_any(x: str | None) -> str:
+    if not x:
+        return ''
+    s = str(x)
+    m = _DOI_RX.search(s)
+    return m.group(1).lower() if m else ''
+
 
 def _iter_jsonl(path: Path) -> Iterable[Dict]:
     with path.open("r", encoding="utf-8") as f:
@@ -47,20 +58,37 @@ def _author_names(auths) -> List[str]:
     return out
 
 def _pick_meta(rec: Dict) -> Dict:
-    doi = (rec.get("doi") or rec.get("paper_id") or "") or ""
-    year = rec.get("year") or rec.get("publication_year")
+    # Prefer rich 'meta' produced by the harvester if present
+    meta = rec.get('meta') if isinstance(rec.get('meta'), dict) else {}
+    # Title
+    title = meta.get('title') or rec.get('title') or rec.get('name') or ''
+    # DOI: extract from any candidate field
+    doi_candidates = [meta.get('doi'), rec.get('doi'), rec.get('paper_id'), rec.get('url'), rec.get('oa_url')]
+    doi = ''
+    for dc in doi_candidates:
+        doi = _norm_doi_any(dc)
+        if doi:
+            break
+    # URL (prefer explicit pdf/url fields from meta, then rec)
+    url = meta.get('pdf_url') or meta.get('url') or rec.get('url') or rec.get('oa_url') or rec.get('pdf_url') or ''
+    # Year
+    year = meta.get('year') or rec.get('year') or rec.get('publication_year')
     if not year:
-        for k in ("date", "published", "pub_date"):
+        for k in ('date', 'published', 'pub_date'):
             v = rec.get(k)
             if isinstance(v, str) and len(v) >= 4 and v[:4].isdigit():
                 year = v[:4]
                 break
+    # Authors: prefer list from meta; otherwise try to parse existing 'authors' structures
+    authors = meta.get('authors')
+    if not authors:
+        authors = _author_names(rec.get('authors') or rec.get('authorships') or []) or (rec.get('authors') or [])
     return {
-        "title": rec.get("title") or rec.get("name") or "",
-        "doi": doi if (isinstance(doi, str) and doi.startswith("10.")) else "",
-        "url": rec.get("url") or rec.get("oa_url") or rec.get("pdf_url") or "",
-        "year": str(year or ""),
-        "authors": _author_names(rec.get("authors") or rec.get("authorships") or []) or (rec.get("authors") or []),
+        'title': title,
+        'doi': doi,
+        'url': url,
+        'year': str(year or ''),
+        'authors': authors,
     }
 
 def _normalize_text(s: str | None) -> str:
