@@ -18,6 +18,99 @@ logger = logging.getLogger(__name__)
 
 UA = "NanoChemGPT-Harvester/1.0 (+https://nanochemgpt-production.up.railway.app/)"
 TIMEOUT = float(os.getenv("OA_TIMEOUT", "12"))
+# ---------------------- Normalization helpers ----------------------
+_DOI_RX = re.compile(r'(10\.\d{4,9}/[-._;()/:A-Z0-9]+)', re.I)
+
+def _norm_str(x):
+    return (x or "").strip()
+
+def _norm_doi(x) -> str:
+    s = _norm_str(x)
+    if not s:
+        return ""
+    m = _DOI_RX.search(s)
+    return m.group(1).lower() if m else ""
+
+def _pmcid_from_any(x: str) -> str:
+    s = _norm_str(x)
+    if not s:
+        return ""
+    m = re.search(r'\bPMC\d+\b', s, flags=re.I)
+    return m.group(0).upper() if m else ""
+
+def _arxiv_id_from_any(url_or_id: str) -> str:
+    s = _norm_str(url_or_id)
+    if not s:
+        return ""
+    m = re.search(r'arxiv\.org/(?:abs|pdf)/([0-9]{4}\.[0-9]{4,5})(?:\.pdf)?', s, flags=re.I)
+    if m:
+        return m.group(1)
+    m = re.search(r'\b([0-9]{4}\.[0-9]{4,5})\b', s)
+    return m.group(1) if m else ""
+
+def _pdf_url_guess_arxiv(arxiv_id: str) -> str:
+    return f"https://arxiv.org/pdf/{arxiv_id}.pdf" if arxiv_id else ""
+
+def _authors_to_list(authors_field):
+    if not authors_field:
+        return []
+    if isinstance(authors_field, list):
+        return [str(a).strip() for a in authors_field if str(a).strip()]
+    s = str(authors_field)
+    parts = re.split(r'\s*;\s*|\s*\band\b\s*|\s*,\s*(?=[A-Z][a-z]+(?:\s|$))', s)
+    out = [p.strip() for p in parts if p and len(p.strip()) > 1]
+    seen, uniq = set(), []
+    for a in out:
+        if a not in seen:
+            seen.add(a); uniq.append(a)
+    return uniq
+
+def _year_from(*vals):
+    for v in vals:
+        s = _norm_str(v)
+        if len(s) >= 4 and s[:4].isdigit():
+            return s[:4]
+        m = re.search(r'(\d{4})', s)
+        if m:
+            return m.group(1)
+    return ""
+
+def _canon_rec(rec: dict) -> dict:
+    doi = _norm_doi(rec.get("doi") or rec.get("url") or rec.get("id") or "")
+    pmcid = rec.get("pmcid") or ""
+    if not pmcid:
+        pmcid = _pmcid_from_any((rec.get("id","") + " " + rec.get("url","")).strip())
+    arxiv_id = rec.get("arxiv_id") or ""
+    if not arxiv_id:
+        arxiv_id = _arxiv_id_from_any((rec.get("id","") + " " + rec.get("url","")).strip())
+    title = rec.get("title") or ""
+    url = rec.get("pdf_url") or rec.get("url") or ""
+    pdf_url = rec.get("pdf_url") or ""
+    if not pdf_url and arxiv_id:
+        pdf_url = _pdf_url_guess_arxiv(arxiv_id)
+    if not pdf_url and url and url.lower().endswith(".pdf"):
+        pdf_url = url
+    authors_list = _authors_to_list(rec.get("authors"))
+    year = _year_from(rec.get("year"), rec.get("pubYear"), rec.get("published"))
+    source = rec.get("source") or ""
+    return {
+        "doi": doi,
+        "pmcid": pmcid,
+        "arxiv_id": arxiv_id,
+        "title": title,
+        "authors_list": authors_list,
+        "year": year,
+        "url": rec.get("url") or "",
+        "pdf_url": pdf_url,
+        "license": rec.get("license"),
+        "access_route": rec.get("access_route", "unknown"),
+        "source": source or ("arxiv" if arxiv_id else ("eupmc" if pmcid else rec.get("source","")))
+    }
+
+def _dedup_key(c):
+    return c["doi"] or c["pmcid"] or c["arxiv_id"] or (c["title"][:200].lower())
+# ------------------------------------------------------------------
+
 
 
 def harvest_one_record(rec):
@@ -211,32 +304,36 @@ def main():
     cfg['max_results_per_source'] = int(cfg.get('max_results_per_source', 50))
     cfg['since_year'] = int(cfg.get('since_year', 2000))
     all_meta = []
-    for q in cfg['queries']:
-        all_meta += search_arxiv(q, cfg['max_results_per_source'])
-        all_meta += search_eupmc(q, cfg['since_year'], cfg['max_results_per_source'])
+for q in cfg['queries']:
+    for r in search_arxiv(q, cfg['max_results_per_source']):
+        r['source'] = 'arxiv'; all_meta.append(r)
+    for r in search_eupmc(q, cfg['since_year'], cfg['max_results_per_source']):
+        r['source'] = 'eupmc'; all_meta.append(r)
 
-    seen, dedup = set(), []
-    for m in all_meta:
-        key = m.get('doi') or m.get('arxiv_id') or m.get('pmcid') or m.get('title')
-        if key and key not in seen:
-            seen.add(key)
-            dedup.append(m)
+# Normalize all records to a common schema
+canon = [_canon_rec(r) for r in all_meta]
 
-    bundle = out_dir / 'bundle.jsonl'
-    with open(bundle, 'w', encoding='utf-8') as fout:
-        for rec in tqdm(dedup, desc='Processing'):
+# De-duplicate by DOI → PMCID → arXiv ID → title
+seen, dedup = set(), []
+for c in canon:
+    key = _dedup_key(c)
+    if key and key not in seen:
+        seen.add(key)
+        dedup.append(c)
+
+for rec in tqdm(dedup, desc='Processing'):
             paper = {
-                'paper_id': rec.get('doi') or rec.get('arxiv_id') or rec.get('pmcid'),
-                'title': rec.get('title', ''),
-                'authors': [{'name': a} for a in rec.get('authors', [])],
-                'doi': rec.get('doi'),
-                'source': rec.get('source'),
-                'urls': {'pdf': rec.get('pdf_url')},
-                'license': rec.get('license'),
-                'access_route': rec.get('access_route', 'unknown'),
-                'sections': [],
-                'extractions': {'methods_paragraphs': []}
-            }
+    'paper_id': rec.get('doi') or rec.get('arxiv_id') or rec.get('pmcid') or rec.get('title','')[:40],
+    'title': rec.get('title', ''),
+    'authors': [{'name': a} for a in (rec.get('authors_list') or [])],
+    'doi': rec.get('doi'),
+    'source': rec.get('source'),
+    'urls': {'pdf': rec.get('pdf_url') or ''},
+    'license': rec.get('license'),
+    'access_route': rec.get('access_route', 'unknown'),
+    'sections': [],
+    'extractions': {'methods_paragraphs': []}
+}
 
             methods: list[dict] = []
             all_sections: list[dict] = []
@@ -256,24 +353,26 @@ def main():
                 if rec.get('doi'):
                     try:
                         oa = resolve_oa(rec['doi'])
-                        # annotate record/paper with OA facts
                         rec['access_route'] = (oa.get('host_type') or 'unknown')
                         rec['license'] = oa.get('license') or rec.get('license')
-                        # set a usable URL if we don't have one yet
                         if oa.get('is_oa'):
                             rec['pdf_url'] = rec.get('pdf_url') or oa.get('pdf_url') or oa.get('url')
                     except Exception:
                         pass
 
-                if rec.get('pdf_url'):
-                    # fetch PDF or discover it from a landing page
+                if rec.get('pdf_url') or rec.get('url'):
+                    start_url = rec.get('pdf_url') or rec.get('url')
                     pdf_bytes = None
-                    kind, payload, final_url = fetch_pdf_or_html(rec['pdf_url'])
-                    if kind == "pdf":
+                    kind, payload, final_url = fetch_pdf_or_html(start_url)
+                    if kind == 'pdf':
                         pdf_bytes = payload
-                    elif kind == "html":
+                    elif kind == 'html':
                         alt_pdf = discover_pdf_in_html(payload, final_url)
                         if alt_pdf:
+                            k2, p2, _ = fetch_pdf_or_html(alt_pdf)
+                            if k2 == 'pdf':
+                                pdf_bytes = p2
+
                             k2, p2, _ = fetch_pdf_or_html(alt_pdf)
                             if k2 == "pdf":
                                 pdf_bytes = p2

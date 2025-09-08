@@ -91,7 +91,7 @@ def fetch_fulltext_jats(pmcid: str, timeout: float = 60.0) -> str | None:
     Tries Europe PMC first, then falls back to NCBI PMC OAI-PMH.
     Returns the JATS XML as a string (or None if unavailable).
     """
-    import httpx, logging
+    import httpx, logging, re
     log = logging.getLogger(__name__)
     pmcid = _ensure_pmcid(pmcid)
     if not pmcid:

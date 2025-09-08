@@ -16,6 +16,8 @@ import threading
 from datetime import datetime
 from pathlib import Path
 from functools import lru_cache
+import json
+import difflib as _difflib
 try:
     from dotenv import load_dotenv
     load_dotenv()
@@ -230,33 +232,6 @@ def _doc(obj):
     return out
 
 # ---- Citation extraction and formatting helpers ----
-def _format_references_block_from_used(used_idxs, refs):
-    """Return an ACS-style block using the ORIGINAL indices (so [3] stays [3])."""
-    def fmt_acs(r: dict) -> str:
-        # very light ACS-ish formatter
-        authors = r.get("authors") or []
-        if isinstance(authors, list):
-            authors = ", ".join([a if isinstance(a, str) else str(a) for a in authors])[:200]
-        title   = r.get("title") or "(no title)"
-        journal = r.get("biblio", {}).get("journal") or r.get("journal") or r.get("source") or ""
-        year    = str(r.get("year") or "").strip()
-        doi     = str(r.get("doi") or "").strip()
-        url     = r.get("url") or (f"https://doi.org/{doi}" if doi and not doi.startswith("10.") else "")
-        tail    = f"{journal} {year}".strip()
-        core    = f"{authors}. {title}" if authors else title
-        line    = f"{core}"
-        if tail: line += f"; {tail}"
-        if doi and doi.startswith("10."): line += f". https://doi.org/{doi}"
-        elif url: line += f". {url}"
-        return line
-
-    toks = sorted({int(i) for i in used_idxs if isinstance(i, (int, str)) and str(i).isdigit()})
-    lines = []
-    for n in toks:
-        if 1 <= n <= len(refs):
-            lines.append(f"[{n}] {fmt_acs(refs[n-1])}")
-    return "\n".join(lines)
-
 def _extract_used_markers(*texts: str) -> dict:
     """Find [n] citations and [CTX]/[PARSED]/[DB]/[GEN] tags."""
     _CIT_BRACKET_RX = re.compile(r"\[(?P<num>\d{1,4})\]")
@@ -629,9 +604,82 @@ def ask():
         return text, ""
 
     def _ref_url(r: dict) -> str:
-        if r.get("url"): return r["url"]
-        if r.get("doi"): return f"https://doi.org/{r['doi']}"
+        if r.get("url"):
+            return r["url"]
+        if r.get("doi"):
+            return f"https://doi.org/{r['doi']}"
         return ""
+
+
+    # ---- Reference normalization + matching helpers ----
+    _DOI_RX = re.compile(r'(10\.\d{4,9}/[-._;()/:A-Z0-9]+)', re.I)
+
+    def _norm_doi(x):
+        if not x: 
+            return ""
+        if isinstance(x, (list, tuple)):
+            x = " ".join(map(str, x))
+        s = str(x)
+        m = _DOI_RX.search(s)
+        return m.group(1).lower() if m else ""
+
+    def _norm_url(url, doi=""):
+        u = (url or "").strip()
+        if u:
+            return u
+        d = (doi or "").strip().lower()
+        return (f"https://doi.org/{d}" if d else "")
+
+    def _canon_title(t):
+        if not t:
+            return ""
+        s = re.sub(r'\s+', ' ', str(t)).strip().lower()
+        s = re.sub(r'[^a-z0-9\s]+', '', s)
+        return s
+
+    def _safe_year(val):
+        if not val:
+            return ""
+        s = str(val)
+        if len(s) >= 4 and s[:4].isdigit():
+            return s[:4]
+        m = re.search(r'(\d{4})', s)
+        return m.group(1) if m else ""
+
+    def _best_ref_idx_for_hit(hit, ref_index, ref_titles, fuzzy_thr=0.84):
+        meta = hit.get("meta", {}) if isinstance(hit, dict) else {}
+        text = hit.get("text") or ""
+        # DOI
+        doi_raw = meta.get("doi") or meta.get("paper_id") or meta.get("url") or ""
+        doi = _norm_doi(doi_raw) or _norm_doi(text)
+        if doi:
+            key = ("doi", doi)
+            if key in ref_index:
+                return ref_index[key]
+        # URL
+        url = (meta.get("url") or meta.get("oa_url") or meta.get("pdf_url") or "").strip().lower()
+        if url:
+            key = ("url", url)
+            if key in ref_index:
+                return ref_index[key]
+        # Title
+        title = _canon_title(meta.get("title") or "")
+        if title:
+            key = ("title", title)
+            if key in ref_index:
+                return ref_index[key]
+            # Fuzzy title
+            import difflib as _difflib
+            best_idx, best = None, 0.0
+            for idx, rt in ref_titles.items():
+                if not rt:
+                    continue
+                score = _difflib.SequenceMatcher(a=title, b=rt).ratio()
+                if score > best:
+                    best, best_idx = score, idx
+            if best_idx is not None and best >= fuzzy_thr:
+                return best_idx
+        return None
 
     # --------------- on-demand harvest helpers (inner) ---------------
     def _needs_more(hits: list[dict]) -> bool:
@@ -932,19 +980,21 @@ def ask():
         except Exception as e:
             app.logger.warning(f"[/ask] auto-harvest failed: {e}")
 
-    # A) Build web_refs from hit.meta (not top-level)
+
+    # A) Build web_refs from hit.meta with aggressive normalization (extract DOI from url/text if needed)
     def _hit_meta(h): return h.get("meta", {}) if isinstance(h, dict) else {}
     web_refs = []
     for h in hits:
         m = _hit_meta(h)
-        doi = (m.get("doi") or m.get("paper_id") or "")
-        if not (isinstance(doi, str) and doi.startswith("10.")):
-            doi = ""
+        doi = _norm_doi(m.get("doi") or m.get("paper_id") or m.get("url") or h.get("text") or "")
+        url = _norm_url(m.get("url") or m.get("oa_url") or m.get("pdf_url"), doi)
+        title = _s(m.get("title") or "(no title)")
+        year = _safe_year(m.get("year") or m.get("publication_year") or m.get("date") or "")
         web_refs.append({
-            "title": _s(m.get("title") or "(no title)"),
-            "year":  _s(m.get("year") or ""),
-            "url":   _s(m.get("url") or m.get("oa_url") or m.get("pdf_url") or ""),
-            "doi":   _s(doi),
+            "title": title,
+            "year":  year,
+            "url":   url,
+            "doi":   doi,
             "authors": m.get("authors") or [],
             "biblio": {},
         })
@@ -968,28 +1018,48 @@ def ask():
         for i, r in enumerate(refs_all)
     ).strip() or "(no references found)"
 
-    # Index references for aligning web snippets
-    def _normkey_ref(r: dict) -> str:
-        return (r.get("doi") or r.get("url") or r.get("title") or "").strip().lower()
+    
+    # Index references for aligning web snippets (prefer DOI, then URL, then title)
+    def _normkey_ref(r: dict):
+        doi = _norm_doi(r.get("doi") or r.get("url") or r.get("title"))
+        if doi:
+            return ("doi", doi)
+        url = (r.get("url") or "").strip().lower()
+        if url:
+            return ("url", url)
+        title = _canon_title(r.get("title"))
+        if title:
+            return ("title", title)
+        return None
 
-    ref_index = { _normkey_ref(r): i+1 for i, r in enumerate(refs_all) }
-
-    def _key_from_hit(h: dict) -> str:
-        m = _hit_meta(h)
-        doi = (m.get("doi") or m.get("paper_id") or "").strip().lower()
-        if doi.startswith("10."): return doi
-        url = _s(m.get("url") or m.get("oa_url") or m.get("pdf_url")).lower()
-        if url: return url
-        return _s(m.get("title") or "").lower()
+    ref_index = {}
+    ref_titles = {}
+    for i, r in enumerate(refs_all, start=1):
+        ref_titles[i] = _canon_title(r.get("title"))
+        key = _normkey_ref(r)
+        if key:
+            ref_index[key] = i
 
     web_ctx_lines = []
+    unmatched_debug = []
     for h in hits[:5]:
-        idx = ref_index.get(_key_from_hit(h))
+        idx = _best_ref_idx_for_hit(h, ref_index, ref_titles, fuzzy_thr=float(os.getenv("FUZZY_TITLE_THRESHOLD", "0.84")))
         head = f"[{idx}]" if idx else "[?]"
-        title = _s(_hit_meta(h).get("title") or "(no title)")
+        title = _s((h.get("meta") or {}).get("title") or "(no title)")
         snip  = _s(h.get("text") or "")
         if snip:
             web_ctx_lines.append(f"{head} {title}\n{snip[:1000]}")
+        if not idx:
+            try:
+                unmatched_debug.append({
+                    "meta_title": (h.get("meta") or {}).get("title"),
+                    "meta_doi": (h.get("meta") or {}).get("doi") or (h.get("meta") or {}).get("paper_id"),
+                    "meta_url": (h.get("meta") or {}).get("url") or (h.get("meta") or {}).get("oa_url") or (h.get("meta") or {}).get("pdf_url")
+                })
+            except Exception:
+                pass
+    if unmatched_debug:
+        app.logger.info(f"[ask] unmatched hits (could not map to numbered refs): {json.dumps(unmatched_debug)[:800]}")
     web_ctx = "\n\n".join(web_ctx_lines)
 
 
@@ -1109,8 +1179,9 @@ def ask():
     if not used_idxs and answer:
         fix_prompt = (
             "Add numeric citations [n] to the answer using the numbered REFERENCES. "
-            "Do not change wording; only append [n] to sentences that use info from CONTEXT/REFERENCES. "
+            "Do not change wording; only append [n] to sentences that clearly use info from CONTEXT/REFERENCES. "
             "If you cannot justify a sentence by CONTEXT/REFERENCES, leave it without [n].\n\n"
+            f"CONTEXT:\n{context_joined}\n\n"
             f"REFERENCES:\n{refs_prompt}\n\n"
             f"ANSWER:\n{answer}"
         )
@@ -1165,19 +1236,30 @@ def ask():
         "index_map": index_map,
     }
 
+
     # judge based on helper if present; otherwise simple rule
     try:
         if callable(_h_judge_sufficiency):
-            judged_ok = bool(_h_judge_sufficiency(question, context_joined))
+            judged_ok = bool(_h_judge_sufficiency(question, context_joined, min_hits=MIN_HITS, min_score=MIN_SCORE, min_chars=MIN_CHARS))
         else:
             judged_ok = len(context_joined) >= MIN_CHARS
     except Exception as e:
         app.logger.warning(f"[/ask] judge/enqueue error (helper): {e}")
         judged_ok = len(context_joined) >= MIN_CHARS
 
+    # judge_hits fallback if not imported
+    _judge_hits = None
+    try:
+        _judge_hits = judge_hits
+    except Exception:
+        pass
+    if not callable(_judge_hits):
+        def _judge_hits(hits, min_hits=1, min_score=0.15, min_chars=64):
+            return bool(hits) and len(hits) >= min_hits
+
     try:
         if kb_hits:
-            kb_ok = judge_hits(kb_hits, min_hits=MIN_HITS, min_score=MIN_SCORE, min_chars=MIN_CHARS)
+            kb_ok = _judge_hits(kb_hits, min_hits=MIN_HITS, min_score=MIN_SCORE, min_chars=MIN_CHARS)
         else:
             kb_ok = False
     except Exception as e:
@@ -1200,9 +1282,10 @@ def ask():
     refs_payload_s      = _stringify_keys(refs_payload or {})
     refs_used_s         = _stringify_keys(refs_used or [])
     refs_all_s          = _stringify_keys(refs_all or [])
-    candidates_s        = _stringify_keys(refs_all or []) 
+    candidates_s        = _stringify_keys(refs_all or [])
 
     try:
+        db = get_db()
         db.qa.insert_one({
             "question": question,
             "intent": intent,
@@ -1217,7 +1300,6 @@ def ask():
             "refs_all": refs_all_s,
             "refs_used": refs_used_s,
             "index_map": index_map_s,
-            **refs_payload_s,                 
             "kb_refs_count": len(kb_refs_raw),
             "web_refs_count": len(web_refs),
             "table_refs": table_refs,
@@ -1227,7 +1309,7 @@ def ask():
     except Exception as e:
         app.logger.warning(f"[/ask] DB save warn: {e}")
 
-    return jsonify({
+    response_payload = {
         "ok": True,
         "question": question,
         "intent": intent,
@@ -1245,10 +1327,12 @@ def ask():
         "refs_used": refs_used_s,
         "candidates": candidates_s,
         "index_map": index_map_s,
-        **refs_payload_s,
         "context_present": bool(context_joined),
         "mining_enqueued": enqueued,
-    })
+    }
+    if isinstance(refs_payload_s, dict):
+        response_payload.update(refs_payload_s)
+    return jsonify(response_payload)
 
 @app.post("/parse")
 def parse_route():
@@ -1373,14 +1457,13 @@ def upload_builtin():
         saved.append(fname)
     return jsonify({"ok": True, "files": saved})
 
+@app.get("/healthz")
+def healthz():
+    return jsonify(ok=True)
+
 if __name__ == "__main__":
     app.run(
         host="0.0.0.0",
         port=int(os.getenv("PORT", 8000)),
         debug=os.getenv("DEBUG", "0") == "1"
     )
-
-@app.get("/healthz")
-def healthz():
-    from flask import jsonify
-    return jsonify(ok=True)
