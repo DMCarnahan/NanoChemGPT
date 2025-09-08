@@ -51,26 +51,24 @@ def diag() -> Dict[str, Any]:
     return info
 
 @app.post("/search")
-async def search(req: SearchRequest, request: Request) -> Dict[str, Any]:
-    debug = request.query_params.get("debug") == "1" or request.headers.get("X-Debug") == "1"
+def search(req: SearchRequest, request: Request):
     try:
         return R.search(query=req.query, k=req.k,
                         level=req.level, k_doc=req.k_doc, k_passage=req.k_passage,
                         w_doc=req.w_doc, w_passage=req.w_passage)
     except Exception as e:
-        if debug:
+        if request.query_params.get("debug") == "1":
             import traceback, os
-            tb = "".join(traceback.format_exc())
             return {
                 "ok": False,
                 "error": str(e),
-                "traceback": tb,
+                "traceback": "".join(traceback.format_exc()),
+                "paths": [(lab, str(p)) for lab, p in getattr(R, "_labels_and_paths")()],
                 "env": {
                     "RETRIEVER_INDEX_DIRS": os.getenv("RETRIEVER_INDEX_DIRS"),
                     "RETRIEVER_INDEX_DIR_DOC": os.getenv("RETRIEVER_INDEX_DIR_DOC"),
                     "RETRIEVER_INDEX_DIR_PASSAGE": os.getenv("RETRIEVER_INDEX_DIR_PASSAGE"),
                     "RETRIEVER_INDEX_DIR": os.getenv("RETRIEVER_INDEX_DIR"),
                 },
-                "paths": [(lab, str(p)) for lab, p in getattr(R, "_labels_and_paths")()],
             }
         raise HTTPException(status_code=500, detail=str(e))
