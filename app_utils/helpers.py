@@ -6,16 +6,18 @@ from typing import List, Dict, Any, Iterable, Optional
 
 # ---------- small utils ----------
 def env_int(name: str, default: int) -> int:
-    try:
-        return int(os.getenv(name, str(default)).strip())
-    except Exception:
-        return default
+    raw = os.getenv(name)
+    if raw is None or not str(raw).strip():
+        return int(default)
+    try: return int(raw)
+    except Exception: return int(default)
 
 def env_float(name: str, default: float) -> float:
-    try:
-        return float(os.getenv(name, str(default)).strip())
-    except Exception:
-        return default
+    raw = os.getenv(name)
+    if raw is None or not str(raw).strip():
+        return float(default)
+    try: return float(raw)
+    except Exception: return float(default)
 
 def _to_float(x, default: float = 0.0) -> float:
     try:

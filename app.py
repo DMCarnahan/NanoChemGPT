@@ -28,7 +28,6 @@ from flask import Flask, request, jsonify, abort, render_template, send_file, g
 from jinja2 import TemplateNotFound
 from openai import OpenAI
 from werkzeug.utils import secure_filename
-from typing import Any, Dict, List
 
 # Local modules
 import vector_store as vs
@@ -211,6 +210,13 @@ def _safe_id(x):
         return ObjectId(x)
     except Exception:
         return None
+    
+def _stringify_keys(obj):
+    if isinstance(obj, dict):
+        return {str(k): _stringify_keys(v) for k, v in obj.items()}
+    if isinstance(obj, list):
+        return [_stringify_keys(x) for x in obj]
+    return obj
 
 def _doc(obj):
     if not isinstance(obj, dict):
@@ -467,6 +473,7 @@ def ask():
     question = (payload.get("question") or payload.get("q") or "").strip()
     if not question:
         return jsonify({"ok": False, "error": "Missing 'question'"}), 400
+    enqueued = False
     MIN_HITS  = _env_int("JUDGE_MIN_HITS", 1)
     MIN_SCORE = _env_float("JUDGE_MIN_SCORE", 0.15)
     MIN_CHARS = _env_int("JUDGE_MIN_CHARS", 64)
@@ -1086,31 +1093,19 @@ def ask():
         answer, rationale = _s(a), _s(r)
 
     # ---------- Build references payload (using deduped refs_all) ----------
-    refs_payload = build_references_payload(answer or "", refs_all or [], top_k=6, question=question)
-    refs_all  = refs_payload.get("refs_all", [])   # ensure bound locally
-    refs_used = refs_payload.get("refs_used", [])
-    index_map = refs_payload.get("index_map", {})
-
-    # Extract cited indexes (robust)
-    try:
-        used_idxs = extract_used_ref_indexes(answer, rationale)
-    except Exception:
-        used_idxs = []
-    # Normalize within the range
-    used_idxs = [i for i in (int(x) for x in used_idxs if str(x).isdigit()) if 1 <= i <= len(refs_all)]
-
-    # Normalize and coerce to integers within range.
-    norm_used = []
-    for i in used_idxs or []:
+    
+    # ---------- Build references payload (single-pass; no extra dedupe) ----------
+    # We already deduped into `refs_all`. Figure out which were cited and prepare used subset.
+    def _extract_used_ref_indexes_safe(ans: str, rat: str) -> list[int]:
         try:
-            j = int(i)
-            if 1 <= j <= len(refs_all):
-                norm_used.append(j)
+            return [int(x) for x in extract_used_ref_indexes(ans, rat) if str(x).isdigit()]
         except Exception:
-            continue
-    used_idxs = norm_used
+            return []
 
-    # 2) If no citations detected but answer is non-empty, ask the model to add [n].
+    used_idxs = _extract_used_ref_indexes_safe(answer, rationale)
+    used_idxs = [i for i in used_idxs if 1 <= i <= len(refs_all)]
+
+    # If no citations but answer exists, ask model to add [n] and retry once
     if not used_idxs and answer:
         fix_prompt = (
             "Add numeric citations [n] to the answer using the numbered REFERENCES. "
@@ -1120,66 +1115,55 @@ def ask():
             f"ANSWER:\n{answer}"
         )
         try:
-            fixed = client.chat_completions.create(
-                model="gpt-4o-mini",
-                messages=[{"role": "user", "content": fix_prompt}],
-                temperature=0.0
-            ).choices[0].message.content
-        except AttributeError:
             fixed = client.chat.completions.create(
                 model="gpt-4o-mini",
                 messages=[{"role": "user", "content": fix_prompt}],
                 temperature=0.0
             ).choices[0].message.content
+            if isinstance(fixed, str) and fixed.strip():
+                answer = fixed
+                used_idxs = _extract_used_ref_indexes_safe(answer, "")
+                used_idxs = [i for i in used_idxs if 1 <= i <= len(refs_all)]
+        except Exception as _e:
+            pass
 
-        if isinstance(fixed, str) and fixed.strip():
-            answer = fixed
-            try:
-                used_idxs = extract_used_ref_indexes(answer, "")
-            except Exception:
-                used_idxs = []
-            used_idxs = [i for i in (int(x) for x in used_idxs if str(x).isdigit()) if 1 <= i <= len(refs_all)]
-
-            norm_used = []
-            for i in used_idxs or []:
-                try:
-                    j = int(i)
-                    if 1 <= j <= len(refs_all):
-                        norm_used.append(j)
-                except Exception:
-                    continue
-            used_idxs = norm_used
-    # Split to used refs and renumber the in-text citations
+    # Split to used refs and create a renumbering map
     try:
         refs_used, index_map = split_used_refs(refs_all, used_idxs)
     except Exception:
         refs_used, index_map = list(refs_all), {i+1: i+1 for i in range(len(refs_all))}
 
+    # Renumber in-text citations to the compact used set
     try:
         answer    = renumber_citations(answer, index_map)
         rationale = renumber_citations(rationale, index_map)
     except Exception:
         pass
 
-    # Build ACS-ish block from the used list
+    # Build ACS-style block from used refs
     try:
         references_block = format_references_block(refs_used)
     except Exception:
         references_block = ""
 
-
-    # Extract marker counts (citations, CTX tags etc.) using existing helper.
+    # Usage markers
     try:
         markers = _extract_used_markers(answer, rationale)
     except Exception:
         markers = {"refs": [], "tags": {}, "has_ctx": False}
 
-    # Normalize used indexes to the new numbering for persistence and response.
+    # Normalize used indexes to new numbering
     try:
-        updated_used = sorted({ index_map.get(i, i) for i in used_idxs })
-        used_idxs = updated_used
+        used_idxs = sorted({ index_map.get(i, i) for i in used_idxs })
     except Exception:
-        pass
+        used_idxs = used_idxs or []
+
+    # Build a lightweight refs_payload for downstream consumers (no double-dedupe)
+    refs_payload = {
+        "refs_all": refs_all,
+        "refs_used": refs_used,
+        "index_map": index_map,
+    }
 
     # judge based on helper if present; otherwise simple rule
     try:
@@ -1212,8 +1196,13 @@ def ask():
             app.logger.warning(f"[/ask] enqueue_text_mining_job failed: {e}")
 
     # ---- Save best-effort to DB ----
+    index_map_s         = {str(k): v for k, v in (index_map or {}).items()}
+    refs_payload_s      = _stringify_keys(refs_payload or {})
+    refs_used_s         = _stringify_keys(refs_used or [])
+    refs_all_s          = _stringify_keys(refs_all or [])
+    candidates_s        = _stringify_keys(refs_all or []) 
+
     try:
-        db = get_db()
         db.qa.insert_one({
             "question": question,
             "intent": intent,
@@ -1222,16 +1211,13 @@ def ask():
             "answer": answer,
             "rationale": rationale,
             "markers": markers,
-            # Persist only the updated citation indices, reflecting the renumbered list
             "used_ref_indexes": used_idxs,
             "references_block": references_block,
-            # Store the full deduped list and the subset actually used for each QA pair
-            "refs": refs_all,
-            "refs_all": refs_all,
-            "refs_used": refs_used,
-            "index_map": index_map,
-            "candidates": refs_all,
-            **refs_payload,
+            "refs": refs_all_s,
+            "refs_all": refs_all_s,
+            "refs_used": refs_used_s,
+            "index_map": index_map_s,
+            **refs_payload_s,                 
             "kb_refs_count": len(kb_refs_raw),
             "web_refs_count": len(web_refs),
             "table_refs": table_refs,
@@ -1254,12 +1240,12 @@ def ask():
         "used_ref_indexes": used_idxs,
         # Provide both the full deduped list and the subset of references actually cited. The
         # frontend uses these to populate candidate dropdowns and to render the references.
-        "refs": refs_all,
-        "refs_all": refs_all,
-        "refs_used": refs_used,
-        "candidates": refs_all,
-        "index_map": index_map,
-        **refs_payload,
+        "refs": refs_all_s,
+        "refs_all": refs_all_s,
+        "refs_used": refs_used_s,
+        "candidates": candidates_s,
+        "index_map": index_map_s,
+        **refs_payload_s,
         "context_present": bool(context_joined),
         "mining_enqueued": enqueued,
     })
