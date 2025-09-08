@@ -765,13 +765,36 @@ def ask():
             return []
 
         # --------- 4) index ---------
-        _stream([
-            "python", str(ROOT/"retriever/index_jsonl.py"),
-            "--bundle", str(bundle_for_index),
-            "--index_dir", str(INDEX_DIR),
-            "--text-key", text_key,
-        ])
-        app.logger.info(f"[harvest_reindex] indexed {bundle_for_index} (text_key={text_key}) → {INDEX_DIR}")
+        doc_dir = os.getenv("RETRIEVER_INDEX_DIR_DOC")
+        pas_dir = os.getenv("RETRIEVER_INDEX_DIR_PASSAGE")
+
+        if doc_dir or pas_dir:
+            # doc-level index 
+            if doc_dir:
+                _stream([
+                    "python", str(ROOT/"retriever/index_jsonl.py"),
+                    "--bundle", str(bundle_for_index),
+                    "--index_dir", str(doc_dir),
+                    "--text-key", "abstract"
+                ])
+            # passage-level index (methods)
+            if pas_dir:
+                _stream([
+                    "python", str(ROOT/"retriever/index_jsonl.py"),
+                    "--bundle", str(bundle_for_index),
+                    "--index_dir", str(pas_dir),
+                    "--text-key", "methods"
+                ])
+            app.logger.info(f"[harvest_reindex] indexed dual: doc={doc_dir} passage={pas_dir}")
+        else:
+            # single-index fallback
+            _stream([
+                "python", str(ROOT/"retriever/index_jsonl.py"),
+                "--bundle", str(bundle_for_index),
+                "--index_dir", str(INDEX_DIR),
+                "--text-key", "methods",
+            ])
+            app.logger.info(f"[harvest_reindex] indexed single → {INDEX_DIR}")
 
         # --------- 5) ping retriever ---------
         try:
@@ -884,8 +907,14 @@ def ask():
         kb_ctx = "\n".join(kb_lines)
 
     # ----------------- Web/hybrid retriever (initial) -----------------
-    hits = retriever_search(question, k=web_k, level=retriever_level, k_doc=k_doc, k_passage=k_passage, w_doc=w_doc, w_passage=w_passage) or []
-
+    try:
+        hits = retriever_search(
+            question, k=web_k, level=retriever_level,
+            k_doc=k_doc, k_passage=k_passage, w_doc=w_doc, w_passage=w_passage
+        ) or []
+    except Exception as e:
+        app.logger.warning(f"[/ask] retriever_search error: {e}")
+        hits = []
     # If evidence thin, optionally auto-harvest -> reindex -> reload -> retry once
     harvest_refs = []  
     if allow_fetch and _needs_more(hits):
@@ -971,8 +1000,8 @@ def ask():
         " - Specify temperatures (°C), ramp rates (°C/min), and hold times (min/h).\n"
         " - Include workup and purification (quench, washing/centrifugation, drying) with volumes.\n"
         " - No placeholders (avoid “e.g.”/“or”). Be decisive.\n"
-        " - Output only the final protocol in markdown. Do not include any fenced blocks named reason or rationale in the answer. Put all reasoning in the separate rationale channel.\n"
-        " - Avoid using Schlenk line, air-free techniques. Do not suggest inert gas."
+        " - Avoid using Schlenk line, air-free techniques. Do not suggest inert gas.\n"
+        " - Do not output a REFERENCES block in the answer."
     )
     reasoning_rules = (
         " - Provide a mechanistic explanation and design considerations for the target.\n"
@@ -986,8 +1015,8 @@ def ask():
         " - (e.g. “hydrothermal at 200 °C [3]”)."
     )
     acs_rule = (
-        " - Write the REFERENCES block in ACS format: author(s), title, journal, year, volume, pages, DOI.\n"
-        " - Use inline numeric citations ([n]) for facts from REFERENCES. Do NOT include a REFERENCES block in your answer."
+        " - Use inline numeric citations ([n]) for any facts taken from REFERENCES.\n"
+        " - Do NOT output a REFERENCES block; it will be assembled server-side."
     )
 
     def strip_references_block(text: str) -> str:
@@ -1151,17 +1180,16 @@ def ask():
     except Exception:
         pass
 
-    # judge based on helper if present; otherwise fall back to simple text-length rule
+    # judge based on helper if present; otherwise simple rule
     try:
         if callable(_h_judge_sufficiency):
-            sufficient = bool(_h_judge_sufficiency(question, context_joined))
+            judged_ok = bool(_h_judge_sufficiency(question, context_joined))
         else:
-            sufficient = len(context_joined) >= MIN_CHARS
+            judged_ok = len(context_joined) >= MIN_CHARS
     except Exception as e:
         app.logger.warning(f"[/ask] judge/enqueue error (helper): {e}")
-        sufficient = len(context_joined) >= MIN_CHARS
+        judged_ok = len(context_joined) >= MIN_CHARS
 
-    enqueued = False
     try:
         if kb_hits:
             kb_ok = judge_hits(kb_hits, min_hits=MIN_HITS, min_score=MIN_SCORE, min_chars=MIN_CHARS)
@@ -1172,8 +1200,10 @@ def ask():
         kb_ok = False
 
     web_thin = _needs_more(hits)
-    sufficient = bool(kb_ok) and not web_thin
-    if not sufficient:
+
+    # final sufficiency: any strong signal should allow skipping harvest/enqueue
+    sufficient = judged_ok or kb_ok
+    if not sufficient or web_thin:
         try:
             enqueue_text_mining_job(question)
             enqueued = True

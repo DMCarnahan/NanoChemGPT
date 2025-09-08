@@ -52,6 +52,10 @@ _VECS: Dict[Path, Tuple[Any, Any]] = {}
 def reload_caches() -> bool:
     _BUNDLES.clear(); _VECS.clear(); return True
 
+def _safe_float(v, default):
+    try: return float(v)
+    except Exception: return float(default)
+
 def _ensure_texts_metas(bundle: dict) -> dict:
     X = bundle.get("matrix")
     n = int(getattr(X, "shape", (0, 0))[0]) if X is not None else 0
@@ -116,47 +120,80 @@ def _pick_from_sequence(obj):
     return mat, vec, texts, metas
 
 def _load_tfidf_for(idx: Path, force: bool = False) -> Dict[str, Any]:
-    if not isinstance(idx, Path): idx = Path(idx)
+    if not isinstance(idx, Path):
+        idx = Path(idx)
     idx = idx.resolve()
-    if idx in _BUNDLES and not force: return _BUNDLES[idx]
+    if idx in _BUNDLES and not force:
+        return _BUNDLES[idx]
 
-    pkl  = idx / "tfidf.pkl"
-    npz  = idx / "tfidf.npz"
-    vecj = idx / "vectorizer.joblib"
-    vocab= idx / "vocab.json"
+    pkl   = idx / "tfidf.pkl"
+    npz   = idx / "tfidf.npz"
+    vecj  = idx / "vectorizer.joblib"
+    vocab = idx / "vocab.json"
 
     print(f"[retriever] Using INDEX_DIR={idx}")
 
+    def _vectorizer_from_vocab_obj(vobj):
+        try:
+            from sklearn.feature_extraction.text import TfidfVectorizer
+        except Exception:
+            return None
+        if isinstance(vobj, dict):
+            vocab_map = vobj
+        elif isinstance(vobj, list):
+            vocab_map = {t: i for i, t in enumerate(vobj)}
+        else:
+            return None
+        return TfidfVectorizer(vocabulary=vocab_map)
+
     # 1) Preferred: tfidf.pkl
     if pkl.exists():
-        obj = joblib.load(pkl)
-        # dict format (expected)
+        obj = None
+        try:
+            obj = joblib.load(pkl)
+        except Exception as e:
+            print(f"[retriever] Failed to load {pkl}: {e}. Will try npz/vectorizer fallbacks.")
+
+        # dict format
         if isinstance(obj, dict):
             X = obj.get("matrix") or obj.get("X") or obj.get("tfidf")
             vectorizer = obj.get("vectorizer") or obj.get("vec")
-            bundle = {"kind": "matrix", "matrix": X, "vectorizer": vectorizer}
-            for k in ("texts","metas","rows","license","titles"):
-                if k in obj: bundle[k] = obj[k]
-            # if either X or vectorizer is missing, try to fall back to npz+vectorizer.joblib
-            if X is None or vectorizer is None:
-                # fall through to npz path
-                pass
-            else:
+            # Sidecar vectorizer if missing
+            if X is not None and vectorizer is None and vecj.exists():
+                try:
+                    vectorizer = joblib.load(vecj)
+                except Exception as e:
+                    print(f"[retriever] vectorizer.joblib load failed: {e}")
+                    vectorizer = None
+            # Rebuild from in-pickle vocabulary, if any
+            if X is not None and vectorizer is None:
+                vobj = obj.get("vocabulary") or obj.get("vocab")
+                if vobj is not None:
+                    vectorizer = _vectorizer_from_vocab_obj(vobj)
+
+            if X is not None and vectorizer is not None:
+                bundle = {"kind": "matrix", "matrix": X, "vectorizer": vectorizer}
+                for k in ("texts", "metas", "rows", "license", "titles"):
+                    if k in obj:
+                        bundle[k] = obj[k]
                 _BUNDLES[idx] = _ensure_texts_metas(bundle)
                 return _BUNDLES[idx]
-        # tuple/list format
+            # else: fall through to npz path
+
+        # tuple/list format: (matrix, vectorizer, texts?, metas?)
         if isinstance(obj, (list, tuple)):
             X, vectorizer, texts, metas = _pick_from_sequence(obj)
             if X is not None and vectorizer is not None:
-                bundle = {"kind":"matrix","matrix": X, "vectorizer": vectorizer}
+                bundle = {"kind": "matrix", "matrix": X, "vectorizer": vectorizer}
                 if texts is not None: bundle["texts"] = texts
                 if metas is not None: bundle["metas"] = metas
                 _BUNDLES[idx] = _ensure_texts_metas(bundle)
                 return _BUNDLES[idx]
-        # unknown object; continue to npz fallbacks
+        # unknown object → continue to npz fallbacks
 
-    # 2) npz + vectorizer.joblib
+    # 2) npz + vectorizer.joblib (or vocab.json)
     if npz.exists():
+        # Load matrix (sparse if SciPy available; else dense)
         try:
             from scipy.sparse import load_npz  # type: ignore
             X = load_npz(npz)
@@ -164,47 +201,62 @@ def _load_tfidf_for(idx: Path, force: bool = False) -> Dict[str, Any]:
             f = np.load(npz)
             key = "arr_0" if "arr_0" in f.files else next(iter(f.files))
             X = f[key]
+
         vectorizer = None
         if vecj.exists():
             try:
                 vectorizer = joblib.load(vecj)
-            except Exception:
+            except Exception as e:
+                print(f"[retriever] vectorizer.joblib load failed: {e}")
                 vectorizer = None
 
-        # legacy vocab.json
         if vectorizer is None and vocab.exists():
-            from sklearn.feature_extraction.text import TfidfVectorizer
-            vocab_list = json.loads(vocab.read_text(encoding="utf-8", errors="ignore"))
-            vocab_map  = {t: i for i, t in enumerate(vocab_list)}
-            vectorizer = TfidfVectorizer(vocabulary=vocab_map)
+            try:
+                vobj = json.loads(vocab.read_text(encoding="utf-8", errors="ignore"))
+            except Exception:
+                vobj = None
+            vectorizer = _vectorizer_from_vocab_obj(vobj)
 
         if vectorizer is None:
             raise RuntimeError(f"Found {npz} but no vectorizer.joblib or vocab.json")
 
-        bundle = {"kind":"matrix","matrix": X, "vectorizer": vectorizer}
-        # sidecars
-        for sidecar in ("rows.pkl","rows.jsonl","texts.jsonl","meta.json"):
+        bundle = {"kind": "matrix", "matrix": X, "vectorizer": vectorizer}
+
+        # Sidecars (optional)
+        for sidecar in ("rows.pkl", "rows.jsonl", "texts.jsonl", "meta.json"):
             p = idx / sidecar
-            if not p.exists(): continue
+            if not p.exists():
+                continue
             try:
                 if p.suffix == ".pkl":
                     rows = joblib.load(p)
-                    if isinstance(rows, list): bundle["rows"] = rows
+                    if isinstance(rows, list):
+                        bundle["rows"] = rows
                 elif p.suffix == ".json":
                     bundle["metas"] = json.loads(p.read_text(encoding="utf-8", errors="ignore"))
                 else:
                     rows = []
                     with p.open("r", encoding="utf-8", errors="ignore") as fh:
                         for line in fh:
-                            try: rows.append(json.loads(line))
-                            except Exception: pass
-                    if rows: bundle["rows"] = rows
-            except Exception:
-                pass
+                            line = line.strip()
+                            if not line:
+                                continue
+                            try:
+                                rows.append(json.loads(line))
+                            except Exception:
+                                pass
+                    if rows:
+                        bundle["rows"] = rows
+            except Exception as e:
+                print(f"[retriever] sidecar load warn {p.name}: {e}")
+
         _BUNDLES[idx] = _ensure_texts_metas(bundle)
         return _BUNDLES[idx]
 
-    raise RuntimeError(f"No TF-IDF index found or unreadable in {idx}. Expected tfidf.pkl (dict/tuple) or tfidf.npz+vectorizer.joblib.")
+    raise RuntimeError(
+        f"No TF-IDF index found or unreadable in {idx}. "
+        f"Expected tfidf.pkl (dict/tuple) or tfidf.npz + vectorizer.joblib/vocab.json."
+    )
 
 def _get_vec_nn(idx: Path) -> Tuple[Any, Any]:
     if idx in _VECS: return _VECS[idx]
@@ -212,43 +264,56 @@ def _get_vec_nn(idx: Path) -> Tuple[Any, Any]:
     vec = tf.get("vectorizer"); nn = tf.get("matrix")
     _VECS[idx] = (vec, nn); return _VECS[idx]
 
-def _cosine_sim(query_vec, matrix):
+def _cosine_sim(qv, M):
     try:
-        import scipy.sparse as sp  # type: ignore
-        if sp.issparse(matrix):
-            q = query_vec
-            if sp.issparse(q):
-                qn = np.sqrt(q.multiply(q).sum())
-                if qn > 0: q = q / qn
-            scores = (matrix @ q.T).toarray().ravel()
-            m_norm = np.sqrt(matrix.multiply(matrix).sum(axis=1)).A.ravel()
-            nz = (m_norm > 0)
-            if not np.allclose(m_norm[nz], 1.0, atol=1e-2):
-                scores[nz] = scores[nz] / m_norm[nz]
-            return scores
+        import scipy.sparse as sp
     except Exception:
-        pass
-    q = np.asarray(query_vec).astype("float32")
-    M = np.asarray(matrix).astype("float32")
-    qn = np.linalg.norm(q) + 1e-8; q = q / qn
-    mn = np.linalg.norm(M, axis=1, keepdims=True) + 1e-8; M = M / mn
-    return (M @ q.reshape(-1,1)).ravel()
+        sp = None
+
+    # Normalize query vector to dense 1D float array
+    if sp is not None and sp.issparse(qv):
+        q = qv.toarray().ravel().astype("float32", copy=False)
+    else:
+        q = np.asarray(qv).ravel().astype("float32", copy=False)
+    qn = np.linalg.norm(q) + 1e-8
+    q = q / qn
+
+    # If matrix is sparse
+    if sp is not None and sp.issparse(M):
+        # (M @ q) needs q as column; wrap q to 2D
+        scores = (M @ q.reshape(-1, 1)).toarray().ravel()
+        # row-norm correction if not unit-norm rows
+        m_norm = np.sqrt(M.multiply(M).sum(axis=1)).A.ravel()
+        nz = (m_norm > 0)
+        if nz.any():
+            scores[nz] = scores[nz] / m_norm[nz]
+        return scores.astype("float32", copy=False)
+
+    # Dense path
+    Md = np.asarray(M, dtype="float32")
+    mn = np.linalg.norm(Md, axis=1, keepdims=True) + 1e-8
+    Md = Md / mn
+    return (Md @ q.reshape(-1, 1)).ravel()
 
 # ------------------------------- Public API --------------------------------
 
-def _labels_and_paths() -> List[Tuple[str, Path]]:
+def _labels_and_paths():
     env = _env_paths()
     items = list(env.items())
-    items.sort(key=lambda kv: {"doc":0,"passage":1}.get(kv[0], 2))
+    # keep explicit *_DOC/*_PASSAGE first if present
+    order = {"doc":0, "passage":1}
+    items.sort(key=lambda kv: order.get(kv[0], 2))
     return items
 
 def _build_query_vec(vec, query: str):
     try:
-        return vec.transform([query])
-    except Exception:
+        qv = vec.transform([query])
+    except Exception as e:
         if hasattr(vec, "encode"):
-            return vec.encode([query])
-        raise
+            qv = vec.encode([query])
+        else:
+            raise
+    return qv
 
 def _topk(scores: np.ndarray, k: int) -> np.ndarray:
     k = max(1, int(k)); k = min(k, scores.shape[0])
@@ -262,8 +327,8 @@ def search(query: str, k: int = 5, **kwargs) -> Dict[str, Any]:
     want_both = (level in ("both","all")) or (level == "auto" and len(label_paths) > 1)
     targets: List[Tuple[str, Path]] = label_paths if want_both else [next(((l,p) for l,p in label_paths if l==level), label_paths[0])]
     k_doc = int(kwargs.get("k_doc", k)); k_pas = int(kwargs.get("k_passage", k)); k_other = int(max(1,k))
-    w_doc = float(kwargs.get("w_doc", os.getenv("WEIGHT_DOC", 0.6))); w_pas = float(kwargs.get("w_passage", os.getenv("WEIGHT_PASSAGE", 0.4)))
-    merged: List[Dict[str, Any]] = []
+    w_doc = _safe_float(kwargs.get("w_doc", os.getenv("WEIGHT_DOC", 0.6)), 0.6)
+    w_pas = _safe_float(kwargs.get("w_passage", os.getenv("WEIGHT_PASSAGE", 0.4)), 0.4)
     for lab, idx_path in targets:
         tf = _load_tfidf_for(idx_path); vec, nn = _get_vec_nn(idx_path)
         qv = _build_query_vec(vec, query); scores = _cosine_sim(qv, nn)
@@ -286,10 +351,20 @@ def health() -> Dict[str, Any]:
     info = {"ok": True, "indexes": []}
     for lab, p in _labels_and_paths():
         try:
-            tf = _load_tfidf_for(p); nn = tf.get("matrix"); docs = int(getattr(nn, "shape", (0,))[0])
-            info["indexes"].append({"label": lab, "path": str(p), "docs": docs})
+            tf = _load_tfidf_for(p)
+            nn = tf.get("matrix")
+            vec = tf.get("vectorizer")
+            n_rows, n_cols = (getattr(nn, "shape", (0,0)) or (0,0))
+            vcols = None
+            if hasattr(vec, "vocabulary_"):
+                vcols = len(getattr(vec, "vocabulary_", {}))
+            info["indexes"].append({
+                "label": lab, "path": str(p), "docs": int(n_rows),
+                "matrix_cols": int(n_cols), "vocab_size": vcols
+            })
         except Exception as e:
             info["indexes"].append({"label": lab, "path": str(p), "error": str(e)})
+
     if not info["indexes"]: return {"ok": False, "error": "no index dirs found"}
     return info
 
