@@ -315,7 +315,7 @@ def _cosine_sim(qv, M):
     except Exception:
         sp = None
 
-    # Dense 1D query
+    # 1) Dense 1D query vector
     if sp is not None and sp.issparse(qv):
         q = qv.toarray().ravel().astype("float32", copy=False)
     else:
@@ -323,18 +323,24 @@ def _cosine_sim(qv, M):
     qn = np.linalg.norm(q) + 1e-8
     q = q / qn
 
+    # 2) Sparse matrix path
     if sp is not None and sp.issparse(M):
-        s = (M @ q.reshape(-1,1)).toarray().ravel()
-        rn = np.sqrt(M.multiply(M).sum(axis=1)).A.ravel()
-        nz = rn > 0
+        tmp = M @ q.reshape(-1, 1)          # this is usually a dense ndarray
+        if sp.issparse(tmp):
+            s = tmp.toarray().ravel()
+        else:
+            s = np.asarray(tmp).ravel()
+        # row-norms for cosine (||row||). Use sparse ops to avoid densifying M.
+        row_norms = np.sqrt(M.multiply(M).sum(axis=1)).A.ravel()
+        nz = row_norms > 0
         if nz.any():
-            s[nz] = s[nz] / rn[nz]
+            s[nz] = s[nz] / row_norms[nz]
         return s.astype("float32", copy=False)
 
+    # 3) Dense matrix path
     Md = np.asarray(M, dtype="float32")
-    rn = np.linalg.norm(Md, axis=1, keepdims=True) + 1e-8
-    Md = Md / rn
-    return (Md @ q.reshape(-1,1)).ravel()
+    row_norms = np.linalg.norm(Md, axis=1) + 1e-8
+    return (Md @ q.reshape(-1, 1)).ravel() / row_norms
 
 def _topk(scores: np.ndarray, k: int) -> np.ndarray:
     k = max(1, int(k)); k = min(k, scores.shape[0])
