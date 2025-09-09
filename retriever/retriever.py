@@ -66,6 +66,30 @@ def reload_caches() -> bool:
     return True
 
 # ------------------------------ Utils ----------------------------------------
+def _pick_from(obj, keys):
+    """
+    Return the first present value for keys without triggering truthiness
+    on NumPy/SciPy objects. Works for np.load npz dicts and normal dicts.
+    """
+    # np.load(...) returns an NpzFile with `.files` listing keys
+    if hasattr(obj, "files"):
+        for k in keys:
+            if k in obj.files:
+                return obj[k]
+        return None
+    # Fallback: normal mapping
+    for k in keys:
+        if k in obj and obj[k] is not None:
+            return obj[k]
+        # tolerate dict-like with .get
+        try:
+            v = obj.get(k)
+        except Exception:
+            v = None
+        if v is not None:
+            return v
+    return None
+
 def _load_rows_jsonl(idx: Path):
     rows_path = idx / "rows.jsonl"
     texts, metas = [], []
@@ -81,7 +105,7 @@ def _load_rows_jsonl(idx: Path):
                     continue
                 if isinstance(r, dict):
                     texts.append(r.get("text", "") or "")
-                    metas.append({k: r.get(k) for k in ("id","title","doi","url","year","authors") if k in r})
+                    metas.append({k: r.get(k) for k in ("id","title","doi","url","pdf_url","oa_url","year","authors") if k in r})
     return texts, metas
 
 def _ensure_texts_metas(bundle: dict) -> dict:
@@ -231,8 +255,8 @@ def _load_tfidf_for(idx: Path, force: bool = False) -> Dict[str, Any]:
 
         # dict format
         if isinstance(obj, dict):
-            X = obj.get("matrix") or obj.get("X") or obj.get("tfidf")
-            vectorizer = obj.get("vectorizer") or obj.get("vec")
+            X = _pick_from(obj, ("matrix", "X", "tfidf"))
+            vectorizer = _pick_from(obj, ("vectorizer", "tfidf_vectorizer"))
             # try sidecar vectorizer
             if X is not None and vectorizer is None and vecj.exists():
                 try:
