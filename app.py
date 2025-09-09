@@ -681,6 +681,113 @@ def ask():
                 return best_idx
         return None
 
+        # (no return below; function ends above)
+
+        # ──────────────── Generic Topic Guardrails (material + synthesis intent) ──────────────── #
+    import re
+    from typing import Iterable
+
+    # Visible intent tokens to activate synthesis guardrails
+    SYNTHESIS_INTENT_TOKENS = {
+        "synthesis","prepare","preparation","protocol","route","procedure","how to make",
+        "hydrothermal","solvothermal","coprecipitation","precipitation","polyol","microwave",
+        "sol-gel","calcination","anneal","autoclave","reduce","oxidize","co-precipitation"
+    }
+
+    # Procedural evidence tokens (keeps primary methods, not reviews)
+    PROC_METHOD_TOKENS = {
+        "synthesis","preparation","experimental","materials and methods","hydrothermal","solvothermal",
+        "coprecipitation","precipitation","polyol","microwave","sol-gel","calcination","anneal","autoclave"
+    }
+    PRECURSOR_TOKENS = {
+        # generic inorganic lab precursors / solvents / modifiers (extend as needed)
+        "no3","so4","cl2","cl-","oh-","naoh","koh","nh4oh","urea","ethylene glycol","eg","pvp",
+        "acetate","nitrate","chloride","sulfate","citric acid","ammonia","hydrazine","hydroxide",
+        "oleylamine","oleic acid","top","hdd"
+    }
+    UNIT_TOKENS = {"°c"," deg c"," mg"," g "," ml"," mL"," h "," hr"," min"," rpm"}
+
+    # Obvious off-intent topics to downrank/ban in titles for synthesis tasks
+    BANNED_TITLE_TOKENS = {
+        "nanomedicine","theranostic","tumor","immunotherap","agriculture","sdg","helicobacter","clinical"
+    }
+
+    # Material phrase helpers
+    MATERIAL_SUFFIXES = {
+        "oxide","dioxide","trioxide","oxychloride",
+        "sulfide","sulfate","phosphate","phosphide","nitride","carbide","boride",
+        "ferrite","perovskite","spinel","spinel ferrite","aluminate","silicate",
+        "chalcogenide","halide","arsenide","antimonide","telluride","selenide"
+    }
+
+    _FORMULA_RX = re.compile(r"\b(?:[A-Z][a-z]?\d*(?:\.[\d]+)?){2,}\b")
+
+    def _looks_like_synthesis(q: str) -> bool:
+        ql = (q or "").lower()
+        return any(tok in ql for tok in SYNTHESIS_INTENT_TOKENS)
+
+    def _tokenize(s: str) -> list[str]:
+        return re.findall(r"[a-zA-Z0-9\-\(\)\[\]\/\.]+", (s or "").lower())
+
+    def _extract_target_terms(q: str) -> set[str]:
+        """
+        Build MUST terms directly from the user query:
+          • any chemical formula tokens (e.g., TiO2, CoFe2O4, Ni3FeN)
+          • any 'element + material' phrases (e.g., 'copper oxide', 'cobalt ferrite')
+          • standalone material words (oxide, nitride, ferrite, perovskite) combined with adjacent element words
+        """
+        ql = (q or "")
+        must: set[str] = set()
+        # 1) formulas
+        for f in _FORMULA_RX.findall(ql):
+            must.add(f.lower())
+        # 2) simple "element + material" phrases (two-word windows)
+        toks = _tokenize(ql)
+        for i in range(len(toks) - 1):
+            a, b = toks[i], toks[i+1]
+            if b in MATERIAL_SUFFIXES:
+                must.add(f"{a} {b}")
+        # 3) single material word if accompanied somewhere by an element name/chemical symbol
+        # (coarse heuristic: keep the material word alone too)
+        for t in toks:
+            if t in MATERIAL_SUFFIXES:
+                must.add(t)
+        return {m for m in must if len(m) >= 2}
+
+    def _apply_guardrails(question: str, hits: list[dict]) -> tuple[list[dict], set[str], bool]:
+        """
+        Guardrails only activate for synthesis-like intent.
+        - If synthesis intent: require material tokens found in the query (if any) to appear in title/body.
+        - Also require evidence of methods/units/precursors to favor primary procedures.
+        - Always downrank/ban obvious off-intent biomed titles.
+        Returns (filtered_hits, material_terms_used, guardrails_active)
+        """
+        if not hits:
+            return [], set(), False
+        synth_mode = _looks_like_synthesis(question)
+        must_terms = _extract_target_terms(question) if synth_mode else set()
+
+        out = []
+        for h in hits:
+            m = (h.get("meta") or {})
+            title = (m.get("title") or "").lower()
+            body  = ((h.get("text") or "") + " " + " ".join(str(m.get(k) or "") for k in ("url","doi","paper_id"))).lower()
+            # ban obvious off-intent titles
+            if any(bt in title for bt in BANNED_TITLE_TOKENS):
+                continue
+            if synth_mode and must_terms:
+                # keep only if ANY material token appears somewhere
+                if not any(mt in title or mt in body for mt in must_terms):
+                    continue
+                # ensure procedural evidence
+                has_method = any(t in title or t in body for t in PROC_METHOD_TOKENS)
+                has_prec   = any(t in title or t in body for t in PRECURSOR_TOKENS)
+                has_units  = any(t in body for t in UNIT_TOKENS)
+                if not (has_method or has_prec or has_units):
+                    continue
+            out.append(h)
+        return (out if out else hits), must_terms, synth_mode
+
     # --------------- on-demand harvest helpers (inner) ---------------
     def _needs_more(hits: list[dict]) -> bool:
         if not hits:
@@ -972,13 +1079,16 @@ def ask():
         app.logger.warning(f"[/ask] retriever_search error: {e}")
         hits = []
     # If evidence thin, optionally auto-harvest -> reindex -> reload -> retry once
-    harvest_refs = []  
+    harvest_refs = []
     if allow_fetch and _needs_more(hits):
         try:
             harvest_refs = _harvest_reindex(_expand_queries(question)) or []   # <— collect refs
             hits = retriever_search(question, k=web_k, level=retriever_level, k_doc=k_doc, k_passage=k_passage, w_doc=w_doc, w_passage=w_passage) or []
         except Exception as e:
             app.logger.warning(f"[/ask] auto-harvest failed: {e}")
+
+    # Apply generalized guardrails to the retriever hits (only activates on synthesis-like intent)
+    hits, _material_terms, _synth_mode = _apply_guardrails(question, hits)
 
 
     # A) Build web_refs from hit.meta with aggressive normalization (extract DOI from url/text if needed)
@@ -1004,8 +1114,15 @@ def ask():
 
     # Deduplicate + rerank with ref_utils
     try:
+        # Strengthen domain terms with detected material tokens (if any) and downrank banned-title refs
+        domain = set(DEFAULT_NANOCHEM_TERMS) | set(_material_terms or [])
         refs_all = dedupe_and_rerank(
-            question, raw_refs, domain_terms=DEFAULT_NANOCHEM_TERMS, top_k=max(40, len(raw_refs))
+            question,
+            raw_refs,
+            domain_terms=domain,
+            top_k=max(40, len(raw_refs)),
+            must_terms=set(_material_terms or []) if _synth_mode else None,
+            ban_terms=BANNED_TITLE_TOKENS if _synth_mode else None,
         )
         if not refs_all:
             refs_all = list(raw_refs)
@@ -1240,7 +1357,12 @@ def ask():
     # judge based on helper if present; otherwise simple rule
     try:
         if callable(_h_judge_sufficiency):
-            judged_ok = bool(_h_judge_sufficiency(question, context_joined, min_hits=MIN_HITS, min_score=MIN_SCORE, min_chars=MIN_CHARS))
+            judged_ok = bool(_h_judge_sufficiency(
+                hits,
+                min_hits=MIN_HITS,
+                min_score=MIN_SCORE,
+                min_chars=MIN_CHARS
+            ))
         else:
             judged_ok = len(context_joined) >= MIN_CHARS
     except Exception as e:
@@ -1248,11 +1370,12 @@ def ask():
         judged_ok = len(context_joined) >= MIN_CHARS
 
     # judge_hits fallback if not imported
-    _judge_hits = None
     try:
         _judge_hits = judge_hits
     except Exception:
-        pass
+        def _judge_hits(hits, min_hits=1, min_score=0.15, min_chars=64):
+            return bool(hits) and len(hits) >= min_hits
+        _judge_hits = _judge_hits
     if not callable(_judge_hits):
         def _judge_hits(hits, min_hits=1, min_score=0.15, min_chars=64):
             return bool(hits) and len(hits) >= min_hits

@@ -358,7 +358,9 @@ def rerank_refs(query: str,
                 domain_terms: Optional[Set[str]] = None,
                 embeddings: Optional[Dict[str, List[float]]] = None,
                 query_embedding: Optional[List[float]] = None,
-                top_k: int = 50
+                top_k: int = 50,
+                must_terms: Optional[Set[str]] = None,
+                ban_terms: Optional[Set[str]] = None
                 ) -> List[dict]:
     """
     Combine BM25(title+abstract) with optional embedding cosine and domain-term boosts.
@@ -394,6 +396,17 @@ def rerank_refs(query: str,
             score += 0.5
         elif hits == 1:
             score += 0.2
+        # hard/soft topic constraints
+        body_lc  = (r.get("title","") + " " + r.get("abstract","")).lower()
+        title_lc = (r.get("title","") or "").lower()
+        if must_terms:
+            # If none of the must_terms appear anywhere, strongly penalize
+            if not any(mt in body_lc for mt in must_terms):
+                score -= 2.0
+        if ban_terms:
+            # If title contains any banned term, strongly penalize
+            if any(bt in title_lc for bt in ban_terms):
+                score -= 2.0
         # penalty if clearly off-topic (no shared tokens at all)
         if bm25[i] == 0.0 and hits == 0:
             score -= 0.25
@@ -412,10 +425,19 @@ def dedupe_and_rerank(query: str, refs: List[dict],
                       domain_terms: Optional[Set[str]] = None,
                       embeddings: Optional[Dict[str, List[float]]] = None,
                       query_embedding: Optional[List[float]] = None,
-                      top_k: int = 50) -> List[dict]:
+                      top_k: int = 50,
+                      must_terms: Optional[Set[str]] = None,
+                      ban_terms: Optional[Set[str]] = None) -> List[dict]:
     unique, merge_map, _ = dedupe_refs(refs)
-    ranked = rerank_refs(query, unique, domain_terms=domain_terms,
-                         embeddings=embeddings, query_embedding=query_embedding, top_k=top_k)
+    ranked = rerank_refs(
+        query, unique,
+        domain_terms=domain_terms,
+        embeddings=embeddings,
+        query_embedding=query_embedding,
+        top_k=top_k,
+        must_terms=must_terms,
+        ban_terms=ban_terms,
+    )
     return ranked
 
 def split_used_refs(refs_all: List[dict], used_indexes: List[int]
