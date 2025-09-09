@@ -66,6 +66,23 @@ def reload_caches() -> bool:
     return True
 
 # ------------------------------ Utils ----------------------------------------
+def _load_rows_jsonl(idx: Path):
+    rows_path = idx / "rows.jsonl"
+    texts, metas = [], []
+    if rows_path.exists():
+        with rows_path.open("r", encoding="utf-8") as f:
+            for line in f:
+                line = line.strip()
+                if not line:
+                    continue
+                try:
+                    r = json.loads(line)
+                except Exception:
+                    continue
+                if isinstance(r, dict):
+                    texts.append(r.get("text", "") or "")
+                    metas.append({k: r.get(k) for k in ("id","title","doi","url","year","authors") if k in r})
+    return texts, metas
 
 def _ensure_texts_metas(bundle: dict) -> dict:
     X = bundle.get("matrix")
@@ -189,7 +206,9 @@ def _load_tfidf_for(idx: Path, force: bool = False) -> Dict[str, Any]:
 
         if vectorizer is not None:
             bundle = {"kind": "matrix", "matrix": X, "vectorizer": vectorizer}
-            # sanity-check shapes
+            texts, metas = _load_rows_jsonl(idx)
+            if texts: bundle["texts"] = texts
+            if metas: bundle["metas"] = metas
             try:
                 n_cols = int(getattr(X, "shape", (0,0))[1]) if X is not None else 0
                 vocab_size = int(len(getattr(vectorizer, "vocabulary_", {}) or {}))
@@ -287,6 +306,9 @@ def _load_tfidf_for(idx: Path, force: bool = False) -> Dict[str, Any]:
             raise RuntimeError(f"Found {npz} but no vectorizer.joblib or vocab.json")
 
         bundle = {"kind":"matrix","matrix": X, "vectorizer": vectorizer}
+        texts, metas = _load_rows_jsonl(idx)
+        if texts: bundle["texts"] = texts
+        if metas: bundle["metas"] = metas
         _BUNDLES[idx] = _ensure_texts_metas(bundle)
         return _BUNDLES[idx]
 
