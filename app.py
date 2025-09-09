@@ -684,9 +684,6 @@ def ask():
         # (no return below; function ends above)
 
         # ──────────────── Generic Topic Guardrails (material + synthesis intent) ──────────────── #
-    import re
-    from typing import Iterable
-
     # Visible intent tokens to activate synthesis guardrails
     SYNTHESIS_INTENT_TOKENS = {
         "synthesis","prepare","preparation","protocol","route","procedure","how to make",
@@ -1190,7 +1187,7 @@ def ask():
 
     # ----------------- Prompting -----------------
     robot_rules = (
-        "Return a discrete lab protocol with exact quantities on a small scale (~0.5 mmol Co):\n"
+        " - Return a discrete lab protocol with exact quantities on a small scale (e.g., ~0.5–1 mmol of the metal precursor):\n"
         " - Include specific masses (mg) or mmol for reagents; volumes (mL) for liquids.\n"
         " - Specify temperatures (°C), ramp rates (°C/min), and hold times (min/h).\n"
         " - Include workup and purification (quench, washing/centrifugation, drying) with volumes.\n"
@@ -1353,7 +1350,6 @@ def ask():
         "index_map": index_map,
     }
 
-
     # judge based on helper if present; otherwise simple rule
     try:
         if callable(_h_judge_sufficiency):
@@ -1453,8 +1449,8 @@ def ask():
         "context_present": bool(context_joined),
         "mining_enqueued": enqueued,
     }
-    if isinstance(refs_payload_s, dict):
-        response_payload.update(refs_payload_s)
+    if isinstance(refs_payload, dict):
+        response_payload.update(refs_payload)
     return jsonify(response_payload)
 
 @app.post("/parse")
