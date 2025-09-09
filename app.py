@@ -16,12 +16,6 @@ import threading
 from datetime import datetime
 from pathlib import Path
 from functools import lru_cache
-import os
-import re
-import sys
-import tempfile
-import subprocess
-import threading
 import json
 import difflib as _difflib
 try:
@@ -295,39 +289,6 @@ def build_references_payload(
         "index_map": index_map,
         "candidates": refs_all,
     }
-
-def _call_judge_sufficiency(helper, question, context, MIN_HITS, MIN_SCORE, MIN_CHARS):
-    """Robustly call judge_sufficiency helper regardless of its signature."""
-    try:
-        # preferred modern signature
-        return bool(helper(question, context, min_hits=MIN_HITS, min_score=MIN_SCORE, min_chars=MIN_CHARS))
-    except TypeError:
-        # legacy variants
-        try:
-            # legacy positional: (question, MIN_HITS, MIN_SCORE, MIN_CHARS)
-            return bool(helper(question, MIN_HITS, MIN_SCORE, MIN_CHARS))
-        except TypeError:
-            # another legacy positional: (question, context, MIN_HITS, MIN_SCORE, MIN_CHARS)
-            return bool(helper(question, context, MIN_HITS, MIN_SCORE, MIN_CHARS))
-    except Exception:
-        pass
-    # final fallback: length rule
-    return len(context) >= MIN_CHARS
-
-def _call_judge_hits(helper, hits, MIN_HITS, MIN_SCORE, MIN_CHARS):
-    """Robustly call judge_hits helper regardless of its signature."""
-    try:
-        return bool(helper(hits, min_hits=MIN_HITS, min_score=MIN_SCORE, min_chars=MIN_CHARS))
-    except TypeError:
-        try:
-            # legacy positional
-            return bool(helper(hits, MIN_HITS, MIN_SCORE, MIN_CHARS))
-        except Exception:
-            pass
-    except Exception:
-        pass
-    # final fallback
-    return bool(hits) and len(hits) >= MIN_HITS
 
 @lru_cache(maxsize=128)
 def cached_vs_search(q):
@@ -1090,17 +1051,10 @@ def ask():
             web_ctx_lines.append(f"{head} {title}\n{snip[:1000]}")
         if not idx:
             try:
-                meta = h.get("meta") or {}
-                meta_title = meta.get("title") or h.get("title") or h.get("meta_title")
-                meta_doi   = meta.get("doi")   or h.get("doi")   or h.get("meta_doi")
-                meta_url   = (
-                    meta.get("url") or meta.get("oa_url") or meta.get("pdf_url")
-                    or h.get("url") or h.get("oa_url") or h.get("pdf_url") or h.get("meta_url")
-                )
                 unmatched_debug.append({
-                    "meta_title": meta_title,
-                    "meta_doi":   meta_doi,
-                    "meta_url":   meta_url,
+                    "meta_title": (h.get("meta") or {}).get("title"),
+                    "meta_doi": (h.get("meta") or {}).get("doi") or (h.get("meta") or {}).get("paper_id"),
+                    "meta_url": (h.get("meta") or {}).get("url") or (h.get("meta") or {}).get("oa_url") or (h.get("meta") or {}).get("pdf_url")
                 })
             except Exception:
                 pass
@@ -1282,13 +1236,11 @@ def ask():
         "index_map": index_map,
     }
 
+
     # judge based on helper if present; otherwise simple rule
     try:
         if callable(_h_judge_sufficiency):
-            judged_ok = _call_judge_sufficiency(
-                _h_judge_sufficiency, question, context_joined,
-                MIN_HITS, MIN_SCORE, MIN_CHARS
-            )
+            judged_ok = bool(_h_judge_sufficiency(question, context_joined, min_hits=MIN_HITS, min_score=MIN_SCORE, min_chars=MIN_CHARS))
         else:
             judged_ok = len(context_joined) >= MIN_CHARS
     except Exception as e:
@@ -1296,19 +1248,20 @@ def ask():
         judged_ok = len(context_joined) >= MIN_CHARS
 
     # judge_hits fallback if not imported
+    _judge_hits = None
     try:
-        _judge_hits  # noqa: F821
-    except NameError:
-        _judge_hits = None
-
+        _judge_hits = judge_hits
+    except Exception:
+        pass
     if not callable(_judge_hits):
-        # define a minimal built-in judge_hits if none provided
         def _judge_hits(hits, min_hits=1, min_score=0.15, min_chars=64):
             return bool(hits) and len(hits) >= min_hits
 
-    # evaluate kb hits with robust wrapper
     try:
-        kb_ok = _call_judge_hits(_judge_hits, kb_hits, MIN_HITS, MIN_SCORE, MIN_CHARS) if kb_hits else False
+        if kb_hits:
+            kb_ok = _judge_hits(kb_hits, min_hits=MIN_HITS, min_score=MIN_SCORE, min_chars=MIN_CHARS)
+        else:
+            kb_ok = False
     except Exception as e:
         app.logger.warning(f"[/ask] judge kb_hits error: {e}")
         kb_ok = False
