@@ -1,0 +1,310 @@
+{
+  "paper_id": "10.1038/s41598-023-33022-4",
+  "title": "Sb<sub>2</sub>Te<sub>3</sub> nanoparticle-containing single-walled carbon nanotube films coated with Sb<sub>2</sub>Te<sub>3</sub> electrodeposited layers for thermoelectric applications.",
+  "authors": [
+    {
+      "name": "Eguchi R"
+    },
+    {
+      "name": "Hoshino K"
+    },
+    {
+      "name": "Takashiri M."
+    }
+  ],
+  "doi": "10.1038/s41598-023-33022-4",
+  "source": "eupmc",
+  "urls": {
+    "pdf": ""
+  },
+  "license": null,
+  "access_route": "unknown",
+  "sections": [
+    {
+      "heading": "(fallback)",
+      "text": "Experimental setup\nFigure 1 shows a schematic of the fabrication process of the SWCNT films containing  Sb2Te3 nanoparticles and \nthe coating of the  Sb2Te3 electrodeposited layers. First, the nanoparticles were synthesized via the spontaneous \nredox reaction using an aluminum substrate (50 mm × 100 mm, 2 mm thick). Prior to nanoparticle synthesis, \nto remove any oxide layers from the aluminum substrate, it was placed in a 1 M NaOH (Fujifilm Wako Pure \nChemical Co.) solution for 5 min, followed by cleaning in deionized (DI) water (i.e., > 18 MΩ). The spontaneous \nredox reaction was conducted between the sacrificial aluminum plate and an electrolyte containing 0.02 M  Sb2O3 \n(Kojundo Chemical Laboratory Co., Ltd.), 0.04 M  TeO2 (Kojundo Chemical Laboratory Co., Ltd.), and 4.0 M \nHCl (Fujifilm Wako Pure Chemical Co.) for 40 min at approximately 25 °C. After the reaction, the nanoparticles \nwere washed with DI water, filtered, and dried under vacuum at 60 °C for 12 h.\n\nFigure 1.   Schematic diagram of the fabrication processes: nanoparticle synthesis, nanocomposite film \npreparation, and electrodeposition.\n\nScientific Reports |         (2023) 13:5783  | \n\nhttps://doi.org/10.1038/s41598-023-33022-4\n\n2\n\nVol:.(1234567890)www.nature.com/scientificreports/\fFor film preparation, SWCNTs synthesized by the super-growth method (SG-CNTs) (ZEONANO SG101, \nZEON Co.) were used as the starting  material39. Powdered SG-CNTs (80 mg) were dispersed in 40 mL of etha-\nnol to prepare an SWCNT dispersion solution with a concentration of 0.25 wt%, and homogenized mixing was \nensured using an ultrasonic homogenizer (SONICS 85, AZONE Co.). Next, the fabricated nanoparticles (5, \n10, 50, and 100 mg) were added to the SWCNT dispersion solution, followed by mixing using the ultrasonic \nhomogenizer. The nanocomposite films were prepared by a vacuum filtration method. A membrane filter (PTFE, \n90 mm diameter: ADVANTEC) was placed in a filter holder in a suction bottle, and the dispersion solution was \nfiltered by reducing the pressure in the suction bottle using a rotary pump. The entire volume of the nanoparticle-\ncontaining SWCNT-dispersion solution was poured dropwise onto the filter and aspirated for 1 h to produce \nthe nanocomposite films with a diameter of 80 mm. After drying for air-drying 24 h, the nanocomposite films \n(thickness = 100 µm) were removed from the membrane filter.\n\nFor electrodeposition,  Sb2Te3 layers were prepared at approximately 25 °C by potentiostatic electrodeposition \nusing a standard three-electrode cell. The electrolytes contained mixtures of 1.88 mM  Sb2O3, 0.63 mM  TeO2, and \n0.58 M HCl diluted with DI water. The working electrode (electrode area: 7.8  cm2) was the nanocomposite film, \nwhich was fixed to a stainless-steel plate using polyimide tape. A platinum-coated titanium mesh on a titanium \nplate was used as the counter electrode (electrode area: 7.8  cm2). A Ag/AgCl (saturated KCl) electrode was used \nas the reference electrode. The electrode voltage was set at − 0.01 V using a potentiostat/galvanostat (HA-151B, \nHokuto Denko) based on our previous  report40, and electrodeposition was performed for 1 h.\n\nThe precise structure of the nanoparticles was analyzed using high-resolution transmission electron micros-\ncopy (HR-TEM, JEOL JEM-ARM200F), selected area electron diffraction (SAED), and energy-dispersive X-ray \nspectroscopy (EDX) elemental mapping. The crystallographic properties of the nanoparticles and films were \nevaluated by X-ray diffraction (XRD; Mini Flex II, Rigaku) using Cu-Kα radiation (λ = 0.154 nm in the 2θ range \nfrom 20° to 70°). The microstructures of the films were analyzed with field emission scanning electron micros-\ncopy (FE-SEM, Hitachi S-4800). The chemical compositions of the nanoparticles and nanocomposite films were \ndetermined with an electron probe microanalyzer (EPMA, Shimadzu EPMA-1610). The compositions of the \nsamples were calibrated using the ZAF4 program installed with the EPMA-1610.\n\nThe in-plane electrical conductivity was measured at approximately 25 °C by a four-point probe method with \nan accuracy of ± 5%. The in-plane Seebeck coefficient of the nanocomposite films was measured at approximately \n25 °C with an accuracy of ± 7%41. We used two K-type thermocouples of 0.1 mm in diameter, which were pressed \non the center of the film. The distance between the thermocouples was 13 mm. One end of the film was connected \nto a heat sink and the other end to a heater. The Seebeck coefficient was determined as the ratio of the potential \ndifference (ΔV) along the film to the temperature difference. The power factor was estimated from the measured \nelectrical conductivity and Seebeck coefficient with an accuracy of ± 10%."
+    }
+  ],
+  "extractions": {
+    "methods_paragraphs": [
+      {
+        "text": "Experimental setup\nFigure 1 shows a schematic of the fabrication process of the SWCNT films containing  Sb2Te3 nanoparticles and \nthe coating of the  Sb2Te3 electrodeposited layers. First, the nanoparticles were synthesized via the spontaneous \nredox reaction using an aluminum substrate (50 mm × 100 mm, 2 mm thick). Prior to nanoparticle synthesis, \nto remove any oxide layers from the aluminum substrate, it was placed in a 1 M NaOH (Fujifilm Wako Pure \nChemical Co.) solution for 5 min, followed by cleaning in deionized (DI) water (i.e., > 18 MΩ). The spontaneous \nredox reaction was conducted between the sacrificial aluminum plate and an electrolyte containing 0.02 M  Sb2O3 \n(Kojundo Chemical Laboratory Co., Ltd.), 0.04 M  TeO2 (Kojundo Chemical Laboratory Co., Ltd.), and 4.0 M \nHCl (Fujifilm Wako Pure Chemical Co.) for 40 min at approximately 25 °C. After the reaction, the nanoparticles \nwere washed with DI water, filtered, and dried under vacuum at 60 °C for 12 h.\n\nFigure 1.   Schematic diagram of the fabrication processes: nanoparticle synthesis, nanocomposite film \npreparation, and electrodeposition.\n\nScientific Reports |         (2023) 13:5783  | \n\nhttps://doi.org/10.1038/s41598-023-33022-4\n\n2\n\nVol:.(1234567890)www.nature.com/scientificreports/\fFor film preparation, SWCNTs synthesized by the super-growth method (SG-CNTs) (ZEONANO SG101, \nZEON Co.) were used as the starting  material39. Powdered SG-CNTs (80 mg) were dispersed in 40 mL of etha-\nnol to prepare an SWCNT dispersion solution with a concentration of 0.25 wt%, and homogenized mixing was \nensured using an ultrasonic homogenizer (SONICS 85, AZONE Co.). Next, the fabricated nanoparticles (5, \n10, 50, and 100 mg) were added to the SWCNT dispersion solution, followed by mixing using the ultrasonic \nhomogenizer. The nanocomposite films were prepared by a vacuum filtration method. A membrane filter (PTFE, \n90 mm diameter: ADVANTEC) was placed in a filter holder in a suction bottle, and the dispersion solution was \nfiltered by reducing the pressure in the suction bottle using a rotary pump. The entire volume of the nanoparticle-\ncontaining SWCNT-dispersion solution was poured dropwise onto the filter and aspirated for 1 h to produce \nthe nanocomposite films with a diameter of 80 mm. After drying for air-drying 24 h, the nanocomposite films \n(thickness = 100 µm) were removed from the membrane filter.\n\nFor electrodeposition,  Sb2Te3 layers were prepared at approximately 25 °C by potentiostatic electrodeposition \nusing a standard three-electrode cell. The electrolytes contained mixtures of 1.88 mM  Sb2O3, 0.63 mM  TeO2, and \n0.58 M HCl diluted with DI water. The working electrode (electrode area: 7.8  cm2) was the nanocomposite film, \nwhich was fixed to a stainless-steel plate using polyimide tape. A platinum-coated titanium mesh on a titanium \nplate was used as the counter electrode (electrode area: 7.8  cm2). A Ag/AgCl (saturated KCl) electrode was used \nas the reference electrode. The electrode voltage was set at − 0.01 V using a potentiostat/galvanostat (HA-151B, \nHokuto Denko) based on our previous  report40, and electrodeposition was performed for 1 h.\n\nThe precise structure of the nanoparticles was analyzed using high-resolution transmission electron micros-\ncopy (HR-TEM, JEOL JEM-ARM200F), selected area electron diffraction (SAED), and energy-dispersive X-ray \nspectroscopy (EDX) elemental mapping. The crystallographic properties of the nanoparticles and films were \nevaluated by X-ray diffraction (XRD; Mini Flex II, Rigaku) using Cu-Kα radiation (λ = 0.154 nm in the 2θ range \nfrom 20° to 70°). The microstructures of the films were analyzed with field emission scanning electron micros-\ncopy (FE-SEM, Hitachi S-4800). The chemical compositions of the nanoparticles and nanocomposite films were \ndetermined with an electron probe microanalyzer (EPMA, Shimadzu EPMA-1610). The compositions of the \nsamples were calibrated using the ZAF4 program installed with the EPMA-1610.\n\nThe in-plane electrical conductivity was measured at approximately 25 °C by a four-point probe method with \nan accuracy of ± 5%. The in-plane Seebeck coefficient of the nanocomposite films was measured at approximately \n25 °C with an accuracy of ± 7%41. We used two K-type thermocouples of 0.1 mm in diameter, which were pressed \non the center of the film. The distance between the thermocouples was 13 mm. One end of the film was connected \nto a heat sink and the other end to a heater. The Seebeck coefficient was determined as the ratio of the potential \ndifference (ΔV) along the film to the temperature difference. The power factor was estimated from the measured \nelectrical conductivity and Seebeck coefficient with an accuracy of ± 10%.",
+        "operations": [
+          {
+            "op_type": "wash",
+            "sentence": "After the reaction, the nanoparticles \nwere washed with DI water, filtered, and dried under vacuum at 60 °C for 12 h.\n\nFigure 1.",
+            "start_char": 906,
+            "end_char": 912,
+            "materials": [
+              "DI",
+              "water",
+              ", the nanoparticles \nwere"
+            ],
+            "params": {
+              "temp": "60 °C",
+              "time": "12 h"
+            }
+          },
+          {
+            "op_type": "filter",
+            "sentence": "After the reaction, the nanoparticles \nwere washed with DI water, filtered, and dried under vacuum at 60 °C for 12 h.\n\nFigure 1.",
+            "start_char": 928,
+            "end_char": 936,
+            "materials": [
+              "DI",
+              "water",
+              ", the nanoparticles \nwere"
+            ],
+            "params": {
+              "temp": "60 °C",
+              "time": "12 h"
+            }
+          },
+          {
+            "op_type": "dry",
+            "sentence": "After the reaction, the nanoparticles \nwere washed with DI water, filtered, and dried under vacuum at 60 °C for 12 h.\n\nFigure 1.",
+            "start_char": 942,
+            "end_char": 947,
+            "materials": [
+              "DI",
+              "water",
+              ", the nanoparticles \nwere"
+            ],
+            "params": {
+              "temp": "60 °C",
+              "time": "12 h"
+            }
+          },
+          {
+            "op_type": "add",
+            "sentence": "Next, the fabricated nanoparticles (5, \n10, 50, and 100 mg) were added to the SWCNT dispersion solution, followed by mixing using the ultrasonic \nhomogenizer.",
+            "start_char": 1706,
+            "end_char": 1711,
+            "materials": [
+              "the fabricated nanoparticles (5",
+              "SWCNT dispersion solution, followed"
+            ],
+            "params": {
+              "amounts": [
+                "100 mg"
+              ]
+            }
+          },
+          {
+            "op_type": "filter",
+            "sentence": "The nanocomposite films were prepared by a vacuum filtration method.",
+            "start_char": 1850,
+            "end_char": 1860,
+            "materials": [],
+            "params": {}
+          },
+          {
+            "op_type": "filter",
+            "sentence": "A membrane filter (PTFE, \n90 mm diameter: ADVANTEC) was placed in a filter holder in a suction bottle, and the dispersion solution was \nfiltered by reducing the pressure in the suction bottle using a rotary pump.",
+            "start_char": 1880,
+            "end_char": 1886,
+            "materials": [
+              "the dispersion solution was \n"
+            ],
+            "params": {
+              "concs": [
+                "90 mm"
+              ]
+            }
+          },
+          {
+            "op_type": "filter",
+            "sentence": "A membrane filter (PTFE, \n90 mm diameter: ADVANTEC) was placed in a filter holder in a suction bottle, and the dispersion solution was \nfiltered by reducing the pressure in the suction bottle using a rotary pump.",
+            "start_char": 1937,
+            "end_char": 1943,
+            "materials": [
+              "the dispersion solution was \n"
+            ],
+            "params": {
+              "concs": [
+                "90 mm"
+              ]
+            }
+          },
+          {
+            "op_type": "filter",
+            "sentence": "A membrane filter (PTFE, \n90 mm diameter: ADVANTEC) was placed in a filter holder in a suction bottle, and the dispersion solution was \nfiltered by reducing the pressure in the suction bottle using a rotary pump.",
+            "start_char": 2005,
+            "end_char": 2013,
+            "materials": [
+              "the dispersion solution was \n"
+            ],
+            "params": {
+              "concs": [
+                "90 mm"
+              ]
+            }
+          },
+          {
+            "op_type": "filter",
+            "sentence": "The entire volume of the nanoparticle-\ncontaining SWCNT-dispersion solution was poured dropwise onto the filter and aspirated for 1 h to produce \nthe nanocomposite films with a diameter of 80 mm.",
+            "start_char": 2187,
+            "end_char": 2193,
+            "materials": [
+              "SWCNT",
+              "-dispersion solution was poured"
+            ],
+            "params": {
+              "time": "1 h",
+              "concs": [
+                "80 mm"
+              ]
+            }
+          },
+          {
+            "op_type": "dry",
+            "sentence": "After drying for air-drying 24 h, the nanocomposite films \n(thickness = 100 µm) were removed from the membrane filter.",
+            "start_char": 2284,
+            "end_char": 2290,
+            "materials": [],
+            "params": {
+              "time": "24 h",
+              "concs": [
+                "100 µm"
+              ]
+            }
+          },
+          {
+            "op_type": "dry",
+            "sentence": "After drying for air-drying 24 h, the nanocomposite films \n(thickness = 100 µm) were removed from the membrane filter.",
+            "start_char": 2299,
+            "end_char": 2305,
+            "materials": [],
+            "params": {
+              "time": "24 h",
+              "concs": [
+                "100 µm"
+              ]
+            }
+          },
+          {
+            "op_type": "filter",
+            "sentence": "After drying for air-drying 24 h, the nanocomposite films \n(thickness = 100 µm) were removed from the membrane filter.",
+            "start_char": 2389,
+            "end_char": 2395,
+            "materials": [],
+            "params": {
+              "time": "24 h",
+              "concs": [
+                "100 µm"
+              ]
+            }
+          },
+          {
+            "op_type": "heat",
+            "sentence": "One end of the film was connected \nto a heat sink and the other end to a heater.",
+            "start_char": 4446,
+            "end_char": 4450,
+            "materials": [
+              "of the film was connected"
+            ],
+            "params": {}
+          }
+        ],
+        "expanded": [
+          {
+            "op_type": "wash",
+            "steps": [
+              "Perform operation 'wash' as described: After the reaction, the nanoparticles \nwere washed with DI water, filtered, and dried under vacuum at 60 °C for 12 h.\n\nFigure 1."
+            ]
+          },
+          {
+            "op_type": "filter",
+            "steps": [
+              "Perform operation 'filter' as described: After the reaction, the nanoparticles \nwere washed with DI water, filtered, and dried under vacuum at 60 °C for 12 h.\n\nFigure 1."
+            ]
+          },
+          {
+            "op_type": "dry",
+            "steps": [
+              "Perform operation 'dry' as described: After the reaction, the nanoparticles \nwere washed with DI water, filtered, and dried under vacuum at 60 °C for 12 h.\n\nFigure 1."
+            ]
+          },
+          {
+            "op_type": "add",
+            "steps": [
+              "Ensure reaction vessel is present and empty.",
+              "Place a clean stir bar in the vessel.",
+              "Measure 100 mg of the fabricated nanoparticles (5.",
+              "Transfer the fabricated nanoparticles (5 into the vessel."
+            ]
+          },
+          {
+            "op_type": "filter",
+            "steps": [
+              "Perform operation 'filter' as described: The nanocomposite films were prepared by a vacuum filtration method."
+            ]
+          },
+          {
+            "op_type": "filter",
+            "steps": [
+              "Perform operation 'filter' as described: A membrane filter (PTFE, \n90 mm diameter: ADVANTEC) was placed in a filter holder in a suction bottle, and the dispersion solution was \nfiltered by reducing the pressure in the suction bottle using a rotary pump."
+            ]
+          },
+          {
+            "op_type": "filter",
+            "steps": [
+              "Perform operation 'filter' as described: A membrane filter (PTFE, \n90 mm diameter: ADVANTEC) was placed in a filter holder in a suction bottle, and the dispersion solution was \nfiltered by reducing the pressure in the suction bottle using a rotary pump."
+            ]
+          },
+          {
+            "op_type": "filter",
+            "steps": [
+              "Perform operation 'filter' as described: A membrane filter (PTFE, \n90 mm diameter: ADVANTEC) was placed in a filter holder in a suction bottle, and the dispersion solution was \nfiltered by reducing the pressure in the suction bottle using a rotary pump."
+            ]
+          },
+          {
+            "op_type": "filter",
+            "steps": [
+              "Perform operation 'filter' as described: The entire volume of the nanoparticle-\ncontaining SWCNT-dispersion solution was poured dropwise onto the filter and aspirated for 1 h to produce \nthe nanocomposite films with a diameter of 80 mm."
+            ]
+          },
+          {
+            "op_type": "dry",
+            "steps": [
+              "Perform operation 'dry' as described: After drying for air-drying 24 h, the nanocomposite films \n(thickness = 100 µm) were removed from the membrane filter."
+            ]
+          },
+          {
+            "op_type": "dry",
+            "steps": [
+              "Perform operation 'dry' as described: After drying for air-drying 24 h, the nanocomposite films \n(thickness = 100 µm) were removed from the membrane filter."
+            ]
+          },
+          {
+            "op_type": "filter",
+            "steps": [
+              "Perform operation 'filter' as described: After drying for air-drying 24 h, the nanocomposite films \n(thickness = 100 µm) were removed from the membrane filter."
+            ]
+          },
+          {
+            "op_type": "heat",
+            "steps": [
+              "Place the reaction vessel on a hotplate.",
+              "Ramp to the target temperature.",
+              "Maintain the target temperature for the specified time."
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "meta": {
+    "title": "Sb<sub>2</sub>Te<sub>3</sub> nanoparticle-containing single-walled carbon nanotube films coated with Sb<sub>2</sub>Te<sub>3</sub> electrodeposited layers for thermoelectric applications.",
+    "doi": "10.1038/s41598-023-33022-4",
+    "url": "",
+    "pdf_url": "",
+    "year": "2023",
+    "authors": [
+      "Eguchi R",
+      "Hoshino K",
+      "Takashiri M."
+    ]
+  },
+  "raw": "OPEN\n\nSb2Te3 nanoparticle‑containing \nsingle‑walled carbon nanotube \nfilms coated with  Sb2Te3 \nelectrodeposited layers \nfor thermoelectric applications\n\nRikuo Eguchi , Koki Hoshino  & Masayuki Takashiri *\n\nSingle‑walled carbon nanotubes (SWCNTs) are promising thermoelectric materials owing to their \nflexibility and excellent durability when exposed to heat and chemicals. Thus, they are expected \nto be used in power supplies for various sensors. However, their thermoelectric performances are \ninferior to those of inorganic thermoelectric materials. To improve the thermoelectric performance \nwhile maintaining the excellent characteristics of SWCNTs, a novel approach to form inorganic \nthermoelectric layers on the SWCNT bundle surfaces using electrodeposition is proposed. We \nsynthesized  Sb2Te3 nanoparticle‑containing SWCNT films and coated them with electrodeposited \n Sb2Te3 layers. The  Sb2Te3 nanoparticles were synthesized via a spontaneous redox reaction, which \nwere then added to a SWCNT dispersion solution, and films were produced via vacuum filtration. \nAt higher nanoparticle contents in the films, the  Sb2Te3 electrodeposited layers completely covered \nthe SWCNT bundles owing to the increase in the concentration of precursor ions near the SWCNT \nbundle surface, which in turn was the result of melted nanoparticles. The thermoelectric performance \nimproved, and the maximum power factor at approximately 25 °C was 59.5 µW/(m  K2), which was \n4.7 times higher than that of the normal SWCNT film. These findings provide valuable insights for \ndesigning and fabricating high‑performance flexible thermoelectric materials.\n\nThermoelectric generators are promising energy harvesting devices. They produce electrical energy via carrier \ndiffusion in response to heat flux produced by a temperature gradient in thermoelectric materials. The widespread \ndevelopment of Internet of Things (IoT) has facilitated the emergence of the flexible thermoelectric generator \n technology1–4. This is because the IoT technology requires a large number of sensors, and wireless power supplies \nfor the sensors using ambient heat sources are indispensable for the technology. In addition, the flexibility favors \nthe installation of generators in a variety of heat sources, such as human bodies and curved surface  objects5–8.\n\nGenerally, flexible thermoelectric materials include conductive organic  materials9–11, single-walled carbon \nnanotubes (SWCNTs)12–14, and their  composites15–17. Among them, SWCNTs are excellent as power supplies \nfor IoT sensors because they exhibit excellent heat and chemical durability. Although SWCNTs demonstrate \nexcellent characteristics for flexible thermoelectric generators, their thermoelectric performances are inferior \nto those of inorganic chalcogenides such as  Bi2Te3-based  alloys18. The thermoelectric performance is expressed \nby the dimensionless figure-of-merit ZT = σS2T/κ and power factor PF = σS2, where σ, S, T, and κ represent the \nelectrical conductivity, Seebeck coefficient, absolute temperature, and thermal conductivity, respectively.\n\nTo increase the thermoelectric performance, an effective approach is to combine the SWCNTs with inorganic \nthermoelectric materials. Jin et al. used a sputtering technique to fabricate a flexible thermoelectric material \ncomprising highly ordered bismuth telluride  (Bi2Te3) nanocrystals anchored on a single-walled carbon nanotube \nnetwork; this material exhibited a high Seebeck  coefficient19. Wu et al.20 prepared hybrid thin films of p-type \nSWCNTs and antimony telluride  (Sb2Te3) nanoplates, which exhibited high power factors, through the combina-\ntion of vacuum filtration and annealing. In addition to these studies, excellent thermoelectric materials have been \nproposed by combining CNTs with inorganic and organic  compounds21,22. In our previous study, we prepared \n\nDepartment of Materials Science, Tokai University, Hiratsuka, Kanagawa 259-1292, Japan. *email: takashiri@\ntokai-u.jp\n\nScientific Reports |         (2023) 13:5783  \n\n| https://doi.org/10.1038/s41598-023-33022-4\n\n1\n\nVol.:(0123456789)www.nature.com/scientificreports\fa SWCNT dispersion solution in  Bi2Te3 nanoplates using a solvothermal synthesis and produced flexible films \nthrough drop-casting, resulting in an increase in the thermoelectric  performance23–25.\n\nThese pioneering studies motivate us to further increase the thermoelectric performance by combining the \nSWCNTs and inorganic chalcogenides. A favorable approach is to coat the SWCNT bundle surface with an \ninorganic chalcogenide via  electrodeposition26–28. As electrodeposition is a wet process, not only the surface of \nthe SWCNT film but also the inside of film can be electrodeposited by the electrolyte penetrating the gaps in the \nfilm. However, it is challenging to effectively deposit the inorganic layer on the SWCNT bundle  surface29. This \nis because the SWCNT films in the bundle form exhibited low electrical conductivity compared to  metals30–32, \nand several precursor ions in the electrolyte were not attracted to the SWCNT bundle surface. Therefore, it is \nnecessary to explore different methods for performing electrodeposition on the SWCNT bundle  surface33.\n\nIn this study, a novel approach was performed to increase the thermoelectric performance of the flexible \nSWCNT films. We mixed  Sb2Te3 nanoparticles with an SWCNT dispersion solution; subsequently, we prepared \nthe p-type films via the drop-casting method.  Sb2Te3 is a traditional p-type chalcogenide, which exhibits high \nthermoelectric performance near 300  K34–36, and  Sb2Te3 nanoparticles were synthesized via a spontaneous redox \n reaction37. This method uses pitting corrosion, which is caused by the action of chloride ions on the substrate \nsurface, as well as galvanic replacement, which is caused by the difference in the standard reduction potential \nbetween the materials. The p-type  Sb2Te3 layers were formed on the nanocomposite films via the electrodeposi-\ntion  method38. We tuned the quantity of  Sb2Te3 nanoparticles in the SWCNT films to investigate the films with \nhigh thermoelectric performance.\n\nExperimental setup\nFigure 1 shows a schematic of the fabrication process of the SWCNT films containing  Sb2Te3 nanoparticles and \nthe coating of the  Sb2Te3 electrodeposited layers. First, the nanoparticles were synthesized via the spontaneous \nredox reaction using an aluminum substrate (50 mm × 100 mm, 2 mm thick). Prior to nanoparticle synthesis, \nto remove any oxide layers from the aluminum substrate, it was placed in a 1 M NaOH (Fujifilm Wako Pure \nChemical Co.) solution for 5 min, followed by cleaning in deionized (DI) water (i.e., > 18 MΩ). The spontaneous \nredox reaction was conducted between the sacrificial aluminum plate and an electrolyte containing 0.02 M  Sb2O3 \n(Kojundo Chemical Laboratory Co., Ltd.), 0.04 M  TeO2 (Kojundo Chemical Laboratory Co., Ltd.), and 4.0 M \nHCl (Fujifilm Wako Pure Chemical Co.) for 40 min at approximately 25 °C. After the reaction, the nanoparticles \nwere washed with DI water, filtered, and dried under vacuum at 60 °C for 12 h.\n\nFigure 1.   Schematic diagram of the fabrication processes: nanoparticle synthesis, nanocomposite film \npreparation, and electrodeposition.\n\nScientific Reports |         (2023) 13:5783  | \n\nhttps://doi.org/10.1038/s41598-023-33022-4\n\n2\n\nVol:.(1234567890)www.nature.com/scientificreports/\fFor film preparation, SWCNTs synthesized by the super-growth method (SG-CNTs) (ZEONANO SG101, \nZEON Co.) were used as the starting  material39. Powdered SG-CNTs (80 mg) were dispersed in 40 mL of etha-\nnol to prepare an SWCNT dispersion solution with a concentration of 0.25 wt%, and homogenized mixing was \nensured using an ultrasonic homogenizer (SONICS 85, AZONE Co.). Next, the fabricated nanoparticles (5, \n10, 50, and 100 mg) were added to the SWCNT dispersion solution, followed by mixing using the ultrasonic \nhomogenizer. The nanocomposite films were prepared by a vacuum filtration method. A membrane filter (PTFE, \n90 mm diameter: ADVANTEC) was placed in a filter holder in a suction bottle, and the dispersion solution was \nfiltered by reducing the pressure in the suction bottle using a rotary pump. The entire volume of the nanoparticle-\ncontaining SWCNT-dispersion solution was poured dropwise onto the filter and aspirated for 1 h to produce \nthe nanocomposite films with a diameter of 80 mm. After drying for air-drying 24 h, the nanocomposite films \n(thickness = 100 µm) were removed from the membrane filter.\n\nFor electrodeposition,  Sb2Te3 layers were prepared at approximately 25 °C by potentiostatic electrodeposition \nusing a standard three-electrode cell. The electrolytes contained mixtures of 1.88 mM  Sb2O3, 0.63 mM  TeO2, and \n0.58 M HCl diluted with DI water. The working electrode (electrode area: 7.8  cm2) was the nanocomposite film, \nwhich was fixed to a stainless-steel plate using polyimide tape. A platinum-coated titanium mesh on a titanium \nplate was used as the counter electrode (electrode area: 7.8  cm2). A Ag/AgCl (saturated KCl) electrode was used \nas the reference electrode. The electrode voltage was set at − 0.01 V using a potentiostat/galvanostat (HA-151B, \nHokuto Denko) based on our previous  report40, and electrodeposition was performed for 1 h.\n\nThe precise structure of the nanoparticles was analyzed using high-resolution transmission electron micros-\ncopy (HR-TEM, JEOL JEM-ARM200F), selected area electron diffraction (SAED), and energy-dispersive X-ray \nspectroscopy (EDX) elemental mapping. The crystallographic properties of the nanoparticles and films were \nevaluated by X-ray diffraction (XRD; Mini Flex II, Rigaku) using Cu-Kα radiation (λ = 0.154 nm in the 2θ range \nfrom 20° to 70°). The microstructures of the films were analyzed with field emission scanning electron micros-\ncopy (FE-SEM, Hitachi S-4800). The chemical compositions of the nanoparticles and nanocomposite films were \ndetermined with an electron probe microanalyzer (EPMA, Shimadzu EPMA-1610). The compositions of the \nsamples were calibrated using the ZAF4 program installed with the EPMA-1610.\n\nThe in-plane electrical conductivity was measured at approximately 25 °C by a four-point probe method with \nan accuracy of ± 5%. The in-plane Seebeck coefficient of the nanocomposite films was measured at approximately \n25 °C with an accuracy of ± 7%41. We used two K-type thermocouples of 0.1 mm in diameter, which were pressed \non the center of the film. The distance between the thermocouples was 13 mm. One end of the film was connected \nto a heat sink and the other end to a heater. The Seebeck coefficient was determined as the ratio of the potential \ndifference (ΔV) along the film to the temperature difference. The power factor was estimated from the measured \nelectrical conductivity and Seebeck coefficient with an accuracy of ± 10%.\n\nResults and discussion\nSynthesis of the  Sb2Te3 nanoparticles.  The  Sb2Te3 nanoparticles were synthesized via a spontaneous \n+ and \nredox reaction, where an aluminum plate was immersed in a hydrochloric acid solution containing  HTeO2\n SbO+ ions. The difference in the redox potential for  Al3+/Al0 (E0 =  − 1.676 V vs. NHE) is more cathodic than for \n SbO+/Sb0 (E0 =  + 0.212 V vs. NHE) and  HTeO2\n+/Te0 (E0 =  + 0.353 V vs. NHE)42. The galvanic displacement of the \naluminum plate to the  Sb2Te3 nanoparticles can be represented as follows:\n\n3HTeO+\nSb2Te0\n\n2 (cid:31)aq(cid:30) + 2SbO+\n3(s) + 8H2O + 6Al3+\n\n(cid:31)aq(cid:30) + 13H+\n\n(cid:31)aq(cid:30) + 6Al0(s) →\n\n(1)\n\nNote that the direct formation of the  Sb2Te3 intermetallic compound is thermodynamically favorable over \nthe formation of  Sb0 and  Te0 because the Gibbs free energy of  Sb2Te3 formation is negative (i.e. ΔGf\n0 =  − 57.5 kL/\nmol)42. In Fig. 2a, the TEM micrograph shows that irregularly shaped particles with a size less than 100 nm are \nagglomerated. In Fig. 2b, the HR-TEM image of the near-surface of the nanoparticles shows that the nanoparticles \nexhibit a polycrystalline phase with grain boundaries of nanometer-sized single crystals, which corresponds to \nthe SAED pattern in the inset. No lattice fringes are observed on the topmost surface of the particles (area A), \nindicating the formation of an amorphous layer. In Fig. 2c, the XRD pattern of the nanoparticles includes the \npeaks originating from  Sb2Te3 and Te, corresponding to the SAED pattern in the inset of Fig. 2b. The elemental \nmapping and atomic composition of the nanoparticles are shown in Fig. 2d. In the elemental mapping, antimony \nand tellurium are almost uniformly distributed within the particles. The atomic percentages of antimony and \ntellurium are 33.1 and 66.9 at%, respectively. This atomic composition ratio deviates from the stoichiometric \nratio (Sb/Te = 40/60) by approximately 7% towards the Te-rich side because of the presence of a Te crystalline \nphase in addition to the  Sb2Te3 crystalline phase.\n\nFor comparison, we synthesized  Sb2Te3 nanoparticles via a spontaneous redox reaction using nickel and \ncopper plates. The characteristics of the synthesized nanoparticles are provided in Supplementary Information \n(Fig. S1). As a result, the atomic compositions of the nanoparticles from the nickel and copper plates determined \nby EPMA significantly differ from the stoichiometric proportions: Sb/Te = 3.2/96.8 at% for the nickel plate and \nSb/Te = 12.2/87.8 at% for the copper plate. This is because nickel and copper are less prone to pitting corrosion \nby chloride  ions43,44, and thus the galvanic displacement reaction is not active.\n\nFormation of the nanocomposite films with electrodeposition.  Figure 3 shows the SEM images of \nthe nanocomposite films without and with the nanoparticles. The SWCNT films without the nanoparticles are \ncomposed of entangled SWCNT bundles of different diameters (Fig. 3a). At 5 mg nanoparticles, the nanoparti-\ncles are not visible in the analysis area (Fig. 3b). However, at 10 mg, aggregated nanoparticles trapped between \n\nScientific Reports |         (2023) 13:5783  | \n\nhttps://doi.org/10.1038/s41598-023-33022-4\n\n3\n\nVol.:(0123456789)www.nature.com/scientificreports/\fFigure 2.   TEM images of  Sb2Te3 nanoparticles prepared via spontaneous redox reaction. (a) Typical  Sb2Te3 \nnanoparticles, (b) corresponding SAED pattern and HR-TEM image of the nanoparticle in (a), (c) XRD pattern \nof the nanoparticles, and (d) atomic composition and elemental mapping.\n\nFigure 3.   Surface SEM images of SWCNT films with different quantities of nanoparticles and excluding \nelectrodeposition: (a) no nanoparticles, (b) 5 mg, (c) 10 mg, (d) 50 mg, and (e) 100 mg. Surface SEM images \nof SWCNT films with different quantities of nanoparticles and with electrodeposition: (f) no nanoparticles, (g) \n5 mg, (f) 10 mg, (i) 50 mg, and (j) 100 mg.\n\nScientific Reports |         (2023) 13:5783  | \n\nhttps://doi.org/10.1038/s41598-023-33022-4\n\n4\n\nVol:.(1234567890)www.nature.com/scientificreports/\fthe SWCNT bundles are observed (Fig. 3c). Further increasing the nanoparticle content increases the size of the \nnanoparticle aggregates (Fig. 3d,e). Figure 3f–j show the electrodeposition performed on nanocomposite films \nof varying nanoparticle content (0–100 mg, respectively). In Fig. 3f, there are no  Sb2Te3 layers on the bundle \nsurface of the film, even though electrodeposition was performed. Therefore, in the absence of nanoparticles \nwithin the films, it is difficult to form an electrodeposited layer on the films. At 5 mg nanoparticles (Fig. 3g), \ntiny spines appeared on the SWCNT bundle surface. The enlarged image in the inset shows that angular crystals \nsparsely grew on the surface. At 10 mg nanoparticle content, the size and density of the angular crystals increase \n(Fig. 3h). At 50 mg, the crystals further grow and completely cover the SWCNT bundle surface (Fig. 3i), while \nat 100 mg, the crystal shape changes to a fine flower-like structure (Fig. 3j), indicative of dendritic growth. The \nelectrodeposition layers are formed not only on the surface of the SWCNT film, but also on the inside of the film.\nTable 1 shows the atomic compositions of the nanocomposite films with varying nanoparticle content after \nelectrodeposition. Antimony and tellurium are not detected in the film without the nanoparticles. At a nanopar-\nticle content of 5–100 mg, the atomic composition of the nanocomposite films is almost constant at Sb: 24 ± 1 at% \nand Te: 76 ± 1 at%, despite the large differences in crystal size and shape of the films. This is because the atomic \ncomposition of alloy films mainly depends on the applied voltage during  electrodeposition45,46. Therefore, even \nthough the atomic composition of the films deviated from the stoichiometric ratio (Sb: 40 at% and Te: 60 at%), \nan electrodeposition layer was formed on the surface of the SWCNT bundle by adding nanoparticles to the film. \nFurther, the structure of the electrodeposited layer was tuned by changing the nanoparticle content. To evaluate \nthe compositional homogeneity of the films, EDS maps are provided in Supplementary Information (Fig. S2). \nThe EDS maps showed that antimony and tellurium were uniformly deposited on the surface of the SWCNTs and \nthat the SWCNTs were less exposed. In addition, the XRD pattern of the typical nanocomposite film containing \n10 mg of nanoparticles with electrodeposition is provided in Supplementary Information (Fig. S3).\n\nHere, we discuss the mechanism of crystal growth of the electrodeposited layers on the nanoparticle-contain-\ning SWCNT films. In previous reports,  Bi2Te3 crystals were grown on CNT surfaces via the sputtering process \nand solvothermal  synthesis19,24. In addition, thin layers were electrodeposited on a SWCNT surface by tuning the \nsurface condition of the SWCNT  films29. These results suggest that layers of inorganic chalcogenides can grow \non the CNT surface via electrodeposition under appropriate conditions. The key factors of electrodeposition \nare the ion concentration around the SWCNTs and current  density47. The quantity of chemicals used during \nelectrodeposition was the same in all the samples; however, the concentration of the precursor ions around \nthe SWCNTs increases as the nanoparticle content in the film increases because the nanoparticles dissolve \nwhen exposed to dilute HCl. As a result, the current density increases as shown in Supplementary Information \n(Table S1). Therefore, in the case of the SWCNT film without nanoparticles,  Sb2Te3 crystals do not grow because \nthe densities of the Sb and Te nuclei are too low, and the crystals possibly re-melt before the crystal size reaches \nthe critical nucleus  radius48. In the presence of nanoparticles, the ion concentration around the SWCNTs and \ncurrent density passing through the film increase and promote crystal growth. However, when the ion concen-\ntration and current density are too high, dendritic growth  occurs47, as shown in Fig. 3j.\n\nThermoelectric  properties  of  nanocomposite  films.  Figure  4  shows  the  in-plane  thermoelectric \nproperties of the nanocomposite films as a function of nanoparticle content. In Fig. 4a, the electrical conductiv-\nity of the normal SWCNT film (without nanoparticles and no electrodeposition) is 42 S/cm. As the nanoparticle \ncontent  increases,  the  electrical  conductivity  of  the  nanocomposite  film  excluding  electrodeposition  slightly \nincreases, indicating that the nanoparticles fill the gaps between the SWCNT bundles. The electrical conductiv-\nity of the nanocomposite film with 100 mg nanoparticles is 78 S/cm, which is 86% higher than that of the normal \nSWCNT film. The increase in electrical conductivity is due to the nanoparticles between the SWCNT bundles \nserving to increase the current paths. On the other hand, by performing electrodeposition on the films contain-\ning the nanoparticles, the electrical conductivity of the films is significantly affected by the quantity of nanopar-\nticle. At 5 mg nanoparticle content and electrodeposition, the electrical conductivity is 179 S/cm, which is three \ntimes higher than that of the electrodeposited film without nanoparticles. At a higher nanoparticle content, the \nelectrical conductivity further increases. At 100 mg, the electrical conductivity reaches 322 S/cm, which is 5.6 \ntimes higher than that of electrodeposited SWCNT film without nanoparticles. Therefore, the electrical con-\nductivity is significantly increased by the increased thickness of the electrodeposited layer due to the increased \nquantity of nanoparticles.\n\nQuantity of nanoparticle [mg]\n\nSb [at%]\n\nTe [at%]\n\nAtomic composition \nof composite film\n\n0\n\n5\n\n10\n\n50\n\n100\n\nN/A\n\n23.2\n\n24.0\n\n24.3\n\n24.1\n\nN/A\n\n76.8\n\n76.0\n\n75.7\n\n75.9\n\nTable 1.   Atomic composition of SWCNT films with nanoparticles, followed by electrodeposition.\n\nScientific Reports |         (2023) 13:5783  | \n\nhttps://doi.org/10.1038/s41598-023-33022-4\n\n5\n\nVol.:(0123456789)www.nature.com/scientificreports/\fFigure 4.   In-plane thermoelectric properties of SWCNT films with different quantities of nanoparticles and \nwith electrodeposition and excluding electrodeposition. (a) Electrical conductivity, (b) Seebeck coefficient, and \n(c) power factor.\n\nIn Fig. 4b, all films exhibit a p-type property due to the positive Seebeck coefficient. The Seebeck coefficient of \nthe nanocomposite film excluding electrodeposition ranges from 55 to 60 µV/K and is independent of the nano-\nparticle content. On the other hand, by performing electrodeposition on the films containing the nanoparticles, \nthe Seebeck coefficient of the films decreases. At 5 mg nanoparticle content, the electrodeposited film exhibits a \nSeebeck coefficient of 40 µV/K, which approximately remains the same even at higher nanoparticle contents. The \ndecrease in the Seebeck coefficient compared to the normal SWCNT films occurs because the electrodeposited \n Sb2Te3 layer exhibits a low Seebeck coefficient owing to the deviation from the stoichiometric  proportion38. \nSince the deviation from the stoichiometric ratio is constant regardless of the quantity of nanoparticles, the \nSeebeck coefficient is largely constant, while there are differences in the thickness and surface morphology of \nthe electrodeposited layers.\n\nIn Fig. 4c, when the electrodeposition is not performed, the power factor slightly increases as the quantity \nof nanoparticles increases. The power factor of the nanocomposite film with 100 mg nanoparticles is 25.1 µW/\n(m  K2), which is two times higher than that of the normal SWCNT film. On the other hand, when electrodepo-\nsition is performed on films containing the nanoparticles, the power factor of the films greatly increases. In \nparticular, at 100 mg nanoparticles with electrodeposition, the power factor is 59.5 µW/(m  K2), which is 2.4 and \n4.7 times higher than that of the corresponding nanocomposite film with no electrodeposition and the normal \nSWCNT film, respectively. Here, we compared the power factor in this study with that shown in the above-\nmentioned literature, where hybrid thin films of SWCNTs and  Sb2Te3 nanoplates were prepared by vacuum \nfiltration, followed by  annealing20. Although no annealing was performed, the maximum power factor in this \nstudy (59.5 µW/(m  K2)) was comparable to the maximum value in the literature (55 µW/(m  K2)).\n\nTherefore, a significant improvement in the thermoelectric performance of  Sb2Te3 nanoparticle-containing \nflexible SWCNT films subjected to  Sb2Te3 layer electrodeposition is observed. To further improve the perfor-\nmance of the nanocomposite films, the Seebeck coefficient should be increased. A feasible approach is to optimize \nelectrodeposition to form  Sb2Te3 layers of stoichiometric proportion. In this study, the thermal conductivity of the \nnanocomposite films was not measured, and thus we calculated the thermal conductivity of the nanocomposite \nfilms based on the respective thermal conductivities of the SWCNT films,  Sb2Te3 nanoparticles, and  Sb2Te3 elec-\ntrodeposited films. The calculated thermal conductivity is provided in Supplementary Information (Table S2). \nIn the future, the calculated thermal conductivity should be verified by measuring the thermal conductivity of \nthe nanocomposite films, and the thermoelectric properties should be analyzed in more detail.\n\nConclusions\nHerein, the thermoelectric performance of the flexible SWCNT films was improved by containing the  Sb2Te3 \nnanoparticles synthesized via spontaneous redox reaction in the SWCNT films, which was followed by the elec-\ntrodeposition of the  Sb2Te3 layer on the SWCNT bundle surface. When the nanoparticles were not contained in \nthe SWCNT film, the  Sb2Te3 layers were not formed using the electrodeposition. In contrast, the nanoparticles \nwere contained in the SWCNT films, and the  Sb2Te3 crystals were grown on the SWCNT bundle surface, even \nthough the atomic composition of the electrodeposited layer deviated from the stoichiometric proportion. The \ncrystal size and density of the electrodeposited  Sb2Te3 increased with an increase in the quantity nanoparticles. \nFurthermore, increasing the concentration of precursor ions around SWCNTs via nanoparticle melting was \nthe key to crystal growth, thus leading to the increase in the current density. The maximum power factor of the \nSWCNT films with  Sb2Te3 electrodeposition was 59.5 µW/(m  K2), which was 4.7 times higher than that of the \nnormal SWCNT film. The proposed method can be extended to various other chalcogenide-SWCNT materials, \nthus demonstrating considerable potential for fabricating thermoelectric generators using both p- and n-type \nflexible thermoelectric films with excellent performance.\n\nData availability\nThe authors declare that most data supporting the findings of this study are available within the paper and its \nsupplementary information files. The rest of the data generated during and/or analyzed during the current study \nare available from the corresponding author upon reasonable request.\n\nScientific Reports |         (2023) 13:5783  | \n\nhttps://doi.org/10.1038/s41598-023-33022-4\n\n6\n\nVol:.(1234567890)www.nature.com/scientificreports/\fReceived: 7 December 2022; Accepted: 6 April 2023\n\nReferences\n  1.  Du, Y., Xu, J., Paul, B. & Eklund, P. Flexible thermoelectric materials and devices. Appl. Mater. Today 12, 366–388 (2018).\n  2.  Chiba, T., Amma, Y. & Takashiri, M. Heat source free water floating carbon nanotube thermoelectric generators. Sci. Rep 11, 14707 \n\n(2021).\n\n  3.  Wang, Y. et al. Flexible thermoelectric materials and generators: Challenges and Innovations. Adv. Mater. 31, 1807916 (2019).\n  4.  Zhang, L., Shi, X.-L., Yang, Y.-L. & Chen, Z.-G. Flexible thermoelectric materials and devices: From materials to applications. \n\nMater. Today 46, 62–108 (2021).\n\n  5.  Park, H. et al. Energy harvesting using thermoelectricity for IoT (Internet of Things) and E-skin sensors. J. Phys. Energy 1, 042001 \n\n(2019).\n\n  6.  Kobayashi, A., Konagaya, R., Tanaka, S. & Takashiri, M. Optimized structure of tubular thermoelectric generators using n-type \n Bi2Te3 and p-type  Sb2Te3 thin films on flexible substrate for energy harvesting. Sens. Actuators A: Phys. 313, 112199 (2020).\n  7.  Toan, N. V., Tuoi, T. T. K., Hieu, N. V. & Ono, T. Thermoelectric generator with a high integration density for portable and wearable \n\nself-powered electronic devices. Energy Convers. Manag. 245, 114571 (2021).\n\n  8.  Norimasa, O., Chiba, T., Hase, M., Komori, T. & Takashiri, M. Improvement of thermoelectric properties of flexible  Bi2Te3 thin \n\nfilms in bent states during sputtering deposition and post-thermal annealing. J. Alloys Compd. 898, 162889 (2022).\n\n  9.  Chen, Y., Zhao, Y. & Liang, Z. Solution processed organic thermoelectrics: Towards flexible thermoelectric modules. Energy \n\nEnviron. Sci. 8, 401–422 (2015).\n\n 10.  Russ, B., Glaudell, A., Urban, J. J., Chabinyc, M. L. & Segalman, R. A. Organic thermoelectric materials for energy harvesting and \n\ntemperature control. Nat. Rev. Mater. 1, 16050 (2016).\n\n 11.  Seki, Y., Takahashi, M. & Takashiri, M. Effects of different electrolytes and film thicknesses on structural and thermoelectric \n\nproperties of electropolymerized poly(3,4-ethylenedioxythiophene) films. RSC Adv. 9, 15957–15965 (2019).\n\n 12.  Ichinose, Y. et al. Solving the thermoelectric trade-off problem with metallic carbon nanotubes. Nano Lett. 19, 7370–7376 (2019).\n 13.  Seki, Y., Nagata, K. & Takashiri, M. Facile preparation of air-stable n-type thermoelectric single-wall carbon nanotube films with \n\nanionic surfactants. Sci. Rep. 10, 8104 (2020).\n\n 14.  Nonoguchi, Y. et al. Systematic conversion of single walled carbon nanotubes into n-type thermoelectric materials by molecular \n\ndopants. Sci. Rep. 3, 3344 (2013).\n\n 15.  Toshima, N. Recent progress of organic and hybrid thermoelectric materials. Synth. Met. 225, 3–21 (2017).\n 16.  Seki, Y. & Takashiri, M. Freestanding bilayers of drop-cast single-walled carbon nanotubes and electropolymerized poly(3,4-\n\nethylenedioxythiophene) for thermoelectric energy harvesting. Org. Electron. 76, 105478 (2020).\n\n 17.  Deya, A., Bajpaib, O. P., Sikdera, A. K., Chattopadhyayb, S. & Shafeeuulla Khana, M. A. Recent advances in CNT/graphene based \nthermoelectric polymer nanocomposite: A proficient move towards waste energy harvesting. Renew. Sustain. Energy Rev. 53, \n653–671 (2016).\n\n 18.  Scherrer, H. & Scherrer, S. CRC Handbook of thermoelectrics, in: D.M. Rowe (Ed.), CRC Press LLC, pp. 211–238 (1995).\n 19.  Jin, Q. et al. Flexible layer-structured  Bi2Te3 thermoelectric on a carbon nanotube scaffold. Nat. Mater. 18, 62–68 (2019).\n 20.  Wu, B. et al. High-performance flexible thermoelectric devices based on all-inorganic hybrid films for harvesting low-grade heat. \n\nAdv. Funct. Mater. 29, 1900304 (2019).\n\n 21.  Buks, K. et al. Growth mechanisms and related thermoelectric properties of innovative hybrid networks fabricated by direct \n\ndeposition of  Bi2Se3 and  Sb2Te3 on multiwalled carbon nanotubes. Mater. Today Energy 18, 100526 (2020).\n\n 22.  Kumanek, B. et al. Enhancing thermoelectric properties of single-walled carbon nanotubes using halide compounds at room \n\ntemperature and above. Sci. Rep. 11, 8649 (2021).\n\n 23.  Hosokawa, Y. & Takashiri, M. Impact of the amount of single-wall carbon nanotubes (SWCNTs) in single-crystalline  Bi2Te3 \n\nnanoplates/SWCNTs nanocomposite films by drop-casting method. Jpn. J. Appl. Phys. 58, SDDG04 (2019).\n\n 24.  Yabuki, H., Yonezawa, S., Eguchi, R. & Takashiri, M. Flexible thermoelectric films formed using integrated nanocomposites with \n\nsingle-wall carbon nanotubes and  Bi2Te3 nanoplates via solvothermal synthesis. Sci. Rep. 10, 17031 (2020).\n\n 25.  Chiba, T., Yabuki, H. & Takashiri, M. High thermoelectric performance of flexible nanocomposite films based on  Bi2Te3 nanoplates \n\nand carbon nanotubes selected using ultracentrifugation. Sci. Rep. 13, 3010 (2023).\n\n 26.  Matsuoka, K., Okuhata, M. & Takashiri, M. Dual-bath electrodeposition of n-type Bi–Te/Bi–Se multilayer thin films. J. Alloys \n\nCompd. 649, 721–725 (2015).\n\n 27.  Yamamuro, H., Hatsuta, N., Wachi, M., Takei, Y. & Takashiri, M. Combination of electrodeposition and transfer processes for \n\nflexible thin-film thermoelectric generators. Coatings 8, 22 (2018).\n\n 28.  Takashiri, M., Makioka, T. & Yamamuro, H. Promotion of crystal growth in as-grown  Bi2Te3 electrodeposited films without micro-\n\npores using sputtered  Bi2Te3 seed layers deposited on a glass substrate. J. Alloys Compd. 764, 802–808 (2018).\n\n 29.  Shimizu, M., Shimizu, S., Katada, A., Uejima, M. & Arai, S. Electrochemical preparation of free-standing carbon-nanotube/Sn \n\ncomposite paper. Mater. Lett. 220, 182–185 (2018).\n\n 30.  Chung, S.-H., Kim, D. H., Kim, H., Kim, H. & Jeong, S. W. Thermoelectric properties of PEDOT: PSS and acid-treated SWCNT \n\ncomposite films. Mater. Today Commun. 23, 100867 (2020).\n\n 31.  Amma, Y. et al. Ultra-long air-stability of n-type carbon nanotube films with low thermal conductivity and all-carbon thermo-\n\nelectric generators. Sci. Rep. 12, 21603 (2022).\n\n 32.  Hong, C. T. et al. Effective doping by spin-coating and enhanced thermoelectric power factors in SWCNT/P3HT hybrid films. J. \n\nMater. Chem. A 3, 12314–12319 (2015).\n\n 33.  Arai, S. Fabrication of metal/carbon nanotube composites by electrochemical deposition. Electrochem 2, 563–589 (2021).\n 34.  Inamoto, T. & Takashiri, M. Experimental and first-principles study of the electronic transport properties of strained  Bi2Te3 thin \n\nfilms on a flexible substrate. J. Appl. Phys. 120, 125105 (2016).\n\n 35.  Khumtong, T., Sakulkalavek, A. & Sakdanuphab, R. Empirical modelling and optimization of pre-heat temperature and Ar flow rate \nusing response surface methodology for stoichiometric  Sb2Te3 thin films prepared by RF magnetron sputtering. J. Alloys Compd. \n715, 65–72 (2017).\n\n 36.  Sasaki, Y. & Takashiri, M. Effects of Cr interlayer thickness on adhesive, structural, and thermoelectric properties of antimony \n\ntelluride thin films deposited by radio-frequency magnetron sputtering. Thin Solid Films 619, 195–201 (2016).\n\n 37.  Sun, Y., Mayers, B. T. & Xia, Y. Template-engaged replacement reaction: A one-step approach to the large-scale synthesis of metal \n\nnanostructures with hollow interiors. Nano Lett. 2, 481–485 (2002).\n\n 38.  Hatsuta, N., Takemori, D. & Takashiri, M. Effect of thermal annealing on the structural and thermoelectric properties of elec-\n\ntrodeposited antimony telluride thin films. J. Alloys Compd. 685, 147–152 (2016).\n\n 39.  Hata, K. et al. Water-Assisted highly efficient synthesis of impurity-free single-walled carbon nanotubes. Science 306, 1362–1364 \n\n(2004).\n\n 40.  Yamamuro, H. & Takashiri, M. Power generation in slope-type thin-film thermoelectric generators by the simple contact of a heat \n\nsource. Coatings 9, 63 (2019).\n\nScientific Reports |         (2023) 13:5783  | \n\nhttps://doi.org/10.1038/s41598-023-33022-4\n\n7\n\nVol.:(0123456789)www.nature.com/scientificreports/\f 41.  Kudo, S., Tanaka, S., Miyazaki, K., Nishi, Y. & Takashiri, M. Anisotropic analysis of nanocrystalline bismuth telluride thin films \n\ntreated by homogeneous electron beam irradiation. Mater. Trans. 58, 513–519 (2017).\n\n 42.  Jung, H. & Myung, N. V. Electrodeposition of antimony telluride thin films from acidic nitrate-tartrate baths. Electrochim. Acta \n\n56, 5611–5615 (2011).\n\n 43.  Qin, L., Lian, J. & Jiang, Q. Effect of grain size on corrosion behavior of electrodeposited bulk nanocrystalline Ni. Trans. Nonferrous \n\nMet. Soc. China 20, 82–89 (2010).\n\n 44.  Alfantazi, A. M., Ahmed, T. M. & Tromans, D. Corrosion behavior of copper alloys in chloride media. Mater. Des. 30, 2425–2430 \n\n(2009).\n\n 45.  Takahashi, M., Kojima, M. & Sato, S. Electric and thermoelectric properties of electrodeposited bismuth telluride  (Bi2Te3) films. \n\nJ. Appl. Phys. 96, 5582 (2004).\n\n 46.  Miyazaki, Y. & Kajitani, T. Preparation of  Bi2Te3 films by electrodeposition. J. Cryst. Growth 229, 542–546 (2001).\n 47.  Yamaguchi, M., Yamamuro, H. & Takashiri, M. Characteristics of electrodeposited bismuth telluride thin films with different \n\ncrystal growth by adjusting electrolyte temperature and concentration. Curr. Appl Phys. 18, 1513–1522 (2018).\n\n 48.  Chernov, A. A. Modern Crystallography III (Springer-Verlag, 1984).\n\nAcknowledgements\nThe authors wish to thank Zeon Corporation for providing SWCNTs, and J.-Y. Park, T. Chiba, and K. Sato from \nTokai University for providing experimental support.\n\nAuthor contributions\nR.E.: Data curation; formal analysis; investigation; methodology; roles/writing—original draft. K.H.: Investi-\ngation; methodology. M.T.: conceptualization; data curation; project administration; resources; supervision; \nvalidation; roles/writing—original draft; writing—review and editing.\n\nCompeting interests \nThe authors declare no competing interests.\n\nAdditional information\nSupplementary Information The online version contains supplementary material available at https:// doi. org/ \n10. 1038/ s41598- 023- 33022-4.\n\nCorrespondence and requests for materials should be addressed to M.T.\n\nReprints and permissions information is available at www.nature.com/reprints.\n\nPublisher’s note  Springer Nature remains neutral with regard to jurisdictional claims in published maps and \ninstitutional affiliations.\n\nOpen  Access    This  article  is  licensed  under  a  Creative  Commons  Attribution  4.0  International \nLicense, which permits use, sharing, adaptation, distribution and reproduction in any medium or \nformat,  as  long  as  you  give  appropriate  credit  to  the  original  author(s)  and  the  source,  provide  a  link  to  the \nCreative Commons licence, and indicate if changes were made. The images or other third party material in this \narticle are included in the article’s Creative Commons licence, unless indicated otherwise in a credit line to the \nmaterial.  If  material  is  not  included  in  the  article’s  Creative  Commons  licence  and  your  intended  use  is  not \npermitted by statutory regulation or exceeds the permitted use, you will need to obtain permission directly from \nthe copyright holder. To view a copy of this licence, visit http:// creat iveco mmons. org/ licen ses/ by/4. 0/.\n\n© The Author(s) 2023\n\nScientific Reports |         (2023) 13:5783  | \n\nhttps://doi.org/10.1038/s41598-023-33022-4\n\n8\n\nVol:.(1234567890)www.nature.com/scientificreports/\f"
+}

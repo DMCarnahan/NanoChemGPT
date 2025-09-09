@@ -13,12 +13,11 @@ MIN_CHARS_DEFAULT = 40
 
 _DOI_RX = re.compile(r'(10\.\d{4,9}/[-._;()/:A-Z0-9]+)', re.I)
 
-def _norm_doi_any(x: str | None) -> str:
+def _norm_doi_any(x):
     if not x:
-        return ''
-    s = str(x)
-    m = _DOI_RX.search(s)
-    return m.group(1).lower() if m else ''
+        return ""
+    m = _DOI_RX.search(str(x))
+    return m.group(1).lower() if m else ""
 
 
 def _iter_jsonl(path: Path) -> Iterable[Dict]:
@@ -58,37 +57,51 @@ def _author_names(auths) -> List[str]:
     return out
 
 def _pick_meta(rec: Dict) -> Dict:
-    # Prefer rich 'meta' produced by the harvester if present
-    meta = rec.get('meta') if isinstance(rec.get('meta'), dict) else {}
-    # Title
-    title = meta.get('title') or rec.get('title') or rec.get('name') or ''
-    # DOI: extract from any candidate field
-    doi_candidates = [meta.get('doi'), rec.get('doi'), rec.get('paper_id'), rec.get('url'), rec.get('oa_url')]
-    doi = ''
-    for dc in doi_candidates:
-        doi = _norm_doi_any(dc)
-        if doi:
-            break
-    # URL (prefer explicit pdf/url fields from meta, then rec)
-    url = meta.get('pdf_url') or meta.get('url') or rec.get('url') or rec.get('oa_url') or rec.get('pdf_url') or ''
+    # prefer the harvester's rich block
+    meta = rec.get("meta") if isinstance(rec.get("meta"), dict) else {}
+
+    title = meta.get("title") or rec.get("title") or rec.get("name") or ""
+
+    # DOI: extract from multiple candidates
+    doi = _norm_doi_any(
+        meta.get("doi")
+        or rec.get("doi")
+        or rec.get("paper_id")
+        or rec.get("url")
+        or rec.get("oa_url")
+    )
+
+    # URL: prefer explicit PDF/URL, include your 'urls':{'pdf':...}
+    url = (
+        meta.get("pdf_url")
+        or meta.get("url")
+        or (rec.get("urls") or {}).get("pdf")
+        or rec.get("url")
+        or rec.get("oa_url")
+        or rec.get("pdf_url")
+        or ""
+    )
+
     # Year
-    year = meta.get('year') or rec.get('year') or rec.get('publication_year')
+    year = meta.get("year") or rec.get("year") or rec.get("publication_year")
     if not year:
-        for k in ('date', 'published', 'pub_date'):
+        for k in ("date", "published", "pub_date"):
             v = rec.get(k)
             if isinstance(v, str) and len(v) >= 4 and v[:4].isdigit():
                 year = v[:4]
                 break
-    # Authors: prefer list from meta; otherwise try to parse existing 'authors' structures
-    authors = meta.get('authors')
+
+    # Authors: prefer list from meta; fall back to your helper/legacy fields
+    authors = meta.get("authors")
     if not authors:
-        authors = _author_names(rec.get('authors') or rec.get('authorships') or []) or (rec.get('authors') or [])
+        authors = _author_names(rec.get("authors") or rec.get("authorships") or []) or (rec.get("authors") or [])
+
     return {
-        'title': title,
-        'doi': doi,
-        'url': url,
-        'year': str(year or ''),
-        'authors': authors,
+        "title": title,
+        "doi": doi,
+        "url": url,
+        "year": str(year or ""),
+        "authors": authors,
     }
 
 def _normalize_text(s: str | None) -> str:
