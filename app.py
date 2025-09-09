@@ -16,6 +16,12 @@ import threading
 from datetime import datetime
 from pathlib import Path
 from functools import lru_cache
+import os
+import re
+import sys
+import tempfile
+import subprocess
+import threading
 import json
 import difflib as _difflib
 try:
@@ -1073,7 +1079,7 @@ def ask():
 
     # ----------------- Prompting -----------------
     robot_rules = (
-        " - Return a discrete lab protocol with exact quantities on a small scale (e.g., ~0.5–1 mmol of the metal precursor):\n"
+        " - Return a discrete lab protocol with exact quantities on a small scale (e.g., ~0.5–1 mmol of the metal precursor).\n"
         " - Include specific masses (mg) or mmol for reagents; volumes (mL) for liquids.\n"
         " - Specify temperatures (°C), ramp rates (°C/min), and hold times (min/h).\n"
         " - Include workup and purification (quench, washing/centrifugation, drying) with volumes.\n"
@@ -1330,8 +1336,8 @@ def ask():
         "context_present": bool(context_joined),
         "mining_enqueued": enqueued,
     }
-    if isinstance(refs_payload, dict):
-        response_payload.update(refs_payload)
+    if isinstance(refs_payload_s, dict):
+        response_payload.update(refs_payload_s)
     return jsonify(response_payload)
 
 @app.post("/parse")
