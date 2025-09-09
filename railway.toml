@@ -31,6 +31,7 @@ cmds = [
   "pip install -U pip wheel",
   "pip install -r requirements.txt",
   "pip install 'spacy<4'",
+  "pip install -U spacy-lookups-data",
   "python -m spacy download en_core_web_sm"
 ]
 

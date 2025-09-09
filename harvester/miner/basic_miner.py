@@ -102,43 +102,43 @@ class BasicMiner:
         self.rx_conc = re.compile(CONC_RX, re.I)
 
     def _ensure_pipeline_ready(self) -> None:
-        """Guarantee doc.sents exists and try to enable LEMMA; set self._lemma_ok accordingly."""
+        """Guarantee doc.sents works; try lemmatizer, but avoid noisy attribute_ruler."""
         nlp = self.nlp
+        self._lemma_ok = False
 
-        # sentence boundaries
+        # sentence boundaries (for doc.sents)
         if not any(p in nlp.pipe_names for p in ("parser", "senter", "sentencizer")):
             nlp.add_pipe("sentencizer")
 
-        # Try to add a lemmatizer. Prefer lookup/rule if tables are available.
-        try:
-            if "attribute_ruler" not in nlp.pipe_names:
-                nlp.add_pipe("attribute_ruler", first=True)
-        except Exception:
-            pass
-
-        # Try rule mode first, then lookup mode
+        # Try to add a lemmatizer. Skip attribute_ruler to avoid W036.
         added_lemma = False
         if "lemmatizer" not in nlp.pipe_names:
             try:
-                nlp.add_pipe("lemmatizer", config={"mode": "rule"})
+                nlp.add_pipe("lemmatizer", config={"mode": "lookup"})
                 added_lemma = True
             except Exception:
-                try:
-                    nlp.add_pipe("lemmatizer", config={"mode": "lookup"})
-                    added_lemma = True
-                except Exception:
-                    pass
+                added_lemma = False
+
+        # Probe whether lemmas are actually available; if not, drop lemmatizer and use LOWER fallback.
+        try:
+            # lightweight init (safe if nothing needs init)
+            nlp.initialize(lambda: [])
+        except Exception:
+            pass
 
         try:
-            nlp.initialize(lambda: [])
-            self._lemma_ok = True
+            probe = nlp("running tested items")
+            # consider lemma usable if any token has a non-empty lemma distinct from text
+            self._lemma_ok = any(t.lemma_ and t.lemma_.lower() != t.text.lower() for t in probe)
         except Exception:
-            if added_lemma and "lemmatizer" in nlp.pipe_names:
-                try:
-                    nlp.remove_pipe("lemmatizer")
-                except Exception:
-                    pass
             self._lemma_ok = False
+
+        if not self._lemma_ok and added_lemma and "lemmatizer" in nlp.pipe_names:
+            try:
+                nlp.remove_pipe("lemmatizer")
+            except Exception:
+                pass
+
 
     def _lemma_free_patterns(self, patterns):
         """Convert patterns using LEMMA to LOWER so matching works without a lemmatizer."""
