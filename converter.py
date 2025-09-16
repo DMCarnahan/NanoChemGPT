@@ -762,8 +762,7 @@ def _micro_for_op(op: dict, vessels: 'VesselRegistry', hardware: list[dict]) -> 
               {"verb":"place","object":v,"to":"stir_plate"}]
         return m
     if typ == "set_stir_rate":
-        m += [{"verb":"set","device": op.get("stir_plate_id") or "stir_plate",
-            "param":"rpm","value":op.get("rpm")}]
+        m += [{"verb":"set","device":"stir_plate","param":"rpm","value":op.get("rpm")}]
         return m
 
     if typ == "add_solute":
@@ -902,6 +901,7 @@ def _micro_for_op(op: dict, vessels: 'VesselRegistry', hardware: list[dict]) -> 
         ]
         return m
 
+    # If no recognized op type, return empty list
     return m
 
 def expand_ops_to_micro(ops: list[dict], vessels: 'VesselRegistry', hardware: list[dict]) -> list[dict]:
