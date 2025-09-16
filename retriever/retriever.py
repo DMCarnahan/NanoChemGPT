@@ -212,7 +212,11 @@ def _load_tfidf_for(idx: Path, force: bool = False) -> Dict[str, Any]:
 
         # dict format
         if isinstance(obj, dict):
-            X = obj.get("matrix") or obj.get("X") or obj.get("tfidf")
+            X = obj.get("matrix")
+            if X is None:
+                X = obj.get("X")
+            if X is None:
+                X = obj.get("tfidf")
             vectorizer = obj.get("vectorizer") or obj.get("vec")
             # try sidecar vectorizer
             if X is not None and vectorizer is None and vecj.exists():
