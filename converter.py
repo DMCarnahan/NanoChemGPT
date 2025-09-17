@@ -20,38 +20,47 @@ DEVICE_IDS = {
     "vacuum_pump_id": "VP1",
     "sonicator_id": "US1",
 }
-# === Robot-friendly postprocessing: auto-normalize JSON for executors ===
+# === Robot-friendly postprocessing v2 ===
 import re, json as _json
 
-def _rfp_deep_walk(obj, visit):
+def _rfp2_walk(obj, visit):
     if isinstance(obj, dict):
         for k, v in list(obj.items()):
-            obj[k] = _rfp_deep_walk(v, visit)
+            obj[k] = _rfp2_walk(v, visit)
         return visit(obj) or obj
     elif isinstance(obj, list):
         for i, v in enumerate(list(obj)):
-            obj[i] = _rfp_deep_walk(v, visit)
+            obj[i] = _rfp2_walk(v, visit)
         return visit(obj) or obj
-    else:
-        return visit(obj) or obj
+    return visit(obj) or obj
 
-def _rfp_purge_and_seed_vessel_registry(doc):
+def _rfp2_seed_defaults_devices(doc):
+    d = doc.setdefault("defaults", {})
+    d.setdefault("stir_rpm", 700)
+    d.setdefault("centrifuge_rpm", 4000)
+    d.setdefault("centrifuge_minutes", 10)
+    d.setdefault("transfer_rate_slow", "slow")
+    d.setdefault("room_temp_C", 25)
+    dev = doc.setdefault("devices", {})
+    dev.setdefault("stir_plate_id", "SP1")
+    dev.setdefault("hotplate_id", "HP1")
+    dev.setdefault("centrifuge_id", "CF1")
+    dev.setdefault("oven_id", "OV1")
+    dev.setdefault("vortex_id", "VX1")
+
+def _rfp2_seed_vessels(doc):
     reg = doc.setdefault("vessel_registry", {})
-    # Seed canonical vessels (prefer beaker or flask if parser sets one; default to beaker here)
-    if "V1" not in reg or not isinstance(reg["V1"], str) or not reg["V1"].strip():
-        reg["V1"] = "beaker 100 mL"
+    # Prefer round-bottom flask; if upstream uses beakers, mapping below will normalize.
+    reg.setdefault("V1", "round-bottom flask 100 mL")
     reg.setdefault("V2", "15 mL centrifuge tube rack")
     reg.setdefault("V2_tube", "15 mL centrifuge tube")
-    # Remove obvious non-vessel entries (free text with rpm/mL or verbs)
     for k, v in list(reg.items()):
         s = str(v or "").lower()
-        if k not in ("V1","V2","V2_tube") and (
-            "centrifuge" in s or "rpm" in s or re.search(r"\b\d+\s*mL\b", s) or "transfer" in s
-        ):
+        if k not in ("V1","V2","V2_tube") and ("centrifuge" in s or "rpm" in s or re.search(r"\b\d+\s*mL\b", s)):
             del reg[k]
 
-def _rfp_map_location_aliases(doc):
-    dev = doc.setdefault("devices", {})
+def _rfp2_map_aliases(doc):
+    dev = doc.get("devices", {})
     alias_to_id = {
         "stir_plate": dev.get("stir_plate_id","SP1"),
         "stir-plate": dev.get("stir_plate_id","SP1"),
@@ -64,26 +73,29 @@ def _rfp_map_location_aliases(doc):
     }
     def _fix(node):
         if isinstance(node, dict):
-            for key in ("to","from","object","vessel","source_vessel","target_vessel"):
+            # normalize device alias
+            if isinstance(node.get("device"), str) and node["device"] in alias_to_id:
+                node["device"] = alias_to_id[node["device"]]
+            for key in ("to","from","object","vessel","source_vessel","target_vessel","tube"):
                 val = node.get(key)
                 if isinstance(val, str):
                     s = re.sub(r"\s*\([^)]*\)", "", val).strip()
                     sl = s.lower()
-                    if "round-bottom flask 100 ml" in sl or "beaker 100 ml" in sl:
+                    if "round-bottom flask 100 ml" in sl or "beaker 100 ml" in sl or sl == "flask 100 ml":
                         node[key] = "V1"; continue
                     if sl in alias_to_id:
                         node[key] = alias_to_id[sl]; continue
-                    if "centrifuge tubes and centrifuge" in sl:
+                    if s == "V1_tube" or "centrifuge tubes and centrifuge" in sl:
                         node[key] = "V2_tube"; continue
                     node[key] = s
         return None
-    _rfp_deep_walk(doc, _fix)
+    _rfp2_walk(doc, _fix)
 
-def _rfp_dedupe_micro_ops(doc):
+def _rfp2_dedupe_micro_ops(doc):
     def dedupe(lst):
         seen, out = set(), []
         for op in lst:
-            key = _json.dumps({k:op.get(k) for k in ("verb","device","param","value","from","to","object","minutes")}, sort_keys=True)
+            key = _json.dumps({k:op.get(k) for k in ("verb","device","param","value","from","to","object","minutes","tube")}, sort_keys=True)
             if key in seen: continue
             seen.add(key); out.append(op)
         return out
@@ -93,38 +105,42 @@ def _rfp_dedupe_micro_ops(doc):
         if isinstance(st.get("micro_ops"), list):
             st["micro_ops"] = dedupe(st["micro_ops"])
 
-def _rfp_canonicalize_transfer_centrifuge(doc):
+def _rfp2_canonicalize_isolate_and_transfer(doc):
     for st in doc.get("steps", []):
         raw = (st.get("raw","") or "").lower()
-        if st.get("action") == "transfer" and "centrifuge" in raw:
+        act = st.get("action","").lower()
+        if ("centrifuge" in raw) and (act in {"isolate","collect","transfer"}):
+            # Use V1 as source unless explicitly set
             src_v = st.get("vessel") or st.get("source_vessel") or "V1"
             m_rpm = re.search(r"(\d{3,5})\s*rpm", raw)
             rpm = int(m_rpm.group(1)) if m_rpm else doc["defaults"].get("centrifuge_rpm",4000)
-            m_mins = re.search(r"(\d+)\s*(min|minutes)", raw)
-            mins = int(m_mins.group(1)) if m_mins else doc["defaults"].get("centrifuge_minutes",10)
+            m_min = re.search(r"(\d+)\s*(min|minutes)", raw)
+            mins = int(m_min.group(1)) if m_min else doc["defaults"].get("centrifuge_minutes",10)
             st["vessel"] = src_v
-            st["ops"] = [
+            ops = [
                 {"op":"transfer_to_centrifuge_tube","from":src_v,"to":"V2_tube"},
                 {"op":"centrifuge","centrifuge_id":doc["devices"]["centrifuge_id"],"rpm":rpm,"minutes":mins},
                 {"op":"decant_supernatant","tube":"V2_tube"}
             ]
-            # Ethanol wash handling
-            if "wash" in raw and "ethanol" in raw:
+            # Detect wash solvent + repeats (ethanol/acetone)
+            if "wash" in raw and ("ethanol" in raw or "acetone" in raw):
                 m_vol = re.search(r"(\d+)\s*mL", raw)
                 vol = int(m_vol.group(1)) if m_vol else 20
-                st["wash_solvent"] = {"name":"ethanol","volume":vol,"volume_units":"mL"}
-                rep = 2 if "twice" in raw else None
-                m_rep = re.search(r"repeat.*?(\d+)\s*(x|times)", raw)
+                solvent = "acetone" if "acetone" in raw else "ethanol"
+                st["wash_solvent"] = {"name":solvent,"volume":vol,"volume_units":"mL"}
+                rep = 3 if "three" in raw else 2 if "twice" in raw else None
+                m_rep = re.search(r"(?:repeat.*?|\b)(\d+)\s*(?:x|×|times)\b", raw)
                 if m_rep: rep = int(m_rep.group(1))
                 if rep: st["repeats"] = rep
-                st["ops"] += [
-                    {"op":"add_wash_solvent","solvent":"ethanol","tube":"V2_tube","volume":vol,"volume_units":"mL"},
+                ops += [
+                    {"op":"add_wash_solvent","solvent":solvent,"tube":"V2_tube","volume":vol,"volume_units":"mL"},
                     {"op":"resuspend","tube":"V2_tube"},
                     {"op":"centrifuge","centrifuge_id":doc["devices"]["centrifuge_id"],"rpm":rpm,"minutes":mins},
                     {"op":"decant_supernatant","tube":"V2_tube"}
                 ]
+            st["ops"] = ops
 
-def _rfp_first_spin_5000rpm(doc):
+def _rfp2_first_spin_default(doc):
     first = True
     def _fix(node):
         nonlocal first
@@ -137,31 +153,58 @@ def _rfp_first_spin_5000rpm(doc):
                 node.setdefault("rpm", doc["defaults"].get("centrifuge_rpm",4000))
                 node.setdefault("minutes", doc["defaults"].get("centrifuge_minutes",10))
         return None
-    _rfp_deep_walk(doc, _fix)
+    _rfp2_walk(doc, _fix)
 
-def _rfp_unify_heat_wait(doc):
-    # Ensure any heat_hold minutes match the micro wait on same step_index
+def _rfp2_unify_heat_wait(doc):
     steps = doc.get("steps", [])
-    micro = doc.get("micro_plan", [])
-    for idx, st in enumerate(steps):
-        if st.get("action") == "heat_hold" and "minutes" in st:
-            mins = st["minutes"]
-            for m in micro:
-                if m.get("verb") == "wait" and m.get("step_index") == idx:
+    for i, st in enumerate(steps):
+        raw = (st.get("raw","") or "").lower()
+        if st.get("action") in {"heat_hold","stir"} and ("2 h" in raw or "2 hours" in raw or re.search(r"\b120\s*min\b", raw)):
+            st["minutes"] = 120
+        mins = st.get("minutes")
+        if st.get("action") == "heat_hold" and mins:
+            for m in doc.get("micro_plan", []):
+                if m.get("verb") == "wait" and m.get("step_index") == i:
                     m["minutes"] = mins
 
-def _rfp_clean_reagent_names(doc):
+def _rfp2_clean_names(doc):
     def fix(node):
         if isinstance(node, dict):
             for k in ("name","reagent","solvent","object"):
                 if k in node and isinstance(node[k], str):
-                    s = re.sub(r"\s*\([^)]*\)", "", node[k]).strip()
-                    s = s.replace(" under magnetic stirring","").replace(" dropwise","")
+                    s = re.sub(r"\s*\([^)]*\)", "", node[k])
+                    s = s.replace(" under magnetic stirring","").replace(" dropwise","").strip()
                     node[k] = s
         return None
-    _rfp_deep_walk(doc, fix)
+    _rfp2_walk(doc, fix)
 
-def _rfp_clean_vessel_contents(doc):
+def _rfp2_fix_wash_blocks(doc):
+    for st in doc.get("steps", []):
+        raw = (st.get("raw","") or "").lower()
+        if st.get("action") in {"postprocess","wash"} and "wash" in raw:
+            # solvent/repeats set if missing
+            if "wash_solvent" not in st:
+                m_vol = re.search(r"(\d+)\s*mL", raw)
+                vol = int(m_vol.group(1)) if m_vol else 20
+                solvent = "acetone" if "acetone" in raw else "ethanol" if "ethanol" in raw else "ethanol"
+                st["wash_solvent"] = {"name":solvent,"volume":vol,"volume_units":"mL"}
+            if "repeats" not in st:
+                rep = 3 if "three" in raw else 2 if "twice" in raw else None
+                m_rep = re.search(r"(?:repeat.*?|\b)(\d+)\s*(?:x|×|times)\b", raw)
+                if m_rep: rep = int(m_rep.group(1))
+                if rep: st["repeats"] = rep
+            # remove stray transfers from V1 during wash
+            st["ops"] = [op for op in st.get("ops", []) if not (op.get("op")=="transfer_to_centrifuge_tube" and op.get("from")=="V1")]
+            # ensure spin/decant exists
+            if not any(op.get("op")=="centrifuge" for op in st["ops"]):
+                st["ops"] += [
+                    {"op":"add_wash_solvent","solvent":st["wash_solvent"]["name"],"tube":"V2_tube","volume":st["wash_solvent"]["volume"],"volume_units":"mL"},
+                    {"op":"resuspend","tube":"V2_tube"},
+                    {"op":"centrifuge","centrifuge_id":doc["devices"]["centrifuge_id"],"rpm":doc["defaults"]["centrifuge_rpm"],"minutes":doc["defaults"]["centrifuge_minutes"]},
+                    {"op":"decant_supernatant","tube":"V2_tube"}
+                ]
+
+def _rfp2_clean_vessel_contents(doc):
     vc = doc.setdefault("vessel_contents", {})
     for k, v in list(vc.items()):
         if isinstance(v, str):
@@ -170,31 +213,19 @@ def _rfp_clean_vessel_contents(doc):
             vc[k] = s
 
 def robot_normalize(doc: dict) -> dict:
-    # Ensure defaults & devices exist
-    dfl = doc.setdefault("defaults", {})
-    dfl.setdefault("stir_rpm", 700)
-    dfl.setdefault("centrifuge_rpm", 4000)
-    dfl.setdefault("centrifuge_minutes", 10)
-    dfl.setdefault("transfer_rate_slow", "slow")
-    dfl.setdefault("room_temp_C", 25)
-    dev = doc.setdefault("devices", {})
-    dev.setdefault("stir_plate_id", "SP1")
-    dev.setdefault("hotplate_id", "HP1")
-    dev.setdefault("centrifuge_id", "CF1")
-    dev.setdefault("oven_id", "OV1")
-    dev.setdefault("vortex_id", "VX1")
-    # Passes
-    _rfp_purge_and_seed_vessel_registry(doc)
-    _rfp_map_location_aliases(doc)
-    _rfp_dedupe_micro_ops(doc)
-    _rfp_canonicalize_transfer_centrifuge(doc)
-    _rfp_first_spin_5000rpm(doc)
-    _rfp_unify_heat_wait(doc)
-    _rfp_clean_reagent_names(doc)
-    _rfp_clean_vessel_contents(doc)
+    _rfp2_seed_defaults_devices(doc)
+    _rfp2_seed_vessels(doc)
+    _rfp2_map_aliases(doc)
+    _rfp2_dedupe_micro_ops(doc)
+    _rfp2_canonicalize_isolate_and_transfer(doc)
+    _rfp2_first_spin_default(doc)
+    _rfp2_unify_heat_wait(doc)
+    _rfp2_clean_names(doc)
+    _rfp2_fix_wash_blocks(doc)
+    _rfp2_clean_vessel_contents(doc)
     return doc
 
-# Chain external postprocessing if available, else use robot_normalize
+# Chain external postprocessing (if available) and then our normalizer.
 try:
     from app_utils.converter_h import apply_postprocessing as _ext_apply_post
 except Exception:
@@ -205,10 +236,9 @@ def apply_postprocessing(doc: dict) -> dict:
         if _ext_apply_post is not None:
             doc = _ext_apply_post(doc)
     except Exception:
-        # ignore external failure, continue
         pass
     return robot_normalize(doc)
-# === end robot postprocessing ===
+# === end Robot-friendly postprocessing v2 ===
 
 
 FENCE_START_RX = re.compile(r"^\s*```")                    # start of any fenced block
