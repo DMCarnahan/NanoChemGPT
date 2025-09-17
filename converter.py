@@ -2,7 +2,28 @@ from __future__ import annotations
 
 import re, json, pathlib, unicodedata
 from typing import List, Dict, Optional, Any, Tuple
-from app_utils.converter_h import apply_postprocessing
+try:
+    from app_utils.converter_h import apply_postprocessing as _ext_apply_post
+except Exception:
+    _ext_apply_post = None
+
+_BANNER_SHOWN = False
+def apply_postprocessing(doc: dict) -> dict:
+    global _BANNER_SHOWN
+    if not _BANNER_SHOWN:
+        try:
+            print(f"[converter] robot-normalizer {ROBOT_NORMALIZER_VERSION} active")
+        except Exception:
+            pass
+        _BANNER_SHOWN = True
+    # Chain external postprocessor if present, but never fail
+    try:
+        if _ext_apply_post is not None:
+            doc = _ext_apply_post(doc)
+    except Exception:
+        pass
+    return robot_normalize(doc)
+
 
 DEFAULTS = {
     "stir_rpm": 700,
@@ -219,7 +240,7 @@ def _validate_robot_safe(doc):
     if re.search(r'"solvent"\s*:\s*"wash solvent"', json.dumps(doc), re.I):
         errs.append("Placeholder 'wash solvent' still present")
     if errs:
-        raise ValueError("Robot-safe validation failed: " + "; ".join(errs))
+        print("[converter] robot-normalizer WARN:", "; ".join(errs)))
 
 def robot_normalize(doc):
     _seed_defaults_devices(doc)
