@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import re, json, pathlib, unicodedata
 from typing import List, Dict, Optional, Any, Tuple
+from app_utils.converter_h import apply_postprocessing
 
 DEFAULTS = {
     "stir_rpm": 700,
@@ -234,26 +235,6 @@ def robot_normalize(doc):
     _map_aliases(doc); _dedupe_micro_ops(doc)
     _validate_robot_safe(doc)
     return doc
-
-# Chain external postprocessing if present, then enforce our normalizer.
-try:
-    from app_utils.converter_h import apply_postprocessing as _ext_apply_post
-except Exception:
-    _ext_apply_post = None
-
-_banner_shown = False
-def apply_postprocessing(doc: dict) -> dict:
-    global _banner_shown
-    if not _banner_shown:
-        print(f"[converter] robot-normalizer {ROBOT_NORMALIZER_VERSION} active")
-        _banner_shown = True
-    try:
-        if _ext_apply_post is not None:
-            doc = _ext_apply_post(doc)
-    except Exception:
-        # ignore external failures
-        pass
-    return robot_normalize(doc)
 
 FENCE_START_RX = re.compile(r"^\s*```")                    # start of any fenced block
 NON_PROC_HEAD_RX = re.compile(
