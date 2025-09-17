@@ -170,10 +170,13 @@ def _fix_wash_blocks(doc):
             st["wash_solvent"] = {"name": solv, "volume": vol, "volume_units": "mL"}
 
             # Repeats: twice / 3x / 'three times'
-            rep = 2 if "twice" in raw else None
+            rep = None
+            if re.search(r"\btwice\b", raw): rep = 2
+            if re.search(r"\brepeat\s+(?:two\s+more\s+)?times?\b", raw): rep = 2 if rep is None else rep
+            if re.search(r"\brepeat\s+twice\b", raw): rep = 2
+            if re.search(r"\bthree\b", raw): rep = 3 if (rep is None or rep < 3) else rep
             m_rep = re.search(r"(?:repeat.*?|^)\s*(\d+)\s*(?:x|×|times)\b", raw)
-            if "three" in raw: rep = 3
-            if m_rep: rep = int(m_rep.group(1) or rep or 2)
+            if m_rep: rep = int(m_rep.group(1))
             if rep: st["repeats"] = rep
 
             # Parse spin settings from text if present
@@ -198,7 +201,7 @@ def _normalize_calcination(doc):
             st["ops"] = [
                 {"op":"move_to_oven","oven_id":doc["devices"].get("oven_id","OV1"),"tube":"V2_tube"},
                 {"op":"set","device":doc["devices"].get("oven_id","OV1"),"param":"temperature_C","value":500},
-                {"op":"timer","minutes":120}
+                {"op":"wait","minutes":120}
             ]
             st["minutes"] = 120
             st.pop("wash_solvent", None)
@@ -288,12 +291,14 @@ def _normalize_add_transfer_and_dry(doc):
 
         # Drying step: remove any wash; use oven 100C x 12h
         if act in {"postprocess","wash"} and "dry" in raw:
+            t = find_temp_c(st.get("raw","")) or 60.0
+            m = find_minutes(st.get("raw","")) or 720.0
             st["ops"] = [
                 {"op":"move_to_oven","oven_id":doc["devices"]["oven_id"],"tube":"V2_tube"},
-                {"device":doc["devices"]["oven_id"],"op":"set","param":"temperature_C","value":100},
-                {"op":"timer","minutes":720}
+                {"device":doc["devices"]["oven_id"],"op":"set","param":"temperature_C","value":t},
+                {"op":"wait","minutes":m}
             ]
-            st.pop("wash_solvent", None); st.pop("repeats", None); st["minutes"] = 720
+            st.pop("wash_solvent", None); st.pop("repeats", None); st["minutes"] = m
 
 # 4) REPLACE micro-op placeholders (“wash solvent”, “centrifuge tubes”)
 def _fix_micro_placeholders(doc):
@@ -319,7 +324,25 @@ def _fix_micro_placeholders(doc):
             m["to"] = "V2_tube"
 
 # 5) CALL these from robot_normalize 
+
+
+def _prune_redundant_steps(doc):
+    steps = doc.get("steps", [])
+    keep = []
+    for st in steps:
+        act = (st.get("action") or "").lower()
+        ops = st.get("ops") or []
+        if act == "process":
+            only_timing = all((op.get("op") in {"wait","timer"}) for op in ops) if ops else True
+            if only_timing:
+                continue
+        keep.append(st)
+    if len(keep) != len(steps):
+        doc["steps"] = keep
+
+
 def robot_normalize(doc):
+    _prune_redundant_steps(doc)
     _seed_defaults_devices(doc)
     _seed_vessels(doc)
     _map_aliases(doc)
@@ -1139,6 +1162,9 @@ def _micro_for_op(op: dict, vessels: 'VesselRegistry', hardware: list[dict]) -> 
         ]
         return m
     if typ == "wait":
+        m += [{"verb":"wait","minutes": op.get("minutes")}]
+        return m
+    if typ == "timer":
         m += [{"verb":"wait","minutes": op.get("minutes")}]
         return m
     if typ == "filter":
