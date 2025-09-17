@@ -2,7 +2,11 @@ from __future__ import annotations
 
 import re, json, pathlib, unicodedata
 from typing import List, Dict, Optional, Any, Tuple
-from app_utils.converter_h import apply_postprocessing
+try:
+    from app_utils.converter_h import apply_postprocessing as _ext_apply_post
+except Exception:
+    _ext_apply_post = None
+# (apply_postprocessing will be defined/overridden below)
 
 DEFAULTS = {
     "stir_rpm": 700,
@@ -20,6 +24,160 @@ DEVICE_IDS = {
     "vacuum_pump_id": "VP1",
     "sonicator_id": "US1",
 }
+# --- Begin: Built-in robot-friendly postprocessing ---
+
+def _deep_walk(obj, visit):
+    if isinstance(obj, dict):
+        for k, v in list(obj.items()):
+            obj[k] = _deep_walk(v, visit)
+        return visit(obj) or obj
+    elif isinstance(obj, list):
+        for i, v in enumerate(list(obj)):
+            obj[i] = _deep_walk(v, visit)
+        return visit(obj) or obj
+    else:
+        return visit(obj) or obj
+
+def _canonical_device_name(name: str) -> str:
+    if not isinstance(name, str): 
+        return name
+    s = name.strip().lower()
+    if s in {"stir","stirrer","stir_plate","stir-plate","stir_plate_id","magnetic_stirrer"}:
+        return DEVICE_IDS.get("stir_plate_id","SP1")
+    if s in {"hotplate","hot_plate","heater","hp","hotplate_id"}:
+        return DEVICE_IDS.get("hotplate_id","HP1")
+    if s in {"centrifuge","centrifuge_id","cf"}:
+        return DEVICE_IDS.get("centrifuge_id","CF1")
+    if s in {"oven","oven_id","dry_oven"}:
+        return DEVICE_IDS.get("oven_id","OV1")
+    if s in {"vortex","vortex_mixer","vortexer","vortex_id"}:
+        return DEVICE_IDS.get("vortex_id","VX1")
+    return name
+
+def _ensure_devices(doc: dict) -> None:
+    dev = doc.setdefault("devices", {})
+    dev.setdefault("stir_plate_id", "SP1")
+    dev.setdefault("hotplate_id", "HP1")
+    dev.setdefault("centrifuge_id", "CF1")
+    dev.setdefault("oven_id", "OV1")
+    dev.setdefault("vortex_id", "VX1")
+
+def _ensure_vessels(doc: dict) -> None:
+    reg = doc.setdefault("vessel_registry", {})
+    if "V1" not in reg or "flask" not in str(reg.get("V1","" )).lower():
+        reg["V1"] = "round-bottom flask 100 mL"
+    reg.setdefault("V2", "15 mL centrifuge tube rack")
+    reg.setdefault("V2_tube", "15 mL centrifuge tube")
+    def _fix_tube_refs(node):
+        if isinstance(node, dict):
+            for key in ("tube","from","to","object","vessel","source_vessel","target_vessel"):
+                if key in node and isinstance(node[key], str) and node[key] == "V1_tube":
+                    node[key] = "V2_tube"
+        return None
+    _deep_walk(doc, _fix_tube_refs)
+
+def _clean_hardware_and_objects(doc: dict) -> None:
+    if "hardware" in doc and isinstance(doc["hardware"], list):
+        for h in doc["hardware"]:
+            if isinstance(h, dict) and isinstance(h.get("name"), str):
+                nm = h["name"]
+                nm = re.sub(r"\s*\([^)]*\)", "", nm).strip()
+                if re.search(r"\bflask\b", nm, re.I) and "100" in nm:
+                    h["name"] = "Round-bottom flask 100 mL"
+                else:
+                    h["name"] = nm
+    def _fix_object_names(node):
+        if isinstance(node, dict):
+            if "object" in node and isinstance(node["object"], str):
+                s = re.sub(r"\s*\([^)]*\)", "", node["object"]).strip()
+                if re.search(r"\bflask\b", s, re.I) and "100" in s:
+                    node["object"] = "Round-bottom flask 100 mL"
+                else:
+                    node["object"] = s
+        return None
+    _deep_walk(doc, _fix_object_names)
+
+def _map_devices_everywhere(doc: dict) -> None:
+    _ensure_devices(doc)
+    def _fix(node):
+        if isinstance(node, dict) and "device" in node:
+            node["device"] = _canonical_device_name(node["device"])
+        return None
+    _deep_walk(doc, _fix)
+
+def _set_centrifuge_rpms(doc: dict) -> None:
+    first_seen = False
+    def _fix(node):
+        nonlocal first_seen
+        if isinstance(node, dict) and node.get("op") == "centrifuge":
+            if not first_seen:
+                node["rpm"] = int(node.get("rpm") or 5000)
+                node["minutes"] = int(node.get("minutes") or doc.get("defaults",{}).get("centrifuge_minutes",10))
+                first_seen = True
+            else:
+                node["rpm"] = int(node.get("rpm") or 4000)
+                node["minutes"] = int(node.get("minutes") or doc.get("defaults",{}).get("centrifuge_minutes",10))
+        return None
+    _deep_walk(doc, _fix)
+
+def _fix_wash_blocks(doc: dict) -> None:
+    for step in doc.get("steps", []):
+        raw = step.get("raw","") or ""
+        if step.get("action","" ).lower() == "wash" or "add_wash_solvent" in json.dumps(step.get("ops",[])):
+            if re.search(r"\bethanol\b", raw, re.I):
+                step["wash_solvent"] = {"name":"ethanol","volume":20,"volume_units":"mL"}
+            m = re.search(r"(\d+)\s*[x×]\b", raw, re.I)
+            if m:
+                step["repeats"] = int(m.group(1))
+            for op in step.get("ops", []):
+                if isinstance(op, dict) and op.get("op") == "centrifuge":
+                    op.setdefault("rpm", 4000)
+                    op.setdefault("minutes", doc.get("defaults",{}).get("centrifuge_minutes",10))
+
+def _unify_heat_wait(doc: dict) -> None:
+    steps = doc.get("steps", [])
+    micro = doc.get("micro_plan", [])
+    for idx, st in enumerate(steps):
+        if st.get("action") == "heat_hold" and "minutes" in st:
+            mins = st["minutes"]
+            for m in micro:
+                if m.get("step_index") == idx and m.get("verb") == "wait":
+                    m["minutes"] = mins
+
+def _clean_vessel_contents(doc: dict) -> None:
+    vc = doc.get("vessel_contents", {})
+    for k, v in list(vc.items()):
+        if isinstance(v, str):
+            s = re.sub(r"\bNone\b", "", v, flags=re.I)
+            s = re.sub(r"\s{2,}", " ", s).strip(" ,;")
+            vc[k] = s
+
+def robot_normalize(doc: dict) -> dict:
+    doc.setdefault("defaults", {}).setdefault("stir_rpm", 700)
+    doc["defaults"].setdefault("centrifuge_rpm", 4000)
+    doc["defaults"].setdefault("centrifuge_minutes", 10)
+    doc["defaults"].setdefault("transfer_rate_slow", "slow")
+    doc["defaults"].setdefault("room_temp_C", 25)
+    _ensure_devices(doc)
+    _ensure_vessels(doc)
+    _clean_hardware_and_objects(doc)
+    _map_devices_everywhere(doc)
+    _set_centrifuge_rpms(doc)
+    _fix_wash_blocks(doc)
+    _unify_heat_wait(doc)
+    _clean_vessel_contents(doc)
+    return doc
+
+def apply_postprocessing(doc: dict) -> dict:
+    # Chain external postprocessing (if any) and our robot normalizer.
+    if _ext_apply_post is not None:
+        try:
+            doc = _ext_apply_post(doc)
+        except Exception:
+            pass
+    return robot_normalize(doc)
+# --- End: Built-in robot-friendly postprocessing ---
+
 
 FENCE_START_RX = re.compile(r"^\s*```")                    # start of any fenced block
 NON_PROC_HEAD_RX = re.compile(
