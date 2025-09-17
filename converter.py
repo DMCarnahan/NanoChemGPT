@@ -230,6 +230,119 @@ def _fix_wash_repeats_and_rpm(doc: dict) -> None:
                     if isinstance(m, dict) and m.get("device") == doc["devices"]["centrifuge_id"] and m.get("param") == "rpm":
                         m["value"] = 5000
 
+import re, json
+
+def _purge_and_seed_vessel_registry(doc: dict) -> None:
+    reg = doc.setdefault("vessel_registry", {})
+    # canonical seeds
+    reg["V1"] = "round-bottom flask 100 mL"
+    reg.setdefault("V2", "15 mL centrifuge tube rack")
+    reg.setdefault("V2_tube", "15 mL centrifuge tube")
+    # normalize obviously wrong entries (free text or reagent phrases)
+    for k, v in list(reg.items()):
+        s = str(v or "").lower()
+        if re.search(r"\b\d+\s*mL\b", s) or "centrifuge" in s or "rpm" in s:
+            # this is not a vessel name; delete and let uses be remapped downstream
+            if k not in ("V1","V2","V2_tube"):
+                del reg[k]
+
+def _map_location_aliases(doc: dict) -> None:
+    dev = doc.setdefault("devices", {})
+    alias_to_id = {
+        "stir_plate": dev.get("stir_plate_id","SP1"),
+        "stir-plate": dev.get("stir_plate_id","SP1"),
+        "stirrer": dev.get("stir_plate_id","SP1"),
+        "centrifuge": dev.get("centrifuge_id","CF1"),
+        "vortex": dev.get("vortex_id","VX1"),
+        "vortexer": dev.get("vortex_id","VX1"),
+        "oven": dev.get("oven_id","OV1"),
+        "tube": "V2_tube",
+    }
+    def _fix(node):
+        if isinstance(node, dict):
+            for key in ("to","from","object","vessel","source_vessel","target_vessel"):
+                val = node.get(key)
+                if isinstance(val, str):
+                    s = re.sub(r"\s*\([^)]*\)", "", val).strip()
+                    sl = s.lower()
+                    # long flask labels → V1
+                    if "flask 100 ml" in sl or "round-bottom flask 100 ml" in sl:
+                        node[key] = "V1"; continue
+                    # aliases
+                    if sl in alias_to_id:
+                        node[key] = alias_to_id[sl]; continue
+                    # free-text centrifuge target → V2_tube
+                    if "centrifuge tubes and centrifuge" in sl:
+                        node[key] = "V2_tube"
+        return None
+    _deep_walk(doc, _fix)
+
+def _dedupe_micro_ops(doc: dict) -> None:
+    def dedupe(lst):
+        seen, out = set(), []
+        for op in lst:
+            key = json.dumps({k:op.get(k) for k in ("verb","device","param","value","from","to","object")}, sort_keys=True)
+            if key in seen: continue
+            seen.add(key); out.append(op)
+        return out
+    if isinstance(doc.get("micro_plan"), list):
+        doc["micro_plan"] = dedupe(doc["micro_plan"])
+    for st in doc.get("steps", []):
+        if isinstance(st.get("micro_ops"), list):
+            st["micro_ops"] = dedupe(st["micro_ops"])
+
+def _canonicalize_transfer_centrifuge(doc: dict) -> None:
+    for st in doc.get("steps", []):
+        raw = (st.get("raw","") or "").lower()
+        if st.get("action") == "transfer" and "centrifuge" in raw:
+            src_v = st.get("vessel") or st.get("source_vessel") or "V1"
+            rpm = int(re.search(r"(\d{3,5})\s*rpm", raw).group(1)) if re.search(r"(\d{3,5})\s*rpm", raw) else doc["defaults"].get("centrifuge_rpm",4000)
+            mins = int(re.search(r"(\d+)\s*(min|minutes)", raw).group(1)) if re.search(r"(\d+)\s*(min|minutes)", raw) else doc["defaults"].get("centrifuge_minutes",10)
+            ops = [
+                {"op":"transfer_to_centrifuge_tube","from":src_v,"to":"V2_tube"},
+                {"op":"centrifuge","centrifuge_id":doc["devices"]["centrifuge_id"],"rpm":rpm,"minutes":mins},
+                {"op":"decant_supernatant","tube":"V2_tube"},
+            ]
+            # ethanol wash
+            if "wash" in raw and "ethanol" in raw:
+                vol = int(re.search(r"(\d+)\s*mL\s*of\s*ethanol", raw).group(1)) if re.search(r"(\d+)\s*mL\s*of\s*ethanol", raw) else 50
+                ops += [
+                    {"op":"add_wash_solvent","solvent":"ethanol","tube":"V2_tube","volume":vol,"volume_units":"mL"},
+                    {"op":"resuspend","tube":"V2_tube"},
+                    {"op":"centrifuge","centrifuge_id":doc["devices"]["centrifuge_id"],"rpm":rpm,"minutes":mins},
+                    {"op":"decant_supernatant","tube":"V2_tube"},
+                ]
+                st["wash_solvent"] = {"name":"ethanol","volume":vol,"volume_units":"mL"}
+                rep = 3 if "three" in raw else None
+                m_rep = re.search(r"repeat.*?(\d+)\s*(x|times)", raw)
+                if m_rep: rep = int(m_rep.group(1))
+                if rep: st["repeats"] = rep
+            st["ops"] = ops
+            st["vessel"] = src_v
+
+def _first_spin_5000rpm(doc: dict) -> None:
+    first = True
+    def _fix(node):
+        nonlocal first
+        if isinstance(node, dict) and node.get("op") == "centrifuge":
+            if first:
+                node.setdefault("rpm", 5000)
+                node.setdefault("minutes", 10)
+                first = False
+            else:
+                node.setdefault("rpm", doc["defaults"].get("centrifuge_rpm",4000))
+                node.setdefault("minutes", doc["defaults"].get("centrifuge_minutes",10))
+        return None
+    _deep_walk(doc, _fix)
+
+def _clean_vessel_contents(doc: dict) -> None:
+    vc = doc.setdefault("vessel_contents", {})
+    for k,v in list(vc.items()):
+        if isinstance(v, str):
+            s = re.sub(r"\bNone\b", "", v, flags=re.I)
+            s = re.sub(r"\s{2,}", " ", s).strip(" ,;")
+            vc[k] = s
+
 def robot_normalize(doc: dict) -> dict:
     doc.setdefault("defaults", {}).setdefault("stir_rpm", 700)
     doc["defaults"].setdefault("centrifuge_rpm", 4000)
@@ -248,10 +361,16 @@ def robot_normalize(doc: dict) -> dict:
     _split_water_hcl_and_add_heat(doc)
     _ensure_initial_5000rpm_spin(doc)
     _fix_wash_repeats_and_rpm(doc)
+    _purge_and_seed_vessel_registry(doc)
+    _map_location_aliases(doc)
+    _dedupe_micro_ops(doc)
+    _canonicalize_transfer_centrifuge(doc)
+    _first_spin_5000rpm(doc)
+    _clean_vessel_contents(doc)
     return doc
 
 def apply_postprocessing(doc: dict) -> dict:
-    # Chain external postprocessing (if any) and our robot normalizer.
+    # Chain external postprocessing (if any) and robot normalizer.
     if _ext_apply_post is not None:
         try:
             doc = _ext_apply_post(doc)
