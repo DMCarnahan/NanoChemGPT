@@ -240,7 +240,7 @@ def _validate_robot_safe(doc):
     if re.search(r'"solvent"\s*:\s*"wash solvent"', json.dumps(doc), re.I):
         errs.append("Placeholder 'wash solvent' still present")
     if errs:
-        print("[converter] robot-normalizer WARN:", "; ".join(errs)))
+        print("[converter] robot-normalizer WARN:", "; ".join(errs))
 
 def robot_normalize(doc):
     _seed_defaults_devices(doc)
