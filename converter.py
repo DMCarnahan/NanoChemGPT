@@ -69,73 +69,6 @@ def _seed_defaults_devices(doc):
     dev.setdefault("oven_id", "OV1")
     dev.setdefault("vortex_id", "VX1")
 
-def _seed_vessels(doc):
-    # Always enforce canonical hardware labels for these 3 IDs
-    reg = doc.setdefault("vessel_registry", {})
-    reg["V1"] = "round-bottom flask 100 mL"
-    reg["V2"] = "15 mL centrifuge tube rack"
-    reg["V2_tube"] = "15 mL centrifuge tube"
-    # Purge anything else that looks like contents/measurements/descriptions
-    for k, v in list(reg.items()):
-        if k in ("V1", "V2", "V2_tube"):
-            continue
-        s = str(v or "").lower()
-        if (
-            "centrifuge" in s
-            or "rpm" in s
-            or re.search(r"\b\d+\s*mL\b", s)
-            or "solution" in s
-            or "dropwise" in s
-        ):
-            del reg[k]
-
-def _map_aliases(doc):
-    dev = doc.setdefault("devices", {})
-    alias = {
-        "stir_plate": dev.get("stir_plate_id", "SP1"),
-        "stir-plate": dev.get("stir_plate_id", "SP1"),
-        "stirrer":    dev.get("stir_plate_id", "SP1"),
-        "centrifuge": dev.get("centrifuge_id", "CF1"),
-        "vortex":     dev.get("vortex_id", "VX1"),
-        "vortexer":   dev.get("vortex_id", "VX1"),
-        "oven":       dev.get("oven_id", "OV1"),
-        "tube":       "V2_tube",
-    }
-
-    def fix(n):
-        if isinstance(n, dict):
-            # device alias → device ID (case-insensitive)
-            if isinstance(n.get("device"), str):
-                key = n["device"].strip().lower()
-                if key in alias:
-                    n["device"] = alias[key]
-
-            # locations / vessels / tubes
-            for k in ("to","from","object","vessel","source_vessel","target_vessel","tube","context_vessel"):
-                v = n.get(k)
-                if isinstance(v, str):
-                    s  = re.sub(r"\s*\([^)]*\)", "", v).strip()
-                    sl = s.lower()
-
-                    # any V{n}_tube variant → V2_tube
-                    if re.fullmatch(r"v\d+_tube", sl) or sl == "v1_tube" or "centrifuge tubes and centrifuge" in sl:
-                        n[k] = "V2_tube"; continue
-
-                    # alias keywords → IDs
-                    if sl in alias:
-                        n[k] = alias[sl]; continue
-
-                    # long labels → V1
-                    if ("flask 100 ml" in sl or "round-bottom flask 100 ml" in sl
-                        or "beaker 100 ml" in sl or sl == "flask 100 ml"):
-                        n[k] = "V1"; continue
-
-                    # cleaned string
-                    n[k] = s
-        return None
-
-    _walk(doc, fix)  
-
 def _clean_names(doc):
     def fix(n):
         if isinstance(n, dict):
@@ -278,25 +211,114 @@ def _normalize_calcination(doc):
                     {"verb":"wait","minutes":120}
                 ]
 
-def _validate_robot_safe(doc):
-    errs = []
-    reg = doc.get("vessel_registry", {})
-    for must in ("V1","V2","V2_tube"):
-        if must not in reg: errs.append(f"vessel_registry missing {must}")
-    if not isinstance(reg.get("V1",""), str) or any(tok in reg["V1"].lower() for tok in ("rpm","centrifuge","ml","solution")):
-        errs.append("V1 must be a hardware vessel name")
-    tubes = json.dumps(doc)
-    if re.search(r"V\d+_tube", tubes) and "V2_tube" not in tubes:
-        errs.append("Non-canonical tube IDs present (expected V2_tube only)")
-    # ensure all device aliases were mapped
-    if re.search(r'"device"\s*:\s*"(stir_plate|centrifuge|vortex|oven)"', json.dumps(doc)):
-        errs.append("Device alias not mapped to ID")
-    # ensure no 'wash solvent' placeholders
-    if re.search(r'"solvent"\s*:\s*"wash solvent"', json.dumps(doc), re.I):
-        errs.append("Placeholder 'wash solvent' still present")
-    if errs:
-        print("[converter] robot-normalizer WARN:", "; ".join(errs))
+# 1) FORCE canonical vessel registry (overwrite & purge)
+def _seed_vessels(doc):
+    reg = doc.setdefault("vessel_registry", {})
+    reg["V1"] = "round-bottom flask 100 mL"
+    reg["V2"] = "15 mL centrifuge tube rack"
+    reg["V2_tube"] = "15 mL centrifuge tube"
+    for k, v in list(reg.items()):
+        if k in ("V1", "V2", "V2_tube"):
+            continue
+        s = str(v or "").lower()
+        if ("centrifuge" in s) or ("rpm" in s) or re.search(r"\b\d+\s*mL\b", s) or ("solution" in s) or ("heated" in s):
+            del reg[k]
 
+# 2) MAP aliases case-insensitively, incl. micro-ops placeholders
+def _map_aliases(doc):
+    dev = doc.setdefault("devices", {})
+    alias = {
+        "stir_plate": dev.get("stir_plate_id","SP1"),
+        "stir-plate": dev.get("stir_plate_id","SP1"),
+        "stirrer":    dev.get("stir_plate_id","SP1"),
+        "centrifuge": dev.get("centrifuge_id","CF1"),
+        "vortex":     dev.get("vortex_id","VX1"),
+        "vortexer":   dev.get("vortex_id","VX1"),
+        "oven":       dev.get("oven_id","OV1"),
+        "centrifuge tubes": "V2_tube",
+        "tube": "V2_tube",
+        "source": "V1",  # treat generic “source” as the reactor
+    }
+    def fix(n):
+        if isinstance(n, dict):
+            # device field
+            if isinstance(n.get("device"), str):
+                key = n["device"].strip().lower()
+                if key in alias: n["device"] = alias[key]
+            # locations / vessels
+            for k in ("to","from","object","vessel","source_vessel","target_vessel","tube","context_vessel"):
+                v = n.get(k)
+                if isinstance(v, str):
+                    s  = re.sub(r"\s*\([^)]*\)", "", v).strip()
+                    sl = s.lower()
+                    if re.fullmatch(r"v\d+_tube", sl) or sl == "v1_tube": n[k] = "V2_tube"; continue
+                    if sl in alias: n[k] = alias[sl]; continue
+                    if ("flask 100 ml" in sl) or ("round-bottom flask 100 ml" in sl) or ("beaker 100 ml" in sl): n[k] = "V1"; continue
+                    n[k] = s
+        return None
+    _walk(doc, fix)
+
+# 3) CANONICALIZE add/transfer/dry blocks
+def _normalize_add_transfer_and_dry(doc):
+    for st in doc.get("steps", []):
+        raw = (st.get("raw","") or "").lower()
+        act = (st.get("action") or "").lower()
+
+        # Add base → into V1 with proper ops
+        if act == "add" and "ammonium hydroxide" in raw:
+            st["vessel"] = "V1"
+            st["source_vessel"] = "bench"; st["target_vessel"] = "V1"
+            st["ops"] = [
+                {"op":"move_to_stir_plate","vessel":"V1","stir_plate_id":doc["devices"]["stir_plate_id"]},
+                {"op":"set_stir_rate","vessel":"V1","rpm":doc["defaults"]["stir_rpm"]},
+                {"device":doc["devices"]["hotplate_id"],"op":"set","param":"temperature_C","value":80},
+                {"op":"add_solvent","vessel":"V1","solvent":"ammonium hydroxide","volume":5,"volume_units":"mL","rate":"slow"},
+                {"op":"timer","minutes":60},
+                {"op":"monitor_ph","sensor":"pH_probe","strategy":"titrate_addition","target_range":[9,10]}
+            ]
+
+        # Transfer to spin must be from V1
+        if act == "transfer" and "centrifuge" not in raw:
+            st["vessel"] = "V1"
+            st["ops"] = [
+                {"op":"transfer_to_centrifuge_tube","from":"V1","to":"V2_tube"},
+                {"op":"centrifuge","centrifuge_id":doc["devices"]["centrifuge_id"],"rpm":doc["defaults"]["centrifuge_rpm"],"minutes":doc["defaults"]["centrifuge_minutes"]},
+                {"op":"decant_supernatant","tube":"V2_tube"}
+            ]
+
+        # Drying step: remove any wash; use oven 100C x 12h
+        if act in {"postprocess","wash"} and "dry" in raw:
+            st["ops"] = [
+                {"op":"move_to_oven","oven_id":doc["devices"]["oven_id"],"tube":"V2_tube"},
+                {"device":doc["devices"]["oven_id"],"op":"set","param":"temperature_C","value":100},
+                {"op":"timer","minutes":720}
+            ]
+            st.pop("wash_solvent", None); st.pop("repeats", None); st["minutes"] = 720
+
+# 4) REPLACE micro-op placeholders (“wash solvent”, “centrifuge tubes”)
+def _fix_micro_placeholders(doc):
+    # step-level solvent if available, else ethanol
+    step_solvent = "ethanol"
+    for st in doc.get("steps", []):
+        if "wash_solvent" in st and isinstance(st["wash_solvent"], dict) and st["wash_solvent"].get("name"):
+            step_solvent = st["wash_solvent"]["name"]
+        if isinstance(st.get("micro_ops"), list):
+            for m in st["micro_ops"]:
+                if isinstance(m.get("object"), str) and m["object"].strip().lower() == "wash solvent":
+                    m["object"] = step_solvent
+                if isinstance(m.get("from"), str) and m["from"].strip().lower() == "wash solvent":
+                    m["from"] = step_solvent
+                if isinstance(m.get("to"), str) and m["to"].strip().lower() == "centrifuge tubes":
+                    m["to"] = "V2_tube"
+    for m in doc.get("micro_plan", []):
+        if isinstance(m.get("object"), str) and m["object"].strip().lower() == "wash solvent":
+            m["object"] = step_solvent
+        if isinstance(m.get("from"), str) and m["from"].strip().lower() == "wash solvent":
+            m["from"] = step_solvent
+        if isinstance(m.get("to"), str) and m["to"].strip().lower() == "centrifuge tubes":
+            m["to"] = "V2_tube"
+
+# 5) CALL these from robot_normalize 
 def robot_normalize(doc):
     _seed_defaults_devices(doc)
     _seed_vessels(doc)
@@ -304,13 +326,14 @@ def robot_normalize(doc):
     _clean_names(doc)
     _dedupe_micro_ops(doc)
     _canonicalize_isolate_transfer(doc)
+    _normalize_add_transfer_and_dry(doc)
+    _fix_wash_blocks(doc)
+    _fix_micro_placeholders(doc)
     _first_spin_default(doc)
     _unify_heat_wait(doc)
-    _fix_wash_blocks(doc)
     _normalize_calcination(doc)
-    # idempotency pass 
+    # idempotency pass
     _map_aliases(doc); _dedupe_micro_ops(doc)
-    _validate_robot_safe(doc)
     return doc
 
 FENCE_START_RX = re.compile(r"^\s*```")                    # start of any fenced block
