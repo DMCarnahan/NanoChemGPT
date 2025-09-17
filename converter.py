@@ -70,51 +70,71 @@ def _seed_defaults_devices(doc):
     dev.setdefault("vortex_id", "VX1")
 
 def _seed_vessels(doc):
+    # Always enforce canonical hardware labels for these 3 IDs
     reg = doc.setdefault("vessel_registry", {})
-    reg.setdefault("V1", "round-bottom flask 100 mL")
-    reg.setdefault("V2", "15 mL centrifuge tube rack")
-    reg.setdefault("V2_tube", "15 mL centrifuge tube")
+    reg["V1"] = "round-bottom flask 100 mL"
+    reg["V2"] = "15 mL centrifuge tube rack"
+    reg["V2_tube"] = "15 mL centrifuge tube"
+    # Purge anything else that looks like contents/measurements/descriptions
     for k, v in list(reg.items()):
+        if k in ("V1", "V2", "V2_tube"):
+            continue
         s = str(v or "").lower()
-        if k not in ("V1","V2","V2_tube") and (
-            "centrifuge" in s or "rpm" in s or re.search(r"\b\d+\s*mL\b", s) or "solution" in s
+        if (
+            "centrifuge" in s
+            or "rpm" in s
+            or re.search(r"\b\d+\s*mL\b", s)
+            or "solution" in s
+            or "dropwise" in s
         ):
             del reg[k]
 
 def _map_aliases(doc):
-    dev = doc["devices"]
+    dev = doc.setdefault("devices", {})
     alias = {
-        "stir_plate": dev["stir_plate_id"],
-        "stir-plate": dev["stir_plate_id"],
-        "stirrer": dev["stir_plate_id"],
-        "centrifuge": dev["centrifuge_id"],
-        "vortex": dev["vortex_id"],
-        "vortexer": dev["vortex_id"],
-        "oven": dev["oven_id"],
-        "tube": "V2_tube",
+        "stir_plate": dev.get("stir_plate_id", "SP1"),
+        "stir-plate": dev.get("stir_plate_id", "SP1"),
+        "stirrer":    dev.get("stir_plate_id", "SP1"),
+        "centrifuge": dev.get("centrifuge_id", "CF1"),
+        "vortex":     dev.get("vortex_id", "VX1"),
+        "vortexer":   dev.get("vortex_id", "VX1"),
+        "oven":       dev.get("oven_id", "OV1"),
+        "tube":       "V2_tube",
     }
+
     def fix(n):
         if isinstance(n, dict):
-            # device field
-            if isinstance(n.get("device"), str) and n["device"] in alias:
-                n["device"] = alias[n["device"]]
-            for key in ("to","from","object","vessel","source_vessel","target_vessel","tube","context_vessel"):
-                val = n.get(key)
-                if isinstance(val, str):
-                    s = re.sub(r"\s*\([^)]*\)", "", val).strip()
+            # device alias → device ID (case-insensitive)
+            if isinstance(n.get("device"), str):
+                key = n["device"].strip().lower()
+                if key in alias:
+                    n["device"] = alias[key]
+
+            # locations / vessels / tubes
+            for k in ("to","from","object","vessel","source_vessel","target_vessel","tube","context_vessel"):
+                v = n.get(k)
+                if isinstance(v, str):
+                    s  = re.sub(r"\s*\([^)]*\)", "", v).strip()
                     sl = s.lower()
-                    # any V{n}_tube -> V2_tube
-                    if re.fullmatch(r"v\d+_tube", s, flags=re.I) or s == "V1_tube":
-                        n[key] = "V2_tube"; continue
+
+                    # any V{n}_tube variant → V2_tube
+                    if re.fullmatch(r"v\d+_tube", sl) or sl == "v1_tube" or "centrifuge tubes and centrifuge" in sl:
+                        n[k] = "V2_tube"; continue
+
+                    # alias keywords → IDs
                     if sl in alias:
-                        n[key] = alias[sl]; continue
-                    if "flask 100 ml" in sl or "round-bottom flask 100 ml" in sl or "beaker 100 ml" in sl:
-                        n[key] = "V1"; continue
-                    if "centrifuge tubes and centrifuge" in sl:
-                        n[key] = "V2_tube"; continue
-                    n[key] = s
+                        n[k] = alias[sl]; continue
+
+                    # long labels → V1
+                    if ("flask 100 ml" in sl or "round-bottom flask 100 ml" in sl
+                        or "beaker 100 ml" in sl or sl == "flask 100 ml"):
+                        n[k] = "V1"; continue
+
+                    # cleaned string
+                    n[k] = s
         return None
-    _walk(doc, fix)
+
+    _walk(doc, fix)  
 
 def _clean_names(doc):
     def fix(n):
@@ -203,24 +223,59 @@ def _fix_wash_blocks(doc):
     for st in doc.get("steps", []):
         raw = (st.get("raw","") or "").lower()
         if st.get("action") in {"postprocess","wash"} and "wash" in raw:
-            if "wash_solvent" not in st:
-                vol = _parse_vol_ml(raw) or 20
-                solvent = "acetone" if "acetone" in raw else "ethanol" if "ethanol" in raw else "ethanol"
-                st["wash_solvent"] = {"name":solvent,"volume":vol,"volume_units":"mL"}
-            if "repeats" not in st:
-                rep = 3 if "three" in raw else 2 if "twice" in raw else None
-                m_rep = re.search(r"(?:repeat.*?|^)\s*(\d+)\s*(?:x|×|times)\b", raw)
-                if m_rep: rep = int(m_rep.group(1))
-                if rep: st["repeats"] = rep
-            # remove stray transfers from V1 during wash
-            st["ops"] = [op for op in st.get("ops", []) if not (op.get("op")=="transfer_to_centrifuge_tube" and op.get("from")=="V1")]
-            # ensure spin/decant exists
-            if not any(op.get("op")=="centrifuge" for op in st["ops"]):
-                st["ops"] += [
-                    {"op":"add_wash_solvent","solvent":st["wash_solvent"]["name"],"tube":"V2_tube","volume":st["wash_solvent"]["volume"],"volume_units":"mL"},
-                    {"op":"resuspend","tube":"V2_tube"},
-                    {"op":"centrifuge","centrifuge_id":doc["devices"]["centrifuge_id"],"rpm":doc["defaults"]["centrifuge_rpm"],"minutes":doc["defaults"]["centrifuge_minutes"]},
-                    {"op":"decant_supernatant","tube":"V2_tube"}
+            # Volume (supports µL/mL/L and decimals)
+            vol = _parse_vol_ml(raw) or 20
+            # Solvent detection (ethanol/acetone/isopropanol)
+            if "acetone" in raw:
+                solv = "acetone"
+            elif "isopropanol" in raw or "ipa" in raw or "2-propanol" in raw:
+                solv = "isopropanol"
+            elif "ethanol" in raw:
+                solv = "ethanol"
+            else:
+                solv = "ethanol"
+            st["wash_solvent"] = {"name": solv, "volume": vol, "volume_units": "mL"}
+
+            # Repeats: twice / 3x / 'three times'
+            rep = 2 if "twice" in raw else None
+            m_rep = re.search(r"(?:repeat.*?|^)\s*(\d+)\s*(?:x|×|times)\b", raw)
+            if "three" in raw: rep = 3
+            if m_rep: rep = int(m_rep.group(1) or rep or 2)
+            if rep: st["repeats"] = rep
+
+            # Parse spin settings from text if present
+            m_rpm = re.search(r"(\d{3,5})\s*rpm", raw)
+            m_min = re.search(r"(\d+)\s*(min|minutes)", raw)
+            rpm = int(m_rpm.group(1)) if m_rpm else doc["defaults"]["centrifuge_rpm"]
+            mins = int(m_min.group(1)) if m_min else doc["defaults"]["centrifuge_minutes"]
+
+            # Normalize ops: wash → resuspend → spin → decant (one cycle; executor will loop by repeats)
+            st["ops"] = [
+                {"op":"add_wash_solvent","solvent":solv,"tube":"V2_tube","volume":vol,"volume_units":"mL"},
+                {"op":"resuspend","tube":"V2_tube"},
+                {"op":"centrifuge","centrifuge_id":doc["devices"]["centrifuge_id"],"rpm":rpm,"minutes":mins},
+                {"op":"decant_supernatant","tube":"V2_tube"}
+            ]
+
+def _normalize_calcination(doc):
+    for st in doc.get("steps", []):
+        raw = (st.get("raw","") or "").lower()
+        if "calcine" in raw or "calcination" in raw:
+            # Oven @ 500 °C for 120 min; drop any leftover wash/vortex bits
+            st["ops"] = [
+                {"op":"move_to_oven","oven_id":doc["devices"].get("oven_id","OV1"),"tube":"V2_tube"},
+                {"op":"set","device":doc["devices"].get("oven_id","OV1"),"param":"temperature_C","value":500},
+                {"op":"timer","minutes":120}
+            ]
+            st["minutes"] = 120
+            st.pop("wash_solvent", None)
+            st.pop("repeats", None)
+            # optional: trim micro_ops to a simple oven set + wait
+            if isinstance(st.get("micro_ops"), list):
+                st["micro_ops"] = [
+                    {"verb":"place","object":"V2_tube","to":"OV1"},
+                    {"verb":"set","device":"OV1","param":"temperature_C","value":500},
+                    {"verb":"wait","minutes":120}
                 ]
 
 def _validate_robot_safe(doc):
@@ -252,7 +307,8 @@ def robot_normalize(doc):
     _first_spin_default(doc)
     _unify_heat_wait(doc)
     _fix_wash_blocks(doc)
-    # idempotency pass (run twice ensures self-consistency)
+    _normalize_calcination(doc)
+    # idempotency pass 
     _map_aliases(doc); _dedupe_micro_ops(doc)
     _validate_robot_safe(doc)
     return doc
