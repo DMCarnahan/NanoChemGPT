@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import re, json, pathlib, unicodedata
 from typing import List, Dict, Optional, Any, Tuple
-from app_utils.converter_h import apply_postprocessing
 
 DEFAULTS = {
     "stir_rpm": 700,
@@ -20,7 +19,7 @@ DEVICE_IDS = {
     "vacuum_pump_id": "VP1",
     "sonicator_id": "US1",
 }
-# === Robot-friendly postprocessing v2 ===
+# === Robot-friendly postprocessing ===
 import re, json as _json
 
 def _rfp2_walk(obj, visit):
@@ -81,11 +80,11 @@ def _rfp2_map_aliases(doc):
                 if isinstance(val, str):
                     s = re.sub(r"\s*\([^)]*\)", "", val).strip()
                     sl = s.lower()
-                    if "round-bottom flask 100 ml" in sl or "beaker 100 ml" in sl or sl == "flask 100 ml":
+                    if "round-bottom flask 100 ml" in sl or "beaker 100 ml" in sl or "flask 100 ml" in sl:
                         node[key] = "V1"; continue
                     if sl in alias_to_id:
                         node[key] = alias_to_id[sl]; continue
-                    if s == "V1_tube" or "centrifuge tubes and centrifuge" in sl:
+                    if s == "V1_tube" or re.fullmatch(r"V\d+_tube", s) or "centrifuge tubes and centrifuge" in sl:
                         node[key] = "V2_tube"; continue
                     node[key] = s
         return None
@@ -225,7 +224,7 @@ def robot_normalize(doc: dict) -> dict:
     _rfp2_clean_vessel_contents(doc)
     return doc
 
-# Chain external postprocessing (if available) and then our normalizer.
+# Chain external postprocessing (if available) and then normalizer.
 try:
     from app_utils.converter_h import apply_postprocessing as _ext_apply_post
 except Exception:
@@ -909,16 +908,16 @@ def ops_for_postproc(vessel: str, actions: List[Dict]) -> List[Dict]:
         if a["action"]=="cool_to":
             ops.append({"op":"set","device":DEVICE_IDS["hotplate_id"],"param":"temperature_C","value":a["temperature_C"]})
         elif a["action"]=="centrifuge":
-            ops.append({"op":"transfer_to_centrifuge_tube","from":vessel,"to":f"{vessel}_tube"})
+            ops.append({"op":"transfer_to_centrifuge_tube","from":vessel,"to":"V2_tube"})
             ops.append({"op":"centrifuge","centrifuge_id":DEVICE_IDS["centrifuge_id"],"rpm":a["rpm"],"minutes":a["minutes"]})
         elif a["action"]=="decant_supernatant":
-            ops.append({"op":"decant_supernatant","tube":f"{vessel}_tube"})
+            ops.append({"op":"decant_supernatant","tube":"V2_tube"})
         elif a["action"]=="add_wash_solvent":
-            ops.append({"op":"add_wash_solvent","tube":f"{vessel}_tube","solvent":a["solvent"]})
+            ops.append({"op":"add_wash_solvent","tube":"V2_tube","solvent":a["solvent"]})
         elif a["action"]=="resuspend":
-            ops.append({"op":"resuspend","tube":f"{vessel}_tube"})
+            ops.append({"op":"resuspend","tube":"V2_tube"})
         elif a["action"]=="oven_dry":
-            ops.append({"op":"move_to_oven","tube":f"{vessel}_tube","oven_id":DEVICE_IDS["oven_id"]})
+            ops.append({"op":"move_to_oven","tube":"V2_tube","oven_id":DEVICE_IDS["oven_id"]})
             ops.append({"op":"set","device":DEVICE_IDS["oven_id"],"param":"temperature_C","value":a["temperature_C"]})
             ops.append({"op":"wait","minutes":a["minutes"]})
         elif a["action"]=="filter":
@@ -1081,7 +1080,7 @@ def _micro_for_op(op: dict, vessels: 'VesselRegistry', hardware: list[dict]) -> 
         return m
 
     if typ == "centrifuge":
-        tube = "tube"
+        tube = op.get("tube") or "V2_tube"
         m += [{"verb":"pick_up","object":tube,"from":"rack"},
               {"verb":"place","object":tube,"to":"centrifuge"},
               {"verb":"set","device": op.get("centrifuge_id") or "centrifuge","param":"rpm","value": op.get("rpm")},
@@ -1093,7 +1092,7 @@ def _micro_for_op(op: dict, vessels: 'VesselRegistry', hardware: list[dict]) -> 
         return m
 
     if typ == "sonicate":
-        tube = "tube"
+        tube = op.get("tube") or "V2_tube"
         m += [{"verb":"pick_up","object":tube,"from":"rack"},
               {"verb":"place","object":tube,"to":"sonicator"},
               {"verb":"set","device": op.get("sonicator_id") or "sonicator","param":"minutes","value": op.get("minutes")},
