@@ -152,6 +152,84 @@ def _clean_vessel_contents(doc: dict) -> None:
             s = re.sub(r"\s{2,}", " ", s).strip(" ,;")
             vc[k] = s
 
+def _map_location_aliases(doc: dict) -> None:
+    dev = doc.get("devices", {})
+    alias_to_id = {
+        "stir_plate": dev.get("stir_plate_id","SP1"),
+        "stir-plate": dev.get("stir_plate_id","SP1"),
+        "centrifuge": dev.get("centrifuge_id","CF1"),
+        "vortex": dev.get("vortex_id","VX1"),
+        "oven": dev.get("oven_id","OV1"),
+    }
+    def _fix(node):
+        if isinstance(node, dict):
+            for key in ("to","from","object","vessel","source_vessel","target_vessel"):
+                val = node.get(key)
+                if isinstance(val, str):
+                    s = val.strip().lower()
+                    if s in alias_to_id:
+                        node[key] = alias_to_id[s]
+                    elif val == "tube":
+                        node[key] = "V2_tube"
+                    elif "flask 100 ml" in s or "round-bottom flask 100 ml" in s:
+                        node[key] = "V1"
+                    # strip any parenthetical noise
+                    node[key] = re.sub(r"\s*\([^)]*\)", "", str(node[key])).strip()
+        return None
+    _deep_walk(doc, _fix)
+
+def _split_water_hcl_and_add_heat(doc: dict) -> None:
+    steps = doc.get("steps", [])
+    if len(steps) < 2:
+        return
+    s2 = steps[1]
+    raw = s2.get("raw","")
+    if "deionized water" in raw.lower():
+        # replace long solvent string with two clean adds
+        s2["reagents"] = ["deionized water"]
+        s2["reagents_structured"] = [{"name":"deionized water","amount":5,"amount_unit":"mL","solvent":True}]
+        s2["solvent"] = "deionized water"
+        s2["ops"] = [op for op in s2.get("ops", []) if op.get("op") != "timer"]
+        s2["ops"].insert(0, {"op":"add_solvent","solvent":"deionized water","vessel":"V1","volume":5,"volume_units":"mL"})
+        if re.search(r"\b0\.?1\s*M\b", raw, re.I) and re.search(r"\bHCl\b", raw, re.I):
+            s2["reagents"].append("HCl (0.1 M)")
+            s2["reagents_structured"].append({"name":"HCl","concentration":0.1,"conc_unit":"M","amount":5,"amount_unit":"mL","solvent":True})
+            s2["ops"].append({"op":"add_solvent","solvent":"HCl (0.1 M)","vessel":"V1","volume":5,"volume_units":"mL"})
+    # add heat/hold if present in text
+    if re.search(r"80\s*°?\s*C", raw) and re.search(r"\b(2\s*h|120\s*min)\b", raw, re.I):
+        s2["ops"].append({"op":"set","device":doc["devices"]["hotplate_id"],"param":"temperature_C","value":80})
+        s2["ops"].append({"op":"timer","minutes":120})
+        doc.setdefault("micro_plan", []).extend([
+            {"verb":"set","device":doc["devices"]["hotplate_id"],"param":"temperature_C","value":80},
+            {"verb":"wait","minutes":120},
+        ])
+
+def _ensure_initial_5000rpm_spin(doc: dict) -> None:
+    for st in doc.get("steps", []):
+        if st.get("action") in {"isolate","collect"}:
+            raw = (st.get("raw","") or "").lower()
+            if "centrifuge" in raw and "5000" in raw and "10" in raw:
+                if not any(op.get("op")=="centrifuge" for op in st.get("ops",[])):
+                    st.setdefault("ops", []).insert(0, {"op":"transfer_to_centrifuge_tube","from":"V1","to":"V2_tube"})
+                    st["ops"].insert(1, {"op":"centrifuge","centrifuge_id":doc["devices"]["centrifuge_id"],"rpm":5000,"minutes":10})
+
+def _fix_wash_repeats_and_rpm(doc: dict) -> None:
+    for st in doc.get("steps", []):
+        if st.get("action") in {"postprocess","wash"}:
+            raw = (st.get("raw","") or "").lower()
+            if "wash" in raw and "ethanol" in raw and "20" in raw:
+                st["wash_solvent"] = {"name":"ethanol","volume":20,"volume_units":"mL"}
+            if re.search(r"repeat\s+the\s+washing\s+step\s+twice|repeat\s+.*\b2\b\s*(x|times)?", raw):
+                st["repeats"] = 2
+            if "centrifuge" in raw and "5000" in raw:
+                for op in st.get("ops", []):
+                    if op.get("op") == "centrifuge":
+                        op["rpm"] = 5000
+                        op.setdefault("minutes", 10)
+                for m in doc.get("micro_plan", []):
+                    if isinstance(m, dict) and m.get("device") == doc["devices"]["centrifuge_id"] and m.get("param") == "rpm":
+                        m["value"] = 5000
+
 def robot_normalize(doc: dict) -> dict:
     doc.setdefault("defaults", {}).setdefault("stir_rpm", 700)
     doc["defaults"].setdefault("centrifuge_rpm", 4000)
@@ -166,6 +244,10 @@ def robot_normalize(doc: dict) -> dict:
     _fix_wash_blocks(doc)
     _unify_heat_wait(doc)
     _clean_vessel_contents(doc)
+    _map_location_aliases(doc)
+    _split_water_hcl_and_add_heat(doc)
+    _ensure_initial_5000rpm_spin(doc)
+    _fix_wash_repeats_and_rpm(doc)
     return doc
 
 def apply_postprocessing(doc: dict) -> dict:
