@@ -343,6 +343,62 @@ def _clean_vessel_contents(doc: dict) -> None:
             s = re.sub(r"\s{2,}", " ", s).strip(" ,;")
             vc[k] = s
 
+def _purge_and_seed_vessel_registry(doc):
+    reg = doc.setdefault("vessel_registry", {})
+    reg["V1"] = "round-bottom flask 100 mL"
+    reg.setdefault("V2", "15 mL centrifuge tube rack")
+    reg.setdefault("V2_tube", "15 mL centrifuge tube")
+    for k, v in list(reg.items()):
+        s = str(v or "").lower()
+        if k not in ("V1","V2","V2_tube") and ("centrifuge" in s or "rpm" in s or re.search(r"\b\d+\s*mL\b", s)):
+            del reg[k]
+
+def _unify_heat_wait(doc):
+    for i, st in enumerate(doc.get("steps", [])):
+        if st.get("action") == "heat_hold" and "minutes" in st:
+            for m in doc.get("micro_plan", []):
+                if m.get("verb") == "wait" and m.get("step_index") == i:
+                    m["minutes"] = st["minutes"]
+
+def _clean_reagent_names(doc):
+    def fix(node):
+        if isinstance(node, dict):
+            for k in ("solvent","reagent","name","object"):
+                if k in node and isinstance(node[k], str):
+                    s = re.sub(r"\s*\([^)]*\)", "", node[k]).strip()
+                    s = s.replace(" under magnetic stirring","").replace(" dropwise","")
+                    node[k] = s
+            # add rate for “dropwise” mentioned in raw
+            if node.get("op") == "add_solvent" and "raw" in node and "dropwise" in node["raw"].lower():
+                node.setdefault("rate","slow")
+        return None
+    _deep_walk(doc, fix)
+
+def _canonicalize_transfer_spin(doc):
+    for st in doc.get("steps", []):
+        raw = (st.get("raw","") or "").lower()
+        if st.get("action") == "transfer" and "centrifuge" in raw:
+            src = st.get("vessel") or "V1"
+            rpm = int(re.search(r"(\d{3,5})\s*rpm", raw).group(1)) if re.search(r"(\d{3,5})\s*rpm", raw) else doc["defaults"].get("centrifuge_rpm",4000)
+            mins = int(re.search(r"(\d+)\s*(min|minutes)", raw).group(1)) if re.search(r"(\d+)\s*(min|minutes)", raw) else doc["defaults"].get("centrifuge_minutes",10)
+            st["vessel"] = src
+            st["ops"] = [
+                {"op":"transfer_to_centrifuge_tube","from":src,"to":"V2_tube"},
+                {"op":"centrifuge","centrifuge_id":doc["devices"]["centrifuge_id"],"rpm":rpm,"minutes":mins},
+                {"op":"decant_supernatant","tube":"V2_tube"},
+            ]
+
+def _fix_wash_loop(doc):
+    for st in doc.get("steps", []):
+        raw = (st.get("raw","") or "").lower()
+        if st.get("action") in {"postprocess","wash"} and "wash" in raw and "ethanol" in raw:
+            # solvent & repeats
+            vol = int(re.search(r"(\d+)\s*mL", raw).group(1)) if re.search(r"(\d+)\s*mL", raw) else 20
+            st["wash_solvent"] = {"name":"ethanol","volume":vol,"volume_units":"mL"}
+            if "three" in raw or re.search(r"repeat.*\b3\b", raw): st["repeats"] = 3
+            # remove stray transfers from V1 (pellet already in V2_tube)
+            st["ops"] = [op for op in st.get("ops", []) if not (op.get("op")=="transfer_to_centrifuge_tube" and op.get("from")=="V1")]
+
 def robot_normalize(doc: dict) -> dict:
     doc.setdefault("defaults", {}).setdefault("stir_rpm", 700)
     doc["defaults"].setdefault("centrifuge_rpm", 4000)
@@ -367,6 +423,11 @@ def robot_normalize(doc: dict) -> dict:
     _canonicalize_transfer_centrifuge(doc)
     _first_spin_5000rpm(doc)
     _clean_vessel_contents(doc)
+    _purge_and_seed_vessel_registry(doc)
+    _unify_heat_wait(doc)
+    _clean_reagent_names(doc)
+    _canonicalize_transfer_spin(doc)
+    _fix_wash_loop(doc)
     return doc
 
 def apply_postprocessing(doc: dict) -> dict:
