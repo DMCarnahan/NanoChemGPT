@@ -163,6 +163,19 @@ def _ensure_process_centrifuge(doc):
                     {"op":"decant_supernatant","tube":"V2_tube"},
                 ]
 
+def _split_wash_and_dry(doc):
+    new = []
+    for st in doc.get("steps", []):
+        raw = (st.get("raw","") or "").lower()
+        if st.get("action") in {"postprocess","wash"} and "wash" in raw and ("dry" in raw or "oven" in raw):
+            wash = dict(st);  wash["raw"] = "wash " + wash.get("raw",""); wash.pop("minutes", None)
+            dry  = dict(st);  dry["action"] = "dry"; dry["raw"]  = "dry " + dry.get("raw","")
+            dry.pop("wash_solvent", None); dry.pop("repeats", None); dry["ops"] = []  # will be filled by _force_pure_dry
+            new += [wash, dry]
+        else:
+            new.append(st)
+    doc["steps"] = new
+
 def _dedupe_adjacent_waits(doc):
     """Remove consecutive duplicate wait ops within a step."""
     for st in doc.get("steps", []):
@@ -211,7 +224,8 @@ def _force_pure_dry(doc):
     for st in doc.get("steps", []):
         raw = (st.get("raw","") or "").lower()
         if ("dry" in raw or "oven" in raw):
-            t = 100; m = 720
+            t = find_temp_c(st.get("raw","")) or st.get("temperature_C") or 60.0
+            m = find_minutes(st.get("raw","")) or st.get("minutes") or 720
             st["minutes"] = m
             st["ops"] = [
                 {"op":"move_to_oven","oven_id":doc["devices"]["oven_id"],"tube":"V2_tube"},
@@ -618,35 +632,51 @@ def robot_normalize(doc):
     _map_aliases(doc)
     _clean_names(doc)
     _dedupe_micro_ops(doc)
+
     _canonicalize_isolate_transfer(doc)
     _normalize_add_transfer_and_dry(doc)
+
+    # Mixed steps → separate wash + dry, then make dry pure
+    _split_wash_and_dry(doc)
     _fix_wash_blocks(doc)
     _fix_micro_placeholders(doc)
+    _force_pure_dry(doc) 
+
     _first_spin_default(doc)
     _unify_heat_wait(doc)
     _normalize_calcination(doc)
-    _timers_to_waits(doc)
-    _fix_wash_waits(doc)
-    _clean_labels(doc)
+
+    # Normalize timing ops once 
     _ops_timer_to_wait(doc)
+
+    # Ensure collect/centrifuge structure
     _ensure_process_centrifuge(doc)
     _split_transfer_collect(doc)
+    _ensure_collect_after_transfer(doc)
+    _drop_duplicate_process_after_collect(doc)
+
     _dedupe_adjacent_waits(doc)
+
+    # Minutes & indices must be ready before micro-plan syncs
+    _sync_add_step_minutes_and_micro(doc)  
+    _fill_missing_step_index(doc)           
+
+    # Micro-plan & wash syncs
     _sync_heat_and_dry_waits(doc)
     _fix_wash_microplan(doc)
     _fix_transfer_context(doc)
-    _ensure_collect_after_transfer(doc)
     _fix_wash_microplan_waits(doc)
-    _sync_add_step_minutes_and_micro(doc)
+
+    # Housekeeping
     _normalize_first_add_solvent_field(doc)
     _purge_stray_vessels_and_contexts(doc)
-    _drop_duplicate_process_after_collect(doc) 
-    _fill_missing_step_index(doc)  
-    _force_pure_dry(doc)
-    # idempotency pass
+
+    # Idempotency
     _map_aliases(doc); _dedupe_micro_ops(doc)
+
     _post_fix_pass(doc)
     return doc
+
 
 FENCE_START_RX = re.compile(r"^\s*```")                    # start of any fenced block
 NON_PROC_HEAD_RX = re.compile(
@@ -2077,6 +2107,16 @@ def validate_file(path: str) -> List[Dict[str, Any]]:
                 raise ValueError(f"{p.name}:{lineno}: {ve}") from None
             items.append(item)
     return items
+
+# --- hard-wrap the exported function the web app calls ---
+if "convert_text_to_robot_ops" in globals():
+    _orig_convert = convert_text_to_robot_ops
+    def convert_text_to_robot_ops(text: str):
+        doc = _orig_convert(text)
+        try:
+            return apply_postprocessing(doc)
+        except Exception:
+            return doc
 
 # -------- CLI --------
 if __name__ == "__main__":
