@@ -42,7 +42,7 @@ DEVICE_IDS = {
     "sonicator_id": "US1",
 }
 
-ROBOT_NORMALIZER_VERSION = "v2.1-first-try"
+ROBOT_NORMALIZER_VERSION = "v2.2-first-try"
 
 def _walk(obj, fn):
     if isinstance(obj, dict):
@@ -158,8 +158,10 @@ def _fix_wash_blocks(doc):
         if st.get("action") in {"postprocess","wash"} and "wash" in raw:
             # Volume (supports µL/mL/L and decimals)
             vol = _parse_vol_ml(raw) or 20
-            # Solvent detection (ethanol/acetone/isopropanol)
-            if "acetone" in raw:
+            # Solvent detection (deionized water / ethanol / acetone / isopropanol)
+            if "deionized water" in raw or re.search(r"\bdi\b.*water", raw):
+                solv = "deionized water"
+            elif "acetone" in raw:
                 solv = "acetone"
             elif "isopropanol" in raw or "ipa" in raw or "2-propanol" in raw:
                 solv = "isopropanol"
@@ -198,7 +200,7 @@ def _normalize_calcination(doc):
             st["ops"] = [
                 {"op":"move_to_oven","oven_id":doc["devices"].get("oven_id","OV1"),"tube":"V2_tube"},
                 {"op":"set","device":doc["devices"].get("oven_id","OV1"),"param":"temperature_C","value":500},
-                {"op":"timer","minutes":120}
+                {"op":"wait","minutes":120}
             ]
             st["minutes"] = 120
             st.pop("wash_solvent", None)
@@ -286,14 +288,18 @@ def _normalize_add_transfer_and_dry(doc):
                 {"op":"decant_supernatant","tube":"V2_tube"}
             ]
 
-        # Drying step: remove any wash; use oven 100C x 12h
-        if act in {"postprocess","wash"} and "dry" in raw:
+        # Drying step: parse temp/time; use oven hold with WAIT (not timer)
+        if act in {"postprocess","wash","dry"} and "dry" in raw:
+            t = find_temp_c(st.get("raw","")) or 60.0
+            m_val = find_minutes(st.get("raw","")) or 720
             st["ops"] = [
                 {"op":"move_to_oven","oven_id":doc["devices"]["oven_id"],"tube":"V2_tube"},
-                {"device":doc["devices"]["oven_id"],"op":"set","param":"temperature_C","value":100},
-                {"op":"timer","minutes":720}
+                {"device":doc["devices"]["oven_id"],"op":"set","param":"temperature_C","value":t},
+                {"op":"wait","minutes":m_val}
             ]
-            st.pop("wash_solvent", None); st.pop("repeats", None); st["minutes"] = 720
+            st.pop("wash_solvent", None); st.pop("repeats", None); st["minutes"] = m_val
+
+# 4) REPLACE micro-op placeholders
 
 # 4) REPLACE micro-op placeholders (“wash solvent”, “centrifuge tubes”)
 def _fix_micro_placeholders(doc):
