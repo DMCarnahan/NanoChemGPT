@@ -125,6 +125,25 @@ def _canonicalize_isolate_transfer(doc):
                     {"op":"decant_supernatant","tube":"V2_tube"}
                 ]
 
+def _drop_duplicate_process_after_collect(doc):
+    steps = doc.get("steps", [])
+    keep = []
+    for i, st in enumerate(steps):
+        if (st.get("action","").lower() == "process"
+            and "centrifuge" in (st.get("raw","").lower())
+            and i > 0 and (steps[i-1].get("action","").lower() == "collect")):
+            continue  # skip duplicate
+        keep.append(st)
+    doc["steps"] = keep
+
+def _fill_missing_step_index(doc):
+    si = None
+    for m in doc.get("micro_plan", []) or []:
+        if "step_index" in m and m["step_index"] is not None:
+            si = m["step_index"]
+        else:
+            m["step_index"] = si
+
 def _ensure_process_centrifuge(doc):
     """If a 'process' step mentions centrifuge but lacks the op, insert the canonical sequence from V1."""
     steps = doc.get("steps", [])
@@ -608,6 +627,8 @@ def robot_normalize(doc):
     _sync_add_step_minutes_and_micro(doc)
     _normalize_first_add_solvent_field(doc)
     _purge_stray_vessels_and_contexts(doc)
+    _drop_duplicate_process_after_collect(doc) 
+    _fill_missing_step_index(doc)  
     # idempotency pass
     _map_aliases(doc); _dedupe_micro_ops(doc)
     _post_fix_pass(doc)
