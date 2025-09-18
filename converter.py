@@ -207,6 +207,19 @@ def _fix_wash_microplan(doc):
             if m.get("step_index")==idx and m.get("verb")=="set" and m.get("device")=="CF1" and m.get("param")=="rpm":
                 m["value"] = rpm
 
+def _force_pure_dry(doc):
+    for st in doc.get("steps", []):
+        raw = (st.get("raw","") or "").lower()
+        if ("dry" in raw or "oven" in raw):
+            t = 100; m = 720
+            st["minutes"] = m
+            st["ops"] = [
+                {"op":"move_to_oven","oven_id":doc["devices"]["oven_id"],"tube":"V2_tube"},
+                {"device":doc["devices"]["oven_id"],"op":"set","param":"temperature_C","value":t},
+                {"op":"wait","minutes":m},
+            ]
+            st.pop("wash_solvent", None); st.pop("repeats", None)
+
 def _ops_timer_to_wait(doc):
     """Normalize op timers to 'wait' for consistency with micro-ops."""
     for st in doc.get("steps", []):
@@ -629,6 +642,7 @@ def robot_normalize(doc):
     _purge_stray_vessels_and_contexts(doc)
     _drop_duplicate_process_after_collect(doc) 
     _fill_missing_step_index(doc)  
+    _force_pure_dry(doc)
     # idempotency pass
     _map_aliases(doc); _dedupe_micro_ops(doc)
     _post_fix_pass(doc)
