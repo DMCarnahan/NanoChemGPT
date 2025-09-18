@@ -125,6 +125,76 @@ def _canonicalize_isolate_transfer(doc):
                     {"op":"decant_supernatant","tube":"V2_tube"}
                 ]
 
+def _ensure_process_centrifuge(doc):
+    """If a 'process' step mentions centrifuge but lacks the op, insert the canonical sequence from V1."""
+    steps = doc.get("steps", [])
+    for st in steps:
+        raw = (st.get("raw","") or "").lower()
+        if st.get("action","").lower() == "process" and "centrifuge" in raw:
+            ops = st.setdefault("ops", [])
+            if not any(op.get("op") == "centrifuge" for op in ops):
+                m_rpm = re.search(r"(\d{3,5})\s*rpm", raw)
+                m_min = re.search(r"(\d+)\s*(?:min|minutes)\b", raw)
+                rpm  = int(m_rpm.group(1)) if m_rpm else doc["defaults"].get("centrifuge_rpm", 4000)
+                mins = int(m_min.group(1)) if m_min else doc["defaults"].get("centrifuge_minutes", 10)
+                st["vessel"] = "V1"
+                st["ops"] = [
+                    {"op":"transfer_to_centrifuge_tube","from":"V1","to":"V2_tube"},
+                    {"op":"centrifuge","centrifuge_id":doc["devices"]["centrifuge_id"],"rpm":rpm,"minutes":mins},
+                    {"op":"decant_supernatant","tube":"V2_tube"},
+                ]
+
+def _dedupe_adjacent_waits(doc):
+    """Remove consecutive duplicate wait ops within a step."""
+    for st in doc.get("steps", []):
+        ops = st.get("ops", [])
+        new, prev = [], None
+        for op in ops:
+            if prev and op.get("op") == prev.get("op") == "wait" and op.get("minutes") == prev.get("minutes"):
+                continue
+            new.append(op); prev = op
+        st["ops"] = new
+
+def _sync_heat_and_dry_waits(doc):
+    """Make micro_plan waits match step minutes for heat/hold and drying steps."""
+    steps = doc.get("steps", [])
+    mp = doc.get("micro_plan", []) or []
+    for idx, st in enumerate(steps, start=1):
+        raw = (st.get("raw","") or "").lower()
+        if not st.get("minutes"): continue
+        if st.get("action") in {"stir","heat_hold"} or ("dry" in raw):
+            for m in mp:
+                if m.get("verb") == "wait" and m.get("step_index") == idx:
+                    m["minutes"] = st["minutes"]
+
+def _fix_wash_microplan(doc):
+    """For each wash step, set ~1 min pre-spin wait, 10 min spin wait, and unify CF1 rpm with step ops."""
+    steps = doc.get("steps", [])
+    mp = doc.get("micro_plan", []) or []
+    for idx, st in enumerate(steps, start=1):
+        raw = (st.get("raw","") or "").lower()
+        if not (st.get("action") in {"postprocess","wash"} and "wash" in raw and "centrifuge" in raw):
+            continue
+        # find CF1 'start' row
+        start_i = next((i for i,m in enumerate(mp) if m.get("step_index")==idx and m.get("verb")=="start" and m.get("device")=="CF1"), None)
+        if start_i is None: continue
+        # set waits
+        for i,m in enumerate(mp):
+            if m.get("step_index")==idx and m.get("verb")=="wait":
+                m["minutes"] = 1 if i < start_i else 10
+        # unify rpm with step op (or default)
+        rpm = next((op.get("rpm") for op in st.get("ops", []) if op.get("op")=="centrifuge" and op.get("rpm")), doc["defaults"].get("centrifuge_rpm",4000))
+        for m in mp:
+            if m.get("step_index")==idx and m.get("verb")=="set" and m.get("device")=="CF1" and m.get("param")=="rpm":
+                m["value"] = rpm
+
+def _ops_timer_to_wait(doc):
+    """Normalize op timers to 'wait' for consistency with micro-ops."""
+    for st in doc.get("steps", []):
+        for op in st.get("ops", []):
+            if op.get("op") == "timer":
+                op["op"] = "wait"
+
 def _split_transfer_collect(doc):
     steps = doc.get("steps", [])
     for i, st in enumerate(steps):
@@ -466,10 +536,15 @@ def robot_normalize(doc):
     _first_spin_default(doc)
     _unify_heat_wait(doc)
     _normalize_calcination(doc)
-    _split_transfer_collect(doc)
     _timers_to_waits(doc)
     _fix_wash_waits(doc)
     _clean_labels(doc)
+    _ops_timer_to_wait(doc)
+    _ensure_process_centrifuge(doc)
+    _split_transfer_collect(doc)
+    _dedupe_adjacent_waits(doc)
+    _sync_heat_and_dry_waits(doc)
+    _fix_wash_microplan(doc)
     _fix_transfer_context(doc)
     # idempotency pass
     _map_aliases(doc); _dedupe_micro_ops(doc)
