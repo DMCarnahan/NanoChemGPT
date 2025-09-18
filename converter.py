@@ -92,6 +92,150 @@ def _dedupe_micro_ops(doc):
         if isinstance(st.get("micro_ops"), list):
             st["micro_ops"] = dedupe(st["micro_ops"])
 
+def _rebuild_step_micro_ops(step, devices, defaults, step_index):
+    """Return a fresh list of micro_ops synthesized from canonical ops."""
+    m = []
+    SP = devices.get("stir_plate_id","SP1")
+    HP = devices.get("hotplate_id","HP1")
+    CF = devices.get("centrifuge_id","CF1")
+    OV = devices.get("oven_id","OV1")
+
+    def add_wait(minutes):
+        if minutes is not None:
+            m.append({"verb":"wait", "minutes": int(minutes), "step_index": step_index})
+
+    for op in step.get("ops", []):
+        typ = op.get("op")
+
+        if typ == "move_to_stir_plate":
+            m += [{"verb":"pick_up","object": op.get("vessel","V1"), "step_index": step_index},
+                  {"verb":"place","object": op.get("vessel","V1"), "to": SP, "step_index": step_index}]
+
+        elif typ == "set_stir_rate":
+            m += [{"verb":"set","device": SP, "param":"rpm", "value": op.get("rpm", defaults.get("stir_rpm",700)), "step_index": step_index}]
+
+        elif typ == "set" and op.get("param") == "temperature_C":
+            dev = op.get("device") or HP
+            m += [{"verb":"set","device": dev, "param":"temperature_C", "value": op.get("value"), "step_index": step_index}]
+
+        elif typ == "add_solvent":
+            m += [{"verb":"pick_up","object": op.get("solvent","solvent"), "from":"bench", "step_index": step_index},
+                  {"verb":"pour","from": op.get("solvent","solvent"), "to": step.get("vessel","V1"),
+                   "volume": op.get("volume"), "volume_units": op.get("volume_units","mL"),
+                   "step_index": step_index},
+                  {"verb":"place","object": op.get("solvent","solvent"), "to":"bench", "step_index": step_index}]
+
+        elif typ == "add_solute":
+            m += [{"verb":"pick_up","object": op.get("solute","solute"), "from":"bench", "step_index": step_index},
+                  {"verb":"pour","from": op.get("solute","solute"), "to": step.get("vessel","V1"),
+                   "mass": op.get("mass"), "mass_units": op.get("mass_units","mg"),
+                   "step_index": step_index},
+                  {"verb":"place","object": op.get("solute","solute"), "to":"bench", "step_index": step_index}]
+
+        elif typ == "transfer_to_centrifuge_tube":
+            m += [{"verb":"pour","from": op.get("from","V1"), "to": op.get("to","V2_tube"),
+                   "context_vessel": op.get("from","V1"), "step_index": step_index}]
+
+        elif typ == "resuspend":
+            m += [{"verb":"vortex","device": devices.get("vortex_id","VX1"),
+                   "tube": step.get("vessel","V2_tube"), "step_index": step_index}]
+
+        elif typ == "centrifuge":
+            rpm = op.get("rpm", defaults.get("centrifuge_rpm",4000))
+            mins = op.get("minutes", defaults.get("centrifuge_minutes",10))
+            m += [{"verb":"set","device": CF, "param":"rpm", "value": rpm, "step_index": step_index},
+                  {"verb":"start","device": CF, "step_index": step_index},
+                  {"verb":"wait","minutes": int(mins), "step_index": step_index},
+                  {"verb":"stop","device": CF, "step_index": step_index}]
+
+        elif typ == "decant_supernatant":
+            m += [{"verb":"decant","object": op.get("tube","V2_tube"), "step_index": step_index}]
+
+        elif typ == "add_wash_solvent":
+            m += [{"verb":"pick_up","object": op.get("solvent","wash solvent"), "from":"bench", "step_index": step_index},
+                  {"verb":"pour","from": op.get("solvent","wash solvent"), "to": op.get("tube","V2_tube"),
+                   "volume": op.get("volume"), "volume_units": op.get("volume_units","mL"),
+                   "step_index": step_index},
+                  {"verb":"place","object": op.get("solvent","wash solvent"), "to":"bench", "step_index": step_index}]
+
+        elif typ == "move_to_oven":
+            m += [{"verb":"place","object": op.get("tube","V2_tube"), "to": OV, "step_index": step_index}]
+
+        elif typ == "wait" or typ == "timer":  # normalize both to wait
+            add_wait(op.get("minutes"))
+
+        # (Ignore unknown ops in micro synthesis — keep steps/ops authoritative)
+
+    return m
+
+def _rebuild_micro_from_ops(doc):
+    """Discard incoming micro_ops/micro_plan and rebuild them deterministically from step ops."""
+    devices = doc.get("devices", {})
+    defaults = doc.get("defaults", {})
+    steps = doc.get("steps", [])
+
+    # Rebuild per-step micro_ops
+    for idx, st in enumerate(steps, start=1):
+        st["micro_ops"] = _rebuild_step_micro_ops(st, devices, defaults, idx)
+
+    # Flatten into micro_plan with correct step_index
+    mp = []
+    for idx, st in enumerate(steps, start=1):
+        for mo in st.get("micro_ops", []):
+            mo.setdefault("step_index", idx)
+            mp.append(mo)
+    doc["micro_plan"] = mp
+
+def _final_invariants(doc):
+    # Canonical vessels
+    reg = doc.setdefault("vessel_registry", {})
+    reg["V1"] = "round-bottom flask 100 mL"
+    reg["V2"] = "15 mL centrifuge tube rack"
+    reg["V2_tube"] = "15 mL centrifuge tube"
+    for k in list(reg.keys()):
+        if k not in ("V1","V2","V2_tube"):
+            del reg[k]
+
+    # Timers → wait (ops)
+    for st in doc.get("steps", []):
+        for op in st.get("ops", []):
+            if op.get("op") == "timer":
+                op["op"] = "wait"
+
+    # Wash waits (micro_plan): 1 min pre-spin, 10 min spin
+    mp = doc.get("micro_plan", [])
+    for si, st in enumerate(doc.get("steps", []), start=1):
+        raw = (st.get("raw","") or "").lower()
+        if st.get("action") in {"postprocess","wash"} and "centrifuge" in raw:
+            start_i = next((i for i,m in enumerate(mp) if m.get("step_index")==si and m.get("verb")=="start" and m.get("device")==doc["devices"].get("centrifuge_id","CF1")), None)
+            if start_i is not None:
+                for i,m in enumerate(mp):
+                    if m.get("step_index")==si and m.get("verb")=="wait":
+                        m["minutes"] = 1 if i < start_i else 10
+
+    # Pure drying: only oven place/set/wait in both ops and micro
+    OV = doc.get("devices", {}).get("oven_id","OV1")
+    for si, st in enumerate(doc.get("steps", []), start=1):
+        raw = (st.get("raw","") or "").lower()
+        if "dry" in raw or "oven" in raw:
+            # keep existing temp/min if present, else defaults
+            t = next((op.get("value") for op in st.get("ops", []) if op.get("op")=="set" and op.get("param")=="temperature_C"), 60)
+            minutes = st.get("minutes") or next((op.get("minutes") for op in st.get("ops", []) if op.get("op")=="wait"), 720)
+            st["minutes"] = minutes
+            st["ops"] = [
+                {"op":"move_to_oven","oven_id":OV,"tube":"V2_tube"},
+                {"device":OV,"op":"set","param":"temperature_C","value":t},
+                {"op":"wait","minutes":int(minutes)},
+            ]
+            # micro: place OV1, set temp, wait minutes
+            step_m = [mo for mo in doc["micro_plan"] if mo.get("step_index")==si]
+            doc["micro_plan"] = [mo for mo in doc["micro_plan"] if mo.get("step_index")!=si]
+            doc["micro_plan"] += [
+                {"verb":"place","object":"V2_tube","to":OV,"step_index":si},
+                {"verb":"set","device":OV,"param":"temperature_C","value":t,"step_index":si},
+                {"verb":"wait","minutes":int(minutes),"step_index":si},
+            ]
+
 def _canonicalize_isolate_transfer(doc):
     for st in doc.get("steps", []):
         raw = (st.get("raw","") or "").lower()
@@ -626,6 +770,13 @@ def _purge_stray_vessels_and_contexts(doc):
         if m.get("context_vessel") not in (None, "V1", "V2", "V2_tube"):
             m["context_vessel"] = "V1"
 
+def _fixpoint(fn, doc, max_iter=2):
+    for _ in range(max_iter):
+        before = json.dumps(doc, sort_keys=True)
+        fn(doc)
+        after = json.dumps(doc, sort_keys=True)
+        if before == after: break
+
 def robot_normalize(doc):
     _seed_defaults_devices(doc)
     _seed_vessels(doc)
@@ -670,6 +821,15 @@ def robot_normalize(doc):
     # Housekeeping
     _normalize_first_add_solvent_field(doc)
     _purge_stray_vessels_and_contexts(doc)
+
+    # Authoritative rebuild: derive micro_ops & micro_plan strictly from ops
+    _rebuild_micro_from_ops(doc)
+
+    # Final guardrails/invariants
+    _final_invariants(doc)
+
+    _fixpoint(_rebuild_micro_from_ops, doc)
+    _fixpoint(_final_invariants, doc)
 
     # Idempotency
     _map_aliases(doc); _dedupe_micro_ops(doc)
