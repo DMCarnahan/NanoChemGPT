@@ -522,6 +522,63 @@ def _post_fix_pass(doc):
             new_ops.append(op)
         st["ops"] = new_ops
 
+def _ensure_collect_after_transfer(doc):
+    steps = doc.get("steps", [])
+    for i, st in enumerate(steps):
+        if (st.get("action","").lower()=="transfer"
+            and not any(op.get("op")=="centrifuge" for op in st.get("ops",[]))):
+            # Insert a collect step right after transfer
+            rpm  = doc["defaults"].get("centrifuge_rpm", 4000)
+            mins = doc["defaults"].get("centrifuge_minutes", 10)
+            steps.insert(i+1, {
+                "action":"collect",
+                "vessel":"V1",
+                "minutes": mins,
+                "ops":[
+                    {"op":"centrifuge","centrifuge_id":doc["devices"]["centrifuge_id"],"rpm":rpm,"minutes":mins},
+                    {"op":"decant_supernatant","tube":"V2_tube"},
+                ],
+                "raw":"Centrifuge to collect the precipitate."
+            })
+
+def _fix_wash_microplan_waits(doc):
+    mp = doc.get("micro_plan", []) or []
+    # For every wash step (with CF1 start), set 1 min before start, 10 min after
+    step_ids = {m.get("step_index") for m in mp if m.get("verb")=="start" and m.get("device")=="CF1"}
+    for si in step_ids:
+        start_i = next((i for i,m in enumerate(mp) if m.get("step_index")==si and m.get("verb")=="start" and m.get("device")=="CF1"), None)
+        if start_i is None: continue
+        for i,m in enumerate(mp):
+            if m.get("step_index")==si and m.get("verb")=="wait":
+                m["minutes"] = 1 if i < start_i else 10
+
+def _sync_add_step_minutes_and_micro(doc):
+    # Step 2: if add step has a wait op, set step minutes to that
+    steps = doc.get("steps", [])
+    if len(steps) >= 2 and (steps[1].get("action") or "").lower()=="add":
+        wait = next((op.get("minutes") for op in steps[1].get("ops",[]) if op.get("op")=="wait"), None)
+        if wait: steps[1]["minutes"] = wait
+        # Fix micro pour to use ammonium hydroxide → V1 if present
+        for m in steps[1].get("micro_ops", []):
+            if m.get("verb")=="pour" and m.get("from")=="V1" and m.get("to")=="V1":
+                m["from"] = "ammonium hydroxide"; m["to"] = "V1"
+
+def _normalize_first_add_solvent_field(doc):
+    # In step 1, ensure add_solvent uses 'solvent' key
+    steps = doc.get("steps", [])
+    if steps:
+        for op in steps[0].get("ops", []):
+            if op.get("op")=="add_solvent" and "reagent" in op and "solvent" not in op:
+                op["solvent"] = op.pop("reagent")
+
+def _purge_stray_vessels_and_contexts(doc):
+    reg = doc.setdefault("vessel_registry", {})
+    for k in list(reg.keys()):
+        if k not in ("V1","V2","V2_tube"): del reg[k]
+    # micro_plan context_vessel cleanup
+    for m in doc.get("micro_plan", []) or []:
+        if m.get("context_vessel") not in (None, "V1", "V2", "V2_tube"):
+            m["context_vessel"] = "V1"
 
 def robot_normalize(doc):
     _seed_defaults_devices(doc)
@@ -546,6 +603,11 @@ def robot_normalize(doc):
     _sync_heat_and_dry_waits(doc)
     _fix_wash_microplan(doc)
     _fix_transfer_context(doc)
+    _ensure_collect_after_transfer(doc)
+    _fix_wash_microplan_waits(doc)
+    _sync_add_step_minutes_and_micro(doc)
+    _normalize_first_add_solvent_field(doc)
+    _purge_stray_vessels_and_contexts(doc)
     # idempotency pass
     _map_aliases(doc); _dedupe_micro_ops(doc)
     _post_fix_pass(doc)
