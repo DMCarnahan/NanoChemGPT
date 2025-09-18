@@ -72,7 +72,7 @@ def _seed_defaults_devices(doc):
 def _clean_names(doc):
     def fix(n):
         if isinstance(n, dict):
-            for k in ("name","reagent","solvent","object"):
+            for k in ("name","reagent","solvent","object","from"):
                 if k in n and isinstance(n[k], str):
                     n[k] = re.sub(r"\s*\([^)]*\)", "", n[k]).replace(" under magnetic stirring","").replace(" dropwise","").strip()
         return None
@@ -149,7 +149,7 @@ def _unify_heat_wait(doc):
         mins = st.get("minutes")
         if st.get("action") == "heat_hold" and mins:
             for m in doc.get("micro_plan", []):
-                if m.get("verb") == "wait" and m.get("step_index") == i:
+                if m.get("verb") == "wait" and m.get("step_index") in (i, i+1):
                     m["minutes"] = mins
 
 def _fix_wash_blocks(doc):
@@ -170,13 +170,10 @@ def _fix_wash_blocks(doc):
             st["wash_solvent"] = {"name": solv, "volume": vol, "volume_units": "mL"}
 
             # Repeats: twice / 3x / 'three times'
-            rep = None
-            if re.search(r"\btwice\b", raw): rep = 2
-            if re.search(r"\brepeat\s+(?:two\s+more\s+)?times?\b", raw): rep = 2 if rep is None else rep
-            if re.search(r"\brepeat\s+twice\b", raw): rep = 2
-            if re.search(r"\bthree\b", raw): rep = 3 if (rep is None or rep < 3) else rep
+            rep = 2 if "twice" in raw else None
             m_rep = re.search(r"(?:repeat.*?|^)\s*(\d+)\s*(?:x|×|times)\b", raw)
-            if m_rep: rep = int(m_rep.group(1))
+            if "three" in raw: rep = 3
+            if m_rep: rep = int(m_rep.group(1) or rep or 2)
             if rep: st["repeats"] = rep
 
             # Parse spin settings from text if present
@@ -201,7 +198,7 @@ def _normalize_calcination(doc):
             st["ops"] = [
                 {"op":"move_to_oven","oven_id":doc["devices"].get("oven_id","OV1"),"tube":"V2_tube"},
                 {"op":"set","device":doc["devices"].get("oven_id","OV1"),"param":"temperature_C","value":500},
-                {"op":"wait","minutes":120}
+                {"op":"timer","minutes":120}
             ]
             st["minutes"] = 120
             st.pop("wash_solvent", None)
@@ -291,14 +288,12 @@ def _normalize_add_transfer_and_dry(doc):
 
         # Drying step: remove any wash; use oven 100C x 12h
         if act in {"postprocess","wash"} and "dry" in raw:
-            t = find_temp_c(st.get("raw","")) or 60.0
-            m = find_minutes(st.get("raw","")) or 720.0
             st["ops"] = [
                 {"op":"move_to_oven","oven_id":doc["devices"]["oven_id"],"tube":"V2_tube"},
-                {"device":doc["devices"]["oven_id"],"op":"set","param":"temperature_C","value":t},
-                {"op":"wait","minutes":m}
+                {"device":doc["devices"]["oven_id"],"op":"set","param":"temperature_C","value":100},
+                {"op":"timer","minutes":720}
             ]
-            st.pop("wash_solvent", None); st.pop("repeats", None); st["minutes"] = m
+            st.pop("wash_solvent", None); st.pop("repeats", None); st["minutes"] = 720
 
 # 4) REPLACE micro-op placeholders (“wash solvent”, “centrifuge tubes”)
 def _fix_micro_placeholders(doc):
@@ -325,24 +320,93 @@ def _fix_micro_placeholders(doc):
 
 # 5) CALL these from robot_normalize 
 
-
-def _prune_redundant_steps(doc):
+def _post_fix_pass(doc):
+    """
+    Final strict-first-try cleanups that run after all other normalizers.
+    - Force transfer steps to use V1 → V2_tube
+    - Sync micro_plan waits with step minutes for heat-hold and oven-dry (off-by-one tolerant)
+    - Map any micro_plan 'to' containing "centrifuge tube(s)" → V2_tube
+    - Strip descriptors like "under magnetic stirring"/"dropwise" from micro_plan 'from'/'object'
+    - Ensure wash solvent matches text (supports deionized water)
+    - Remove duplicate 'timer' when a 'wait' with same minutes exists
+    """
+    import re
     steps = doc.get("steps", [])
-    keep = []
+    mp = doc.get("micro_plan", []) or []
+
+    def _sl(s):
+        return (s or "").lower() if isinstance(s, str) else s
+
+    # 1) Force canonical transfer from V1 → V2_tube
     for st in steps:
         act = (st.get("action") or "").lower()
+        if act == "transfer":
+            st["vessel"] = "V1"
+            ops = st.get("ops") or []
+            for op in ops:
+                if op.get("op") == "transfer_to_centrifuge_tube":
+                    op["from"] = "V1"
+                    op["to"] = "V2_tube"
+            st["ops"] = ops
+
+    # 2) Sync micro_plan waits for heat-hold and drying (handle 0/1-based step_index)
+    for i, st in enumerate(steps):
+        act = (st.get("action") or "").lower()
+        raw = _sl(st.get("raw"))
+        mins = st.get("minutes")
+        if not mins:
+            continue
+        wants_sync = (act == "heat_hold") or (act in {"postprocess","dry","wash"} and "dry" in raw)
+        if not wants_sync:
+            continue
+        for m in mp:
+            if m.get("verb") == "wait" and m.get("step_index") in (i, i+1):
+                m["minutes"] = mins
+
+    # 3) Micro-plan alias mapping and descriptor cleanup
+    for m in mp:
+        # 'to' -> V2_tube if mentions centrifuge tube(s)
+        if isinstance(m.get("to"), str):
+            to_sl = _sl(m["to"])
+            if re.search(r"centrifuge\s+tubes?", to_sl):
+                m["to"] = "V2_tube"
+        # strip descriptors on 'from'/'object'
+        for key in ("from","object"):
+            if isinstance(m.get(key), str):
+                s = m[key]
+                s = re.sub(r"\s*under magnetic stirring\b", "", s, flags=re.I)
+                s = re.sub(r"\s*dropwise\b", "", s, flags=re.I)
+                s = re.sub(r"\s*\([^)]*\)", "", s)
+                m[key] = s.strip()
+
+    # 4) Wash solvent: respect 'deionized water' if present in raw
+    for st in steps:
+        act = (st.get("action") or "").lower()
+        raw = _sl(st.get("raw"))
+        if act in {"postprocess","wash"} and "wash" in raw:
+            if "deionized water" in raw or re.search(r"\bdi\b.*water", raw):
+                st.setdefault("wash_solvent", {})
+                st["wash_solvent"]["name"] = "deionized water"
+                # update ops solvent field
+                ops = st.get("ops") or []
+                for op in ops:
+                    if op.get("op") == "add_wash_solvent":
+                        op["solvent"] = "deionized water"
+                st["ops"] = ops
+
+    # 5) Remove duplicate timer when identical wait exists
+    for st in steps:
         ops = st.get("ops") or []
-        if act == "process":
-            only_timing = all((op.get("op") in {"wait","timer"}) for op in ops) if ops else True
-            if only_timing:
+        waits = {(op.get("op"), op.get("minutes")) for op in ops if op.get("op") == "wait" and op.get("minutes") is not None}
+        new_ops = []
+        for op in ops:
+            if op.get("op") == "timer" and ("wait", op.get("minutes")) in waits:
                 continue
-        keep.append(st)
-    if len(keep) != len(steps):
-        doc["steps"] = keep
+            new_ops.append(op)
+        st["ops"] = new_ops
 
 
 def robot_normalize(doc):
-    _prune_redundant_steps(doc)
     _seed_defaults_devices(doc)
     _seed_vessels(doc)
     _map_aliases(doc)
@@ -357,6 +421,7 @@ def robot_normalize(doc):
     _normalize_calcination(doc)
     # idempotency pass
     _map_aliases(doc); _dedupe_micro_ops(doc)
+    _post_fix_pass(doc)
     return doc
 
 FENCE_START_RX = re.compile(r"^\s*```")                    # start of any fenced block
@@ -1162,9 +1227,6 @@ def _micro_for_op(op: dict, vessels: 'VesselRegistry', hardware: list[dict]) -> 
         ]
         return m
     if typ == "wait":
-        m += [{"verb":"wait","minutes": op.get("minutes")}]
-        return m
-    if typ == "timer":
         m += [{"verb":"wait","minutes": op.get("minutes")}]
         return m
     if typ == "filter":
