@@ -125,6 +125,47 @@ def _canonicalize_isolate_transfer(doc):
                     {"op":"decant_supernatant","tube":"V2_tube"}
                 ]
 
+def _split_transfer_collect(doc):
+    steps = doc.get("steps", [])
+    for i, st in enumerate(steps):
+        if (st.get("action") or "").lower() == "transfer":
+            if any((s.get("action") or "").lower() in {"collect","isolate"} or 
+                   ("centrifuge" in (s.get("raw","").lower())) for s in steps[i+1:]):
+                st["ops"] = [op for op in st.get("ops", []) if op.get("op")=="transfer_to_centrifuge_tube"]
+
+def _timers_to_waits(doc):
+    _walk(doc, lambda n: (n.update({"op":"wait"}) if isinstance(n,dict) and n.get("op")=="timer" else None))
+
+def _fix_wash_waits(doc):
+    mp = doc.get("micro_plan", [])
+    # find CF1 start for the wash step (e.g., step_index == 7)
+    for si in {m.get("step_index") for m in mp if m.get("verb") in {"start","wait"}}:
+        cf1 = next((i for i,m in enumerate(mp) if m.get("step_index")==si and m.get("verb")=="start" and m.get("device")=="CF1"), None)
+        if cf1 is None: continue
+        for i,m in enumerate(mp):
+            if m.get("step_index")==si and m.get("verb")=="wait":
+                m["minutes"] = 1 if i < cf1 else 10
+
+_LABEL_RX = re.compile(r"(?:\s*under magnetic stirring|\s*at room temperature)|\s*\([^)]*\)", re.I)
+def _clean_labels(doc):
+    def f(n):
+        if isinstance(n, dict):
+            for k in ("name","reagent","solvent","object","solute","from"):
+                if isinstance(n.get(k), str):
+                    n[k] = _LABEL_RX.sub("", n[k]).strip()
+        return None
+    _walk(doc, f)
+    vc = doc.setdefault("vessel_contents", {})
+    for k,v in list(vc.items()):
+        if isinstance(v, str):
+            s = _LABEL_RX.sub("", v).replace(" None None", "").strip()
+            vc[k] = re.sub(r"\s{2,}", " ", s)
+
+def _fix_transfer_context(doc):
+    for m in doc.get("micro_plan", []):
+        if m.get("step_index")==5 and m.get("verb")=="pour" and m.get("to")=="V2_tube":
+            m["context_vessel"] = "V1"
+
 def _first_spin_default(doc):
     first = True
     def fix(n):
@@ -425,6 +466,11 @@ def robot_normalize(doc):
     _first_spin_default(doc)
     _unify_heat_wait(doc)
     _normalize_calcination(doc)
+    _split_transfer_collect(doc)
+    _timers_to_waits(doc)
+    _fix_wash_waits(doc)
+    _clean_labels(doc)
+    _fix_transfer_context(doc)
     # idempotency pass
     _map_aliases(doc); _dedupe_micro_ops(doc)
     _post_fix_pass(doc)
