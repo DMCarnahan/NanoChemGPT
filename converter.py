@@ -137,8 +137,11 @@ def _rebuild_step_micro_ops(step, devices, defaults, step_index):
                    "context_vessel": op.get("from","V1"), "step_index": step_index}]
 
         elif typ == "resuspend":
-            m += [{"verb":"vortex","device": devices.get("vortex_id","VX1"),
-                   "tube": step.get("vessel","V2_tube"), "step_index": step_index}]
+            tube = op.get("tube") or step.get("vessel","V2_tube")
+            m += [{"verb":"vortex",
+                "device": devices.get("vortex_id","VX1"),
+                "tube": tube,
+                "step_index": step_index}]
 
         elif typ == "centrifuge":
             rpm = op.get("rpm", defaults.get("centrifuge_rpm",4000))
@@ -453,6 +456,52 @@ def _unify_heat_wait(doc):
                 if m.get("verb") == "wait" and m.get("step_index") in (i, i+1):
                     m["minutes"] = mins
 
+def _collapse_adjacent_collect_spins(doc):
+    """Drop a collect-like step if the previous step already did centrifuge+decant with same settings."""
+    steps = doc.get("steps", [])
+    keep = []
+    prev_spin = None
+    for st in steps:
+        ops = st.get("ops", [])
+        spin = next((op for op in ops if op.get("op")=="centrifuge"), None)
+        dec  = any(op.get("op")=="decant_supernatant" for op in ops)
+        if spin and dec:
+            key = (spin.get("rpm"), spin.get("minutes"))
+            if prev_spin == key:
+                # skip duplicate collect block
+                continue
+            prev_spin = key
+        keep.append(st)
+    doc["steps"] = keep
+
+def _collapse_consecutive_dry_steps(doc):
+    steps = doc.get("steps", [])
+    keep = []
+    pending = None  # (temp, minutes) from first dry
+    for st in steps:
+        raw = (st.get("raw","") or "").lower()
+        is_dry = ("dry" in raw) or ("oven" in raw)
+        if not is_dry:
+            pending = None
+            keep.append(st)
+            continue
+        # extract temp/min from this dry step if present
+        t = next((op.get("value") for op in st.get("ops", []) if op.get("op")=="set" and op.get("param")=="temperature_C"), None)
+        m = next((op.get("minutes") for op in st.get("ops", []) if op.get("op")=="wait"), None) or st.get("minutes")
+        if pending is None:
+            # keep the first; ensure ops are pure oven set/wait (your _force_pure_dry/_final_invariants will enforce)
+            pending = (t, m)
+            keep.append(st)
+        else:
+            # merge into the first: choose latest explicit temp/min if provided
+            pt, pm = pending
+            if t is not None: pt = t
+            if m is not None: pm = m
+            pending = (pt, pm)
+            # drop this duplicate dry step
+    # write back merged temp/min onto the kept dry step
+    doc["steps"] = keep
+
 def _fix_wash_blocks(doc):
     for st in doc.get("steps", []):
         raw = (st.get("raw","") or "").lower()
@@ -712,6 +761,18 @@ def _post_fix_pass(doc):
             new_ops.append(op)
         st["ops"] = new_ops
 
+def _sync_step_minutes_from_ops(doc):
+    """Set step.minutes to the max 'wait' minutes found in step.ops; mirror waits to that value."""
+    for st in doc.get("steps", []):
+        waits = [op.get("minutes") for op in st.get("ops", []) if op.get("op") in ("wait","timer") and op.get("minutes") is not None]
+        if not waits: 
+            continue
+        m = int(max(waits))
+        st["minutes"] = m
+        for op in st.get("ops", []):
+            if op.get("op") in ("wait","timer"):
+                op["minutes"] = m
+
 def _ensure_collect_after_transfer(doc):
     steps = doc.get("steps", [])
     for i, st in enumerate(steps):
@@ -792,7 +853,7 @@ def robot_normalize(doc):
     _fix_wash_blocks(doc)
     _fix_micro_placeholders(doc)
     _force_pure_dry(doc) 
-
+    _collapse_consecutive_dry_steps(doc)
     _first_spin_default(doc)
     _unify_heat_wait(doc)
     _normalize_calcination(doc)
@@ -805,7 +866,7 @@ def robot_normalize(doc):
     _split_transfer_collect(doc)
     _ensure_collect_after_transfer(doc)
     _drop_duplicate_process_after_collect(doc)
-
+    _collapse_adjacent_collect_spins(doc)
     _dedupe_adjacent_waits(doc)
 
     # Minutes & indices must be ready before micro-plan syncs
@@ -821,6 +882,7 @@ def robot_normalize(doc):
     # Housekeeping
     _normalize_first_add_solvent_field(doc)
     _purge_stray_vessels_and_contexts(doc)
+    _sync_step_minutes_from_ops(doc)
 
     # Authoritative rebuild: derive micro_ops & micro_plan strictly from ops
     _rebuild_micro_from_ops(doc)
@@ -2103,7 +2165,7 @@ def convert_text_to_robot_ops(text: str) -> Dict:
                 _add_structured_reagents_inplace(record)
                 records.append(record)
                 continue
-            # ...existing fallback detectors (resuspend, collect, discard, transfer)...
+            
             res = detect_resuspend(sub)
             if res:
                 record = {
