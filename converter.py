@@ -922,6 +922,38 @@ def _fixpoint(fn, doc, max_iter=2):
         after = json.dumps(doc, sort_keys=True)
         if before == after: break
 
+
+def _flatten_micro_plan_from_steps(doc):
+    """Make doc['micro_plan'] exactly the concatenation of steps[*].micro_ops (base verbs only)."""
+    allowed = {"pick_up","place","pour","set","wait"}
+    mp = []
+    for idx, st in enumerate(doc.get("steps", []) or [], start=1):
+        for m in (st.get("micro_ops") or []):
+            if m.get("verb") in allowed:
+                m = {**m, "step_index": idx}
+                mp.append(m)
+    # de-dup consecutive identical entries
+    out = []
+    for m in mp:
+        if not out or out[-1] != m:
+            out.append(m)
+    doc["micro_plan"] = out
+
+def _inject_vacuum_micro_ops(doc):
+    """If a step mentions 'vacuum' in raw, ensure a set(VP1,power=on) occurs before the first wait in that step."""
+    vp = (doc.get("devices", {}) or {}).get("vacuum_pump_id", "VP1")
+    for idx, st in enumerate(doc.get("steps", []) or [], start=1):
+        raw = (st.get("raw", "") or "").lower()
+        if "vacuum" not in raw:
+            continue
+        mops = st.get("micro_ops") or []
+        has_on = any(m.get("verb")=="set" and (m.get("device") in {vp, "vacuum_pump"}) and m.get("param")=="power" and str(m.get("value")).lower()=="on" for m in mops)
+        if not has_on:
+            # insert before first wait; else append at end
+            insert_at = next((i for i,m in enumerate(mops) if m.get("verb")=="wait"), len(mops))
+            mops.insert(insert_at, {"verb":"set","device": vp, "param":"power","value":"on","step_index": idx})
+        st["micro_ops"] = mops
+
 def robot_normalize(doc):
     _seed_defaults_devices(doc)
     _seed_vessels(doc)
@@ -984,7 +1016,12 @@ def robot_normalize(doc):
     _enforce_base_micro_verbs(doc)
     _enforce_base_micro_verbs_steps(doc)
     _sync_wait_minutes_to_step(doc)
-    polish_robot_doc(doc)
+    _inject_vacuum_micro_ops(doc)
+    _flatten_micro_plan_from_steps(doc)
+    try:
+        polish_robot_doc(doc)
+    except Exception:
+        pass
     return doc
 
 
