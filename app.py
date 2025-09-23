@@ -1242,16 +1242,24 @@ def ask():
         "index_map": index_map,
     }
 
-
     # judge based on helper if present; otherwise simple rule
-    try:
-        if callable(_h_judge_sufficiency):
-            judged_ok = bool(_h_judge_sufficiency(question, context_joined, min_hits=MIN_HITS, min_score=MIN_SCORE, min_chars=MIN_CHARS))
-        else:
+    if callable(_h_judge_sufficiency):
+        try:
+            # Try new signature: (question, min_hits, min_score, min_chars, context)
+            judged_ok = bool(_h_judge_sufficiency(question, MIN_HITS, MIN_SCORE, MIN_CHARS, context_joined))
+        except TypeError as e_new:
+            try:
+                # Fallback to old signature: (question, context, min_hits, min_score, min_chars)
+                judged_ok = bool(_h_judge_sufficiency(question, context_joined, MIN_HITS, MIN_SCORE, MIN_CHARS))
+            except Exception as e_old:
+                app.logger.warning(f"[/ask] judge/enqueue error (helper): new-sig {e_new}; old-sig {e_old}")
+                judged_ok = len(context_joined) >= MIN_CHARS
+        except Exception as e:
+            app.logger.warning(f"[/ask] judge/enqueue error (helper): {e}")
             judged_ok = len(context_joined) >= MIN_CHARS
-    except Exception as e:
-        app.logger.warning(f"[/ask] judge/enqueue error (helper): {e}")
+    else:
         judged_ok = len(context_joined) >= MIN_CHARS
+
 
     # judge_hits fallback if not imported
     _judge_hits = None
