@@ -184,6 +184,144 @@ def normalize_names(data: Dict[str,Any]) -> None:
             if v == "FeCl3":
                 vr[k] = "FeCl3·6H2O solution"
 
+BASE_VERBS = {"pick_up","place","pour","set","wait"}
+
+def _ensure_transfer_pours(step):
+    """For any op.transfer in step.ops, inject a pour into step.micro_ops if missing."""
+    ops = step.get("ops") or []
+    mops = step.get("micro_ops") or []
+    idx = mops[0].get("step_index") if mops else step.get("index")
+    existing_pour = any(m.get("verb") == "pour" for m in mops)
+    transfers = [op for op in ops if op.get("op") == "transfer"]
+    # If any transfer exists and no pour recorded, add a single pour per transfer (conservative order: after placement)
+    if transfers:
+        # Find insertion point: after last 'place' or at end
+        insert_at = 0
+        for i, m in enumerate(mops):
+            if m.get("verb") == "place":
+                insert_at = i + 1
+        for t in transfers:
+            src = t.get("from") or "source"
+            dst = t.get("to") or step.get("vessel") or step.get("target_vessel") or "V?"
+            pour = {"verb":"pour","from": src, "to": dst, "step_index": idx}
+            mops.insert(insert_at, pour)
+            insert_at += 1
+    step["micro_ops"] = mops
+
+def _ensure_centrifuge_motion(step):
+    """If step has a centrifuge op, ensure motion (pick_up→place CF1→wait→off→place back) exists in micro_ops."""
+    ops = step.get("ops") or []
+    if not any(op.get("op") == "centrifuge" for op in ops):
+        return
+    mops = step.get("micro_ops") or []
+    idx = mops[0].get("step_index") if mops else step.get("index")
+    tube = None
+    # Find tube name from ops or a tube field
+    for op in ops:
+        if op.get("op") == "centrifuge":
+            tube = op.get("tube") or step.get("tube") or "V2_tube"
+            rpm  = op.get("rpm")
+            mins = op.get("minutes") or step.get("minutes")  # priority to op minutes
+            cfid = op.get("centrifuge_id") or "CF1"
+            break
+    # Presence checks
+    has_pick = any(m.get("verb")=="pick_up" and m.get("object")==tube for m in mops)
+    has_place_cf = any(m.get("verb")=="place" and m.get("to")=="centrifuge" for m in mops) or any(m.get("verb")=="place" and m.get("to")==cfid for m in mops)
+    has_wait = any(m.get("verb")=="wait" for m in mops)
+    # Build missing pieces conservatively at the start of micro_ops
+    new = []
+    if not has_pick:
+        new.append({"verb":"pick_up","object": tube, "from": "rack", "step_index": idx})
+    if not has_place_cf:
+        new.append({"verb":"place","object": tube, "to": cfid, "step_index": idx})
+    # ensure rpm + power on
+    new.append({"verb":"set","device": cfid, "param":"rpm","value": rpm, "step_index": idx})
+    new.append({"verb":"set","device": cfid, "param":"power","value": "on", "step_index": idx})
+    # ensure wait with correct minutes
+    if mins is not None:
+        new.append({"verb":"wait","minutes": mins, "step_index": idx})
+    # power off & place back
+    new.append({"verb":"set","device": cfid, "param":"power","value": "off", "step_index": idx})
+    new.append({"verb":"place","object": tube, "to": "rack", "step_index": idx})
+    # Prepend new motions
+    mops = new + mops
+    # Normalize ANY existing waits in this step to 'mins' if present
+    if mins is not None:
+        norm = []
+        for mm in mops:
+            if mm.get('verb')=='wait':
+                mm = {**mm, 'minutes': mins}
+            norm.append(mm)
+        mops = norm
+    # Deduplicate consecutive identical entries
+    dedup = []
+    seen = set()
+    for m in mops:
+        key = json.dumps(m, sort_keys=True)
+        if not dedup or json.dumps(dedup[-1], sort_keys=True) != key:
+            dedup.append(m)
+    step["micro_ops"] = dedup
+
+def _sync_step_wait_minutes(step):
+    """Sync any wait in step.micro_ops to step.minutes when present (unless centrifuge op provided its own)."""
+    if step.get("minutes") is None:
+        return
+    minutes = step.get("minutes")
+    new = []
+    for m in step.get("micro_ops") or []:
+        if m.get("verb") == "wait" and "minutes" in m and ("centrifuge" not in step.get("raw","")) and not any(op.get("op")=="centrifuge" for op in step.get("ops",[])):
+            m = {**m, "minutes": minutes}
+        new.append(m)
+    step["micro_ops"] = new
+
+def _unify_heating_placement(step):
+    """If this step sets HP1.temperature_C but vessel is placed on SP1 only, switch placement target to HP1."""
+    has_hp_temp = any(m.get("verb")=="set" and m.get("device") in ("HP1","hotplate","hotplate_id") and m.get("param")=="temperature_C" for m in step.get("micro_ops") or [])
+    if not has_hp_temp:
+        return
+    for m in step.get("micro_ops") or []:
+        if m.get("verb")=="place" and m.get("to")=="SP1":
+            m["to"] = "HP1"
+
+def _add_missing_vessels_to_registry(doc):
+    reg = doc.setdefault("vessel_registry", {})
+    known = set(reg.keys())
+    referenced = set()
+    # collect V* references
+    for m in doc.get("micro_plan", []) or []:
+        for k in ("object","from","to"):
+            v = m.get(k)
+            if isinstance(v,str) and re.match(r"^V\d+(_tube)?$", v):
+                referenced.add(v)
+    for st in doc.get("steps", []) or []:
+        for m in st.get("micro_ops") or []:
+            for k in ("object","from","to"):
+                v = m.get(k)
+                if isinstance(v,str) and re.match(r"^V\d+(_tube)?$", v):
+                    referenced.add(v)
+        for k in ("vessel","source_vessel","target_vessel","tube"):
+            v = st.get(k)
+            if isinstance(v,str) and re.match(r"^V\d+(_tube)?$", v):
+                referenced.add(v)
+    for v in sorted(referenced):
+        if v not in known:
+            reg[v] = "(auto) vessel"
+
+def polish_robot_doc(doc):
+    # operate on steps
+    for st in doc.get("steps", []) or []:
+        _ensure_transfer_pours(st)
+        _ensure_centrifuge_motion(st)
+        _sync_step_wait_minutes(st)
+        _unify_heating_placement(st)
+    _add_missing_vessels_to_registry(doc)
+    # Enforce base verbs globally (be safe)
+    allowed = BASE_VERBS
+    doc["micro_plan"] = [m for m in (doc.get("micro_plan") or []) if m.get("verb") in allowed]
+    for st in doc.get("steps", []) or []:
+        st["micro_ops"] = [m for m in (st.get("micro_ops") or []) if m.get("verb") in allowed]
+    return doc
+
 # ---------------- Public entry ----------------
 def apply_postprocessing(data: Dict[str,Any]) -> Dict[str,Any]:
     """

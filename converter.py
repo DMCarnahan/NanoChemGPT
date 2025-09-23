@@ -3,7 +3,7 @@ from __future__ import annotations
 import re, json, pathlib, unicodedata
 from typing import List, Dict, Optional, Any, Tuple
 try:
-    from app_utils.converter_h import apply_postprocessing as _ext_apply_post
+    from app_utils.converter_h import apply_postprocessing as _ext_apply_post, polish_robot_doc
 except Exception:
     _ext_apply_post = None
 
@@ -23,7 +23,6 @@ def apply_postprocessing(doc: dict) -> dict:
     except Exception:
         pass
     return robot_normalize(doc)
-
 
 DEFAULTS = {
     "stir_rpm": 700,
@@ -782,7 +781,7 @@ def _post_fix_pass(doc):
                 s = re.sub(r"\s*dropwise\b", "", s, flags=re.I)
                 s = re.sub(r"\s*\([^)]*\)", "", s)
                 m[key] = s.strip()
-                
+
     for st in doc.get("steps", []) or []:
         rs = st.get("reagents_structured") or []
         for r in rs:
@@ -985,6 +984,7 @@ def robot_normalize(doc):
     _enforce_base_micro_verbs(doc)
     _enforce_base_micro_verbs_steps(doc)
     _sync_wait_minutes_to_step(doc)
+    polish_robot_doc(doc)
     return doc
 
 
