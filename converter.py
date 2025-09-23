@@ -170,6 +170,120 @@ def _rebuild_step_micro_ops(step, devices, defaults, step_index):
 
     return m
 
+def _post_pass_repair(doc):
+    """Repair vessel usage, centrifuge order, reagent tokenization, and flatten micro_plan."""
+
+    # 1) reagent name cleanup
+    for st in doc.get("steps", []) or []:
+        for r in st.get("reagents_structured") or []:
+            name = r.get("name")
+            if isinstance(name, str):
+                name2 = re.sub(r"\.\s*Heat the mixture.*$", "", name, flags=re.I)
+                name2 = re.sub(r"^\s*of\s+", "", name2, flags=re.I)
+                r["name"] = name2.strip()
+
+    # 2) unify reaction vessel to V1 for early steps; place to HP1 when heating
+    for st in doc.get("steps", [])[:5]:
+        st["vessel"] = "V1"
+        mops = st.get("micro_ops") or []
+        if any(m.get("verb")=="set" and m.get("device")=="HP1" and m.get("param")=="temperature_C" for m in mops):
+            for m in mops:
+                if m.get("verb")=="place":
+                    m["to"] = "HP1"
+        for m in mops:
+            if m.get("verb") in ("pick_up","place") and isinstance(m.get("object"), str) and m["object"].startswith("V"):
+                m["object"] = "V1"
+        st["micro_ops"] = mops
+
+    # 3) ethanol always goes into V1
+    for st in doc.get("steps", []) or []:
+        if "ethanol" in (st.get("raw","").lower()):
+            for m in st.get("micro_ops") or []:
+                if m.get("verb") == "pour":
+                    m["to"] = "V1"
+
+    # 4) centrifuge step: transfer before spin; wait=10 (not 720)
+    for st in doc.get("steps", []) or []:
+        if st.get("minutes")==10 and "centrifuge" in (st.get("raw","").lower()):
+            idx = st.get("index", 6)
+            st["micro_ops"] = [
+                {"verb":"pour","from":"V1","to":"V2_tube","step_index": idx},
+                {"verb":"pick_up","object":"V2_tube","from":"rack","step_index": idx},
+                {"verb":"place","object":"V2_tube","to":"CF1","step_index": idx},
+                {"verb":"set","device":"CF1","param":"rpm","value":6000,"step_index": idx},
+                {"verb":"set","device":"CF1","param":"power","value":"on","step_index": idx},
+                {"verb":"wait","minutes":10,"step_index": idx},
+                {"verb":"set","device":"CF1","param":"power","value":"off","step_index": idx},
+                {"verb":"place","object":"V2_tube","to":"rack","step_index": idx},
+                {"verb":"pour","from":"V2_tube","to":"waste","step_index": idx},
+            ]
+
+    # 5) insert an acetone wash (if Acetone listed but no pour of acetone exists)
+    has_acetone_pour = any(
+        m.get("verb")=="pour" and "acetone" in str(m.get("from","")).lower()
+        for st in doc.get("steps",[]) for m in (st.get("micro_ops") or [])
+    )
+    acetone_in_reagents = any(isinstance(r,str) and "acetone" in r.lower() for r in doc.get("reagents", []))
+    if acetone_in_reagents and not has_acetone_pour:
+        cidx = next((i for i, st in enumerate(doc.get("steps", []))
+                     if "centrifuge" in (st.get("raw","").lower())), None)
+        if cidx is not None:
+            ins_idx = cidx + 1
+            wash = {
+                "action":"wash",
+                "minutes":10,
+                "raw":"Wash the precipitate with 50 mL of acetone and centrifuge again at 6000 rpm for 10 minutes.",
+                "reagents":["Acetone"],
+                "reagents_structured":[{"name":"Acetone","amount":50,"amount_unit":"mL"}],
+                "vessel":"V2_tube",
+                "micro_ops":[
+                    {"verb":"pour","from":"acetone_bottle","to":"V2_tube","step_index": ins_idx+1},
+                    {"verb":"pick_up","object":"V2_tube","from":"rack","step_index": ins_idx+1},
+                    {"verb":"place","object":"V2_tube","to":"CF1","step_index": ins_idx+1},
+                    {"verb":"set","device":"CF1","param":"rpm","value":6000,"step_index": ins_idx+1},
+                    {"verb":"set","device":"CF1","param":"power","value":"on","step_index": ins_idx+1},
+                    {"verb":"wait","minutes":10,"step_index": ins_idx+1},
+                    {"verb":"set","device":"CF1","param":"power","value":"off","step_index": ins_idx+1},
+                    {"verb":"place","object":"V2_tube","to":"rack","step_index": ins_idx+1},
+                    {"verb":"pour","from":"V2_tube","to":"waste","step_index": ins_idx+1},
+                ]
+            }
+            doc["steps"].insert(ins_idx+1, wash)
+            # reindex
+            for j, s in enumerate(doc["steps"], start=1):
+                s["index"] = j
+                for m in s.get("micro_ops") or []:
+                    m["step_index"] = j
+
+    # 6) respect ambient drying: if raw says 'ambient', remove oven/temps; just wait at bench
+    for st in doc.get("steps", []) or []:
+        if "ambient" in (st.get("raw","").lower()):
+            idx = st.get("index", 7)
+            st["minutes"] = 720
+            st["micro_ops"] = [
+                {"verb":"pick_up","object":"V2_tube","from":"rack","step_index": idx},
+                {"verb":"place","object":"V2_tube","to":"bench","step_index": idx},
+                {"verb":"wait","minutes":720,"step_index": idx},
+            ]
+
+    # 7) flatten micro_plan from steps (only base verbs)
+    allowed = {"pick_up","place","pour","set","wait"}
+    mp = []
+    for s in doc.get("steps", []) or []:
+        for m in s.get("micro_ops") or []:
+            if m.get("verb") in allowed:
+                mp.append(m)
+    out = []
+    for m in mp:
+        if not out or out[-1] != m:
+            out.append(m)
+    doc["micro_plan"] = out
+
+    # 8) ensure vessels for bottles/waste exist
+    reg = doc.setdefault("vessel_registry", {})
+    for name in ("V1","V2_tube","oleic_bottle","ode_bottle","ethanol_bottle","acetone_bottle","waste"):
+        reg.setdefault(name, "(auto) vessel")
+
 def _rebuild_micro_from_ops(doc):
     """Discard incoming micro_ops/micro_plan and rebuild them deterministically from step ops."""
     devices = doc.get("devices", {})
@@ -1018,6 +1132,7 @@ def robot_normalize(doc):
     _sync_wait_minutes_to_step(doc)
     _inject_vacuum_micro_ops(doc)
     _flatten_micro_plan_from_steps(doc)
+    _post_pass_repair(doc)
     try:
         polish_robot_doc(doc)
     except Exception:

@@ -1242,25 +1242,72 @@ def ask():
         "index_map": index_map,
     }
 
+
     # judge based on helper if present; otherwise simple rule
     if callable(_h_judge_sufficiency):
         try:
-            # Try new signature: (question, min_hits, min_score, min_chars, context)
-            judged_ok = bool(_h_judge_sufficiency(question, MIN_HITS, MIN_SCORE, MIN_CHARS, context_joined))
-        except TypeError as e_new:
+            import inspect
+            fn = _h_judge_sufficiency
+            sig = None
             try:
-                # Fallback to old signature: (question, context, min_hits, min_score, min_chars)
-                judged_ok = bool(_h_judge_sufficiency(question, context_joined, MIN_HITS, MIN_SCORE, MIN_CHARS))
-            except Exception as e_old:
-                app.logger.warning(f"[/ask] judge/enqueue error (helper): new-sig {e_new}; old-sig {e_old}")
-                judged_ok = len(context_joined) >= MIN_CHARS
+                sig = inspect.signature(fn)
+            except Exception:
+                pass
+            # Build candidate kwargs; we will only pass what the function can accept.
+            candidate_kwargs = {
+                'context': context_joined, 'ctx': context_joined, 'text': context_joined,
+                'min_hits': MIN_HITS, 'hits': MIN_HITS,
+                'min_score': MIN_SCORE, 'score': MIN_SCORE,
+                'min_chars': MIN_CHARS, 'chars': MIN_CHARS,
+                'thresholds': {'min_hits': MIN_HITS, 'min_score': MIN_SCORE, 'min_chars': MIN_CHARS},
+            }
+            judged_ok = False
+            attempts = []
+            # Prefer passing by name (question positional; everything else as keywords filtered to signature)
+            if sig is not None:
+                param_names = [p.name for p in sig.parameters.values()]
+                kw = {k: v for k, v in candidate_kwargs.items() if k in param_names}
+                attempts.append(( [question], kw, 'sig-filtered kw'))
+                # Also craft up to 3 additional positional args in order of common patterns to keep <=4 positional
+                common_order = ['context','min_hits','min_score','min_chars']
+                pos_args = [question]
+                for name in common_order:
+                    if name in param_names and len(pos_args) < 4:
+                        pos_args.append(candidate_kwargs[name])
+                # Remove any of those names from kw to avoid duplication
+                kw2 = {k: v for k, v in kw.items() if k not in common_order[:max(0,len(pos_args)-1)]}
+                attempts.append(( pos_args, kw2, 'sig-guided pos+kw'))
+            # Generic fallbacks (<=4 positional total)
+            attempts.extend([
+                ([question], {}, 'q only'),
+                ([question, context_joined], {}, 'q,context'),
+                ([question, MIN_HITS], {}, 'q,min_hits'),
+                ([question, MIN_HITS, MIN_SCORE], {}, 'q,min_hits,min_score'),
+                ([question, MIN_HITS, MIN_SCORE, MIN_CHARS], {}, 'q,min_hits,min_score,min_chars'),
+                ([question, context_joined, MIN_HITS], {}, 'q,context,min_hits'),
+                ([question, context_joined, MIN_HITS, MIN_SCORE], {}, 'q,context,min_hits,min_score'),
+                # Keywords-only (besides question) to avoid positional duplication
+                ([question], {'min_hits': MIN_HITS, 'min_score': MIN_SCORE, 'min_chars': MIN_CHARS, 'context': context_joined}, 'q + all kw'),
+            ])
+            last_err = None
+            for args_, kwargs_, tag in attempts:
+                try:
+                    judged_ok = bool(fn(*args_, **kwargs_))
+                    app.logger.debug(f"[/ask] judge helper attempt '{tag}' succeeded")
+                    break
+                except TypeError as te:
+                    last_err = te
+                    continue
+                except Exception as ex:
+                    last_err = ex
+                    continue
+            if last_err is not None and not judged_ok:
+                app.logger.warning(f"[/ask] judge/enqueue error (helper): {last_err}")
         except Exception as e:
             app.logger.warning(f"[/ask] judge/enqueue error (helper): {e}")
             judged_ok = len(context_joined) >= MIN_CHARS
     else:
         judged_ok = len(context_joined) >= MIN_CHARS
-
-
     # judge_hits fallback if not imported
     _judge_hits = None
     try:
