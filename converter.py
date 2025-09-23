@@ -676,6 +676,54 @@ def _fix_micro_placeholders(doc):
 
 # 5) CALL these from robot_normalize 
 
+def _enforce_base_micro_verbs(doc):
+    """Keep only pick_up/place/pour/set/wait in doc.micro_plan; start/stop→set(power)."""
+    allowed = {"pick_up","place","pour","set","wait"}
+    mp = doc.get("micro_plan", []) or []
+    out = []
+    for m in mp:
+        v = m.get("verb")
+        if v == "start":
+            m = {**m, "verb":"set", "param":"power", "value":"on"}
+        elif v == "stop":
+            m = {**m, "verb":"set", "param":"power", "value":"off"}
+        if m.get("verb") in allowed:
+            out.append(m)
+    doc["micro_plan"] = out
+
+def _enforce_base_micro_verbs_steps(doc):
+    """Same clean-up for each step.micro_ops; also map decant→pour(...→waste)."""
+    allowed = {"pick_up","place","pour","set","wait"}
+    for st in doc.get("steps", []) or []:
+        ops = st.get("micro_ops") or []
+        out = []
+        for m in ops:
+            v = m.get("verb")
+            if v == "start":
+                dev = m.get("device") or m.get("hardware") or "device"
+                m = {"verb":"set","device":dev,"param":"power","value":"on","step_index":m.get("step_index")}
+            elif v == "stop":
+                dev = m.get("device") or m.get("hardware") or "device"
+                m = {"verb":"set","device":dev,"param":"power","value":"off","step_index":m.get("step_index")}
+            elif v == "decant":
+                src = m.get("object") or m.get("from") or "tube"
+                m = {"verb":"pour","from":src,"to":"waste","step_index":m.get("step_index")}
+            if m.get("verb") in allowed:
+                out.append(m)
+        st["micro_ops"] = out
+
+def _sync_wait_minutes_to_step(doc):
+    """Make wait.minutes in micro_plan equal the corresponding step.minutes when present."""
+    minutes_by_idx = {i+1: s.get("minutes") for i, s in enumerate(doc.get("steps", []))}
+    new_mp = []
+    for m in doc.get("micro_plan", []) or []:
+        if m.get("verb") == "wait" and "step_index" in m:
+            mins = minutes_by_idx.get(m["step_index"])
+            if mins is not None:
+                m = {**m, "minutes": mins}
+        new_mp.append(m)
+    doc["micro_plan"] = new_mp
+
 def _post_fix_pass(doc):
     """
     Final strict-first-try cleanups that run after all other normalizers.
@@ -734,6 +782,13 @@ def _post_fix_pass(doc):
                 s = re.sub(r"\s*dropwise\b", "", s, flags=re.I)
                 s = re.sub(r"\s*\([^)]*\)", "", s)
                 m[key] = s.strip()
+                
+    for st in doc.get("steps", []) or []:
+        rs = st.get("reagents_structured") or []
+        for r in rs:
+            name = r.get("name")
+            if isinstance(name, str) and ". Heat the mixture" in name:
+                r["name"] = name.split(". Heat the mixture")[0].strip()
 
     # 4) Wash solvent: respect 'deionized water' if present in raw
     for st in steps:
@@ -928,6 +983,8 @@ def robot_normalize(doc):
 
     _post_fix_pass(doc)
     _enforce_base_micro_verbs(doc)
+    _enforce_base_micro_verbs_steps(doc)
+    _sync_wait_minutes_to_step(doc)
     return doc
 
 
@@ -1666,11 +1723,13 @@ def _micro_for_op(op: dict, vessels: 'VesselRegistry', hardware: list[dict]) -> 
         m += [{"verb":"pick_up","object":v,"from":"bench"},
               {"verb":"place","object":v,"to":"bench"}]
         return m
+    
     if typ == "move_to_stir_plate":
         v = _label_for_vessel(op.get("vessel",""), vessels, hardware)
         m += [{"verb":"pick_up","object":v,"from":"bench"},
               {"verb":"place","object":v,"to":"stir_plate"}]
         return m
+    
     if typ == "set_stir_rate":
         m += [{"verb":"set","device": op.get("stir_plate_id") or "stir_plate",
             "param":"rpm","value":op.get("rpm")}]
@@ -1701,8 +1760,65 @@ def _micro_for_op(op: dict, vessels: 'VesselRegistry', hardware: list[dict]) -> 
         ]
         return m
 
+    if typ == "transfer_to_centrifuge_tube":
+        src = _label_for_vessel(op.get("from", ""), vessels, hardware) if op.get("from") else "source"
+        dst = op.get("to") or "V2_tube"
+        m += [
+            {"verb":"pick_up","object":src,"from":"bench"},
+            {"verb":"pour","from":src,"to":dst},
+            {"verb":"place","object":src,"to":"bench"},
+        ]
+        return m
 
-    # Generic primitive ops -----------------------------------------------
+    if typ == "centrifuge":
+        tube = op.get("tube") or "V2_tube"
+        dev  = op.get("centrifuge_id") or "CF1"
+        mins = op.get("minutes")  
+        m += [
+            {"verb":"pick_up","object":tube,"from":"rack"},
+            {"verb":"place","object":tube,"to":"centrifuge"},
+            {"verb":"set","device": dev,"param":"rpm","value": op.get("rpm")},
+            {"verb":"set","device": dev,"param":"power","value":"on"},
+        ]
+        if mins is not None:
+            m += [{"verb":"wait","minutes": mins}]
+        m += [
+            {"verb":"set","device": dev,"param":"power","value":"off"},
+            {"verb":"place","object":tube,"to":"rack"},
+        ]
+        return m
+
+    if typ == "sonicate":
+        tube = op.get("tube") or "V2_tube"
+        dev  = op.get("sonicator_id") or "US1"
+        mins = op.get("minutes")
+        m += [
+            {"verb":"pick_up","object":tube,"from":"rack"},
+            {"verb":"place","object":tube,"to":"sonicator"},
+            {"verb":"set","device": dev,"param":"power","value":"on"},
+        ]
+        if mins is not None:
+            m += [{"verb":"wait","minutes": mins}]
+        m += [
+            {"verb":"set","device": dev,"param":"power","value":"off"},
+            {"verb":"place","object":tube,"to":"rack"},
+        ]
+        return m
+
+    if typ == "start_vacuum":
+        m += [{"verb":"set","device": op.get("vacuum_pump_id") or "VP1","param":"power","value":"on"}]
+        return m
+
+    if typ == "start":
+        dev = op.get("device") or "device"
+        m += [{"verb":"set","device": dev, "param":"power", "value":"on"}]
+        return m
+
+    if typ == "stop":
+        dev = op.get("device") or "device"
+        m += [{"verb":"set","device": dev, "param":"power", "value":"off"}]
+        return m
+
     if typ == "set":
         dev = op.get("device") or op.get("hotplate_id") or op.get("oven_id") or "device"
         m += [{"verb":"set","device": dev, "param": op.get("param"), "value": op.get("value")}]
@@ -1712,18 +1828,22 @@ def _micro_for_op(op: dict, vessels: 'VesselRegistry', hardware: list[dict]) -> 
         dev = op.get("device") or "device"
         m += [{"verb":"set","device": dev, "param":"power", "value":"on"}]
         return m
+    
     if typ == "stop":
         dev = op.get("device") or "device"
         m += [{"verb":"set","device": dev, "param":"power", "value":"off"}]
         return m
+    
     if typ == "pick_up":
         v = _label_for_vessel(op.get("vessel",""), vessels, hardware)
         m += [{"verb":"pick_up","object":v,"from":"bench"}]
         return m
+    
     if typ == "place":
         v = _label_for_vessel(op.get("vessel",""), vessels, hardware)
         m += [{"verb":"place","object":v,"to":"bench"}]
         return m
+    
     if typ == "transfer":
         src = _label_for_vessel(op.get("from", ""), vessels, hardware) if op.get("from") else "source"
         dst = _label_for_vessel(op.get("to", ""),   vessels, hardware) if op.get("to")   else "target"
@@ -1734,9 +1854,11 @@ def _micro_for_op(op: dict, vessels: 'VesselRegistry', hardware: list[dict]) -> 
             {"verb":"place","object":src,"to":"bench"},
         ]
         return m
+    
     if typ == "wait":
         m += [{"verb":"wait","minutes": op.get("minutes")}]
         return m
+    
     if typ == "filter":
         v = _label_for_vessel(op.get("vessel",""), vessels, hardware)
         m += [{"verb":"place","object":"filtration setup","to":"bench"},
