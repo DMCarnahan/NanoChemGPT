@@ -6,6 +6,7 @@ try:
     from app_utils.converter_h import apply_postprocessing as _ext_apply_post, polish_robot_doc
 except Exception:
     _ext_apply_post = None
+    from app_utils.converter_h import polish_robot_doc
 
 _BANNER_SHOWN = False
 def apply_postprocessing(doc: dict) -> dict:
@@ -1054,18 +1055,28 @@ def _flatten_micro_plan_from_steps(doc):
     doc["micro_plan"] = out
 
 def _inject_vacuum_micro_ops(doc):
-    """If a step mentions 'vacuum' in raw, ensure a set(VP1,power=on) occurs before the first wait in that step."""
+    """
+    If a step mentions 'vacuum' in raw:
+      - ensure set(VP1, power=on) before the first wait in that step, and
+      - ensure set(VP1, power=off) immediately after the last wait in that step.
+    """
     vp = (doc.get("devices", {}) or {}).get("vacuum_pump_id", "VP1")
     for idx, st in enumerate(doc.get("steps", []) or [], start=1):
         raw = (st.get("raw", "") or "").lower()
         if "vacuum" not in raw:
             continue
-        mops = st.get("micro_ops") or []
-        has_on = any(m.get("verb")=="set" and (m.get("device") in {vp, "vacuum_pump"}) and m.get("param")=="power" and str(m.get("value")).lower()=="on" for m in mops)
-        if not has_on:
-            # insert before first wait; else append at end
-            insert_at = next((i for i,m in enumerate(mops) if m.get("verb")=="wait"), len(mops))
-            mops.insert(insert_at, {"verb":"set","device": vp, "param":"power","value":"on","step_index": idx})
+        mops = list(st.get("micro_ops") or [])
+        # ensure ON before first wait
+        first_wait = next((i for i,m in enumerate(mops) if m.get("verb")=="wait"), None)
+        has_on = any(m.get("verb")=="set" and m.get("device") in {vp, "vacuum_pump"} and m.get("param")=="power" and str(m.get("value")).lower()=="on" for m in mops)
+        if first_wait is not None and not has_on:
+            mops.insert(first_wait, {"verb":"set","device": vp, "param":"power","value":"on","step_index": idx})
+        # ensure OFF after last wait
+        last_wait = next((i for i in range(len(mops)-1, -1, -1) if mops[i].get("verb")=="wait"), None)
+        has_off_after = any(m.get("verb")=="set" and m.get("device")==vp and m.get("param")=="power" and str(m.get("value")).lower()=="off"
+                            for m in (mops[last_wait+1:] if last_wait is not None else []))
+        if last_wait is not None and not has_off_after:
+            mops.insert(last_wait+1, {"verb":"set","device": vp, "param":"power","value":"off","step_index": idx})
         st["micro_ops"] = mops
 
 def robot_normalize(doc):
@@ -1131,8 +1142,14 @@ def robot_normalize(doc):
     _enforce_base_micro_verbs_steps(doc)
     _sync_wait_minutes_to_step(doc)
     _inject_vacuum_micro_ops(doc)
-    _flatten_micro_plan_from_steps(doc)
+
+    # IMPORTANT: repair BEFORE we finalize micro-ops/plan,
+    # then rebuild from ops so step.micro_ops and the flattened micro_plan match.
     _post_pass_repair(doc)
+    _rebuild_micro_from_ops(doc)
+    _enforce_base_micro_verbs(doc)
+    _enforce_base_micro_verbs_steps(doc)
+    _flatten_micro_plan_from_steps(doc)
     try:
         polish_robot_doc(doc)
     except Exception:
