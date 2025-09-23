@@ -2,14 +2,38 @@ from __future__ import annotations
 
 import re, json, pathlib, unicodedata
 from typing import List, Dict, Optional, Any, Tuple
+
+# Try to load defaults/device IDs and optional external post-processor
 try:
-    from app_utils.converter_h import apply_postprocessing as _ext_apply_post
+    from app_utils.converter_h import DEFAULTS, DEVICE_IDS, apply_postprocessing as _ext_apply_post
 except Exception:
     _ext_apply_post = None
-    from app_utils.converter_h import polish_robot_doc
+    DEFAULTS = {
+        "stir_rpm": 700,
+        "centrifuge_rpm": 4000,
+        "centrifuge_minutes": 10,
+        "room_temp_C": 25,
+        "transfer_rate_slow": "slow",
+    }
+    DEVICE_IDS = {
+        "stir_plate_id": "SP1",
+        "hotplate_id": "HP1",
+        "centrifuge_id": "CF1",
+        "oven_id": "OV1",
+        "vacuum_pump_id": "VP1",
+        "vortex_id": "VX1",
+        "sonicator_id": "SN1",
+    }
 
+try:
+    from app_utils.post_polish import polish_robot_doc as _post_polish
+except Exception:
+    _post_polish = None
+
+ROBOT_NORMALIZER_VERSION = "2.2.3"
 _BANNER_SHOWN = False
 def apply_postprocessing(doc: dict) -> dict:
+
     global _BANNER_SHOWN
     if not _BANNER_SHOWN:
         try:
@@ -24,30 +48,6 @@ def apply_postprocessing(doc: dict) -> dict:
     except Exception:
         pass
     return robot_normalize(doc)
-
-DEFAULTS = {
-    "stir_rpm": 700,
-    "centrifuge_rpm": 4000,
-    "centrifuge_minutes": 10,
-    "transfer_rate_slow": "slow",
-    "room_temp_C": 25.0,
-}
-
-DEVICE_IDS = {
-    "stir_plate_id": "SP1",
-    "hotplate_id": "HP1",
-    "centrifuge_id": "CF1",
-    "oven_id": "OV1",
-    "vacuum_pump_id": "VP1",
-    "sonicator_id": "US1",
-}
-
-ROBOT_NORMALIZER_VERSION = "v2.2"
-
-try:
-    from app_utils.post_polish import polish_robot_doc as _post_polish
-except Exception:
-    _post_polish = None
 
 def _build_bottle_config(doc):
     """Create a generalized bottle_map/bottle_labels from reagents & micro-ops so chemicals become vessels."""
@@ -65,16 +65,16 @@ def _build_bottle_config(doc):
                 v = m.get(key)
                 if not isinstance(v, str): 
                     continue
-                s = v.strip()
-                if not s or s.lower() in {"bench","rack","waste"}:
+                s2 = v.strip()
+                if not s2 or s2.lower() in {"bench","rack","waste"}:
                     continue
-                if s.endswith("_bottle"):
+                if s2.endswith("_bottle"):
                     continue
-                if re.fullmatch(r"V\\d+(_tube)?", s):
+                if re.fullmatch(r"V\d+(_tube)?", s2):
                     continue
                 if m.get("verb") == "set":
                     continue
-                names.add(s)
+                names.add(s2)
     # build maps (case-insensitive keys)
     bottle_map = {n.lower(): re.sub(r"[^a-z0-9]+", "_", n.lower()).strip("_") + "_bottle" for n in names}
     bottle_labels = {vid: (n.title() + " bottle") for n, vid in bottle_map.items()}
@@ -89,7 +89,6 @@ def _build_bottle_config(doc):
             "minutes": (doc.get("defaults", {}) or {}).get("centrifuge_minutes", 10),
             "tube": "V2_tube",
         },
-        # Use ethanol as the wash reagent if present
         "wash": {"reagent": bottle_map.get("ethanol"), "cycles": 0},
         "drying": {"prefer_ambient_if_mentioned": True, "ambient_minutes": 1440, "vacuum_minutes": 720, "vacuum_temp_C": 25},
     }
@@ -101,22 +100,21 @@ def _run_post_polish(doc):
         cfg = _build_bottle_config(doc)
     except Exception:
         pass
-    # Prefer local post_polish module if available; else fall back to any existing polish_robot_doc
     if _post_polish is not None:
         try:
             return _post_polish(doc, config=cfg)
         except Exception:
             return doc
     try:
-        # fallback: if another polish_robot_doc is in scope and supports (doc, config)
-        return _run_post_polish(doc, config=cfg)  # type: ignore
+        return polish_robot_doc(doc, config=cfg)  # type: ignore
     except Exception:
         try:
-            # last resort: call without config
-            return _run_post_polish(doc)  # type: ignore
+            return polish_robot_doc(doc)  # type: ignore
         except Exception:
             return doc
-        
+# --- End: post_polish integration ---
+
+
 def _walk(obj, fn):
     if isinstance(obj, dict):
         for k,v in list(obj.items()):
@@ -164,29 +162,6 @@ def _dedupe_micro_ops(doc):
     for st in doc.get("steps", []):
         if isinstance(st.get("micro_ops"), list):
             st["micro_ops"] = dedupe(st["micro_ops"])
-
-def _flatten_plan(doc):
-    allowed = {"pick_up","place","pour","set","wait"}
-    mp = []
-    for i, st in enumerate(doc.get("steps", []), 1):
-        for m in st.get("micro_ops") or []:
-            if m.get("verb") in allowed:
-                m = {**m, "step_index": i}
-                mp.append(m)
-    # remove consecutive duplicates
-    out = []
-    for m in mp:
-        if not out or out[-1] != m: out.append(m)
-    doc["micro_plan"] = out
-
-def _normalize_heating_and_vessel(doc):
-    for st in doc.get("steps", []) or []:
-        mops = st.get("micro_ops") or []
-        heating = any(m.get("verb")=="set" and m.get("device")=="HP1" and m.get("param")=="temperature_C" for m in mops)
-        if heating:
-            for m in mops:
-                if m.get("verb")=="place" and m.get("object","").startswith("V"):
-                    m["to"] = "HP1"
 
 def _rebuild_step_micro_ops(step, devices, defaults, step_index):
     """Return a fresh list of micro_ops synthesized from canonical ops."""
@@ -266,120 +241,6 @@ def _rebuild_step_micro_ops(step, devices, defaults, step_index):
         # (Ignore unknown ops in micro synthesis — keep steps/ops authoritative)
 
     return m
-
-def _post_pass_repair(doc):
-    """Repair vessel usage, centrifuge order, reagent tokenization, and flatten micro_plan."""
-
-    # 1) reagent name cleanup
-    for st in doc.get("steps", []) or []:
-        for r in st.get("reagents_structured") or []:
-            name = r.get("name")
-            if isinstance(name, str):
-                name2 = re.sub(r"\.\s*Heat the mixture.*$", "", name, flags=re.I)
-                name2 = re.sub(r"^\s*of\s+", "", name2, flags=re.I)
-                r["name"] = name2.strip()
-
-    # 2) unify reaction vessel to V1 for early steps; place to HP1 when heating
-    for st in doc.get("steps", [])[:5]:
-        st["vessel"] = "V1"
-        mops = st.get("micro_ops") or []
-        if any(m.get("verb")=="set" and m.get("device")=="HP1" and m.get("param")=="temperature_C" for m in mops):
-            for m in mops:
-                if m.get("verb")=="place":
-                    m["to"] = "HP1"
-        for m in mops:
-            if m.get("verb") in ("pick_up","place") and isinstance(m.get("object"), str) and m["object"].startswith("V"):
-                m["object"] = "V1"
-        st["micro_ops"] = mops
-
-    # 3) ethanol always goes into V1
-    for st in doc.get("steps", []) or []:
-        if "ethanol" in (st.get("raw","").lower()):
-            for m in st.get("micro_ops") or []:
-                if m.get("verb") == "pour":
-                    m["to"] = "V1"
-
-    # 4) centrifuge step: transfer before spin; wait=10 (not 720)
-    for st in doc.get("steps", []) or []:
-        if st.get("minutes")==10 and "centrifuge" in (st.get("raw","").lower()):
-            idx = st.get("index", 6)
-            st["micro_ops"] = [
-                {"verb":"pour","from":"V1","to":"V2_tube","step_index": idx},
-                {"verb":"pick_up","object":"V2_tube","from":"rack","step_index": idx},
-                {"verb":"place","object":"V2_tube","to":"CF1","step_index": idx},
-                {"verb":"set","device":"CF1","param":"rpm","value":6000,"step_index": idx},
-                {"verb":"set","device":"CF1","param":"power","value":"on","step_index": idx},
-                {"verb":"wait","minutes":10,"step_index": idx},
-                {"verb":"set","device":"CF1","param":"power","value":"off","step_index": idx},
-                {"verb":"place","object":"V2_tube","to":"rack","step_index": idx},
-                {"verb":"pour","from":"V2_tube","to":"waste","step_index": idx},
-            ]
-
-    # 5) insert an acetone wash (if Acetone listed but no pour of acetone exists)
-    has_acetone_pour = any(
-        m.get("verb")=="pour" and "acetone" in str(m.get("from","")).lower()
-        for st in doc.get("steps",[]) for m in (st.get("micro_ops") or [])
-    )
-    acetone_in_reagents = any(isinstance(r,str) and "acetone" in r.lower() for r in doc.get("reagents", []))
-    if acetone_in_reagents and not has_acetone_pour:
-        cidx = next((i for i, st in enumerate(doc.get("steps", []))
-                     if "centrifuge" in (st.get("raw","").lower())), None)
-        if cidx is not None:
-            ins_idx = cidx + 1
-            wash = {
-                "action":"wash",
-                "minutes":10,
-                "raw":"Wash the precipitate with 50 mL of acetone and centrifuge again at 6000 rpm for 10 minutes.",
-                "reagents":["Acetone"],
-                "reagents_structured":[{"name":"Acetone","amount":50,"amount_unit":"mL"}],
-                "vessel":"V2_tube",
-                "micro_ops":[
-                    {"verb":"pour","from":"acetone_bottle","to":"V2_tube","step_index": ins_idx+1},
-                    {"verb":"pick_up","object":"V2_tube","from":"rack","step_index": ins_idx+1},
-                    {"verb":"place","object":"V2_tube","to":"CF1","step_index": ins_idx+1},
-                    {"verb":"set","device":"CF1","param":"rpm","value":6000,"step_index": ins_idx+1},
-                    {"verb":"set","device":"CF1","param":"power","value":"on","step_index": ins_idx+1},
-                    {"verb":"wait","minutes":10,"step_index": ins_idx+1},
-                    {"verb":"set","device":"CF1","param":"power","value":"off","step_index": ins_idx+1},
-                    {"verb":"place","object":"V2_tube","to":"rack","step_index": ins_idx+1},
-                    {"verb":"pour","from":"V2_tube","to":"waste","step_index": ins_idx+1},
-                ]
-            }
-            doc["steps"].insert(ins_idx+1, wash)
-            # reindex
-            for j, s in enumerate(doc["steps"], start=1):
-                s["index"] = j
-                for m in s.get("micro_ops") or []:
-                    m["step_index"] = j
-
-    # 6) respect ambient drying: if raw says 'ambient', remove oven/temps; just wait at bench
-    for st in doc.get("steps", []) or []:
-        if "ambient" in (st.get("raw","").lower()):
-            idx = st.get("index", 7)
-            st["minutes"] = 720
-            st["micro_ops"] = [
-                {"verb":"pick_up","object":"V2_tube","from":"rack","step_index": idx},
-                {"verb":"place","object":"V2_tube","to":"bench","step_index": idx},
-                {"verb":"wait","minutes":720,"step_index": idx},
-            ]
-
-    # 7) flatten micro_plan from steps (only base verbs)
-    allowed = {"pick_up","place","pour","set","wait"}
-    mp = []
-    for s in doc.get("steps", []) or []:
-        for m in s.get("micro_ops") or []:
-            if m.get("verb") in allowed:
-                mp.append(m)
-    out = []
-    for m in mp:
-        if not out or out[-1] != m:
-            out.append(m)
-    doc["micro_plan"] = out
-
-    # 8) ensure vessels for bottles/waste exist
-    reg = doc.setdefault("vessel_registry", {})
-    for name in ("V1","V2_tube","oleic_bottle","ode_bottle","ethanol_bottle","acetone_bottle","waste"):
-        reg.setdefault(name, "(auto) vessel")
 
 def _rebuild_micro_from_ops(doc):
     """Discard incoming micro_ops/micro_plan and rebuild them deterministically from step ops."""
@@ -699,7 +560,7 @@ def _collapse_consecutive_dry_steps(doc):
         t = next((op.get("value") for op in st.get("ops", []) if op.get("op")=="set" and op.get("param")=="temperature_C"), None)
         m = next((op.get("minutes") for op in st.get("ops", []) if op.get("op")=="wait"), None) or st.get("minutes")
         if pending is None:
-            # keep the first; ensure ops are pure oven set/wait (_force_pure_dry/_final_invariants will enforce)
+            # keep the first; ensure ops are pure oven set/wait (your _force_pure_dry/_final_invariants will enforce)
             pending = (t, m)
             keep.append(st)
         else:
@@ -886,54 +747,6 @@ def _fix_micro_placeholders(doc):
 
 # 5) CALL these from robot_normalize 
 
-def _enforce_base_micro_verbs(doc):
-    """Keep only pick_up/place/pour/set/wait in doc.micro_plan; start/stop→set(power)."""
-    allowed = {"pick_up","place","pour","set","wait"}
-    mp = doc.get("micro_plan", []) or []
-    out = []
-    for m in mp:
-        v = m.get("verb")
-        if v == "start":
-            m = {**m, "verb":"set", "param":"power", "value":"on"}
-        elif v == "stop":
-            m = {**m, "verb":"set", "param":"power", "value":"off"}
-        if m.get("verb") in allowed:
-            out.append(m)
-    doc["micro_plan"] = out
-
-def _enforce_base_micro_verbs_steps(doc):
-    """Same clean-up for each step.micro_ops; also map decant→pour(...→waste)."""
-    allowed = {"pick_up","place","pour","set","wait"}
-    for st in doc.get("steps", []) or []:
-        ops = st.get("micro_ops") or []
-        out = []
-        for m in ops:
-            v = m.get("verb")
-            if v == "start":
-                dev = m.get("device") or m.get("hardware") or "device"
-                m = {"verb":"set","device":dev,"param":"power","value":"on","step_index":m.get("step_index")}
-            elif v == "stop":
-                dev = m.get("device") or m.get("hardware") or "device"
-                m = {"verb":"set","device":dev,"param":"power","value":"off","step_index":m.get("step_index")}
-            elif v == "decant":
-                src = m.get("object") or m.get("from") or "tube"
-                m = {"verb":"pour","from":src,"to":"waste","step_index":m.get("step_index")}
-            if m.get("verb") in allowed:
-                out.append(m)
-        st["micro_ops"] = out
-
-def _sync_wait_minutes_to_step(doc):
-    """Make wait.minutes in micro_plan equal the corresponding step.minutes when present."""
-    minutes_by_idx = {i+1: s.get("minutes") for i, s in enumerate(doc.get("steps", []))}
-    new_mp = []
-    for m in doc.get("micro_plan", []) or []:
-        if m.get("verb") == "wait" and "step_index" in m:
-            mins = minutes_by_idx.get(m["step_index"])
-            if mins is not None:
-                m = {**m, "minutes": mins}
-        new_mp.append(m)
-    doc["micro_plan"] = new_mp
-
 def _post_fix_pass(doc):
     """
     Final strict-first-try cleanups that run after all other normalizers.
@@ -992,13 +805,6 @@ def _post_fix_pass(doc):
                 s = re.sub(r"\s*dropwise\b", "", s, flags=re.I)
                 s = re.sub(r"\s*\([^)]*\)", "", s)
                 m[key] = s.strip()
-
-    for st in doc.get("steps", []) or []:
-        rs = st.get("reagents_structured") or []
-        for r in rs:
-            name = r.get("name")
-            if isinstance(name, str) and ". Heat the mixture" in name:
-                r["name"] = name.split(". Heat the mixture")[0].strip()
 
     # 4) Wash solvent: respect 'deionized water' if present in raw
     for st in steps:
@@ -1096,84 +902,12 @@ def _purge_stray_vessels_and_contexts(doc):
         if m.get("context_vessel") not in (None, "V1", "V2", "V2_tube"):
             m["context_vessel"] = "V1"
 
-def _enforce_base_micro_verbs(doc):
-    """Ensure micro_plan uses only base verbs: pick_up, place, pour, set, wait.
-
-    Map start/stop → set(power=on/off) and drop any unknowns."""
-    allowed = {"pick_up","place","pour","set","wait"}
-    mp = doc.get("micro_plan", []) or []
-    out = []
-    for m in mp:
-        v = m.get("verb")
-        if v == "start":
-            m = {**m, "verb":"set", "param":"power", "value":"on"}
-        elif v == "stop":
-            m = {**m, "verb":"set", "param":"power", "value":"off"}
-        # strip device-less set
-        if m.get("verb") == "set" and not m.get("device"):
-            # try to promote known ids from context fields
-            pass
-        if m.get("verb") in allowed:
-            out.append(m)
-        # else drop
-    doc["micro_plan"] = out
-
-    reg = doc.setdefault("vessel_registry", {})
-    for k in list(reg.keys()):
-        if k not in ("V1","V2","V2_tube"): del reg[k]
-    # micro_plan context_vessel cleanup
-    for m in doc.get("micro_plan", []) or []:
-        if m.get("context_vessel") not in (None, "V1", "V2", "V2_tube"):
-            m["context_vessel"] = "V1"
-
 def _fixpoint(fn, doc, max_iter=2):
     for _ in range(max_iter):
         before = json.dumps(doc, sort_keys=True)
         fn(doc)
         after = json.dumps(doc, sort_keys=True)
         if before == after: break
-
-
-def _flatten_micro_plan_from_steps(doc):
-    """Make doc['micro_plan'] exactly the concatenation of steps[*].micro_ops (base verbs only)."""
-    allowed = {"pick_up","place","pour","set","wait"}
-    mp = []
-    for idx, st in enumerate(doc.get("steps", []) or [], start=1):
-        for m in (st.get("micro_ops") or []):
-            if m.get("verb") in allowed:
-                m = {**m, "step_index": idx}
-                mp.append(m)
-    # de-dup consecutive identical entries
-    out = []
-    for m in mp:
-        if not out or out[-1] != m:
-            out.append(m)
-    doc["micro_plan"] = out
-
-def _inject_vacuum_micro_ops(doc):
-    """
-    If a step mentions 'vacuum' in raw:
-      - ensure set(VP1, power=on) before the first wait in that step, and
-      - ensure set(VP1, power=off) immediately after the last wait in that step.
-    """
-    vp = (doc.get("devices", {}) or {}).get("vacuum_pump_id", "VP1")
-    for idx, st in enumerate(doc.get("steps", []) or [], start=1):
-        raw = (st.get("raw", "") or "").lower()
-        if "vacuum" not in raw:
-            continue
-        mops = list(st.get("micro_ops") or [])
-        # ensure ON before first wait
-        first_wait = next((i for i,m in enumerate(mops) if m.get("verb")=="wait"), None)
-        has_on = any(m.get("verb")=="set" and m.get("device") in {vp, "vacuum_pump"} and m.get("param")=="power" and str(m.get("value")).lower()=="on" for m in mops)
-        if first_wait is not None and not has_on:
-            mops.insert(first_wait, {"verb":"set","device": vp, "param":"power","value":"on","step_index": idx})
-        # ensure OFF after last wait
-        last_wait = next((i for i in range(len(mops)-1, -1, -1) if mops[i].get("verb")=="wait"), None)
-        has_off_after = any(m.get("verb")=="set" and m.get("device")==vp and m.get("param")=="power" and str(m.get("value")).lower()=="off"
-                            for m in (mops[last_wait+1:] if last_wait is not None else []))
-        if last_wait is not None and not has_off_after:
-            mops.insert(last_wait+1, {"verb":"set","device": vp, "param":"power","value":"off","step_index": idx})
-        st["micro_ops"] = mops
 
 def robot_normalize(doc):
     _seed_defaults_devices(doc)
@@ -1229,11 +963,12 @@ def robot_normalize(doc):
 
     _fixpoint(_rebuild_micro_from_ops, doc)
     _fixpoint(_final_invariants, doc)
-
     # Idempotency
     _map_aliases(doc); _dedupe_micro_ops(doc)
 
-    _post_fix_pass(doc)
+    # Post-polish with executor-safe normalizer
+    doc = _run_post_polish(doc)
+    return doc
 
 
 FENCE_START_RX = re.compile(r"^\s*```")                    # start of any fenced block
@@ -1971,13 +1706,11 @@ def _micro_for_op(op: dict, vessels: 'VesselRegistry', hardware: list[dict]) -> 
         m += [{"verb":"pick_up","object":v,"from":"bench"},
               {"verb":"place","object":v,"to":"bench"}]
         return m
-    
     if typ == "move_to_stir_plate":
         v = _label_for_vessel(op.get("vessel",""), vessels, hardware)
         m += [{"verb":"pick_up","object":v,"from":"bench"},
               {"verb":"place","object":v,"to":"stir_plate"}]
         return m
-    
     if typ == "set_stir_rate":
         m += [{"verb":"set","device": op.get("stir_plate_id") or "stir_plate",
             "param":"rpm","value":op.get("rpm")}]
@@ -2008,90 +1741,28 @@ def _micro_for_op(op: dict, vessels: 'VesselRegistry', hardware: list[dict]) -> 
         ]
         return m
 
-    if typ == "transfer_to_centrifuge_tube":
-        src = _label_for_vessel(op.get("from", ""), vessels, hardware) if op.get("from") else "source"
-        dst = op.get("to") or "V2_tube"
-        m += [
-            {"verb":"pick_up","object":src,"from":"bench"},
-            {"verb":"pour","from":src,"to":dst},
-            {"verb":"place","object":src,"to":"bench"},
-        ]
-        return m
 
-    if typ == "centrifuge":
-        tube = op.get("tube") or "V2_tube"
-        dev  = op.get("centrifuge_id") or "CF1"
-        mins = op.get("minutes")  
-        m += [
-            {"verb":"pick_up","object":tube,"from":"rack"},
-            {"verb":"place","object":tube,"to":"centrifuge"},
-            {"verb":"set","device": dev,"param":"rpm","value": op.get("rpm")},
-            {"verb":"set","device": dev,"param":"power","value":"on"},
-        ]
-        if mins is not None:
-            m += [{"verb":"wait","minutes": mins}]
-        m += [
-            {"verb":"set","device": dev,"param":"power","value":"off"},
-            {"verb":"place","object":tube,"to":"rack"},
-        ]
-        return m
-
-    if typ == "sonicate":
-        tube = op.get("tube") or "V2_tube"
-        dev  = op.get("sonicator_id") or "US1"
-        mins = op.get("minutes")
-        m += [
-            {"verb":"pick_up","object":tube,"from":"rack"},
-            {"verb":"place","object":tube,"to":"sonicator"},
-            {"verb":"set","device": dev,"param":"power","value":"on"},
-        ]
-        if mins is not None:
-            m += [{"verb":"wait","minutes": mins}]
-        m += [
-            {"verb":"set","device": dev,"param":"power","value":"off"},
-            {"verb":"place","object":tube,"to":"rack"},
-        ]
-        return m
-
-    if typ == "start_vacuum":
-        m += [{"verb":"set","device": op.get("vacuum_pump_id") or "VP1","param":"power","value":"on"}]
-        return m
-
-    if typ == "start":
-        dev = op.get("device") or "device"
-        m += [{"verb":"set","device": dev, "param":"power", "value":"on"}]
-        return m
-
-    if typ == "stop":
-        dev = op.get("device") or "device"
-        m += [{"verb":"set","device": dev, "param":"power", "value":"off"}]
-        return m
-
+    # Generic primitive ops -----------------------------------------------
     if typ == "set":
         dev = op.get("device") or op.get("hotplate_id") or op.get("oven_id") or "device"
         m += [{"verb":"set","device": dev, "param": op.get("param"), "value": op.get("value")}]
         return m
-    
     if typ == "start":
         dev = op.get("device") or "device"
-        m += [{"verb":"set","device": dev, "param":"power", "value":"on"}]
+        m += [{"verb":"start","device": dev}]
         return m
-    
     if typ == "stop":
         dev = op.get("device") or "device"
-        m += [{"verb":"set","device": dev, "param":"power", "value":"off"}]
+        m += [{"verb":"stop","device": dev}]
         return m
-    
     if typ == "pick_up":
         v = _label_for_vessel(op.get("vessel",""), vessels, hardware)
         m += [{"verb":"pick_up","object":v,"from":"bench"}]
         return m
-    
     if typ == "place":
         v = _label_for_vessel(op.get("vessel",""), vessels, hardware)
         m += [{"verb":"place","object":v,"to":"bench"}]
         return m
-    
     if typ == "transfer":
         src = _label_for_vessel(op.get("from", ""), vessels, hardware) if op.get("from") else "source"
         dst = _label_for_vessel(op.get("to", ""),   vessels, hardware) if op.get("to")   else "target"
@@ -2102,11 +1773,9 @@ def _micro_for_op(op: dict, vessels: 'VesselRegistry', hardware: list[dict]) -> 
             {"verb":"place","object":src,"to":"bench"},
         ]
         return m
-    
     if typ == "wait":
         m += [{"verb":"wait","minutes": op.get("minutes")}]
         return m
-    
     if typ == "filter":
         v = _label_for_vessel(op.get("vessel",""), vessels, hardware)
         m += [{"verb":"place","object":"filtration setup","to":"bench"},
@@ -2114,11 +1783,10 @@ def _micro_for_op(op: dict, vessels: 'VesselRegistry', hardware: list[dict]) -> 
               {"verb":"pour","from":v,"to":"filtration setup"},
               {"verb":"place","object":v,"to":"bench"}]
         return m
-    
     if typ == "start_vacuum":
-        m += [{"verb":"set","device": op.get("vacuum_pump_id") or "vacuum_pump","param":"power","value":"on"}]
+        m += [{"verb":"set","device": op.get("vacuum_pump_id") or "vacuum_pump","param":"power","value":"on"},
+              {"verb":"start","device": op.get("vacuum_pump_id") or "vacuum_pump"}]
         return m
-    
     if typ == "decant_supernatant":
         tube = op.get("tube") or "tube"
         m += [{"verb":"pick_up","object":tube,"from":"rack"},

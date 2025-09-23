@@ -307,6 +307,22 @@ def _add_missing_vessels_to_registry(doc):
         if v not in known:
             reg[v] = "(auto) vessel"
 
+DEFAULTS = {
+  "stir_rpm": 700,
+  "centrifuge_rpm": 4000,
+  "centrifuge_minutes": 10,
+  "room_temp_C": 25,
+  "transfer_rate_slow": "slow",
+}
+DEVICE_IDS = {
+  "stir_plate_id": "SP1",
+  "hotplate_id": "HP1",
+  "centrifuge_id": "CF1",
+  "oven_id": "OV1",
+  "vacuum_pump_id": "VP1",
+  "vortex_id": "VX1",
+  "sonicator_id": "SN1",
+}
 # ---------------- Public entry ----------------
 def apply_postprocessing(data: Dict[str,Any]) -> Dict[str,Any]:
     """
