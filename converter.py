@@ -92,6 +92,29 @@ def _dedupe_micro_ops(doc):
         if isinstance(st.get("micro_ops"), list):
             st["micro_ops"] = dedupe(st["micro_ops"])
 
+def _flatten_plan(doc):
+    allowed = {"pick_up","place","pour","set","wait"}
+    mp = []
+    for i, st in enumerate(doc.get("steps", []), 1):
+        for m in st.get("micro_ops") or []:
+            if m.get("verb") in allowed:
+                m = {**m, "step_index": i}
+                mp.append(m)
+    # remove consecutive duplicates
+    out = []
+    for m in mp:
+        if not out or out[-1] != m: out.append(m)
+    doc["micro_plan"] = out
+
+def _normalize_heating_and_vessel(doc):
+    for st in doc.get("steps", []) or []:
+        mops = st.get("micro_ops") or []
+        heating = any(m.get("verb")=="set" and m.get("device")=="HP1" and m.get("param")=="temperature_C" for m in mops)
+        if heating:
+            for m in mops:
+                if m.get("verb")=="place" and m.get("object","").startswith("V"):
+                    m["to"] = "HP1"
+
 def _rebuild_step_micro_ops(step, devices, defaults, step_index):
     """Return a fresh list of micro_ops synthesized from canonical ops."""
     m = []
@@ -1124,6 +1147,8 @@ def robot_normalize(doc):
     _normalize_first_add_solvent_field(doc)
     _purge_stray_vessels_and_contexts(doc)
     _sync_step_minutes_from_ops(doc)
+    _normalize_heating_and_vessel(doc)
+    _flatten_plan(doc)
 
     # Authoritative rebuild: derive micro_ops & micro_plan strictly from ops
     _rebuild_micro_from_ops(doc)
