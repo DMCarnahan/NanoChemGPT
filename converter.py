@@ -489,7 +489,7 @@ def _collapse_consecutive_dry_steps(doc):
         t = next((op.get("value") for op in st.get("ops", []) if op.get("op")=="set" and op.get("param")=="temperature_C"), None)
         m = next((op.get("minutes") for op in st.get("ops", []) if op.get("op")=="wait"), None) or st.get("minutes")
         if pending is None:
-            # keep the first; ensure ops are pure oven set/wait (your _force_pure_dry/_final_invariants will enforce)
+            # keep the first; ensure ops are pure oven set/wait (_force_pure_dry/_final_invariants will enforce)
             pending = (t, m)
             keep.append(st)
         else:
@@ -823,6 +823,30 @@ def _normalize_first_add_solvent_field(doc):
                 op["solvent"] = op.pop("reagent")
 
 def _purge_stray_vessels_and_contexts(doc):
+
+def _enforce_base_micro_verbs(doc):
+    """Ensure micro_plan uses only base verbs: pick_up, place, pour, set, wait.
+
+    Map start/stop → set(power=on/off) and drop any unknowns."""
+    allowed = {"pick_up","place","pour","set","wait"}
+    mp = doc.get("micro_plan", []) or []
+    out = []
+    for m in mp:
+        v = m.get("verb")
+        if v == "start":
+            m = {**m, "verb":"set", "param":"power", "value":"on"}
+        elif v == "stop":
+            m = {**m, "verb":"set", "param":"power", "value":"off"}
+        # strip device-less set
+        if m.get("verb") == "set" and not m.get("device"):
+            # try to promote known ids from context fields
+            pass
+        if m.get("verb") in allowed:
+            out.append(m)
+        # else drop
+    doc["micro_plan"] = out
+
+
     reg = doc.setdefault("vessel_registry", {})
     for k in list(reg.keys()):
         if k not in ("V1","V2","V2_tube"): del reg[k]
@@ -897,6 +921,7 @@ def robot_normalize(doc):
     _map_aliases(doc); _dedupe_micro_ops(doc)
 
     _post_fix_pass(doc)
+    _enforce_base_micro_verbs(doc)
     return doc
 
 
@@ -1676,14 +1701,15 @@ def _micro_for_op(op: dict, vessels: 'VesselRegistry', hardware: list[dict]) -> 
         dev = op.get("device") or op.get("hotplate_id") or op.get("oven_id") or "device"
         m += [{"verb":"set","device": dev, "param": op.get("param"), "value": op.get("value")}]
         return m
-    if typ == "start":
-        dev = op.get("device") or "device"
-        m += [{"verb":"start","device": dev}]
-        return m
-    if typ == "stop":
-        dev = op.get("device") or "device"
-        m += [{"verb":"stop","device": dev}]
-        return m
+    
+if typ == "start":
+    dev = op.get("device") or "device"
+    m += [{"verb":"set","device": dev, "param":"power", "value":"on"}]
+    return m
+if typ == "stop":
+    dev = op.get("device") or "device"
+    m += [{"verb":"set","device": dev, "param":"power", "value":"off"}]
+    return m
     if typ == "pick_up":
         v = _label_for_vessel(op.get("vessel",""), vessels, hardware)
         m += [{"verb":"pick_up","object":v,"from":"bench"}]
@@ -1712,10 +1738,10 @@ def _micro_for_op(op: dict, vessels: 'VesselRegistry', hardware: list[dict]) -> 
               {"verb":"pour","from":v,"to":"filtration setup"},
               {"verb":"place","object":v,"to":"bench"}]
         return m
-    if typ == "start_vacuum":
-        m += [{"verb":"set","device": op.get("vacuum_pump_id") or "vacuum_pump","param":"power","value":"on"},
-              {"verb":"start","device": op.get("vacuum_pump_id") or "vacuum_pump"}]
-        return m
+    
+if typ == "start_vacuum":
+    m += [{"verb":"set","device": op.get("vacuum_pump_id") or "vacuum_pump","param":"power","value":"on"}]
+    return m
     if typ == "decant_supernatant":
         tube = op.get("tube") or "tube"
         m += [{"verb":"pick_up","object":tube,"from":"rack"},
