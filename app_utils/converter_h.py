@@ -307,21 +307,6 @@ def _add_missing_vessels_to_registry(doc):
         if v not in known:
             reg[v] = "(auto) vessel"
 
-def polish_robot_doc(doc):
-    # operate on steps
-    for st in doc.get("steps", []) or []:
-        _ensure_transfer_pours(st)
-        _ensure_centrifuge_motion(st)
-        _sync_step_wait_minutes(st)
-        _unify_heating_placement(st)
-    _add_missing_vessels_to_registry(doc)
-    # Enforce base verbs globally (be safe)
-    allowed = BASE_VERBS
-    doc["micro_plan"] = [m for m in (doc.get("micro_plan") or []) if m.get("verb") in allowed]
-    for st in doc.get("steps", []) or []:
-        st["micro_ops"] = [m for m in (st.get("micro_ops") or []) if m.get("verb") in allowed]
-    return doc
-
 # ---------------- Public entry ----------------
 def apply_postprocessing(data: Dict[str,Any]) -> Dict[str,Any]:
     """
