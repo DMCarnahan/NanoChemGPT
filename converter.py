@@ -823,6 +823,13 @@ def _normalize_first_add_solvent_field(doc):
                 op["solvent"] = op.pop("reagent")
 
 def _purge_stray_vessels_and_contexts(doc):
+    reg = doc.setdefault("vessel_registry", {})
+    for k in list(reg.keys()):
+        if k not in ("V1","V2","V2_tube"): del reg[k]
+    # micro_plan context_vessel cleanup
+    for m in doc.get("micro_plan", []) or []:
+        if m.get("context_vessel") not in (None, "V1", "V2", "V2_tube"):
+            m["context_vessel"] = "V1"
 
 def _enforce_base_micro_verbs(doc):
     """Ensure micro_plan uses only base verbs: pick_up, place, pour, set, wait.
@@ -845,7 +852,6 @@ def _enforce_base_micro_verbs(doc):
             out.append(m)
         # else drop
     doc["micro_plan"] = out
-
 
     reg = doc.setdefault("vessel_registry", {})
     for k in list(reg.keys()):
@@ -1702,14 +1708,14 @@ def _micro_for_op(op: dict, vessels: 'VesselRegistry', hardware: list[dict]) -> 
         m += [{"verb":"set","device": dev, "param": op.get("param"), "value": op.get("value")}]
         return m
     
-if typ == "start":
-    dev = op.get("device") or "device"
-    m += [{"verb":"set","device": dev, "param":"power", "value":"on"}]
-    return m
-if typ == "stop":
-    dev = op.get("device") or "device"
-    m += [{"verb":"set","device": dev, "param":"power", "value":"off"}]
-    return m
+    if typ == "start":
+        dev = op.get("device") or "device"
+        m += [{"verb":"set","device": dev, "param":"power", "value":"on"}]
+        return m
+    if typ == "stop":
+        dev = op.get("device") or "device"
+        m += [{"verb":"set","device": dev, "param":"power", "value":"off"}]
+        return m
     if typ == "pick_up":
         v = _label_for_vessel(op.get("vessel",""), vessels, hardware)
         m += [{"verb":"pick_up","object":v,"from":"bench"}]
@@ -1739,9 +1745,10 @@ if typ == "stop":
               {"verb":"place","object":v,"to":"bench"}]
         return m
     
-if typ == "start_vacuum":
-    m += [{"verb":"set","device": op.get("vacuum_pump_id") or "vacuum_pump","param":"power","value":"on"}]
-    return m
+    if typ == "start_vacuum":
+        m += [{"verb":"set","device": op.get("vacuum_pump_id") or "vacuum_pump","param":"power","value":"on"}]
+        return m
+    
     if typ == "decant_supernatant":
         tube = op.get("tube") or "tube"
         m += [{"verb":"pick_up","object":tube,"from":"rack"},
