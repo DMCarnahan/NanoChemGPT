@@ -1248,30 +1248,33 @@ def ask():
         try:
             import inspect
             fn = _h_judge_sufficiency
-            sig = None
-            try:
-                sig = inspect.signature(fn)
-            except Exception:
-                pass
-            # Build candidate kwargs and filter strictly to signature names (excluding the first positional).
-            candidate_kwargs = {
-                'context': context_joined, 'ctx': context_joined, 'text': context_joined,
-                'min_hits': MIN_HITS, 'hits': MIN_HITS,
-                'min_score': MIN_SCORE, 'score': MIN_SCORE,
-                'min_chars': MIN_CHARS, 'chars': MIN_CHARS,
-                'thresholds': {'min_hits': MIN_HITS, 'min_score': MIN_SCORE, 'min_chars': MIN_CHARS},
-            }
             judged_ok = False
             last_err = None
-            if sig is not None:
+            # ---- Try signature-aware keyword call (question positional; rest filtered) ----
+            try:
+                sig = inspect.signature(fn)
                 param_names = [p.name for p in sig.parameters.values()]
-                filtered_kw = {k: v for k, v in candidate_kwargs.items() if k in param_names and k not in ('question','q')}
-                try:
-                    judged_ok = bool(fn(question, **filtered_kw))
-                except TypeError as te1:
-                    last_err = te1
+                accepted = set(param_names) - {'question','q'}
+                kw_final = {}
+                # thresholds
+                if 'min_hits' in accepted: kw_final['min_hits'] = MIN_HITS
+                elif 'hits' in accepted: kw_final['hits'] = MIN_HITS
+                if 'min_score' in accepted: kw_final['min_score'] = MIN_SCORE
+                elif 'score' in accepted: kw_final['score'] = MIN_SCORE
+                if 'min_chars' in accepted: kw_final['min_chars'] = MIN_CHARS
+                elif 'chars' in accepted: kw_final['chars'] = MIN_CHARS
+                # context-like parameter (only if explicitly accepted)
+                if 'context' in accepted: kw_final['context'] = context_joined
+                elif 'ctx' in accepted: kw_final['ctx'] = context_joined
+                elif 'text' in accepted: kw_final['text'] = context_joined
+                judged_ok = bool(fn(question, **kw_final))
+            except TypeError as te_sig:
+                last_err = te_sig
+            except Exception as ex_sig:
+                last_err = ex_sig
+            # ---- If not ok, try <=4 positional variants, no kwargs ----
             if not judged_ok:
-                attempts = [
+                attempts_pos = [
                     [question],
                     [question, context_joined],
                     [question, MIN_HITS],
@@ -1280,21 +1283,39 @@ def ask():
                     [question, context_joined, MIN_HITS],
                     [question, context_joined, MIN_HITS, MIN_SCORE],
                 ]
-                for args_ in attempts:
+                for a in attempts_pos:
                     try:
-                        judged_ok = bool(fn(*args_))
-                        if judged_ok: break
+                        judged_ok = bool(fn(*a))
+                        if judged_ok:
+                            break
                     except TypeError as te2:
                         last_err = te2
                         continue
                     except Exception as ex2:
                         last_err = ex2
                         continue
+            # ---- As a last resort, try safe keyword-only variants WITHOUT any context key first ----
             if not judged_ok:
-                try:
-                    judged_ok = bool(fn(question, min_hits=MIN_HITS, min_score=MIN_SCORE, min_chars=MIN_CHARS, context=context_joined))
-                except Exception as ex3:
-                    last_err = ex3
+                kw_candidates = [
+                    {'min_hits': MIN_HITS, 'min_score': MIN_SCORE, 'min_chars': MIN_CHARS},
+                    {'hits': MIN_HITS, 'score': MIN_SCORE, 'chars': MIN_CHARS},
+                    # Then context-like keys, attempted only after non-context variants
+                    {'min_hits': MIN_HITS, 'min_score': MIN_SCORE, 'min_chars': MIN_CHARS, 'ctx': context_joined},
+                    {'min_hits': MIN_HITS, 'min_score': MIN_SCORE, 'min_chars': MIN_CHARS, 'text': context_joined},
+                    {'hits': MIN_HITS, 'score': MIN_SCORE, 'chars': MIN_CHARS, 'ctx': context_joined},
+                    {'hits': MIN_HITS, 'score': MIN_SCORE, 'chars': MIN_CHARS, 'text': context_joined},
+                ]
+                for kw in kw_candidates:
+                    try:
+                        judged_ok = bool(fn(question, **kw))
+                        if judged_ok:
+                            break
+                    except TypeError as te3:
+                        last_err = te3
+                        continue
+                    except Exception as ex3:
+                        last_err = ex3
+                        continue
             if not judged_ok and last_err is not None:
                 app.logger.warning(f"[/ask] judge/enqueue error (helper): {last_err}")
         except Exception as e:
