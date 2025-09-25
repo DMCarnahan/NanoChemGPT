@@ -25,13 +25,71 @@ except Exception:
         "sonicator_id": "SN1",
     }
 
+ROBOT_NORMALIZER_VERSION = "2.2.3"
+_BANNER_SHOWN = False
+
 try:
     from app_utils.post_polish import polish_robot_doc as _post_polish
 except Exception:
     _post_polish = None
 
-ROBOT_NORMALIZER_VERSION = "2.2.3"
-_BANNER_SHOWN = False
+def _build_bottle_config(doc):
+    # Map chemicals → bottles and set executor prefs (rpm, washes, drying)
+    import re
+    names = set()
+    for st in doc.get("steps", []) or []:
+        for r in st.get("reagents_structured") or []:
+            if isinstance(r, dict):
+                n = r.get("name")
+                if isinstance(n, str) and n.strip():
+                    names.add(n.strip())
+        for m in st.get("micro_ops") or []:
+            for key in ("object","from"):
+                v = m.get(key)
+                if not isinstance(v, str): 
+                    continue
+                s2 = v.strip()
+                if not s2 or s2.lower() in {"bench","rack","waste"}:
+                    continue
+                if s2.endswith("_bottle"):
+                    continue
+                if re.fullmatch(r"V\\d+(_tube)?", s2):
+                    continue
+                if m.get("verb") == "set":
+                    continue
+                names.add(s2)
+    # ensure common bottles
+    names.update({"ethanol", "deionized water"})
+    bottle_map = {n.lower(): re.sub(r"[^a-z0-9]+", "_", n.lower()).strip("_") + "_bottle" for n in names}
+    bottle_labels = {vid: (n.title() + " bottle") for n, vid in bottle_map.items()}
+    bottle_labels.update({
+        "deionized_water_bottle": "Deionized water bottle",
+        "ethanol_bottle": "Ethanol bottle",
+        "waste": "Waste container",
+    })
+    return {
+        "devices": doc.get("devices", {}),
+        "reaction_vessel": "V1",
+        "bottle_map": bottle_map,
+        "bottle_labels": bottle_labels,
+        "centrifuge": {"rpm": 8000, "minutes": 10, "tube": "V2_tube"},
+        "wash": {"reagent": bottle_map.get("ethanol", "ethanol_bottle"), "cycles": 2},
+        "drying": {
+            "prefer_ambient_if_mentioned": True,
+            "ambient_minutes": 1440,
+            "vacuum_minutes": 720,
+            "vacuum_temp_C": 25,
+        },
+    }
+
+def _run_post_polish(doc):
+    if _post_polish is None:
+        return doc
+    try:
+        return _post_polish(doc, config=_build_bottle_config(doc))
+    except Exception:
+        return doc
+    
 def apply_postprocessing(doc: dict) -> dict:
 
     global _BANNER_SHOWN
@@ -49,72 +107,6 @@ def apply_postprocessing(doc: dict) -> dict:
         pass
     return robot_normalize(doc)
 
-def _build_bottle_config(doc):
-    """Create a generalized bottle_map/bottle_labels from reagents & micro-ops so chemicals become vessels."""
-    names = set()
-    # from structured reagents
-    for st in doc.get("steps", []) or []:
-        for r in st.get("reagents_structured") or []:
-            if isinstance(r, dict):
-                n = r.get("name")
-                if isinstance(n, str) and n.strip():
-                    names.add(n.strip())
-        # from micro-ops objects/from (skip devices/known vessels)
-        for m in st.get("micro_ops") or []:
-            for key in ("object","from"):
-                v = m.get(key)
-                if not isinstance(v, str): 
-                    continue
-                s2 = v.strip()
-                if not s2 or s2.lower() in {"bench","rack","waste"}:
-                    continue
-                if s2.endswith("_bottle"):
-                    continue
-                if re.fullmatch(r"V\d+(_tube)?", s2):
-                    continue
-                if m.get("verb") == "set":
-                    continue
-                names.add(s2)
-    # build maps (case-insensitive keys)
-    bottle_map = {n.lower(): re.sub(r"[^a-z0-9]+", "_", n.lower()).strip("_") + "_bottle" for n in names}
-    bottle_labels = {vid: (n.title() + " bottle") for n, vid in bottle_map.items()}
-    bottle_labels.setdefault("waste", "Waste container")
-    cfg = {
-        "devices": doc.get("devices", {}),
-        "reaction_vessel": "V1",
-        "bottle_map": bottle_map,
-        "bottle_labels": bottle_labels,
-        "centrifuge": {
-            "rpm": (doc.get("defaults", {}) or {}).get("centrifuge_rpm", 4000),
-            "minutes": (doc.get("defaults", {}) or {}).get("centrifuge_minutes", 10),
-            "tube": "V2_tube",
-        },
-        "wash": {"reagent": bottle_map.get("ethanol"), "cycles": 0},
-        "drying": {"prefer_ambient_if_mentioned": True, "ambient_minutes": 1440, "vacuum_minutes": 720, "vacuum_temp_C": 25},
-    }
-    return cfg
-
-def _run_post_polish(doc):
-    cfg = None
-    try:
-        cfg = _build_bottle_config(doc)
-    except Exception:
-        pass
-    if _post_polish is not None:
-        try:
-            return _post_polish(doc, config=cfg)
-        except Exception:
-            return doc
-    try:
-        return polish_robot_doc(doc, config=cfg)  # type: ignore
-    except Exception:
-        try:
-            return polish_robot_doc(doc)  # type: ignore
-        except Exception:
-            return doc
-# --- End: post_polish integration ---
-
-
 def _walk(obj, fn):
     if isinstance(obj, dict):
         for k,v in list(obj.items()):
@@ -129,7 +121,7 @@ def _walk(obj, fn):
 def _seed_defaults_devices(doc):
     d = doc.setdefault("defaults", {})
     d.setdefault("stir_rpm", 700)
-    d.setdefault("centrifuge_rpm", 4000)
+    d.setdefault("centrifuge_rpm", 8000)
     d.setdefault("centrifuge_minutes", 10)
     d.setdefault("transfer_rate_slow", "slow")
     d.setdefault("room_temp_C", 25)
@@ -949,6 +941,9 @@ def robot_normalize(doc):
     _fix_wash_microplan(doc)
     _fix_transfer_context(doc)
     _fix_wash_microplan_waits(doc)
+    _timers_to_waits(doc)
+    _fix_wash_waits(doc)
+    _clean_labels(doc)
 
     # Housekeeping
     _normalize_first_add_solvent_field(doc)
@@ -969,7 +964,6 @@ def robot_normalize(doc):
     # Post-polish with executor-safe normalizer
     doc = _run_post_polish(doc)
     return doc
-
 
 FENCE_START_RX = re.compile(r"^\s*```")                    # start of any fenced block
 NON_PROC_HEAD_RX = re.compile(
