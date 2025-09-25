@@ -116,11 +116,18 @@ def _sanity_assertions(doc: dict) -> None:
     print("[converter] SANITY OK" if not errs else "[converter] SANITY FAIL:\n  - " + "\n  - ".join(errs))
 
 
+_JUNK_VESSEL_RE = re.compile(r'^[vV]\d+(?:_tube)?_bottle$')
+
 def _tidy_registry(doc: dict) -> None:
     reg = doc.setdefault("vessel_registry", {})
-    # remove junk ids commonly created by parsing glitches
+
+    # remove junk ids produced by naive "Vn → vN_bottle" mapping or glitchy long names
     for k in list(reg.keys()):
-        if k in {"solute_bottle", "v1_bottle", "v2_tube_bottle"}:
+        if (
+            _JUNK_VESSEL_RE.match(k) or
+            k in {"solute_bottle"} or
+            (k.endswith("_bottle") and "centrifuge" in k.lower())
+        ):
             reg.pop(k, None)
 
 def apply_postprocessing(doc: dict) -> dict:
@@ -165,9 +172,10 @@ def apply_postprocessing(doc: dict) -> dict:
             print("[converter] post_polish not imported; skipping")
     except Exception as e:
         print("[converter] _run_post_polish error:", repr(e))
-
-    _tidy_registry(doc)
+        
     _rebuild_micro_plan(doc)
+    _tidy_registry(doc)
+    
     _sanity_assertions(doc)
 
     return doc
