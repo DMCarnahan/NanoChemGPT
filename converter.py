@@ -91,7 +91,6 @@ def _run_post_polish(doc):
         return doc
     
 def apply_postprocessing(doc: dict) -> dict:
-
     global _BANNER_SHOWN
     if not _BANNER_SHOWN:
         try:
@@ -99,13 +98,23 @@ def apply_postprocessing(doc: dict) -> dict:
         except Exception:
             pass
         _BANNER_SHOWN = True
-    # Chain external postprocessor if present, but never fail
+
     try:
         if _ext_apply_post is not None:
             doc = _ext_apply_post(doc)
-    except Exception:
-        pass
-    return robot_normalize(doc)
+    except Exception as e:
+        print("[converter] _ext_apply_post error:", repr(e))
+
+    doc = robot_normalize(doc)
+
+    try:
+        doc = _run_post_polish(doc)
+    except Exception as e:
+        print("[converter] _run_post_polish error:", repr(e))
+
+    _sanity_assertions(doc)
+
+    return doc
 
 def _walk(obj, fn):
     if isinstance(obj, dict):
@@ -155,6 +164,40 @@ def _dedupe_micro_ops(doc):
         if isinstance(st.get("micro_ops"), list):
             st["micro_ops"] = dedupe(st["micro_ops"])
 
+def _sanity_assertions(doc):
+    errs = []
+    rpm = (doc.get("defaults") or {}).get("centrifuge_rpm")
+    if rpm != 8000:
+        errs.append(f"defaults.centrifuge_rpm={rpm}, expected 8000")
+    reg = doc.get("vessel_registry") or {}
+    for must in ("deionized_water_bottle","ethanol_bottle","V1","V2_tube","waste"):
+        if must not in reg:
+            errs.append(f"missing {must} in vessel_registry")
+    mp = doc.get("micro_plan") or []
+    ok_cf = any(
+        mp[i].get("verb")=="place" and mp[i].get("object")=="V2_tube" and mp[i].get("to")=="CF1" and
+        mp[i+1].get("verb")=="set" and mp[i+1].get("device")=="CF1" and mp[i+1].get("param")=="rpm" and
+        mp[i+2].get("verb")=="set" and mp[i+2].get("device")=="CF1" and mp[i+2].get("param")=="power"
+        for i in range(len(mp)-2)
+    )
+    if not ok_cf:
+        errs.append("centrifuge sequence missing place(V2_tube→CF1) before rpm/on")
+    # ambient dry check (if mentioned in last 'dry' step)
+    for st in (doc.get("steps") or [])[::-1]:
+        raw = (st.get("raw") or "").lower()
+        if "dry" in raw:
+            if "ambient" in raw:
+                ops = st.get("micro_ops") or []
+                if not any(m.get("verb")=="place" and m.get("to")=="bench" for m in ops):
+                    errs.append("ambient dry requested but no place(...→bench)")
+                if any(m.get("device")=="OV1" for m in ops):
+                    errs.append("ambient dry requested but OV1 ops present")
+            break
+    if errs:
+        print("[converter] SANITY FAIL:\n  - " + "\n  - ".join(errs))
+    else:
+        print("[converter] SANITY OK")
+        
 def _rebuild_step_micro_ops(step, devices, defaults, step_index):
     """Return a fresh list of micro_ops synthesized from canonical ops."""
     m = []
