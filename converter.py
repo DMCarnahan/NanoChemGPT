@@ -82,13 +82,62 @@ def _build_bottle_config(doc):
         },
     }
 
-def _run_post_polish(doc):
-    if _post_polish is None:
-        return doc
+def _safety_seed(doc: dict) -> None:
+    """Seed required defaults so external hooks don't crash, and set sane baselines."""
+    d = doc.setdefault("defaults", {})
+    d.setdefault("dropwise_timer_minutes", 5)  # prevents the KeyError you’re seeing
+    d.setdefault("centrifuge_minutes", 10)
+    d.setdefault("centrifuge_rpm", 8000)       # baseline; post-polish will keep/align this
+
+def _run_post_polish(doc: dict) -> dict:
+    """Run post-polish with auto-built config; be noisy so we can see it ran."""
     try:
-        return _post_polish(doc, config=_build_bottle_config(doc))
-    except Exception:
+        cfg = _build_bottle_config(doc)  # your helper (or the one we added earlier)
+    except Exception as e:
+        print("[converter] _build_bottle_config error:", repr(e))
+        cfg = None
+    if _post_polish is None:
+        print("[converter] post_polish not imported; skipping")
         return doc
+    before = (doc.get("defaults") or {}).get("centrifuge_rpm")
+    out = _post_polish(doc, config=cfg)
+    after = (out.get("defaults") or {}).get("centrifuge_rpm")
+    print(f"[converter] post_polish ran (rpm {before}→{after})")
+    return out
+
+def _sanity_assertions(doc: dict) -> None:
+    errs = []
+    rpm = (doc.get("defaults") or {}).get("centrifuge_rpm")
+    if rpm != 8000:
+        errs.append(f"defaults.centrifuge_rpm={rpm}, expected 8000")
+    reg = doc.get("vessel_registry") or {}
+    for must in ("deionized_water_bottle","ethanol_bottle","V1","V2_tube","waste"):
+        if must not in reg:
+            errs.append(f"missing {must} in vessel_registry")
+    mp = doc.get("micro_plan") or []
+    ok_cf = any(
+        mp[i].get("verb")=="place" and mp[i].get("object")=="V2_tube" and mp[i].get("to")=="CF1" and
+        mp[i+1].get("verb")=="set" and mp[i+1].get("device")=="CF1" and mp[i+1].get("param")=="rpm" and
+        mp[i+2].get("verb")=="set" and mp[i+2].get("device")=="CF1" and mp[i+2].get("param")=="power"
+        for i in range(len(mp)-2)
+    )
+    if not ok_cf:
+        errs.append("centrifuge sequence missing place(V2_tube→CF1) before rpm/on")
+    # ambient dry check if mentioned
+    for st in (doc.get("steps") or [])[::-1]:
+        raw = (st.get("raw") or "").lower()
+        if "dry" in raw:
+            if "ambient" in raw:
+                ops = st.get("micro_ops") or []
+                if not any(m.get("verb")=="place" and m.get("to")=="bench" for m in ops):
+                    errs.append("ambient dry requested but no place(...→bench)")
+                if any(m.get("device")=="OV1" for m in ops):
+                    errs.append("ambient dry requested but OV1 ops present")
+            break
+    if errs:
+        print("[converter] SANITY FAIL:\n  - " + "\n  - ".join(errs))
+    else:
+        print("[converter] SANITY OK")
     
 def apply_postprocessing(doc: dict) -> dict:
     global _BANNER_SHOWN
@@ -99,19 +148,33 @@ def apply_postprocessing(doc: dict) -> dict:
             pass
         _BANNER_SHOWN = True
 
+    # Safety seeds first so external hook won't crash
+    _safety_seed(doc)
+
+    # Run external post-processor 
     try:
         if _ext_apply_post is not None:
             doc = _ext_apply_post(doc)
     except Exception as e:
         print("[converter] _ext_apply_post error:", repr(e))
 
+    # Core normalize
     doc = robot_normalize(doc)
 
+    # Safety fuse: ensure defaults are at target if upstream didn’t set them
+    d = doc.setdefault("defaults", {})
+    if d.get("centrifuge_rpm") != 8000:
+        print("[converter] forcing defaults.centrifuge_rpm to 8000 (safety fuse)")
+        d["centrifuge_rpm"] = 8000
+    d.setdefault("centrifuge_minutes", 10)
+
+    # Post-polish to clean micro_ops/micro_plan and vessel mapping
     try:
         doc = _run_post_polish(doc)
     except Exception as e:
         print("[converter] _run_post_polish error:", repr(e))
 
+    # Final sanity (prints any remaining mismatches)
     _sanity_assertions(doc)
 
     return doc
@@ -164,40 +227,6 @@ def _dedupe_micro_ops(doc):
         if isinstance(st.get("micro_ops"), list):
             st["micro_ops"] = dedupe(st["micro_ops"])
 
-def _sanity_assertions(doc):
-    errs = []
-    rpm = (doc.get("defaults") or {}).get("centrifuge_rpm")
-    if rpm != 8000:
-        errs.append(f"defaults.centrifuge_rpm={rpm}, expected 8000")
-    reg = doc.get("vessel_registry") or {}
-    for must in ("deionized_water_bottle","ethanol_bottle","V1","V2_tube","waste"):
-        if must not in reg:
-            errs.append(f"missing {must} in vessel_registry")
-    mp = doc.get("micro_plan") or []
-    ok_cf = any(
-        mp[i].get("verb")=="place" and mp[i].get("object")=="V2_tube" and mp[i].get("to")=="CF1" and
-        mp[i+1].get("verb")=="set" and mp[i+1].get("device")=="CF1" and mp[i+1].get("param")=="rpm" and
-        mp[i+2].get("verb")=="set" and mp[i+2].get("device")=="CF1" and mp[i+2].get("param")=="power"
-        for i in range(len(mp)-2)
-    )
-    if not ok_cf:
-        errs.append("centrifuge sequence missing place(V2_tube→CF1) before rpm/on")
-    # ambient dry check (if mentioned in last 'dry' step)
-    for st in (doc.get("steps") or [])[::-1]:
-        raw = (st.get("raw") or "").lower()
-        if "dry" in raw:
-            if "ambient" in raw:
-                ops = st.get("micro_ops") or []
-                if not any(m.get("verb")=="place" and m.get("to")=="bench" for m in ops):
-                    errs.append("ambient dry requested but no place(...→bench)")
-                if any(m.get("device")=="OV1" for m in ops):
-                    errs.append("ambient dry requested but OV1 ops present")
-            break
-    if errs:
-        print("[converter] SANITY FAIL:\n  - " + "\n  - ".join(errs))
-    else:
-        print("[converter] SANITY OK")
-        
 def _rebuild_step_micro_ops(step, devices, defaults, step_index):
     """Return a fresh list of micro_ops synthesized from canonical ops."""
     m = []
