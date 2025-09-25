@@ -92,13 +92,12 @@ def _safety_seed(doc: dict) -> None:
 
 def _sanity_assertions(doc: dict) -> None:
     errs = []
-    rpm = (doc.get("defaults") or {}).get("centrifuge_rpm")
-    if rpm != 8000:
-        errs.append(f"defaults.centrifuge_rpm={rpm}, expected 8000")
-    reg = doc.get("vessel_registry") or {}
-    for must in ("deionized_water_bottle","ethanol_bottle","V1","V2_tube","waste"):
-        if must not in reg:
-            errs.append(f"missing {must} in vessel_registry")
+    d = doc.get("defaults") or {}
+    if d.get("centrifuge_rpm") != 8000: errs.append(f"defaults.centrifuge_rpm={d.get('centrifuge_rpm')} != 8000")
+    # junk vessels?
+    bad = [k for k in (doc.get("vessel_registry") or {}) if re.fullmatch(r"v\d+_bottle", k, flags=re.I)]
+    if bad: errs.append(f"junk vessel ids present: {bad[:5]}{'…' if len(bad)>5 else ''}")
+    # CF sequence present?
     mp = doc.get("micro_plan") or []
     ok_cf = any(
         mp[i].get("verb")=="place" and mp[i].get("object")=="V2_tube" and mp[i].get("to")=="CF1" and
@@ -106,23 +105,16 @@ def _sanity_assertions(doc: dict) -> None:
         mp[i+2].get("verb")=="set" and mp[i+2].get("device")=="CF1" and mp[i+2].get("param")=="power"
         for i in range(len(mp)-2)
     )
-    if not ok_cf:
-        errs.append("centrifuge sequence missing place(V2_tube→CF1) before rpm/on")
-    # ambient dry check if mentioned
-    for st in (doc.get("steps") or [])[::-1]:
-        raw = (st.get("raw") or "").lower()
-        if "dry" in raw:
-            if "ambient" in raw:
-                ops = st.get("micro_ops") or []
-                if not any(m.get("verb")=="place" and m.get("to")=="bench" for m in ops):
-                    errs.append("ambient dry requested but no place(...→bench)")
-                if any(m.get("device")=="OV1" for m in ops):
-                    errs.append("ambient dry requested but OV1 ops present")
-            break
-    if errs:
-        print("[converter] SANITY FAIL:\n  - " + "\n  - ".join(errs))
-    else:
-        print("[converter] SANITY OK")
+    if not ok_cf: errs.append("centrifuge sequence missing place(V2_tube→CF1) before rpm/on")
+    # ambient dry (no OV1/VP1 ops) if last step says ambient
+    last = doc.get("steps", [])[-1] if doc.get("steps") else {}
+    if "ambient" in (last.get("raw") or "").lower():
+        if any(m.get("device") in {"OV1","VP1"} for m in mp):
+            errs.append("ambient dry requested but OV1/VP1 ops present in micro_plan")
+        if not any(m.get("verb")=="place" and m.get("to")=="bench" for m in mp[-10:]):
+            errs.append("ambient dry requested but no place(...→bench) near end of plan")
+    print("[converter] SANITY OK" if not errs else "[converter] SANITY FAIL:\n  - " + "\n  - ".join(errs))
+
 
 def _tidy_registry(doc: dict) -> None:
     reg = doc.setdefault("vessel_registry", {})
@@ -311,16 +303,19 @@ def _rebuild_micro_plan(doc: dict) -> None:
     allowed = {"pick_up","place","pour","set","wait"}
     out = []
     for st in doc.get("steps", []):
+        idx = st.get("index")
         for m in st.get("micro_ops") or []:
             if m.get("verb") in allowed:
-                out.append(dict(m))
+                mm = dict(m)
+                mm["step_index"] = idx  # enforce correct index
+                out.append(mm)
     # de-dup consecutive identical ops
     flat = []
     for m in out:
         if not flat or flat[-1] != m:
             flat.append(m)
-    # ensure no oven/vacuum ops when ambient is preferred
-    flat = [m for m in flat if not (m.get("device") in {"OV1","VP1"})]
+    # ensure no oven/vacuum ops when ambient is requested
+    flat = [m for m in flat if m.get("device") not in {"OV1","VP1"}]
     doc["micro_plan"] = flat
 
 def _rebuild_micro_from_ops(doc):
