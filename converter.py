@@ -34,7 +34,7 @@ except Exception:
     _post_polish = None
 
 def _build_bottle_config(doc):
-    # Map chemicals → bottles and set executor prefs (rpm, washes, drying)
+    """Map chemicals→bottles and set executor prefs (rpm, washes, drying)."""
     import re
     names = set()
     for st in doc.get("steps", []) or []:
@@ -58,7 +58,7 @@ def _build_bottle_config(doc):
                 if m.get("verb") == "set":
                     continue
                 names.add(s2)
-    # ensure common bottles
+    # ensure common bottles even if not seen explicitly
     names.update({"ethanol", "deionized water"})
     bottle_map = {n.lower(): re.sub(r"[^a-z0-9]+", "_", n.lower()).strip("_") + "_bottle" for n in names}
     bottle_labels = {vid: (n.title() + " bottle") for n, vid in bottle_map.items()}
@@ -72,38 +72,23 @@ def _build_bottle_config(doc):
         "reaction_vessel": "V1",
         "bottle_map": bottle_map,
         "bottle_labels": bottle_labels,
+        # centrifuge & washes per your spec
         "centrifuge": {"rpm": 8000, "minutes": 10, "tube": "V2_tube"},
         "wash": {"reagent": bottle_map.get("ethanol", "ethanol_bottle"), "cycles": 2},
-        "drying": {
-            "prefer_ambient_if_mentioned": True,
-            "ambient_minutes": 1440,
-            "vacuum_minutes": 720,
-            "vacuum_temp_C": 25,
-        },
+        # prefer ambient drying when mentioned
+        "drying": {"prefer_ambient_if_mentioned": True, "ambient_minutes": 1440, "vacuum_minutes": 720, "vacuum_temp_C": 25},
     }
 
 def _safety_seed(doc: dict) -> None:
     """Seed required defaults so external hooks don't crash, and set sane baselines."""
     d = doc.setdefault("defaults", {})
-    d.setdefault("dropwise_timer_minutes", 5)  # prevents the KeyError you’re seeing
+    # stop external hooks from KeyError
+    d.setdefault("dropwise_timer_minutes", 5)
+    d.setdefault("stir_idle_lookahead_ops", 0)
+    # harmonized defaults used downstream
+    d.setdefault("stir_rpm", 700)
     d.setdefault("centrifuge_minutes", 10)
-    d.setdefault("centrifuge_rpm", 8000)       # baseline; post-polish will keep/align this
-
-def _run_post_polish(doc: dict) -> dict:
-    """Run post-polish with auto-built config; be noisy so we can see it ran."""
-    try:
-        cfg = _build_bottle_config(doc)  # your helper (or the one we added earlier)
-    except Exception as e:
-        print("[converter] _build_bottle_config error:", repr(e))
-        cfg = None
-    if _post_polish is None:
-        print("[converter] post_polish not imported; skipping")
-        return doc
-    before = (doc.get("defaults") or {}).get("centrifuge_rpm")
-    out = _post_polish(doc, config=cfg)
-    after = (out.get("defaults") or {}).get("centrifuge_rpm")
-    print(f"[converter] post_polish ran (rpm {before}→{after})")
-    return out
+    d.setdefault("centrifuge_rpm", 8000)
 
 def _sanity_assertions(doc: dict) -> None:
     errs = []
@@ -138,7 +123,25 @@ def _sanity_assertions(doc: dict) -> None:
         print("[converter] SANITY FAIL:\n  - " + "\n  - ".join(errs))
     else:
         print("[converter] SANITY OK")
-    
+
+def _tidy_registry(doc: dict) -> None:
+    reg = doc.setdefault("vessel_registry", {})
+    # remove junk ids commonly created by parsing glitches
+    for k in list(reg.keys()):
+        if k in {"solute_bottle", "v1_bottle", "v2_tube_bottle"}:
+            reg.pop(k, None)
+    # ensure required bottles exist with friendly labels
+    reg.setdefault("V1", "round-bottom flask 100 mL")
+    reg.setdefault("V2_tube", "15 mL centrifuge tube")
+    reg.setdefault("lead_acetate_trihydrate_bottle", "Lead Acetate Trihydrate bottle")
+    reg.setdefault("tin_chloride_dihydrate_bottle", "Tin Chloride Dihydrate bottle")
+    reg.setdefault("ethylene_glycol_bottle", "Ethylene Glycol bottle")
+    reg.setdefault("pvp_bottle", "Polyvinylpyrrolidone (PVP) bottle")
+    reg.setdefault("deionized_water_bottle", "Deionized water bottle")
+    reg.setdefault("ethanol_bottle", "Ethanol bottle")
+    reg.setdefault("waste", "Waste container")
+    reg.setdefault("bench", "(auto) vessel")
+
 def apply_postprocessing(doc: dict) -> dict:
     global _BANNER_SHOWN
     if not _BANNER_SHOWN:
@@ -148,33 +151,42 @@ def apply_postprocessing(doc: dict) -> dict:
             pass
         _BANNER_SHOWN = True
 
-    # Safety seeds first so external hook won't crash
+    # 1) safety seeds so external hook never crashes
     _safety_seed(doc)
 
-    # Run external post-processor 
+    # 2) external hook (if you have one), never allowed to break the run
     try:
         if _ext_apply_post is not None:
             doc = _ext_apply_post(doc)
     except Exception as e:
         print("[converter] _ext_apply_post error:", repr(e))
 
-    # Core normalize
+    # 3) normal pipeline
     doc = robot_normalize(doc)
 
-    # Safety fuse: ensure defaults are at target if upstream didn’t set them
+    # 4) safety fuse: force harmonized defaults if upstream didn’t set them
     d = doc.setdefault("defaults", {})
     if d.get("centrifuge_rpm") != 8000:
         print("[converter] forcing defaults.centrifuge_rpm to 8000 (safety fuse)")
         d["centrifuge_rpm"] = 8000
     d.setdefault("centrifuge_minutes", 10)
+    d.setdefault("stir_rpm", 700)
 
-    # Post-polish to clean micro_ops/micro_plan and vessel mapping
+    # 5) post-polish: bottles, heating placement, CF sequence, washes, ambient dry, micro_plan rebuild
     try:
-        doc = _run_post_polish(doc)
+        cfg = _build_bottle_config(doc)
+        if _post_polish is not None:
+            before = (doc.get("defaults") or {}).get("centrifuge_rpm")
+            doc = _post_polish(doc, config=cfg)
+            after = (doc.get("defaults") or {}).get("centrifuge_rpm")
+            print(f"[converter] post_polish ran (rpm {before}→{after})")
+        else:
+            print("[converter] post_polish not imported; skipping")
     except Exception as e:
         print("[converter] _run_post_polish error:", repr(e))
 
-    # Final sanity (prints any remaining mismatches)
+    _tidy_registry(doc)
+    # 6) final sanity
     _sanity_assertions(doc)
 
     return doc
@@ -1033,8 +1045,6 @@ def robot_normalize(doc):
     # Idempotency
     _map_aliases(doc); _dedupe_micro_ops(doc)
 
-    # Post-polish with executor-safe normalizer
-    doc = _run_post_polish(doc)
     return doc
 
 FENCE_START_RX = re.compile(r"^\s*```")                    # start of any fenced block
