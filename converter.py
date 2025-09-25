@@ -130,17 +130,6 @@ def _tidy_registry(doc: dict) -> None:
     for k in list(reg.keys()):
         if k in {"solute_bottle", "v1_bottle", "v2_tube_bottle"}:
             reg.pop(k, None)
-    # ensure required bottles exist with friendly labels
-    reg.setdefault("V1", "round-bottom flask 100 mL")
-    reg.setdefault("V2_tube", "15 mL centrifuge tube")
-    reg.setdefault("lead_acetate_trihydrate_bottle", "Lead Acetate Trihydrate bottle")
-    reg.setdefault("tin_chloride_dihydrate_bottle", "Tin Chloride Dihydrate bottle")
-    reg.setdefault("ethylene_glycol_bottle", "Ethylene Glycol bottle")
-    reg.setdefault("pvp_bottle", "Polyvinylpyrrolidone (PVP) bottle")
-    reg.setdefault("deionized_water_bottle", "Deionized water bottle")
-    reg.setdefault("ethanol_bottle", "Ethanol bottle")
-    reg.setdefault("waste", "Waste container")
-    reg.setdefault("bench", "(auto) vessel")
 
 def apply_postprocessing(doc: dict) -> dict:
     global _BANNER_SHOWN
@@ -186,7 +175,7 @@ def apply_postprocessing(doc: dict) -> dict:
         print("[converter] _run_post_polish error:", repr(e))
 
     _tidy_registry(doc)
-    # 6) final sanity
+    _rebuild_micro_plan(doc)
     _sanity_assertions(doc)
 
     return doc
@@ -317,6 +306,22 @@ def _rebuild_step_micro_ops(step, devices, defaults, step_index):
         # (Ignore unknown ops in micro synthesis — keep steps/ops authoritative)
 
     return m
+
+def _rebuild_micro_plan(doc: dict) -> None:
+    allowed = {"pick_up","place","pour","set","wait"}
+    out = []
+    for st in doc.get("steps", []):
+        for m in st.get("micro_ops") or []:
+            if m.get("verb") in allowed:
+                out.append(dict(m))
+    # de-dup consecutive identical ops
+    flat = []
+    for m in out:
+        if not flat or flat[-1] != m:
+            flat.append(m)
+    # ensure no oven/vacuum ops when ambient is preferred
+    flat = [m for m in flat if not (m.get("device") in {"OV1","VP1"})]
+    doc["micro_plan"] = flat
 
 def _rebuild_micro_from_ops(doc):
     """Discard incoming micro_ops/micro_plan and rebuild them deterministically from step ops."""
