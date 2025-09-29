@@ -336,6 +336,10 @@ def _set_job(jid: str, **kw): JOBS.setdefault(jid, {}).update(kw)
 
 @app.post("/upload")
 def upload():
+    try:
+        app.logger.info("[/upload] received content-type=%s, content-length=%s", request.content_type, request.content_length)
+    except Exception:
+        pass
     f = request.files.get("file")
     if not f or f.filename == "":
         abort(400, "No file uploaded.")
@@ -399,7 +403,7 @@ def status(jid: str):
 
 def _process_pdf_job(jid: str, path: Path, filename: str):
     try:
-        from PyPDF2 import PdfReader as _PdfReader
+        from pypdf import PdfReader as _PdfReader
     except Exception:
         try:
             from PyPDF2 import PdfReader as _PdfReader
@@ -413,7 +417,7 @@ def _process_pdf_job(jid: str, path: Path, filename: str):
             app.logger.warning(f"[/upload] get_db failed (continuing without DB): {e}")
         if _PdfReader is None:
 
-            raise ImportError("pypdf/PyPDF2 not installed — cannot parse PDFs.")
+            raise ImportError(\"pypdf/PyPDF2 not installed — cannot parse PDFs.\")
 
         reader = _PdfReader(str(path))
         n = len(reader.pages) or 1
@@ -1547,6 +1551,38 @@ def upload_builtin():
 def healthz():
     return jsonify(ok=True)
 
+@app.get("/upload_test")
+def upload_test_page():
+    return """
+<!doctype html>
+<html><head><meta charset='utf-8'><title>Upload Test</title></head>
+<body style="font-family: system-ui, sans-serif; margin: 2rem;">
+  <h2>Upload Test</h2>
+  <form id="f" enctype="multipart/form-data">
+    <input type="file" name="file" id="file" />
+    <button id="btn">Upload</button>
+  </form>
+  <pre id="out" style="white-space:pre-wrap; background:#f6f8fa; padding:1rem; border-radius:8px;"></pre>
+  <script>
+    const f = document.getElementById('f');
+    const out = document.getElementById('out');
+    f.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const data = new FormData(f);
+      out.textContent = 'Uploading…';
+      try {
+        const res = await fetch('/upload', { method: 'POST', body: data });
+        const text = await res.text();
+        try { out.textContent = JSON.stringify(JSON.parse(text), null, 2); }
+        catch { out.textContent = text; }
+      } catch (err) {
+        out.textContent = 'Request failed: ' + (err && err.message || err);
+      }
+    });
+  </script>
+</body></html>
+    """
+
 
 # ---- CSRF exemptions for API endpoints used by the SPA/AJAX ----
 try:
@@ -1564,5 +1600,5 @@ if __name__ == "__main__":
     app.run(
         host="0.0.0.0",
         port=int(os.getenv("PORT", 8000)),
-        debug=os.getenv("DEBUG", "0") == "1")
-    
+        debug=os.getenv("DEBUG", "0") == "1"
+    )
