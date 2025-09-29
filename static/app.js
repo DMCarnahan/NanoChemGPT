@@ -13,6 +13,22 @@
 })();
 
 document.addEventListener('DOMContentLoaded', () => {
+  // Lightweight toast helper (in case #uplMsg is missing)
+  function showToast(msg, type) {
+    try {
+      const t = document.createElement('div');
+      t.className = 'alert ' + (type === 'error' ? 'error' : 'success');
+      t.style.position = 'fixed';
+      t.style.top = '16px';
+      t.style.right = '16px';
+      t.style.zIndex = '10000';
+      t.style.minWidth = '220px';
+      t.textContent = msg;
+      document.body.appendChild(t);
+      setTimeout(() => t.remove(), 3000);
+    } catch {}
+  }
+
   // Spinner overlay for long-running requests
   const spinnerOverlay = document.createElement('div');
   spinnerOverlay.id = 'globalSpinnerOverlay';
@@ -317,8 +333,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const file = fileInput?.files?.[0];
     if (!file) return;
     uploadBtn.disabled = true;
-    uplMsg.textContent = 'Uploading…';
-    uplMsg.classList.remove('hidden');
+    uplMsg && (uplMsg.textContent = 'Uploading…');
+    if (!uplMsg) showToast('Uploading…', '');
+    uplMsg?.classList.remove('hidden');
 
   try {
       const headers = {};
@@ -328,27 +345,62 @@ document.addEventListener('DOMContentLoaded', () => {
       const fd = new FormData();
       fd.append('file', file);
 
-      const res = await fetch('/upload', {
+      const res = await fetch(`${window.BASE_PATH}/upload`, {
         method: 'POST',
         headers,
         body: fd
       });
 
       const json = await res.json();
+      const base = window.BASE_PATH || '';
+      const statusUrl = (id) => `${base}/status/${id}`;
+
+      async function pollStatus(jid, onupdate) {
+        const start = Date.now();
+        let lastPct = 0;
+        while (true) {
+          const r = await fetch(statusUrl(jid));
+          if (!r.ok) break;
+          const s = await r.json();
+          if (onupdate) {
+            try { onupdate(s); } catch {}
+          }
+          if (s.status === 'done' || s.status === 'error') return s;
+          await new Promise(res => setTimeout(res, 500));
+        }
+        return null;
+      }
+
       if (json.ok) {
-        uplMsg.textContent = 'Uploaded OK';
+        uplMsg && (uplMsg.textContent = 'Uploaded OK');
+        if (json.job_id) {
+          try {
+            const st = await pollStatus(json.job_id, (s) => {
+              const pct = s && s.progress != null ? s.progress : 0;
+              uplMsg && (uplMsg.textContent = `Processing… ${pct}%`);
+            });
+            if (st && st.status === 'done') {
+              uplMsg && (uplMsg.textContent = 'Indexed ✓');
+            } else if (st && st.status === 'error') {
+              uplMsg && (uplMsg.textContent = `Error: ${st.error || 'failed'}`);
+              if (!uplMsg) showToast(`Upload error: ${st.error || 'failed'}`, 'error');
+            }
+          } catch (e) {
+            uplMsg && (uplMsg.textContent = 'Uploaded (no status)');
+          }
+        }
         if (json.filename) {
           const li = document.createElement('li');
-          li.textContent = json.filename;
+          li.textContent = json.filename + (json.job_id ? ' (queued)' : '');
           uplList?.appendChild(li);
         }
       } else {
-        uplMsg.textContent = `Upload error: ${json.error || 'unknown'}`;
+        uplMsg && (uplMsg.textContent = `Upload error: ${json.error || 'unknown'}`);
       }
 
     } catch (err) {
       console.error(err);
-      uplMsg.textContent = `Upload failed: ${err.message || err}`;
+      uplMsg && (uplMsg.textContent = `Upload failed: ${err.message || err}`);
     } finally {
       uploadBtn.disabled = false;
     }
