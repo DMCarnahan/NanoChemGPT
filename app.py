@@ -417,7 +417,7 @@ def _process_pdf_job(jid: str, path: Path, filename: str):
             app.logger.warning(f"[/upload] get_db failed (continuing without DB): {e}")
         if _PdfReader is None:
 
-            raise ImportError(\"pypdf/PyPDF2 not installed — cannot parse PDFs.\")
+            raise ImportError("pypdf/PyPDF2 not installed — cannot parse PDFs.")
 
         reader = _PdfReader(str(path))
         n = len(reader.pages) or 1
