@@ -398,14 +398,24 @@ def status(jid: str):
     return jsonify(j)
 
 def _process_pdf_job(jid: str, path: Path, filename: str):
-    from PyPDF2 import PdfReader
+    try:
+        from PyPDF2 import PdfReader as _PdfReader
+    except Exception:
+        try:
+            from PyPDF2 import PdfReader as _PdfReader
+        except Exception:
+            _PdfReader = None
     db = None
     try:
         try:
             db = get_db()
         except Exception as e:
             app.logger.warning(f"[/upload] get_db failed (continuing without DB): {e}")
-        reader = PdfReader(str(path))
+        if _PdfReader is None:
+
+            raise ImportError("pypdf/PyPDF2 not installed — cannot parse PDFs.")
+
+        reader = _PdfReader(str(path))
         n = len(reader.pages) or 1
         texts = []
         for i, page in enumerate(reader.pages, 1):
@@ -1537,9 +1547,22 @@ def upload_builtin():
 def healthz():
     return jsonify(ok=True)
 
+
+# ---- CSRF exemptions for API endpoints used by the SPA/AJAX ----
+try:
+    if csrf:
+        for fn in (upload, parse_upload, upload_builtin, clear_uploads_route, ask, parse_route, save_txt, api_history, api_history_one, api_uploads, status):
+            csrf.exempt(fn)
+except Exception as _e:
+    try:
+        app.logger.warning(f"[csrf] exempt setup warn: {_e}")
+    except Exception:
+        pass
+
+
 if __name__ == "__main__":
     app.run(
         host="0.0.0.0",
         port=int(os.getenv("PORT", 8000)),
-        debug=os.getenv("DEBUG", "0") == "1"
-    )
+        debug=os.getenv("DEBUG", "0") == "1")
+    
