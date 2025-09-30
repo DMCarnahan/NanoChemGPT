@@ -332,14 +332,18 @@ def home():
 
 # ---- Uploads ---- #
 JOBS: dict[str, dict] = {}
-def _set_job(jid: str, **kw): JOBS.setdefault(jid, {}).update(kw)
+JOB_DIR = Path(os.environ.get('JOB_DIR', '/mnt/data/jobs'))
+JOB_DIR.mkdir(parents=True, exist_ok=True)
+def _set_job(jid: str, **kw):
+    J = JOBS.setdefault(jid, {})
+    J.update(kw)
+    try:
+        (JOB_DIR / f"{jid}.json").write_text(json.dumps(J, ensure_ascii=False), encoding='utf-8')
+    except Exception:
+        pass
 
 @app.post("/upload")
 def upload():
-    try:
-        app.logger.info("[/upload] received content-type=%s, content-length=%s", request.content_type, request.content_length)
-    except Exception:
-        pass
     f = request.files.get("file")
     if not f or f.filename == "":
         abort(400, "No file uploaded.")
@@ -398,7 +402,14 @@ def _mark_uploaded(fname: str, *, kind: str, status: str):
 def status(jid: str):
     j = JOBS.get(jid)
     if not j:
-        abort(404, "unknown job id")
+        try:
+            p = JOB_DIR / f"{jid}.json"
+            if p.exists():
+                j = json.loads(p.read_text(encoding='utf-8'))
+            else:
+                abort(404, "unknown job id")
+        except Exception:
+            abort(404, "unknown job id")
     return jsonify(j)
 
 def _process_pdf_job(jid: str, path: Path, filename: str):
@@ -416,14 +427,27 @@ def _process_pdf_job(jid: str, path: Path, filename: str):
         except Exception as e:
             app.logger.warning(f"[/upload] get_db failed (continuing without DB): {e}")
         if _PdfReader is None:
-
-            raise ImportError("pypdf/PyPDF2 not installed — cannot parse PDFs.")
-
+            raise ImportError('pypdf/PyPDF2 not installed — cannot parse PDFs.')
         reader = _PdfReader(str(path))
         n = len(reader.pages) or 1
         texts = []
+        import gc
+        MAX_PDF_PAGES = int(os.environ.get('MAX_PDF_PAGES', '120') or '120')
         for i, page in enumerate(reader.pages, 1):
-            texts.append(page.extract_text() or "")
+            if i > MAX_PDF_PAGES:
+                try: app.logger.warning(f"[worker] truncated at {MAX_PDF_PAGES} pages for {filename}")
+                except Exception: pass
+                break
+            try:
+                txt_i = page.extract_text() or ""
+            except Exception as ex_p:
+                txt_i = ""
+                try: app.logger.warning(f"[worker] page {i} extract_text failed: {ex_p}")
+                except Exception: pass
+            texts.append(txt_i)
+            if i % 8 == 0:
+                try: gc.collect()
+                except Exception: pass
             _set_job(jid, progress=int(100 * i / n))
         text = "\n".join(texts)
         if not text.strip():
@@ -1550,51 +1574,6 @@ def upload_builtin():
 @app.get("/healthz")
 def healthz():
     return jsonify(ok=True)
-
-@app.get("/upload_test")
-def upload_test_page():
-    return """
-<!doctype html>
-<html><head><meta charset='utf-8'><title>Upload Test</title></head>
-<body style="font-family: system-ui, sans-serif; margin: 2rem;">
-  <h2>Upload Test</h2>
-  <form id="f" enctype="multipart/form-data">
-    <input type="file" name="file" id="file" />
-    <button id="btn">Upload</button>
-  </form>
-  <pre id="out" style="white-space:pre-wrap; background:#f6f8fa; padding:1rem; border-radius:8px;"></pre>
-  <script>
-    const f = document.getElementById('f');
-    const out = document.getElementById('out');
-    f.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const data = new FormData(f);
-      out.textContent = 'Uploading…';
-      try {
-        const res = await fetch('/upload', { method: 'POST', body: data });
-        const text = await res.text();
-        try { out.textContent = JSON.stringify(JSON.parse(text), null, 2); }
-        catch { out.textContent = text; }
-      } catch (err) {
-        out.textContent = 'Request failed: ' + (err && err.message || err);
-      }
-    });
-  </script>
-</body></html>
-    """
-
-
-# ---- CSRF exemptions for API endpoints used by the SPA/AJAX ----
-try:
-    if csrf:
-        for fn in (upload, parse_upload, upload_builtin, clear_uploads_route, ask, parse_route, save_txt, api_history, api_history_one, api_uploads, status):
-            csrf.exempt(fn)
-except Exception as _e:
-    try:
-        app.logger.warning(f"[csrf] exempt setup warn: {_e}")
-    except Exception:
-        pass
-
 
 if __name__ == "__main__":
     app.run(
