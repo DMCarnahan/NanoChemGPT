@@ -12,8 +12,11 @@ import os
 import io
 import re
 import glob
+import json
 import logging
 import threading
+import time
+import uuid
 from datetime import datetime
 from pathlib import Path
 from functools import lru_cache
@@ -145,10 +148,9 @@ ROOT = Path(__file__).resolve().parent
 TEMPLATES_DIR = ROOT / "templates"
 STATIC_DIR = ROOT / "static"
 BUILTIN_DIR = Path(os.getenv("BUILTIN_DIR", ROOT / "builtin")).resolve()
-UPLOADS_DIR = Path(os.getenv("UPLOADS_DIR", "/mnt/data/uploads")
+UPLOADS_DIR = Path(os.getenv("UPLOADS_DIR", "/mnt/data/uploads")).resolve()
 ATTACH_DIR = Path(os.environ.get('ATTACH_DIR', '/mnt/data/attachments'))
 ATTACH_DIR.mkdir(parents=True, exist_ok=True)
-).resolve()
 LOOKUP_UPLOAD_DIR = Path(os.getenv("LOOKUP_UPLOAD_DIR", "/mnt/data/datasets")).resolve()
 VECTORSTORE_DIR = Path(os.getenv("VECTORSTORE_DIR", "/mnt/data/index")).resolve()
 
@@ -694,20 +696,6 @@ def _process_pdf_job(jid: str, path: Path, filename: str):
                 pass
         _set_job(jid, status="error", error=str(e))
 
-
-    # attachment_context merge
-    try:
-        if hasattr(g, 'attachment_context') and g.attachment_context:
-            if 'contexts' in locals() and isinstance(contexts, list):
-                contexts.extend(g.attachment_context)
-            elif 'ctx_blobs' in locals() and isinstance(ctx_blobs, list):
-                ctx_blobs.extend(g.attachment_context)
-            elif 'upload_ctx' in locals() and isinstance(upload_ctx, list):
-                upload_ctx.extend(g.attachment_context)
-            else:
-                ctx_blobs = list(g.attachment_context)
-    except Exception:
-        pass
 # ---- Ask ---- #
 @app.post("/ask")
 def ask():
@@ -757,7 +745,6 @@ def ask():
     """
 
     # ---------- request payload ----------
-    from flask import request, jsonify  
     answer = ""
     payload = request.get_json(silent=True) or {}
     question = (payload.get("question") or payload.get("q") or "").strip()
