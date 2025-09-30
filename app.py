@@ -12,6 +12,7 @@ import os
 import io
 import re
 import glob
+import logging
 import threading
 from datetime import datetime
 from pathlib import Path
@@ -48,6 +49,18 @@ from ref_utils import (
     dedupe_and_rerank, extract_used_ref_indexes, renumber_citations,
     split_used_refs, DEFAULT_NANOCHEM_TERMS, format_references_block
 )
+
+# Enhanced citation relevance import
+try:
+    from harvester.enhanced_citations import enhance_citation_relevance
+    ENHANCED_CITATIONS_AVAILABLE = True
+except ImportError:
+    ENHANCED_CITATIONS_AVAILABLE = False
+    def enhance_citation_relevance(response_text, references, query, intent):
+        return response_text, references
+
+# Initialize logger
+logger = logging.getLogger(__name__)
 try:
     from app_utils.helpers import (
         classify_intent as _h_classify_intent,
@@ -89,6 +102,10 @@ BUILTIN_DIR = Path(os.getenv("BUILTIN_DIR", ROOT / "builtin")).resolve()
 UPLOADS_DIR = Path(os.getenv("UPLOADS_DIR", "/mnt/data/uploads")).resolve()
 LOOKUP_UPLOAD_DIR = Path(os.getenv("LOOKUP_UPLOAD_DIR", "/mnt/data/datasets")).resolve()
 VECTORSTORE_DIR = Path(os.getenv("VECTORSTORE_DIR", "/mnt/data/index")).resolve()
+
+# Enhanced citation settings
+ENABLE_ENHANCED_CITATIONS = os.getenv("ENABLE_ENHANCED_CITATIONS", "true").lower() in ("true", "1", "yes")
+CITATION_MIN_SCORE = float(os.getenv("CITATION_MIN_SCORE", "0.25"))
 
 BUNDLE_AUTO   = ROOT / "harvester" / "out_auto" / "bundle.jsonl"
 BUNDLE_MERGED = ROOT / "harvester" / "out_auto" / "bundle_with_methods.jsonl"
@@ -1197,6 +1214,32 @@ def ask():
         messages=[{"role": "user", "content": prompt}],
         temperature=0.2
     ).choices[0].message.content
+
+    # Apply enhanced citation relevance filtering if available and enabled
+    if ENHANCED_CITATIONS_AVAILABLE and ENABLE_ENHANCED_CITATIONS:
+        try:
+            # Use the classify_intent helper if available, otherwise fall back to mode
+            if callable(_h_classify_intent):
+                intent = _h_classify_intent(question)
+            else:
+                intent = mode or "procedure"
+            
+            # Get original refs count for logging
+            original_refs_count = len(refs_all)
+            
+            # Import and configure enhanced filtering with proper min_score
+            from harvester.enhanced_citations import EnhancedCitationFilter
+            filter_engine = EnhancedCitationFilter()
+            raw_filtered, refs_all_filtered = filter_engine.filter_low_relevance_citations(
+                raw, refs_all, question, intent, min_score=CITATION_MIN_SCORE
+            )
+            
+            if raw_filtered and refs_all_filtered:
+                raw = raw_filtered
+                refs_all = refs_all_filtered
+                logger.info(f"Enhanced citation filtering: kept {len(refs_all_filtered)}/{original_refs_count} references")
+        except Exception as e:
+            logger.warning(f"Enhanced citation filtering failed: {e}. Using original citations.")
 
     # Split answer/rationale and strip any in-answer references block
     if mode == "reasoning":

@@ -10,6 +10,7 @@ from tei_utils import tei_to_sections, filter_methods_sections as filt_tei
 from jats_utils import jats_to_sections, filter_methods_sections as filt_jats
 from miner.runtime import get_miner
 from oa_resolver import resolve_oa
+from enhanced_relevance import enhance_harvester_relevance
 
 miner = get_miner(nlp_model= "SPACY_MODEL")
 
@@ -327,6 +328,57 @@ def main():
             seen.add(key)
             dedup.append(c)
 
+    # Apply enhanced relevance filtering if enabled
+    enable_enhanced_relevance = cfg.get('enable_enhanced_relevance', False)
+    if enable_enhanced_relevance:
+        logger.info(f"Applying enhanced relevance filtering to {len(dedup)} papers...")
+        try:
+            # Convert to format expected by enhanced_relevance
+            papers_for_filtering = []
+            for rec in dedup:
+                paper_dict = {
+                    "title": rec.get("title", ""),
+                    "abstract": rec.get("abstract", ""),  # May be empty for many papers
+                    "journal": rec.get("journal", ""),
+                    "year": rec.get("year"),
+                    "doi": rec.get("doi"),
+                    "isOpenAccess": rec.get("access_route") not in ["unknown", "closed"],
+                    "text": "",  # Will be populated later during processing
+                    "keywords": rec.get("keywords", [])
+                }
+                papers_for_filtering.append(paper_dict)
+            
+            # Apply enhanced relevance with current config
+            relevance_config = {
+                "min_year": cfg.get("min_year", cfg.get("since_year", 2018)),
+                "quality_threshold": cfg.get("quality_threshold", 0.4),
+                "max_papers": cfg.get("max_papers", len(dedup)),
+                "queries": cfg.get("queries", [])
+            }
+            
+            enhanced_papers = enhance_harvester_relevance(papers_for_filtering, relevance_config)
+            
+            # Map back to original dedup format, preserving enhanced metadata
+            relevance_map = {i: paper for i, paper in enumerate(enhanced_papers)}
+            filtered_dedup = []
+            
+            for i, rec in enumerate(dedup):
+                if i < len(enhanced_papers):
+                    # Add relevance metadata to the record
+                    rec["relevance_score"] = enhanced_papers[i].get("relevance_score", 0.0)
+                    rec["relevance_breakdown"] = enhanced_papers[i].get("relevance_breakdown", {})
+                    rec["relevance_reasons"] = enhanced_papers[i].get("relevance_reasons", [])
+                    filtered_dedup.append(rec)
+            
+            dedup = filtered_dedup
+            logger.info(f"Enhanced relevance filtering retained {len(dedup)} papers")
+            
+        except Exception as e:
+            logger.warning(f"Enhanced relevance filtering failed: {e}. Continuing with original papers.")
+    
+    else:
+        logger.info(f"Enhanced relevance filtering disabled. Processing all {len(dedup)} papers.")
+
     # Prepare bundle file
     bundle = Path(cfg.get("out_bundle", out_dir / "bundle.jsonl"))
     written = 0
@@ -343,6 +395,11 @@ def main():
                 'access_route': rec.get('access_route', 'unknown'),
                 'sections': [],
                 'extractions': {'methods_paragraphs': []},
+                'relevance': {
+                    'score': rec.get('relevance_score', 0.0),
+                    'breakdown': rec.get('relevance_breakdown', {}),
+                    'reasons': rec.get('relevance_reasons', [])
+                },
                 'meta': {
                     'title': rec.get('title', ''),
                     'doi': rec.get('doi') or '',
@@ -445,6 +502,7 @@ def main():
 
             # Run the miner on those paragraphs
             paras = [s['text'] for s in methods]
+            entities_for_relevance = []
             if paras:
                 mp = []
                 for ptxt in paras:
@@ -454,9 +512,23 @@ def main():
                         "operations": ann.get("operations", []),
                         "expanded": ann.get("expanded", [])
                     })
+                    # Collect entities for relevance scoring
+                    for op in ann.get("operations", []):
+                        for material in op.get("materials", []):
+                            entities_for_relevance.append({"label": "MATERIAL", "text": material})
+                        for param_key, param_val in op.get("params", {}).items():
+                            if param_key in ["temperature", "temp"]:
+                                entities_for_relevance.append({"label": "TEMP", "text": str(param_val)})
+                            elif param_key in ["time", "duration"]:
+                                entities_for_relevance.append({"label": "TIME", "text": str(param_val)})
+                            elif param_key in ["amount", "quantity"]:
+                                entities_for_relevance.append({"label": "AMOUNT", "text": str(param_val)})
+                
                 paper['extractions']['methods_paragraphs'] = mp
+                paper['extractions']['entities'] = entities_for_relevance
             else:
                 paper['extractions']['methods_paragraphs'] = []
+                paper['extractions']['entities'] = []
 
             if not paper.get("raw"):
                 raw_source = ""

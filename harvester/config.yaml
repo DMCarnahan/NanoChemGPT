@@ -7,3 +7,9 @@ grobid_url: "http://localhost:8070"
 spaCy_model_dir: "../NanoChemGPT/miner/ner_model/model-best"
 heuristic_linker_path: "../NanoChemGPT/miner/heuristic_linker.py"
 out_dir: "harvester/out_auto"
+
+# Enhanced relevance filtering settings
+enable_enhanced_relevance: true
+min_year: 2020                    # Minimum publication year for relevance
+quality_threshold: 0.4            # Relevance score threshold (0.0-1.0)
+max_papers: 150                   # Maximum papers to retain after filtering
