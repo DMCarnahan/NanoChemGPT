@@ -357,8 +357,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
       async function pollStatus(jid, onupdate) {
         const start = Date.now();
-        const MAX_POLL_TIME = 120000; // 2 minutes max for frontend
-        const MAX_ITERATIONS = 240; // 240 * 500ms = 2 minutes max
+        const MAX_POLL_TIME = 60000; // 1 minute max for frontend
+        const MAX_ITERATIONS = 120; // 120 * 500ms = 1 minute max
         let iterations = 0;
         let lastPct = 0;
         let stuckCount = 0;
@@ -389,8 +389,12 @@ document.addEventListener('DOMContentLoaded', () => {
             // Detect truly stuck processing (progress 100% but still processing)
             if (s.status === 'processing' && s.progress === 100) {
               stuckCount++;
-              if (stuckCount > 20) { // 10 seconds stuck at 100%
-                console.warn('Upload appears stuck at 100% processing, giving up');
+              if (stuckCount > 10) { // 5 seconds stuck at 100%
+                console.warn('Upload appears stuck at 100% processing, continuing to poll (backend should auto-complete soon)');
+                // Don't break immediately, let backend auto-complete
+              }
+              if (stuckCount > 70) { // 35 seconds stuck - give up
+                console.warn('Upload stuck too long, giving up');
                 break;
               }
             } else {
