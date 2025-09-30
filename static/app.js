@@ -145,7 +145,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const res = await fetch(`${(window.BASE_PATH||'')}/ask`, {
         method: 'POST',
         headers,
-        body: JSON.stringify(payload)
+        body: JSON.stringify(Object.assign({}, payload, { attachments: pendingAttachmentIds }))
       });
 
       const raw = await res.text();
