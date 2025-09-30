@@ -39,8 +39,34 @@ from openai import OpenAI
 from werkzeug.utils import secure_filename
 
 # Local modules
-import vector_store as vs
-from vector_store.uploads_vector import UploadsVectorSearch
+try:
+    import vector_store as vs_module
+    VS_AVAILABLE = True
+    print("[startup] Vector store module loaded successfully")
+except Exception as vs_import_error:
+    print(f"[startup] Vector store import failed: {vs_import_error}")
+    VS_AVAILABLE = False
+    # Create dummy vs module to prevent crashes
+    class DummyVectorStore:
+        def add_to_store(self, text, tag="upload"):
+            print(f"[vs] add_to_store called but vector store not available: tag={tag}")
+        def search(self, query, k=8):
+            print(f"[vs] search called but vector store not available: query={query[:50]}...")
+            return ""
+        def clear_uploads(self):
+            print("[vs] clear_uploads called but vector store not available")
+    vs_module = DummyVectorStore()
+
+# Alias for backwards compatibility
+vs = vs_module
+
+try:
+    from vector_store.uploads_vector import UploadsVectorSearch
+    UVS_AVAILABLE = True
+except Exception as uvs_import_error:
+    print(f"[startup] UploadsVectorSearch import failed: {uvs_import_error}")
+    UVS_AVAILABLE = False
+    UploadsVectorSearch = None
 from converter import validate_step, convert_text_to_robot_ops
 from mongo_client import get_db
 from decider.miner_queue import enqueue_text_mining_job
@@ -388,19 +414,30 @@ def upload():
         if lower.endswith(".pdf"):
             threading.Thread(target=_process_pdf_job, args=(jid, dest, fname), daemon=True).start()
         elif lower.endswith(".json"):
-            txt = dest.read_text(encoding="utf-8", errors="ignore")
-            vs.add_to_store(txt, tag=f"upload:{fname}")
-            _mark_uploaded(fname, kind="json", status="indexed")
-            _set_job(jid, status="done", progress=100)
+            try:
+                txt = dest.read_text(encoding="utf-8", errors="ignore")
+                vs.add_to_store(txt, tag=f"upload:{fname}")
+                _mark_uploaded(fname, kind="json", status="indexed")
+                _set_job(jid, status="done", progress=100)
+            except Exception as vs_error:
+                app.logger.error(f"[/upload] Vector store error for JSON: {vs_error}")
+                _mark_uploaded(fname, kind="json", status="stored")  # fallback
+                _set_job(jid, status="done", progress=100, warning=f"Indexing failed: {vs_error}")
         elif lower.endswith((".parquet", ".csv", ".tsv", ".xlsx")):
             _mark_uploaded(fname, kind="table", status="stored")
             _set_job(jid, status="done", progress=100)
         else:
-            txt = dest.read_text(encoding="utf-8", errors="ignore")
-            vs.add_to_store(txt, tag=f"upload:{fname}")
-            _mark_uploaded(fname, kind="text", status="indexed")
-            _set_job(jid, status="done", progress=100)
+            try:
+                txt = dest.read_text(encoding="utf-8", errors="ignore")
+                vs.add_to_store(txt, tag=f"upload:{fname}")
+                _mark_uploaded(fname, kind="text", status="indexed")
+                _set_job(jid, status="done", progress=100)
+            except Exception as vs_error:
+                app.logger.error(f"[/upload] Vector store error for text: {vs_error}")
+                _mark_uploaded(fname, kind="text", status="stored")  # fallback
+                _set_job(jid, status="done", progress=100, warning=f"Indexing failed: {vs_error}")
     except Exception as e:
+        app.logger.error(f"[/upload] General upload error: {e}")
         _set_job(jid, status="error", error=str(e))
 
     return jsonify({"ok": True, "job_id": jid, "filename": fname, "path": str(dest)})
@@ -469,14 +506,35 @@ def _process_pdf_job(jid: str, path: Path, filename: str):
         text = "\n".join(texts)
         if not text.strip():
             raise ValueError("PDF contains no extractable text.")
-        vs.add_to_store(text, tag=f"upload:{filename}")
+        
+        # Add vector store with error handling
+        try:
+            vs.add_to_store(text, tag=f"upload:{filename}")
+            vs_success = True
+        except Exception as vs_error:
+            app.logger.error(f"[_process_pdf_job] Vector store error: {vs_error}")
+            vs_success = False
+        
         if db is not None:
+            status = "indexed" if vs_success else "stored"
+            update_data = {
+                "status": status, 
+                "indexed_at": datetime.utcnow(), 
+                "n_pages": n
+            }
+            if not vs_success:
+                update_data["indexing_error"] = str(vs_error)
+                
             db.uploads.update_one(
                 {"filename": filename},
-                {"$set": {"status": "indexed", "indexed_at": datetime.utcnow(), "n_pages": n}},
+                {"$set": update_data},
                 upsert=True,
             )
-        _set_job(jid, status="done", progress=100)
+        
+        job_data = {"status": "done", "progress": 100}
+        if not vs_success:
+            job_data["warning"] = f"PDF extracted but indexing failed: {vs_error}"
+        _set_job(jid, **job_data)
     except Exception as e:
         if db is not None:
             try:
@@ -560,7 +618,15 @@ def ask():
     intent = payload.get("intent") or ci.get("intent") or "protocol"
     mode   = payload.get("mode")   or ci.get("mode")
     if not mode:
-        mode = "reasoning" if intent in {"reasoning", "analysis"} else "protocol"
+        # Force protocol mode for synthesis-related intents to ensure structured output
+        synthesis_intents = {"protocol", "synthesis", "methods", "procedure"}
+        if intent in synthesis_intents:
+            mode = "protocol"
+        else:
+            mode = "reasoning" if intent in {"reasoning", "analysis"} else "protocol"
+    
+    # Debug logging to understand mode selection
+    app.logger.info(f"[/ask] Intent: {intent}, Mode: {mode}, Question: {question[:100]}...")
 
     want_inline = _pick_bool("want_inline", True)
     allow_fetch = _pick_bool("allow_fetch", True)
@@ -592,11 +658,18 @@ def ask():
             vector_device = "cpu"
 
         try:
-            uvs = UploadsVectorSearch.from_folder(uploads_dir, device=vector_device, max_docs=1000)
+            if UploadsVectorSearch is None:
+                app.logger.warning("[/ask] UploadsVectorSearch not available")
+                uvs = None
+            else:
+                uvs = UploadsVectorSearch.from_folder(uploads_dir, device=vector_device, max_docs=1000)
         except TypeError:
             # Fallback: attempt without max_docs if the signature differs.
             try:
-                uvs = UploadsVectorSearch.from_folder(uploads_dir, device=vector_device)
+                if UploadsVectorSearch is not None:
+                    uvs = UploadsVectorSearch.from_folder(uploads_dir, device=vector_device)
+                else:
+                    uvs = None
             except Exception as e2:
                 app.logger.warning(f"[/ask] Uploads VS error: {e2}")
                 uvs = None

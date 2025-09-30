@@ -357,36 +357,88 @@ document.addEventListener('DOMContentLoaded', () => {
 
       async function pollStatus(jid, onupdate) {
         const start = Date.now();
+        const MAX_POLL_TIME = 300000; // 5 minutes max
+        const MAX_ITERATIONS = 600; // 600 * 500ms = 5 minutes max
+        let iterations = 0;
         let lastPct = 0;
-        while (true) {
-          const r = await fetch(statusUrl(jid));
-          if (!r.ok) break;
-          const s = await r.json();
-          if (onupdate) {
-            try { onupdate(s); } catch {}
+        
+        while (iterations < MAX_ITERATIONS) {
+          const elapsed = Date.now() - start;
+          if (elapsed > MAX_POLL_TIME) {
+            console.warn('Upload polling timeout after', elapsed, 'ms');
+            break;
           }
-          if (s.status === 'done' || s.status === 'error') return s;
+          
+          try {
+            const r = await fetch(statusUrl(jid));
+            if (!r.ok) {
+              console.warn('Status endpoint returned error:', r.status);
+              break;
+            }
+            
+            const s = await r.json();
+            if (onupdate) {
+              try { onupdate(s); } catch {}
+            }
+            
+            if (s.status === 'done' || s.status === 'error') {
+              return s;
+            }
+            
+            // Add safety check for stuck processing
+            if (s.status === 'processing' && iterations > 120) { // 1 minute
+              const currentPct = s.progress || 0;
+              if (currentPct === lastPct && iterations > 240) { // 2 minutes stuck
+                console.warn('Upload appears stuck at', currentPct, '%');
+                break;
+              }
+              lastPct = currentPct;
+            }
+            
+          } catch (fetchError) {
+            console.error('Error polling status:', fetchError);
+            break;
+          }
+          
+          iterations++;
           await new Promise(res => setTimeout(res, 500));
         }
+        
+        if (iterations >= MAX_ITERATIONS) {
+          console.warn('Upload polling exceeded maximum iterations');
+        }
+        
         return null;
       }
 
       if (json.ok) {
         uplMsg && (uplMsg.textContent = 'Uploaded OK');
+        console.log('[Upload] File uploaded successfully:', json);
+        
         if (json.job_id) {
+          console.log('[Upload] Starting status polling for job:', json.job_id);
           try {
             const st = await pollStatus(json.job_id, (s) => {
               const pct = s && s.progress != null ? s.progress : 0;
+              console.log('[Upload] Status update:', s);
               uplMsg && (uplMsg.textContent = `Processing… ${pct}%`);
             });
+            
+            console.log('[Upload] Final status:', st);
+            
             if (st && st.status === 'done') {
-              uplMsg && (uplMsg.textContent = 'Indexed ✓');
+              const message = st.warning ? `Indexed ✓ (${st.warning})` : 'Indexed ✓';
+              uplMsg && (uplMsg.textContent = message);
             } else if (st && st.status === 'error') {
               uplMsg && (uplMsg.textContent = `Error: ${st.error || 'failed'}`);
               if (!uplMsg) showToast(`Upload error: ${st.error || 'failed'}`, 'error');
+            } else {
+              console.warn('[Upload] Unexpected final status or null result:', st);
+              uplMsg && (uplMsg.textContent = 'Processing timed out');
             }
           } catch (e) {
-            uplMsg && (uplMsg.textContent = 'Uploaded (no status)');
+            console.error('[Upload] Status polling error:', e);
+            uplMsg && (uplMsg.textContent = 'Uploaded (status check failed)');
           }
         }
         if (json.filename) {

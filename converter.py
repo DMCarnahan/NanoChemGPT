@@ -255,9 +255,12 @@ def _rebuild_step_micro_ops(step, devices, defaults, step_index):
             m += [{"verb":"set","device": dev, "param":"temperature_C", "value": op.get("value"), "step_index": step_index}]
 
         elif typ == "add_solvent":
+            rate = "slow" if "dropwise" in step.get("raw", "").lower() else "normal"
+            temp_context = step.get("temperature_C")
             m += [{"verb":"pick_up","object": op.get("solvent","solvent"), "from":"bench", "step_index": step_index},
                   {"verb":"pour","from": op.get("solvent","solvent"), "to": step.get("vessel","V1"),
                    "volume": op.get("volume"), "volume_units": op.get("volume_units","mL"),
+                   "rate": rate, "temperature_context": temp_context,
                    "step_index": step_index},
                   {"verb":"place","object": op.get("solvent","solvent"), "to":"bench", "step_index": step_index}]
 
@@ -308,12 +311,63 @@ def _rebuild_step_micro_ops(step, devices, defaults, step_index):
     return m
 
 def _rebuild_micro_plan(doc: dict) -> None:
-    allowed = {"pick_up","place","pour","set","wait"}
+    allowed = {"pick_up","place","pour","set","wait","start","stop","vortex","decant"}
+    
+    def validate_action(action):
+        """Validate atomic action parameters"""
+        verb = action.get("verb")
+        if not verb:
+            print(f"[converter] Warning: Action missing 'verb': {action}")
+            return False
+            
+        # Required parameters for each action type
+        if verb == "pick_up":
+            valid = "object" in action
+            if not valid:
+                print(f"[converter] Warning: pick_up missing 'object': {action}")
+            return valid
+        elif verb == "place":
+            valid = "object" in action and "to" in action
+            if not valid:
+                print(f"[converter] Warning: place missing 'object' or 'to': {action}")
+            return valid
+        elif verb == "pour":
+            valid = "from" in action and "to" in action
+            if not valid:
+                print(f"[converter] Warning: pour missing 'from' or 'to': {action}")
+            return valid
+        elif verb == "set":
+            valid = "device" in action and "param" in action and "value" in action
+            if not valid:
+                print(f"[converter] Warning: set missing 'device', 'param', or 'value': {action}")
+            return valid
+        elif verb == "wait":
+            valid = "minutes" in action and isinstance(action.get("minutes"), (int, float))
+            if not valid:
+                print(f"[converter] Warning: wait missing or invalid 'minutes': {action}")
+            return valid
+        elif verb in {"start", "stop"}:
+            valid = "device" in action
+            if not valid:
+                print(f"[converter] Warning: {verb} missing 'device': {action}")
+            return valid
+        elif verb == "vortex":
+            valid = "device" in action and "tube" in action
+            if not valid:
+                print(f"[converter] Warning: vortex missing 'device' or 'tube': {action}")
+            return valid
+        elif verb == "decant":
+            valid = "object" in action
+            if not valid:
+                print(f"[converter] Warning: decant missing 'object': {action}")
+            return valid
+        return True  # allow other verbs
+    
     out = []
     for st in doc.get("steps", []):
         idx = st.get("index")
         for m in st.get("micro_ops") or []:
-            if m.get("verb") in allowed:
+            if m.get("verb") in allowed and validate_action(m):
                 mm = dict(m)
                 mm["step_index"] = idx  # enforce correct index
                 out.append(mm)
@@ -1504,18 +1558,64 @@ def detect_solution_prep(line: str) -> Optional[Dict]:
             }
     return None
 
+def _normalize_units(value, unit):
+    """Normalize units to standard forms"""
+    if not unit:
+        return value, unit
+    
+    unit_lower = unit.lower().replace("µ", "u").replace(" ", "")
+    
+    # Volume normalization to mL
+    if unit_lower in ["ul", "μl"]:
+        return value / 1000.0, "mL"
+    elif unit_lower in ["l"]:
+        return value * 1000.0, "mL"
+    elif unit_lower in ["ml"]:
+        return value, "mL"
+    
+    # Mass normalization to mg
+    elif unit_lower in ["g"]:
+        return value * 1000.0, "mg"
+    elif unit_lower in ["kg"]:
+        return value * 1000000.0, "mg"
+    elif unit_lower in ["ug", "μg"]:
+        return value / 1000.0, "mg"
+    elif unit_lower in ["mg"]:
+        return value, "mg"
+    
+    # Time normalization to minutes
+    elif unit_lower in ["h", "hr", "hour", "hours"]:
+        return value * 60.0, "min"
+    elif unit_lower in ["s", "sec", "second", "seconds"]:
+        return value / 60.0, "min"
+    elif unit_lower in ["min", "minute", "minutes"]:
+        return value, "min"
+    
+    return value, unit
+
 def detect_add_solvent(line: str) -> Optional[Dict]:
     s = strip_tags(_clean_unicode(line.strip()))
+    # More flexible pattern to catch variations like "add 5mL ethanol to the mixture"
     m = re.search(
-        r"\badd\s+(?P<vol>[\d\.]+)\s*(?P<vunit>µ?u?L|mL|ml|l|L)\s+of\s+(?P<solvent>.+?)\s+to\s+(?:the\s+)?(?:solution|mixture|suspension|dispersion)\b",
+        r"\b(?:add|pour|introduce)\s+(?P<vol>[\d\.]+)\s*(?P<vunit>µ?u?L|mL|ml|l|L)\s+(?:of\s+)?(?P<solvent>.+?)\s+(?:to|into)\s+(?:the\s+)?(?:solution|mixture|suspension|dispersion|flask|beaker|vessel)\b",
         s, re.I
     )
     if not m:
+        # Fallback pattern for "add ethanol (5 mL) to mixture"
+        m = re.search(
+            r"\b(?:add|pour|introduce)\s+(?P<solvent>.+?)\s*\(\s*(?P<vol>[\d\.]+)\s*(?P<vunit>µ?u?L|mL|ml|l|L)\s*\)\s+(?:to|into)\s+(?:the\s+)?(?:solution|mixture|suspension|dispersion|flask|beaker|vessel)\b",
+            s, re.I
+        )
+    if not m:
         return None
+    
+    # Normalize volume units
+    volume, volume_units = _normalize_units(float(m.group("vol")), m.group("vunit"))
+    
     return {
         "action": "add_solvent",
-        "volume": float(m.group("vol")),
-        "volume_units": m.group("vunit"),
+        "volume": volume,
+        "volume_units": volume_units,
         "solvent": m.group("solvent").strip()
     }
 
