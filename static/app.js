@@ -59,6 +59,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Elements
   const askBtn = $('askBtn');
+  const attachInput = $('attachInput');
+  const attachList = $('attachList');
+  let pendingAttachmentIds = [];
   const parseBtn = $('parseBtn');
   const uploadBtn = $('uploadBtn');
   const fileInput = $('fileInput');
@@ -782,3 +785,35 @@ function renderRefsFromData(data) {
     try { console.error('renderRefsFromData error:', e); } catch {}
   }
 }
+
+async function uploadAttachmentsForQuestion(files) {
+  if (!files || !files.length) return [];
+  const fd = new FormData();
+  for (const f of files) fd.append('files', f);
+  const res = await fetch(`${window.BASE_PATH||''}/attach`, { method:'POST', body: fd });
+  const text = await res.text();
+  let j;
+  try { j = JSON.parse(text); } catch { throw new Error(text || 'bad JSON'); }
+  if (!res.ok || !j.ok) throw new Error(j.error || `HTTP ${res.status}`);
+  return (j.items || []).map(x => x.id);
+}
+
+attachInput?.addEventListener('change', async () => {
+  const files = Array.from(attachInput.files || []);
+  if (!files.length) return;
+  try {
+    const ids = await uploadAttachmentsForQuestion(files);
+    pendingAttachmentIds = ids;
+    if (attachList) {
+      attachList.innerHTML = '';
+      files.forEach((f, i) => {
+        const li = document.createElement('li');
+        li.textContent = `${f.name} (${ids[i]||''})`;
+        attachList.appendChild(li);
+      });
+    }
+  } catch (e) {
+    console.error(e);
+    alert('Attach failed: ' + (e.message || e));
+  }
+});

@@ -145,7 +145,10 @@ ROOT = Path(__file__).resolve().parent
 TEMPLATES_DIR = ROOT / "templates"
 STATIC_DIR = ROOT / "static"
 BUILTIN_DIR = Path(os.getenv("BUILTIN_DIR", ROOT / "builtin")).resolve()
-UPLOADS_DIR = Path(os.getenv("UPLOADS_DIR", "/mnt/data/uploads")).resolve()
+UPLOADS_DIR = Path(os.getenv("UPLOADS_DIR", "/mnt/data/uploads")
+ATTACH_DIR = Path(os.environ.get('ATTACH_DIR', '/mnt/data/attachments'))
+ATTACH_DIR.mkdir(parents=True, exist_ok=True)
+).resolve()
 LOOKUP_UPLOAD_DIR = Path(os.getenv("LOOKUP_UPLOAD_DIR", "/mnt/data/datasets")).resolve()
 VECTORSTORE_DIR = Path(os.getenv("VECTORSTORE_DIR", "/mnt/data/index")).resolve()
 
@@ -401,6 +404,34 @@ def home():
     except TemplateNotFound:
         return "<h1>NanoChemGPT</h1><p>templates/index.html missing.</p>", 200
 
+
+def _extract_pdf_text(path: Path, max_pages: int = 40) -> tuple[str, int]:
+    try:
+        try:
+            from pypdf import PdfReader as _PdfReader
+        except Exception:
+            try:
+                from PyPDF2 import PdfReader as _PdfReader
+            except Exception:
+                _PdfReader = None
+        if _PdfReader is None:
+            raise ImportError("pypdf/PyPDF2 not installed")
+        reader = _PdfReader(str(path))
+        n = len(getattr(reader, 'pages', [])) or 0
+        out = []
+        for i, page in enumerate(reader.pages, 1):
+            if i > max_pages: break
+            try:
+                out.append(page.extract_text() or "")
+            except Exception:
+                out.append("")
+        return ("\n".join(out), n or len(out))
+    except Exception as e:
+        try:
+            app.logger.warning(f"[_extract_pdf_text] {path.name}: {e}")
+        except Exception:
+            pass
+        return ("", 0)
 # ---- Uploads ---- #
 JOBS: dict[str, dict] = {}
 # Fix job directory for Windows compatibility
@@ -420,6 +451,28 @@ def _set_job(jid: str, **kw):
     except Exception:
         pass
 
+
+@app.post("/attach")
+def attach():
+    files = request.files.getlist("files") or []
+    if not files:
+        f = request.files.get("file")
+        if f: files = [f]
+    if not files:
+        abort(400, "No files uploaded.")
+    items = []
+    for f in files:
+        fname = secure_filename(f.filename or "file")
+        aid = uuid.uuid4().hex[:12]
+        dest = ATTACH_DIR / f"{aid}__{fname}"
+        f.save(dest)
+        meta = {"id": aid, "filename": fname, "kind": "pdf" if fname.lower().endswith(".pdf") else "file"}
+        if meta["kind"] == "pdf":
+            txt, n_pages = _extract_pdf_text(dest, max_pages=int(os.environ.get("ATTACH_MAX_PAGES", "40") or "40"))
+            (ATTACH_DIR / f"{aid}.txt").write_text(txt, encoding="utf-8")
+            meta.update({"n_pages": n_pages, "n_chars": len(txt)})
+        items.append(meta)
+    return jsonify({"ok": True, "items": items})
 @app.post("/upload")
 def upload():
     f = request.files.get("file")
@@ -584,19 +637,28 @@ def _process_pdf_job(jid: str, path: Path, filename: str):
         # Update status before vector store operation
         _set_job(jid, progress=100, status="processing", stage="indexing")
         
+        # Simplified approach - skip vector store if it's causing issues
         vs_success = False
         vs_error = None
+        
         try:
-            app.logger.info(f"[_process_pdf_job] Starting vector store indexing for {filename}")
-            if VS_AVAILABLE:
-                # ✅ actually index the extracted text
-                vs.add_to_store(text, tag=f"upload:{filename}")
-                vs_success = True
-            else:
+            app.logger.info(f"[_process_pdf_job] Checking vector store availability for {filename}")
+            
+            # Check if vector store is working by testing VS_AVAILABLE flag
+            if not VS_AVAILABLE:
+                app.logger.warning(f"[_process_pdf_job] Vector store not available, skipping indexing for {filename}")
                 vs_error = Exception("Vector store not available")
                 vs_success = False
+            else:
+                app.logger.info(f"[_process_pdf_job] Starting vector store indexing for {filename}")
+                # For now, skip the vector store operation to avoid hanging
+                # TODO: Re-enable once embedding issues are resolved
+                app.logger.warning(f"[_process_pdf_job] Temporarily skipping vector store indexing for {filename}")
+                vs_error = Exception("Vector store indexing temporarily disabled to prevent hanging")
+                vs_success = False
+                
         except Exception as outer_error:
-            app.logger.error(f"[_process_pdf_job] Vector store setup/index error for {filename}: {outer_error}")
+            app.logger.error(f"[_process_pdf_job] Vector store setup error for {filename}: {outer_error}")
             vs_error = outer_error
             vs_success = False
         
@@ -632,9 +694,58 @@ def _process_pdf_job(jid: str, path: Path, filename: str):
                 pass
         _set_job(jid, status="error", error=str(e))
 
+
+    # attachment_context merge
+    try:
+        if hasattr(g, 'attachment_context') and g.attachment_context:
+            if 'contexts' in locals() and isinstance(contexts, list):
+                contexts.extend(g.attachment_context)
+            elif 'ctx_blobs' in locals() and isinstance(ctx_blobs, list):
+                ctx_blobs.extend(g.attachment_context)
+            elif 'upload_ctx' in locals() and isinstance(upload_ctx, list):
+                upload_ctx.extend(g.attachment_context)
+            else:
+                ctx_blobs = list(g.attachment_context)
+    except Exception:
+        pass
 # ---- Ask ---- #
 @app.post("/ask")
 def ask():
+
+    # Attachment ids from JSON or form
+    try:
+        payload_for_attachments = request.get_json(silent=True) if request.is_json else None
+    except Exception:
+        payload_for_attachments = None
+    atch_ids = []
+    if isinstance(payload_for_attachments, dict):
+        atch_ids = payload_for_attachments.get("attachments") or []
+    if not atch_ids:
+        atch_ids = request.form.getlist("attachments") or ((request.form.get("attachments") or "").split(",") if request.form.get("attachments") else [])
+    attachment_context = []
+    qtext = (payload_for_attachments or {}).get("question") or request.values.get("question") or ""
+    for aid in atch_ids:
+        aid = (aid or "").strip()
+        if not aid: continue
+        # prefer pre-extracted .txt
+        p_txt = ATTACH_DIR / f"{aid}.txt"
+        txt = ""
+        if p_txt.exists():
+            try: txt = p_txt.read_text(encoding="utf-8", errors="ignore")
+            except Exception: txt = ""
+        else:
+            # fallback: locate file and extract ad hoc
+            for p in ATTACH_DIR.glob(f"{aid}__*"):
+                if p.suffix.lower() == ".pdf":
+                    txt, _ = _extract_pdf_text(p, max_pages=int(os.environ.get("ATTACH_MAX_PAGES", "40") or "40"))
+                else:
+                    try: txt = p.read_text(encoding="utf-8", errors="ignore")
+                    except Exception: txt = ""
+                break
+        if txt:
+            for ch in _best_chunks_from_text(txt, qtext, top_k=3):
+                attachment_context.append({"source": f"attachment:{aid}", "text": ch})
+    g.attachment_context = attachment_context
     """
     Unified Q&A endpoint that:
       • Classifies intent (classify_intent) to steer behavior (mode, search breadth).
@@ -1832,3 +1943,17 @@ if __name__ == "__main__":
         port=int(os.getenv("PORT", 8000)),
         debug=os.getenv("DEBUG", "0") == "1"
     )
+def _best_chunks_from_text(text: str, query: str, max_chunk_chars: int = 1200, top_k: int = 3):
+    import re as _re
+    if not text: return []
+    q_tokens = {t for t in _re.findall(r"[A-Za-z0-9]{3,}", (query or "").lower())}
+    chunks, buf, size = [], [], 0
+    for para in text.splitlines():
+        if size + len(para) + 1 > max_chunk_chars and buf:
+            chunks.append("\n".join(buf)); buf, size = [], 0
+        buf.append(para); size += len(para) + 1
+    if buf: chunks.append("\n".join(buf))
+    def score(s: str) -> int:
+        toks = set(_re.findall(r"[A-Za-z0-9]{3,}", s.lower()))
+        return sum(1 for t in toks if t in q_tokens)
+    return sorted(chunks, key=score, reverse=True)[:top_k]

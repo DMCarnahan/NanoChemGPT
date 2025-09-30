@@ -150,7 +150,22 @@
         <p class="small muted mt-2">Tip: Describe reagents, solvents, temps, and any constraints.</p>
         <label class="visually-hidden" for="question">Enter your question</label>
         <textarea id="question" class="textarea" rows="8" autocomplete="off" placeholder="Ask a synthesis question…" aria-describedby="askHelp"></textarea>
-
+        <label for="attachInput" class="small mt-2" id="attachLabel">Attach files</label>
+        <input id="attachInput"
+              type="file"
+              multiple
+              accept=".pdf,.txt,.json"
+              aria-describedby="attachHelp attachMsg"
+              data-max-files="3">
+        <ul id="attachList"
+            class="mt-1"
+            aria-live="polite"
+            aria-relevant="additions removals"></ul>
+        <div id="attachMsg"
+            class="small muted mt-1"
+            role="status"
+            aria-live="polite"
+            aria-atomic="true"></div>
         <div class="toolbar mt-3" role="group" aria-label="Ask toolbar">
           <button id="askBtn" class="btn" type="button" aria-controls="answerPre rationalePre refsSection askMsg">Ask</button>
           <button id="parseBtn" class="btn secondary" type="button">Convert → JSON</button>
