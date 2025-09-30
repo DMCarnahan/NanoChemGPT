@@ -57,6 +57,26 @@ except Exception as vs_import_error:
             print("[vs] clear_uploads called but vector store not available")
     vs_module = DummyVectorStore()
 
+# Test vector store availability with actual operations
+if VS_AVAILABLE:
+    try:
+        # Test if vector store can actually work
+        test_result = vs_module.search("test", k=1)
+        print("[startup] Vector store operations test successful")
+    except Exception as vs_test_error:
+        print(f"[startup] Vector store operations failed: {vs_test_error}")
+        print("[startup] Falling back to dummy vector store")
+        VS_AVAILABLE = False
+        class DummyVectorStore:
+            def add_to_store(self, text, tag="upload"):
+                print(f"[vs] add_to_store disabled (embedding error): tag={tag}")
+            def search(self, query, k=8):
+                print(f"[vs] search disabled (embedding error): query={query[:50]}...")
+                return ""
+            def clear_uploads(self):
+                print("[vs] clear_uploads disabled (embedding error)")
+        vs_module = DummyVectorStore()
+
 # Alias for backwards compatibility
 vs = vs_module
 
@@ -225,6 +245,14 @@ _no_proxy = httpx.Client(trust_env=False, timeout=120.0)
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "")
 client = OpenAI(api_key=OPENAI_API_KEY, http_client=_no_proxy) if OPENAI_API_KEY else None
 
+# Vector store settings - configure to use OpenAI embeddings if available
+if not os.getenv("EMBED_BACKEND") and OPENAI_API_KEY:
+    os.environ["EMBED_BACKEND"] = "openai"
+    os.environ["EMBED_OPENAI_MODEL"] = "text-embedding-3-small"
+    print("[startup] Configured vector store to use OpenAI embeddings")
+elif not os.getenv("EMBED_BACKEND"):
+    print("[startup] Warning: No embedding backend configured and no OpenAI key available")
+
 RETRIEVER_URL = os.getenv("RETRIEVER_URL", f"http://localhost:{os.getenv('PORT','8000')}/retriever")
 
 def retriever_search(query: str, k: int = 8, level: str|None = None,
@@ -375,10 +403,17 @@ def home():
 
 # ---- Uploads ---- #
 JOBS: dict[str, dict] = {}
-JOB_DIR = Path(os.environ.get('JOB_DIR', '/mnt/data/jobs'))
+# Fix job directory for Windows compatibility
+JOB_DIR = Path(os.environ.get('JOB_DIR', str(Path.cwd() / 'data' / 'jobs')))
 JOB_DIR.mkdir(parents=True, exist_ok=True)
 def _set_job(jid: str, **kw):
+    import time
     J = JOBS.setdefault(jid, {})
+    # Add timestamp for new jobs or significant updates
+    if "status" in kw:
+        kw["updated_at"] = time.time()
+    if not J:  # New job
+        kw["created_at"] = time.time()
     J.update(kw)
     try:
         (JOB_DIR / f"{jid}.json").write_text(json.dumps(J, ensure_ascii=False), encoding='utf-8')
@@ -464,7 +499,49 @@ def status(jid: str):
                 abort(404, "unknown job id")
         except Exception:
             abort(404, "unknown job id")
+    
+    # Auto-cleanup stuck jobs that have been processing for too long
+    if j.get("status") == "processing" and j.get("progress") == 100:
+        try:
+            import time
+            # Check if job has been stuck for more than 5 minutes
+            job_start = j.get("created_at", 0)
+            if isinstance(job_start, str):
+                from datetime import datetime
+                job_start = datetime.fromisoformat(job_start).timestamp()
+            current_time = time.time()
+            
+            if current_time - job_start > 300:  # 5 minutes
+                app.logger.warning(f"[status] Auto-completing stuck job {jid} after {current_time - job_start}s")
+                j["status"] = "done"
+                j["warning"] = "Job was stuck and auto-completed"
+                _set_job(jid, **j)
+        except Exception as cleanup_error:
+            app.logger.warning(f"[status] Job cleanup error for {jid}: {cleanup_error}")
+    
     return jsonify(j)
+
+@app.post("/force_complete_job/<jid>")
+def force_complete_job(jid: str):
+    """Force complete a stuck job - useful for debugging"""
+    j = JOBS.get(jid)
+    if not j:
+        try:
+            p = JOB_DIR / f"{jid}.json"
+            if p.exists():
+                j = json.loads(p.read_text(encoding='utf-8'))
+            else:
+                abort(404, "unknown job id")
+        except Exception:
+            abort(404, "unknown job id")
+    
+    if j.get("status") != "processing":
+        return jsonify({"ok": False, "error": f"Job status is {j.get('status')}, not processing"})
+    
+    app.logger.info(f"[force_complete_job] Manually completing stuck job {jid}")
+    _set_job(jid, status="done", progress=100, warning="Manually force-completed due to timeout")
+    
+    return jsonify({"ok": True, "message": f"Job {jid} force-completed"})
 
 def _process_pdf_job(jid: str, path: Path, filename: str):
     try:
@@ -507,12 +584,55 @@ def _process_pdf_job(jid: str, path: Path, filename: str):
         if not text.strip():
             raise ValueError("PDF contains no extractable text.")
         
-        # Add vector store with error handling
+        # Update status before vector store operation
+        _set_job(jid, progress=100, status="processing", stage="indexing")
+        
+        # Add vector store with error handling and timeout
+        vs_success = False
+        vs_error = None
         try:
-            vs.add_to_store(text, tag=f"upload:{filename}")
-            vs_success = True
-        except Exception as vs_error:
-            app.logger.error(f"[_process_pdf_job] Vector store error: {vs_error}")
+            app.logger.info(f"[_process_pdf_job] Starting vector store indexing for {filename}")
+            
+            # Use threading with timeout for vector store operation
+            import threading
+            import queue
+            
+            result_queue = queue.Queue()
+            
+            def do_indexing():
+                try:
+                    vs.add_to_store(text, tag=f"upload:{filename}")
+                    result_queue.put(("success", None))
+                except Exception as e:
+                    result_queue.put(("error", e))
+            
+            index_thread = threading.Thread(target=do_indexing, daemon=True)
+            index_thread.start()
+            
+            # Wait up to 60 seconds for indexing to complete
+            index_thread.join(timeout=60.0)
+            
+            if index_thread.is_alive():
+                app.logger.error(f"[_process_pdf_job] Vector store indexing timed out for {filename}")
+                vs_error = Exception("Vector store indexing timed out after 60 seconds")
+                vs_success = False
+            else:
+                try:
+                    result_type, error = result_queue.get_nowait()
+                    if result_type == "success":
+                        vs_success = True
+                        app.logger.info(f"[_process_pdf_job] Vector store indexing completed for {filename}")
+                    else:
+                        vs_error = error
+                        vs_success = False
+                        app.logger.error(f"[_process_pdf_job] Vector store indexing failed for {filename}: {error}")
+                except queue.Empty:
+                    vs_error = Exception("Vector store operation completed but no result available")
+                    vs_success = False
+                    
+        except Exception as outer_error:
+            app.logger.error(f"[_process_pdf_job] Vector store setup error for {filename}: {outer_error}")
+            vs_error = outer_error
             vs_success = False
         
         if db is not None:

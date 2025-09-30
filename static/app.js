@@ -357,10 +357,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
       async function pollStatus(jid, onupdate) {
         const start = Date.now();
-        const MAX_POLL_TIME = 300000; // 5 minutes max
-        const MAX_ITERATIONS = 600; // 600 * 500ms = 5 minutes max
+        const MAX_POLL_TIME = 120000; // 2 minutes max for frontend
+        const MAX_ITERATIONS = 240; // 240 * 500ms = 2 minutes max
         let iterations = 0;
         let lastPct = 0;
+        let stuckCount = 0;
         
         while (iterations < MAX_ITERATIONS) {
           const elapsed = Date.now() - start;
@@ -385,15 +386,18 @@ document.addEventListener('DOMContentLoaded', () => {
               return s;
             }
             
-            // Add safety check for stuck processing
-            if (s.status === 'processing' && iterations > 120) { // 1 minute
-              const currentPct = s.progress || 0;
-              if (currentPct === lastPct && iterations > 240) { // 2 minutes stuck
-                console.warn('Upload appears stuck at', currentPct, '%');
+            // Detect truly stuck processing (progress 100% but still processing)
+            if (s.status === 'processing' && s.progress === 100) {
+              stuckCount++;
+              if (stuckCount > 20) { // 10 seconds stuck at 100%
+                console.warn('Upload appears stuck at 100% processing, giving up');
                 break;
               }
-              lastPct = currentPct;
+            } else {
+              stuckCount = 0;
             }
+            
+            lastPct = s.progress || 0;
             
           } catch (fetchError) {
             console.error('Error polling status:', fetchError);
