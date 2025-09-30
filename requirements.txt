@@ -7,11 +7,7 @@ scipy==1.11.4
 --extra-index-url https://download.pytorch.org/whl/cpu
 torch==2.2.2+cpu
 scikit-learn==1.4.2
-
 sentence-transformers==2.6.1
-transformers==4.40.2
-tokenizers>=0.19,<0.20
-huggingface-hub==0.22.2
 
 # ---- spaCy (3.7 line) ----
 spacy==3.7.4
@@ -28,28 +24,21 @@ tldextract>=5,<6
 # ---- Web stack ----
 Flask==3.1.1
 Werkzeug==3.1
-Jinja2==3.1.4
-MarkupSafe==2.1.5
-itsdangerous==2.2
 gunicorn==21.2.0
-fastapi==0.95.2
-uvicorn[standard]==0.23.2
+fastapi==0.95.2         
 asgiref==3.6.0
 
 # ---- IO / parsing ----
 lxml>=5,<6
-PyPDF2==3.0.1
-pymupdf==1.24.10         
+pymupdf==1.24.10        
 ijson==3.2.3
 python-multipart==0.0.6
-pdfminer.six==20250506
 html-text==0.7.0
 
 # ---- Infra / utils ----
-pydantic==1.10.14
+pydantic==2.8.2         
 typing-extensions==4.11.0
 python-dotenv==1.0.1
-packaging==24.0
 backoff==2.2.1
 tqdm>=4.66.4             
 requests==2.32.3
@@ -58,7 +47,6 @@ jsonschema>=4.21,<5
 regex>=2024.05.15        
 redis>=5
 rq>=1.15
-joblib==1.3.2
 
 # ---- Domain ----
 pubchempy==1.0.4

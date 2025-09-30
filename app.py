@@ -787,6 +787,56 @@ def ask():
                 if txt:
                     lines.append(head + "\n" + txt.strip()[:1200])
             uploads_ctx = "\n\n".join(lines)
+        else:
+            # Fallback: when vector search is disabled, read uploaded files directly
+            app.logger.info("[/ask] Vector search disabled, using direct PDF fallback")
+            try:
+                lines = []
+                pdf_files = list(uploads_dir.glob("*.pdf"))
+                for i, pdf_path in enumerate(pdf_files[:3], start=1):  # Limit to 3 most recent files
+                    try:
+                        # Use the same PDF reading logic as in upload processing
+                        pdf_text = ""
+                        try:
+                            from pymupdf import Document as FitzDocument
+                            doc = FitzDocument(str(pdf_path))
+                            text_parts = []
+                            for page_num in range(min(10, doc.page_count)):  # First 10 pages max
+                                page = doc[page_num]
+                                text_parts.append(page.get_text())
+                            doc.close()
+                            pdf_text = "\n".join(text_parts)
+                        except Exception:
+                            # Fallback to PyPDF2 if PyMuPDF fails
+                            try:
+                                from PyPDF2 import PdfReader as _PdfReader
+                                reader = _PdfReader(str(pdf_path))
+                                text_parts = []
+                                for page_num in range(min(10, len(reader.pages))):  # First 10 pages max
+                                    page = reader.pages[page_num]
+                                    text_parts.append(page.extract_text())
+                                pdf_text = "\n".join(text_parts)
+                            except Exception as pypdf_error:
+                                app.logger.warning(f"[/ask] PyPDF2 fallback failed for {pdf_path.name}: {pypdf_error}")
+                                continue
+                        
+                        if pdf_text.strip():
+                            title = pdf_path.stem.replace("_", " ").replace("-", " ")
+                            head = f"[U{i}] {title} — {pdf_path.name}"
+                            # Include more text since we can't do semantic search
+                            lines.append(head + "\n" + pdf_text.strip()[:3000])
+                            app.logger.info(f"[/ask] Loaded fallback content from {pdf_path.name}")
+                    except Exception as pdf_error:
+                        app.logger.warning(f"[/ask] Failed to read {pdf_path.name}: {pdf_error}")
+                        continue
+                
+                if lines:
+                    uploads_ctx = "\n\n".join(lines)
+                    app.logger.info(f"[/ask] Fallback loaded {len(lines)} PDF files")
+                else:
+                    app.logger.warning("[/ask] No PDF files could be read in fallback mode")
+            except Exception as fallback_error:
+                app.logger.warning(f"[/ask] PDF fallback failed: {fallback_error}")
     except Exception as e:
         app.logger.warning(f"[/ask] uploads_ctx warn: {e}")
 
