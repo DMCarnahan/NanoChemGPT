@@ -136,10 +136,16 @@ document.addEventListener('DOMContentLoaded', () => {
       const csrf = readCsrfToken();
       if (csrf) headers['X-CSRFToken'] = csrf;
 
+      const payload = {
+        question,
+        mode,
+        attachments: pendingAttachmentIds
+      };
+
       const res = await fetch(`${(window.BASE_PATH||'')}/ask`, {
         method: 'POST',
         headers,
-        body: JSON.stringify({ question, mode })
+        body: JSON.stringify(payload)
       });
 
       const raw = await res.text();
@@ -156,6 +162,12 @@ document.addEventListener('DOMContentLoaded', () => {
       } else {
         askMsg.textContent = 'Done.';
       }
+      
+      // Clear attachments after successful ask
+      pendingAttachmentIds = [];
+      if (attachList) attachList.innerHTML = '';
+      if (attachInput) attachInput.value = '';
+      
     } catch (err) {
       console.error(err);
       askMsg.textContent = `Error: ${err.message || err}`;
@@ -790,7 +802,16 @@ async function uploadAttachmentsForQuestion(files) {
   if (!files || !files.length) return [];
   const fd = new FormData();
   for (const f of files) fd.append('files', f);
-  const res = await fetch(`${window.BASE_PATH||''}/attach`, { method:'POST', body: fd });
+  
+  const headers = {};
+  const csrf = readCsrfToken();
+  if (csrf) headers['X-CSRFToken'] = csrf;
+  
+  const res = await fetch(`${window.BASE_PATH||''}/attach`, { 
+    method: 'POST', 
+    headers,
+    body: fd 
+  });
   const text = await res.text();
   let j;
   try { j = JSON.parse(text); } catch { throw new Error(text || 'bad JSON'); }

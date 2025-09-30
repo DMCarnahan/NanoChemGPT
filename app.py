@@ -14,19 +14,15 @@ import re
 import glob
 import json
 import logging
+import subprocess
+import sys
+import tempfile
 import threading
 import time
 import uuid
 from datetime import datetime
 from pathlib import Path
 from functools import lru_cache
-import os
-import re
-import sys
-import tempfile
-import subprocess
-import threading
-import json
 import difflib as _difflib
 try:
     from dotenv import load_dotenv
@@ -42,54 +38,8 @@ from openai import OpenAI
 from werkzeug.utils import secure_filename
 
 # Local modules
-try:
-    import vector_store as vs_module
-    VS_AVAILABLE = True
-    print("[startup] Vector store module loaded successfully")
-except Exception as vs_import_error:
-    print(f"[startup] Vector store import failed: {vs_import_error}")
-    VS_AVAILABLE = False
-    # Create dummy vs module to prevent crashes
-    class DummyVectorStore:
-        def add_to_store(self, text, tag="upload"):
-            print(f"[vs] add_to_store called but vector store not available: tag={tag}")
-        def search(self, query, k=8):
-            print(f"[vs] search called but vector store not available: query={query[:50]}...")
-            return ""
-        def clear_uploads(self):
-            print("[vs] clear_uploads called but vector store not available")
-    vs_module = DummyVectorStore()
-
-# Test vector store availability with actual operations
-if VS_AVAILABLE:
-    try:
-        # Test if vector store can actually work
-        test_result = vs_module.search("test", k=1)
-        print("[startup] Vector store operations test successful")
-    except Exception as vs_test_error:
-        print(f"[startup] Vector store operations failed: {vs_test_error}")
-        print("[startup] Falling back to dummy vector store")
-        VS_AVAILABLE = False
-        class DummyVectorStore:
-            def add_to_store(self, text, tag="upload"):
-                print(f"[vs] add_to_store disabled (embedding error): tag={tag}")
-            def search(self, query, k=8):
-                print(f"[vs] search disabled (embedding error): query={query[:50]}...")
-                return ""
-            def clear_uploads(self):
-                print("[vs] clear_uploads disabled (embedding error)")
-        vs_module = DummyVectorStore()
-
-# Alias for backwards compatibility
-vs = vs_module
-
-try:
-    from vector_store.uploads_vector import UploadsVectorSearch
-    UVS_AVAILABLE = True
-except Exception as uvs_import_error:
-    print(f"[startup] UploadsVectorSearch import failed: {uvs_import_error}")
-    UVS_AVAILABLE = False
-    UploadsVectorSearch = None
+import vector_store as vs
+from vector_store.uploads_vector import UploadsVectorSearch
 from converter import validate_step, convert_text_to_robot_ops
 from mongo_client import get_db
 from decider.miner_queue import enqueue_text_mining_job
@@ -98,18 +48,6 @@ from ref_utils import (
     dedupe_and_rerank, extract_used_ref_indexes, renumber_citations,
     split_used_refs, DEFAULT_NANOCHEM_TERMS, format_references_block
 )
-
-# Enhanced citation relevance import
-try:
-    from harvester.enhanced_citations import enhance_citation_relevance
-    ENHANCED_CITATIONS_AVAILABLE = True
-except ImportError:
-    ENHANCED_CITATIONS_AVAILABLE = False
-    def enhance_citation_relevance(response_text, references, query, intent):
-        return response_text, references
-
-# Initialize logger
-logger = logging.getLogger(__name__)
 try:
     from app_utils.helpers import (
         classify_intent as _h_classify_intent,
@@ -153,10 +91,6 @@ ATTACH_DIR = Path(os.environ.get('ATTACH_DIR', '/mnt/data/attachments'))
 ATTACH_DIR.mkdir(parents=True, exist_ok=True)
 LOOKUP_UPLOAD_DIR = Path(os.getenv("LOOKUP_UPLOAD_DIR", "/mnt/data/datasets")).resolve()
 VECTORSTORE_DIR = Path(os.getenv("VECTORSTORE_DIR", "/mnt/data/index")).resolve()
-
-# Enhanced citation settings
-ENABLE_ENHANCED_CITATIONS = os.getenv("ENABLE_ENHANCED_CITATIONS", "true").lower() in ("true", "1", "yes")
-CITATION_MIN_SCORE = float(os.getenv("CITATION_MIN_SCORE", "0.25"))
 
 BUNDLE_AUTO   = ROOT / "harvester" / "out_auto" / "bundle.jsonl"
 BUNDLE_MERGED = ROOT / "harvester" / "out_auto" / "bundle_with_methods.jsonl"
@@ -249,14 +183,6 @@ except Exception as e:
 _no_proxy = httpx.Client(trust_env=False, timeout=120.0)
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "")
 client = OpenAI(api_key=OPENAI_API_KEY, http_client=_no_proxy) if OPENAI_API_KEY else None
-
-# Vector store settings - configure to use OpenAI embeddings if available
-if not os.getenv("EMBED_BACKEND") and OPENAI_API_KEY:
-    os.environ["EMBED_BACKEND"] = "openai"
-    os.environ["EMBED_OPENAI_MODEL"] = "text-embedding-3-small"
-    print("[startup] Configured vector store to use OpenAI embeddings")
-elif not os.getenv("EMBED_BACKEND"):
-    print("[startup] Warning: No embedding backend configured and no OpenAI key available")
 
 RETRIEVER_URL = os.getenv("RETRIEVER_URL", f"http://localhost:{os.getenv('PORT','8000')}/retriever")
 
@@ -406,75 +332,10 @@ def home():
     except TemplateNotFound:
         return "<h1>NanoChemGPT</h1><p>templates/index.html missing.</p>", 200
 
-
-def _extract_pdf_text(path: Path, max_pages: int = 40) -> tuple[str, int]:
-    try:
-        try:
-            from pypdf import PdfReader as _PdfReader
-        except Exception:
-            try:
-                from PyPDF2 import PdfReader as _PdfReader
-            except Exception:
-                _PdfReader = None
-        if _PdfReader is None:
-            raise ImportError("pypdf/PyPDF2 not installed")
-        reader = _PdfReader(str(path))
-        n = len(getattr(reader, 'pages', [])) or 0
-        out = []
-        for i, page in enumerate(reader.pages, 1):
-            if i > max_pages: break
-            try:
-                out.append(page.extract_text() or "")
-            except Exception:
-                out.append("")
-        return ("\n".join(out), n or len(out))
-    except Exception as e:
-        try:
-            app.logger.warning(f"[_extract_pdf_text] {path.name}: {e}")
-        except Exception:
-            pass
-        return ("", 0)
 # ---- Uploads ---- #
 JOBS: dict[str, dict] = {}
-# Fix job directory for Windows compatibility
-JOB_DIR = Path(os.environ.get('JOB_DIR', str(Path.cwd() / 'data' / 'jobs')))
-JOB_DIR.mkdir(parents=True, exist_ok=True)
-def _set_job(jid: str, **kw):
-    import time
-    J = JOBS.setdefault(jid, {})
-    # Add timestamp for new jobs or significant updates
-    if "status" in kw:
-        kw["updated_at"] = time.time()
-    if not J:  # New job
-        kw["created_at"] = time.time()
-    J.update(kw)
-    try:
-        (JOB_DIR / f"{jid}.json").write_text(json.dumps(J, ensure_ascii=False), encoding='utf-8')
-    except Exception:
-        pass
+def _set_job(jid: str, **kw): JOBS.setdefault(jid, {}).update(kw)
 
-
-@app.post("/attach")
-def attach():
-    files = request.files.getlist("files") or []
-    if not files:
-        f = request.files.get("file")
-        if f: files = [f]
-    if not files:
-        abort(400, "No files uploaded.")
-    items = []
-    for f in files:
-        fname = secure_filename(f.filename or "file")
-        aid = uuid.uuid4().hex[:12]
-        dest = ATTACH_DIR / f"{aid}__{fname}"
-        f.save(dest)
-        meta = {"id": aid, "filename": fname, "kind": "pdf" if fname.lower().endswith(".pdf") else "file"}
-        if meta["kind"] == "pdf":
-            txt, n_pages = _extract_pdf_text(dest, max_pages=int(os.environ.get("ATTACH_MAX_PAGES", "40") or "40"))
-            (ATTACH_DIR / f"{aid}.txt").write_text(txt, encoding="utf-8")
-            meta.update({"n_pages": n_pages, "n_chars": len(txt)})
-        items.append(meta)
-    return jsonify({"ok": True, "items": items})
 @app.post("/upload")
 def upload():
     f = request.files.get("file")
@@ -504,30 +365,19 @@ def upload():
         if lower.endswith(".pdf"):
             threading.Thread(target=_process_pdf_job, args=(jid, dest, fname), daemon=True).start()
         elif lower.endswith(".json"):
-            try:
-                txt = dest.read_text(encoding="utf-8", errors="ignore")
-                vs.add_to_store(txt, tag=f"upload:{fname}")
-                _mark_uploaded(fname, kind="json", status="indexed")
-                _set_job(jid, status="done", progress=100)
-            except Exception as vs_error:
-                app.logger.error(f"[/upload] Vector store error for JSON: {vs_error}")
-                _mark_uploaded(fname, kind="json", status="stored")  # fallback
-                _set_job(jid, status="done", progress=100, warning=f"Indexing failed: {vs_error}")
+            txt = dest.read_text(encoding="utf-8", errors="ignore")
+            vs.add_to_store(txt, tag=f"upload:{fname}")
+            _mark_uploaded(fname, kind="json", status="indexed")
+            _set_job(jid, status="done", progress=100)
         elif lower.endswith((".parquet", ".csv", ".tsv", ".xlsx")):
             _mark_uploaded(fname, kind="table", status="stored")
             _set_job(jid, status="done", progress=100)
         else:
-            try:
-                txt = dest.read_text(encoding="utf-8", errors="ignore")
-                vs.add_to_store(txt, tag=f"upload:{fname}")
-                _mark_uploaded(fname, kind="text", status="indexed")
-                _set_job(jid, status="done", progress=100)
-            except Exception as vs_error:
-                app.logger.error(f"[/upload] Vector store error for text: {vs_error}")
-                _mark_uploaded(fname, kind="text", status="stored")  # fallback
-                _set_job(jid, status="done", progress=100, warning=f"Indexing failed: {vs_error}")
+            txt = dest.read_text(encoding="utf-8", errors="ignore")
+            vs.add_to_store(txt, tag=f"upload:{fname}")
+            _mark_uploaded(fname, kind="text", status="indexed")
+            _set_job(jid, status="done", progress=100)
     except Exception as e:
-        app.logger.error(f"[/upload] General upload error: {e}")
         _set_job(jid, status="error", error=str(e))
 
     return jsonify({"ok": True, "job_id": jid, "filename": fname, "path": str(dest)})
@@ -546,144 +396,34 @@ def _mark_uploaded(fname: str, *, kind: str, status: str):
 def status(jid: str):
     j = JOBS.get(jid)
     if not j:
-        try:
-            p = JOB_DIR / f"{jid}.json"
-            if p.exists():
-                j = json.loads(p.read_text(encoding='utf-8'))
-            else:
-                abort(404, "unknown job id")
-        except Exception:
-            abort(404, "unknown job id")
-    
-    # Auto-cleanup stuck jobs that have been processing for too long
-    if j.get("status") == "processing" and j.get("progress") == 100:
-        try:
-            import time
-            # Check if job has been stuck for more than 30 seconds at 100%
-            updated_at = j.get("updated_at", 0)
-            current_time = time.time()
-            
-            if current_time - updated_at > 30:  # 30 seconds instead of 5 minutes
-                app.logger.warning(f"[status] Auto-completing stuck job {jid} after {current_time - updated_at}s")
-                j["status"] = "done"
-                j["warning"] = "Job was stuck at indexing stage and auto-completed (vector store disabled)"
-                _set_job(jid, **j)
-        except Exception as cleanup_error:
-            app.logger.warning(f"[status] Job cleanup error for {jid}: {cleanup_error}")
-    
+        abort(404, "unknown job id")
     return jsonify(j)
 
-@app.post("/force_complete_job/<jid>")
-def force_complete_job(jid: str):
-    """Force complete a stuck job - useful for debugging"""
-    j = JOBS.get(jid)
-    if not j:
-        try:
-            p = JOB_DIR / f"{jid}.json"
-            if p.exists():
-                j = json.loads(p.read_text(encoding='utf-8'))
-            else:
-                abort(404, "unknown job id")
-        except Exception:
-            abort(404, "unknown job id")
-    
-    if j.get("status") != "processing":
-        return jsonify({"ok": False, "error": f"Job status is {j.get('status')}, not processing"})
-    
-    app.logger.info(f"[force_complete_job] Manually completing stuck job {jid}")
-    _set_job(jid, status="done", progress=100, warning="Manually force-completed due to timeout")
-    
-    return jsonify({"ok": True, "message": f"Job {jid} force-completed"})
-
 def _process_pdf_job(jid: str, path: Path, filename: str):
-    try:
-        from pypdf import PdfReader as _PdfReader
-    except Exception:
-        try:
-            from PyPDF2 import PdfReader as _PdfReader
-        except Exception:
-            _PdfReader = None
+    from PyPDF2 import PdfReader
     db = None
     try:
         try:
             db = get_db()
         except Exception as e:
             app.logger.warning(f"[/upload] get_db failed (continuing without DB): {e}")
-        if _PdfReader is None:
-            raise ImportError('pypdf/PyPDF2 not installed — cannot parse PDFs.')
-        reader = _PdfReader(str(path))
+        reader = PdfReader(str(path))
         n = len(reader.pages) or 1
         texts = []
-        import gc
-        MAX_PDF_PAGES = int(os.environ.get('MAX_PDF_PAGES', '120') or '120')
         for i, page in enumerate(reader.pages, 1):
-            if i > MAX_PDF_PAGES:
-                try: app.logger.warning(f"[worker] truncated at {MAX_PDF_PAGES} pages for {filename}")
-                except Exception: pass
-                break
-            try:
-                txt_i = page.extract_text() or ""
-            except Exception as ex_p:
-                txt_i = ""
-                try: app.logger.warning(f"[worker] page {i} extract_text failed: {ex_p}")
-                except Exception: pass
-            texts.append(txt_i)
-            if i % 8 == 0:
-                try: gc.collect()
-                except Exception: pass
+            texts.append(page.extract_text() or "")
             _set_job(jid, progress=int(100 * i / n))
         text = "\n".join(texts)
         if not text.strip():
             raise ValueError("PDF contains no extractable text.")
-        
-        # Update status before vector store operation
-        _set_job(jid, progress=100, status="processing", stage="indexing")
-        
-        # Simplified approach - skip vector store if it's causing issues
-        vs_success = False
-        vs_error = None
-        
-        try:
-            app.logger.info(f"[_process_pdf_job] Checking vector store availability for {filename}")
-            
-            # Check if vector store is working by testing VS_AVAILABLE flag
-            if not VS_AVAILABLE:
-                app.logger.warning(f"[_process_pdf_job] Vector store not available, skipping indexing for {filename}")
-                vs_error = Exception("Vector store not available")
-                vs_success = False
-            else:
-                app.logger.info(f"[_process_pdf_job] Starting vector store indexing for {filename}")
-                # For now, skip the vector store operation to avoid hanging
-                # TODO: Re-enable once embedding issues are resolved
-                app.logger.warning(f"[_process_pdf_job] Temporarily skipping vector store indexing for {filename}")
-                vs_error = Exception("Vector store indexing temporarily disabled to prevent hanging")
-                vs_success = False
-                
-        except Exception as outer_error:
-            app.logger.error(f"[_process_pdf_job] Vector store setup error for {filename}: {outer_error}")
-            vs_error = outer_error
-            vs_success = False
-        
+        vs.add_to_store(text, tag=f"upload:{filename}")
         if db is not None:
-            status = "indexed" if vs_success else "stored"
-            update_data = {
-                "status": status, 
-                "indexed_at": datetime.utcnow(), 
-                "n_pages": n
-            }
-            if not vs_success:
-                update_data["indexing_error"] = str(vs_error)
-                
             db.uploads.update_one(
                 {"filename": filename},
-                {"$set": update_data},
+                {"$set": {"status": "indexed", "indexed_at": datetime.utcnow(), "n_pages": n}},
                 upsert=True,
             )
-        
-        job_data = {"status": "done", "progress": 100}
-        if not vs_success:
-            job_data["warning"] = f"PDF extracted but indexing failed: {vs_error}"
-        _set_job(jid, **job_data)
+        _set_job(jid, status="done", progress=100)
     except Exception as e:
         if db is not None:
             try:
@@ -699,41 +439,6 @@ def _process_pdf_job(jid: str, path: Path, filename: str):
 # ---- Ask ---- #
 @app.post("/ask")
 def ask():
-
-    # Attachment ids from JSON or form
-    try:
-        payload_for_attachments = request.get_json(silent=True) if request.is_json else None
-    except Exception:
-        payload_for_attachments = None
-    atch_ids = []
-    if isinstance(payload_for_attachments, dict):
-        atch_ids = payload_for_attachments.get("attachments") or []
-    if not atch_ids:
-        atch_ids = request.form.getlist("attachments") or ((request.form.get("attachments") or "").split(",") if request.form.get("attachments") else [])
-    attachment_context = []
-    qtext = (payload_for_attachments or {}).get("question") or request.values.get("question") or ""
-    for aid in atch_ids:
-        aid = (aid or "").strip()
-        if not aid: continue
-        # prefer pre-extracted .txt
-        p_txt = ATTACH_DIR / f"{aid}.txt"
-        txt = ""
-        if p_txt.exists():
-            try: txt = p_txt.read_text(encoding="utf-8", errors="ignore")
-            except Exception: txt = ""
-        else:
-            # fallback: locate file and extract ad hoc
-            for p in ATTACH_DIR.glob(f"{aid}__*"):
-                if p.suffix.lower() == ".pdf":
-                    txt, _ = _extract_pdf_text(p, max_pages=int(os.environ.get("ATTACH_MAX_PAGES", "40") or "40"))
-                else:
-                    try: txt = p.read_text(encoding="utf-8", errors="ignore")
-                    except Exception: txt = ""
-                break
-        if txt:
-            for ch in _best_chunks_from_text(txt, qtext, top_k=3):
-                attachment_context.append({"source": f"attachment:{aid}", "text": ch})
-    g.attachment_context = attachment_context
     """
     Unified Q&A endpoint that:
       • Classifies intent (classify_intent) to steer behavior (mode, search breadth).
@@ -801,15 +506,7 @@ def ask():
     intent = payload.get("intent") or ci.get("intent") or "protocol"
     mode   = payload.get("mode")   or ci.get("mode")
     if not mode:
-        # Force protocol mode for synthesis-related intents to ensure structured output
-        synthesis_intents = {"protocol", "synthesis", "methods", "procedure"}
-        if intent in synthesis_intents:
-            mode = "protocol"
-        else:
-            mode = "reasoning" if intent in {"reasoning", "analysis"} else "protocol"
-    
-    # Debug logging to understand mode selection
-    app.logger.info(f"[/ask] Intent: {intent}, Mode: {mode}, Question: {question[:100]}...")
+        mode = "reasoning" if intent in {"reasoning", "analysis"} else "protocol"
 
     want_inline = _pick_bool("want_inline", True)
     allow_fetch = _pick_bool("allow_fetch", True)
@@ -829,6 +526,49 @@ def ask():
 
 
     # ----------------- tiny helpers -----------------
+    
+def _extract_pdf_text(path: Path, max_pages: int = 40) -> tuple[str, int]:
+    try:
+        try:
+            from pypdf import PdfReader as _PdfReader
+        except Exception:
+            try:
+                from PyPDF2 import PdfReader as _PdfReader
+            except Exception:
+                _PdfReader = None
+        if _PdfReader is None:
+            raise ImportError("pypdf/PyPDF2 not installed")
+        reader = _PdfReader(str(path))
+        pages = getattr(reader, 'pages', [])
+        n = len(pages) or 0
+        out = []
+        for i, page in enumerate(pages, 1):
+            if i > max_pages: break
+            try:
+                out.append(page.extract_text() or "")
+            except Exception:
+                out.append("")
+        return ("\n".join(out), n or len(out))
+    except Exception as e:
+        try: app.logger.warning(f"[_extract_pdf_text] {path.name}: {e}")
+        except Exception: pass
+        return ("", 0)
+
+def _best_chunks_from_text(text: str, query: str, max_chunk_chars: int = 1200, top_k: int = 3):
+    import re as _re
+    if not text: return []
+    q_tokens = {t for t in _re.findall(r"[A-Za-z0-9]{3,}", (query or "").lower())}
+    if not q_tokens: q_tokens = set(_re.findall(r"[A-Za-z0-9]{3,}", text.lower()))
+    chunks, buf, size = [], [], 0
+    for para in text.splitlines():
+        if size + len(para) + 1 > max_chunk_chars and buf:
+            chunks.append("\n".join(buf)); buf, size = [], 0
+        buf.append(para); size += len(para) + 1
+    if buf: chunks.append("\n".join(buf))
+    def score(s: str) -> int:
+        toks = set(_re.findall(r"[A-Za-z0-9]{3,}", s.lower()))
+        return sum(1 for t in toks if t in q_tokens)
+    return sorted(chunks, key=score, reverse=True)[:top_k]
     # ----------------- uploads → semantic context -----------------
     uploads_ctx = ""
     try:
@@ -841,18 +581,11 @@ def ask():
             vector_device = "cpu"
 
         try:
-            if UploadsVectorSearch is None:
-                app.logger.warning("[/ask] UploadsVectorSearch not available")
-                uvs = None
-            else:
-                uvs = UploadsVectorSearch.from_folder(uploads_dir, device=vector_device, max_docs=1000)
+            uvs = UploadsVectorSearch.from_folder(uploads_dir, device=vector_device, max_docs=1000)
         except TypeError:
             # Fallback: attempt without max_docs if the signature differs.
             try:
-                if UploadsVectorSearch is not None:
-                    uvs = UploadsVectorSearch.from_folder(uploads_dir, device=vector_device)
-                else:
-                    uvs = None
+                uvs = UploadsVectorSearch.from_folder(uploads_dir, device=vector_device)
             except Exception as e2:
                 app.logger.warning(f"[/ask] Uploads VS error: {e2}")
                 uvs = None
@@ -876,56 +609,6 @@ def ask():
                 if txt:
                     lines.append(head + "\n" + txt.strip()[:1200])
             uploads_ctx = "\n\n".join(lines)
-        else:
-            # Fallback: when vector search is disabled, read uploaded files directly
-            app.logger.info("[/ask] Vector search disabled, using direct PDF fallback")
-            try:
-                lines = []
-                pdf_files = list(uploads_dir.glob("*.pdf"))
-                for i, pdf_path in enumerate(pdf_files[:3], start=1):  # Limit to 3 most recent files
-                    try:
-                        # Use the same PDF reading logic as in upload processing
-                        pdf_text = ""
-                        try:
-                            from pymupdf import Document as FitzDocument
-                            doc = FitzDocument(str(pdf_path))
-                            text_parts = []
-                            for page_num in range(min(10, doc.page_count)):  # First 10 pages max
-                                page = doc[page_num]
-                                text_parts.append(page.get_text())
-                            doc.close()
-                            pdf_text = "\n".join(text_parts)
-                        except Exception:
-                            # Fallback to PyPDF2 if PyMuPDF fails
-                            try:
-                                from PyPDF2 import PdfReader as _PdfReader
-                                reader = _PdfReader(str(pdf_path))
-                                text_parts = []
-                                for page_num in range(min(10, len(reader.pages))):  # First 10 pages max
-                                    page = reader.pages[page_num]
-                                    text_parts.append(page.extract_text())
-                                pdf_text = "\n".join(text_parts)
-                            except Exception as pypdf_error:
-                                app.logger.warning(f"[/ask] PyPDF2 fallback failed for {pdf_path.name}: {pypdf_error}")
-                                continue
-                        
-                        if pdf_text.strip():
-                            title = pdf_path.stem.replace("_", " ").replace("-", " ")
-                            head = f"[U{i}] {title} — {pdf_path.name}"
-                            # Include more text since we can't do semantic search
-                            lines.append(head + "\n" + pdf_text.strip()[:3000])
-                            app.logger.info(f"[/ask] Loaded fallback content from {pdf_path.name}")
-                    except Exception as pdf_error:
-                        app.logger.warning(f"[/ask] Failed to read {pdf_path.name}: {pdf_error}")
-                        continue
-                
-                if lines:
-                    uploads_ctx = "\n\n".join(lines)
-                    app.logger.info(f"[/ask] Fallback loaded {len(lines)} PDF files")
-                else:
-                    app.logger.warning("[/ask] No PDF files could be read in fallback mode")
-            except Exception as fallback_error:
-                app.logger.warning(f"[/ask] PDF fallback failed: {fallback_error}")
     except Exception as e:
         app.logger.warning(f"[/ask] uploads_ctx warn: {e}")
 
@@ -1430,8 +1113,50 @@ def ask():
     web_ctx = "\n\n".join(web_ctx_lines)
 
 
-    # ----------------- Compose CONTEXT -----------------
+    
+    # ----------------- attachments → per-question context -----------------
+    attachments_ctx = ""
+    try:
+        atch_ids = []
+        try:
+            payload_json = request.get_json(silent=True) if request.is_json else None
+        except Exception:
+            payload_json = None
+        if isinstance(payload_json, dict):
+            atch_ids = payload_json.get("attachments") or []
+        if not atch_ids:
+            atch_ids = request.form.getlist("attachments") or ((request.form.get("attachments") or "").split(",") if request.form.get("attachments") else [])
+        atch_ids = [ (a or '').strip() for a in atch_ids if (a or '').strip() ]
+
+        if atch_ids:
+            lines = []
+            qtext = question or ((payload_json or {}).get("question") or "")
+            for j, aid in enumerate(atch_ids, start=1):
+                p_txt = ATTACH_DIR / f"{aid}.txt"
+                txt = ""
+                if p_txt.exists():
+                    try: txt = p_txt.read_text(encoding="utf-8", errors="ignore")
+                    except Exception: txt = ""
+                else:
+                    for pth in ATTACH_DIR.glob(f"{aid}__*"):
+                        if pth.suffix.lower() == ".pdf":
+                            txt, _ = _extract_pdf_text(pth, max_pages=int(os.getenv("ATTACH_MAX_PAGES", "40") or "40"))
+                        else:
+                            try: txt = pth.read_text(encoding="utf-8", errors="ignore")
+                            except Exception: txt = ""
+                        break
+                if txt:
+                    for k, ch in enumerate(_best_chunks_from_text(txt, qtext, top_k=3), start=1):
+                        head = f"[A{j}.{k}] attachment:{aid}"
+                        lines.append(head + "\n" + ch.strip()[:1200])
+            attachments_ctx = "\n\n".join(lines)
+    except Exception as e:
+        try: app.logger.warning(f"[/ask] attachments_ctx warn: {e}")
+        except Exception: pass
+# ----------------- Compose CONTEXT -----------------
     ctx_parts = []
+    if attachments_ctx: ctx_parts.insert(0, "<<<CTX_ATTACH>>>\n" + attachments_ctx)
+
     if uploads_ctx: ctx_parts.append("<<<CTX_UPLOADS>>>\n" + uploads_ctx)
     if table_ctx:   ctx_parts.append("<<<CTX_TABLE>>>\n" + table_ctx)
     if kb_ctx:      ctx_parts.append("<<<CTX_KB>>>\n" + kb_ctx)
@@ -1520,32 +1245,6 @@ def ask():
         messages=[{"role": "user", "content": prompt}],
         temperature=0.2
     ).choices[0].message.content
-
-    # Apply enhanced citation relevance filtering if available and enabled
-    if ENHANCED_CITATIONS_AVAILABLE and ENABLE_ENHANCED_CITATIONS:
-        try:
-            # Use the classify_intent helper if available, otherwise fall back to mode
-            if callable(_h_classify_intent):
-                intent = _h_classify_intent(question)
-            else:
-                intent = mode or "procedure"
-            
-            # Get original refs count for logging
-            original_refs_count = len(refs_all)
-            
-            # Import and configure enhanced filtering with proper min_score
-            from harvester.enhanced_citations import EnhancedCitationFilter
-            filter_engine = EnhancedCitationFilter()
-            raw_filtered, refs_all_filtered = filter_engine.filter_low_relevance_citations(
-                raw, refs_all, question, intent, min_score=CITATION_MIN_SCORE
-            )
-            
-            if raw_filtered and refs_all_filtered:
-                raw = raw_filtered
-                refs_all = refs_all_filtered
-                logger.info(f"Enhanced citation filtering: kept {len(refs_all_filtered)}/{original_refs_count} references")
-        except Exception as e:
-            logger.warning(f"Enhanced citation filtering failed: {e}. Using original citations.")
 
     # Split answer/rationale and strip any in-answer references block
     if mode == "reasoning":
@@ -1930,17 +1629,3 @@ if __name__ == "__main__":
         port=int(os.getenv("PORT", 8000)),
         debug=os.getenv("DEBUG", "0") == "1"
     )
-def _best_chunks_from_text(text: str, query: str, max_chunk_chars: int = 1200, top_k: int = 3):
-    import re as _re
-    if not text: return []
-    q_tokens = {t for t in _re.findall(r"[A-Za-z0-9]{3,}", (query or "").lower())}
-    chunks, buf, size = [], [], 0
-    for para in text.splitlines():
-        if size + len(para) + 1 > max_chunk_chars and buf:
-            chunks.append("\n".join(buf)); buf, size = [], 0
-        buf.append(para); size += len(para) + 1
-    if buf: chunks.append("\n".join(buf))
-    def score(s: str) -> int:
-        toks = set(_re.findall(r"[A-Za-z0-9]{3,}", s.lower()))
-        return sum(1 for t in toks if t in q_tokens)
-    return sorted(chunks, key=score, reverse=True)[:top_k]
