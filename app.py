@@ -584,28 +584,19 @@ def _process_pdf_job(jid: str, path: Path, filename: str):
         # Update status before vector store operation
         _set_job(jid, progress=100, status="processing", stage="indexing")
         
-        # Simplified approach - skip vector store if it's causing issues
         vs_success = False
         vs_error = None
-        
         try:
-            app.logger.info(f"[_process_pdf_job] Checking vector store availability for {filename}")
-            
-            # Check if vector store is working by testing VS_AVAILABLE flag
-            if not VS_AVAILABLE:
-                app.logger.warning(f"[_process_pdf_job] Vector store not available, skipping indexing for {filename}")
+            app.logger.info(f"[_process_pdf_job] Starting vector store indexing for {filename}")
+            if VS_AVAILABLE:
+                # ✅ actually index the extracted text
+                vs.add_to_store(text, tag=f"upload:{filename}")
+                vs_success = True
+            else:
                 vs_error = Exception("Vector store not available")
                 vs_success = False
-            else:
-                app.logger.info(f"[_process_pdf_job] Starting vector store indexing for {filename}")
-                # For now, skip the vector store operation to avoid hanging
-                # TODO: Re-enable once embedding issues are resolved
-                app.logger.warning(f"[_process_pdf_job] Temporarily skipping vector store indexing for {filename}")
-                vs_error = Exception("Vector store indexing temporarily disabled to prevent hanging")
-                vs_success = False
-                
         except Exception as outer_error:
-            app.logger.error(f"[_process_pdf_job] Vector store setup error for {filename}: {outer_error}")
+            app.logger.error(f"[_process_pdf_job] Vector store setup/index error for {filename}: {outer_error}")
             vs_error = outer_error
             vs_success = False
         
