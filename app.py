@@ -116,6 +116,53 @@ except Exception:
     def generate_csrf() -> str:
         return ""
 
+# Ephemeral per-question attachments
+ATTACH_DIR = Path(os.environ.get("ATTACH_DIR", "/mnt/data/attachments"))
+ATTACH_DIR.mkdir(parents=True, exist_ok=True)
+
+def _extract_pdf_text(path: Path, max_pages: int = 40) -> tuple[str, int]:
+    """Extract text from a PDF using pypdf/PyPDF2 with a soft page cap."""
+    try:
+        try:
+            from pypdf import PdfReader as _PdfReader
+        except Exception:
+            try:
+                from PyPDF2 import PdfReader as _PdfReader
+            except Exception:
+                _PdfReader = None
+        if _PdfReader is None:
+            raise ImportError("pypdf/PyPDF2 not installed")
+        reader = _PdfReader(str(path))
+        pages = getattr(reader, "pages", [])
+        out = []
+        for i, page in enumerate(pages, 1):
+            if i > max_pages: break
+            try:
+                out.append(page.extract_text() or "")
+            except Exception:
+                out.append("")
+        return ("\n".join(out), len(pages) or len(out))
+    except Exception as e:
+        try: app.logger.warning(f"[_extract_pdf_text] {path.name}: {e}")
+        except Exception: pass
+        return ("", 0)
+
+def _best_chunks_from_text(text: str, query: str, max_chunk_chars: int = 1200, top_k: int = 3):
+    import re as _re
+    if not text: return []
+    q = {t for t in _re.findall(r"[A-Za-z0-9]{3,}", (query or "").lower())}
+    if not q: q = set(_re.findall(r"[A-Za-z0-9]{3,}", text.lower()))
+    chunks, buf, size = [], [], 0
+    for para in text.splitlines():
+        if size + len(para) + 1 > max_chunk_chars and buf:
+            chunks.append("\n".join(buf)); buf, size = [], 0
+        buf.append(para); size += len(para) + 1
+    if buf: chunks.append("\n".join(buf))
+    def score(s: str) -> int:
+        toks = set(_re.findall(r"[A-Za-z0-9]{3,}", s.lower()))
+        return sum(1 for t in toks if t in q)
+    return sorted(chunks, key=score, reverse=True)[:top_k]
+
 @app.context_processor
 def inject_csrf_token():
     return dict(csrf_token=generate_csrf)
@@ -524,52 +571,7 @@ def ask():
     w_doc = float(payload.get("w_doc", os.getenv("WEIGHT_DOC", 0.6)))
     w_passage = float(payload.get("w_passage", os.getenv("WEIGHT_PASSAGE", 0.4)))
 
-
-    # ----------------- tiny helpers -----------------
-    
-def _extract_pdf_text(path: Path, max_pages: int = 40) -> tuple[str, int]:
-    try:
-        try:
-            from pypdf import PdfReader as _PdfReader
-        except Exception:
-            try:
-                from PyPDF2 import PdfReader as _PdfReader
-            except Exception:
-                _PdfReader = None
-        if _PdfReader is None:
-            raise ImportError("pypdf/PyPDF2 not installed")
-        reader = _PdfReader(str(path))
-        pages = getattr(reader, 'pages', [])
-        n = len(pages) or 0
-        out = []
-        for i, page in enumerate(pages, 1):
-            if i > max_pages: break
-            try:
-                out.append(page.extract_text() or "")
-            except Exception:
-                out.append("")
-        return ("\n".join(out), n or len(out))
-    except Exception as e:
-        try: app.logger.warning(f"[_extract_pdf_text] {path.name}: {e}")
-        except Exception: pass
-        return ("", 0)
-
-def _best_chunks_from_text(text: str, query: str, max_chunk_chars: int = 1200, top_k: int = 3):
-    import re as _re
-    if not text: return []
-    q_tokens = {t for t in _re.findall(r"[A-Za-z0-9]{3,}", (query or "").lower())}
-    if not q_tokens: q_tokens = set(_re.findall(r"[A-Za-z0-9]{3,}", text.lower()))
-    chunks, buf, size = [], [], 0
-    for para in text.splitlines():
-        if size + len(para) + 1 > max_chunk_chars and buf:
-            chunks.append("\n".join(buf)); buf, size = [], 0
-        buf.append(para); size += len(para) + 1
-    if buf: chunks.append("\n".join(buf))
-    def score(s: str) -> int:
-        toks = set(_re.findall(r"[A-Za-z0-9]{3,}", s.lower()))
-        return sum(1 for t in toks if t in q_tokens)
-    return sorted(chunks, key=score, reverse=True)[:top_k]
-    # ----------------- uploads → semantic context -----------------
+        # ----------------- uploads → semantic context -----------------
     uploads_ctx = ""
     try:
         uploads_dir = UPLOADS_DIR
@@ -1118,32 +1120,35 @@ def _best_chunks_from_text(text: str, query: str, max_chunk_chars: int = 1200, t
     attachments_ctx = ""
     try:
         atch_ids = []
-        try:
-            payload_json = request.get_json(silent=True) if request.is_json else None
-        except Exception:
-            payload_json = None
+        payload_json = request.get_json(silent=True) if request.is_json else None
         if isinstance(payload_json, dict):
             atch_ids = payload_json.get("attachments") or []
         if not atch_ids:
-            atch_ids = request.form.getlist("attachments") or ((request.form.get("attachments") or "").split(",") if request.form.get("attachments") else [])
-        atch_ids = [ (a or '').strip() for a in atch_ids if (a or '').strip() ]
+            atch_ids = request.form.getlist("attachments") or (
+                (request.form.get("attachments") or "").split(",") if request.form.get("attachments") else []
+            )
+        atch_ids = [(a or "").strip() for a in atch_ids if (a or "").strip()]
 
         if atch_ids:
             lines = []
-            qtext = question or ((payload_json or {}).get("question") or "")
+            qtext = (payload_json or {}).get("question") or request.values.get("question") or ""
             for j, aid in enumerate(atch_ids, start=1):
                 p_txt = ATTACH_DIR / f"{aid}.txt"
                 txt = ""
                 if p_txt.exists():
-                    try: txt = p_txt.read_text(encoding="utf-8", errors="ignore")
-                    except Exception: txt = ""
+                    try:
+                        txt = p_txt.read_text(encoding="utf-8", errors="ignore")
+                    except Exception:
+                        txt = ""
                 else:
                     for pth in ATTACH_DIR.glob(f"{aid}__*"):
                         if pth.suffix.lower() == ".pdf":
-                            txt, _ = _extract_pdf_text(pth, max_pages=int(os.getenv("ATTACH_MAX_PAGES", "40") or "40"))
+                            txt, _ = _extract_pdf_text(pth, max_pages=int(os.environ.get("ATTACH_MAX_PAGES", "40") or "40"))
                         else:
-                            try: txt = pth.read_text(encoding="utf-8", errors="ignore")
-                            except Exception: txt = ""
+                            try:
+                                txt = pth.read_text(encoding="utf-8", errors="ignore")
+                            except Exception:
+                                txt = ""
                         break
                 if txt:
                     for k, ch in enumerate(_best_chunks_from_text(txt, qtext, top_k=3), start=1):
@@ -1153,6 +1158,8 @@ def _best_chunks_from_text(text: str, query: str, max_chunk_chars: int = 1200, t
     except Exception as e:
         try: app.logger.warning(f"[/ask] attachments_ctx warn: {e}")
         except Exception: pass
+
+        
 # ----------------- Compose CONTEXT -----------------
     ctx_parts = []
     if attachments_ctx: ctx_parts.insert(0, "<<<CTX_ATTACH>>>\n" + attachments_ctx)
@@ -1496,6 +1503,51 @@ def _best_chunks_from_text(text: str, query: str, max_chunk_chars: int = 1200, t
         response_payload.update(refs_payload_s)
     return jsonify(response_payload)
 
+    # ----------------- tiny helpers -----------------
+    
+def _extract_pdf_text(path: Path, max_pages: int = 40) -> tuple[str, int]:
+    try:
+        try:
+            from pypdf import PdfReader as _PdfReader
+        except Exception:
+            try:
+                from PyPDF2 import PdfReader as _PdfReader
+            except Exception:
+                _PdfReader = None
+        if _PdfReader is None:
+            raise ImportError("pypdf/PyPDF2 not installed")
+        reader = _PdfReader(str(path))
+        pages = getattr(reader, 'pages', [])
+        n = len(pages) or 0
+        out = []
+        for i, page in enumerate(pages, 1):
+            if i > max_pages: break
+            try:
+                out.append(page.extract_text() or "")
+            except Exception:
+                out.append("")
+        return ("\n".join(out), n or len(out))
+    except Exception as e:
+        try: app.logger.warning(f"[_extract_pdf_text] {path.name}: {e}")
+        except Exception: pass
+        return ("", 0)
+
+def _best_chunks_from_text(text: str, query: str, max_chunk_chars: int = 1200, top_k: int = 3):
+    import re as _re
+    if not text: return []
+    q_tokens = {t for t in _re.findall(r"[A-Za-z0-9]{3,}", (query or "").lower())}
+    if not q_tokens: q_tokens = set(_re.findall(r"[A-Za-z0-9]{3,}", text.lower()))
+    chunks, buf, size = [], [], 0
+    for para in text.splitlines():
+        if size + len(para) + 1 > max_chunk_chars and buf:
+            chunks.append("\n".join(buf)); buf, size = [], 0
+        buf.append(para); size += len(para) + 1
+    if buf: chunks.append("\n".join(buf))
+    def score(s: str) -> int:
+        toks = set(_re.findall(r"[A-Za-z0-9]{3,}", s.lower()))
+        return sum(1 for t in toks if t in q_tokens)
+    return sorted(chunks, key=score, reverse=True)[:top_k]
+
 @app.post("/parse")
 def parse_route():
     try:
@@ -1592,6 +1644,30 @@ def api_uploads():
     cur = db.uploads.find({}).sort([("indexed_at", -1), ("ts", -1)]).limit(limit)
     items = [_doc(d) for d in cur]
     return jsonify({"items": items, "limit": limit})
+
+@app.post("/attach")
+def attach():
+    files = request.files.getlist("files") or []
+    if not files:
+        f = request.files.get("file")
+        if f: files = [f]
+    if not files:
+        abort(400, "No files uploaded.")
+    items = []
+    for f in files:
+        if not f or not getattr(f, "filename", ""): 
+            continue
+        fname = secure_filename(f.filename or "file")
+        aid = uuid.uuid4().hex[:12]
+        dest = ATTACH_DIR / f"{aid}__{fname}"
+        f.save(dest)
+        meta = {"id": aid, "filename": fname, "kind": "pdf" if fname.lower().endswith(".pdf") else "file"}
+        if meta["kind"] == "pdf":
+            txt, n_pages = _extract_pdf_text(dest, max_pages=int(os.environ.get("ATTACH_MAX_PAGES", "40") or "40"))
+            (ATTACH_DIR / f"{aid}.txt").write_text(txt, encoding="utf-8")
+            meta.update({"n_pages": n_pages, "n_chars": len(txt)})
+        items.append(meta)
+    return jsonify({"ok": True, "items": items})
 
 @app.errorhandler(400)
 @app.errorhandler(422)
