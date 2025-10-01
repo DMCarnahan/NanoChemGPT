@@ -105,16 +105,17 @@ app = Flask(__name__, template_folder=str(TEMPLATES_DIR), static_folder=str(STAT
 app.config["MAX_CONTENT_LENGTH"] = 100 * 1024 * 1024  # 100 MB
 app.config["JSON_AS_ASCII"] = False  # allow UTF-8
 
-# CSRF setup
-try:
-    from flask_wtf.csrf import CSRFProtect, generate_csrf
-    app.config['SECRET_KEY'] = os.getenv("FLASK_SECRET_KEY", "change-me")
-    app.config['WTF_CSRF_TIME_LIMIT'] = None
-    csrf = CSRFProtect(app)
-except Exception:
-    csrf = None
-    def generate_csrf() -> str:
-        return ""
+# ---- CSRF: disabled globally ----
+app.config.update(
+    SECRET_KEY=os.getenv("FLASK_SECRET_KEY", "change-me"),
+    WTF_CSRF_ENABLED=False,
+    WTF_CSRF_CHECK_DEFAULT=False,   # belt & suspenders
+    WTF_CSRF_TIME_LIMIT=None,
+)
+
+csrf = None
+def generate_csrf() -> str:
+    return ""
 
 # Ephemeral per-question attachments
 ATTACH_DIR = Path(os.environ.get("ATTACH_DIR", "/mnt/data/attachments"))
@@ -1162,7 +1163,8 @@ def ask():
         
 # ----------------- Compose CONTEXT -----------------
     ctx_parts = []
-    if attachments_ctx: ctx_parts.insert(0, "<<<CTX_ATTACH>>>\n" + attachments_ctx)
+    if attachments_ctx:
+        ctx_parts.insert(0, "<<<CTX_ATTACH>>>\n" + attachments_ctx)
 
     if uploads_ctx: ctx_parts.append("<<<CTX_UPLOADS>>>\n" + uploads_ctx)
     if table_ctx:   ctx_parts.append("<<<CTX_TABLE>>>\n" + table_ctx)
