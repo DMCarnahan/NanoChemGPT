@@ -1197,15 +1197,22 @@ def ask():
         
 # ----------------- Compose CONTEXT -----------------
     ctx_parts = []
+
+    # keep attachments first
     if attachments_ctx:
-        ctx_parts.insert(0, "<<<CTX_ATTACH>>>\n" + attachments_ctx)
+        ctx_parts.append("<<<CTX_ATTACH>>>\n" + attachments_ctx)
 
-    if uploads_ctx: ctx_parts.append("<<<CTX_UPLOADS>>>\n" + uploads_ctx)
-    if table_ctx:   ctx_parts.append("<<<CTX_TABLE>>>\n" + table_ctx)
-    if kb_ctx:      ctx_parts.append("<<<CTX_KB>>>\n" + kb_ctx)
-    if web_ctx:     ctx_parts.append(0, "<<<CTX_WEB>>>\n" + web_ctx) 
-    context_joined = "\n\n---\n\n".join(ctx_parts).strip()
+    # then whatever else you collect
+    if uploads_ctx:
+        ctx_parts.append("<<<CTX_UPLOADS>>>\n" + uploads_ctx)
+    if table_ctx:
+        ctx_parts.append("<<<CTX_TABLES>>>\n" + table_ctx)
+    if kb_ctx:
+        ctx_parts.append("<<<CTX_KB>>>\n" + kb_ctx)
+    if web_ctx:
+        ctx_parts.append("<<<CTX_WEB>>>\n" + web_ctx)
 
+    context_joined = "\n\n---\n\n".join([p for p in ctx_parts if p]).strip()
     # ----------------- Prompting -----------------
     # Adjust scale requirements based on attachment presence
     if attachments_ctx:
