@@ -1203,7 +1203,7 @@ def ask():
     if uploads_ctx: ctx_parts.append("<<<CTX_UPLOADS>>>\n" + uploads_ctx)
     if table_ctx:   ctx_parts.append("<<<CTX_TABLE>>>\n" + table_ctx)
     if kb_ctx:      ctx_parts.append("<<<CTX_KB>>>\n" + kb_ctx)
-    if web_ctx:     ctx_parts.insert(0, "<<<CTX_WEB>>>\n" + web_ctx) 
+    if web_ctx:     ctx_parts.append(0, "<<<CTX_WEB>>>\n" + web_ctx) 
     context_joined = "\n\n---\n\n".join(ctx_parts).strip()
 
     # ----------------- Prompting -----------------
