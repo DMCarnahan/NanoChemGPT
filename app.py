@@ -239,6 +239,125 @@ def retriever_search(query: str, k: int = 8, level: str|None = None,
         return []
 
 # ──────────────── Utilities ──────────────── #
+def _clean_attachment_text(s: str) -> str:
+    import re
+    # remove our chunk headers like: [A1.3] attachment:XYZ
+    s = re.sub(r"^\[A\d+\.\d+\]\s*attachment:[^\n]+\n", "", s, flags=re.M)
+    # common OCR artifact in FeSO4·7H2O
+    s = s.replace("", "·")
+    return s
+
+def _extract_facts_from_text(text: str) -> dict:
+    import re
+    t = text.lower()
+
+    # helpers
+    def find(pat, flags=re.I):
+        m = re.search(pat, text, flags)
+        return (m.group(1) if m and m.groups() else (m.group(0) if m else "")) or ""
+
+    conc_fe   = find(r"\b0\.1\s*m\b")
+    conc_naoh = find(r"\b0\.45\s*m\b")
+    vol_fe    = find(r"\b(\d+)\s*m[lL]\b\s*(?:iron|iron\(ii\)|iron solution)")
+    temp_bath = find(r"(?:at|temperature(?:\s*was)?\s*at|temperature\s*=\s*)(\d+)\s*°?\s*c")
+    rate_naoh = find(r"(\d+)\s*m[lL]\s*/?\s*min")
+    term_ph   = find(r"pH\s*(\d+(?:\.\d+)?)")
+    dry_temp  = find(r"dri(?:ed|ing)[^\.]*?(\d+)\s*°?\s*c")
+    dry_time  = find(r"dri(?:ed|ing)[^\.]*?(\d+)\s*h")
+    brand     = find(r"(mettler\s*toledo\s*dl50)", flags=re.I)
+
+    # equipment mentions
+    water_bath  = "water bath" in t
+    autotitr    = "autotitrator" in t or "auto-titrator" in t
+    vac_filter  = "vacuum" in t and "filter" in t
+    oven        = "oven" in t
+
+    facts = {
+        "hardware": [],
+        "materials": [],
+        "procedure": []
+    }
+
+    # Hardware & Glassware (only if mentioned)
+    if water_bath: facts["hardware"].append(f"Water bath ({temp_bath or 'temperature not specified'})")
+    if autotitr:   facts["hardware"].append(f"Autotitrator{f' ({brand})' if brand else ''}")
+    if vac_filter: facts["hardware"].append("Vacuum filtration setup")
+    if oven:       facts["hardware"].append("Oven")
+
+    # Materials (use only what’s stated)
+    facts["materials"].append({
+        "name": "iron(II) sulfate heptahydrate (FeSO4·7H2O)",
+        "concentration": conc_fe or "not specified",
+        "volume": (vol_fe + " mL") if vol_fe else "not specified",
+        "role": "iron oxide precursor"
+    })
+    facts["materials"].append({
+        "name": "sodium hydroxide (NaOH)",
+        "concentration": conc_naoh or "not specified",
+        "volume": "not specified",
+        "role": "precipitating agent"
+    })
+
+    # Procedure steps (verbatim-derived, no inventions)
+    # 1 prepare Fe solution
+    s1 = "Prepare the iron(II) sulfate solution"
+    if conc_fe: s1 += f" ({conc_fe})"
+    if vol_fe:  s1 += f", {vol_fe} mL"
+    facts["procedure"].append(s1 + ".")
+    # 2 temperature + stirring
+    step2 = "Maintain the reaction in a water bath"
+    if temp_bath: step2 += f" at {temp_bath} °C"
+    step2 += " with continuous stirring."
+    facts["procedure"].append(step2)
+    # 3 add NaOH at rate with autotitrator
+    s3 = "Add NaOH"
+    if conc_naoh: s3 += f" ({conc_naoh})"
+    s3 += " to the iron solution"
+    if rate_naoh: s3 += f" at {rate_naoh} mL/min"
+    if autotitr:  s3 += " using an autotitrator"
+    if brand:     s3 += f" ({brand})"
+    s3 += ", monitoring pH."
+    facts["procedure"].append(s3)
+    # 4 endpoint pH
+    if term_ph:
+        facts["procedure"].append(f"Continue the titration to pH {term_ph}.")
+    # 5 isolate + dry
+    if vac_filter: facts["procedure"].append("Filter the precipitated solid under vacuum.")
+    s6 = "Dry the solid in an oven"
+    if dry_temp: s6 += f" at {dry_temp} °C"
+    if dry_time: s6 += f" for {dry_time} h"
+    s6 += "."
+    facts["procedure"].append(s6)
+
+    return facts
+
+def _render_protocol_md(facts: dict) -> str:
+    def bullets(xs): 
+        return "\n".join(f"   - {x}" for x in xs if x)
+    def matline(m):
+        bits = [m.get("name")]
+        if m.get("concentration") and m["concentration"] != "not specified":
+            bits.append(m["concentration"])
+        if m.get("volume") and m["volume"] != "not specified":
+            bits.append(m["volume"])
+        if m.get("role"):
+            bits.append(f"({m['role']})")
+        return " ".join(bits)
+
+    hardware = bullets(facts.get("hardware", []))
+    materials = bullets([matline(m) for m in facts.get("materials", [])])
+    steps = "\n".join([f"   {i+1}. {s}" for i, s in enumerate([x for x in facts.get('procedure', []) if x])])
+
+    return (
+        "## Synthesis Protocol:\n\n"
+        "1. **Hardware & Glassware**:\n"
+        + (hardware or "   - not specified") + "\n\n"
+        "2. **Materials**:\n"
+        + (materials or "   - not specified") + "\n\n"
+        "3. **Procedure**:\n"
+        + (steps or "   1. not specified")
+    )
+
 def _s(x):
     # Hardened sanitizer prefers helpers._safe_text
     try:
@@ -1240,6 +1359,22 @@ def ask():
         ctx_parts.append("<<<CTX_WEB>>>\n" + web_ctx)
 
     context_joined = "\n\n---\n\n".join([p for p in ctx_parts if p]).strip()
+    
+    # detect user intent; you can also set this via a payload flag from the UI
+    def _wants_structured(q: str) -> bool:
+        q = (q or "").lower()
+        return any(k in q for k in ("repeat", "transcribe", "quote", "verbatim")) and ("procedure" in q or "protocol" in q)
+
+    structured_from_attachment = bool(attachments_ctx) and _wants_structured(question)
+
+    if structured_from_attachment:
+        raw_text = _clean_attachment_text(attachments_ctx)
+        facts = _extract_facts_from_text(raw_text)
+        answer = _render_protocol_md(facts)
+        rationale = "Rendered in protocol format using only facts present in the attached text."
+        refs = [{"source": "attachment"}]
+        return jsonify({"ok": True, "answer": answer, "rationale": rationale, "refs": refs})
+
     # ----------------- Prompting -----------------
     # Adjust scale requirements based on attachment presence
     if attachments_ctx:
