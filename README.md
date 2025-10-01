@@ -2,7 +2,23 @@
 
 _A domain‑specific RAG system and text‑mining pipeline for nanochemistry synthesis, reasoning, and structured protocol generation._
 
+> **📖 Publication-Ready Documentation**: For comprehensive documentation suitable for academic use, see [README_PUBLICATION.md](README_PUBLICATION.md)
+
 ---
+
+[![MIT License](https://img.shields.io/badge/License-MIT-green.svg)](https://choosealicense.com/licenses/mit/)
+[![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
+[![Flask](https://img.shields.io/badge/Flask-3.1.1-red.svg)](https://flask.palletsprojects.com/)
+[![FastAPI](https://img.shields.io/badge/FastAPI-0.95.2-009688.svg)](https://fastapi.tiangolo.com/)
+
+**Quick Links:**
+- 📚 [Complete Documentation](README_PUBLICATION.md)
+- 🚀 [Installation Guide](docs/INSTALLATION.md)
+- 📖 [API Reference](docs/API.md)
+- 💻 [Examples](examples/)
+- 🧪 [Testing](tests/)
+- 🤝 [Contributing](CONTRIBUTING.md)
+- 📄 [Citation](CITATION.md)
 
 ## Table of Contents
 - [Overview](#overview)

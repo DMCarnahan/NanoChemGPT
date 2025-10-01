@@ -23,6 +23,7 @@ import uuid
 from datetime import datetime
 from pathlib import Path
 from functools import lru_cache
+from typing import Dict, List, Optional, Tuple, Union, Any
 import difflib as _difflib
 try:
     from dotenv import load_dotenv
@@ -138,19 +139,60 @@ def _extract_pdf_text(path: Path, max_pages: int = 40) -> tuple[str, int]:
         except Exception: pass
         return ("", 0)
 
-def _best_chunks_from_text(text: str, query: str, max_chunk_chars: int = 1200, top_k: int = 3):
+def _best_chunks_from_text(
+    text: str, 
+    query: str, 
+    max_chunk_chars: int = 1200, 
+    top_k: int = 3
+) -> List[str]:
+    """
+    Extract the most relevant text chunks from a document based on query terms.
+    
+    This function splits text into chunks of maximum size and ranks them by
+    relevance to the query using term overlap scoring.
+    
+    Args:
+        text: The input text to chunk and rank
+        query: The search query to match against
+        max_chunk_chars: Maximum size of each chunk in characters
+        top_k: Number of top-ranked chunks to return
+        
+    Returns:
+        List of the top_k most relevant text chunks, ranked by relevance score
+        
+    Example:
+        >>> chunks = _best_chunks_from_text(
+        ...     "Gold nanoparticles synthesis. Silver nanoparticles formation.",
+        ...     "gold synthesis",
+        ...     max_chunk_chars=100,
+        ...     top_k=1
+        ... )
+        >>> len(chunks)
+        1
+    """
     import re as _re
-    if not text: return []
+    if not text: 
+        return []
+    
+    # Extract query terms for scoring
     q = {t for t in _re.findall(r"[A-Za-z0-9]{3,}", (query or "").lower())} or set(_re.findall(r"[A-Za-z0-9]{3,}", text.lower()))
+    
+    # Split text into chunks
     chunks, buf, size = [], [], 0
     for para in text.splitlines():
         if size + len(para) + 1 > max_chunk_chars and buf:
-            chunks.append("\n".join(buf)); buf, size = [], 0
-        buf.append(para); size += len(para) + 1
-    if buf: chunks.append("\n".join(buf))
-    def score(s: str): 
+            chunks.append("\n".join(buf))
+            buf, size = [], 0
+        buf.append(para)
+        size += len(para) + 1
+    if buf: 
+        chunks.append("\n".join(buf))
+    
+    def score(s: str) -> int:
+        """Score chunk by number of query term matches."""
         toks = set(_re.findall(r"[A-Za-z0-9]{3,}", s.lower()))
         return sum(1 for t in toks if t in q)
+    
     return sorted(chunks, key=score, reverse=True)[:top_k]
 
 @app.before_request
@@ -239,6 +281,29 @@ def retriever_search(query: str, k: int = 8, level: str|None = None,
         return []
 
 # ──────────────── Utilities ──────────────── #
+def _pick_method_paragraph(text: str) -> str:
+    """
+    Heuristic: return the single paragraph that hits the most method cues.
+    """
+    import re as _re
+    text = _normalize_pdf_text(text)
+    paragraphs = [p.strip() for p in text.split("\n") if p.strip()]
+    if not paragraphs: return ""
+
+    cues = [
+        r"\b0\.1\s*m\b", r"\b0\.45\s*m\b", r"\b100\s*m[lL]\b",
+        r"\b5\s*m[lL]\s*/?\s*min\b",
+        r"\b45\s*°\s*C\b", r"\b50\s*°\s*C\b", r"\b24\s*h\b",
+        r"\bpH\s*12\b", r"\bautotitrator\b|\bdl50\b|\bmettler\b",
+        r"\bwater bath\b", r"\bfiltered?\b|\bvacuum\b", r"\bdry(?:ed|ing)?\b"
+    ]
+    rx = [_re.compile(c, _re.I) for c in cues]
+
+    def sc(p: str) -> int:
+        return sum(1 for r in rx if r.search(p)) + len(_re.findall(r"\b\d", p))
+    best = max(paragraphs, key=sc)
+    return best
+
 def _clean_attachment_text(s: str) -> str:
     import re
     # remove our chunk headers like: [A1.3] attachment:XYZ
@@ -358,7 +423,27 @@ def _render_protocol_md(facts: dict) -> str:
         + (steps or "   1. not specified")
     )
 
-def _s(x):
+def _s(x: Any) -> str:
+    """
+    Safe text sanitizer that converts any input to a clean string.
+    
+    Prefers the helper module's _safe_text function if available,
+    otherwise falls back to basic string conversion.
+    
+    Args:
+        x: Any input value to convert to string
+        
+    Returns:
+        Sanitized string representation of the input
+        
+    Example:
+        >>> _s(None)
+        ''
+        >>> _s("  hello  ")
+        'hello'
+        >>> _s(123)
+        '123'
+    """
     # Hardened sanitizer prefers helpers._safe_text
     try:
         from app_utils.helpers import _safe_text as _h_safe_text  # local import to avoid circulars
@@ -366,21 +451,72 @@ def _s(x):
     except Exception:
         return str(x).strip() if x is not None else ""
 
-def _safe_id(x):
+def _safe_id(x: Any) -> Optional[Any]:
+    """
+    Safely convert input to MongoDB ObjectId.
+    
+    Args:
+        x: Input value to convert to ObjectId
+        
+    Returns:
+        ObjectId instance if conversion successful, None otherwise
+        
+    Example:
+        >>> _safe_id("507f1f77bcf86cd799439011")  # Valid ObjectId string
+        ObjectId('507f1f77bcf86cd799439011')
+        >>> _safe_id("invalid")
+        None
+    """
     try:
         from bson import ObjectId
         return ObjectId(x)
     except Exception:
         return None
     
-def _stringify_keys(obj):
+def _stringify_keys(obj: Any) -> Any:
+    """
+    Recursively convert all dictionary keys to strings.
+    
+    This is useful for serializing objects that may have non-string keys
+    (e.g., ObjectId instances) to JSON-compatible format.
+    
+    Args:
+        obj: Object to process (dict, list, or primitive)
+        
+    Returns:
+        Object with all dictionary keys converted to strings
+        
+    Example:
+        >>> from bson import ObjectId
+        >>> obj = {ObjectId("507f1f77bcf86cd799439011"): "value"}
+        >>> _stringify_keys(obj)
+        {'507f1f77bcf86cd799439011': 'value'}
+    """
     if isinstance(obj, dict):
         return {str(k): _stringify_keys(v) for k, v in obj.items()}
     if isinstance(obj, list):
         return [_stringify_keys(x) for x in obj]
     return obj
 
-def _doc(obj):
+def _doc(obj: Any) -> Any:
+    """
+    Convert a MongoDB document to a JSON-serializable format.
+    
+    Converts ObjectId fields to strings and handles other MongoDB-specific
+    types that may not be JSON serializable.
+    
+    Args:
+        obj: MongoDB document or any object
+        
+    Returns:
+        JSON-serializable version of the input object
+        
+    Example:
+        >>> from bson import ObjectId
+        >>> doc = {"_id": ObjectId("507f1f77bcf86cd799439011"), "name": "test"}
+        >>> _doc(doc)
+        {'_id': '507f1f77bcf86cd799439011', 'name': 'test'}
+    """
     if not isinstance(obj, dict):
         return obj
     out = dict(obj)
@@ -1257,6 +1393,7 @@ def ask():
                 if p_txt.exists():
                     try:
                         txt = p_txt.read_text(encoding="utf-8", errors="ignore")
+                        txt = _normalize_pdf_text(txt)  
                     except Exception:
                         txt = ""
                 else:
@@ -1369,11 +1506,28 @@ def ask():
 
     if structured_from_attachment:
         raw_text = _clean_attachment_text(attachments_ctx)
-        facts = _extract_facts_from_text(raw_text)
+        
+        # Use _pick_method_paragraph to find the most relevant method section
+        # This helps focus on the actual experimental procedure rather than random text
+        method_paragraph = _pick_method_paragraph(raw_text)
+        
+        # If we found a focused method paragraph, use it; otherwise fall back to full text
+        text_to_process = method_paragraph if method_paragraph and len(method_paragraph.strip()) > 50 else raw_text
+        
+        facts = _extract_facts_from_text(text_to_process)
         answer = _render_protocol_md(facts)
-        rationale = "Rendered in protocol format using only facts present in the attached text."
+        rationale = "Rendered in protocol format using only facts present in the attached text. " + \
+                   ("Focused on the most relevant method paragraph." if method_paragraph else "")
         refs = [{"source": "attachment"}]
-        return jsonify({"ok": True, "answer": answer, "rationale": rationale, "refs": refs})
+        
+        return jsonify({
+            "ok": True, 
+            "answer": answer, 
+            "rationale": rationale, 
+            "refs": refs,
+            "method_paragraph_used": bool(method_paragraph),
+            "extracted_facts": facts
+        })
 
     # ----------------- Prompting -----------------
     # Adjust scale requirements based on attachment presence
@@ -1724,8 +1878,42 @@ def ask():
 
     # ----------------- tiny helpers -----------------
     
+# --- PDF text normalization ---
+def _normalize_pdf_text(s: str) -> str:
+    import re
+    if not s: return ""
+    # Remove zero-width and control junk
+    s = s.replace("\u200b", "").replace("\ufeff", "")
+    # Common artifact from some PDFs (looks like a mid-dot between letters)
+    # Collapse "a·b·c" -> "abc"
+    s = re.sub(r"(?<=\w)[·∙•](?=\w)", "", s)       # mid-dot surrounded by word chars
+    s = s.replace("∙", "").replace("•", "").replace("·", "")
+    # Fix FeSO4  7H2O artifact
+    s = s.replace("\x03", "·")
+    # Normalize whitespace/hyphenation across line breaks
+    s = re.sub(r"-\s*\n\s*", "", s)                # de-hyphenate line breaks
+    s = re.sub(r"\s+\n", "\n", s)
+    s = re.sub(r"\n\s+", "\n", s)
+    s = re.sub(r"[ \t]+", " ", s)
+    return s.strip()
+
+# --- Better PDF extractor (pdfminer.six -> pypdf -> PyPDF2), then normalize ---
 def _extract_pdf_text(path: Path, max_pages: int = 40) -> tuple[str, int]:
     try:
+        # 1) pdfminer.six (best at handling weird encodings/glyph maps)
+        try:
+            from pdfminer.high_level import extract_text as _pdfminer_extract
+            txt = _pdfminer_extract(str(path))
+            if txt:
+                # Keep only first max_pages by rough split (pdfminer doesn’t paginate cleanly)
+                pages = txt.split("\f")
+                pages = pages[:max_pages]
+                out = "\n".join(pages)
+                return (_normalize_pdf_text(out), len(pages))
+        except Exception:
+            pass
+
+        # 2) pypdf / PyPDF2 fallback
         try:
             from pypdf import PdfReader as _PdfReader
         except Exception:
@@ -1733,19 +1921,20 @@ def _extract_pdf_text(path: Path, max_pages: int = 40) -> tuple[str, int]:
                 from PyPDF2 import PdfReader as _PdfReader
             except Exception:
                 _PdfReader = None
-        if _PdfReader is None:
-            raise ImportError("pypdf/PyPDF2 not installed")
-        reader = _PdfReader(str(path))
-        pages = getattr(reader, 'pages', [])
-        n = len(pages) or 0
-        out = []
-        for i, page in enumerate(pages, 1):
-            if i > max_pages: break
-            try:
-                out.append(page.extract_text() or "")
-            except Exception:
-                out.append("")
-        return ("\n".join(out), n or len(out))
+
+        if _PdfReader is not None:
+            reader = _PdfReader(str(path))
+            pages = getattr(reader, "pages", [])
+            out = []
+            for i, page in enumerate(pages, 1):
+                if i > max_pages: break
+                try:
+                    out.append(page.extract_text() or "")
+                except Exception:
+                    out.append("")
+            return (_normalize_pdf_text("\n".join(out)), len(pages))
+        else:
+            raise ImportError("No PDF backend available")
     except Exception as e:
         try: app.logger.warning(f"[_extract_pdf_text] {path.name}: {e}")
         except Exception: pass
@@ -1754,18 +1943,43 @@ def _extract_pdf_text(path: Path, max_pages: int = 40) -> tuple[str, int]:
 def _best_chunks_from_text(text: str, query: str, max_chunk_chars: int = 1200, top_k: int = 3):
     import re as _re
     if not text: return []
+    text = _normalize_pdf_text(text)
+
+    # Token overlap with query
     q_tokens = {t for t in _re.findall(r"[A-Za-z0-9]{3,}", (query or "").lower())}
-    if not q_tokens: q_tokens = set(_re.findall(r"[A-Za-z0-9]{3,}", text.lower()))
+
+    # Strong procedural cues to bias towards methods
+    cues = [
+        r"\b0\.1\s*m\b", r"\b0\.45\s*m\b", r"\b\d+\s*m[lL]\s*/?\s*min\b",
+        r"\bpH\s*(?:\d+(?:\.\d+)?)\b", r"\b\d+\s*°\s*C\b", r"\b\d+\s*h\b",
+        r"\bfiltered?\b|\bfiltration\b|\bvacuum\b", r"\bdry(?:ing|ed)?\b",
+        r"\bautotitrator\b|\bmettler\b|\bdl50\b", r"\bwater bath\b",
+        r"\bfe\s*so\s*4\b|\bfeooh\b|\bmagnetite\b|\bfe3o4\b", r"\bprocedure\b|\bmethod\b|\bsynthesi"
+    ]
+    cue_res = [_re.compile(c, _re.I) for c in cues]
+
+    # Chunk by paragraphs, bounded by size
+    paras = [p.strip() for p in text.splitlines()]
     chunks, buf, size = [], [], 0
-    for para in text.splitlines():
-        if size + len(para) + 1 > max_chunk_chars and buf:
-            chunks.append("\n".join(buf)); buf, size = [], 0
-        buf.append(para); size += len(para) + 1
+    for p in paras:
+        if not p:
+            if buf:
+                chunks.append("\n".join(buf)); buf=[]; size=0
+            continue
+        if size + len(p) + 1 > max_chunk_chars and buf:
+            chunks.append("\n".join(buf)); buf=[]; size=0
+        buf.append(p); size += len(p) + 1
     if buf: chunks.append("\n".join(buf))
+
     def score(s: str) -> int:
         toks = set(_re.findall(r"[A-Za-z0-9]{3,}", s.lower()))
-        return sum(1 for t in toks if t in q_tokens)
-    return sorted(chunks, key=score, reverse=True)[:top_k]
+        base = sum(1 for t in toks if t in q_tokens)
+        bonus = sum(3 for rx in cue_res if rx.search(s))  # strong bonus for any cue hit
+        # extra weight for multiple numeric+unit patterns in the same chunk
+        nums = len(_re.findall(r"\b\d+(?:\.\d+)?\s*(?:m|mL|min|°C|h|pH)\b", s))
+        return base + bonus + nums
+    ranked = sorted(chunks, key=score, reverse=True)
+    return ranked[:top_k]
 
 @app.post("/parse")
 def parse_route():
@@ -1781,6 +1995,111 @@ def parse_route():
     except Exception as e:
         app.logger.error(f"parse failed: {e}")
         return jsonify({"ok": False, "error": f"parse failed: {e}"}), 500
+
+@app.post("/transcribe")
+def transcribe_method():
+    """
+    Transcribe a methods paragraph from attached paper into robot-mode format
+    without changing the content itself. Useful for the converter module.
+    """
+    try:
+        # Handle both file upload and direct text input
+        text_input = None
+        
+        # Check for file upload
+        if request.files and 'file' in request.files:
+            f = request.files['file']
+            if f and f.filename != "":
+                try:
+                    # Process uploaded file
+                    attachment_text = _process_uploaded_file(f)
+                    if attachment_text:
+                        # Use _pick_method_paragraph to find the best method section
+                        text_input = _pick_method_paragraph(attachment_text)
+                except Exception as e:
+                    app.logger.warning(f"File processing failed: {e}")
+                    return jsonify({"ok": False, "error": f"Failed to process file: {e}"}), 400
+        
+        # Check for direct text input if no file was processed
+        if not text_input:
+            payload = request.get_json(silent=True) or {}
+            text_input = (payload.get("text") or "").strip()
+        
+        # Also check form data for text
+        if not text_input and request.form:
+            text_input = request.form.get("text", "").strip()
+            
+        if not text_input:
+            return jsonify({"ok": False, "error": "No text found in file upload or request body"}), 400
+        
+        # Extract structured facts from the method paragraph
+        facts = _extract_facts_from_text(text_input)
+        
+        # Render as structured protocol (preserving original content)
+        structured_protocol = _render_protocol_md(facts)
+        
+        # Optionally convert to robot operations if requested
+        include_robot_ops = request.form.get("convert_to_robot", "false").lower() == "true"
+        if request.json:
+            include_robot_ops = request.json.get("convert_to_robot", False)
+            
+        result = {
+            "ok": True,
+            "original_text": text_input,
+            "structured_protocol": structured_protocol,
+            "extracted_facts": facts
+        }
+        
+        if include_robot_ops:
+            try:
+                robot_operations = convert_text_to_robot_ops(structured_protocol)
+                result["robot_operations"] = robot_operations
+            except Exception as e:
+                app.logger.warning(f"Robot conversion failed: {e}")
+                result["robot_conversion_error"] = str(e)
+        
+        return jsonify(result)
+        
+    except Exception as e:
+        app.logger.error(f"transcribe failed: {e}")
+        return jsonify({"ok": False, "error": f"Transcription failed: {e}"}), 500
+
+def _process_uploaded_file(file) -> str:
+    """Helper function to extract text from uploaded files."""
+    filename = secure_filename(file.filename or "upload")
+    
+    try:
+        if filename.lower().endswith('.pdf'):
+            # Handle PDF files
+            try:
+                from pypdf import PdfReader as _PdfReader
+                content = file.read()
+                pdf_reader = _PdfReader(io.BytesIO(content))
+                text_parts = []
+                for page in pdf_reader.pages:
+                    text_parts.append(page.extract_text())
+                return "\n".join(text_parts)
+            except Exception:
+                # Fallback to pdfminer
+                try:
+                    from pdfminer.high_level import extract_text as _pdfminer_extract
+                    content = file.read()
+                    return _pdfminer_extract(io.BytesIO(content))
+                except Exception as e:
+                    raise Exception(f"PDF processing failed: {e}")
+        else:
+            # Handle text files
+            content = file.read()
+            try:
+                return content.decode('utf-8')
+            except UnicodeDecodeError:
+                try:
+                    return content.decode('latin-1')
+                except UnicodeDecodeError:
+                    return content.decode('utf-8', errors='ignore')
+                    
+    except Exception as e:
+        raise Exception(f"File processing error: {e}")
 
 @app.post("/save_txt")
 def save_txt():
