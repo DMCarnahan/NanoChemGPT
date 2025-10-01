@@ -119,7 +119,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
   askBtn.disabled = true;
   askMsg.classList.remove('hidden');
-  askMsg.textContent = 'Asking…';
+  
+  // Debug logging for attachments
+  console.log('[ask] attachments ->', pendingAttachmentIds);
+  
+  // Show attachment status to user
+  if (askMsg) { 
+    askMsg.textContent = `Using attachments: ${pendingAttachmentIds.join(', ') || '(none)'} - Asking…`; 
+  }
+  
   spinner.style.display = 'block';
 
   try {

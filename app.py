@@ -113,7 +113,6 @@ ATTACH_DIR = Path(os.environ.get("ATTACH_DIR", "/mnt/data/attachments"))
 ATTACH_DIR.mkdir(parents=True, exist_ok=True)
 
 def _extract_pdf_text(path: Path, max_pages: int = 40) -> tuple[str, int]:
-    """Extract text from a PDF using pypdf/PyPDF2 with a soft page cap."""
     try:
         try:
             from pypdf import PdfReader as _PdfReader
@@ -142,15 +141,14 @@ def _extract_pdf_text(path: Path, max_pages: int = 40) -> tuple[str, int]:
 def _best_chunks_from_text(text: str, query: str, max_chunk_chars: int = 1200, top_k: int = 3):
     import re as _re
     if not text: return []
-    q = {t for t in _re.findall(r"[A-Za-z0-9]{3,}", (query or "").lower())}
-    if not q: q = set(_re.findall(r"[A-Za-z0-9]{3,}", text.lower()))
+    q = {t for t in _re.findall(r"[A-Za-z0-9]{3,}", (query or "").lower())} or set(_re.findall(r"[A-Za-z0-9]{3,}", text.lower()))
     chunks, buf, size = [], [], 0
     for para in text.splitlines():
         if size + len(para) + 1 > max_chunk_chars and buf:
             chunks.append("\n".join(buf)); buf, size = [], 0
         buf.append(para); size += len(para) + 1
     if buf: chunks.append("\n".join(buf))
-    def score(s: str) -> int:
+    def score(s: str): 
         toks = set(_re.findall(r"[A-Za-z0-9]{3,}", s.lower()))
         return sum(1 for t in toks if t in q)
     return sorted(chunks, key=score, reverse=True)[:top_k]
@@ -1147,6 +1145,55 @@ def ask():
         try: app.logger.warning(f"[/ask] attachments_ctx warn: {e}")
         except Exception: pass
 
+# ----------------- attachments → per-question context -----------------
+    attachments_ctx = ""
+    try:
+        # 1) ids from JSON or form
+        atch_ids = []
+        payload_json = request.get_json(silent=True) if request.is_json else None
+        if isinstance(payload_json, dict):
+            atch_ids = payload_json.get("attachments") or []
+        if not atch_ids:
+            atch_ids = request.form.getlist("attachments") or ((request.form.get("attachments") or "").split(",") if request.form.get("attachments") else [])
+        atch_ids = [(a or "").strip() for a in atch_ids if (a or "").strip()]
+
+        # 2) fallback: use the most recent attachment if none were passed
+        if not atch_ids:
+            latest_txt = None
+            try:
+                latest_txt = max(ATTACH_DIR.glob("*.txt"), key=lambda p: p.stat().st_mtime, default=None)
+            except Exception:
+                latest_txt = None
+            if latest_txt:
+                atch_ids = [latest_txt.stem]  # id without .txt
+
+        # 3) build chunks
+        if atch_ids:
+            lines = []
+            qtext = (payload_json or {}).get("question") or request.values.get("question") or ""
+            for j, aid in enumerate(atch_ids, start=1):
+                p_txt = ATTACH_DIR / f"{aid}.txt"
+                txt = ""
+                if p_txt.exists():
+                    try: txt = p_txt.read_text(encoding="utf-8", errors="ignore")
+                    except Exception: txt = ""
+                else:
+                    for pth in ATTACH_DIR.glob(f"{aid}__*"):
+                        if pth.suffix.lower() == ".pdf":
+                            txt, _ = _extract_pdf_text(pth, max_pages=int(os.environ.get("ATTACH_MAX_PAGES", "40") or "40"))
+                        else:
+                            try: txt = pth.read_text(encoding="utf-8", errors="ignore")
+                            except Exception: txt = ""
+                        break
+                if txt:
+                    for k, ch in enumerate(_best_chunks_from_text(txt, qtext, top_k=3), start=1):
+                        head = f"[A{j}.{k}] attachment:{aid}"
+                        lines.append(head + "\n" + ch.strip()[:1200])
+            attachments_ctx = "\n\n".join(lines)
+        app.logger.info(f"[ask] attachments used: {atch_ids} | ctx_chars={len(attachments_ctx)}")
+    except Exception as e:
+        try: app.logger.warning(f"[/ask] attachments_ctx warn: {e}")
+        except Exception: pass
         
 # ----------------- Compose CONTEXT -----------------
     ctx_parts = []
