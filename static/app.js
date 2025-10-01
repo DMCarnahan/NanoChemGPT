@@ -105,15 +105,6 @@ document.addEventListener('DOMContentLoaded', () => {
     modeRobot?.classList.remove('active');
   });
 
-  /**
-   * Reads the CSRF token from meta tag or cookie.
-   * @returns {string|undefined}
-   */
-  function readCsrfToken() {
-    return document.querySelector('meta[name="csrf-token"]')?.content ||
-      (document.cookie.match(/(?:^|;\s*)csrf_token=([^;]+)/)?.[1]);
-  }
-
   // Small helper to sandbox optional UI so it can't crash the flow
   function safe(fn){ try { fn(); } catch(e){ console.warn('Optional UI failed:', e); } }
 
@@ -133,8 +124,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
   try {
       const headers = { 'Content-Type': 'application/json' };
-      const csrf = readCsrfToken();
-      if (csrf) headers['X-CSRFToken'] = csrf;
 
       const payload = {
         question,
@@ -192,8 +181,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
   try {
       const headers = { 'Content-Type': 'application/json' };
-      const csrf = readCsrfToken();
-      if (csrf) headers['X-CSRFToken'] = csrf;
 
       const res = await fetch('/parse', {
         method: 'POST',
@@ -354,8 +341,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
   try {
       const headers = {};
-      const csrf = readCsrfToken();
-      if (csrf) headers['X-CSRFToken'] = csrf;
 
       const fd = new FormData();
       fd.append('file', file);
@@ -590,10 +575,8 @@ document.addEventListener('DOMContentLoaded', () => {
       const fd = new FormData();
       for (const file of files) fd.append('file', file);
 
-      // Add CSRF token to headers
+      // No CSRF token needed
       const headers = {};
-      const csrf = readCsrfToken();
-      if (csrf) headers['X-CSRFToken'] = csrf;
 
       const res = await fetch('/upload_builtin', {
         method: 'POST',
@@ -804,8 +787,6 @@ async function uploadAttachmentsForQuestion(files) {
   for (const f of files) fd.append('files', f);
   
   const headers = {};
-  const csrf = readCsrfToken();
-  if (csrf) headers['X-CSRFToken'] = csrf;
   
   const res = await fetch(`${window.BASE_PATH||''}/attach`, { 
     method: 'POST', 

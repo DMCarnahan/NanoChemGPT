@@ -105,17 +105,8 @@ app = Flask(__name__, template_folder=str(TEMPLATES_DIR), static_folder=str(STAT
 app.config["MAX_CONTENT_LENGTH"] = 100 * 1024 * 1024  # 100 MB
 app.config["JSON_AS_ASCII"] = False  # allow UTF-8
 
-# ---- CSRF: disabled globally ----
-app.config.update(
-    SECRET_KEY=os.getenv("FLASK_SECRET_KEY", "change-me"),
-    WTF_CSRF_ENABLED=False,
-    WTF_CSRF_CHECK_DEFAULT=False,   # belt & suspenders
-    WTF_CSRF_TIME_LIMIT=None,
-)
-
-csrf = None
-def generate_csrf() -> str:
-    return ""
+# No CSRF protection needed for this application
+app.config['SECRET_KEY'] = os.getenv("FLASK_SECRET_KEY", "change-me")
 
 # Ephemeral per-question attachments
 ATTACH_DIR = Path(os.environ.get("ATTACH_DIR", "/mnt/data/attachments"))
@@ -163,10 +154,6 @@ def _best_chunks_from_text(text: str, query: str, max_chunk_chars: int = 1200, t
         toks = set(_re.findall(r"[A-Za-z0-9]{3,}", s.lower()))
         return sum(1 for t in toks if t in q)
     return sorted(chunks, key=score, reverse=True)[:top_k]
-
-@app.context_processor
-def inject_csrf_token():
-    return dict(csrf_token=generate_csrf)
 
 @app.before_request
 def _inject_base_path():
