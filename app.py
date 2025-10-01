@@ -1207,15 +1207,29 @@ def ask():
     context_joined = "\n\n---\n\n".join(ctx_parts).strip()
 
     # ----------------- Prompting -----------------
-    robot_rules = (
-        " - Return a discrete lab protocol with exact quantities on a small scale (e.g., ~0.5–1 mmol of the metal precursor).\n"
-        " - Include specific masses (mg) or mmol for reagents; volumes (mL) for liquids.\n"
-        " - Specify temperatures (°C), ramp rates (°C/min), and hold times (min/h).\n"
-        " - Include workup and purification (quench, washing/centrifugation, drying) with volumes.\n"
-        " - No placeholders (avoid “e.g.”/“or”). Be decisive.\n"
-        " - Avoid using Schlenk line, air-free techniques. Do not suggest inert gas.\n"
-        " - Do not output a REFERENCES block in the answer."
-    )
+    # Adjust scale requirements based on attachment presence
+    if attachments_ctx:
+        # If attachments are present, preserve their scale
+        robot_rules = (
+            " - Return a discrete lab protocol preserving the scale and quantities from the attached documents.\n"
+            " - If the attachment contains specific quantities, maintain those exact amounts.\n"
+            " - Include specific masses (mg, g) or mmol for reagents; volumes (mL, L) for liquids as shown in attachments.\n"
+            " - Specify temperatures (°C), ramp rates (°C/min), and hold times (min/h) matching the attachment when provided.\n"
+            " - Include workup and purification (quench, washing/centrifugation, drying) with volumes from the attachment.\n"
+            " - No placeholders (avoid \"e.g.\"/\"or\"). Be decisive.\n"
+            " - Avoid using Schlenk line, air-free techniques. Do not suggest inert gas.\n"
+            " - Do not output a REFERENCES block in the answer."
+        )
+    else:
+        robot_rules = (
+            " - Return a discrete lab protocol with exact quantities on a small scale (e.g., ~0.5–1 mmol of the metal precursor).\n"
+            " - Include specific masses (mg) or mmol for reagents; volumes (mL) for liquids.\n"
+            " - Specify temperatures (°C), ramp rates (°C/min), and hold times (min/h).\n"
+            " - Include workup and purification (quench, washing/centrifugation, drying) with volumes.\n"
+            " - No placeholders (avoid \"e.g.\"/\"or\"). Be decisive.\n"
+            " - Avoid using Schlenk line, air-free techniques. Do not suggest inert gas.\n"
+            " - Do not output a REFERENCES block in the answer."
+        )
     reasoning_rules = (
         " - Provide a mechanistic explanation and design considerations for the target.\n"
         " - Focus on: nucleation vs growth; ligand/solvent coordination; " 
