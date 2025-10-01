@@ -344,6 +344,20 @@ def cached_lookup_query(q):
             return None
     return None
 
+def _wants_verbatim(q: str) -> bool:
+    q = (q or "").lower()
+    keys = ("repeat", "verbatim", "quote", "transcribe", "as written", "exact text")
+    return any(k in q for k in keys)
+
+def _clean_verbatim_block(s: str) -> str:
+    # strip our chunk headers and tidy OCR artifacts, but keep the source wording
+    import re
+    s = re.sub(r"^\[A\d+\.\d+\]\s*attachment:[^\n]+\n", "", s, flags=re.M)
+    s = s.replace("", "·")      # common OCR artifact in “FeSO4·7H2O”
+    # Normalize trivial whitespace only (don’t touch units/values)
+    s = re.sub(r"[ \t]+", " ", s)
+    return s.strip()
+
 # ──────────────── Routes ──────────────── #
 @app.get("/health")
 def health():
@@ -1194,7 +1208,20 @@ def ask():
     except Exception as e:
         try: app.logger.warning(f"[/ask] attachments_ctx warn: {e}")
         except Exception: pass
-        
+    verbatim_mode = bool(attachments_ctx) and _wants_verbatim(question)
+
+    raw_verbatim_text = ""
+    if verbatim_mode:
+        # attachments_ctx was built from best chunks; concatenate them and clean
+        raw_verbatim_text = _clean_verbatim_block(attachments_ctx)
+
+    # Early return for verbatim mode - skip LLM processing entirely
+    if verbatim_mode and raw_verbatim_text:
+        answer = "## Experimental procedure (verbatim from attachment)\n\n" + raw_verbatim_text
+        rationale = "Returned exactly as written in the attached document (verbatim mode)."
+        refs = [{"source": "attachment", "note": "verbatim"}]  # or your normal refs shape
+        return jsonify({"ok": True, "answer": answer, "rationale": rationale, "refs": refs})
+
 # ----------------- Compose CONTEXT -----------------
     ctx_parts = []
 
