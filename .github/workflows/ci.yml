@@ -54,6 +54,10 @@ jobs:
           # Do not auto-download spaCy English model here; the integration job will
           # prefer the repository-packaged model at harvester/miner/ner_model/model-best.
       - name: Run miner integration tests
+        env:
+          # Override global pytest addopts (pytest.ini) so a single integration
+          # test run can't fail the whole job due to global coverage thresholds.
+          PYTEST_ADDOPTS: "-q"
         run: |
           # Show the model directory contents for debugging and fail fast if not present.
           MODEL_DIR="$GITHUB_WORKSPACE/harvester/miner/ner_model/model-best"
@@ -65,9 +69,9 @@ jobs:
             # If model was accidentally committed as LFS pointers, show file sizes
             echo "---- file listing with sizes ----"
             find "$MODEL_DIR" -type f -exec ls -l {} \; || true
-            SPACY_MODEL="$MODEL_DIR" python -m pytest -q tests/test_miner_integration.py
+            SPACY_MODEL="$MODEL_DIR" python -m pytest tests/test_miner_integration.py
           else
             echo "model-best not found in repo; falling back to downloading en_core_web_sm"
             python -m spacy download en_core_web_sm
-            SPACY_MODEL="en_core_web_sm" python -m pytest -q tests/test_miner_integration.py
+            SPACY_MODEL="en_core_web_sm" python -m pytest tests/test_miner_integration.py
           fi
