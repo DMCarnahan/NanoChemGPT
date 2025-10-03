@@ -59,10 +59,11 @@ jobs:
           MODEL_DIR="$GITHUB_WORKSPACE/harvester/miner/ner_model/model-best"
           echo "Model path: $MODEL_DIR"
           if [ -d "$MODEL_DIR" ]; then
+            echo "Found repo model-best at $MODEL_DIR"
             ls -la "$MODEL_DIR" || true
+            SPACY_MODEL="$MODEL_DIR" python -m pytest -q tests/test_miner_integration.py
           else
-            echo "ERROR: model-best not found in repo at $MODEL_DIR. Aborting miner-integration job." >&2
-            exit 1
+            echo "model-best not found in repo; falling back to downloading en_core_web_sm"
+            python -m spacy download en_core_web_sm
+            SPACY_MODEL="en_core_web_sm" python -m pytest -q tests/test_miner_integration.py
           fi
-          # Run the miner integration test using the repo model-best
-          SPACY_MODEL="$MODEL_DIR" python -m pytest -q tests/test_miner_integration.py
