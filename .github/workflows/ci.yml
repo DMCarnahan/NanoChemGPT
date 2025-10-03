@@ -60,7 +60,11 @@ jobs:
           echo "Model path: $MODEL_DIR"
           if [ -d "$MODEL_DIR" ]; then
             echo "Found repo model-best at $MODEL_DIR"
+            # Ensure path permissions and show contents
             ls -la "$MODEL_DIR" || true
+            # If model was accidentally committed as LFS pointers, show file sizes
+            echo "---- file listing with sizes ----"
+            find "$MODEL_DIR" -type f -exec ls -l {} \; || true
             SPACY_MODEL="$MODEL_DIR" python -m pytest -q tests/test_miner_integration.py
           else
             echo "model-best not found in repo; falling back to downloading en_core_web_sm"
