@@ -1,7 +1,10 @@
 import os
-import duckdb
+from typing import Optional, Sequence
+
 import pandas as pd
-from typing import Sequence, Optional
+
+import duckdb
+
 
 class DuckSearcher:
     def __init__(self, db_path: str, table: str, text_cols: Sequence[str]):
@@ -12,7 +15,10 @@ class DuckSearcher:
 
     def _validate_table(self):
         with duckdb.connect(self.db_path, read_only=True) as con:
-            cols = [c[0] for c in con.execute(f"PRAGMA table_info('{self.table}')").fetchall()]
+            cols = [
+                c[0]
+                for c in con.execute(f"PRAGMA table_info('{self.table}')").fetchall()
+            ]
             self.text_cols = [c for c in self.text_cols if c in cols]
 
     def query(self, pattern: str, topk: int = 8, **kwargs) -> pd.DataFrame:
@@ -27,10 +33,13 @@ class DuckSearcher:
             rows = con.execute(sql, [like] * len(self.text_cols)).fetchdf()
         return rows
 
+
 def get_duck_searcher() -> Optional[DuckSearcher]:
     db_path = os.getenv("LOOKUP_DUCKDB_PATH")
     table = os.getenv("LOOKUP_DUCKDB_TABLE", "reactions")
-    text_cols = [s.strip() for s in os.getenv("LOOKUP_TEXT_COLS", "").split(",") if s.strip()]
+    text_cols = [
+        s.strip() for s in os.getenv("LOOKUP_TEXT_COLS", "").split(",") if s.strip()
+    ]
     if db_path and os.path.exists(db_path) and text_cols:
         try:
             return DuckSearcher(db_path, table, text_cols)

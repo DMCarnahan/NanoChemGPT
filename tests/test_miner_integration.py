@@ -1,9 +1,10 @@
+from pathlib import Path
+
 import pytest
 
-import os
-from pathlib import Path
 try:
     from harvester.miner.runtime import get_miner
+
     HAS_MINER = True
 except Exception:
     HAS_MINER = False
@@ -45,7 +46,9 @@ def test_miner_extracts_simple_operations():
         # Expect add, heat, and centrifuge operations to be detected
         assert "add" in op_types
         assert "heat" in op_types or any(t for t in op_types if "heat" in (t or ""))
-        assert "centrifuge" in op_types or any(t for t in op_types if "centrifuge" in (t or ""))
+        assert "centrifuge" in op_types or any(
+            t for t in op_types if "centrifuge" in (t or "")
+        )
 
         # Check params: amounts and time should be parsed
         add_ops = [op for op in res if op.get("op_type") == "add"]
@@ -66,9 +69,20 @@ def test_miner_extracts_simple_operations():
         # If an expected-output fixture exists, compare in a fuzzy manner to ensure deterministic behaviour
         try:
             import json
-            fixture_path = Path(__file__).resolve().parents[1] / "tests" / "fixtures" / "miner_expected.json"
+
+            fixture_path = (
+                Path(__file__).resolve().parents[1]
+                / "tests"
+                / "fixtures"
+                / "miner_expected.json"
+            )
             # above resolves to repo/tests/tests/fixtures — correct by backing up one more
-            fixture_path = Path(__file__).resolve().parents[2] / "tests" / "fixtures" / "miner_expected.json"
+            fixture_path = (
+                Path(__file__).resolve().parents[2]
+                / "tests"
+                / "fixtures"
+                / "miner_expected.json"
+            )
             if fixture_path.exists():
                 expected = json.loads(fixture_path.read_text(encoding="utf-8"))
                 # Check that each expected op_type appears in the results in order

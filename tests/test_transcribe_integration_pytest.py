@@ -1,4 +1,3 @@
-import json
 from app import app as flask_app
 
 
@@ -39,5 +38,7 @@ def test_method_paragraph_pick():
         "Results: The nanoparticles showed excellent stability.\n"
     )
 
-    rv = client.post("/transcribe", json={"text": mixed_text, "convert_to_robot": False})
+    rv = client.post(
+        "/transcribe", json={"text": mixed_text, "convert_to_robot": False}
+    )
     assert rv.status_code in (200, 202, 400)

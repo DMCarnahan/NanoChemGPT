@@ -1,17 +1,17 @@
 from __future__ import annotations
+
 import argparse
 import json
-from pathlib import Path
-from typing import List, Tuple, Iterable, Dict
 import re
+from pathlib import Path
+from typing import Dict, Iterable, List, Tuple
 
 from sklearn.feature_extraction.text import TfidfVectorizer
-from scipy import sparse
-from joblib import dump
 
 MIN_CHARS_DEFAULT = 40
 
-_DOI_RX = re.compile(r'(10\.\d{4,9}/[-._;()/:A-Z0-9]+)', re.I)
+_DOI_RX = re.compile(r"(10\.\d{4,9}/[-._;()/:A-Z0-9]+)", re.I)
+
 
 def _norm_doi_any(x):
     if not x:
@@ -33,12 +33,14 @@ def _iter_jsonl(path: Path) -> Iterable[Dict]:
             if isinstance(rec, dict):
                 yield rec
 
+
 def _pick_id(rec: Dict, i: int) -> str:
     for k in ("paper_id", "id", "uid", "doc_id", "hash", "doi"):
         v = rec.get(k)
         if v:
             return str(v)
     return f"rec:{i}"
+
 
 def _author_names(auths) -> List[str]:
     out: List[str] = []
@@ -55,6 +57,7 @@ def _author_names(auths) -> List[str]:
                 if n:
                     out.append(n)
     return out
+
 
 def _pick_meta(rec: Dict) -> Dict:
     # prefer the harvester's rich block
@@ -94,7 +97,9 @@ def _pick_meta(rec: Dict) -> Dict:
     # Authors: prefer list from meta; fall back to your helper/legacy fields
     authors = meta.get("authors")
     if not authors:
-        authors = _author_names(rec.get("authors") or rec.get("authorships") or []) or (rec.get("authors") or [])
+        authors = _author_names(rec.get("authors") or rec.get("authorships") or []) or (
+            rec.get("authors") or []
+        )
 
     return {
         "title": title,
@@ -104,8 +109,10 @@ def _pick_meta(rec: Dict) -> Dict:
         "authors": authors,
     }
 
+
 def _normalize_text(s: str | None) -> str:
     return " ".join((s or "").split())
+
 
 def _gather_text(rec: Dict, source: str) -> str:
     if source == "methods":
@@ -137,7 +144,10 @@ def _gather_text(rec: Dict, source: str) -> str:
             t = ""
     return t
 
-def load_texts(path: Path, source: str, min_chars: int) -> Tuple[List[str], List[str], List[Dict]]:
+
+def load_texts(
+    path: Path, source: str, min_chars: int
+) -> Tuple[List[str], List[str], List[Dict]]:
     ids: List[str] = []
     texts: List[str] = []
     metas: List[Dict] = []
@@ -163,14 +173,23 @@ def load_texts(path: Path, source: str, min_chars: int) -> Tuple[List[str], List
         metas.append(m)
     return ids, texts, metas
 
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--bundle", required=True, type=Path)
     ap.add_argument("--index_dir", required=True, type=Path)
     ap.add_argument("--max_docs", type=int, default=None)
-    ap.add_argument("--embed-backend", choices=["openai", "sentence-transformers", "none"], default="none")  # compat
+    ap.add_argument(
+        "--embed-backend",
+        choices=["openai", "sentence-transformers", "none"],
+        default="none",
+    )  # compat
     ap.add_argument("--embed-model", default=None)  # compat
-    ap.add_argument("--text-key", default="methods", help="methods | sections | raw | text | content | abstract | body | title")
+    ap.add_argument(
+        "--text-key",
+        default="methods",
+        help="methods | sections | raw | text | content | abstract | body | title",
+    )
     ap.add_argument("--min-chars", type=int, default=MIN_CHARS_DEFAULT)
     args = ap.parse_args()
 
@@ -179,10 +198,16 @@ def main():
 
     ids, texts, metas = load_texts(args.bundle, args.text_key, args.min_chars)
     if args.max_docs:
-        ids, texts, metas = ids[:args.max_docs], texts[:args.max_docs], metas[:args.max_docs]
+        ids, texts, metas = (
+            ids[: args.max_docs],
+            texts[: args.max_docs],
+            metas[: args.max_docs],
+        )
 
     if not texts:
-        raise SystemExit(f"[index_jsonl] No documents to index from {args.bundle} (source='{args.text_key}').")
+        raise SystemExit(
+            f"[index_jsonl] No documents to index from {args.bundle} (source='{args.text_key}')."
+        )
 
     vectorizer = TfidfVectorizer(
         lowercase=True,
@@ -197,9 +222,10 @@ def main():
     if X.shape[1] == 0:
         raise SystemExit("[index_jsonl] 0 features — inputs likely too short/empty.")
 
-    from scipy.sparse import save_npz
-    import joblib
     import os
+
+    import joblib
+    from scipy.sparse import save_npz
 
     npz_final = out / "tfidf.npz"
     tmp_npz = out / "tfidf.npz.tmp"
@@ -211,7 +237,10 @@ def main():
         save_npz(npz_final, X)
 
     joblib.dump(vectorizer, out / "vectorizer.joblib")
-    joblib.dump({"matrix": X, "vectorizer": vectorizer, "texts": texts, "metas": metas}, out / "tfidf.pkl")
+    joblib.dump(
+        {"matrix": X, "vectorizer": vectorizer, "texts": texts, "metas": metas},
+        out / "tfidf.pkl",
+    )
     with (out / "rows.jsonl").open("w", encoding="utf-8") as f:
         for t, m in zip(texts, metas):
             row = {"text": t}
@@ -219,6 +248,7 @@ def main():
             f.write(json.dumps(row, ensure_ascii=False) + "\n")
 
     print(f"[index_jsonl] OK. docs={len(ids)} terms={X.shape[1]} → {out}")
+
 
 if __name__ == "__main__":
     main()

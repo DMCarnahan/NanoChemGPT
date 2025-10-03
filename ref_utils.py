@@ -4,30 +4,39 @@ import math
 import re
 import unicodedata
 from html import unescape as _html_unescape
-from typing import Dict, List, Tuple, Set, Optional
+from typing import Dict, List, Optional, Set, Tuple
 
 # ------------------------
 # Text utilities
 # ------------------------
 
 _WS_RX = re.compile(r"\\s+")
-_PUNCT_RX = re.compile(r"[\\u2010\\u2011\\u2012\\u2013\\u2014\\u2015\\-\\p{P}]", re.UNICODE)
+_PUNCT_RX = re.compile(
+    r"[\\u2010\\u2011\\u2012\\u2013\\u2014\\u2015\\-\\p{P}]", re.UNICODE
+)
+
 
 def _lower(s: Optional[str]) -> str:
     return s.lower() if isinstance(s, str) else ""
 
+
 def _strip(s: Optional[str]) -> str:
     return s.strip() if isinstance(s, str) else ""
+
 
 def _norm_space(s: str) -> str:
     return _WS_RX.sub(" ", s).strip()
 
+
 def _fold(s: str) -> str:
     # NFKD fold to strip accents; keep ASCII
     try:
-        return unicodedata.normalize("NFKD", s).encode("ascii", "ignore").decode("ascii")
+        return (
+            unicodedata.normalize("NFKD", s).encode("ascii", "ignore").decode("ascii")
+        )
     except Exception:
         return s
+
 
 def _clean_text(s: Optional[str]) -> str:
     if not s:
@@ -35,6 +44,7 @@ def _clean_text(s: Optional[str]) -> str:
     s = _html_unescape(s)
     s = _norm_space(s)
     return s
+
 
 def _tokenize(s: str) -> List[str]:
     out = []
@@ -50,10 +60,12 @@ def _tokenize(s: str) -> List[str]:
         out.append("".join(token))
     return out
 
+
 def _shingles(s: str, k: int = 3) -> Set[str]:
     if len(s) < k:
         return {s} if s else set()
-    return {s[i:i+k] for i in range(len(s)-k+1)}
+    return {s[i : i + k] for i in range(len(s) - k + 1)}
+
 
 def _jaccard_trigram(a: str, b: str) -> float:
     a = _fold(_clean_text(a.lower()))
@@ -68,9 +80,11 @@ def _jaccard_trigram(a: str, b: str) -> float:
     union = len(A | B)
     return inter / union if union else 0.0
 
+
 # ------------------------
 # ID normalization
 # ------------------------
+
 
 def _norm_doi(x: Optional[str]) -> str:
     if not x:
@@ -80,17 +94,20 @@ def _norm_doi(x: Optional[str]) -> str:
     s = s.replace("doi:", "").strip()
     return s
 
+
 def _norm_pmid(x: Optional[str]) -> str:
     if not x:
         return ""
     s = "".join(ch for ch in str(x) if ch.isdigit())
     return s
 
+
 def _norm_arxiv(x: Optional[str]) -> str:
     if not x:
         return ""
     s = _lower(x).replace("arxiv:", "").replace("https://arxiv.org/abs/", "").strip()
     return s
+
 
 def _title_key(title: Optional[str]) -> str:
     if not title:
@@ -101,14 +118,14 @@ def _title_key(title: Optional[str]) -> str:
     s = _norm_space(s)
     return s
 
+
 # ------------------------
 # Citation parsing & renumbering
 # ------------------------
 
 # Matches [1], [1, 2, 5], [3–7], [3-7], and mixed combos like [2, 4–6, 9]
-_CITE_RX = re.compile(
-    r"\[(\d+(?:\s*[-–]\s*\d+)?(?:\s*,\s*\d+(?:\s*[-–]\s*\d+)?)*)\]"
-)
+_CITE_RX = re.compile(r"\[(\d+(?:\s*[-–]\s*\d+)?(?:\s*,\s*\d+(?:\s*[-–]\s*\d+)?)*)\]")
+
 
 def extract_used_ref_indexes(*texts: Optional[str]) -> List[int]:
     """
@@ -126,7 +143,8 @@ def extract_used_ref_indexes(*texts: Optional[str]) -> List[int]:
                 if re.search(r"[-–]", part):
                     a, b = re.split(r"[-–]", part)
                     try:
-                        a_i = int(a.strip()); b_i = int(b.strip())
+                        a_i = int(a.strip())
+                        b_i = int(b.strip())
                     except Exception:
                         continue
                     if a_i <= b_i:
@@ -142,12 +160,14 @@ def extract_used_ref_indexes(*texts: Optional[str]) -> List[int]:
                         pass
     return sorted(used)
 
+
 def renumber_citations(text: Optional[str], index_map: Dict[int, int]) -> str:
     """
     Rewrite bracketed citations using index_map (old->new). Keeps ranges when contiguous.
     """
     if not text:
         return ""
+
     def _rewrite(match: re.Match) -> str:
         raw = match.group(1)
         out = []
@@ -155,7 +175,8 @@ def renumber_citations(text: Optional[str], index_map: Dict[int, int]) -> str:
             if re.search(r"[-–]", part):
                 a, b = re.split(r"[-–]", part)
                 try:
-                    a_i = int(a.strip()); b_i = int(b.strip())
+                    a_i = int(a.strip())
+                    b_i = int(b.strip())
                 except Exception:
                     continue
                 lo, hi = (a_i, b_i) if a_i <= b_i else (b_i, a_i)
@@ -172,11 +193,14 @@ def renumber_citations(text: Optional[str], index_map: Dict[int, int]) -> str:
                 except Exception:
                     pass
         return "[" + ", ".join(out) + "]"
+
     return _CITE_RX.sub(_rewrite, text)
+
 
 # ------------------------
 # Dedupe
 # ------------------------
+
 
 def _choose_primary(a: dict, b: dict) -> dict:
     """Heuristic: prefer entry with DOI; else longer abstract; else has year; else 'a'."""
@@ -194,8 +218,10 @@ def _choose_primary(a: dict, b: dict) -> dict:
         return a if a_year else b
     return a  # stable
 
-def dedupe_refs(refs: List[dict], title_sim_threshold: float = 0.85
-               ) -> Tuple[List[dict], Dict[int, int], List[List[int]]]:
+
+def dedupe_refs(
+    refs: List[dict], title_sim_threshold: float = 0.85
+) -> Tuple[List[dict], Dict[int, int], List[List[int]]]:
     """
     Deduplicate by DOI/PMID/arXiv; else fuzzy by title (trigram Jaccard).
     Returns:
@@ -226,9 +252,12 @@ def dedupe_refs(refs: List[dict], title_sim_threshold: float = 0.85
         doi = _norm_doi(r.get("doi"))
         pmid = _norm_pmid(r.get("pmid"))
         arx = _norm_arxiv(r.get("arxiv_id"))
-        if doi: keys.append(("doi", doi))
-        if pmid: keys.append(("pmid", pmid))
-        if arx: keys.append(("arxiv", arx))
+        if doi:
+            keys.append(("doi", doi))
+        if pmid:
+            keys.append(("pmid", pmid))
+        if arx:
+            keys.append(("arxiv", arx))
         if not keys:
             # temporary title key bucket
             tkey = _title_key(r.get("title"))
@@ -262,7 +291,15 @@ def dedupe_refs(refs: List[dict], title_sim_threshold: float = 0.85
 
     # Second pass: fuzzy between kept title-similar entries without IDs
     # Build list of entries without DOI/PMID/arXiv
-    no_id = [r for r in kept if not (_norm_doi(r.get("doi")) or _norm_pmid(r.get("pmid")) or _norm_arxiv(r.get("arxiv_id")))]
+    no_id = [
+        r
+        for r in kept
+        if not (
+            _norm_doi(r.get("doi"))
+            or _norm_pmid(r.get("pmid"))
+            or _norm_arxiv(r.get("arxiv_id"))
+        )
+    ]
     used = set()
     final_kept = []
     # Simple O(n^2) since n is typically small (<200)
@@ -271,11 +308,11 @@ def dedupe_refs(refs: List[dict], title_sim_threshold: float = 0.85
             continue
         group = [r]
         used.add(r["index"])
-        for j in range(i+1, len(no_id)):
+        for j in range(i + 1, len(no_id)):
             s = no_id[j]
             if s["index"] in used:
                 continue
-            sim = _jaccard_trigram(r.get("title",""), s.get("title",""))
+            sim = _jaccard_trigram(r.get("title", ""), s.get("title", ""))
             if sim >= title_sim_threshold:
                 group.append(s)
                 used.add(s["index"])
@@ -307,19 +344,24 @@ def dedupe_refs(refs: List[dict], title_sim_threshold: float = 0.85
     # Reassign contiguous 'index' for presentation? No: preserve original 'index' for mapping stability.
     return unique_refs, merge_map, groups
 
+
 # ------------------------
 # BM25 reranking (+ optional embedding cosine + domain boosts)
 # ------------------------
+
 
 def _idf(N: int, df: int) -> float:
     # BM25 idf variant; add small epsilon to avoid div by zero
     return math.log((N - df + 0.5) / (df + 0.5) + 1e-9)
 
-def _bm25_scores(query: str, docs: List[str], k1: float = 1.5, b: float = 0.75) -> List[float]:
+
+def _bm25_scores(
+    query: str, docs: List[str], k1: float = 1.5, b: float = 0.75
+) -> List[float]:
     q_tokens = _tokenize(_fold(_clean_text(query)))
     if not q_tokens:
         return [0.0] * len(docs)
-    doc_tokens = [ _tokenize(_fold(_clean_text(d))) for d in docs ]
+    doc_tokens = [_tokenize(_fold(_clean_text(d))) for d in docs]
     N = len(docs)
     avgdl = sum(len(t) for t in doc_tokens) / float(N or 1)
     # document frequencies
@@ -343,25 +385,28 @@ def _bm25_scores(query: str, docs: List[str], k1: float = 1.5, b: float = 0.75) 
         scores.append(score)
     return scores
 
+
 def _cosine(a: List[float], b: List[float]) -> float:
     if not a or not b or len(a) != len(b):
         return 0.0
-    dot = sum(x*y for x, y in zip(a, b))
-    na = math.sqrt(sum(x*x for x in a))
-    nb = math.sqrt(sum(y*y for y in b))
+    dot = sum(x * y for x, y in zip(a, b))
+    na = math.sqrt(sum(x * x for x in a))
+    nb = math.sqrt(sum(y * y for y in b))
     if na == 0.0 or nb == 0.0:
         return 0.0
     return dot / (na * nb)
 
-def rerank_refs(query: str,
-                refs: List[dict],
-                domain_terms: Optional[Set[str]] = None,
-                embeddings: Optional[Dict[str, List[float]]] = None,
-                query_embedding: Optional[List[float]] = None,
-                top_k: int = 50,
-                must_terms: Optional[Set[str]] = None,
-                ban_terms: Optional[Set[str]] = None
-                ) -> List[dict]:
+
+def rerank_refs(
+    query: str,
+    refs: List[dict],
+    domain_terms: Optional[Set[str]] = None,
+    embeddings: Optional[Dict[str, List[float]]] = None,
+    query_embedding: Optional[List[float]] = None,
+    top_k: int = 50,
+    must_terms: Optional[Set[str]] = None,
+    ban_terms: Optional[Set[str]] = None,
+) -> List[dict]:
     """
     Combine BM25(title+abstract) with optional embedding cosine and domain-term boosts.
     - If 'embeddings' provided, key them by a stable ID per ref (e.g., DOI or fallback to str(index)).
@@ -369,10 +414,11 @@ def rerank_refs(query: str,
     - Domain boost: +0.5 if >=2 domain terms present; +0.2 if 1 term.
     Returns top_k refs sorted by 'score' desc, with 'score' attached.
     """
-    texts = [ (r.get("title","") + " " + r.get("abstract","")).strip() for r in refs ]
+    texts = [(r.get("title", "") + " " + r.get("abstract", "")).strip() for r in refs]
     bm25 = _bm25_scores(query, texts)
     # Precompute domain presence
     domain_terms = set(t.lower() for t in (domain_terms or set()))
+
     def domain_hits(txt: str) -> int:
         if not domain_terms or not txt:
             return 0
@@ -386,7 +432,12 @@ def rerank_refs(query: str,
         # embedding cosine
         if embeddings and query_embedding:
             # pick a stable key
-            key = _norm_doi(r.get("doi")) or _norm_pmid(r.get("pmid")) or _norm_arxiv(r.get("arxiv_id")) or str(r.get("index"))
+            key = (
+                _norm_doi(r.get("doi"))
+                or _norm_pmid(r.get("pmid"))
+                or _norm_arxiv(r.get("arxiv_id"))
+                or str(r.get("index"))
+            )
             vec = embeddings.get(key)
             if vec:
                 score += 0.4 * _cosine(query_embedding, vec)
@@ -397,8 +448,8 @@ def rerank_refs(query: str,
         elif hits == 1:
             score += 0.2
         # hard/soft topic constraints
-        body_lc  = (r.get("title","") + " " + r.get("abstract","")).lower()
-        title_lc = (r.get("title","") or "").lower()
+        body_lc = (r.get("title", "") + " " + r.get("abstract", "")).lower()
+        title_lc = (r.get("title", "") or "").lower()
         if must_terms:
             # If none of the must_terms appear anywhere, strongly penalize
             if not any(mt in body_lc for mt in must_terms):
@@ -417,20 +468,26 @@ def rerank_refs(query: str,
     out.sort(key=lambda r: r.get("score", 0.0), reverse=True)
     return out[:top_k]
 
+
 # ------------------------
 # High-level helpers
 # ------------------------
 
-def dedupe_and_rerank(query: str, refs: List[dict],
-                      domain_terms: Optional[Set[str]] = None,
-                      embeddings: Optional[Dict[str, List[float]]] = None,
-                      query_embedding: Optional[List[float]] = None,
-                      top_k: int = 50,
-                      must_terms: Optional[Set[str]] = None,
-                      ban_terms: Optional[Set[str]] = None) -> List[dict]:
+
+def dedupe_and_rerank(
+    query: str,
+    refs: List[dict],
+    domain_terms: Optional[Set[str]] = None,
+    embeddings: Optional[Dict[str, List[float]]] = None,
+    query_embedding: Optional[List[float]] = None,
+    top_k: int = 50,
+    must_terms: Optional[Set[str]] = None,
+    ban_terms: Optional[Set[str]] = None,
+) -> List[dict]:
     unique, merge_map, _ = dedupe_refs(refs)
     ranked = rerank_refs(
-        query, unique,
+        query,
+        unique,
         domain_terms=domain_terms,
         embeddings=embeddings,
         query_embedding=query_embedding,
@@ -440,8 +497,10 @@ def dedupe_and_rerank(query: str, refs: List[dict],
     )
     return ranked
 
-def split_used_refs(refs_all: List[dict], used_indexes: List[int]
-                   ) -> Tuple[List[dict], Dict[int, int]]:
+
+def split_used_refs(
+    refs_all: List[dict], used_indexes: List[int]
+) -> Tuple[List[dict], Dict[int, int]]:
     """
     Given full (ranked) refs with original 'index' values,
     return (refs_used_renumbered, index_map) where index_map maps old->new (1-based).
@@ -460,6 +519,7 @@ def split_used_refs(refs_all: List[dict], used_indexes: List[int]
         new_list.append(r2)
     return new_list, index_map
 
+
 def format_references_block(refs_used: List[dict]) -> str:
     """
     Render ACS-ish block from used refs (expected to be renumbered 1..m).
@@ -471,10 +531,10 @@ def format_references_block(refs_used: List[dict]) -> str:
         authors = r.get("authors") or ""
         title = r.get("title") or ""
         venue = r.get("venue") or ""
-        year  = str(r.get("year") or "").strip()
-        doi   = _norm_doi(r.get("doi"))
-        url   = _strip(r.get("url") or "")
-        link  = f"https://doi.org/{doi}" if doi else url
+        year = str(r.get("year") or "").strip()
+        doi = _norm_doi(r.get("doi"))
+        url = _strip(r.get("url") or "")
+        link = f"https://doi.org/{doi}" if doi else url
         piece = f"[{idx}] {authors}. {title}. {venue} {year}. {link}".strip()
         # tidy spaces
         piece = re.sub(r"\\s+\\.", ".", piece)
@@ -482,12 +542,63 @@ def format_references_block(refs_used: List[dict]) -> str:
         lines.append(piece)
     return "\\n".join(lines)
 
+
 # A reasonable default domain-term set for nanochem / synthesis
-DEFAULT_NANOCHEM_TERMS: Set[str] = set(map(str.lower, [
-    "synthesis","solvothermal","hydrothermal","autoclave","nanocrystal","nanoparticle","nanowire",
-    "nanorod","nanocube","seed","precursor","ligand","surfactant","oleylamine","oleic","PVP",
-    "ethylene","glycol","polyol","reduction","nucleation","growth","facet","{111}","{100}",
-    "HCl","NaCl","AgNO3","Ag+","AuCl3","Fe(acac)3","Ni(acac)2","TOP","TOPO","HDA","HDD","OA",
-    "reaction","anneal","calcination","microwave","stirring","injection","temperature","time",
-    "monodisperse","monodispersity","facet-selective","shape-control","capping","cetyltrimethylammonium",
-]))
+DEFAULT_NANOCHEM_TERMS: Set[str] = set(
+    map(
+        str.lower,
+        [
+            "synthesis",
+            "solvothermal",
+            "hydrothermal",
+            "autoclave",
+            "nanocrystal",
+            "nanoparticle",
+            "nanowire",
+            "nanorod",
+            "nanocube",
+            "seed",
+            "precursor",
+            "ligand",
+            "surfactant",
+            "oleylamine",
+            "oleic",
+            "PVP",
+            "ethylene",
+            "glycol",
+            "polyol",
+            "reduction",
+            "nucleation",
+            "growth",
+            "facet",
+            "{111}",
+            "{100}",
+            "HCl",
+            "NaCl",
+            "AgNO3",
+            "Ag+",
+            "AuCl3",
+            "Fe(acac)3",
+            "Ni(acac)2",
+            "TOP",
+            "TOPO",
+            "HDA",
+            "HDD",
+            "OA",
+            "reaction",
+            "anneal",
+            "calcination",
+            "microwave",
+            "stirring",
+            "injection",
+            "temperature",
+            "time",
+            "monodisperse",
+            "monodispersity",
+            "facet-selective",
+            "shape-control",
+            "capping",
+            "cetyltrimethylammonium",
+        ],
+    )
+)

@@ -1,13 +1,16 @@
+from typing import Any, Dict, List
+
 import httpx
-from typing import List, Dict, Any
 
 EPMC_SEARCH = "https://www.ebi.ac.uk/europepmc/webservices/rest/search"
+
 
 def _to_int(x, default=None):
     try:
         return int(x)
     except Exception:
         return default
+
 
 def search_eupmc(query: str, since_year=None, max_results=25) -> List[Dict[str, Any]]:
     """
@@ -62,22 +65,31 @@ def search_eupmc(query: str, since_year=None, max_results=25) -> List[Dict[str, 
             year = _to_int(rec.get("pubYear"), None)
             if sy is not None and (year is None or year < sy):
                 continue
-            out.append({
-                "id": rec.get("id") or rec.get("pmid") or rec.get("pmcid") or "",
-                "title": rec.get("title") or "",
-                "url": rec.get("fullTextUrlList", {}).get("fullTextUrl", [{}])[0].get("url", "") if rec.get("fullTextUrlList") else "",
-                "doi": rec.get("doi") or "",
-                "journal": rec.get("journalTitle") or "",
-                "pubYear": year,
-                "authors": rec.get("authorString") or "",
-                "source": rec.get("source") or "",
-                "isOpenAccess": rec.get("isOpenAccess"),
-            })
+            out.append(
+                {
+                    "id": rec.get("id") or rec.get("pmid") or rec.get("pmcid") or "",
+                    "title": rec.get("title") or "",
+                    "url": (
+                        rec.get("fullTextUrlList", {})
+                        .get("fullTextUrl", [{}])[0]
+                        .get("url", "")
+                        if rec.get("fullTextUrlList")
+                        else ""
+                    ),
+                    "doi": rec.get("doi") or "",
+                    "journal": rec.get("journalTitle") or "",
+                    "pubYear": year,
+                    "authors": rec.get("authorString") or "",
+                    "source": rec.get("source") or "",
+                    "isOpenAccess": rec.get("isOpenAccess"),
+                }
+            )
         except Exception:
             continue
 
     # Cap to mr
     return out[:mr]
+
 
 def _ensure_pmcid(pmcid: str) -> str:
     pmcid = (pmcid or "").strip()
@@ -85,13 +97,18 @@ def _ensure_pmcid(pmcid: str) -> str:
         return pmcid
     return pmcid if pmcid.upper().startswith("PMC") else f"PMC{pmcid}"
 
+
 def fetch_fulltext_jats(pmcid: str, timeout: float = 60.0) -> str | None:
     """
     Fetch JATS full text for a PMCID.
     Tries Europe PMC first, then falls back to NCBI PMC OAI-PMH.
     Returns the JATS XML as a string (or None if unavailable).
     """
-    import httpx, logging, re
+    import logging
+    import re
+
+    import httpx
+
     log = logging.getLogger(__name__)
     pmcid = _ensure_pmcid(pmcid)
     if not pmcid:
@@ -100,7 +117,12 @@ def fetch_fulltext_jats(pmcid: str, timeout: float = 60.0) -> str | None:
     # 1) Europe PMC: /webservices/rest/{PMCID}/fullTextXML
     url_epmc = f"https://www.ebi.ac.uk/europepmc/webservices/rest/{pmcid}/fullTextXML"
     try:
-        r = httpx.get(url_epmc, headers={"Accept": "application/xml"}, timeout=timeout, follow_redirects=True)
+        r = httpx.get(
+            url_epmc,
+            headers={"Accept": "application/xml"},
+            timeout=timeout,
+            follow_redirects=True,
+        )
         if r.status_code == 200 and r.text and "<article" in r.text:
             return r.text
     except Exception as e:
@@ -109,7 +131,12 @@ def fetch_fulltext_jats(pmcid: str, timeout: float = 60.0) -> str | None:
     # 2) Fallback: NCBI PMC OAI-PMH → extract <article> … </article>
     url_oai = f"https://www.ncbi.nlm.nih.gov/pmc/oai/oai.cgi?verb=GetRecord&metadataPrefix=pmc&identifier={pmcid}"
     try:
-        r = httpx.get(url_oai, headers={"Accept": "application/xml"}, timeout=timeout, follow_redirects=True)
+        r = httpx.get(
+            url_oai,
+            headers={"Accept": "application/xml"},
+            timeout=timeout,
+            follow_redirects=True,
+        )
         if r.status_code == 200 and r.text:
             m = re.search(r"(<article[\s\S]*?</article>)", r.text, flags=re.I)
             if m:

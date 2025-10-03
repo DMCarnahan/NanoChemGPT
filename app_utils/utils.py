@@ -1,4 +1,5 @@
 """Small utility helpers used by app.py (sanitizers, converters, markers)."""
+
 from __future__ import annotations
 
 import re
@@ -8,6 +9,7 @@ from typing import Any
 def s(x: Any) -> str:
     try:
         from app_utils.helpers import _safe_text as _h_safe_text
+
         return _h_safe_text(x)
     except Exception:
         return str(x).strip() if x is not None else ""
@@ -19,6 +21,7 @@ def safe_id(x: Any):
         return None
     try:
         from bson import ObjectId
+
         return ObjectId(x)
     except Exception:
         return None
@@ -52,14 +55,21 @@ def extract_used_markers(*texts: str) -> dict:
     seen = set()
     tag_counts = {t: 0 for t in TAGS}
     for t in texts:
-        if not t: continue
+        if not t:
+            continue
         for rx in (_CIT_BRACKET_RX, _CIT_FULL_RX, _CIT_FOOT_RX):
             for m in rx.finditer(t):
-                try: seen.add(int(m.group("num")))
-                except Exception: pass
+                try:
+                    seen.add(int(m.group("num")))
+                except Exception:
+                    pass
         for tag in TAGS:
             tag_counts[tag] += len(re.findall(rf"\[{tag}\]", t))
-    return {"refs": sorted(seen), "tags": tag_counts, "has_ctx": any(tag_counts[k] > 0 for k in ("CTX", "PARSED", "DB"))}
+    return {
+        "refs": sorted(seen),
+        "tags": tag_counts,
+        "has_ctx": any(tag_counts[k] > 0 for k in ("CTX", "PARSED", "DB")),
+    }
 
 
 def wants_verbatim(q: str) -> bool:

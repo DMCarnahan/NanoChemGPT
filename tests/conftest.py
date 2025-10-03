@@ -1,8 +1,12 @@
 import pytest
 
+
 class DummyChoice:
     def __init__(self, content):
-        self.choices = [type('C', (), {'message': type('M', (), {'content': content})})()]
+        self.choices = [
+            type("C", (), {"message": type("M", (), {"content": content})})()
+        ]
+
 
 class DummyClient:
     def __init__(self, reply_text):
@@ -15,7 +19,18 @@ class DummyClient:
             return None
 
     def chat_completions_create(self, *args, **kwargs):
-        return type('R', (), {'choices': [type('C', (), {'message': type('M', (), {'content': self._reply})})()]})()
+        return type(
+            "R",
+            (),
+            {
+                "choices": [
+                    type(
+                        "C", (), {"message": type("M", (), {"content": self._reply})}
+                    )()
+                ]
+            },
+        )()
+
 
 @pytest.fixture(autouse=True)
 def fake_openai_client(monkeypatch, request):
@@ -34,6 +49,7 @@ def fake_openai_client(monkeypatch, request):
         # the `client` attribute used by tests. This avoids needing Flask,
         # httpx, etc. for pure unit tests.
         import types
+
         app = types.SimpleNamespace()
         app.client = None
 
@@ -42,17 +58,19 @@ def fake_openai_client(monkeypatch, request):
             class Msg:
                 def __init__(self, c):
                     self.content = c
-            self.choices = [type('C', (), {'message': Msg(content)})()]
+
+            self.choices = [type("C", (), {"message": Msg(content)})()]
 
     class FakeClient:
         def __init__(self):
             pass
+
         class chat:
             @staticmethod
             def completions_create(**kwargs):
                 # Return a simple answer that doesn't require context
                 return FakeResp("This is a fake answer.\n\n## References\n")
 
-    monkeypatch.setattr(app, 'client', FakeClient())
+    monkeypatch.setattr(app, "client", FakeClient())
     yield
     # teardown handled by monkeypatch

@@ -1,5 +1,8 @@
 from __future__ import annotations
-import os, json, logging
+
+import json
+import logging
+import os
 from pathlib import Path
 
 logging.getLogger(__name__).setLevel(logging.INFO)
@@ -19,6 +22,7 @@ _index = None
 _texts = None
 _loaded = False
 
+
 def _lazy_load() -> None:
     """
     Load local FAISS index and texts only once and only if we're not using a remote retriever.
@@ -31,17 +35,26 @@ def _lazy_load() -> None:
 
     try:
         import faiss  # type: ignore
+
         if INDEX_PATH.exists():
             _index = faiss.read_index(str(INDEX_PATH))
-            logging.info("KB: loaded FAISS index from %s (ntotal=%s)", INDEX_PATH, getattr(_index, "ntotal", "?"))
+            logging.info(
+                "KB: loaded FAISS index from %s (ntotal=%s)",
+                INDEX_PATH,
+                getattr(_index, "ntotal", "?"),
+            )
             if TEXTS_PATH.exists():
                 with open(TEXTS_PATH, "r", encoding="utf-8") as f:
                     _texts = [json.loads(line) for line in f if line.strip()]
             else:
                 _texts = None
-                logging.warning("KB: %s not found; results will lack metadata.", TEXTS_PATH)
+                logging.warning(
+                    "KB: %s not found; results will lack metadata.", TEXTS_PATH
+                )
         else:
-            logging.warning("KB: FAISS index not found at %s. Local KB disabled.", INDEX_PATH)
+            logging.warning(
+                "KB: FAISS index not found at %s. Local KB disabled.", INDEX_PATH
+            )
         _loaded = True
     except Exception:
         logging.exception("KB: failed to load local FAISS index; disabling KB.")
@@ -49,12 +62,14 @@ def _lazy_load() -> None:
         _texts = None
         _loaded = True
 
+
 def kb_available() -> bool:
     """Return True if either remote retriever is configured or local index is present."""
     if RETRIEVER_URL:
         return True
     _lazy_load()
     return _index is not None
+
 
 def kb_search(query: str, k: int = 8) -> list[dict]:
     """
@@ -73,6 +88,7 @@ def kb_search(query: str, k: int = 8) -> list[dict]:
     if RETRIEVER_URL:
         try:
             import requests  # type: ignore
+
             resp = requests.post(
                 f"{RETRIEVER_URL.rstrip('/')}/search",
                 json={"q": query, "k": int(k)},
@@ -91,9 +107,10 @@ def kb_search(query: str, k: int = 8) -> list[dict]:
     if _index is None or int(getattr(_index, "ntotal", 0) or 0) <= 0:
         return []
 
-    from vector_store import embed  # uses EMBED_BACKEND/EMBED_MODEL/OPENAI_EMB envs
-    import numpy as np
     import faiss  # type: ignore
+    import numpy as np
+
+    from vector_store import embed  # uses EMBED_BACKEND/EMBED_MODEL/OPENAI_EMB envs
 
     vec = embed([query])[0]
     xq = np.asarray([vec], dtype="float32")
@@ -118,6 +135,7 @@ def kb_search(query: str, k: int = 8) -> list[dict]:
         meta = _texts[idx] if (_texts and 0 <= idx < len(_texts)) else {}
         hits.append({"i": idx, "score": score, **meta})
     return hits
+
 
 def kb_fetch(idx: int) -> dict:
     """

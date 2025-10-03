@@ -1,26 +1,34 @@
 from __future__ import annotations
-import os, json, logging, tempfile
+
+import json
+import logging
+import os
+import tempfile
 from pathlib import Path
-from typing import List, Dict, Any, Optional
+from typing import Any, Dict, List, Optional
 
 import numpy as np
+
 # Lazy-import faiss to avoid import-time failures on environments where faiss
 # is not installed or incompatible with the local NumPy ABI. Use HAS_FAISS and
 # _faiss to refer to the module when available.
 try:
     import faiss as _faiss
+
     HAS_FAISS = True
 except Exception as _e:
     _faiss = None
     HAS_FAISS = False
     # don't print here; tests/CI will surface errors when FAISS functionality is used
 try:
-    from fastapi import FastAPI, Body
+    from fastapi import Body, FastAPI
     from pydantic import BaseModel
+
     _HAS_FASTAPI = True
 except Exception:
     # Provide minimal stubs so module can be imported in environments without fastapi
     _HAS_FASTAPI = False
+
     class Body:
         def __init__(self, default=None):
             self.default = default
@@ -28,17 +36,23 @@ except Exception:
     class _DummyApp:
         def __init__(self, *args, **kwargs):
             pass
+
         def on_event(self, *args, **kwargs):
             def _d(fn):
                 return fn
+
             return _d
+
         def get(self, *args, **kwargs):
             def _d(fn):
                 return fn
+
             return _d
+
         def post(self, *args, **kwargs):
             def _d(fn):
                 return fn
+
             return _d
 
     FastAPI = _DummyApp
@@ -88,11 +102,14 @@ except PermissionError:
 
 _state: Dict[str, Any] = {"index": None, "texts": []}
 
+
 def _load_index() -> None:
     if FAISS_INDEX_PATH.exists():
         if not HAS_FAISS:
             # can't load index without faiss; leave state empty and log
-            log.warning("FAISS not available; skipping index load from %s", FAISS_INDEX_PATH)
+            log.warning(
+                "FAISS not available; skipping index load from %s", FAISS_INDEX_PATH
+            )
             return
         idx = _faiss.read_index(str(FAISS_INDEX_PATH))
         texts = []
@@ -101,9 +118,14 @@ def _load_index() -> None:
                 texts = [json.loads(line) for line in f if line.strip()]
         _state["index"] = idx
         _state["texts"] = texts
-        log.info("Loaded FAISS index: ntotal=%s | texts=%s", getattr(idx, "ntotal", 0), len(texts))
+        log.info(
+            "Loaded FAISS index: ntotal=%s | texts=%s",
+            getattr(idx, "ntotal", 0),
+            len(texts),
+        )
     else:
         log.warning("FAISS index not found at %s", FAISS_INDEX_PATH)
+
 
 def _build_index_from_bundle(bundle_path: Path) -> None:
     if not bundle_path.exists() or bundle_path.stat().st_size == 0:
@@ -121,7 +143,9 @@ def _build_index_from_bundle(bundle_path: Path) -> None:
         raise ValueError("no text found in bundle; expected 'text' or 'content' field")
 
     if not HAS_FAISS:
-        raise RuntimeError("faiss is not available in this environment; cannot build index from bundle")
+        raise RuntimeError(
+            "faiss is not available in this environment; cannot build index from bundle"
+        )
     vecs = embed(texts)  # List[List[float]]
     X = np.asarray(vecs, dtype="float32")
     _faiss.normalize_L2(X)
@@ -138,6 +162,7 @@ def _build_index_from_bundle(bundle_path: Path) -> None:
     _state["texts"] = docs
     log.info("Built index from bundle: ntotal=%s", index.ntotal)
 
+
 @app.on_event("startup")
 def startup():
     _load_index()
@@ -147,6 +172,7 @@ def startup():
             _build_index_from_bundle(BUNDLE_PATH)
         except Exception as e:
             log.error("Bootstrap build failed: %s", e)
+
 
 class SearchIn(BaseModel):
     # Accept multiple aliases; all optional so missing body won't 422
@@ -158,15 +184,20 @@ class SearchIn(BaseModel):
     def q_text(self) -> str:
         return (self.q or self.query or self.question or "").strip()
 
+
 @app.get("/health")
 def health():
     ntotal = int(getattr(_state["index"], "ntotal", 0) or 0)
     return {"ok": True, "ntotal": ntotal, "texts": len(_state["texts"])}
 
+
 @app.post("/reindex")
 def reindex(bundle_path: Optional[str] = None, text_key: str = "text"):
-    _build_index_from_bundle(Path(bundle_path) if bundle_path else BUNDLE_PATH, text_key=text_key)
-    return {"ok": True, "ntotal": int(_state['index'].ntotal)}
+    _build_index_from_bundle(
+        Path(bundle_path) if bundle_path else BUNDLE_PATH, text_key=text_key
+    )
+    return {"ok": True, "ntotal": int(_state["index"].ntotal)}
+
 
 # Accept missing body without 422 by making it Optional w/ default None
 @app.post("/search")
@@ -196,6 +227,7 @@ def search(inp: Optional[SearchIn] = Body(default=None)):
         meta = _state["texts"][i] if 0 <= i < len(_state["texts"]) else {}
         hits.append({"i": i, "score": float(s), **meta})
     return {"hits": hits}
+
 
 @app.get("/search")
 def search_get(q: str, k: int = 8):

@@ -1,6 +1,7 @@
-import pytest
-
-from harvester.enhanced_relevance import EnhancedRelevanceFilter, enhance_harvester_relevance
+from harvester.enhanced_relevance import (
+    EnhancedRelevanceFilter,
+    enhance_harvester_relevance,
+)
 
 
 def make_paper(**kwargs):
@@ -41,7 +42,15 @@ def test_score_components_are_reasonable():
 def test_filter_papers_filters_by_threshold():
     f = EnhancedRelevanceFilter(min_year=2018, quality_threshold=0.5)
     good = make_paper()
-    bad = make_paper(title="Unrelated review", text="This is about ecology.", journal="PLOS One", year=2017, doi=None, isOpenAccess=False, entities=[])
+    bad = make_paper(
+        title="Unrelated review",
+        text="This is about ecology.",
+        journal="PLOS One",
+        year=2017,
+        doi=None,
+        isOpenAccess=False,
+        entities=[],
+    )
 
     results = f.filter_papers([good, bad], query_terms={"sno"})
     # Only the good paper should pass the 0.5 threshold
@@ -51,7 +60,9 @@ def test_filter_papers_filters_by_threshold():
 
 def test_enhance_harvester_relevance_adds_metadata():
     papers = [make_paper()]
-    enhanced = enhance_harvester_relevance(papers, config={"min_year": 2018, "quality_threshold": 0.0})
+    enhanced = enhance_harvester_relevance(
+        papers, config={"min_year": 2018, "quality_threshold": 0.0}
+    )
 
     assert isinstance(enhanced, list)
     assert "relevance_score" in enhanced[0]

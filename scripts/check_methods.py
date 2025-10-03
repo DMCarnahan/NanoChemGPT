@@ -1,4 +1,7 @@
-import json, sys, pathlib
+import json
+import pathlib
+import sys
+
 p = pathlib.Path(sys.argv[1] if len(sys.argv) > 1 else r".\out\bundle.jsonl")
 papers = nonempty = 0
 with p.open("r", encoding="utf-8") as f:

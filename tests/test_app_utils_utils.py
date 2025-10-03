@@ -1,4 +1,3 @@
-import os
 from app_utils import utils as u
 
 
@@ -33,7 +32,8 @@ def test_clean_verbatim_block_replaces_tokens():
     s = "[A1.1] attachment:file.pdf\nSome text" + ""
     out = u.clean_verbatim_block(s)
     assert "attachment" not in out
-import os
+
+
 from app_utils import utils as u
 
 
