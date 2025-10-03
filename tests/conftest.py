@@ -26,7 +26,16 @@ def fake_openai_client(monkeypatch, request):
         # do nothing for integration tests; they exercise miner directly.
         yield
         return
-    import app
+    try:
+        import app
+    except Exception:
+        # If the full `app` module (and its heavy deps) are not available in
+        # the test environment, create a minimal dummy module that provides
+        # the `client` attribute used by tests. This avoids needing Flask,
+        # httpx, etc. for pure unit tests.
+        import types
+        app = types.SimpleNamespace()
+        app.client = None
 
     class FakeResp:
         def __init__(self, content):
