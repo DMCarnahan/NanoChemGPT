@@ -1,9 +1,11 @@
 from __future__ import annotations
-from dataclasses import dataclass, field, asdict
+
 import re
+from dataclasses import dataclass, field
+from typing import Any, Dict, List
+
 import spacy
 from spacy.matcher import Matcher
-from typing import List, Dict, Any, Optional
 
 # --- Patterns ---
 UNIT_RX = r"(?:mg|g|kg|µg|ug|mL|L|µL|ul|mol|mmol|µmol|M|wt%|vol%)"
@@ -18,17 +20,51 @@ CHEMFORM_RX = re.compile(r"\b(?=.*\d)(?:[A-Z][a-z]?\d*){2,}\b")
 
 # keywords that often flag materials even without a parser
 MATERIAL_HINTS = {
-    "oxide","chloride","sulfide","sulfate","nitrate","acetate",
-    "hydroxide","carbonate","phosphate","boride","fluoride","iodide",
-    "polymer","copolymer","nanoparticle","nanoparticles","nanotube",
-    "nanowire","graphene","perovskite","mof","metal–organic","metal-organic",
-    "alloy","ceramic","composite","solution","precursor","powder","film"
+    "oxide",
+    "chloride",
+    "sulfide",
+    "sulfate",
+    "nitrate",
+    "acetate",
+    "hydroxide",
+    "carbonate",
+    "phosphate",
+    "boride",
+    "fluoride",
+    "iodide",
+    "polymer",
+    "copolymer",
+    "nanoparticle",
+    "nanoparticles",
+    "nanotube",
+    "nanowire",
+    "graphene",
+    "perovskite",
+    "mof",
+    "metal–organic",
+    "metal-organic",
+    "alloy",
+    "ceramic",
+    "composite",
+    "solution",
+    "precursor",
+    "powder",
+    "film",
 }
 
 ACTIONS = {
     "add": ["add", "added", "adding", "introduce", "charge", "charged"],
     "stir": ["stir", "stirred", "stirring", "agitate", "mix", "mixed"],
-    "heat": ["heat", "heated", "heating", "maintain", "maintained", "anneal", "annealed", "reflux"],
+    "heat": [
+        "heat",
+        "heated",
+        "heating",
+        "maintain",
+        "maintained",
+        "anneal",
+        "annealed",
+        "reflux",
+    ],
     "degas": ["degas", "degassed", "purge", "purged", "sparge", "sparged"],
     "inject": ["inject", "injected", "injection"],
     "wash": ["wash", "washed", "rinse", "rinsed"],
@@ -37,6 +73,7 @@ ACTIONS = {
     "sonicate": ["sonicate", "sonicated", "sonication"],
     "filter": ["filter", "filtered", "filtration"],
 }
+
 
 @dataclass
 class Operation:
@@ -47,21 +84,25 @@ class Operation:
     materials: List[str] = field(default_factory=list)
     params: Dict[str, Any] = field(default_factory=dict)
 
+
 class BasicMiner:
     def __init__(self, nlp_model: str | None = None):
         import os
         from pathlib import Path as _P
+
         # Resolve model path/name preference:
-        cand = nlp_model or os.getenv('SPACY_MODEL')
-        if cand == 'SPACY_MODEL':
-            cand = os.getenv('SPACY_MODEL')
+        cand = nlp_model or os.getenv("SPACY_MODEL")
+        if cand == "SPACY_MODEL":
+            cand = os.getenv("SPACY_MODEL")
         if not cand:
             # Try local trained models first
             here = _P(__file__).parent
-            local_ner = here / 'ner_model' / 'ner'
-            local_best = here / 'ner_model' / 'model-best'
+            local_ner = here / "ner_model" / "ner"
+            local_best = here / "ner_model" / "model-best"
             # Also check a repository-level path (in case package structure differs)
-            repo_best = here.parent.parent / 'harvester' / 'miner' / 'ner_model' / 'model-best'
+            repo_best = (
+                here.parent.parent / "harvester" / "miner" / "ner_model" / "model-best"
+            )
             if local_ner.exists():
                 cand = str(local_ner)
             elif local_best.exists():
@@ -69,17 +110,19 @@ class BasicMiner:
             elif repo_best.exists():
                 cand = str(repo_best)
             else:
-                cand = 'en_core_web_sm'
+                cand = "en_core_web_sm"
         try:
             self.nlp = spacy.load(cand)
         except Exception as e:
             # Final fallback to small English model
-            self.nlp = spacy.load('en_core_web_sm')
+            self.nlp = spacy.load("en_core_web_sm")
 
         self._lemma_ok = False
         self._ensure_pipeline_ready()
 
-        if not any(p in self.nlp.pipe_names for p in ("parser", "senter", "sentencizer")):
+        if not any(
+            p in self.nlp.pipe_names for p in ("parser", "senter", "sentencizer")
+        ):
             self.nlp.add_pipe("sentencizer")
 
         # Build action patterns; prefer LEMMA if lemmatizer is available
@@ -97,7 +140,7 @@ class BasicMiner:
             # register all patterns for this label at once
             self.matcher.add(rule_id, pats)
             self._raw_patterns.extend(pats)
-        
+
         # precompile regexes
         self.rx_amount = re.compile(rf"\b({NUM_RX})\s*({UNIT_RX})\b", re.I)
         self.rx_temp = re.compile(TEMP_RX, re.I)
@@ -133,7 +176,9 @@ class BasicMiner:
         try:
             probe = nlp("running tested items")
             # consider lemma usable if any token has a non-empty lemma distinct from text
-            self._lemma_ok = any(t.lemma_ and t.lemma_.lower() != t.text.lower() for t in probe)
+            self._lemma_ok = any(
+                t.lemma_ and t.lemma_.lower() != t.text.lower() for t in probe
+            )
         except Exception:
             self._lemma_ok = False
 
@@ -143,9 +188,9 @@ class BasicMiner:
             except Exception:
                 pass
 
-
     def _lemma_free_patterns(self, patterns):
         """Convert patterns using LEMMA to LOWER so matching works without a lemmatizer."""
+
         def convert_token(tok):
             t = dict(tok)
             if "LEMMA" in t:
@@ -169,6 +214,7 @@ class BasicMiner:
             return
         # rebuild the matcher based on whether lemmatization is working
         from spacy.matcher import Matcher
+
         self.matcher = Matcher(self.nlp.vocab)
         if self._lemma_ok:
             self.matcher.add("OPERATION", self._raw_patterns)
@@ -216,7 +262,7 @@ class BasicMiner:
             i = 0
             while i < len(toks):
                 t = toks[i]
-                if (t.is_alpha and t.lower_ in MATERIAL_HINTS):
+                if t.is_alpha and t.lower_ in MATERIAL_HINTS:
                     # grow a small window around the keyword
                     start = max(0, i - 2)
                     end = min(len(toks), i + 3)
@@ -233,6 +279,7 @@ class BasicMiner:
         # keep it tidy
         out = sorted(mats, key=lambda s: (len(s), s.lower()))[:6]
         return out
+
     # cap to keep outputs tidy
 
     def extract(self, text: str) -> list[dict]:
@@ -244,14 +291,16 @@ class BasicMiner:
             for match_id, start, end in self.matcher(subdoc):
                 span = subdoc[start:end]
                 label = self.nlp.vocab.strings[match_id].lower()
-                results.append({
-                    "op_type": label,
-                    "sentence": sent.text,
-                    "start_char": span.start_char + sent.start_char,
-                    "end_char": span.end_char + sent.start_char,
-                    "materials": self._guess_materials(subdoc),
-                    "params": self._extract_params(sent.text),
-                })
+                results.append(
+                    {
+                        "op_type": label,
+                        "sentence": sent.text,
+                        "start_char": span.start_char + sent.start_char,
+                        "end_char": span.end_char + sent.start_char,
+                        "materials": self._guess_materials(subdoc),
+                        "params": self._extract_params(sent.text),
+                    }
+                )
         return results
 
     # --- Expansion to low-level micro-steps ---
@@ -269,7 +318,7 @@ class BasicMiner:
                     f"Ensure {vessel} is present and empty.",
                     "Place a clean stir bar in the vessel.",
                     f"Measure {amt} of {mat}.",
-                    f"Transfer {mat} into the vessel."
+                    f"Transfer {mat} into the vessel.",
                 ]
             elif t == "stir":
                 speed = p.get("speed", "an appropriate speed")
@@ -277,7 +326,7 @@ class BasicMiner:
                 steps = [
                     f"Place the {vessel} on a stir plate.",
                     f"Set the stirrer to {speed}.",
-                    f"Stir for {time_}."
+                    f"Stir for {time_}.",
                 ]
             elif t == "heat":
                 temp = p.get("temp", "the target temperature")
@@ -285,7 +334,7 @@ class BasicMiner:
                 steps = [
                     f"Place the {vessel} on a hotplate.",
                     f"Ramp to {temp}.",
-                    f"Maintain {temp} for {time_}."
+                    f"Maintain {temp} for {time_}.",
                 ]
             else:
                 steps = [f"Perform operation '{t}' as described: {op['sentence']}"]
@@ -295,4 +344,4 @@ class BasicMiner:
     def extract_procedure(self, text: str) -> dict:
         ops = self.extract(text)
         expanded = self.expand(ops)
-        return {'operations': ops, 'expanded': expanded}
+        return {"operations": ops, "expanded": expanded}

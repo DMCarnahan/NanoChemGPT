@@ -1,41 +1,111 @@
 from __future__ import annotations
-import argparse, json, lzma, re, random, unicodedata, sys
-from typing import List, Tuple, Dict, Any, Optional
+
+import argparse
+import json
+import lzma
+import random
+import re
+import sys
+import unicodedata
 from pathlib import Path
+from typing import Any, Dict, List, Optional, Tuple
+
 import spacy
-from spacy.tokens import Doc, DocBin, Span
+from spacy.tokens import DocBin
 
 # -------------------- Configs --------------------
 
 OPTYPE_TO_TRIGGERS = {
-    "HeatingOperation": ["heat","heated","heating","maintain","maintained","anneal","annealed","reflux","calcine","calcined","sinter","sintered"],
-    "StirringOperation": ["stir","stirred","stirring","agitate","mixed","mixing","mix"],
-    "AdditionOperation": ["add","added","adding","introduce","charge","charged"],
-    "InjectionOperation": ["inject","injected","injection"],
-    "DegassingOperation": ["degas","degassed","purge","purged","sparge","sparged"],
-    "CentrifugeOperation": ["centrifuge","centrifuged","centrifugation"],
-    "WashingOperation": ["wash","washed","rinse","rinsed"],
-    "DryingOperation": ["dry","dried","drying","evaporate","evaporated"],
-    "FiltrationOperation": ["filter","filtered","filtration"],
-    "SonicationOperation": ["sonicate","sonicated","sonication"],
-    "_solidstate": ["grind","ground","mill","milled","press","pressed","pelletize","pelletized","calcine","calcined","sinter","sintered","anneal","annealed"]
+    "HeatingOperation": [
+        "heat",
+        "heated",
+        "heating",
+        "maintain",
+        "maintained",
+        "anneal",
+        "annealed",
+        "reflux",
+        "calcine",
+        "calcined",
+        "sinter",
+        "sintered",
+    ],
+    "StirringOperation": [
+        "stir",
+        "stirred",
+        "stirring",
+        "agitate",
+        "mixed",
+        "mixing",
+        "mix",
+    ],
+    "AdditionOperation": ["add", "added", "adding", "introduce", "charge", "charged"],
+    "InjectionOperation": ["inject", "injected", "injection"],
+    "DegassingOperation": ["degas", "degassed", "purge", "purged", "sparge", "sparged"],
+    "CentrifugeOperation": ["centrifuge", "centrifuged", "centrifugation"],
+    "WashingOperation": ["wash", "washed", "rinse", "rinsed"],
+    "DryingOperation": ["dry", "dried", "drying", "evaporate", "evaporated"],
+    "FiltrationOperation": ["filter", "filtered", "filtration"],
+    "SonicationOperation": ["sonicate", "sonicated", "sonication"],
+    "_solidstate": [
+        "grind",
+        "ground",
+        "mill",
+        "milled",
+        "press",
+        "pressed",
+        "pelletize",
+        "pelletized",
+        "calcine",
+        "calcined",
+        "sinter",
+        "sintered",
+        "anneal",
+        "annealed",
+    ],
 }
 
-VESSEL_WORDS = ["flask","beaker","vial","autoclave","round-bottom","tube","ampoule","crucible","furnace","reactor","tube furnace","muffle furnace"]
-EQUIPMENT_WORDS = ["stir plate","hotplate","thermocouple","centrifuge","vacuum","oven","ultrasonicator","sonicator","balance","hood","ball mill","press"]
-ATMOS_WORDS = ["argon","nitrogen","air","oxygen","vacuum","N2","Ar","O2","H2"]
+VESSEL_WORDS = [
+    "flask",
+    "beaker",
+    "vial",
+    "autoclave",
+    "round-bottom",
+    "tube",
+    "ampoule",
+    "crucible",
+    "furnace",
+    "reactor",
+    "tube furnace",
+    "muffle furnace",
+]
+EQUIPMENT_WORDS = [
+    "stir plate",
+    "hotplate",
+    "thermocouple",
+    "centrifuge",
+    "vacuum",
+    "oven",
+    "ultrasonicator",
+    "sonicator",
+    "balance",
+    "hood",
+    "ball mill",
+    "press",
+]
+ATMOS_WORDS = ["argon", "nitrogen", "air", "oxygen", "vacuum", "N2", "Ar", "O2", "H2"]
 
 # --- Units for AMOUNT pairing ONLY ---
 VOLUME_UNITS = r"(?:μL|µL|uL|mL|L)"
-MASS_UNITS   = r"(?:μg|µg|ug|mg|g|kg)"
-MOL_UNITS    = r"(?:μmol|µmol|umol|mmol|mol)"
-LENGTH_UNITS = r"(?:nm|μm|µm|mm|cm)"   # keep if your gold treats lengths as AMOUNT
+MASS_UNITS = r"(?:μg|µg|ug|mg|g|kg)"
+MOL_UNITS = r"(?:μmol|µmol|umol|mmol|mol)"
+LENGTH_UNITS = r"(?:nm|μm|µm|mm|cm)"  # keep if your gold treats lengths as AMOUNT
 
 # DO NOT include concentration or speed units here
 UNIT_RX = rf"(?:{VOLUME_UNITS}|{MASS_UNITS}|{MOL_UNITS}|{LENGTH_UNITS})"
 
 # --- Concentration & Speed handled separately ---
-CONC_UNIT_RX  = r"(?:M|mM|μM|µM|uM|%|wt%|vol%|v/v|w/w|mol/?L|mol·L(?:-1|⁻¹))"
+CONC_UNIT_RX = r"(?:M|mM|μM|µM|uM|%|wt%|vol%|v/v|w/w|mol/?L|mol·L(?:-1|⁻¹))"
 SPEED_UNIT_RX = r"(?:rpm|r[\.\s·]?min(?:-1|⁻¹|\^-1))"
 
 NUM_RX = r"""
@@ -56,49 +126,109 @@ TIME_RX = r"(?<![\w])(\d+(?:[.,]\d+)?)\s*(?:s|sec|secs|second|seconds|min|mins|m
 SPEED_RX = r"(?<![\w])(\d+(?:[.,]\d+)?)\s*(?:rpm)\b"
 CONC_RX = r"(?<![\w])(\d+(?:[.,]\d+)?)\s*(?:M|mM|µM|uM|wt%|vol%|%)\b"
 SOLVENT_WHITELIST = {
-    "water","ethanol","methanol","isopropanol","isopropyl alcohol","ipa","propanol",
-    "butanol","toluene","hexane","heptane","octane","chloroform","dichloromethane","dcm",
-    "acetonitrile","acetone","dmf","dimethylformamide","dmso","dimethyl sulfoxide",
-    "oleylamine","oleic acid","trioctylphosphine","top","tbhp","pvp","peg"
+    "water",
+    "ethanol",
+    "methanol",
+    "isopropanol",
+    "isopropyl alcohol",
+    "ipa",
+    "propanol",
+    "butanol",
+    "toluene",
+    "hexane",
+    "heptane",
+    "octane",
+    "chloroform",
+    "dichloromethane",
+    "dcm",
+    "acetonitrile",
+    "acetone",
+    "dmf",
+    "dimethylformamide",
+    "dmso",
+    "dimethyl sulfoxide",
+    "oleylamine",
+    "oleic acid",
+    "trioctylphosphine",
+    "top",
+    "tbhp",
+    "pvp",
+    "peg",
 }
-TEXT_KEYS = ["paragraph_string","paragraph","text","context","sentence","raw","span_text","source_text","proc_text","body","content","abstract"]
-MATERIAL_KEY_HINTS = ["precursor","reactant","reagent","material","target","product","solvent","compound","salt","oxide"]
+TEXT_KEYS = [
+    "paragraph_string",
+    "paragraph",
+    "text",
+    "context",
+    "sentence",
+    "raw",
+    "span_text",
+    "source_text",
+    "proc_text",
+    "body",
+    "content",
+    "abstract",
+]
+MATERIAL_KEY_HINTS = [
+    "precursor",
+    "reactant",
+    "reagent",
+    "material",
+    "target",
+    "product",
+    "solvent",
+    "compound",
+    "salt",
+    "oxide",
+]
 
-KEY_SCORE_HINTS = {"paragraph","operations","quantities","precursor","material","solvent","target"}
+KEY_SCORE_HINTS = {
+    "paragraph",
+    "operations",
+    "quantities",
+    "precursor",
+    "material",
+    "solvent",
+    "target",
+}
 
 PAIR_RX = rf"(?P<num>{NUM_RX})\s*(?P<unit>{UNIT_RX})"
 PAIR_RE = re.compile(PAIR_RX, re.I)
 ACTION_FP_PATTERNS = [
-    r"\bgrinding media\b", r"\bmilling (?:jar|jars)\b",
-    r"\bpress (?:die|dies)\b", r"\bball mill\b"
+    r"\bgrinding media\b",
+    r"\bmilling (?:jar|jars)\b",
+    r"\bpress (?:die|dies)\b",
+    r"\bball mill\b",
 ]
 # Heuristics to reduce MATERIAL over-labeling
 TAIL_NONMAT = re.compile(
-    r'\s*(?:'
-    r'film(?:s)?|thin\s*film(?:s)?|coating(?:s)?|layer(?:s)?|'
-    r'substrate(?:s)?|wafer(?:s)?|support(?:s)?|'
-    r'powder(?:s)?|nanopowder(?:s)?|pellet(?:s)?|granule(?:s)?|grain(?:s)?|crystallite(?:s)?|'
-    r'particle(?:s)?|nanoparticle(?:s)?|microparticle(?:s)?|'
-    r'nanocrystal(?:s)?|nanocrystalline|nanorod(?:s)?|nanowire(?:s)?|nanosheet(?:s)?|nanofiber(?:s)?|nanoflake(?:s)?|nanotube(?:s)?|'
-    r'sphere(?:s)?|hollow\s*sphere(?:s)?|core[-\s]*shell(?:s)?|yolk[-\s]*shell(?:s)?|'
-    r'composite(?:s)?|nanocomposite(?:s)?|hybrid(?:s)?|heterostructure(?:s)?|'
-    r'catalyst(?:s)?|photocatalyst(?:s)?|electrode(?:s)?|membrane(?:s)?|'
-    r'sample(?:s)?|product(?:s)?|specimen(?:s)?|'
-    r'solution(?:s)?|suspension(?:s)?|slurry|gel(?:s)?|sol(?:s)?'
-    r')\s*$',
-    re.I
+    r"\s*(?:"
+    r"film(?:s)?|thin\s*film(?:s)?|coating(?:s)?|layer(?:s)?|"
+    r"substrate(?:s)?|wafer(?:s)?|support(?:s)?|"
+    r"powder(?:s)?|nanopowder(?:s)?|pellet(?:s)?|granule(?:s)?|grain(?:s)?|crystallite(?:s)?|"
+    r"particle(?:s)?|nanoparticle(?:s)?|microparticle(?:s)?|"
+    r"nanocrystal(?:s)?|nanocrystalline|nanorod(?:s)?|nanowire(?:s)?|nanosheet(?:s)?|nanofiber(?:s)?|nanoflake(?:s)?|nanotube(?:s)?|"
+    r"sphere(?:s)?|hollow\s*sphere(?:s)?|core[-\s]*shell(?:s)?|yolk[-\s]*shell(?:s)?|"
+    r"composite(?:s)?|nanocomposite(?:s)?|hybrid(?:s)?|heterostructure(?:s)?|"
+    r"catalyst(?:s)?|photocatalyst(?:s)?|electrode(?:s)?|membrane(?:s)?|"
+    r"sample(?:s)?|product(?:s)?|specimen(?:s)?|"
+    r"solution(?:s)?|suspension(?:s)?|slurry|gel(?:s)?|sol(?:s)?"
+    r")\s*$",
+    re.I,
 )
 DOPANT_RX = r"[A-Z][a-z]?(?:\d+|[0-9\-+½¼¾⁻⁺]*)"
 COMPLEX_FORMULA_RX = rf"(?:{DOPANT_RX}(?:[:\-–—·•]{DOPANT_RX})+|[A-Z][a-z]?\([A-Za-z0-9\.\-+−⁻]+\)\d*(?:[A-Za-z0-9\.\-+−⁻]*)?)"
 CHEMISH = re.compile(
     rf"(?:{COMPLEX_FORMULA_RX})|(?:[A-Z][a-z]?\d+)+|oxide|nitrate|acetate|chloride|sulfate|hydroxide|phosphate|carbonate|perovskite|aluminate",
-    re.I
+    re.I,
 )
+
 
 # -------------------- Helpers --------------------
 def looks_like_fp_action(text: str, s: int, e: int) -> bool:
-    win = text[max(0, s-12): min(len(text), e+20)].lower()
+    win = text[max(0, s - 12) : min(len(text), e + 20)].lower()
     return any(re.search(p, win) for p in ACTION_FP_PATTERNS)
+
 
 def norm_text(t: str) -> str:
     t = unicodedata.normalize("NFKC", t)
@@ -106,11 +236,13 @@ def norm_text(t: str) -> str:
     t = re.sub(r"[ \t\r\f\v]+", " ", t)
     return t
 
+
 def _json_open(path: Path):
     # open lzma .xz or plain .json
     if str(path).lower().endswith(".xz"):
         return lzma.open(path, "rt", encoding="utf-8")
     return open(path, "rt", encoding="utf-8")
+
 
 def _iter_jsonl(f):
     for line in f:
@@ -119,7 +251,8 @@ def _iter_jsonl(f):
             continue
         yield json.loads(line)
 
-def _nested_lists_of_dicts(obj: Any, path: str="") -> List[tuple]:
+
+def _nested_lists_of_dicts(obj: Any, path: str = "") -> List[tuple]:
     """Return [(path, list_obj)] for any list whose elements are dicts."""
     out = []
     if isinstance(obj, list) and obj and isinstance(obj[0], dict):
@@ -130,6 +263,7 @@ def _nested_lists_of_dicts(obj: Any, path: str="") -> List[tuple]:
             out.extend(_nested_lists_of_dicts(v, subpath))
     return out
 
+
 def _score_candidate_list(lst: list) -> int:
     # Heuristic: length + presence of indicative keys in sample dicts
     score = len(lst)
@@ -138,7 +272,8 @@ def _score_candidate_list(lst: list) -> int:
         score += 50 * len(keys & KEY_SCORE_HINTS)
     return score
 
-def load_records(path: Path, root_key: Optional[str]=None) -> List[dict]:
+
+def load_records(path: Path, root_key: Optional[str] = None) -> List[dict]:
     with _json_open(path) as f:
         head = f.read(4096)
         f.seek(0)
@@ -177,10 +312,14 @@ def load_records(path: Path, root_key: Optional[str]=None) -> List[dict]:
         raise ValueError("No list[dict] candidates found in JSON object")
     best_path, best_list = max(candidates, key=lambda kv: _score_candidate_list(kv[1]))
     # print hint
-    print(f"[info] Auto-selected root at '{best_path}' with {len(best_list)} records", file=sys.stderr)
+    print(
+        f"[info] Auto-selected root at '{best_path}' with {len(best_list)} records",
+        file=sys.stderr,
+    )
     return best_list
 
-def pick_text(rec: dict, forced_key: Optional[str]=None) -> str:
+
+def pick_text(rec: dict, forced_key: Optional[str] = None) -> str:
     if forced_key and isinstance(rec.get(forced_key), str):
         return norm_text(rec[forced_key])
     for k in TEXT_KEYS:
@@ -196,44 +335,59 @@ def pick_text(rec: dict, forced_key: Optional[str]=None) -> str:
                     return norm_text(vv)
     # longest string anywhere
     best = ""
+
     def scan(obj):
         nonlocal best
         if isinstance(obj, str) and len(obj) > len(best):
             best = obj
         elif isinstance(obj, dict):
-            for vv in obj.values(): scan(vv)
+            for vv in obj.values():
+                scan(vv)
         elif isinstance(obj, list):
-            for it in obj: scan(it)
+            for it in obj:
+                scan(it)
+
     scan(rec)
     return norm_text(best)
 
-def find_all(text: str, sub: str) -> List[Tuple[int,int]]:
+
+def find_all(text: str, sub: str) -> List[Tuple[int, int]]:
     spans = []
     sub = norm_text(sub).strip()
-    if not sub: return spans
-    lower = text.lower(); needle = sub.lower()
+    if not sub:
+        return spans
+    lower = text.lower()
+    needle = sub.lower()
     start = 0
     while True:
         i = lower.find(needle, start)
-        if i == -1: break
-        spans.append((i, i+len(sub)))
+        if i == -1:
+            break
+        spans.append((i, i + len(sub)))
         start = i + 1
     return spans
+
 
 def regex_find(text: str, pattern: str):
     for m in re.finditer(pattern, text, flags=re.I):
         yield (m.start(), m.end(), m.group(0))
 
+
 def choose_non_overlapping(spans):
-    spans_sorted = sorted(spans, key=lambda x: (-(x[1]-x[0]), x[0]))
-    chosen = []; used = []
-    for s,e,lab,src in spans_sorted:
-        if any(not (e <= us or s >= ue) for us,ue in used):
+    spans_sorted = sorted(spans, key=lambda x: (-(x[1] - x[0]), x[0]))
+    chosen = []
+    used = []
+    for s, e, lab, src in spans_sorted:
+        if any(not (e <= us or s >= ue) for us, ue in used):
             continue
-        chosen.append((s,e,lab,src)); used.append((s,e))
+        chosen.append((s, e, lab, src))
+        used.append((s, e))
     return sorted(chosen, key=lambda x: x[0])
 
-def collect_material_strings(rec: dict, extra_keys: List[str] | None = None) -> List[str]:
+
+def collect_material_strings(
+    rec: dict, extra_keys: List[str] | None = None
+) -> List[str]:
     """Collect candidate MATERIAL strings from the JSON record."""
     mats: List[str] = []
     keys_set = set(extra_keys or [])
@@ -252,13 +406,29 @@ def collect_material_strings(rec: dict, extra_keys: List[str] | None = None) -> 
                     if isinstance(v, list):
                         for it in v:
                             if isinstance(it, dict):
-                                for subk in ("material_string","name","formula","chemical","label","material","compound"):
+                                for subk in (
+                                    "material_string",
+                                    "name",
+                                    "formula",
+                                    "chemical",
+                                    "label",
+                                    "material",
+                                    "compound",
+                                ):
                                     if subk in it:
                                         maybe_add(it.get(subk))
                             else:
                                 maybe_add(it)
                     elif isinstance(v, dict):
-                        for subk in ("material_string","name","formula","chemical","label","material","compound"):
+                        for subk in (
+                            "material_string",
+                            "name",
+                            "formula",
+                            "chemical",
+                            "label",
+                            "material",
+                            "compound",
+                        ):
                             if subk in v:
                                 maybe_add(v.get(subk))
                         dig(v, lk)
@@ -277,7 +447,12 @@ def collect_material_strings(rec: dict, extra_keys: List[str] | None = None) -> 
     seen = set()
     for mstr in mats:
         core = TAIL_NONMAT.sub("", mstr).strip()
-        core = re.sub(r'^\s*(?:aqueous|ethanolic|methanolic)?\s*solution of\s+', '', core, flags=re.I)
+        core = re.sub(
+            r"^\s*(?:aqueous|ethanolic|methanolic)?\s*solution of\s+",
+            "",
+            core,
+            flags=re.I,
+        )
         if not core:
             continue
         low = core.lower()
@@ -285,11 +460,15 @@ def collect_material_strings(rec: dict, extra_keys: List[str] | None = None) -> 
             continue
         # Always allow common solvents/reagents
         if low in SOLVENT_WHITELIST:
-            out.append(core); seen.add(low); continue
+            out.append(core)
+            seen.add(low)
+            continue
         # Keep multi-word or anything that looks chemical-ish
-        if (' ' in core) or CHEMISH.search(core):
-            out.append(core); seen.add(low)
+        if (" " in core) or CHEMISH.search(core):
+            out.append(core)
+            seen.add(low)
     return out[:100]
+
 
 def collect_action_triggers(rec: dict) -> List[str]:
     triggers = set()
@@ -307,18 +486,33 @@ def collect_action_triggers(rec: dict) -> List[str]:
         triggers.add(t)
     return sorted(triggers)
 
-def build_spans_from_record(text: str, rec: Dict[str, Any], extra_material_keys: List[str] | None = None) -> List[Tuple[int, int, str, str]]:
+
+def build_spans_from_record(
+    text: str, rec: Dict[str, Any], extra_material_keys: List[str] | None = None
+) -> List[Tuple[int, int, str, str]]:
     text = norm_text(text)
     spans: List[Tuple[int, int, str, str]] = []
     covered: List[Tuple[int, int]] = []
 
     # -------- MATERIAL (with atmosphere guard at match time) --------
-    for mstr in (collect_material_strings(rec, extra_material_keys) or []):
+    for mstr in collect_material_strings(rec, extra_material_keys) or []:
         core = mstr.strip()
         for a, b in find_all(text, mstr):
-            if core.lower() in {"o2", "oxygen", "n2", "nitrogen", "air", "argon", "ar", "h2", "hydrogen"}:
-                win = text[max(0, a - 25): b + 25].lower()
-                if re.search(r"\b(flow|atmosphere|under|in|purge|gas)\b", win, flags=re.I):
+            if core.lower() in {
+                "o2",
+                "oxygen",
+                "n2",
+                "nitrogen",
+                "air",
+                "argon",
+                "ar",
+                "h2",
+                "hydrogen",
+            }:
+                win = text[max(0, a - 25) : b + 25].lower()
+                if re.search(
+                    r"\b(flow|atmosphere|under|in|purge|gas)\b", win, flags=re.I
+                ):
                     continue
             spans.append((a, b, "MATERIAL", "materials"))
 
@@ -355,14 +549,15 @@ def build_spans_from_record(text: str, rec: Dict[str, Any], extra_material_keys:
                 pass
             spans.append((s, e, "ACTION", "op.trigger"))
 
-# -------- Structured quantities from JSON (also mark covered) --------
+    # -------- Structured quantities from JSON (also mark covered) --------
     qs = rec.get("quantities")
     if isinstance(qs, list):
         for q in qs:
             if isinstance(q, dict):
                 for qd in q.get("quantity", []) or []:
                     if isinstance(qd, dict):
-                        num = qd.get("number"); unit = qd.get("unit")
+                        num = qd.get("number")
+                        unit = qd.get("unit")
                         if num is None or not unit:
                             continue
                         num_s = str(num).replace(",", ".")
@@ -375,7 +570,9 @@ def build_spans_from_record(text: str, rec: Dict[str, Any], extra_material_keys:
                                 ns, ne = m.start(), m.end()
                                 us, ue = ne - len(u), ne
                                 spans.append((ns, ne, "AMOUNT", "quantities"))
-                                spans.append((ns, ns + len(num_s), "AMOUNT", "quantities.num"))
+                                spans.append(
+                                    (ns, ns + len(num_s), "AMOUNT", "quantities.num")
+                                )
                                 spans.append((us, ue, "UNIT", "quantities.unit"))
                                 covered.append((ns, ns + len(num_s)))
                                 covered.append((us, ue))
@@ -425,30 +622,42 @@ def build_spans_from_record(text: str, rec: Dict[str, Any], extra_material_keys:
 
     return choose_non_overlapping(spans)
 
+
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--input", required=True, help="Path to dataset .json[.xz] (list/dict/JSONL)")
+    ap.add_argument(
+        "--input", required=True, help="Path to dataset .json[.xz] (list/dict/JSONL)"
+    )
     ap.add_argument("--outdir", required=True, help="Output directory for .spacy files")
     ap.add_argument("--limit", type=int, default=None)
     ap.add_argument("--dev_frac", type=float, default=0.1)
     ap.add_argument("--seed", type=int, default=13)
     ap.add_argument("--text-key", type=str, default=None)
     ap.add_argument("--material-keys", nargs="*", default=None)
-    ap.add_argument("--root-key", type=str, default=None, help="Dot path inside JSON object to list[dict]")
+    ap.add_argument(
+        "--root-key",
+        type=str,
+        default=None,
+        help="Dot path inside JSON object to list[dict]",
+    )
     args = ap.parse_args()
 
-    outdir = Path(args.outdir); outdir.mkdir(parents=True, exist_ok=True)
+    outdir = Path(args.outdir)
+    outdir.mkdir(parents=True, exist_ok=True)
     data_path = Path(args.input)
 
     records = load_records(data_path, root_key=args.root_key)
     if args.limit:
         records = records[: args.limit]
 
-    nlp = spacy.blank("en"); nlp.add_pipe("sentencizer")
-    db_train = DocBin(store_user_data=False); db_dev = DocBin(store_user_data=False)
+    nlp = spacy.blank("en")
+    nlp.add_pipe("sentencizer")
+    db_train = DocBin(store_user_data=False)
+    db_dev = DocBin(store_user_data=False)
 
     rng = random.Random(args.seed)
-    idxs = list(range(len(records))); rng.shuffle(idxs)
+    idxs = list(range(len(records)))
+    rng.shuffle(idxs)
     split = int(len(idxs) * (1.0 - args.dev_frac))
     train_idxs = set(idxs[:split])
 
@@ -458,28 +667,52 @@ def main():
         text = pick_text(rec, forced_key=args.text_key)
         if not text.strip():
             continue
-        spans = build_spans_from_record(text, rec, extra_material_keys=args.material_keys)
+        spans = build_spans_from_record(
+            text, rec, extra_material_keys=args.material_keys
+        )
         doc = nlp.make_doc(text)
         ents = []
-        for s,e,label,src in spans:
+        for s, e, label, src in spans:
             span = doc.char_span(s, e, label=label, alignment_mode="contract")
-            if span is not None and span.text.strip() and len(span)>0:
+            if span is not None and span.text.strip() and len(span) > 0:
                 ents.append(span)
         ents = spacy.util.filter_spans(ents)
         doc.ents = ents
         if rec_idx in train_idxs:
-            db_train.add(doc); n_train += 1
+            db_train.add(doc)
+            n_train += 1
         else:
-            db_dev.add(doc); n_dev += 1
+            db_dev.add(doc)
+            n_dev += 1
 
     (outdir / "train.spacy").write_bytes(db_train.to_bytes())
     (outdir / "dev.spacy").write_bytes(db_dev.to_bytes())
     with open(outdir / "labels.json", "w", encoding="utf-8") as f:
-        json.dump(["ACTION","MATERIAL","AMOUNT","UNIT","TEMP","TIME","SPEED","CONC","VESSEL","ATMOS","EQUIPMENT"], f, indent=2)
+        json.dump(
+            [
+                "ACTION",
+                "MATERIAL",
+                "AMOUNT",
+                "UNIT",
+                "TEMP",
+                "TIME",
+                "SPEED",
+                "CONC",
+                "VESSEL",
+                "ATMOS",
+                "EQUIPMENT",
+            ],
+            f,
+            indent=2,
+        )
 
     print(f"Wrote {n_train} train docs → {outdir/'train.spacy'}")
     print(f"Wrote {n_dev} dev docs   → {outdir/'dev.spacy'}")
-    print("Tip: Use --root-key if auto-selection picks the wrong list; run peek_dataset.py to see candidates.", file=sys.stderr)
+    print(
+        "Tip: Use --root-key if auto-selection picks the wrong list; run peek_dataset.py to see candidates.",
+        file=sys.stderr,
+    )
+
 
 if __name__ == "__main__":
     main()

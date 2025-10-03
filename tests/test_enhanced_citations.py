@@ -1,6 +1,7 @@
-import pytest
-
-from harvester.enhanced_citations import EnhancedCitationFilter, enhance_citation_relevance
+from harvester.enhanced_citations import (
+    EnhancedCitationFilter,
+    enhance_citation_relevance,
+)
 
 
 def make_ref(**kwargs):
@@ -29,15 +30,30 @@ def test_extract_citation_context_merges_multiple_occurrences():
 def test_score_query_alignment_prefers_synthesis_terms():
     f = EnhancedCitationFilter()
     context = "This work describes a synthesis procedure and experimental protocol for nanorods."
-    score = f.score_query_alignment(context, "How to synthesize nanorods", intent="procedure")
+    score = f.score_query_alignment(
+        context, "How to synthesize nanorods", intent="procedure"
+    )
     assert score > 0.5
 
 
 def test_rank_and_filter_reorders_and_filters():
     f = EnhancedCitationFilter()
-    refs = [make_ref(), make_ref(journal="Some Journal", year=2010, doi=None, isOpenAccess=False, text="Short" )]
-    response = "We followed the reported protocol [1,2] and observed similar morphology."
-    filtered_response, filtered_refs = f.filter_low_relevance_citations(response, refs, "synthesize nanorods")
+    refs = [
+        make_ref(),
+        make_ref(
+            journal="Some Journal",
+            year=2010,
+            doi=None,
+            isOpenAccess=False,
+            text="Short",
+        ),
+    ]
+    response = (
+        "We followed the reported protocol [1,2] and observed similar morphology."
+    )
+    filtered_response, filtered_refs = f.filter_low_relevance_citations(
+        response, refs, "synthesize nanorods"
+    )
 
     # At least one reference should remain
     assert isinstance(filtered_response, str)

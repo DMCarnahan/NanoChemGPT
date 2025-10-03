@@ -1,5 +1,3 @@
-import os
-import tempfile
 from harvester import utils as hu
 
 

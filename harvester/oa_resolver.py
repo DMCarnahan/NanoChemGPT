@@ -1,40 +1,49 @@
 # harvester/oa_resolver.py
-import os, time, json
-import re
+import os
 import urllib.parse
+
 import requests
 
 UNPAYWALL = "https://api.unpaywall.org/v2/"
-OPENALEX  = "https://api.openalex.org/works/"
-EPMC      = "https://www.ebi.ac.uk/europepmc/webservices/rest/search"
+OPENALEX = "https://api.openalex.org/works/"
+EPMC = "https://www.ebi.ac.uk/europepmc/webservices/rest/search"
 
 UA = "NanoChemGPT-Harvester/1.0 (+https://nanochemgpt-production.up.railway.app/)"
 TIMEOUT = float(os.getenv("OA_TIMEOUT", "12"))
 
+
 def _get(session, url, **kw):
     kw.setdefault("timeout", TIMEOUT)
     kw.setdefault("headers", {"User-Agent": UA})
-    r = session.get(url, **kw); r.raise_for_status(); return r
+    r = session.get(url, **kw)
+    r.raise_for_status()
+    return r
+
 
 def unpaywall_get(doi: str, email: str, session=None) -> dict:
-    if not doi: return {}
+    if not doi:
+        return {}
     session = session or requests.Session()
     url = UNPAYWALL + urllib.parse.quote(doi)
     r = _get(session, url, params={"email": email})
     return r.json()
 
+
 def openalex_get_by_doi(doi: str, session=None) -> dict:
-    if not doi: return {}
+    if not doi:
+        return {}
     session = session or requests.Session()
     url = OPENALEX + f"doi:{urllib.parse.quote(doi.lower())}"
-    r = _get(session, url, params={"mailto": os.getenv("OPENALEX_MAILTO","")})
+    r = _get(session, url, params={"mailto": os.getenv("OPENALEX_MAILTO", "")})
     return r.json()
+
 
 def eupmc_find_by_doi(doi: str, session=None) -> dict:
     session = session or requests.Session()
     q = f"EXT_ID:{doi}"
     r = _get(session, EPMC, params={"query": q, "format": "json", "resultType": "core"})
     return r.json()
+
 
 def eupmc_best_pdf(json_obj: dict) -> str:
     """
@@ -43,15 +52,19 @@ def eupmc_best_pdf(json_obj: dict) -> str:
     try:
         results = json_obj.get("resultList", {}).get("result", [])
         for rec in results:
-            if str(rec.get("isOpenAccess","false")).lower() != "true":
+            if str(rec.get("isOpenAccess", "false")).lower() != "true":
                 continue
             # Prefer PDF link in fullTextUrlList
             for ft in rec.get("fullTextUrlList", {}).get("fullTextUrl", []):
-                if ft.get("availability") == "Open access" and ft.get("documentStyle") == "pdf":
+                if (
+                    ft.get("availability") == "Open access"
+                    and ft.get("documentStyle") == "pdf"
+                ):
                     return ft.get("url") or ""
     except Exception:
         pass
     return ""
+
 
 def resolve_oa(doi: str, session=None) -> dict:
     """
@@ -68,7 +81,15 @@ def resolve_oa(doi: str, session=None) -> dict:
     """
     session = session or requests.Session()
     email = os.getenv("UNPAYWALL_EMAIL", "")
-    out = {"is_oa": False, "source": None, "host_type": None, "license": None, "version": None, "url": None, "pdf_url": None}
+    out = {
+        "is_oa": False,
+        "source": None,
+        "host_type": None,
+        "license": None,
+        "version": None,
+        "url": None,
+        "pdf_url": None,
+    }
 
     # 1) Unpaywall
     if email:
@@ -94,7 +115,14 @@ def resolve_oa(doi: str, session=None) -> dict:
         ej = eupmc_find_by_doi(doi, session=session)
         pdf = eupmc_best_pdf(ej)
         if pdf:
-            out.update(is_oa=True, source="eupmc", host_type="repository", version="publishedVersion", pdf_url=pdf, url=pdf)
+            out.update(
+                is_oa=True,
+                source="eupmc",
+                host_type="repository",
+                version="publishedVersion",
+                pdf_url=pdf,
+                url=pdf,
+            )
             return out
     except Exception:
         pass
@@ -105,9 +133,10 @@ def resolve_oa(doi: str, session=None) -> dict:
         oa = w.get("open_access") or {}
         if oa.get("is_oa"):
             out.update(
-                is_oa=True, source="openalex",
+                is_oa=True,
+                source="openalex",
                 host_type=oa.get("oa_status"),  # not strictly host_type, but useful
-                url=oa.get("oa_url")
+                url=oa.get("oa_url"),
             )
     except Exception:
         pass

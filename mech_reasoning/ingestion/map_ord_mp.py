@@ -1,10 +1,10 @@
 from __future__ import annotations
 
-import os
-import json
-import time
 import argparse
 import datetime as dt
+import json
+import os
+import time
 from typing import Any, Dict, List
 
 import requests
@@ -16,6 +16,7 @@ except Exception as e:
 
 
 # -------------------------- Helpers --------------------------
+
 
 def _now_iso() -> str:
     return dt.datetime.utcnow().isoformat() + "Z"
@@ -32,7 +33,10 @@ def _coerce_num(x: Any) -> float | None:
 
 # -------------------------- Open Reaction Database (ORD) --------------------------
 
-DEFAULT_ORD_URL = os.getenv("ORD_API_URL", "https://api.open-reaction-database.org/records")
+DEFAULT_ORD_URL = os.getenv(
+    "ORD_API_URL", "https://api.open-reaction-database.org/records"
+)
+
 
 def fetch_ord(limit: int = 100, offset: int = 0) -> List[Dict[str, Any]]:
     """Fetch a page of ORD records (JSON)."""
@@ -55,7 +59,9 @@ def map_ord_record(rec: Dict[str, Any]) -> Dict[str, Any] | None:
     if isinstance(products, list) and products:
         p = products[0]
         system = p.get("smiles") or p.get("name") or p.get("product_name")
-    system = system or rec.get("title") or rec.get("reaction_name") or "Unknown reaction"
+    system = (
+        system or rec.get("title") or rec.get("reaction_name") or "Unknown reaction"
+    )
 
     rxn_type = rec.get("reaction_type") or rec.get("type") or "solution-phase reaction"
 
@@ -71,19 +77,32 @@ def map_ord_record(rec: Dict[str, Any]) -> Dict[str, Any] | None:
     params = []
     cond = rec.get("conditions") or rec.get("reaction_conditions") or {}
 
-    def add_param(name: str, units: str, value: Any, role: str, target="yield", direction="unknown", rationale=""):
+    def add_param(
+        name: str,
+        units: str,
+        value: Any,
+        role: str,
+        target="yield",
+        direction="unknown",
+        rationale="",
+    ):
         if value is None:
             return
-        params.append({
-            "name": name,
-            "units": units,
-            "role": role,
-            "effects": [{
-                "target": target,
-                "direction": direction,
-                "mechanistic_rationale": rationale or f"{name} can influence {target}"
-            }]
-        })
+        params.append(
+            {
+                "name": name,
+                "units": units,
+                "role": role,
+                "effects": [
+                    {
+                        "target": target,
+                        "direction": direction,
+                        "mechanistic_rationale": rationale
+                        or f"{name} can influence {target}",
+                    }
+                ],
+            }
+        )
 
     # temperature
     temp = None
@@ -111,11 +130,27 @@ def map_ord_record(rec: Dict[str, Any]) -> Dict[str, Any] | None:
         elif isinstance(s, dict):
             solvent = s.get("name")
     if solvent:
-        add_param("solvent", "", solvent, "medium", target="yield", rationale="Solvent can alter activity/selectivity")
+        add_param(
+            "solvent",
+            "",
+            solvent,
+            "medium",
+            target="yield",
+            rationale="Solvent can alter activity/selectivity",
+        )
 
-    catalyst = rec.get("catalyst") or (cond.get("catalyst") if isinstance(cond, dict) else None)
+    catalyst = rec.get("catalyst") or (
+        cond.get("catalyst") if isinstance(cond, dict) else None
+    )
     if catalyst:
-        add_param("catalyst", "", catalyst, "catalyst system", target="yield", rationale="Catalyst changes rate/selectivity")
+        add_param(
+            "catalyst",
+            "",
+            catalyst,
+            "catalyst system",
+            target="yield",
+            rationale="Catalyst changes rate/selectivity",
+        )
 
     observed_outcomes = []
     outcome = rec.get("outcome") or rec.get("outcomes") or {}
@@ -127,7 +162,9 @@ def map_ord_record(rec: Dict[str, Any]) -> Dict[str, Any] | None:
         if isinstance(o0, dict):
             yld = _coerce_num(o0.get("yield_percent") or o0.get("yield"))
     if yld is not None:
-        observed_outcomes.append({"metric": "yield", "value": yld, "units": "%", "notes": ""})
+        observed_outcomes.append(
+            {"metric": "yield", "value": yld, "units": "%", "notes": ""}
+        )
 
     return {
         "system": system,
@@ -136,18 +173,26 @@ def map_ord_record(rec: Dict[str, Any]) -> Dict[str, Any] | None:
         "parameters": params,
         "observed_outcomes": observed_outcomes,
         "most_influential_parameter": {},
-        "evidence": ([{
-            "source_type": "paper",
-            "citation": doi or "",
-            "url": (f"https://doi.org/{doi}" if doi else ""),
-            "quote": ""
-        }] if doi else []),
+        "evidence": (
+            [
+                {
+                    "source_type": "paper",
+                    "citation": doi or "",
+                    "url": (f"https://doi.org/{doi}" if doi else ""),
+                    "quote": "",
+                }
+            ]
+            if doi
+            else []
+        ),
         "created_at": _now_iso(),
         "updated_at": _now_iso(),
     }
 
 
-def harvest_ord(total_limit: int = 200, page_size: int = 100, sleep_s: float = 0.5) -> List[Dict[str, Any]]:
+def harvest_ord(
+    total_limit: int = 200, page_size: int = 100, sleep_s: float = 0.5
+) -> List[Dict[str, Any]]:
     entries: List[Dict[str, Any]] = []
     fetched = 0
     while fetched < total_limit:
@@ -170,10 +215,15 @@ def harvest_ord(total_limit: int = 200, page_size: int = 100, sleep_s: float = 0
 
 # -------------------------- Materials Project (MP) --------------------------
 
-DEFAULT_MP_URL = os.getenv("MP_API_URL", "https://api.materialsproject.org/materials/summary")
+DEFAULT_MP_URL = os.getenv(
+    "MP_API_URL", "https://api.materialsproject.org/materials/summary"
+)
 MP_API_KEY = os.getenv("MP_API_KEY", "")
 
-def fetch_mp_by_formulas(formulas: List[str], per_formula_limit: int = 100) -> List[Dict[str, Any]]:
+
+def fetch_mp_by_formulas(
+    formulas: List[str], per_formula_limit: int = 100
+) -> List[Dict[str, Any]]:
     if not MP_API_KEY:
         raise RuntimeError("MP_API_KEY is not set. Export MP_API_KEY first.")
     headers = {"X-API-KEY": MP_API_KEY}
@@ -189,7 +239,12 @@ def fetch_mp_by_formulas(formulas: List[str], per_formula_limit: int = 100) -> L
 
 
 def map_mp_record(rec: Dict[str, Any]) -> Dict[str, Any] | None:
-    system = rec.get("formula_pretty") or rec.get("full_formula") or rec.get("composition") or "Unknown material"
+    system = (
+        rec.get("formula_pretty")
+        or rec.get("full_formula")
+        or rec.get("composition")
+        or "Unknown material"
+    )
     dois = []
     bibs = rec.get("references") or rec.get("bibtex") or []
     if isinstance(bibs, list):
@@ -205,22 +260,26 @@ def map_mp_record(rec: Dict[str, Any]) -> Dict[str, Any] | None:
             "name": "annealing temperature",
             "units": "°C",
             "role": "sets phase formation thermodynamics",
-            "effects": [{
-                "target": "phase_purity",
-                "direction": "increase",
-                "mechanistic_rationale": "Higher temperature improves diffusion and phase ordering in solids"
-            }]
+            "effects": [
+                {
+                    "target": "phase_purity",
+                    "direction": "increase",
+                    "mechanistic_rationale": "Higher temperature improves diffusion and phase ordering in solids",
+                }
+            ],
         },
         {
             "name": "annealing time",
             "units": "h",
             "role": "controls grain growth",
-            "effects": [{
-                "target": "grain_size",
-                "direction": "increase",
-                "mechanistic_rationale": "Longer anneals allow grains to grow"
-            }]
-        }
+            "effects": [
+                {
+                    "target": "grain_size",
+                    "direction": "increase",
+                    "mechanistic_rationale": "Longer anneals allow grains to grow",
+                }
+            ],
+        },
     ]
 
     return {
@@ -231,16 +290,26 @@ def map_mp_record(rec: Dict[str, Any]) -> Dict[str, Any] | None:
         "mechanisms": [{"name": "thermodynamic control", "confidence": 0.6}],
         "parameters": parameters,
         "observed_outcomes": [
-            {"metric": "formation_energy_per_atom", "value": rec.get("formation_energy_per_atom", ""), "units": "eV/atom"},
+            {
+                "metric": "formation_energy_per_atom",
+                "value": rec.get("formation_energy_per_atom", ""),
+                "units": "eV/atom",
+            },
             {"metric": "band_gap", "value": (rec.get("band_gap") or ""), "units": "eV"},
         ],
         "most_influential_parameter": {},
-        "evidence": ([{
-            "source_type": "paper",
-            "citation": dois[0],
-            "url": f"https://doi.org/{dois[0]}",
-            "quote": ""
-        }] if dois else []),
+        "evidence": (
+            [
+                {
+                    "source_type": "paper",
+                    "citation": dois[0],
+                    "url": f"https://doi.org/{dois[0]}",
+                    "quote": "",
+                }
+            ]
+            if dois
+            else []
+        ),
         "created_at": _now_iso(),
         "updated_at": _now_iso(),
     }
@@ -248,10 +317,13 @@ def map_mp_record(rec: Dict[str, Any]) -> Dict[str, Any] | None:
 
 # -------------------------- Main CLI --------------------------
 
+
 def main():
     ap = argparse.ArgumentParser(description="Ingest ORD and MP into mechanistic_kb")
     ap.add_argument("--ord", action="store_true", help="Harvest Open Reaction Database")
-    ap.add_argument("--mp", action="store_true", help="Harvest Materials Project summaries")
+    ap.add_argument(
+        "--mp", action="store_true", help="Harvest Materials Project summaries"
+    )
     ap.add_argument("--ord-limit", type=int, default=200)
     ap.add_argument("--ord-page", type=int, default=100)
     ap.add_argument("--mp-formulas", type=str, default="")
@@ -286,6 +358,7 @@ def main():
 
     ids = ingest(all_entries)
     print(f"[INGESTED] {len(ids)} entries into mechanistic_kb")
+
 
 if __name__ == "__main__":
     main()

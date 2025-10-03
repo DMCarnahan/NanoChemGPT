@@ -12,5 +12,5 @@ def test_extract_used_ref_indexes_simple_and_ranges():
 
 def test_renumber_citations_basic_mapping():
     text = "See methods [1] and review [3]."
-    new = renumber_citations(text, {1:5, 3:7})
+    new = renumber_citations(text, {1: 5, 3: 7})
     assert "[5]" in new and "[7]" in new

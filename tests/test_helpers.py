@@ -1,9 +1,7 @@
-import pytest
-
-from app_utils.pdf_utils import normalize_pdf_text
-from app_utils.text_chunks import pick_method_paragraph, best_chunks_from_text
 from app_utils.fact_extractor import extract_facts_from_text
+from app_utils.pdf_utils import normalize_pdf_text
 from app_utils.rendering import render_protocol_md
+from app_utils.text_chunks import best_chunks_from_text, pick_method_paragraph
 
 
 def test_normalize_pdf_text_basic():

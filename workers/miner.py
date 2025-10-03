@@ -1,7 +1,12 @@
-import subprocess, os, sys, json, time, logging
+import json
+import logging
+import subprocess
+import sys
+import time
 from pathlib import Path
 
 logging.basicConfig(level=logging.INFO)
+
 
 def run_miner(payload: dict):
     """
@@ -13,7 +18,7 @@ def run_miner(payload: dict):
     root = Path(__file__).resolve().parents[1]  # project root (/app)
     harvester = root / "harvester" / "harvester.py"
     bundle = root / "harvester" / "out_auto" / "bundle.jsonl"
-    merged  = root / "harvester" / "out_auto" / "bundle_with_methods.jsonl"
+    merged = root / "harvester" / "out_auto" / "bundle_with_methods.jsonl"
     add_fallback = root / "scripts" / "bundle_add_fallback.py"
     indexer = root / "retriever" / "index_jsonl.py"
     index_dir = root / "retriever" / "index"
@@ -28,12 +33,18 @@ def run_miner(payload: dict):
     subprocess.check_call([sys.executable, str(add_fallback), str(bundle), str(merged)])
 
     # 3) index (use methods text)
-    subprocess.check_call([
-        sys.executable, str(indexer),
-        "--bundle", str(bundle),
-        "--index_dir", str(index_dir),
-        "--text-key", "methods"
-    ])
+    subprocess.check_call(
+        [
+            sys.executable,
+            str(indexer),
+            "--bundle",
+            str(bundle),
+            "--index_dir",
+            str(index_dir),
+            "--text-key",
+            "methods",
+        ]
+    )
 
     logging.info("[miner] done for %r", q)
     return {"ok": True, "query": q}

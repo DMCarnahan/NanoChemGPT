@@ -1,4 +1,5 @@
 """Simple in-memory job tracking used by the upload endpoints for quick status checks."""
+
 from __future__ import annotations
 
 from typing import Dict

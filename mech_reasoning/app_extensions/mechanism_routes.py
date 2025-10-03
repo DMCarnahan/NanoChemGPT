@@ -1,27 +1,29 @@
 from __future__ import annotations
 
-import os
-import regex as re
 import json
+import os
 import traceback
-import numpy as np
 from pathlib import Path
-from typing import List, Dict, Any, Tuple
+from typing import Any, Dict, List, Tuple
 
-from flask import Blueprint, request, jsonify, current_app
+import regex as re
+from flask import Blueprint, current_app, jsonify, request
 
 # RAG bits (mechanistic KB)
-from retriever.retriever import search, Embedder
+from retriever.retriever import Embedder, search
 
 mechanism_bp = Blueprint("mechanism_bp", __name__, url_prefix="/mechanism")
 
 # ---------- Prompt building ----------
 
+
 def _root_dir() -> Path:
     return Path(__file__).resolve().parents[1]
 
+
 def _template_path() -> Path:
     return _root_dir() / "prompts" / "mechanistic_answering_template.txt"
+
 
 def build_prompt(question: str, hits: List[Dict[str, Any]]) -> str:
     """Render a lean, mechanism-focused prompt from the template + retrieved facts."""
@@ -60,8 +62,12 @@ def build_prompt(question: str, hits: List[Dict[str, Any]]) -> str:
     tmpl = tmpl.replace("{{ system }}", "N/A")
     tmpl = tmpl.replace("{{ question }}", question)
     tmpl = tmpl.replace("{{ synthesis_method }}", "N/A")
-    facts_block = "\n".join(f"- {f}" for f in facts) if facts else "- (no facts retrieved)"
-    tmpl = tmpl.replace("{% for f in facts %}\n  - {{ f }}\n  {% endfor %}", facts_block)
+    facts_block = (
+        "\n".join(f"- {f}" for f in facts) if facts else "- (no facts retrieved)"
+    )
+    tmpl = tmpl.replace(
+        "{% for f in facts %}\n  - {{ f }}\n  {% endfor %}", facts_block
+    )
 
     # Hard-require strict JSON at the end
     strict_tail = (
@@ -76,7 +82,7 @@ def build_prompt(question: str, hits: List[Dict[str, Any]]) -> str:
 
 # ---------- Output parsing & validation ----------
 
-_JSON_BLOCK_RX = re.compile(r"\{(?:[^{}]|(?R))*\}", re.M) 
+_JSON_BLOCK_RX = re.compile(r"\{(?:[^{}]|(?R))*\}", re.M)
 
 ANSWER_SCHEMA = {
     "type": "object",
@@ -95,16 +101,17 @@ ANSWER_SCHEMA = {
                 "properties": {
                     "name": {"type": "string"},
                     "score": {"type": "number"},
-                    "evidence_ids": {"type": "array", "items": {"type": "string"}}
-                }
-            }
-        }
+                    "evidence_ids": {"type": "array", "items": {"type": "string"}},
+                },
+            },
+        },
     },
     "additionalProperties": True,
 }
 
+
 def _validate_answer_shape(obj: Dict[str, Any]) -> Tuple[bool, str]:
-    # Lightweight manual validation 
+    # Lightweight manual validation
     try:
         for k in ("question", "reasoning_steps", "final_answer", "scope", "citations"):
             if k not in obj:
@@ -116,6 +123,7 @@ def _validate_answer_shape(obj: Dict[str, Any]) -> Tuple[bool, str]:
         return True, ""
     except Exception as e:
         return False, f"validation error: {e}"
+
 
 def _extract_json_object(raw: str) -> Dict[str, Any] | None:
     # 1) Try direct parse
@@ -136,6 +144,7 @@ def _extract_json_object(raw: str) -> Dict[str, Any] | None:
             pass
     return None
 
+
 def _coerce_mechanistic_json(raw: str, question: str) -> Dict[str, Any]:
     obj = _extract_json_object(raw)
     if obj is not None:
@@ -153,6 +162,7 @@ def _coerce_mechanistic_json(raw: str, question: str) -> Dict[str, Any]:
 
 # ---------- Post-hoc helpers (citations & parameter ranking) ----------
 
+
 def _collect_kb_citations(hits: List[Dict[str, Any]]) -> List[str]:
     """Extract DOI/URL-like citations from retrieved entries."""
     cites: List[str] = []
@@ -167,6 +177,7 @@ def _collect_kb_citations(hits: List[Dict[str, Any]]) -> List[str]:
                 cites.append(c or u)
                 seen.add(key)
     return cites
+
 
 def _score_parameters_from_hits(hits: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
     """
@@ -186,7 +197,9 @@ def _score_parameters_from_hits(hits: List[Dict[str, Any]]) -> List[Dict[str, An
             pname = (p.get("name") or "").strip()
             if not pname:
                 continue
-            base = scores.setdefault(pname, {"name": pname, "score": 0.0, "evidence_ids": set()})
+            base = scores.setdefault(
+                pname, {"name": pname, "score": 0.0, "evidence_ids": set()}
+            )
             for eff in p.get("effects", []) or []:
                 tgt = (eff.get("target") or "").strip().lower()
                 direction = (eff.get("direction") or "").strip().lower()
@@ -210,6 +223,7 @@ def _score_parameters_from_hits(hits: List[Dict[str, Any]]) -> List[Dict[str, An
 
 # ---------- Route ----------
 
+
 @mechanism_bp.route("/ask", methods=["POST"])
 def ask():
     data = request.get_json(force=True)
@@ -232,11 +246,15 @@ def ask():
     if client is None:
         return jsonify({"error": "OpenAI client not configured"}), 500
     try:
-        raw = client.chat.completions.create(
-            model=os.getenv("MECH_MODEL", "gpt-4o"),
-            messages=[{"role": "user", "content": prompt}],
-            temperature=0.2,
-        ).choices[0].message.content
+        raw = (
+            client.chat.completions.create(
+                model=os.getenv("MECH_MODEL", "gpt-4o"),
+                messages=[{"role": "user", "content": prompt}],
+                temperature=0.2,
+            )
+            .choices[0]
+            .message.content
+        )
     except Exception as e:
         traceback.print_exc()
         return jsonify({"error": f"LLM call failed: {e}"}), 500
@@ -253,14 +271,18 @@ def ask():
                 "question (string), reasoning_steps (array of strings), final_answer (string), "
                 "scope (string), citations (array of strings). No prose, no markdown, JSON only."
             )
-            repaired = client.chat.completions.create(
-                model=os.getenv("MECH_MODEL", "gpt-4o"),
-                messages=[
-                    {"role": "user", "content": repair_instr},
-                    {"role": "user", "content": raw},
-                ],
-                temperature=0,
-            ).choices[0].message.content
+            repaired = (
+                client.chat.completions.create(
+                    model=os.getenv("MECH_MODEL", "gpt-4o"),
+                    messages=[
+                        {"role": "user", "content": repair_instr},
+                        {"role": "user", "content": raw},
+                    ],
+                    temperature=0,
+                )
+                .choices[0]
+                .message.content
+            )
             obj2 = _coerce_mechanistic_json(repaired, question)
             ok2, _ = _validate_answer_shape(obj2)
             if ok2:
@@ -269,7 +291,11 @@ def ask():
             pass
 
     # 4) Auto-append citations from KB if model returned none
-    if isinstance(obj, dict) and isinstance(obj.get("citations"), list) and len(obj["citations"]) == 0:
+    if (
+        isinstance(obj, dict)
+        and isinstance(obj.get("citations"), list)
+        and len(obj["citations"]) == 0
+    ):
         kb_cites = _collect_kb_citations(hits)
         if kb_cites:
             obj["citations"] = kb_cites[:10]
@@ -288,23 +314,25 @@ def ask():
                 f"influential parameter (score={ranking[0]['score']:.2f})."
             )
             # Append to final_answer succinctly
-            obj["final_answer"] = (obj.get("final_answer") or "")
+            obj["final_answer"] = obj.get("final_answer") or ""
             if obj["final_answer"] and not obj["final_answer"].endswith("\n"):
                 obj["final_answer"] += "\n"
             obj["final_answer"] += suggestion
 
     # 6) Return everything (including raw model text for debugging)
-    return jsonify({
-        "question": question,
-        "retrieved": [
-            {
-                "id": h.get("entry", {}).get("id"),
-                "system": h.get("entry", {}).get("system"),
-                "method": h.get("entry", {}).get("synthesis_method"),
-            }
-            for h in hits
-        ],
-        "prompt": prompt,
-        "model_raw": raw,
-        "answer": obj,
-    })
+    return jsonify(
+        {
+            "question": question,
+            "retrieved": [
+                {
+                    "id": h.get("entry", {}).get("id"),
+                    "system": h.get("entry", {}).get("system"),
+                    "method": h.get("entry", {}).get("synthesis_method"),
+                }
+                for h in hits
+            ],
+            "prompt": prompt,
+            "model_raw": raw,
+            "answer": obj,
+        }
+    )

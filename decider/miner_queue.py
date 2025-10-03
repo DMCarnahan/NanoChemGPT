@@ -5,21 +5,33 @@ Usage (env):
   MINER_MODE=disabled   -> no-op; returns a fake id (default)
   MINER_MODE=log        -> just logs payload locally, returns log-based id
   MINER_MODE=redis      -> enqueue to RQ (Redis Queue)
-  
+
   REDIS_URL=x
 """
+
 from __future__ import annotations
-from typing import Optional, Dict, Any
-import os, time, json, logging
+
+import json
+import logging
+import os
+import time
+from typing import Any, Dict, Optional
 
 logging.basicConfig(level=logging.INFO)
 MINER_MODE = os.getenv("MINER_MODE", "disabled").strip().lower()
 
+
 def _now_ms() -> int:
     return int(time.time() * 1000)
 
-def _mk_payload(query: str, user_id: Optional[str], intent: Optional[str],
-                reason: Optional[str], features: Optional[Dict]) -> Dict[str, Any]:
+
+def _mk_payload(
+    query: str,
+    user_id: Optional[str],
+    intent: Optional[str],
+    reason: Optional[str],
+    features: Optional[Dict],
+) -> Dict[str, Any]:
     return {
         "query": query,
         "user_id": user_id,
@@ -29,12 +41,14 @@ def _mk_payload(query: str, user_id: Optional[str], intent: Optional[str],
         "ts_ms": _now_ms(),
     }
 
+
 def enqueue_text_mining_job(
-    query: str, *,
+    query: str,
+    *,
     user_id: Optional[str] = None,
     intent: Optional[str] = None,
     reason: Optional[str] = None,
-    features: Optional[Dict] = None
+    features: Optional[Dict] = None,
 ) -> str:
     """
     Enqueue a mining job and return a job_id, or a sentinel if disabled.
@@ -65,6 +79,7 @@ def enqueue_text_mining_job(
         try:
             from redis import Redis
             from rq import Queue
+
             redis_url = os.getenv("REDIS_URL", "redis://localhost:6379/0")
             conn = Redis.from_url(redis_url)
             q = Queue("miner", connection=conn, default_timeout=600)

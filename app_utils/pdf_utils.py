@@ -1,12 +1,15 @@
 """PDF utilities: normalization and extraction helpers."""
+
 from __future__ import annotations
 
 import re
 from pathlib import Path
 from typing import Tuple
 
+
 def normalize_pdf_text(s: str) -> str:
-    if not s: return ""
+    if not s:
+        return ""
     # Remove zero-width and control junk
     s = s.replace("\u200b", "").replace("\ufeff", "")
     # Collapse mid-dots
@@ -26,6 +29,7 @@ def extract_pdf_text(path: Path, max_pages: int = 40) -> Tuple[str, int]:
         # Try pdfminer.six first
         try:
             from pdfminer.high_level import extract_text as _pdfminer_extract
+
             txt = _pdfminer_extract(str(path))
             if txt:
                 pages = txt.split("\f")
@@ -49,7 +53,8 @@ def extract_pdf_text(path: Path, max_pages: int = 40) -> Tuple[str, int]:
             pages = getattr(reader, "pages", [])
             out = []
             for i, page in enumerate(pages, 1):
-                if i > max_pages: break
+                if i > max_pages:
+                    break
                 try:
                     out.append(page.extract_text() or "")
                 except Exception:
@@ -60,6 +65,7 @@ def extract_pdf_text(path: Path, max_pages: int = 40) -> Tuple[str, int]:
     except Exception as e:
         try:
             import logging
+
             logging.getLogger(__name__).warning(f"[extract_pdf_text] {path.name}: {e}")
         except Exception:
             pass

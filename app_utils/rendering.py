@@ -1,4 +1,5 @@
 """Rendering utilities to convert extracted facts into markdown."""
+
 from __future__ import annotations
 
 from typing import Dict, List
@@ -14,7 +15,9 @@ def render_protocol_md(facts: Dict) -> str:
         parts.append("## Materials")
         mats = []
         for m in facts["materials"]:
-            parts.append(f"- **{m.get('name')}** — {m.get('role')} ({m.get('concentration')}, {m.get('volume')})")
+            parts.append(
+                f"- **{m.get('name')}** — {m.get('role')} ({m.get('concentration')}, {m.get('volume')})"
+            )
     if facts.get("hardware"):
         parts.append("\n## Equipment")
         parts.append(bullets(facts.get("hardware", [])))
