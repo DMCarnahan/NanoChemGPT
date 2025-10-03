@@ -69,9 +69,9 @@ jobs:
             # If model was accidentally committed as LFS pointers, show file sizes
             echo "---- file listing with sizes ----"
             find "$MODEL_DIR" -type f -exec ls -l {} \; || true
-            SPACY_MODEL="$MODEL_DIR" python -m pytest tests/test_miner_integration.py
+            SPACY_MODEL="$MODEL_DIR" python -m pytest --override-ini=addopts= tests/test_miner_integration.py
           else
             echo "model-best not found in repo; falling back to downloading en_core_web_sm"
             python -m spacy download en_core_web_sm
-            SPACY_MODEL="en_core_web_sm" python -m pytest tests/test_miner_integration.py
+            SPACY_MODEL="en_core_web_sm" python -m pytest --override-ini=addopts= tests/test_miner_integration.py
           fi
