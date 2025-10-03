@@ -138,6 +138,7 @@ document.addEventListener('DOMContentLoaded', () => {
         mode,
         attachments: pendingAttachmentIds
       };
+      payload.format = 'protocol-grounded';
 
       const res = await fetch(`${(window.BASE_PATH||'')}/ask`, {
         method: 'POST',
