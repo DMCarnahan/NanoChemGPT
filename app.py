@@ -82,63 +82,6 @@ except Exception:
         except Exception:
             return default
 
-# -------------------- Paths/Config --------------------
-ROOT = Path(__file__).resolve().parent
-TEMPLATES_DIR = ROOT / "templates"
-STATIC_DIR = ROOT / "static"
-BUILTIN_DIR = Path(os.getenv("BUILTIN_DIR", ROOT / "builtin")).resolve()
-UPLOADS_DIR = Path(os.getenv("UPLOADS_DIR", "/mnt/data/uploads")).resolve()
-ATTACH_DIR = Path(os.environ.get('ATTACH_DIR', '/mnt/data/attachments'))
-ATTACH_DIR.mkdir(parents=True, exist_ok=True)
-LOOKUP_UPLOAD_DIR = Path(os.getenv("LOOKUP_UPLOAD_DIR", "/mnt/data/datasets")).resolve()
-VECTORSTORE_DIR = Path(os.getenv("VECTORSTORE_DIR", "/mnt/data/index")).resolve()
-
-BUNDLE_AUTO   = ROOT / "harvester" / "out_auto" / "bundle.jsonl"
-BUNDLE_MERGED = ROOT / "harvester" / "out_auto" / "bundle_with_methods.jsonl"
-INDEX_DIR     = ROOT / "retriever" / "index"
-
-# Ensure required directories exist
-for d in (BUILTIN_DIR, UPLOADS_DIR, LOOKUP_UPLOAD_DIR, VECTORSTORE_DIR):
-    d.mkdir(parents=True, exist_ok=True)
-
-# -------------------- Flask app setup --------------------
-app = Flask(__name__, template_folder=str(TEMPLATES_DIR), static_folder=str(STATIC_DIR))
-app.config["MAX_CONTENT_LENGTH"] = 100 * 1024 * 1024  # 100 MB
-app.config["JSON_AS_ASCII"] = False  # allow UTF-8
-
-# No CSRF protection needed for this application
-app.config['SECRET_KEY'] = os.getenv("FLASK_SECRET_KEY", "change-me")
-
-# Ephemeral per-question attachments
-ATTACH_DIR = Path(os.environ.get("ATTACH_DIR", "/mnt/data/attachments"))
-ATTACH_DIR.mkdir(parents=True, exist_ok=True)
-
-def _extract_pdf_text(path: Path, max_pages: int = 40) -> tuple[str, int]:
-    try:
-        try:
-            from pypdf import PdfReader as _PdfReader
-        except Exception:
-            try:
-                from PyPDF2 import PdfReader as _PdfReader
-            except Exception:
-                _PdfReader = None
-        if _PdfReader is None:
-            raise ImportError("pypdf/PyPDF2 not installed")
-        reader = _PdfReader(str(path))
-        pages = getattr(reader, "pages", [])
-        out = []
-        for i, page in enumerate(pages, 1):
-            if i > max_pages: break
-            try:
-                out.append(page.extract_text() or "")
-            except Exception:
-                out.append("")
-        return ("\n".join(out), len(pages) or len(out))
-    except Exception as e:
-        try: app.logger.warning(f"[_extract_pdf_text] {path.name}: {e}")
-        except Exception: pass
-        return ("", 0)
-
 def _best_chunks_from_text(
     text: str, 
     query: str, 
@@ -194,6 +137,11 @@ def _best_chunks_from_text(
         return sum(1 for t in toks if t in q)
     
     return sorted(chunks, key=score, reverse=True)[:top_k]
+
+# Create Flask application instance early so decorators and modules can use it.
+# Keep template/static folder paths explicit for packaging and mounting under ASGI.
+app = Flask(__name__, static_folder="static", template_folder="templates")
+app.logger.setLevel(logging.INFO)
 
 @app.before_request
 def _inject_base_path():
@@ -281,6 +229,11 @@ def retriever_search(query: str, k: int = 8, level: str|None = None,
         return []
 
 # ──────────────── Utilities ──────────────── #
+from app_utils.pdf_utils import extract_pdf_text as _extract_pdf_text, clean_attachment_text as _clean_attachment_text, normalize_pdf_text as _normalize_pdf_text
+from app_utils.text_chunks import best_chunks_from_text as _best_chunks_from_text, pick_method_paragraph as _pick_method_paragraph
+from app_utils.fact_extractor import extract_facts_from_text as _extract_facts_from_text
+from app_utils.rendering import render_protocol_md as _render_protocol_md
+
 def _pick_method_paragraph(text: str) -> str:
     """
     Heuristic: return the single paragraph that hits the most method cues.
@@ -467,6 +420,9 @@ def _safe_id(x: Any) -> Optional[Any]:
         >>> _safe_id("invalid")
         None
     """
+    # Treat falsy values as None to match test expectations
+    if not x:
+        return None
     try:
         from bson import ObjectId
         return ObjectId(x)
@@ -635,8 +591,9 @@ def home():
         return "<h1>NanoChemGPT</h1><p>templates/index.html missing.</p>", 200
 
 # ---- Uploads ---- #
-JOBS: dict[str, dict] = {}
-def _set_job(jid: str, **kw): JOBS.setdefault(jid, {}).update(kw)
+from app_utils.jobs import JOBS as JOBS, set_job as _set_job, get_job as _get_job
+from app_utils.utils import s as _s, safe_id as _safe_id, stringify_keys as _stringify_keys, doc as _doc, extract_used_markers as _extract_used_markers, wants_verbatim as _wants_verbatim, clean_verbatim_block as _clean_verbatim_block
+from app_utils.citations import build_references_payload
 
 @app.post("/upload")
 def upload():
@@ -700,6 +657,24 @@ def status(jid: str):
     if not j:
         abort(404, "unknown job id")
     return jsonify(j)
+
+
+@app.get('/miner/health')
+def miner_health():
+    """Return a simple JSON with miner model info and pipeline status."""
+    try:
+        from harvester.miner import runtime as mrun
+        miner = mrun.get_miner()
+        model = getattr(miner, '_model_path_requested', None)
+        pipeline = getattr(miner, 'nlp', None)
+        pipe_names = getattr(pipeline, 'pipe_names', None) if pipeline is not None else None
+        return jsonify({
+            'ok': True,
+            'model_requested': model,
+            'pipeline_components': pipe_names or [],
+        })
+    except Exception as e:
+        return jsonify({'ok': False, 'error': str(e)})
 
 def _process_pdf_job(jid: str, path: Path, filename: str):
     from PyPDF2 import PdfReader
@@ -1022,7 +997,7 @@ def ask():
                 seen.add(s); uniq.append(s)
         return uniq[:6]
 
-    def _harvest_reindex(queries: list[str], use_grobid: bool | None = None) -> list[dict]:
+    def _harvest_reindex(queries: list[str], use_grobid: bool | None = None, jid: str | None = None) -> list[dict]:
         """
         Harvest new papers for the given queries and rebuild the retriever index.
         Returns a list of reference dicts extracted from the chosen bundle so the agent
@@ -1034,7 +1009,7 @@ def ask():
         out_dir = ROOT / "harvester" / "out_auto"
         out_dir.mkdir(parents=True, exist_ok=True)
 
-        # ------------- config -------------
+    # ------------- config -------------
         raw = os.getenv("HARVEST_MAX_RESULTS", "6")
         try:
             max_results = int(raw)
@@ -1053,6 +1028,8 @@ def ask():
         )
 
         env = os.environ.copy()
+        # Ensure subprocesses print using UTF-8 (avoid cp1252 UnicodeEncodeError on Windows)
+        env.setdefault("PYTHONIOENCODING", "utf-8")
         if use_grobid is None:
             use_grobid = env.get("USE_GROBID", "0").lower() in {"1", "true", "yes"}
         env["USE_GROBID"] = "1" if use_grobid else "0"
@@ -1066,8 +1043,14 @@ def ask():
                 text=True, env=env, cwd=str(ROOT)
             )
             assert p.stdout is not None
+            # Stream lines and update job progress message if a job id is present
             for line in p.stdout:
                 sys.stdout.write(line)
+                if jid:
+                    try:
+                        _set_job(jid, status="processing", stage="harvest", last_line=line.strip())
+                    except Exception:
+                        pass
             rc = p.wait()
             if rc == 0:
                 app.logger.info(f"[harvest_reindex] {' '.join(cmd)} OK")
@@ -1090,16 +1073,26 @@ def ask():
             tf.write(cfg)
             cfg_path = tf.name
 
+        if jid:
+            try:
+                _set_job(jid, status="processing", progress=5, stage="starting_harvest", queries=queries)
+            except Exception:
+                pass
+
         rc = _stream(["python", str(ROOT/"harvester/harvester.py"), "--config", cfg_path])
         bundle_raw = out_dir / "bundle.jsonl"
         partial_ok = _file_has_lines(bundle_raw, 1)
 
         if rc != 0 and not partial_ok:
             app.logger.warning("[harvest_reindex] harvest failed and no bundle produced; skipping index.")
+            if jid:
+                _set_job(jid, status="error", progress=0, stage="harvest_failed")
             return []
 
         if rc != 0 and partial_ok:
             app.logger.info("[harvest_reindex] harvest non-zero, but bundle exists — continuing with index.")
+            if jid:
+                _set_job(jid, status="processing", progress=20, stage="harvest_partial")
 
         # --------- 2) add fallback (methods) ---------
         merged_bundle = out_dir / "bundle_with_methods.jsonl"
@@ -1107,6 +1100,8 @@ def ask():
             "python", str(ROOT/"scripts/bundle_add_fallback.py"),
             str(bundle_raw), str(merged_bundle)
         ])
+        if jid:
+            _set_job(jid, status="processing", progress=45, stage="adding_methods")
 
         # --------- 3) choose bundle + text_key ---------
         # (Assumes BUNDLE_AUTO/MERGED/PLAIN/INDEX_DIR defined at module top)
@@ -1149,6 +1144,8 @@ def ask():
                     "--text-key", "methods"
                 ])
             app.logger.info(f"[harvest_reindex] indexed dual: doc={doc_dir} passage={pas_dir}")
+            if jid:
+                _set_job(jid, status="processing", progress=80, stage="indexing")
         else:
             # single-index fallback
             _stream([
@@ -1158,12 +1155,18 @@ def ask():
                 "--text-key", "methods",
             ])
             app.logger.info(f"[harvest_reindex] indexed single → {INDEX_DIR}")
+            if jid:
+                _set_job(jid, status="processing", progress=80, stage="indexing")
 
         # --------- 5) ping retriever ---------
         try:
             with httpx.Client(timeout=20) as s:
                 s.post(f"{RETRIEVER_URL.rstrip('/')}/reload")
+            if jid:
+                _set_job(jid, status="processing", progress=90, stage="reload_retriever")
         except Exception:
+            if jid:
+                _set_job(jid, status="warning", progress=85, stage="reload_failed")
             pass
 
         # --------- 6) BUILD REFERENCE TABLE from the chosen bundle ---------
@@ -1232,6 +1235,8 @@ def ask():
         except Exception as e:
             app.logger.warning(f"[/harvest_reindex] refs build warn: {e}")
 
+        if jid:
+            _set_job(jid, status="done", progress=100, stage="complete", refs=len(harvest_refs))
         return harvest_refs
 
     # ----------------- KB search + fetch -----------------
@@ -1280,12 +1285,25 @@ def ask():
         hits = []
     # If evidence thin, optionally auto-harvest -> reindex -> reload -> retry once
     harvest_refs = []  
+    # Auto-harvest can be expensive and relies on optional dependencies. Gate it behind an env var.
+    job_id_for_harvest = None
     if allow_fetch and _needs_more(hits):
-        try:
-            harvest_refs = _harvest_reindex(_expand_queries(question)) or []   # <— collect refs
-            hits = retriever_search(question, k=web_k, level=retriever_level, k_doc=k_doc, k_passage=k_passage, w_doc=w_doc, w_passage=w_passage) or []
-        except Exception as e:
-            app.logger.warning(f"[/ask] auto-harvest failed: {e}")
+        if os.getenv("ENABLE_AUTO_HARVEST", "0").lower() in {"1", "true", "yes"}:
+            try:
+                # Create a job id so callers can poll progress
+                job_id_for_harvest = os.urandom(8).hex()
+                try:
+                    _set_job(job_id_for_harvest, status="queued", progress=0, stage="queued_harvest", queries=[])
+                except Exception:
+                    pass
+                harvest_refs = _harvest_reindex(_expand_queries(question), jid=job_id_for_harvest) or []   # <— collect refs
+                hits = retriever_search(question, k=web_k, level=retriever_level, k_doc=k_doc, k_passage=k_passage, w_doc=w_doc, w_passage=w_passage) or []
+            except Exception as e:
+                app.logger.warning(f"[/ask] auto-harvest failed: {e}")
+                if job_id_for_harvest:
+                    _set_job(job_id_for_harvest, status="error", error=str(e))
+        else:
+            app.logger.info("[/ask] auto-harvest disabled via ENABLE_AUTO_HARVEST")
 
 
     # A) Build web_refs from hit.meta with aggressive normalization (extract DOI from url/text if needed)
@@ -1476,7 +1494,10 @@ def ask():
         answer = "## Experimental procedure (verbatim from attachment)\n\n" + raw_verbatim_text
         rationale = "Returned exactly as written in the attached document (verbatim mode)."
         refs = [{"source": "attachment", "note": "verbatim"}]  # or your normal refs shape
-        return jsonify({"ok": True, "answer": answer, "rationale": rationale, "refs": refs})
+        resp = {"ok": True, "answer": answer, "rationale": rationale, "refs": refs}
+        if job_id_for_harvest:
+            resp["job_id"] = job_id_for_harvest
+        return jsonify(resp)
 
 # ----------------- Compose CONTEXT -----------------
     ctx_parts = []
@@ -1879,107 +1900,9 @@ def ask():
     # ----------------- tiny helpers -----------------
     
 # --- PDF text normalization ---
-def _normalize_pdf_text(s: str) -> str:
-    import re
-    if not s: return ""
-    # Remove zero-width and control junk
-    s = s.replace("\u200b", "").replace("\ufeff", "")
-    # Common artifact from some PDFs (looks like a mid-dot between letters)
-    # Collapse "a·b·c" -> "abc"
-    s = re.sub(r"(?<=\w)[·∙•](?=\w)", "", s)       # mid-dot surrounded by word chars
-    s = s.replace("∙", "").replace("•", "").replace("·", "")
-    # Fix FeSO4  7H2O artifact
-    s = s.replace("\x03", "·")
-    # Normalize whitespace/hyphenation across line breaks
-    s = re.sub(r"-\s*\n\s*", "", s)                # de-hyphenate line breaks
-    s = re.sub(r"\s+\n", "\n", s)
-    s = re.sub(r"\n\s+", "\n", s)
-    s = re.sub(r"[ \t]+", " ", s)
-    return s.strip()
+from app_utils.pdf_utils import extract_pdf_text as _extract_pdf_text, clean_attachment_text as _clean_attachment_text, normalize_pdf_text as _normalize_pdf_text
 
-# --- Better PDF extractor (pdfminer.six -> pypdf -> PyPDF2), then normalize ---
-def _extract_pdf_text(path: Path, max_pages: int = 40) -> tuple[str, int]:
-    try:
-        # 1) pdfminer.six (best at handling weird encodings/glyph maps)
-        try:
-            from pdfminer.high_level import extract_text as _pdfminer_extract
-            txt = _pdfminer_extract(str(path))
-            if txt:
-                # Keep only first max_pages by rough split (pdfminer doesn’t paginate cleanly)
-                pages = txt.split("\f")
-                pages = pages[:max_pages]
-                out = "\n".join(pages)
-                return (_normalize_pdf_text(out), len(pages))
-        except Exception:
-            pass
-
-        # 2) pypdf / PyPDF2 fallback
-        try:
-            from pypdf import PdfReader as _PdfReader
-        except Exception:
-            try:
-                from PyPDF2 import PdfReader as _PdfReader
-            except Exception:
-                _PdfReader = None
-
-        if _PdfReader is not None:
-            reader = _PdfReader(str(path))
-            pages = getattr(reader, "pages", [])
-            out = []
-            for i, page in enumerate(pages, 1):
-                if i > max_pages: break
-                try:
-                    out.append(page.extract_text() or "")
-                except Exception:
-                    out.append("")
-            return (_normalize_pdf_text("\n".join(out)), len(pages))
-        else:
-            raise ImportError("No PDF backend available")
-    except Exception as e:
-        try: app.logger.warning(f"[_extract_pdf_text] {path.name}: {e}")
-        except Exception: pass
-        return ("", 0)
-
-def _best_chunks_from_text(text: str, query: str, max_chunk_chars: int = 1200, top_k: int = 3):
-    import re as _re
-    if not text: return []
-    text = _normalize_pdf_text(text)
-
-    # Token overlap with query
-    q_tokens = {t for t in _re.findall(r"[A-Za-z0-9]{3,}", (query or "").lower())}
-
-    # Strong procedural cues to bias towards methods
-    cues = [
-        r"\b0\.1\s*m\b", r"\b0\.45\s*m\b", r"\b\d+\s*m[lL]\s*/?\s*min\b",
-        r"\bpH\s*(?:\d+(?:\.\d+)?)\b", r"\b\d+\s*°\s*C\b", r"\b\d+\s*h\b",
-        r"\bfiltered?\b|\bfiltration\b|\bvacuum\b", r"\bdry(?:ing|ed)?\b",
-        r"\bautotitrator\b|\bmettler\b|\bdl50\b", r"\bwater bath\b",
-        r"\bfe\s*so\s*4\b|\bfeooh\b|\bmagnetite\b|\bfe3o4\b", r"\bprocedure\b|\bmethod\b|\bsynthesi"
-    ]
-    cue_res = [_re.compile(c, _re.I) for c in cues]
-
-    # Chunk by paragraphs, bounded by size
-    paras = [p.strip() for p in text.splitlines()]
-    chunks, buf, size = [], [], 0
-    for p in paras:
-        if not p:
-            if buf:
-                chunks.append("\n".join(buf)); buf=[]; size=0
-            continue
-        if size + len(p) + 1 > max_chunk_chars and buf:
-            chunks.append("\n".join(buf)); buf=[]; size=0
-        buf.append(p); size += len(p) + 1
-    if buf: chunks.append("\n".join(buf))
-
-    def score(s: str) -> int:
-        toks = set(_re.findall(r"[A-Za-z0-9]{3,}", s.lower()))
-        base = sum(1 for t in toks if t in q_tokens)
-        bonus = sum(3 for rx in cue_res if rx.search(s))  # strong bonus for any cue hit
-        # extra weight for multiple numeric+unit patterns in the same chunk
-        nums = len(_re.findall(r"\b\d+(?:\.\d+)?\s*(?:m|mL|min|°C|h|pH)\b", s))
-        return base + bonus + nums
-    ranked = sorted(chunks, key=score, reverse=True)
-    return ranked[:top_k]
+from app_utils.text_chunks import best_chunks_from_text as _best_chunks_from_text, pick_method_paragraph as _pick_method_paragraph
 
 @app.post("/parse")
 def parse_route():

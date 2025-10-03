@@ -1,0 +1,10 @@
+# Development and test dependencies
+pytest
+pytest-cov
+requests
+pypdf
+pdfminer.six
+python-dotenv
+# Add optional ML deps separately (heavy)
+# sentence-transformers
+# faiss-cpu

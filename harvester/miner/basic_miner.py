@@ -60,10 +60,14 @@ class BasicMiner:
             here = _P(__file__).parent
             local_ner = here / 'ner_model' / 'ner'
             local_best = here / 'ner_model' / 'model-best'
+            # Also check a repository-level path (in case package structure differs)
+            repo_best = here.parent.parent / 'harvester' / 'miner' / 'ner_model' / 'model-best'
             if local_ner.exists():
                 cand = str(local_ner)
             elif local_best.exists():
                 cand = str(local_best)
+            elif repo_best.exists():
+                cand = str(repo_best)
             else:
                 cand = 'en_core_web_sm'
         try:

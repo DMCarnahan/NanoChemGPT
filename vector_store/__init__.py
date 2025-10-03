@@ -3,7 +3,15 @@ from __future__ import annotations
 import os, re, time, threading, gzip, json, pathlib, tempfile, contextlib
 from typing import List, Dict, Any, Optional, Tuple
 import numpy as np
-import faiss
+# Lazy/faiss import: importing faiss at module import time can fail (ABI mismatches with NumPy 2.x).
+# Try to import it, but allow the module to be imported even when faiss isn't usable.
+try:
+    import faiss as _faiss
+    HAS_FAISS = True
+except Exception as _e:
+    _faiss = None
+    HAS_FAISS = False
+    print(f"[vector_store.v2] faiss import failed at module import time: {_e}")
 
 # ---------------- Boot log ----------------
 print("[vector_store.v2] EMBED_BACKEND =", os.getenv("EMBED_BACKEND", "st"),
@@ -37,7 +45,7 @@ CHUNK_OVERLAP   = int(os.getenv("VS_CHUNK_OVERLAP", "150"))
 
 # ---------------- State ----------------
 SCHEMA_VERSION = 2
-_index: Optional[faiss.Index] = None
+_index: Optional[object] = None
 _meta: List[Dict[str, Any]] = []      # [{id, tag, ts, text, doc_id}]
 _dirty_index = False                  
 _lock = threading.Lock()
@@ -110,16 +118,25 @@ def _meta_path() -> pathlib.Path:
     return INDEX_DIR / "meta.v2.json.gz"
 
 def _reset_index(d: int):
-    global _index
-    _index = faiss.IndexFlatIP(d)
+    """Reset the FAISS index to an empty index of dimension d.
 
-def _get_index(d: int) -> faiss.Index:
+    If faiss is not available, set _index to None and raise only when used.
+    """
+    global _index
+    if not HAS_FAISS:
+        _index = None
+        return
+    _index = _faiss.IndexFlatIP(d)
+
+def _get_index(d: int):
     global _index
     if _index is None:
         ipath = _index_path()
         if ipath.exists():
             try:
-                _index = faiss.read_index(str(ipath))
+                if not HAS_FAISS:
+                    raise RuntimeError("faiss is not available; cannot load index")
+                _index = _faiss.read_index(str(ipath))
                 _load_meta()
                 print("[vector_store.v2] loaded FAISS index with ntotal=", _index.ntotal)
                 return _index
@@ -147,7 +164,9 @@ def _persist():
         return
     try:
         if _index is not None:
-            faiss.write_index(_index, str(_index_path()))
+            if not HAS_FAISS:
+                raise RuntimeError("faiss is not available; cannot persist index")
+            _faiss.write_index(_index, str(_index_path()))
         payload = {"schema": SCHEMA_VERSION, "meta": _meta}
         b = gzip.compress(json.dumps(payload).encode("utf-8"))
         _atomic_write(_meta_path(), b)
@@ -213,6 +232,8 @@ def _rebuild_index_locked():
     embs = _encode(texts)
     d = embs.shape[1]
     _reset_index(d)
+    if _index is None:
+        raise RuntimeError("faiss is not available; cannot rebuild index")
     _index.add(embs)
     _persist()
     _dirty_index = False

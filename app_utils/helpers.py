@@ -93,7 +93,8 @@ def judge_hits(hits, min_hits=1, min_score=0.0, min_chars=48):
 
 # Trim answer safely
 def _safe_text(s: str, max_chars: int = 8000) -> str:
-    s = _to_str(s)
+    # Normalize to string and trim whitespace to avoid preserving leading/trailing spaces
+    s = _to_str(s).strip()
     if max_chars and max_chars > 0:
         return s[:max_chars]
     return s

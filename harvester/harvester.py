@@ -1,4 +1,13 @@
-import argparse, json, yaml, httpx, re, os, sys, html_text
+import argparse, json, yaml, httpx, re, os, sys
+try:
+    import html_text
+except Exception:
+    # lightweight fallback for environments without html_text
+    class _FakeHTML:
+        @staticmethod
+        def extract_text(html):
+            return ""
+    html_text = _FakeHTML()
 from pathlib import Path
 from tqdm import tqdm
 from utils import ensure_dir, write_json, safe_slug
@@ -12,7 +21,14 @@ from miner.runtime import get_miner
 from oa_resolver import resolve_oa
 from enhanced_relevance import enhance_harvester_relevance
 
-miner = get_miner(nlp_model= "SPACY_MODEL")
+_MINER = None
+
+def _get_global_miner():
+    global _MINER
+    if _MINER is None:
+        # get_miner will resolve SPACY_MODEL env or the packaged model-best automatically
+        _MINER = get_miner()
+    return _MINER
 
 import logging
 logger = logging.getLogger(__name__)
@@ -506,7 +522,7 @@ def main():
             if paras:
                 mp = []
                 for ptxt in paras:
-                    ann = miner.extract_procedure(ptxt)
+                    ann = _get_global_miner().extract_procedure(ptxt)
                     mp.append({
                         "text": ptxt,
                         "operations": ann.get("operations", []),

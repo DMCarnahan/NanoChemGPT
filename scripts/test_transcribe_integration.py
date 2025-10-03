@@ -73,7 +73,8 @@ def test_transcribe_endpoint():
     import tempfile
     import os
     
-    with tempfile.NamedTemporaryFile(mode='w', suffix='.txt', delete=False) as f:
+    # Ensure we write the temp file with UTF-8 encoding on Windows
+    with tempfile.NamedTemporaryFile(mode='w', suffix='.txt', delete=False, encoding='utf-8') as f:
         f.write(sample_method)
         temp_file_path = f.name
     
