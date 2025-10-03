@@ -29,7 +29,42 @@ except Exception as e:
     raise
 
 def get_miner(nlp_model: str | None = None, **kwargs):
-    return BasicMiner(nlp_model=nlp_model, **kwargs)
+    """
+    Return a BasicMiner instance. Resolve the spaCy model path according to this priority:
+      1. explicit nlp_model argument if provided and not empty
+      2. SPACY_MODEL environment variable if set
+      3. builtin trained model at harvester/miner/ner_model/model-best (relative to package)
+      4. fall back to spaCy small english model
+    """
+    import os
+    from pathlib import Path
+
+    cand = nlp_model or os.getenv('SPACY_MODEL')
+    if not cand:
+        # Prefer the packaged 'model-best' shipped under harvester/miner/ner_model/model-best
+        pkg_dir = Path(__file__).resolve().parent
+        model_best = pkg_dir / 'ner_model' / 'model-best'
+        if model_best.exists():
+            cand = str(model_best)
+    else:
+        # If a candidate path/name was provided (env var or arg) and it points to an
+        # existing filesystem path, prefer its resolved absolute path. This makes the
+        # runtime-recorded requested path deterministic (absolute) for tests and
+        # callers that inspect miner._model_path_requested.
+        try:
+            cand_path = Path(cand)
+            if cand_path.exists():
+                cand = str(cand_path.resolve())
+        except Exception:
+            # If Path() fails for whatever reason, keep the original candidate
+            pass
+    miner = BasicMiner(nlp_model=cand, **kwargs)
+    # record which model path/name was requested so callers can inspect it
+    try:
+        miner._model_path_requested = cand
+    except Exception:
+        pass
+    return miner
 
 @lru_cache(maxsize=1)
 def get_material_filter():

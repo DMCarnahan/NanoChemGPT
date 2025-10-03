@@ -1,0 +1,14 @@
+[
+  {
+    "op_type": "add",
+    "materials": ["SnCl2"],
+    "params": {"amounts": ["10 mL"]}
+  },
+  {
+    "op_type": "heat",
+    "params": {"temp": "180 C", "time": "12 hours"}
+  },
+  {
+    "op_type": "centrifuge"
+  }
+]
