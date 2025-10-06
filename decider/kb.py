@@ -16,7 +16,9 @@ from app_utils.constants import INDEX_DIR as CONST_INDEX_DIR
 
 # Resolve repo root -> data/vector_store by default; prefer canonical constant
 APP_ROOT = Path(__file__).resolve().parents[1]
-INDEX_DIR = Path(os.getenv("INDEX_DIR", str(CONST_INDEX_DIR or APP_ROOT / "data" / "vector_store")))
+INDEX_DIR = Path(
+    os.getenv("INDEX_DIR", str(CONST_INDEX_DIR or APP_ROOT / "data" / "vector_store"))
+)
 INDEX_PATH = Path(os.getenv("FAISS_INDEX_PATH", str(INDEX_DIR / "index.faiss")))
 TEXTS_PATH = Path(os.getenv("KB_TEXTS_PATH", str(INDEX_DIR / "texts.jsonl")))
 

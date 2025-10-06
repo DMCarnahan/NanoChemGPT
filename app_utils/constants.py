@@ -18,4 +18,6 @@ _ba = os.getenv("BUNDLE_AUTO") or os.getenv("BUNDLE_AUTO_PATH")
 if _ba:
     BUNDLE_AUTO = Path(_ba)
 else:
-    BUNDLE_AUTO = Path(os.getenv("BUNDLE_AUTO_PATH", str(ROOT / "out" / "bundle_auto.jsonl")))
+    BUNDLE_AUTO = Path(
+        os.getenv("BUNDLE_AUTO_PATH", str(ROOT / "out" / "bundle_auto.jsonl"))
+    )

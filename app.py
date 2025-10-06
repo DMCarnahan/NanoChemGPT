@@ -28,8 +28,10 @@ from datetime import datetime
 from pathlib import Path
 from functools import lru_cache
 from typing import List, Optional, Any
+
 try:
     from dotenv import load_dotenv
+
     load_dotenv()
 except Exception:
     pass
@@ -49,8 +51,12 @@ from mongo_client import get_db
 from decider.miner_queue import enqueue_text_mining_job
 from DuckDB.duck_searcher import get_duck_searcher
 from ref_utils import (
-    dedupe_and_rerank, extract_used_ref_indexes, renumber_citations,
-    split_used_refs, DEFAULT_NANOCHEM_TERMS, format_references_block
+    dedupe_and_rerank,
+    extract_used_ref_indexes,
+    renumber_citations,
+    split_used_refs,
+    DEFAULT_NANOCHEM_TERMS,
+    format_references_block,
 )
 from app_utils import paths as _paths
 
@@ -67,6 +73,7 @@ except Exception:
 
 _ROOT = Path(__file__).resolve().parent
 
+
 def _resolve_path(name: str, default: Path):
     # 1) app_utils.paths override
     if hasattr(_paths, name):
@@ -80,6 +87,7 @@ def _resolve_path(name: str, default: Path):
         return Path(val)
     # 4) default
     return Path(default)
+
 
 ATTACH_DIR = _resolve_path("ATTACH_DIR", _ROOT / "data" / "attachments")
 UPLOADS_DIR = _resolve_path("UPLOADS_DIR", _ROOT / "data" / "uploads")
@@ -109,6 +117,7 @@ try:
         INDEX_DIR as CANON_INDEX_DIR,
         BUNDLE_AUTO as CANON_BUNDLE_AUTO,
     )
+
     # Overwrite module-level values with canonical ones when present
     ATTACH_DIR = CANON_ATTACH_DIR or ATTACH_DIR
     UPLOADS_DIR = CANON_UPLOADS_DIR or UPLOADS_DIR
@@ -152,13 +161,16 @@ try:
         _safe_text as _h_safe_text,
         env_int as _env_int,
         env_float as _env_float,
-        judge_hits, Hit as _Hit, renumber_citations as _h_renumber_citations,
+        judge_hits,
+        Hit as _Hit,
+        renumber_citations as _h_renumber_citations,
     )
 except Exception:
     _h_classify_intent = _h_kb_search = _h_kb_fetch = None
     _h_judge_sufficiency = _h_safe_text = _h_extract_used_ref_indexes = None
     _h_renumber_citations = None
     _Hit = None
+
     # --- Safe fallbacks so /ask never 500s if helpers are missing or envs are blank ---
     def _env_int(name: str, default: int) -> int:
         v = os.getenv(name, "")
@@ -176,27 +188,25 @@ except Exception:
         except Exception:
             return default
 
+
 def _best_chunks_from_text(
-    text: str, 
-    query: str, 
-    max_chunk_chars: int = 1200, 
-    top_k: int = 3
+    text: str, query: str, max_chunk_chars: int = 1200, top_k: int = 3
 ) -> List[str]:
     """
     Extract the most relevant text chunks from a document based on query terms.
-    
+
     This function splits text into chunks of maximum size and ranks them by
     relevance to the query using term overlap scoring.
-    
+
     Args:
         text: The input text to chunk and rank
         query: The search query to match against
         max_chunk_chars: Maximum size of each chunk in characters
         top_k: Number of top-ranked chunks to return
-        
+
     Returns:
         List of the top_k most relevant text chunks, ranked by relevance score
-        
+
     Example:
         >>> chunks = _best_chunks_from_text(
         ...     "Gold nanoparticles synthesis. Silver nanoparticles formation.",
@@ -208,12 +218,15 @@ def _best_chunks_from_text(
         1
     """
     import re as _re
-    if not text: 
+
+    if not text:
         return []
-    
+
     # Extract query terms for scoring
-    q = {t for t in _re.findall(r"[A-Za-z0-9]{3,}", (query or "").lower())} or set(_re.findall(r"[A-Za-z0-9]{3,}", text.lower()))
-    
+    q = {t for t in _re.findall(r"[A-Za-z0-9]{3,}", (query or "").lower())} or set(
+        _re.findall(r"[A-Za-z0-9]{3,}", text.lower())
+    )
+
     # Split text into chunks
     chunks, buf, size = [], [], 0
     for para in text.splitlines():
@@ -222,27 +235,31 @@ def _best_chunks_from_text(
             buf, size = [], 0
         buf.append(para)
         size += len(para) + 1
-    if buf: 
+    if buf:
         chunks.append("\n".join(buf))
-    
+
     def score(s: str) -> int:
         """Score chunk by number of query term matches."""
         toks = set(_re.findall(r"[A-Za-z0-9]{3,}", s.lower()))
         return sum(1 for t in toks if t in q)
-    
+
     return sorted(chunks, key=score, reverse=True)[:top_k]
+
 
 # Create Flask application instance early so decorators and modules can use it.
 # Keep template/static folder paths explicit for packaging and mounting under ASGI.
 app = Flask(__name__, static_folder="static", template_folder="templates")
 app.logger.setLevel(logging.INFO)
 
+
 @app.before_request
 def _inject_base_path():
     # request.script_root will be "/app" when mounted at /app, else ""
     g.base_path = request.script_root or ""
 
+
 # ──────────────── DuckDB setup ──────────────── #
+
 
 def maybe_build_duckdb():
     """
@@ -256,7 +273,9 @@ def maybe_build_duckdb():
     db_path = os.getenv("LOOKUP_DUCKDB_PATH")
     tbl = os.getenv("LOOKUP_DUCKDB_TABLE", "reactions")
     if not (parq_glob and db_path):
-        app.logger.info("[duckdb-init] missing LOOKUP_PARQUET_GLOB or LOOKUP_DUCKDB_PATH")
+        app.logger.info(
+            "[duckdb-init] missing LOOKUP_PARQUET_GLOB or LOOKUP_DUCKDB_PATH"
+        )
         return
     matches = glob.glob(parq_glob, recursive=True)
     if not matches:
@@ -267,15 +286,19 @@ def maybe_build_duckdb():
         return
     try:
         import duckdb, pathlib
+
         pathlib.Path(db_path).parent.mkdir(parents=True, exist_ok=True)
         con = duckdb.connect(db_path)
-        con.execute(f"CREATE TABLE {tbl} AS SELECT * FROM read_parquet('{parq_glob}', hive_partitioning=1)")
+        con.execute(
+            f"CREATE TABLE {tbl} AS SELECT * FROM read_parquet('{parq_glob}', hive_partitioning=1)"
+        )
         con.execute("CHECKPOINT")
         result = con.execute(f"SELECT COUNT(*) FROM {tbl}").fetchone()
         rows = result[0] if result else 0
         app.logger.info("[duckdb-init] created %s rows=%d table=%s", db_path, rows, tbl)
     except Exception as e:
         app.logger.warning("[duckdb-init] build failed: %s", e)
+
 
 maybe_build_duckdb()
 
@@ -290,7 +313,9 @@ try:
                 nrows = con.execute(f"SELECT COUNT(*) FROM {view}").fetchone()[0]
                 app.logger.info("[dataset_search] view '%s' rows=%s", view, nrows)
             except Exception:
-                app.logger.info("[dataset_search] DuckDB connected (row count probe failed)")
+                app.logger.info(
+                    "[dataset_search] DuckDB connected (row count probe failed)"
+                )
     else:
         app.logger.warning("[dataset_search] no LOOKUP source configured")
 except Exception as e:
@@ -299,22 +324,40 @@ except Exception as e:
 # ──────────────── OpenAI client ──────────────── #
 _no_proxy = httpx.Client(trust_env=False, timeout=120.0)
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "")
-client = OpenAI(api_key=OPENAI_API_KEY, http_client=_no_proxy) if OPENAI_API_KEY else None
+client = (
+    OpenAI(api_key=OPENAI_API_KEY, http_client=_no_proxy) if OPENAI_API_KEY else None
+)
 
-RETRIEVER_URL = os.getenv("RETRIEVER_URL", f"http://localhost:{os.getenv('PORT','8000')}/retriever")
+RETRIEVER_URL = os.getenv(
+    "RETRIEVER_URL", f"http://localhost:{os.getenv('PORT','8000')}/retriever"
+)
 
-def retriever_search(query: str, k: int = 8, level: str|None = None,
-                    k_doc: int|None = None, k_passage: int|None = None,
-                    w_doc: float|None = None, w_passage: float|None = None,
-                    **_: dict) -> list[dict]:
+
+def retriever_search(
+    query: str,
+    k: int = 8,
+    level: str | None = None,
+    k_doc: int | None = None,
+    k_passage: int | None = None,
+    w_doc: float | None = None,
+    w_passage: float | None = None,
+    **_: dict,
+) -> list[dict]:
     try:
         payload = {"query": query, "k": int(k)}
-        if level: payload["level"] = str(level)
-        if k_doc is not None: payload["k_doc"] = int(k_doc)
-        if k_passage is not None: payload["k_passage"] = int(k_passage)
-        if w_doc is not None: payload["w_doc"] = float(w_doc)
-        if w_passage is not None: payload["w_passage"] = float(w_passage)
-        r = _no_proxy.post(f"{RETRIEVER_URL.rstrip('/')}/search", json=payload, timeout=60)
+        if level:
+            payload["level"] = str(level)
+        if k_doc is not None:
+            payload["k_doc"] = int(k_doc)
+        if k_passage is not None:
+            payload["k_passage"] = int(k_passage)
+        if w_doc is not None:
+            payload["w_doc"] = float(w_doc)
+        if w_passage is not None:
+            payload["w_passage"] = float(w_passage)
+        r = _no_proxy.post(
+            f"{RETRIEVER_URL.rstrip('/')}/search", json=payload, timeout=60
+        )
         r.raise_for_status()
         data = r.json()
         return data.get("hits", []) if isinstance(data, dict) else []
@@ -322,45 +365,68 @@ def retriever_search(query: str, k: int = 8, level: str|None = None,
         app.logger.warning(f"[retriever] search failed: {e}")
         return []
 
+
 # ──────────────── Utilities ──────────────── #
-from app_utils.pdf_utils import extract_pdf_text as _extract_pdf_text, clean_attachment_text as _clean_attachment_text, normalize_pdf_text as _normalize_pdf_text
-from app_utils.text_chunks import best_chunks_from_text as _best_chunks_from_text, pick_method_paragraph as _pick_method_paragraph
+from app_utils.pdf_utils import (
+    extract_pdf_text as _extract_pdf_text,
+    clean_attachment_text as _clean_attachment_text,
+    normalize_pdf_text as _normalize_pdf_text,
+)
+from app_utils.text_chunks import (
+    best_chunks_from_text as _best_chunks_from_text,
+    pick_method_paragraph as _pick_method_paragraph,
+)
 from app_utils.fact_extractor import extract_facts_from_text as _extract_facts_from_text
 from app_utils.rendering import render_protocol_md as _render_protocol_md
+
 
 def _pick_method_paragraph(text: str) -> str:
     """
     Heuristic: return the single paragraph that hits the most method cues.
     """
     import re as _re
+
     text = _normalize_pdf_text(text)
     paragraphs = [p.strip() for p in text.split("\n") if p.strip()]
-    if not paragraphs: return ""
+    if not paragraphs:
+        return ""
 
     cues = [
-        r"\b0\.1\s*m\b", r"\b0\.45\s*m\b", r"\b100\s*m[lL]\b",
+        r"\b0\.1\s*m\b",
+        r"\b0\.45\s*m\b",
+        r"\b100\s*m[lL]\b",
         r"\b5\s*m[lL]\s*/?\s*min\b",
-        r"\b45\s*°\s*C\b", r"\b50\s*°\s*C\b", r"\b24\s*h\b",
-        r"\bpH\s*12\b", r"\bautotitrator\b|\bdl50\b|\bmettler\b",
-        r"\bwater bath\b", r"\bfiltered?\b|\bvacuum\b", r"\bdry(?:ed|ing)?\b"
+        r"\b45\s*°\s*C\b",
+        r"\b50\s*°\s*C\b",
+        r"\b24\s*h\b",
+        r"\bpH\s*12\b",
+        r"\bautotitrator\b|\bdl50\b|\bmettler\b",
+        r"\bwater bath\b",
+        r"\bfiltered?\b|\bvacuum\b",
+        r"\bdry(?:ed|ing)?\b",
     ]
     rx = [_re.compile(c, _re.I) for c in cues]
 
     def sc(p: str) -> int:
         return sum(1 for r in rx if r.search(p)) + len(_re.findall(r"\b\d", p))
+
     best = max(paragraphs, key=sc)
     return best
 
+
 def _clean_attachment_text(s: str) -> str:
     import re
+
     # remove our chunk headers like: [A1.3] attachment:XYZ
     s = re.sub(r"^\[A\d+\.\d+\]\s*attachment:[^\n]+\n", "", s, flags=re.M)
     # common OCR artifact in FeSO4·7H2O
     s = s.replace("", "·")
     return s
 
+
 def _extract_facts_from_text(text: str) -> dict:
     import re
+
     t = text.lower()
 
     # helpers
@@ -368,84 +434,104 @@ def _extract_facts_from_text(text: str) -> dict:
         m = re.search(pat, text, flags)
         return (m.group(1) if m and m.groups() else (m.group(0) if m else "")) or ""
 
-    conc_fe   = find(r"\b0\.1\s*m\b")
+    conc_fe = find(r"\b0\.1\s*m\b")
     conc_naoh = find(r"\b0\.45\s*m\b")
-    vol_fe    = find(r"\b(\d+)\s*m[lL]\b\s*(?:iron|iron\(ii\)|iron solution)")
-    temp_bath = find(r"(?:at|temperature(?:\s*was)?\s*at|temperature\s*=\s*)(\d+)\s*°?\s*c")
+    vol_fe = find(r"\b(\d+)\s*m[lL]\b\s*(?:iron|iron\(ii\)|iron solution)")
+    temp_bath = find(
+        r"(?:at|temperature(?:\s*was)?\s*at|temperature\s*=\s*)(\d+)\s*°?\s*c"
+    )
     rate_naoh = find(r"(\d+)\s*m[lL]\s*/?\s*min")
-    term_ph   = find(r"pH\s*(\d+(?:\.\d+)?)")
-    dry_temp  = find(r"dri(?:ed|ing)[^\.]*?(\d+)\s*°?\s*c")
-    dry_time  = find(r"dri(?:ed|ing)[^\.]*?(\d+)\s*h")
-    brand     = find(r"(mettler\s*toledo\s*dl50)", flags=re.I)
+    term_ph = find(r"pH\s*(\d+(?:\.\d+)?)")
+    dry_temp = find(r"dri(?:ed|ing)[^\.]*?(\d+)\s*°?\s*c")
+    dry_time = find(r"dri(?:ed|ing)[^\.]*?(\d+)\s*h")
+    brand = find(r"(mettler\s*toledo\s*dl50)", flags=re.I)
 
     # equipment mentions
-    water_bath  = "water bath" in t
-    autotitr    = "autotitrator" in t or "auto-titrator" in t
-    vac_filter  = "vacuum" in t and "filter" in t
-    oven        = "oven" in t
+    water_bath = "water bath" in t
+    autotitr = "autotitrator" in t or "auto-titrator" in t
+    vac_filter = "vacuum" in t and "filter" in t
+    oven = "oven" in t
 
-    facts = {
-        "hardware": [],
-        "materials": [],
-        "procedure": []
-    }
+    facts = {"hardware": [], "materials": [], "procedure": []}
 
     # Hardware & Glassware (only if mentioned)
-    if water_bath: facts["hardware"].append(f"Water bath ({temp_bath or 'temperature not specified'})")
-    if autotitr:   facts["hardware"].append(f"Autotitrator{f' ({brand})' if brand else ''}")
-    if vac_filter: facts["hardware"].append("Vacuum filtration setup")
-    if oven:       facts["hardware"].append("Oven")
+    if water_bath:
+        facts["hardware"].append(
+            f"Water bath ({temp_bath or 'temperature not specified'})"
+        )
+    if autotitr:
+        facts["hardware"].append(f"Autotitrator{f' ({brand})' if brand else ''}")
+    if vac_filter:
+        facts["hardware"].append("Vacuum filtration setup")
+    if oven:
+        facts["hardware"].append("Oven")
 
     # Materials (use only what’s stated)
-    facts["materials"].append({
-        "name": "iron(II) sulfate heptahydrate (FeSO4·7H2O)",
-        "concentration": conc_fe or "not specified",
-        "volume": (vol_fe + " mL") if vol_fe else "not specified",
-        "role": "iron oxide precursor"
-    })
-    facts["materials"].append({
-        "name": "sodium hydroxide (NaOH)",
-        "concentration": conc_naoh or "not specified",
-        "volume": "not specified",
-        "role": "precipitating agent"
-    })
+    facts["materials"].append(
+        {
+            "name": "iron(II) sulfate heptahydrate (FeSO4·7H2O)",
+            "concentration": conc_fe or "not specified",
+            "volume": (vol_fe + " mL") if vol_fe else "not specified",
+            "role": "iron oxide precursor",
+        }
+    )
+    facts["materials"].append(
+        {
+            "name": "sodium hydroxide (NaOH)",
+            "concentration": conc_naoh or "not specified",
+            "volume": "not specified",
+            "role": "precipitating agent",
+        }
+    )
 
     # Procedure steps (verbatim-derived, no inventions)
     # 1 prepare Fe solution
     s1 = "Prepare the iron(II) sulfate solution"
-    if conc_fe: s1 += f" ({conc_fe})"
-    if vol_fe:  s1 += f", {vol_fe} mL"
+    if conc_fe:
+        s1 += f" ({conc_fe})"
+    if vol_fe:
+        s1 += f", {vol_fe} mL"
     facts["procedure"].append(s1 + ".")
     # 2 temperature + stirring
     step2 = "Maintain the reaction in a water bath"
-    if temp_bath: step2 += f" at {temp_bath} °C"
+    if temp_bath:
+        step2 += f" at {temp_bath} °C"
     step2 += " with continuous stirring."
     facts["procedure"].append(step2)
     # 3 add NaOH at rate with autotitrator
     s3 = "Add NaOH"
-    if conc_naoh: s3 += f" ({conc_naoh})"
+    if conc_naoh:
+        s3 += f" ({conc_naoh})"
     s3 += " to the iron solution"
-    if rate_naoh: s3 += f" at {rate_naoh} mL/min"
-    if autotitr:  s3 += " using an autotitrator"
-    if brand:     s3 += f" ({brand})"
+    if rate_naoh:
+        s3 += f" at {rate_naoh} mL/min"
+    if autotitr:
+        s3 += " using an autotitrator"
+    if brand:
+        s3 += f" ({brand})"
     s3 += ", monitoring pH."
     facts["procedure"].append(s3)
     # 4 endpoint pH
     if term_ph:
         facts["procedure"].append(f"Continue the titration to pH {term_ph}.")
     # 5 isolate + dry
-    if vac_filter: facts["procedure"].append("Filter the precipitated solid under vacuum.")
+    if vac_filter:
+        facts["procedure"].append("Filter the precipitated solid under vacuum.")
     s6 = "Dry the solid in an oven"
-    if dry_temp: s6 += f" at {dry_temp} °C"
-    if dry_time: s6 += f" for {dry_time} h"
+    if dry_temp:
+        s6 += f" at {dry_temp} °C"
+    if dry_time:
+        s6 += f" for {dry_time} h"
     s6 += "."
     facts["procedure"].append(s6)
 
     return facts
 
+
 def _render_protocol_md(facts: dict) -> str:
-    def bullets(xs): 
+    def bullets(xs):
         return "\n".join(f"   - {x}" for x in xs if x)
+
     def matline(m):
         bits = [m.get("name")]
         if m.get("concentration") and m["concentration"] != "not specified":
@@ -458,31 +544,34 @@ def _render_protocol_md(facts: dict) -> str:
 
     hardware = bullets(facts.get("hardware", []))
     materials = bullets([matline(m) for m in facts.get("materials", [])])
-    steps = "\n".join([f"   {i+1}. {s}" for i, s in enumerate([x for x in facts.get('procedure', []) if x])])
+    steps = "\n".join(
+        [
+            f"   {i+1}. {s}"
+            for i, s in enumerate([x for x in facts.get("procedure", []) if x])
+        ]
+    )
 
     return (
         "## Synthesis Protocol:\n\n"
-        "1. **Hardware & Glassware**:\n"
-        + (hardware or "   - not specified") + "\n\n"
-        "2. **Materials**:\n"
-        + (materials or "   - not specified") + "\n\n"
-        "3. **Procedure**:\n"
-        + (steps or "   1. not specified")
+        "1. **Hardware & Glassware**:\n" + (hardware or "   - not specified") + "\n\n"
+        "2. **Materials**:\n" + (materials or "   - not specified") + "\n\n"
+        "3. **Procedure**:\n" + (steps or "   1. not specified")
     )
+
 
 def _s(x: Any) -> str:
     """
     Safe text sanitizer that converts any input to a clean string.
-    
+
     Prefers the helper module's _safe_text function if available,
     otherwise falls back to basic string conversion.
-    
+
     Args:
         x: Any input value to convert to string
-        
+
     Returns:
         Sanitized string representation of the input
-        
+
     Example:
         >>> _s(None)
         ''
@@ -493,21 +582,25 @@ def _s(x: Any) -> str:
     """
     # Hardened sanitizer prefers helpers._safe_text
     try:
-        from app_utils.helpers import _safe_text as _h_safe_text  # local import to avoid circulars
+        from app_utils.helpers import (
+            _safe_text as _h_safe_text,
+        )  # local import to avoid circulars
+
         return _h_safe_text(x)
     except Exception:
         return str(x).strip() if x is not None else ""
 
+
 def _safe_id(x: Any) -> Optional[Any]:
     """
     Safely convert input to MongoDB ObjectId.
-    
+
     Args:
         x: Input value to convert to ObjectId
-        
+
     Returns:
         ObjectId instance if conversion successful, None otherwise
-        
+
     Example:
         >>> _safe_id("507f1f77bcf86cd799439011")  # Valid ObjectId string
         ObjectId('507f1f77bcf86cd799439011')
@@ -519,23 +612,25 @@ def _safe_id(x: Any) -> Optional[Any]:
         return None
     try:
         from bson import ObjectId
+
         return ObjectId(x)
     except Exception:
         return None
-    
+
+
 def _stringify_keys(obj: Any) -> Any:
     """
     Recursively convert all dictionary keys to strings.
-    
+
     This is useful for serializing objects that may have non-string keys
     (e.g., ObjectId instances) to JSON-compatible format.
-    
+
     Args:
         obj: Object to process (dict, list, or primitive)
-        
+
     Returns:
         Object with all dictionary keys converted to strings
-        
+
     Example:
         >>> from bson import ObjectId
         >>> obj = {ObjectId("507f1f77bcf86cd799439011"): "value"}
@@ -548,19 +643,20 @@ def _stringify_keys(obj: Any) -> Any:
         return [_stringify_keys(x) for x in obj]
     return obj
 
+
 def _doc(obj: Any) -> Any:
     """
     Convert a MongoDB document to a JSON-serializable format.
-    
+
     Converts ObjectId fields to strings and handles other MongoDB-specific
     types that may not be JSON serializable.
-    
+
     Args:
         obj: MongoDB document or any object
-        
+
     Returns:
         JSON-serializable version of the input object
-        
+
     Example:
         >>> from bson import ObjectId
         >>> doc = {"_id": ObjectId("507f1f77bcf86cd799439011"), "name": "test"}
@@ -577,6 +673,7 @@ def _doc(obj: Any) -> Any:
             out[k] = v.isoformat()
     return out
 
+
 # ---- Citation extraction and formatting helpers ----
 def _extract_used_markers(*texts: str) -> dict:
     """Find [n] citations and [CTX]/[PARSED]/[DB]/[GEN] tags."""
@@ -587,21 +684,25 @@ def _extract_used_markers(*texts: str) -> dict:
     seen = set()
     tag_counts = {t: 0 for t in TAGS}
     for t in texts:
-        if not t: continue
+        if not t:
+            continue
         for rx in (_CIT_BRACKET_RX, _CIT_FULL_RX, _CIT_FOOT_RX):
             for m in rx.finditer(t):
-                try: seen.add(int(m.group("num")))
-                except Exception: pass
+                try:
+                    seen.add(int(m.group("num")))
+                except Exception:
+                    pass
         for tag in TAGS:
             tag_counts[tag] += len(re.findall(rf"\[{tag}\]", t))
-    return {"refs": sorted(seen), "tags": tag_counts, "has_ctx": any(tag_counts[k] > 0 for k in ("CTX", "PARSED", "DB"))}
+    return {
+        "refs": sorted(seen),
+        "tags": tag_counts,
+        "has_ctx": any(tag_counts[k] > 0 for k in ("CTX", "PARSED", "DB")),
+    }
+
 
 def build_references_payload(
-    answer_text: str,
-    refs_input: list[dict],
-    *,
-    question: str = "",
-    top_k: int = 40
+    answer_text: str, refs_input: list[dict], *, question: str = "", top_k: int = 40
 ) -> dict:
     """
     Build a consistent references payload using ref_utils:
@@ -614,7 +715,7 @@ def build_references_payload(
             question or "",
             refs_input or [],
             domain_terms=DEFAULT_NANOCHEM_TERMS,
-            top_k=max(top_k, len(refs_input or []))
+            top_k=max(top_k, len(refs_input or [])),
         )
     except Exception:
         refs_all = list(refs_input or [])
@@ -627,7 +728,9 @@ def build_references_payload(
     try:
         refs_used, index_map = split_used_refs(refs_all, used)
     except Exception:
-        refs_used, index_map = list(refs_all), {i+1: i+1 for i in range(len(refs_all))}
+        refs_used, index_map = list(refs_all), {
+            i + 1: i + 1 for i in range(len(refs_all))
+        }
 
     return {
         "refs_all": refs_all,
@@ -636,9 +739,11 @@ def build_references_payload(
         "candidates": refs_all,
     }
 
+
 @lru_cache(maxsize=128)
 def cached_vs_search(q):
     return vs.search(q, k=8) or ""
+
 
 @lru_cache(maxsize=128)
 def cached_lookup_query(q):
@@ -649,24 +754,29 @@ def cached_lookup_query(q):
             return None
     return None
 
+
 def _wants_verbatim(q: str) -> bool:
     q = (q or "").lower()
     keys = ("repeat", "verbatim", "quote", "transcribe", "as written", "exact text")
     return any(k in q for k in keys)
 
+
 def _clean_verbatim_block(s: str) -> str:
     # strip our chunk headers and tidy OCR artifacts, but keep the source wording
     import re
+
     s = re.sub(r"^\[A\d+\.\d+\]\s*attachment:[^\n]+\n", "", s, flags=re.M)
-    s = s.replace("", "·")      # common OCR artifact in “FeSO4·7H2O”
+    s = s.replace("", "·")  # common OCR artifact in “FeSO4·7H2O”
     # Normalize trivial whitespace only (don’t touch units/values)
     s = re.sub(r"[ \t]+", " ", s)
     return s.strip()
+
 
 # ──────────────── Routes ──────────────── #
 @app.get("/health")
 def health():
     return "ok", 200
+
 
 @app.get("/db_health")
 def db_health():
@@ -677,6 +787,7 @@ def db_health():
     except Exception as e:
         return {"mongo": "error", "detail": str(e)}, 500
 
+
 @app.get("/")
 def home():
     try:
@@ -684,10 +795,25 @@ def home():
     except TemplateNotFound:
         return "<h1>NanoChemGPT</h1><p>templates/index.html missing.</p>", 200
 
+
 # ---- Uploads ---- #
 from app_utils.jobs import JOBS as JOBS, set_job as _set_job
-from app_utils.utils import s as _s, safe_id as _safe_id, stringify_keys as _stringify_keys, doc as _doc, extract_used_markers as _extract_used_markers, wants_verbatim as _wants_verbatim, clean_verbatim_block as _clean_verbatim_block
-from app_utils.uploads import save_attachment, save_builtin_files, read_attachment_text, latest_attachment_id
+from app_utils.utils import (
+    s as _s,
+    safe_id as _safe_id,
+    stringify_keys as _stringify_keys,
+    doc as _doc,
+    extract_used_markers as _extract_used_markers,
+    wants_verbatim as _wants_verbatim,
+    clean_verbatim_block as _clean_verbatim_block,
+)
+from app_utils.uploads import (
+    save_attachment,
+    save_builtin_files,
+    read_attachment_text,
+    latest_attachment_id,
+)
+
 
 @app.post("/upload")
 def upload():
@@ -697,7 +823,11 @@ def upload():
     fname = secure_filename(f.filename or "")
     lower = fname.lower()
 
-    dest = CONST_LOOKUP_UPLOAD_DIR / fname if lower.endswith((".parquet", ".csv", ".tsv", ".xlsx")) else (CONST_UPLOADS_DIR / fname)
+    dest = (
+        CONST_LOOKUP_UPLOAD_DIR / fname
+        if lower.endswith((".parquet", ".csv", ".tsv", ".xlsx"))
+        else (CONST_UPLOADS_DIR / fname)
+    )
     dest.parent.mkdir(parents=True, exist_ok=True)
     f.save(dest)
 
@@ -705,7 +835,14 @@ def upload():
         db = get_db()
         db.uploads.update_one(
             {"filename": fname},
-            {"$set": {"filename": fname, "ts": datetime.utcnow(), "status": "received", "path": str(dest)}},
+            {
+                "$set": {
+                    "filename": fname,
+                    "ts": datetime.utcnow(),
+                    "status": "received",
+                    "path": str(dest),
+                }
+            },
             upsert=True,
         )
     except Exception as e:
@@ -716,7 +853,9 @@ def upload():
 
     try:
         if lower.endswith(".pdf"):
-            threading.Thread(target=_process_pdf_job, args=(jid, dest, fname), daemon=True).start()
+            threading.Thread(
+                target=_process_pdf_job, args=(jid, dest, fname), daemon=True
+            ).start()
         elif lower.endswith(".json"):
             txt = dest.read_text(encoding="utf-8", errors="ignore")
             vs.add_to_store(txt, tag=f"upload:{fname}")
@@ -735,6 +874,7 @@ def upload():
 
     return jsonify({"ok": True, "job_id": jid, "filename": fname, "path": str(dest)})
 
+
 def _mark_uploaded(fname: str, *, kind: str, status: str):
     try:
         get_db().uploads.update_one(
@@ -745,6 +885,7 @@ def _mark_uploaded(fname: str, *, kind: str, status: str):
     except Exception as e:
         app.logger.warning(f"[/upload] DB update warn: {e}")
 
+
 @app.get("/status/<jid>")
 def status(jid: str):
     j = JOBS.get(jid)
@@ -753,25 +894,32 @@ def status(jid: str):
     return jsonify(j)
 
 
-@app.get('/miner/health')
+@app.get("/miner/health")
 def miner_health():
     """Return a simple JSON with miner model info and pipeline status."""
     try:
         from harvester.miner import runtime as mrun
+
         miner = mrun.get_miner()
-        model = getattr(miner, '_model_path_requested', None)
-        pipeline = getattr(miner, 'nlp', None)
-        pipe_names = getattr(pipeline, 'pipe_names', None) if pipeline is not None else None
-        return jsonify({
-            'ok': True,
-            'model_requested': model,
-            'pipeline_components': pipe_names or [],
-        })
+        model = getattr(miner, "_model_path_requested", None)
+        pipeline = getattr(miner, "nlp", None)
+        pipe_names = (
+            getattr(pipeline, "pipe_names", None) if pipeline is not None else None
+        )
+        return jsonify(
+            {
+                "ok": True,
+                "model_requested": model,
+                "pipeline_components": pipe_names or [],
+            }
+        )
     except Exception as e:
-        return jsonify({'ok': False, 'error': str(e)})
+        return jsonify({"ok": False, "error": str(e)})
+
 
 def _process_pdf_job(jid: str, path: Path, filename: str):
     from PyPDF2 import PdfReader
+
     db = None
     try:
         try:
@@ -791,7 +939,13 @@ def _process_pdf_job(jid: str, path: Path, filename: str):
         if db is not None:
             db.uploads.update_one(
                 {"filename": filename},
-                {"$set": {"status": "indexed", "indexed_at": datetime.utcnow(), "n_pages": n}},
+                {
+                    "$set": {
+                        "status": "indexed",
+                        "indexed_at": datetime.utcnow(),
+                        "n_pages": n,
+                    }
+                },
                 upsert=True,
             )
         _set_job(jid, status="done", progress=100)
@@ -800,12 +954,19 @@ def _process_pdf_job(jid: str, path: Path, filename: str):
             try:
                 db.uploads.update_one(
                     {"filename": filename},
-                    {"$set": {"status": "error", "error": str(e), "indexed_at": datetime.utcnow()}},
+                    {
+                        "$set": {
+                            "status": "error",
+                            "error": str(e),
+                            "indexed_at": datetime.utcnow(),
+                        }
+                    },
                     upsert=True,
                 )
             except Exception:
                 pass
         _set_job(jid, status="error", error=str(e))
+
 
 # ---- Ask ---- #
 @app.post("/ask")
@@ -827,7 +988,7 @@ def ask():
     if not question:
         return jsonify({"ok": False, "error": "Missing 'question'"}), 400
     enqueued = False
-    MIN_HITS  = _env_int("JUDGE_MIN_HITS", 1)
+    MIN_HITS = _env_int("JUDGE_MIN_HITS", 1)
     MIN_SCORE = _env_float("JUDGE_MIN_SCORE", 0.15)
     MIN_CHARS = _env_int("JUDGE_MIN_CHARS", 64)
 
@@ -835,6 +996,7 @@ def ask():
     try:
         # Prefer decider if available
         from decider.intent import classify_intent as _decide_intent
+
         ci = _decide_intent(question)
     except Exception as e:
         # Fallback to helper’s heuristic
@@ -848,13 +1010,18 @@ def ask():
 
     # helpers to coerce types from payload/ci
     def _coerce_bool(v):
-        if isinstance(v, bool): return v
-        if v is None: return None
-        if isinstance(v, (int, float)): return bool(v)
+        if isinstance(v, bool):
+            return v
+        if v is None:
+            return None
+        if isinstance(v, (int, float)):
+            return bool(v)
         if isinstance(v, str):
             t = v.strip().lower()
-            if t in {"1","true","yes","y","on"}:  return True
-            if t in {"0","false","no","n","off"}: return False
+            if t in {"1", "true", "yes", "y", "on"}:
+                return True
+            if t in {"0", "false", "no", "n", "off"}:
+                return False
         return None
 
     def _pick_bool(key, default):
@@ -875,19 +1042,26 @@ def ask():
 
     # final intent/mode + knobs
     intent = payload.get("intent") or ci.get("intent") or "protocol"
-    mode   = payload.get("mode")   or ci.get("mode")
+    mode = payload.get("mode") or ci.get("mode")
     if not mode:
         mode = "reasoning" if intent in {"reasoning", "analysis"} else "protocol"
 
     want_inline = _pick_bool("want_inline", True)
     allow_fetch = _pick_bool("allow_fetch", True)
-    kb_k        = _pick_int("kb_k", 5)
-    web_k       = _pick_int("web_k", 10)
+    kb_k = _pick_int("kb_k", 5)
+    web_k = _pick_int("web_k", 10)
 
     # Choose retriever level and knobs
-    retriever_level = (payload.get("retrieval") or payload.get("retriever_level") or
-                       os.getenv("RETRIEVER_LEVEL_DEFAULT") or
-                       ("both" if (mode == "protocol" or intent in {"protocol","synthesis","methods"}) else "doc"))
+    retriever_level = (
+        payload.get("retrieval")
+        or payload.get("retriever_level")
+        or os.getenv("RETRIEVER_LEVEL_DEFAULT")
+        or (
+            "both"
+            if (mode == "protocol" or intent in {"protocol", "synthesis", "methods"})
+            else "doc"
+        )
+    )
     k_doc_default = min(web_k, 6)
     k_pass_default = max(web_k, 10)
     k_doc = int(payload.get("k_doc", k_doc_default))
@@ -959,7 +1133,9 @@ def ask():
                 note = row.get("notes") or ""
                 line = f"[T{i}] solvent={_s(solvent)}; temp_C={_s(temp)}; time_h={_s(time_h)}; {_s(note)}".strip()
                 lines.append(line)
-                url = row.get("url") or (row.get("doi") and f"https://doi.org/{row['doi']}")
+                url = row.get("url") or (
+                    row.get("doi") and f"https://doi.org/{row['doi']}"
+                )
                 if url:
                     table_refs.append({"title": f"Table row {i}", "url": url})
             table_ctx = "\n".join(lines)
@@ -970,18 +1146,23 @@ def ask():
         if not raw:
             return "", ""
         text = raw.strip()
-        fence_rx = re.compile(r"```(?:reason|rationale|reasoning)\s*([\s\S]*?)```", re.I)
+        fence_rx = re.compile(
+            r"```(?:reason|rationale|reasoning)\s*([\s\S]*?)```", re.I
+        )
         rationale = ""
         fences = list(fence_rx.finditer(text))
         if fences:
             rationale = fences[-1].group(1).strip()
             answer = fence_rx.sub("", text).strip()
             return answer, rationale
-        head = re.compile(r"(?:^|\n)#{1,3}\s*(rationale|reasoning)\b[^\n]*\n((?:.*\n?)*)$", re.I | re.S)
+        head = re.compile(
+            r"(?:^|\n)#{1,3}\s*(rationale|reasoning)\b[^\n]*\n((?:.*\n?)*)$",
+            re.I | re.S,
+        )
         m = head.search(text)
         if m:
             rationale = m.group(2).strip()
-            answer = text[:m.start()].strip()
+            answer = text[: m.start()].strip()
             return answer, rationale
         return text, ""
 
@@ -992,12 +1173,11 @@ def ask():
             return f"https://doi.org/{r['doi']}"
         return ""
 
-
     # ---- Reference normalization + matching helpers ----
-    _DOI_RX = re.compile(r'(10\.\d{4,9}/[-._;()/:A-Z0-9]+)', re.I)
+    _DOI_RX = re.compile(r"(10\.\d{4,9}/[-._;()/:A-Z0-9]+)", re.I)
 
     def _norm_doi(x):
-        if not x: 
+        if not x:
             return ""
         if isinstance(x, (list, tuple)):
             x = " ".join(map(str, x))
@@ -1010,13 +1190,13 @@ def ask():
         if u:
             return u
         d = (doi or "").strip().lower()
-        return (f"https://doi.org/{d}" if d else "")
+        return f"https://doi.org/{d}" if d else ""
 
     def _canon_title(t):
         if not t:
             return ""
-        s = re.sub(r'\s+', ' ', str(t)).strip().lower()
-        s = re.sub(r'[^a-z0-9\s]+', '', s)
+        s = re.sub(r"\s+", " ", str(t)).strip().lower()
+        s = re.sub(r"[^a-z0-9\s]+", "", s)
         return s
 
     def _safe_year(val):
@@ -1025,7 +1205,7 @@ def ask():
         s = str(val)
         if len(s) >= 4 and s[:4].isdigit():
             return s[:4]
-        m = re.search(r'(\d{4})', s)
+        m = re.search(r"(\d{4})", s)
         return m.group(1) if m else ""
 
     def _best_ref_idx_for_hit(hit, ref_index, ref_titles, fuzzy_thr=0.84):
@@ -1039,7 +1219,11 @@ def ask():
             if key in ref_index:
                 return ref_index[key]
         # URL
-        url = (meta.get("url") or meta.get("oa_url") or meta.get("pdf_url") or "").strip().lower()
+        url = (
+            (meta.get("url") or meta.get("oa_url") or meta.get("pdf_url") or "")
+            .strip()
+            .lower()
+        )
         if url:
             key = ("url", url)
             if key in ref_index:
@@ -1052,6 +1236,7 @@ def ask():
                 return ref_index[key]
             # Fuzzy title
             import difflib as _difflib
+
             best_idx, best = None, 0.0
             for idx, rt in ref_titles.items():
                 if not rt:
@@ -1067,37 +1252,58 @@ def ask():
     def _needs_more(hits: list[dict]) -> bool:
         if not hits:
             return True
+
         # prefer meta identifiers (doi/url/title)
         def _hk(h):
             m = h.get("meta", {}) if isinstance(h, dict) else {}
             doi = (m.get("doi") or m.get("paper_id") or "").strip().lower()
             doi = doi if doi.startswith("10.") else ""
-            url = (m.get("url") or m.get("oa_url") or m.get("pdf_url") or "").strip().lower()
+            url = (
+                (m.get("url") or m.get("oa_url") or m.get("pdf_url") or "")
+                .strip()
+                .lower()
+            )
             title = (m.get("title") or "").strip().lower()
             return doi or url or title
+
         uniq = {_hk(h) for h in hits if _hk(h)}
         if len(uniq) < 1:
             return True
         scores = [float(h.get("score", 0.0)) for h in hits[:3]]
         if scores and sum(scores) / len(scores) < 0.18:
             return True
-        total_ctx = sum(len(_s(h.get("text",""))) for h in hits)
+        total_ctx = sum(len(_s(h.get("text", ""))) for h in hits)
         return total_ctx < 800
+
     def _expand_queries(q: str) -> list[str]:
         seeds = [
-            "hydrothermal","solvothermal","sol-gel","calcination","anneal",
-            "spin-coating","precursor","coprecipitation","microwave",
-            "template","electrospinning","nanoparticle","thin film","oxide"
+            "hydrothermal",
+            "solvothermal",
+            "sol-gel",
+            "calcination",
+            "anneal",
+            "spin-coating",
+            "precursor",
+            "coprecipitation",
+            "microwave",
+            "template",
+            "electrospinning",
+            "nanoparticle",
+            "thin film",
+            "oxide",
         ]
         base = q.strip()
         out = [base] + [f"{base} {w}" for w in seeds]
         seen, uniq = set(), []
         for s in out:
             if s not in seen:
-                seen.add(s); uniq.append(s)
+                seen.add(s)
+                uniq.append(s)
         return uniq[:6]
 
-    def _harvest_reindex(queries: list[str], use_grobid: bool | None = None, jid: str | None = None) -> list[dict]:
+    def _harvest_reindex(
+        queries: list[str], use_grobid: bool | None = None, jid: str | None = None
+    ) -> list[dict]:
         """
         Harvest new papers for the given queries and rebuild the retriever index.
         Returns a list of reference dicts extracted from the chosen bundle so the agent
@@ -1109,7 +1315,7 @@ def ask():
         out_dir = ROOT / "harvester" / "out_auto"
         out_dir.mkdir(parents=True, exist_ok=True)
 
-    # ------------- config -------------
+        # ------------- config -------------
         raw = os.getenv("HARVEST_MAX_RESULTS", "6")
         try:
             max_results = int(raw)
@@ -1121,7 +1327,7 @@ def ask():
             "since_year: 2016\n"
             f"max_results_per_source: {max_results}\n"
             "grobid_url: http://127.0.0.1:8070\n"
-            "unpaywall_email: \"\"\n"
+            'unpaywall_email: ""\n'
         ).format(
             od=str(out_dir).replace("\\", "/"),
             qs="\n".join(f"- {json.dumps(q)}" for q in queries),
@@ -1133,14 +1339,23 @@ def ask():
         if use_grobid is None:
             use_grobid = env.get("USE_GROBID", "0").lower() in {"1", "true", "yes"}
         env["USE_GROBID"] = "1" if use_grobid else "0"
-        for var in ("OMP_NUM_THREADS","OPENBLAS_NUM_THREADS","MKL_NUM_THREADS","NUMEXPR_NUM_THREADS"):
+        for var in (
+            "OMP_NUM_THREADS",
+            "OPENBLAS_NUM_THREADS",
+            "MKL_NUM_THREADS",
+            "NUMEXPR_NUM_THREADS",
+        ):
             env.setdefault(var, "1")
 
         def _stream(cmd: list[str]) -> int:
             app.logger.info(f"[harvest_reindex] running: {' '.join(cmd)}")
             p = subprocess.Popen(
-                cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
-                text=True, env=env, cwd=str(ROOT)
+                cmd,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.STDOUT,
+                text=True,
+                env=env,
+                cwd=str(ROOT),
             )
             assert p.stdout is not None
             # Stream lines and update job progress message if a job id is present
@@ -1148,7 +1363,12 @@ def ask():
                 sys.stdout.write(line)
                 if jid:
                     try:
-                        _set_job(jid, status="processing", stage="harvest", last_line=line.strip())
+                        _set_job(
+                            jid,
+                            status="processing",
+                            stage="harvest",
+                            last_line=line.strip(),
+                        )
                     except Exception:
                         pass
             rc = p.wait()
@@ -1175,31 +1395,47 @@ def ask():
 
         if jid:
             try:
-                _set_job(jid, status="processing", progress=5, stage="starting_harvest", queries=queries)
+                _set_job(
+                    jid,
+                    status="processing",
+                    progress=5,
+                    stage="starting_harvest",
+                    queries=queries,
+                )
             except Exception:
                 pass
 
-        rc = _stream(["python", str(ROOT/"harvester/harvester.py"), "--config", cfg_path])
+        rc = _stream(
+            ["python", str(ROOT / "harvester/harvester.py"), "--config", cfg_path]
+        )
         bundle_raw = out_dir / "bundle.jsonl"
         partial_ok = _file_has_lines(bundle_raw, 1)
 
         if rc != 0 and not partial_ok:
-            app.logger.warning("[harvest_reindex] harvest failed and no bundle produced; skipping index.")
+            app.logger.warning(
+                "[harvest_reindex] harvest failed and no bundle produced; skipping index."
+            )
             if jid:
                 _set_job(jid, status="error", progress=0, stage="harvest_failed")
             return []
 
         if rc != 0 and partial_ok:
-            app.logger.info("[harvest_reindex] harvest non-zero, but bundle exists — continuing with index.")
+            app.logger.info(
+                "[harvest_reindex] harvest non-zero, but bundle exists — continuing with index."
+            )
             if jid:
                 _set_job(jid, status="processing", progress=20, stage="harvest_partial")
 
         # --------- 2) add fallback (methods) ---------
         merged_bundle = out_dir / "bundle_with_methods.jsonl"
-        _stream([
-            "python", str(ROOT/"scripts/bundle_add_fallback.py"),
-            str(bundle_raw), str(merged_bundle)
-        ])
+        _stream(
+            [
+                "python",
+                str(ROOT / "scripts/bundle_add_fallback.py"),
+                str(bundle_raw),
+                str(merged_bundle),
+            ]
+        )
         if jid:
             _set_job(jid, status="processing", progress=45, stage="adding_methods")
 
@@ -1208,7 +1444,7 @@ def ask():
         bundle_for_index = None
         text_key = "methods"
         try:
-            if hasattr(CONST_BUNDLE_AUTO, 'exists') and CONST_BUNDLE_AUTO.exists():
+            if hasattr(CONST_BUNDLE_AUTO, "exists") and CONST_BUNDLE_AUTO.exists():
                 bundle_for_index = CONST_BUNDLE_AUTO
         except Exception:
             # ignore non-path-like bundle flags
@@ -1234,33 +1470,53 @@ def ask():
         pas_dir = os.getenv("RETRIEVER_INDEX_DIR_PASSAGE")
 
         if doc_dir or pas_dir:
-            # doc-level index 
+            # doc-level index
             if doc_dir:
-                _stream([
-                    "python", str(ROOT/"retriever/index_jsonl.py"),
-                    "--bundle", str(bundle_for_index),
-                    "--index_dir", str(doc_dir),
-                    "--text-key", "abstract"
-                ])
+                _stream(
+                    [
+                        "python",
+                        str(ROOT / "retriever/index_jsonl.py"),
+                        "--bundle",
+                        str(bundle_for_index),
+                        "--index_dir",
+                        str(doc_dir),
+                        "--text-key",
+                        "abstract",
+                    ]
+                )
             # passage-level index (methods)
             if pas_dir:
-                _stream([
-                    "python", str(ROOT/"retriever/index_jsonl.py"),
-                    "--bundle", str(bundle_for_index),
-                    "--index_dir", str(pas_dir),
-                    "--text-key", "methods"
-                ])
-            app.logger.info(f"[harvest_reindex] indexed dual: doc={doc_dir} passage={pas_dir}")
+                _stream(
+                    [
+                        "python",
+                        str(ROOT / "retriever/index_jsonl.py"),
+                        "--bundle",
+                        str(bundle_for_index),
+                        "--index_dir",
+                        str(pas_dir),
+                        "--text-key",
+                        "methods",
+                    ]
+                )
+            app.logger.info(
+                f"[harvest_reindex] indexed dual: doc={doc_dir} passage={pas_dir}"
+            )
             if jid:
                 _set_job(jid, status="processing", progress=80, stage="indexing")
         else:
             # single-index fallback
-            _stream([
-                "python", str(ROOT/"retriever/index_jsonl.py"),
-                "--bundle", str(bundle_for_index),
-                "--index_dir", str(CONST_INDEX_DIR),
-                "--text-key", "methods",
-            ])
+            _stream(
+                [
+                    "python",
+                    str(ROOT / "retriever/index_jsonl.py"),
+                    "--bundle",
+                    str(bundle_for_index),
+                    "--index_dir",
+                    str(CONST_INDEX_DIR),
+                    "--text-key",
+                    "methods",
+                ]
+            )
             app.logger.info(f"[harvest_reindex] indexed single → {CONST_INDEX_DIR}")
             if jid:
                 _set_job(jid, status="processing", progress=80, stage="indexing")
@@ -1270,7 +1526,9 @@ def ask():
             with httpx.Client(timeout=20) as s:
                 s.post(f"{RETRIEVER_URL.rstrip('/')}/reload")
             if jid:
-                _set_job(jid, status="processing", progress=90, stage="reload_retriever")
+                _set_job(
+                    jid, status="processing", progress=90, stage="reload_retriever"
+                )
         except Exception:
             if jid:
                 _set_job(jid, status="warning", progress=85, stage="reload_failed")
@@ -1287,8 +1545,12 @@ def ask():
                         elif isinstance(a, dict):
                             n = (
                                 a.get("name")
-                                or " ".join(x for x in [a.get("first"), a.get("last")] if x)
-                                or " ".join(x for x in [a.get("given"), a.get("family")] if x)
+                                or " ".join(
+                                    x for x in [a.get("first"), a.get("last")] if x
+                                )
+                                or " ".join(
+                                    x for x in [a.get("given"), a.get("family")] if x
+                                )
                             )
                             if n:
                                 out.append(n)
@@ -1296,9 +1558,13 @@ def ask():
 
             title = (rec.get("title") or rec.get("name") or "").strip()
             paper_id = str(rec.get("paper_id") or "")
-            doi = (rec.get("doi") or (paper_id if paper_id.startswith("10.") else "") or "").strip()
+            doi = (
+                rec.get("doi") or (paper_id if paper_id.startswith("10.") else "") or ""
+            ).strip()
             url = (
-                rec.get("url") or rec.get("oa_url") or rec.get("pdf_url")
+                rec.get("url")
+                or rec.get("oa_url")
+                or rec.get("pdf_url")
                 or (f"https://doi.org/{doi}" if doi else "")
                 or ""
             ).strip()
@@ -1311,8 +1577,15 @@ def ask():
                         year = v[:4]
                         break
             year = str(year or "")
-            authors = rec.get("authors") or rec.get("authorships") or rec.get("metadata", {}).get("authors") or []
-            authors = _author_names(authors) or authors  # normalize to list of strings if possible
+            authors = (
+                rec.get("authors")
+                or rec.get("authorships")
+                or rec.get("metadata", {}).get("authors")
+                or []
+            )
+            authors = (
+                _author_names(authors) or authors
+            )  # normalize to list of strings if possible
 
             return {
                 "title": title,
@@ -1343,7 +1616,13 @@ def ask():
             app.logger.warning(f"[/harvest_reindex] refs build warn: {e}")
 
         if jid:
-            _set_job(jid, status="done", progress=100, stage="complete", refs=len(harvest_refs))
+            _set_job(
+                jid,
+                status="done",
+                progress=100,
+                stage="complete",
+                refs=len(harvest_refs),
+            )
         return harvest_refs
 
     # ----------------- KB search + fetch -----------------
@@ -1383,15 +1662,23 @@ def ask():
 
     # ----------------- Web/hybrid retriever (initial) -----------------
     try:
-        hits = retriever_search(
-            question, k=web_k, level=retriever_level,
-            k_doc=k_doc, k_passage=k_passage, w_doc=w_doc, w_passage=w_passage
-        ) or []
+        hits = (
+            retriever_search(
+                question,
+                k=web_k,
+                level=retriever_level,
+                k_doc=k_doc,
+                k_passage=k_passage,
+                w_doc=w_doc,
+                w_passage=w_passage,
+            )
+            or []
+        )
     except Exception as e:
         app.logger.warning(f"[/ask] retriever_search error: {e}")
         hits = []
     # If evidence thin, optionally auto-harvest -> reindex -> reload -> retry once
-    harvest_refs = []  
+    harvest_refs = []
     # Auto-harvest can be expensive and relies on optional dependencies. Gate it behind an env var.
     job_id_for_harvest = None
     if allow_fetch and _needs_more(hits):
@@ -1400,11 +1687,31 @@ def ask():
                 # Create a job id so callers can poll progress
                 job_id_for_harvest = os.urandom(8).hex()
                 try:
-                    _set_job(job_id_for_harvest, status="queued", progress=0, stage="queued_harvest", queries=[])
+                    _set_job(
+                        job_id_for_harvest,
+                        status="queued",
+                        progress=0,
+                        stage="queued_harvest",
+                        queries=[],
+                    )
                 except Exception:
                     pass
-                harvest_refs = _harvest_reindex(_expand_queries(question), jid=job_id_for_harvest) or []   # <— collect refs
-                hits = retriever_search(question, k=web_k, level=retriever_level, k_doc=k_doc, k_passage=k_passage, w_doc=w_doc, w_passage=w_passage) or []
+                harvest_refs = (
+                    _harvest_reindex(_expand_queries(question), jid=job_id_for_harvest)
+                    or []
+                )  # <— collect refs
+                hits = (
+                    retriever_search(
+                        question,
+                        k=web_k,
+                        level=retriever_level,
+                        k_doc=k_doc,
+                        k_passage=k_passage,
+                        w_doc=w_doc,
+                        w_passage=w_passage,
+                    )
+                    or []
+                )
             except Exception as e:
                 app.logger.warning(f"[/ask] auto-harvest failed: {e}")
                 if job_id_for_harvest:
@@ -1412,24 +1719,31 @@ def ask():
         else:
             app.logger.info("[/ask] auto-harvest disabled via ENABLE_AUTO_HARVEST")
 
-
     # A) Build web_refs from hit.meta with aggressive normalization (extract DOI from url/text if needed)
-    def _hit_meta(h): return h.get("meta", {}) if isinstance(h, dict) else {}
+    def _hit_meta(h):
+        return h.get("meta", {}) if isinstance(h, dict) else {}
+
     web_refs = []
     for h in hits:
         m = _hit_meta(h)
-        doi = _norm_doi(m.get("doi") or m.get("paper_id") or m.get("url") or h.get("text") or "")
+        doi = _norm_doi(
+            m.get("doi") or m.get("paper_id") or m.get("url") or h.get("text") or ""
+        )
         url = _norm_url(m.get("url") or m.get("oa_url") or m.get("pdf_url"), doi)
         title = _s(m.get("title") or "(no title)")
-        year = _safe_year(m.get("year") or m.get("publication_year") or m.get("date") or "")
-        web_refs.append({
-            "title": title,
-            "year":  year,
-            "url":   url,
-            "doi":   doi,
-            "authors": m.get("authors") or [],
-            "biblio": {},
-        })
+        year = _safe_year(
+            m.get("year") or m.get("publication_year") or m.get("date") or ""
+        )
+        web_refs.append(
+            {
+                "title": title,
+                "year": year,
+                "url": url,
+                "doi": doi,
+                "authors": m.get("authors") or [],
+                "biblio": {},
+            }
+        )
 
     # B) Collect raw references from web, KB, and harvest, then deduplicate and rerank them using ref_utils.
     raw_refs = web_refs + kb_refs_raw + harvest_refs
@@ -1437,7 +1751,10 @@ def ask():
     # Deduplicate + rerank with ref_utils
     try:
         refs_all = dedupe_and_rerank(
-            question, raw_refs, domain_terms=DEFAULT_NANOCHEM_TERMS, top_k=max(40, len(raw_refs))
+            question,
+            raw_refs,
+            domain_terms=DEFAULT_NANOCHEM_TERMS,
+            top_k=max(40, len(raw_refs)),
         )
         if not refs_all:
             refs_all = list(raw_refs)
@@ -1445,12 +1762,14 @@ def ask():
         refs_all = list(raw_refs)
 
     # Numbered REFERENCES string shown to the LLM
-    refs_prompt = "\n".join(
-        f"[{i+1}] {(r.get('title') or '(no title)')} ({r.get('year') or ''}) — {_ref_url(r)}"
-        for i, r in enumerate(refs_all)
-    ).strip() or "(no references found)"
+    refs_prompt = (
+        "\n".join(
+            f"[{i+1}] {(r.get('title') or '(no title)')} ({r.get('year') or ''}) — {_ref_url(r)}"
+            for i, r in enumerate(refs_all)
+        ).strip()
+        or "(no references found)"
+    )
 
-    
     # Index references for aligning web snippets (prefer DOI, then URL, then title)
     def _normkey_ref(r: dict):
         doi = _norm_doi(r.get("doi") or r.get("url") or r.get("title"))
@@ -1475,32 +1794,42 @@ def ask():
     web_ctx_lines = []
     unmatched_debug = []
     for h in hits[:5]:
-        idx = _best_ref_idx_for_hit(h, ref_index, ref_titles, fuzzy_thr=float(os.getenv("FUZZY_TITLE_THRESHOLD", "0.84")))
+        idx = _best_ref_idx_for_hit(
+            h,
+            ref_index,
+            ref_titles,
+            fuzzy_thr=float(os.getenv("FUZZY_TITLE_THRESHOLD", "0.84")),
+        )
         head = f"[{idx}]" if idx else "[?]"
         title = _s((h.get("meta") or {}).get("title") or "(no title)")
-        snip  = _s(h.get("text") or "")
+        snip = _s(h.get("text") or "")
         if snip:
             web_ctx_lines.append(f"{head} {title}\n{snip[:1000]}")
         if not idx:
             try:
-                unmatched_debug.append({
-                    "meta_title": (h.get("meta") or {}).get("title"),
-                    "meta_doi": (h.get("meta") or {}).get("doi") or (h.get("meta") or {}).get("paper_id"),
-                    "meta_url": (h.get("meta") or {}).get("url") or (h.get("meta") or {}).get("oa_url") or (h.get("meta") or {}).get("pdf_url")
-                })
+                unmatched_debug.append(
+                    {
+                        "meta_title": (h.get("meta") or {}).get("title"),
+                        "meta_doi": (h.get("meta") or {}).get("doi")
+                        or (h.get("meta") or {}).get("paper_id"),
+                        "meta_url": (h.get("meta") or {}).get("url")
+                        or (h.get("meta") or {}).get("oa_url")
+                        or (h.get("meta") or {}).get("pdf_url"),
+                    }
+                )
             except Exception:
                 pass
     if unmatched_debug:
-        app.logger.info(f"[ask] unmatched hits (could not map to numbered refs): {json.dumps(unmatched_debug)[:800]}")
+        app.logger.info(
+            f"[ask] unmatched hits (could not map to numbered refs): {json.dumps(unmatched_debug)[:800]}"
+        )
     web_ctx = "\n\n".join(web_ctx_lines)
 
-
-    
     # The attachments handling block was consolidated below to prefer the
     # ATTACH_DIR-based implementation. The older _consts-based block was
     # removed to avoid duplicated logic and indentation/syntax issues.
 
-# ----------------- attachments → per-question context -----------------
+    # ----------------- attachments → per-question context -----------------
     attachments_ctx = ""
     try:
         # 1) ids from JSON or form
@@ -1509,7 +1838,11 @@ def ask():
         if isinstance(payload_json, dict):
             atch_ids = payload_json.get("attachments") or []
         if not atch_ids:
-            atch_ids = request.form.getlist("attachments") or ((request.form.get("attachments") or "").split(",") if request.form.get("attachments") else [])
+            atch_ids = request.form.getlist("attachments") or (
+                (request.form.get("attachments") or "").split(",")
+                if request.form.get("attachments")
+                else []
+            )
         atch_ids = [(a or "").strip() for a in atch_ids if (a or "").strip()]
 
         # 2) fallback: use the most recent attachment if none were passed
@@ -1521,15 +1854,25 @@ def ask():
         # 3) build chunks
         if atch_ids:
             lines = []
-            qtext = (payload_json or {}).get("question") or request.values.get("question") or ""
+            qtext = (
+                (payload_json or {}).get("question")
+                or request.values.get("question")
+                or ""
+            )
             for j, aid in enumerate(atch_ids, start=1):
-                txt = read_attachment_text(aid, max_pages=int(os.environ.get("ATTACH_MAX_PAGES", "40") or "40"))
+                txt = read_attachment_text(
+                    aid, max_pages=int(os.environ.get("ATTACH_MAX_PAGES", "40") or "40")
+                )
                 if txt:
-                    for k, ch in enumerate(_best_chunks_from_text(txt, qtext, top_k=3), start=1):
+                    for k, ch in enumerate(
+                        _best_chunks_from_text(txt, qtext, top_k=3), start=1
+                    ):
                         head = f"[A{j}.{k}] attachment:{aid}"
                         lines.append(head + "\n" + ch.strip()[:1200])
             attachments_ctx = "\n\n".join(lines)
-            app.logger.info(f"[ask] attachments used: {atch_ids} | ctx_chars={len(attachments_ctx)}")
+            app.logger.info(
+                f"[ask] attachments used: {atch_ids} | ctx_chars={len(attachments_ctx)}"
+            )
     except Exception as e:
         try:
             app.logger.warning(f"[/ask] attachments_ctx warn: {e}")
@@ -1544,15 +1887,22 @@ def ask():
 
     # Early return for verbatim mode - skip LLM processing entirely
     if verbatim_mode and raw_verbatim_text:
-        answer = "## Experimental procedure (verbatim from attachment)\n\n" + raw_verbatim_text
-        rationale = "Returned exactly as written in the attached document (verbatim mode)."
-        refs = [{"source": "attachment", "note": "verbatim"}]  # or your normal refs shape
+        answer = (
+            "## Experimental procedure (verbatim from attachment)\n\n"
+            + raw_verbatim_text
+        )
+        rationale = (
+            "Returned exactly as written in the attached document (verbatim mode)."
+        )
+        refs = [
+            {"source": "attachment", "note": "verbatim"}
+        ]  # or your normal refs shape
         resp = {"ok": True, "answer": answer, "rationale": rationale, "refs": refs}
         if job_id_for_harvest:
             resp["job_id"] = job_id_for_harvest
         return jsonify(resp)
 
-# ----------------- Compose CONTEXT -----------------
+    # ----------------- Compose CONTEXT -----------------
     ctx_parts = []
 
     # keep attachments first
@@ -1570,38 +1920,52 @@ def ask():
         ctx_parts.append("<<<CTX_WEB>>>\n" + web_ctx)
 
     context_joined = "\n\n---\n\n".join([p for p in ctx_parts if p]).strip()
-    
+
     # detect user intent; you can also set this via a payload flag from the UI
     def _wants_structured(q: str) -> bool:
         q = (q or "").lower()
-        return any(k in q for k in ("repeat", "transcribe", "quote", "verbatim")) and ("procedure" in q or "protocol" in q)
+        return any(k in q for k in ("repeat", "transcribe", "quote", "verbatim")) and (
+            "procedure" in q or "protocol" in q
+        )
 
     structured_from_attachment = bool(attachments_ctx) and _wants_structured(question)
 
     if structured_from_attachment:
         raw_text = _clean_attachment_text(attachments_ctx)
-        
+
         # Use _pick_method_paragraph to find the most relevant method section
         # This helps focus on the actual experimental procedure rather than random text
         method_paragraph = _pick_method_paragraph(raw_text)
-        
+
         # If we found a focused method paragraph, use it; otherwise fall back to full text
-        text_to_process = method_paragraph if method_paragraph and len(method_paragraph.strip()) > 50 else raw_text
-        
+        text_to_process = (
+            method_paragraph
+            if method_paragraph and len(method_paragraph.strip()) > 50
+            else raw_text
+        )
+
         facts = _extract_facts_from_text(text_to_process)
         answer = _render_protocol_md(facts)
-        rationale = "Rendered in protocol format using only facts present in the attached text. " + \
-                   ("Focused on the most relevant method paragraph." if method_paragraph else "")
+        rationale = (
+            "Rendered in protocol format using only facts present in the attached text. "
+            + (
+                "Focused on the most relevant method paragraph."
+                if method_paragraph
+                else ""
+            )
+        )
         refs = [{"source": "attachment"}]
-        
-        return jsonify({
-            "ok": True, 
-            "answer": answer, 
-            "rationale": rationale, 
-            "refs": refs,
-            "method_paragraph_used": bool(method_paragraph),
-            "extracted_facts": facts
-        })
+
+        return jsonify(
+            {
+                "ok": True,
+                "answer": answer,
+                "rationale": rationale,
+                "refs": refs,
+                "method_paragraph_used": bool(method_paragraph),
+                "extracted_facts": facts,
+            }
+        )
 
     # ----------------- Prompting -----------------
     # Adjust scale requirements based on attachment presence
@@ -1613,7 +1977,7 @@ def ask():
             " - Include specific masses (mg, g) or mmol for reagents; volumes (mL, L) for liquids as shown in attachments.\n"
             " - Specify temperatures (°C), ramp rates (°C/min), and hold times (min/h) matching the attachment when provided.\n"
             " - Include workup and purification (quench, washing/centrifugation, drying) with volumes from the attachment.\n"
-            " - No placeholders (avoid \"e.g.\"/\"or\"). Be decisive.\n"
+            ' - No placeholders (avoid "e.g."/"or"). Be decisive.\n'
             " - Avoid using Schlenk line, air-free techniques. Do not suggest inert gas.\n"
             " - Do not output a REFERENCES block in the answer."
         )
@@ -1623,13 +1987,13 @@ def ask():
             " - Include specific masses (mg) or mmol for reagents; volumes (mL) for liquids.\n"
             " - Specify temperatures (°C), ramp rates (°C/min), and hold times (min/h).\n"
             " - Include workup and purification (quench, washing/centrifugation, drying) with volumes.\n"
-            " - No placeholders (avoid \"e.g.\"/\"or\"). Be decisive.\n"
+            ' - No placeholders (avoid "e.g."/"or"). Be decisive.\n'
             " - Avoid using Schlenk line, air-free techniques. Do not suggest inert gas.\n"
             " - Do not output a REFERENCES block in the answer."
         )
     reasoning_rules = (
         " - Provide a mechanistic explanation and design considerations for the target.\n"
-        " - Focus on: nucleation vs growth; ligand/solvent coordination; " 
+        " - Focus on: nucleation vs growth; ligand/solvent coordination; "
         " - IMPORTANT: specify why certain precursors over others; and IMPORTANT: why certain reagents over others.\n"
         " - Do NOT say generic statements, or say you only chose things because they were in context or references. Specify your reasoning.\n"
         " - Do NOT return a step-by-step protocol. Be concise but specific."
@@ -1694,11 +2058,15 @@ def ask():
     if client is None:
         return jsonify({"ok": False, "error": "OpenAI client not configured"}), 500
 
-    raw = client.chat.completions.create(
-        model="gpt-4o",
-        messages=[{"role": "user", "content": prompt}],
-        temperature=0.2
-    ).choices[0].message.content
+    raw = (
+        client.chat.completions.create(
+            model="gpt-4o",
+            messages=[{"role": "user", "content": prompt}],
+            temperature=0.2,
+        )
+        .choices[0]
+        .message.content
+    )
 
     # Split answer/rationale and strip any in-answer references block
     if mode == "reasoning":
@@ -1709,12 +2077,14 @@ def ask():
         answer, rationale = _s(a), _s(r)
 
     # ---------- Build references payload (using deduped refs_all) ----------
-    
+
     # ---------- Build references payload (single-pass; no extra dedupe) ----------
     # We already deduped into `refs_all`. Figure out which were cited and prepare used subset.
     def _extract_used_ref_indexes_safe(ans: str, rat: str) -> list[int]:
         try:
-            return [int(x) for x in extract_used_ref_indexes(ans, rat) if str(x).isdigit()]
+            return [
+                int(x) for x in extract_used_ref_indexes(ans, rat) if str(x).isdigit()
+            ]
         except Exception:
             return []
 
@@ -1732,11 +2102,15 @@ def ask():
             f"ANSWER:\n{answer}"
         )
         try:
-            fixed = client.chat.completions.create(
-                model="gpt-4o-mini",
-                messages=[{"role": "user", "content": fix_prompt}],
-                temperature=0.0
-            ).choices[0].message.content
+            fixed = (
+                client.chat.completions.create(
+                    model="gpt-4o-mini",
+                    messages=[{"role": "user", "content": fix_prompt}],
+                    temperature=0.0,
+                )
+                .choices[0]
+                .message.content
+            )
             if isinstance(fixed, str) and fixed.strip():
                 answer = fixed
                 used_idxs = _extract_used_ref_indexes_safe(answer, "")
@@ -1748,11 +2122,13 @@ def ask():
     try:
         refs_used, index_map = split_used_refs(refs_all, used_idxs)
     except Exception:
-        refs_used, index_map = list(refs_all), {i+1: i+1 for i in range(len(refs_all))}
+        refs_used, index_map = list(refs_all), {
+            i + 1: i + 1 for i in range(len(refs_all))
+        }
 
     # Renumber in-text citations to the compact used set
     try:
-        answer    = renumber_citations(answer, index_map)
+        answer = renumber_citations(answer, index_map)
         rationale = renumber_citations(rationale, index_map)
     except Exception:
         pass
@@ -1771,7 +2147,7 @@ def ask():
 
     # Normalize used indexes to new numbering
     try:
-        used_idxs = sorted({ index_map.get(i, i) for i in used_idxs })
+        used_idxs = sorted({index_map.get(i, i) for i in used_idxs})
     except Exception:
         used_idxs = used_idxs or []
 
@@ -1782,11 +2158,11 @@ def ask():
         "index_map": index_map,
     }
 
-
     # judge based on helper if present; otherwise simple rule
     if callable(_h_judge_sufficiency):
         try:
             import inspect
+
             fn = _h_judge_sufficiency
             judged_ok = False
             last_err = None
@@ -1794,19 +2170,28 @@ def ask():
             try:
                 sig = inspect.signature(fn)
                 param_names = [p.name for p in sig.parameters.values()]
-                accepted = set(param_names) - {'question','q'}
+                accepted = set(param_names) - {"question", "q"}
                 kw_final = {}
                 # thresholds
-                if 'min_hits' in accepted: kw_final['min_hits'] = MIN_HITS
-                elif 'hits' in accepted: kw_final['hits'] = MIN_HITS
-                if 'min_score' in accepted: kw_final['min_score'] = MIN_SCORE
-                elif 'score' in accepted: kw_final['score'] = MIN_SCORE
-                if 'min_chars' in accepted: kw_final['min_chars'] = MIN_CHARS
-                elif 'chars' in accepted: kw_final['chars'] = MIN_CHARS
+                if "min_hits" in accepted:
+                    kw_final["min_hits"] = MIN_HITS
+                elif "hits" in accepted:
+                    kw_final["hits"] = MIN_HITS
+                if "min_score" in accepted:
+                    kw_final["min_score"] = MIN_SCORE
+                elif "score" in accepted:
+                    kw_final["score"] = MIN_SCORE
+                if "min_chars" in accepted:
+                    kw_final["min_chars"] = MIN_CHARS
+                elif "chars" in accepted:
+                    kw_final["chars"] = MIN_CHARS
                 # context-like parameter (only if explicitly accepted)
-                if 'context' in accepted: kw_final['context'] = context_joined
-                elif 'ctx' in accepted: kw_final['ctx'] = context_joined
-                elif 'text' in accepted: kw_final['text'] = context_joined
+                if "context" in accepted:
+                    kw_final["context"] = context_joined
+                elif "ctx" in accepted:
+                    kw_final["ctx"] = context_joined
+                elif "text" in accepted:
+                    kw_final["text"] = context_joined
                 judged_ok = bool(fn(question, **kw_final))
             except TypeError as te_sig:
                 last_err = te_sig
@@ -1837,13 +2222,37 @@ def ask():
             # ---- As a last resort, try safe keyword-only variants WITHOUT any context key first ----
             if not judged_ok:
                 kw_candidates = [
-                    {'min_hits': MIN_HITS, 'min_score': MIN_SCORE, 'min_chars': MIN_CHARS},
-                    {'hits': MIN_HITS, 'score': MIN_SCORE, 'chars': MIN_CHARS},
+                    {
+                        "min_hits": MIN_HITS,
+                        "min_score": MIN_SCORE,
+                        "min_chars": MIN_CHARS,
+                    },
+                    {"hits": MIN_HITS, "score": MIN_SCORE, "chars": MIN_CHARS},
                     # Then context-like keys, attempted only after non-context variants
-                    {'min_hits': MIN_HITS, 'min_score': MIN_SCORE, 'min_chars': MIN_CHARS, 'ctx': context_joined},
-                    {'min_hits': MIN_HITS, 'min_score': MIN_SCORE, 'min_chars': MIN_CHARS, 'text': context_joined},
-                    {'hits': MIN_HITS, 'score': MIN_SCORE, 'chars': MIN_CHARS, 'ctx': context_joined},
-                    {'hits': MIN_HITS, 'score': MIN_SCORE, 'chars': MIN_CHARS, 'text': context_joined},
+                    {
+                        "min_hits": MIN_HITS,
+                        "min_score": MIN_SCORE,
+                        "min_chars": MIN_CHARS,
+                        "ctx": context_joined,
+                    },
+                    {
+                        "min_hits": MIN_HITS,
+                        "min_score": MIN_SCORE,
+                        "min_chars": MIN_CHARS,
+                        "text": context_joined,
+                    },
+                    {
+                        "hits": MIN_HITS,
+                        "score": MIN_SCORE,
+                        "chars": MIN_CHARS,
+                        "ctx": context_joined,
+                    },
+                    {
+                        "hits": MIN_HITS,
+                        "score": MIN_SCORE,
+                        "chars": MIN_CHARS,
+                        "text": context_joined,
+                    },
                 ]
                 for kw in kw_candidates:
                     try:
@@ -1870,12 +2279,15 @@ def ask():
     except Exception:
         pass
     if not callable(_judge_hits):
+
         def _judge_hits(hits, min_hits=1, min_score=0.15, min_chars=64):
             return bool(hits) and len(hits) >= min_hits
 
     try:
         if kb_hits:
-            kb_ok = _judge_hits(kb_hits, min_hits=MIN_HITS, min_score=MIN_SCORE, min_chars=MIN_CHARS)
+            kb_ok = _judge_hits(
+                kb_hits, min_hits=MIN_HITS, min_score=MIN_SCORE, min_chars=MIN_CHARS
+            )
         else:
             kb_ok = False
     except Exception as e:
@@ -1894,34 +2306,36 @@ def ask():
             app.logger.warning(f"[/ask] enqueue_text_mining_job failed: {e}")
 
     # ---- Save best-effort to DB ----
-    index_map_s         = {str(k): v for k, v in (index_map or {}).items()}
-    refs_payload_s      = _stringify_keys(refs_payload or {})
-    refs_used_s         = _stringify_keys(refs_used or [])
-    refs_all_s          = _stringify_keys(refs_all or [])
-    candidates_s        = _stringify_keys(refs_all or [])
+    index_map_s = {str(k): v for k, v in (index_map or {}).items()}
+    refs_payload_s = _stringify_keys(refs_payload or {})
+    refs_used_s = _stringify_keys(refs_used or [])
+    refs_all_s = _stringify_keys(refs_all or [])
+    candidates_s = _stringify_keys(refs_all or [])
 
     try:
         db = get_db()
-        db.qa.insert_one({
-            "question": question,
-            "intent": intent,
-            "mode": mode,
-            "created_at": datetime.utcnow(),
-            "answer": answer,
-            "rationale": rationale,
-            "markers": markers,
-            "used_ref_indexes": used_idxs,
-            "references_block": references_block,
-            "refs": refs_all_s,
-            "refs_all": refs_all_s,
-            "refs_used": refs_used_s,
-            "index_map": index_map_s,
-            "kb_refs_count": len(kb_refs_raw),
-            "web_refs_count": len(web_refs),
-            "table_refs": table_refs,
-            "context_present": bool(context_joined),
-            "mining_enqueued": enqueued,
-        })
+        db.qa.insert_one(
+            {
+                "question": question,
+                "intent": intent,
+                "mode": mode,
+                "created_at": datetime.utcnow(),
+                "answer": answer,
+                "rationale": rationale,
+                "markers": markers,
+                "used_ref_indexes": used_idxs,
+                "references_block": references_block,
+                "refs": refs_all_s,
+                "refs_all": refs_all_s,
+                "refs_used": refs_used_s,
+                "index_map": index_map_s,
+                "kb_refs_count": len(kb_refs_raw),
+                "web_refs_count": len(web_refs),
+                "table_refs": table_refs,
+                "context_present": bool(context_joined),
+                "mining_enqueued": enqueued,
+            }
+        )
     except Exception as e:
         app.logger.warning(f"[/ask] DB save warn: {e}")
 
@@ -1951,11 +2365,20 @@ def ask():
     return jsonify(response_payload)
 
     # ----------------- tiny helpers -----------------
-    
-# --- PDF text normalization ---
-from app_utils.pdf_utils import extract_pdf_text as _extract_pdf_text, clean_attachment_text as _clean_attachment_text, normalize_pdf_text as _normalize_pdf_text
 
-from app_utils.text_chunks import best_chunks_from_text as _best_chunks_from_text, pick_method_paragraph as _pick_method_paragraph
+
+# --- PDF text normalization ---
+from app_utils.pdf_utils import (
+    extract_pdf_text as _extract_pdf_text,
+    clean_attachment_text as _clean_attachment_text,
+    normalize_pdf_text as _normalize_pdf_text,
+)
+
+from app_utils.text_chunks import (
+    best_chunks_from_text as _best_chunks_from_text,
+    pick_method_paragraph as _pick_method_paragraph,
+)
+
 
 @app.post("/parse")
 def parse_route():
@@ -1972,6 +2395,7 @@ def parse_route():
         app.logger.error(f"parse failed: {e}")
         return jsonify({"ok": False, "error": f"parse failed: {e}"}), 500
 
+
 @app.post("/transcribe")
 def transcribe_method():
     """
@@ -1981,10 +2405,10 @@ def transcribe_method():
     try:
         # Handle both file upload and direct text input
         text_input = None
-        
+
         # Check for file upload
-        if request.files and 'file' in request.files:
-            f = request.files['file']
+        if request.files and "file" in request.files:
+            f = request.files["file"]
             if f and f.filename != "":
                 try:
                     # Process uploaded file
@@ -1994,38 +2418,51 @@ def transcribe_method():
                         text_input = _pick_method_paragraph(attachment_text)
                 except Exception as e:
                     app.logger.warning(f"File processing failed: {e}")
-                    return jsonify({"ok": False, "error": f"Failed to process file: {e}"}), 400
-        
+                    return (
+                        jsonify({"ok": False, "error": f"Failed to process file: {e}"}),
+                        400,
+                    )
+
         # Check for direct text input if no file was processed
         if not text_input:
             payload = request.get_json(silent=True) or {}
             text_input = (payload.get("text") or "").strip()
-        
+
         # Also check form data for text
         if not text_input and request.form:
             text_input = request.form.get("text", "").strip()
-            
+
         if not text_input:
-            return jsonify({"ok": False, "error": "No text found in file upload or request body"}), 400
-        
+            return (
+                jsonify(
+                    {
+                        "ok": False,
+                        "error": "No text found in file upload or request body",
+                    }
+                ),
+                400,
+            )
+
         # Extract structured facts from the method paragraph
         facts = _extract_facts_from_text(text_input)
-        
+
         # Render as structured protocol (preserving original content)
         structured_protocol = _render_protocol_md(facts)
-        
+
         # Optionally convert to robot operations if requested
-        include_robot_ops = request.form.get("convert_to_robot", "false").lower() == "true"
+        include_robot_ops = (
+            request.form.get("convert_to_robot", "false").lower() == "true"
+        )
         if request.json:
             include_robot_ops = request.json.get("convert_to_robot", False)
-            
+
         result = {
             "ok": True,
             "original_text": text_input,
             "structured_protocol": structured_protocol,
-            "extracted_facts": facts
+            "extracted_facts": facts,
         }
-        
+
         if include_robot_ops:
             try:
                 robot_operations = convert_text_to_robot_ops(structured_protocol)
@@ -2033,22 +2470,24 @@ def transcribe_method():
             except Exception as e:
                 app.logger.warning(f"Robot conversion failed: {e}")
                 result["robot_conversion_error"] = str(e)
-        
+
         return jsonify(result)
-        
+
     except Exception as e:
         app.logger.error(f"transcribe failed: {e}")
         return jsonify({"ok": False, "error": f"Transcription failed: {e}"}), 500
 
+
 def _process_uploaded_file(file) -> str:
     """Helper function to extract text from uploaded files."""
     filename = secure_filename(file.filename or "upload")
-    
+
     try:
-        if filename.lower().endswith('.pdf'):
+        if filename.lower().endswith(".pdf"):
             # Handle PDF files
             try:
                 from pypdf import PdfReader as _PdfReader
+
                 content = file.read()
                 pdf_reader = _PdfReader(io.BytesIO(content))
                 text_parts = []
@@ -2059,6 +2498,7 @@ def _process_uploaded_file(file) -> str:
                 # Fallback to pdfminer
                 try:
                     from pdfminer.high_level import extract_text as _pdfminer_extract
+
                     content = file.read()
                     return _pdfminer_extract(io.BytesIO(content))
                 except Exception as e:
@@ -2067,15 +2507,16 @@ def _process_uploaded_file(file) -> str:
             # Handle text files
             content = file.read()
             try:
-                return content.decode('utf-8')
+                return content.decode("utf-8")
             except UnicodeDecodeError:
                 try:
-                    return content.decode('latin-1')
+                    return content.decode("latin-1")
                 except UnicodeDecodeError:
-                    return content.decode('utf-8', errors='ignore')
-                    
+                    return content.decode("utf-8", errors="ignore")
+
     except Exception as e:
         raise Exception(f"File processing error: {e}")
+
 
 @app.post("/save_txt")
 def save_txt():
@@ -2087,7 +2528,10 @@ def save_txt():
     buf = io.BytesIO(f"Q: {question}\n\nA:\n{answer}\n".encode())
     buf.seek(0)
     fname = f"chatau_{datetime.utcnow():%Y%m%d_%H%M%S}.txt"
-    return send_file(buf, mimetype="text/plain", as_attachment=True, download_name=fname)
+    return send_file(
+        buf, mimetype="text/plain", as_attachment=True, download_name=fname
+    )
+
 
 @app.post("/parse_upload")
 def parse_upload():
@@ -2109,6 +2553,7 @@ def parse_upload():
         app.logger.error(f"parse_upload failed: {e}")
         return jsonify({"ok": False, "error": f"parse_upload failed: {e}"}), 500
 
+
 @app.post("/clear_uploads")
 def clear_uploads_route():
     try:
@@ -2116,6 +2561,7 @@ def clear_uploads_route():
     except Exception as e:
         app.logger.warning(f"clear_uploads error: {e}")
     return {"status": "uploads cleared"}
+
 
 @app.get("/api/history")
 def api_history():
@@ -2137,6 +2583,7 @@ def api_history():
     items = [_doc(d) for d in cur.sort("created_at", -1).skip(skip).limit(limit)]
     return jsonify({"items": items, "skip": skip, "limit": limit})
 
+
 @app.get("/api/history/<id>")
 def api_history_one(id):
     db = get_db()
@@ -2148,6 +2595,7 @@ def api_history_one(id):
         abort(404, "not found")
     return jsonify(_doc(doc))
 
+
 @app.get("/api/uploads")
 def api_uploads():
     db = get_db()
@@ -2158,6 +2606,7 @@ def api_uploads():
     cur = db.uploads.find({}).sort([("indexed_at", -1), ("ts", -1)]).limit(limit)
     items = [_doc(d) for d in cur]
     return jsonify({"items": items, "limit": limit})
+
 
 @app.post("/attach")
 def attach():
@@ -2177,15 +2626,18 @@ def attach():
             app.logger.warning(f"[/attach] save_attachment failed: {e}")
     return jsonify({"ok": True, "items": items})
 
+
 @app.errorhandler(400)
 @app.errorhandler(422)
 @app.errorhandler(500)
 def handle_err(e):
     return jsonify(error=str(e)), getattr(e, "code", 500)
 
+
 @app.errorhandler(413)
 def too_large(e):
     return jsonify(error="File bigger than 100 MB — compress or split it."), 413
+
 
 @app.post("/upload_builtin")
 def upload_builtin():
@@ -2199,13 +2651,15 @@ def upload_builtin():
         return jsonify({"ok": False, "error": str(e)}), 500
     return jsonify({"ok": True, "files": saved})
 
+
 @app.get("/healthz")
 def healthz():
     return jsonify(ok=True)
+
 
 if __name__ == "__main__":
     app.run(
         host="0.0.0.0",
         port=int(os.getenv("PORT", 8000)),
-        debug=os.getenv("DEBUG", "0") == "1"
+        debug=os.getenv("DEBUG", "0") == "1",
     )

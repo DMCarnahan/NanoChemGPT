@@ -7,7 +7,9 @@ ROOT = Path(__file__).resolve().parents[1]
 
 ATTACH_DIR = Path(os.getenv("ATTACH_DIR", str(ROOT / "data" / "attachments"))).resolve()
 UPLOADS_DIR = Path(os.getenv("UPLOADS_DIR", str(ROOT / "data" / "uploads"))).resolve()
-LOOKUP_UPLOAD_DIR = Path(os.getenv("LOOKUP_UPLOAD_DIR", str(UPLOADS_DIR / "lookup"))).resolve()
+LOOKUP_UPLOAD_DIR = Path(
+    os.getenv("LOOKUP_UPLOAD_DIR", str(UPLOADS_DIR / "lookup"))
+).resolve()
 BUILTIN_DIR = Path(os.getenv("BUILTIN_DIR", str(ROOT / "builtin"))).resolve()
 
 _env_ba = os.getenv("BUNDLE_AUTO", "1")
