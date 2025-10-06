@@ -25,7 +25,7 @@ jobs:
       - name: Install tools
         run: |
           python -m pip install --upgrade pip
-          pip install black isort ruff
+          pip install black isort ruff black[jupyter]
       - name: Run isort
         run: python -m isort . --profile black
       - name: Run black (check)
