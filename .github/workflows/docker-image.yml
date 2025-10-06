@@ -29,19 +29,25 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Build and push
+      - name: Build and push image to GHCR
         uses: docker/build-push-action@v4
         with:
           context: .
           push: true
           tags: |
-            ghcr.io/${{ github.repository }}:{{ github.ref_name }}
+            ghcr.io/${{ github.repository }}:${{ github.ref_name }}
             ghcr.io/${{ github.repository }}:latest
           platforms: linux/amd64,linux/arm64
 
       - name: Optionally push to Docker Hub
-        if: ${{ secrets.DOCKERHUB_TOKEN && secrets.DOCKERHUB_USERNAME }}
+        env:
+          DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+          DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
         run: |
+          if [ -z "$DOCKERHUB_TOKEN" ] || [ -z "$DOCKERHUB_USERNAME" ]; then
+            echo "Docker Hub credentials not set; skipping Docker Hub push"
+            exit 0
+          fi
           echo "$DOCKERHUB_TOKEN" | docker login -u "$DOCKERHUB_USERNAME" --password-stdin
-          docker tag ghcr.io/${{ github.repository }}:{{ github.ref_name }} $DOCKERHUB_USERNAME/${{ github.repository }}:{{ github.ref_name }}
-          docker push $DOCKERHUB_USERNAME/${{ github.repository }}:{{ github.ref_name }}
+          docker tag ghcr.io/${{ github.repository }}:${{ github.ref_name }} $DOCKERHUB_USERNAME/${{ github.repository }}:${{ github.ref_name }}
+          docker push $DOCKERHUB_USERNAME/${{ github.repository }}:${{ github.ref_name }}

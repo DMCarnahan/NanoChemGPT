@@ -69,13 +69,15 @@ jobs:
 
       - name: Create GitHub Release (draft)
         id: create_release
-        uses: actions/create-release@v1
-        with:
-          tag_name: ${{ github.ref_name }}
-          release_name: ${{ github.ref_name }}
-          draft: true
-          prerelease: false
-          body: ''
+        run: |
+          # Extract changelog excerpt and create a draft release with that body
+          python scripts/extract_changelog.py --path CHANGELOG.md > changelog_body.tmp || true
+          body=$(cat changelog_body.tmp || true)
+          rm -f changelog_body.tmp
+          echo "Creating draft release for ${{ github.ref_name }}"
+          gh release create "${{ github.ref_name }}" --title "${{ github.ref_name }}" --notes "$body" --draft || true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Make dist files list for upload
         id: make_dist_output
