@@ -1,0 +1,13 @@
+__pycache__/
+dist/
+build/
+.venv/
+.venv*/
+*.pyc
+.pytest_cache/
+tests/
+docs/
+data/
+harvester/out_auto/
+*.egg-info/
+/.github/

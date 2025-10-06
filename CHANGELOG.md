@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+> Release candidate: branch `pr/ci-format-checks-2025-10-03` merged into `main`. All tests passed locally and CI format/test jobs completed successfully. Ready to tag and publish.
+
+
 ### Added
 - Comprehensive test suite with pytest framework
 - Publication-ready documentation structure

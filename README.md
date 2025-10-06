@@ -10,6 +10,10 @@ _A domain‑specific RAG system and text‑mining pipeline for nanochemistry syn
 [![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
 [![Flask](https://img.shields.io/badge/Flask-3.1.1-red.svg)](https://flask.palletsprojects.com/)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.95.2-009688.svg)](https://fastapi.tiangolo.com/)
+<!-- CI / Release badges -->
+[![CI](https://github.com/DMCarnahan/NanoChemGPT/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/DMCarnahan/NanoChemGPT/actions/workflows/ci.yml)
+[![Latest Release](https://img.shields.io/github/v/release/DMCarnahan/NanoChemGPT)](https://github.com/DMCarnahan/NanoChemGPT/releases)
+[![PyPI - Version](https://img.shields.io/pypi/v/NanoChemGPT?label=PyPI)](https://pypi.org/project/NanoChemGPT/)
 
 **Quick Links:**
 - 📚 [Complete Documentation](README_PUBLICATION.md)
@@ -192,6 +196,33 @@ ADMIN_TOKEN=change-me          # required for /admin/* endpoints
 ```
 
 The app will fall back to sensible defaults if some variables are missing, but the above is recommended.
+
+## Publishing & Docker
+
+Automated publishing and Docker image builds are provided via GitHub Actions in `.github/workflows/`.
+
+- Release (PyPI/TestPyPI): push an annotated tag `vX.Y.Z` and `release.yml` will build sdist/wheel and upload using the `PYPI_API_TOKEN` repository secret. If you prefer TestPyPI, set the secret `PUBLISH_REPOSITORY_URL` to `https://test.pypi.org/legacy/`.
+- Docker images: `docker-image.yml` builds multi-arch images and pushes to `ghcr.io/${{ github.repository }}`. To enable Docker Hub pushes, add `DOCKERHUB_USERNAME` and `DOCKERHUB_TOKEN` secrets.
+
+Quick Docker run (build locally):
+
+```powershell
+docker build -t nanochemgpt:local .
+docker run -p 8000:8000 --env-file .env nanochemgpt:local
+```
+
+Secrets required for automation
+- `PYPI_API_TOKEN` — PyPI API token for publishing wheels (required to publish automatically).
+- `PUBLISH_REPOSITORY_URL` — optional, set to TestPyPI URL to publish there instead.
+- `DOCKERHUB_USERNAME` and `DOCKERHUB_TOKEN` — optional, for pushing images to Docker Hub.
+- `GHCR_PAT` — optional, if your org requires a PAT for GHCR instead of `GITHUB_TOKEN`.
+
+Quick verification of workflows
+1. Push an annotated tag: `git tag -a vX.Y.Z -m "Release vX.Y.Z" && git push origin vX.Y.Z`.
+2. Open the Actions page and watch `Release (PyPI)` and `Build and publish Docker image` run.
+3. Inspect the `dist-artifacts-<tag>` artifact attached to the release workflow run.
+
+
 
 
 ## Building Indexes & Datasets

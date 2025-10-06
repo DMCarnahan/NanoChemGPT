@@ -15,6 +15,13 @@ jobs:
         uses: actions/setup-python@v4
         with:
           python-version: '3.11'
+      - name: Cache pip
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements*.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
       - name: Install tools
         run: |
           python -m pip install --upgrade pip
@@ -35,6 +42,13 @@ jobs:
         uses: actions/setup-python@v4
         with:
           python-version: '3.11'
+      - name: Cache pip
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements*.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
       - name: Set environment for UTF-8
         run: echo "PYTHONIOENCODING=utf-8" >> $GITHUB_ENV
       - name: Install deps
@@ -42,8 +56,16 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
           pip install -r requirements-dev.txt
-      - name: Run tests (full suite for coverage)
-        run: python -m pytest -q
+      - name: Run tests (full suite with coverage)
+        run: |
+          python -m pytest -q --cov=. --cov-report=xml:coverage.xml --cov-report=html
+      - name: Upload coverage report
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: |
+            coverage.xml
+            htmlcov
 
   miner-integration:
     runs-on: ubuntu-latest
@@ -54,6 +76,20 @@ jobs:
         uses: actions/setup-python@v4
         with:
           python-version: '3.11'
+      - name: Cache pip
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements*.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+      - name: Cache spaCy models
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/spacy
+          key: ${{ runner.os }}-spacy-${{ hashFiles('**/requirements*.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-spacy-
       - name: Set environment for UTF-8
         run: echo "PYTHONIOENCODING=utf-8" >> $GITHUB_ENV
       - name: Install deps + spaCy
