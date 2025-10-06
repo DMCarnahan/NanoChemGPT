@@ -9,10 +9,31 @@ need to reference legacy module-level names directly.
 from pathlib import Path
 import os
 from typing import List
+from tempfile import gettempdir
+import shutil
 
 from werkzeug.datastructures import FileStorage
+from werkzeug.utils import secure_filename
 
 from app_utils.constants import ATTACH_DIR, BUILTIN_DIR
+
+FALLBACK_ATTACH_DIR = Path(gettempdir()) / "nanochemgpt_attachments"
+FALLBACK_ATTACH_DIR.mkdir(exist_ok=True)
+
+
+def _ensure_dir(p: Path) -> Path:
+    try:
+        p.mkdir(parents=True, exist_ok=True)
+        return p
+    except Exception as e:
+        logger.warning(
+            "[attachments] primary dir create failed %s -> using fallback %s (%s)",
+            p,
+            FALLBACK_ATTACH_DIR,
+            e,
+        )
+        FALLBACK_ATTACH_DIR.mkdir(exist_ok=True)
+        return FALLBACK_ATTACH_DIR
 
 
 def save_attachment(file: FileStorage, max_pages: int | None = None) -> dict:
@@ -21,7 +42,6 @@ def save_attachment(file: FileStorage, max_pages: int | None = None) -> dict:
     Returns a dict with keys: id, filename, kind, n_pages (if pdf), n_chars (if pdf)
     """
     import uuid
-    from werkzeug.utils import secure_filename
 
     fname = secure_filename(file.filename or "file")
     aid = uuid.uuid4().hex[:12]
@@ -59,8 +79,6 @@ def save_attachment(file: FileStorage, max_pages: int | None = None) -> dict:
 
 def save_builtin_files(files: List[FileStorage]) -> List[str]:
     """Save builtin files into BUILTIN_DIR and return list of saved filenames."""
-    from werkzeug.utils import secure_filename
-
     saved = []
     for f in files:
         if not getattr(f, "filename", None):
@@ -123,3 +141,38 @@ def latest_attachment_id() -> str | None:
     except Exception:
         return None
     return None
+
+
+def save_attachment(file_storage, attachment_id: str) -> Path:
+    target_root = _ensure_dir(ATTACH_DIR)
+    out_dir = _ensure_dir(target_root / attachment_id)
+    fn = secure_filename(getattr(file_storage, "filename", "uploaded.bin"))
+    dest = out_dir / fn
+    try:
+        file_storage.save(dest)
+    except Exception as e:
+        logger.warning("[attachments] save failed (%s) retrying in fallback: %s", dest, e)
+        fb_dir = _ensure_dir(FALLBACK_ATTACH_DIR / attachment_id)
+        dest = fb_dir / fn
+        file_storage.save(dest)
+    return dest
+
+
+def read_attachment_text(attachment_id: str) -> str:
+    root = ATTACH_DIR / attachment_id
+    if not root.exists():
+        alt = FALLBACK_ATTACH_DIR / attachment_id
+        if alt.exists():
+            root = alt
+        else:
+            return ""
+    texts = []
+    for p in sorted(root.glob("*")):
+        if p.is_file() and p.stat().st_size < 5_000_000:
+            try:
+                txt = p.read_text(errors="ignore")
+                if txt.strip():
+                    texts.append(txt)
+            except Exception as e:
+                logger.debug("[attachments] skip %s (%s)", p, e)
+    return "\n\n".join(texts)

@@ -105,6 +105,60 @@ CONST_BUILTIN_DIR = BUILTIN_DIR
 CONST_INDEX_DIR = INDEX_DIR
 CONST_BUNDLE_AUTO = BUNDLE_AUTO
 
+# --- Writable directory safety fallback -------------------------------------
+def _ensure_writable(path: Path, name: str) -> Path:
+    """Ensure directory exists and is writable; fallback to temp if needed.
+
+    If creation fails due to permission error, create a user-writable temp
+    directory (e.g., /tmp/nanochem/<name>) and log a warning. Returns the
+    path chosen so callers can update globals.
+    """
+    try:
+        path.mkdir(parents=True, exist_ok=True)
+        # Try a trivial write test (create & delete a sentinel)
+        test_file = path / ".writable_test"
+        try:
+            test_file.write_text("ok", encoding="utf-8")
+            test_file.unlink(missing_ok=True)  # type: ignore[arg-type]
+            return path
+        except Exception:
+            pass
+    except PermissionError:
+        pass
+    except Exception:
+        # non-permission errors still fallback (conservative)
+        pass
+    # Fallback
+    import tempfile, uuid as _uuid
+    base = Path(tempfile.gettempdir()) / "nanochem"
+    try:
+        base.mkdir(parents=True, exist_ok=True)
+    except Exception:
+        # last resort: current working directory
+        base = Path.cwd() / "nanochem_tmp"
+        base.mkdir(parents=True, exist_ok=True)
+    alt = base / f"{name.lower()}_{_uuid.uuid4().hex[:8]}"
+    alt.mkdir(parents=True, exist_ok=True)
+    try:
+        print(f"[path-fallback] {name} -> {alt} (permission fallback from {path})")
+    except Exception:
+        pass
+    return alt
+
+# Apply fallback for key directories (skip if env explicitly marked NO_FALLBACK)
+if os.getenv("NANOCHEM_DISABLE_DIR_FALLBACK", "0") != "1":
+    ATTACH_DIR = _ensure_writable(Path(ATTACH_DIR), "ATTACH_DIR")
+    UPLOADS_DIR = _ensure_writable(Path(UPLOADS_DIR), "UPLOADS_DIR")
+    LOOKUP_UPLOAD_DIR = _ensure_writable(Path(LOOKUP_UPLOAD_DIR), "LOOKUP_UPLOAD_DIR")
+    BUILTIN_DIR = _ensure_writable(Path(BUILTIN_DIR), "BUILTIN_DIR")
+    INDEX_DIR = _ensure_writable(Path(INDEX_DIR), "INDEX_DIR")
+    # Refresh CONST_* aliases to reflect any fallback adjustments
+    CONST_ATTACH_DIR = ATTACH_DIR
+    CONST_UPLOADS_DIR = UPLOADS_DIR
+    CONST_LOOKUP_UPLOAD_DIR = LOOKUP_UPLOAD_DIR
+    CONST_BUILTIN_DIR = BUILTIN_DIR
+    CONST_INDEX_DIR = INDEX_DIR
+
 # Prefer final canonical constants from app_utils.constants when available.
 # This avoids undefined-name errors for static analysis and centralizes
 # path defaults for the application.
