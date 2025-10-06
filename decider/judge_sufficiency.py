@@ -31,39 +31,6 @@ def clamp01(x: float) -> float:
     return max(0.0, min(1.0, x))
 
 
-def judge_sufficiency(
-    query: str, hits, min_docs: int = 3, min_score: float = 0.15, **kwargs
-):
-    """
-    Decide if retrieval results are sufficient.
-    hits: iterable of (score, payload) or objects with .score
-    """
-    if hits is None:
-        return False, {"reason": "no_hits"}
-    scored = []
-    for h in hits:
-        try:
-            if isinstance(h, (tuple, list)) and len(h) >= 1:
-                s = float(h[0])
-            else:
-                s = float(getattr(h, "score", 0.0))
-        except Exception:
-            s = 0.0
-        scored.append(s)
-    if not scored:
-        return False, {"reason": "empty"}
-    enough_docs = len(scored) >= min_docs
-    high_enough = max(scored) >= min_score
-    ok = enough_docs and high_enough
-    return ok, {
-        "reason": "ok" if ok else "insufficient",
-        "n_docs": len(scored),
-        "max_score": max(scored),
-        "min_docs": min_docs,
-        "min_score": min_score,
-    }
-
-
 def judge_sufficiency(hits, intent: str):
     """
     Robust version: accepts

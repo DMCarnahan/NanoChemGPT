@@ -201,8 +201,6 @@ The app will fall back to sensible defaults if some variables are missing, but t
 
 Automated publishing and Docker image builds are provided via GitHub Actions in `.github/workflows/`.
 
-- Release (PyPI/TestPyPI): push an annotated tag `vX.Y.Z` and `release.yml` will build sdist/wheel and upload using the `PYPI_API_TOKEN` repository secret. If you prefer TestPyPI, set the secret `PUBLISH_REPOSITORY_URL` to `https://test.pypi.org/legacy/`.
-- Docker images: `docker-image.yml` builds multi-arch images and pushes to `ghcr.io/${{ github.repository }}`. To enable Docker Hub pushes, add `DOCKERHUB_USERNAME` and `DOCKERHUB_TOKEN` secrets.
 
 Quick Docker run (build locally):
 
@@ -210,6 +208,55 @@ Quick Docker run (build locally):
 docker build -t nanochemgpt:local .
 docker run -p 8000:8000 --env-file .env nanochemgpt:local
 ```
+
+## Deployment
+
+### Docker
+
+#### Writable Data Directories & Permissions
+The application writes uploads, attachments, indexes, and harvested bundles to data directories that default to locations derived from the project root. In some container runtimes (notably when running as a non-root user) you may see permission errors like:
+
+```
+PermissionError: [Errno 13] Permission denied: '/home/appuser/app/data'
+```
+
+To avoid this, ensure the runtime user owns the data paths. A minimal hardened Dockerfile fragment (multi-stage compatible) is:
+
+```Dockerfile
+ARG APP_USER=appuser
+RUN adduser --disabled-password --gecos "" ${APP_USER} \
+ && mkdir -p /app/data/attachments /app/data/uploads /app/data/indexes \
+ && chown -R ${APP_USER}:${APP_USER} /app/data
+USER ${APP_USER}
+
+# (Optional) pre-build retriever index if bundle exists
+# RUN python retriever/index_jsonl.py --input harvester/out_auto/bundle.jsonl --output retriever/index_doc || true
+```
+
+You can override any directory via environment variables at runtime:
+
+| Purpose | Env Var | Default (relative) |
+|---------|---------|--------------------|
+| Attachments (uploaded PDFs/text) | `ATTACH_DIR` | `data/attachments` |
+| Raw uploads (generic) | `UPLOADS_DIR` | `data/uploads` |
+| Lookup uploads (DuckDB table sources) | `LOOKUP_UPLOAD_DIR` | `data/lookup_uploads` |
+| Built‑in seed files | `BUILTIN_DIR` | `builtin` |
+| Vector / TF-IDF indexes | `INDEX_DIR` | `retriever/index_doc` |
+
+If a directory is not writable, the app now falls back to a temp path (under the system temp dir) and logs a message starting with `[path-fallback]`. To disable this safety net (e.g., in production where you prefer a hard failure) set:
+
+```
+NANOCHEM_DISABLE_DIR_FALLBACK=1
+```
+
+#### Preflight Retriever Index Check
+On startup a lightweight preflight logs warnings if TF-IDF artifacts are missing. To build them manually:
+
+```
+python retriever/index_jsonl.py --input harvester/out_auto/bundle.jsonl --output retriever/index_doc
+```
+
+You can then bake the generated `retriever/index_doc` directory into an image layer for faster cold starts.
 
 Secrets required for automation
 - `PYPI_API_TOKEN` — PyPI API token for publishing wheels (required to publish automatically).

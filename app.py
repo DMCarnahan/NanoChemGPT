@@ -386,6 +386,50 @@ RETRIEVER_URL = os.getenv(
     "RETRIEVER_URL", f"http://localhost:{os.getenv('PORT','8000')}/retriever"
 )
 
+# --- Retriever index preflight ------------------------------------------------
+def _preflight_retriever_indexes():
+    """Check presence of expected TF-IDF / vector index artifacts and log guidance.
+
+    We avoid raising hard errors so the app can still respond (albeit with
+    reduced retrieval); instead we emit actionable warnings.
+    """
+    try:
+        doc_dir = Path(
+            os.getenv(
+                "RETRIEVER_INDEX_DIR_DOC",
+                str(_ROOT / "retriever" / "index_doc"),
+            )
+        )
+        expected_any = ["tfidf.pkl", "tfidf.npz", "vectorizer.joblib"]
+        if not doc_dir.exists():
+            app.logger.warning(
+                f"[preflight] Retriever doc index dir missing: {doc_dir}. Build via: python retriever/index_jsonl.py --input harvester/out_auto/bundle.jsonl --output retriever/index_doc"
+            )
+            return
+        present = {p.name for p in doc_dir.glob("*")}
+        if not any(name in present for name in expected_any):
+            app.logger.warning(
+                f"[preflight] No TF-IDF artifacts in {doc_dir}. Run indexing script. Files present: {sorted(present)[:8]}"
+            )
+        # Optional passage index check
+        pas_dir = Path(
+            os.getenv(
+                "RETRIEVER_INDEX_DIR_PASSAGE",
+                str(_ROOT / "retriever" / "index_passage"),
+            )
+        )
+        if not pas_dir.exists():
+            app.logger.info(
+                f"[preflight] Passage index dir not found (optional): {pas_dir}"
+            )
+    except Exception as e:
+        try:
+            app.logger.warning(f"[preflight] retriever index check failed: {e}")
+        except Exception:
+            print(f"[preflight] retriever index check failed: {e}")
+
+_preflight_retriever_indexes()
+
 
 def retriever_search(
     query: str,
@@ -1736,42 +1780,41 @@ def ask():
     # Auto-harvest can be expensive and relies on optional dependencies. Gate it behind an env var.
     job_id_for_harvest = None
     if allow_fetch and _needs_more(hits):
-        if os.getenv("ENABLE_AUTO_HARVEST", "0").lower() in {"1", "true", "yes"}:
+        try:
+            # Create a job id so callers can poll progress
+            job_id_for_harvest = os.urandom(8).hex()
             try:
-                # Create a job id so callers can poll progress
-                job_id_for_harvest = os.urandom(8).hex()
-                try:
-                    _set_job(
-                        job_id_for_harvest,
-                        status="queued",
-                        progress=0,
-                        stage="queued_harvest",
-                        queries=[],
-                    )
-                except Exception:
-                    pass
-                harvest_refs = (
-                    _harvest_reindex(_expand_queries(question), jid=job_id_for_harvest)
-                    or []
-                )  # <— collect refs
-                hits = (
-                    retriever_search(
-                        question,
-                        k=web_k,
-                        level=retriever_level,
-                        k_doc=k_doc,
-                        k_passage=k_passage,
-                        w_doc=w_doc,
-                        w_passage=w_passage,
-                    )
-                    or []
+                _set_job(
+                    job_id_for_harvest,
+                    status="queued",
+                    progress=0,
+                    stage="queued_harvest",
+                    queries=[],
                 )
-            except Exception as e:
-                app.logger.warning(f"[/ask] auto-harvest failed: {e}")
-                if job_id_for_harvest:
-                    _set_job(job_id_for_harvest, status="error", error=str(e))
+            except Exception:
+                pass
+            harvest_refs = (
+                _harvest_reindex(_expand_queries(question), jid=job_id_for_harvest)
+                or []
+            )  # <— collect refs
+            hits = (
+                retriever_search(
+                    question,
+                    k=web_k,
+                    level=retriever_level,
+                    k_doc=k_doc,
+                    k_passage=k_passage,
+                    w_doc=w_doc,
+                    w_passage=w_passage,
+                )
+                or []
+            )
+        except Exception as e:
+            app.logger.warning(f"[/ask] auto-harvest failed: {e}")
+            if job_id_for_harvest:
+                _set_job(job_id_for_harvest, status="error", error=str(e))
         else:
-            app.logger.info("[/ask] auto-harvest disabled via ENABLE_AUTO_HARVEST")
+            app.logger.info("[/ask] auto-harvest unnecessary or succeeded.")
 
     # A) Build web_refs from hit.meta with aggressive normalization (extract DOI from url/text if needed)
     def _hit_meta(h):
@@ -2212,117 +2255,54 @@ def ask():
         "index_map": index_map,
     }
 
-    # judge based on helper if present; otherwise simple rule
+    # judge based on helper if present; otherwise simple length rule
     if callable(_h_judge_sufficiency):
         try:
             import inspect
 
             fn = _h_judge_sufficiency
+            sig = inspect.signature(fn)
+            params = list(sig.parameters.values())
+            # Build kwargs based on parameter names (excluding first positional if likely 'hits')
+            kw = {}
+            names = [p.name for p in params]
+            # Provide thresholds if expected
+            if "min_hits" in names:
+                kw["min_hits"] = MIN_HITS
+            elif "hits" in names and "min_hits" not in names:  # legacy alias
+                kw["hits"] = MIN_HITS
+            if "min_score" in names:
+                kw["min_score"] = MIN_SCORE
+            elif "score" in names and "min_score" not in names:
+                kw["score"] = MIN_SCORE
+            if "min_chars" in names:
+                kw["min_chars"] = MIN_CHARS
+            elif "chars" in names and "min_chars" not in names:
+                kw["chars"] = MIN_CHARS
+            # Context-like field if present
+            if "context" in names:
+                kw["context"] = context_joined
+            elif "ctx" in names:
+                kw["ctx"] = context_joined
+            elif "text" in names:
+                kw["text"] = context_joined
+            # Determine if first param is hits-like; if so pass context as second only if param count>1 and recognized
             judged_ok = False
-            last_err = None
-            # ---- Try signature-aware keyword call (question positional; rest filtered) ----
             try:
-                sig = inspect.signature(fn)
-                param_names = [p.name for p in sig.parameters.values()]
-                accepted = set(param_names) - {"question", "q"}
-                kw_final = {}
-                # thresholds
-                if "min_hits" in accepted:
-                    kw_final["min_hits"] = MIN_HITS
-                elif "hits" in accepted:
-                    kw_final["hits"] = MIN_HITS
-                if "min_score" in accepted:
-                    kw_final["min_score"] = MIN_SCORE
-                elif "score" in accepted:
-                    kw_final["score"] = MIN_SCORE
-                if "min_chars" in accepted:
-                    kw_final["min_chars"] = MIN_CHARS
-                elif "chars" in accepted:
-                    kw_final["chars"] = MIN_CHARS
-                # context-like parameter (only if explicitly accepted)
-                if "context" in accepted:
-                    kw_final["context"] = context_joined
-                elif "ctx" in accepted:
-                    kw_final["ctx"] = context_joined
-                elif "text" in accepted:
-                    kw_final["text"] = context_joined
-                judged_ok = bool(fn(question, **kw_final))
-            except TypeError as te_sig:
-                last_err = te_sig
-            except Exception as ex_sig:
-                last_err = ex_sig
-            # ---- If not ok, try <=4 positional variants, no kwargs ----
-            if not judged_ok:
-                attempts_pos = [
-                    [question],
-                    [question, context_joined],
-                    [question, MIN_HITS],
-                    [question, MIN_HITS, MIN_SCORE],
-                    [question, MIN_HITS, MIN_SCORE, MIN_CHARS],
-                    [question, context_joined, MIN_HITS],
-                    [question, context_joined, MIN_HITS, MIN_SCORE],
-                ]
-                for a in attempts_pos:
+                # distinct call styles based on declared param order
+                if names and names[0] in {"hits", "min_hits"}:
+                    judged_ok = bool(fn(hits, **kw))
+                else:
+                    # fallback: just pass hits first if a parameter likely expects iterable; else question
                     try:
-                        judged_ok = bool(fn(*a))
-                        if judged_ok:
-                            break
-                    except TypeError as te2:
-                        last_err = te2
-                        continue
-                    except Exception as ex2:
-                        last_err = ex2
-                        continue
-            # ---- As a last resort, try safe keyword-only variants WITHOUT any context key first ----
-            if not judged_ok:
-                kw_candidates = [
-                    {
-                        "min_hits": MIN_HITS,
-                        "min_score": MIN_SCORE,
-                        "min_chars": MIN_CHARS,
-                    },
-                    {"hits": MIN_HITS, "score": MIN_SCORE, "chars": MIN_CHARS},
-                    # Then context-like keys, attempted only after non-context variants
-                    {
-                        "min_hits": MIN_HITS,
-                        "min_score": MIN_SCORE,
-                        "min_chars": MIN_CHARS,
-                        "ctx": context_joined,
-                    },
-                    {
-                        "min_hits": MIN_HITS,
-                        "min_score": MIN_SCORE,
-                        "min_chars": MIN_CHARS,
-                        "text": context_joined,
-                    },
-                    {
-                        "hits": MIN_HITS,
-                        "score": MIN_SCORE,
-                        "chars": MIN_CHARS,
-                        "ctx": context_joined,
-                    },
-                    {
-                        "hits": MIN_HITS,
-                        "score": MIN_SCORE,
-                        "chars": MIN_CHARS,
-                        "text": context_joined,
-                    },
-                ]
-                for kw in kw_candidates:
-                    try:
+                        judged_ok = bool(fn(hits, **kw))
+                    except TypeError:
                         judged_ok = bool(fn(question, **kw))
-                        if judged_ok:
-                            break
-                    except TypeError as te3:
-                        last_err = te3
-                        continue
-                    except Exception as ex3:
-                        last_err = ex3
-                        continue
-            if not judged_ok and last_err is not None:
-                app.logger.warning(f"[/ask] judge/enqueue error (helper): {last_err}")
+            except Exception as call_err:
+                app.logger.warning(f"[/ask] judge helper call error: {call_err}")
+                judged_ok = len(context_joined) >= MIN_CHARS
         except Exception as e:
-            app.logger.warning(f"[/ask] judge/enqueue error (helper): {e}")
+            app.logger.warning(f"[/ask] judge helper setup error: {e}")
             judged_ok = len(context_joined) >= MIN_CHARS
     else:
         judged_ok = len(context_joined) >= MIN_CHARS
