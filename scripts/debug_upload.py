@@ -38,7 +38,7 @@ def test_vector_store():
         uploads_dir = Path("/mnt/data/uploads")
         uploads_dir.mkdir(parents=True, exist_ok=True)
 
-        uvs = UploadsVectorSearch.from_folder(uploads_dir, device="cpu", max_docs=10)
+        UploadsVectorSearch.from_folder(uploads_dir, device="cpu", max_docs=10)
         print("   ✓ UploadsVectorSearch created successfully")
 
     except Exception as e:

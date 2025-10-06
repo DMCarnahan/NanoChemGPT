@@ -143,7 +143,7 @@ def test_method_paragraph_extraction():
             original_length = len(mixed_text)
             processed_length = len(result.get("original_text", ""))
 
-            print(f"\nMethod extraction test:")
+            print("\nMethod extraction test:")
             print(f"Original text: {original_length} chars")
             print(f"Processed text: {processed_length} chars")
 

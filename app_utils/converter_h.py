@@ -287,7 +287,7 @@ def _ensure_transfer_pours(step):
     ops = step.get("ops") or []
     mops = step.get("micro_ops") or []
     idx = mops[0].get("step_index") if mops else step.get("index")
-    existing_pour = any(m.get("verb") == "pour" for m in mops)
+    any(m.get("verb") == "pour" for m in mops)
     transfers = [op for op in ops if op.get("op") == "transfer"]
     # If any transfer exists and no pour recorded, add a single pour per transfer (conservative order: after placement)
     if transfers:
@@ -326,7 +326,7 @@ def _ensure_centrifuge_motion(step):
     has_place_cf = any(
         m.get("verb") == "place" and m.get("to") == "centrifuge" for m in mops
     ) or any(m.get("verb") == "place" and m.get("to") == cfid for m in mops)
-    has_wait = any(m.get("verb") == "wait" for m in mops)
+    any(m.get("verb") == "wait" for m in mops)
     # Build missing pieces conservatively at the start of micro_ops
     new = []
     if not has_pick:
@@ -374,7 +374,6 @@ def _ensure_centrifuge_motion(step):
         mops = norm
     # Deduplicate consecutive identical entries
     dedup = []
-    seen = set()
     for m in mops:
         key = json.dumps(m, sort_keys=True)
         if not dedup or json.dumps(dedup[-1], sort_keys=True) != key:

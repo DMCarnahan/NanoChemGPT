@@ -146,14 +146,14 @@ if __name__ == "__main__":
     time.sleep(5)
 
     # Test 3: Status endpoint logic
-    print(f"\n3️⃣  Testing status endpoint auto-completion:")
+    print("\n3️⃣  Testing status endpoint auto-completion:")
     time.sleep(32)  # Wait for the 30-second timeout
     test_status_endpoint_logic(test_jid)
 
     # Wait for thread to complete
     thread.join()
 
-    print(f"\n4️⃣  Final job state:")
+    print("\n4️⃣  Final job state:")
     try:
         p = JOB_DIR / f"{test_jid}.json"
         if p.exists():
@@ -164,4 +164,4 @@ if __name__ == "__main__":
     except Exception as e:
         print(f"❌ Error reading final state: {e}")
 
-    print(f"\n🎯 Test completed! Check data/jobs/ for job files.")
+    print("\n🎯 Test completed! Check data/jobs/ for job files.")

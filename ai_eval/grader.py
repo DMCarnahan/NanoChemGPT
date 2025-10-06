@@ -559,7 +559,7 @@ def rel_eval(gold, preds, match_mode="iou", thr=0.5):
         gid = gex["id"]
         pex = pred_by_id.get(gid, {})
         text = gex.get("text")
-        ptext = pex.get("text", text)
+        pex.get("text", text)
         gents = safe_entities(gex)
         pents = safe_entities(pex)
         grels = safe_relations(gex)
@@ -605,7 +605,7 @@ def rel_eval(gold, preds, match_mode="iou", thr=0.5):
                 # fallback: try int
                 try:
                     return int(ref)
-                except:
+                except Exception:
                     return None
 
             hi = idx_from_ref(r["head"])
@@ -628,7 +628,7 @@ def rel_eval(gold, preds, match_mode="iou", thr=0.5):
                             return j
                 try:
                     return int(ref)
-                except:
+                except Exception:
                     return None
 
             hj = pidx(r["head"])

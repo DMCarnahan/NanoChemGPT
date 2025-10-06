@@ -668,7 +668,7 @@ def _final_invariants(doc):
                 {"op": "wait", "minutes": int(minutes)},
             ]
             # micro: place OV1, set temp, wait minutes
-            step_m = [mo for mo in doc["micro_plan"] if mo.get("step_index") == si]
+            [mo for mo in doc["micro_plan"] if mo.get("step_index") == si]
             doc["micro_plan"] = [
                 mo for mo in doc["micro_plan"] if mo.get("step_index") != si
             ]

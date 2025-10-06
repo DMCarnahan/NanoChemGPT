@@ -59,6 +59,7 @@ except Exception:
     from pydantic import BaseModel
 
 from vector_store import embed  # returns List[List[float]]
+from app_utils.constants import INDEX_DIR as CONST_INDEX_DIR
 
 log = logging.getLogger("retriever")
 log.setLevel(logging.INFO)
@@ -70,8 +71,9 @@ app = FastAPI(title="NanoChemGPT Retriever")
 # attempting to write to root-level folders like '/data' (which CI often
 # forbids). If creation fails due to permissions, fall back to a temp dir.
 REPO_ROOT = Path(__file__).resolve().parents[1]
+# Default index dir: prefer canonical constant but keep repo-local fallback
 _default_index = REPO_ROOT / "vector_store"
-INDEX_DIR = Path(os.getenv("INDEX_DIR", str(_default_index)))
+INDEX_DIR = Path(os.getenv("INDEX_DIR", str(CONST_INDEX_DIR or _default_index)))
 FAISS_INDEX_PATH = Path(os.getenv("FAISS_INDEX_PATH", str(INDEX_DIR / "index.faiss")))
 TEXTS_PATH = Path(os.getenv("KB_TEXTS_PATH", str(INDEX_DIR / "texts.jsonl")))
 # default bundle inside the repo harvester output (safer than /data/out)

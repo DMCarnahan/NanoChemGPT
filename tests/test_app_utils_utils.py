@@ -34,9 +34,6 @@ def test_clean_verbatim_block_replaces_tokens():
     assert "attachment" not in out
 
 
-from app_utils import utils as u
-
-
 def test_s_returns_string():
     assert isinstance(u.s(None), str)
     assert u.s(123) == "123"

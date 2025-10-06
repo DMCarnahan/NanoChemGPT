@@ -37,7 +37,7 @@ def build_prompt(question: str, hits: List[Dict[str, Any]]) -> str:
         prioritized, others = [], []
         for p in e.get("parameters", []) or []:
             pname = (p.get("name") or "").strip()
-            role = (p.get("role") or "").strip()
+            (p.get("role") or "").strip()
             for eff in p.get("effects", []) or []:
                 tgt = (eff.get("target") or "").strip().lower()
                 line = f"{system}|{route}: {pname} -> {eff.get('target','')} ({eff.get('direction','')}); rationale: {eff.get('mechanistic_rationale','')}"
@@ -235,7 +235,7 @@ def ask():
     # Retrieve mechanistic facts
     try:
         hits = search(question, k=k, embedder=Embedder())
-    except Exception as e:
+    except Exception:
         traceback.print_exc()
         hits = []
 

@@ -1,7 +1,6 @@
 ﻿from __future__ import annotations
 
-import json
-import os
+import os, json
 from pathlib import Path
 from typing import Any, Dict, List, Tuple
 
@@ -9,7 +8,6 @@ import joblib
 import numpy as np
 
 # ------------------------------ Path resolution ------------------------------
-
 
 def _env_paths() -> Dict[str, Path]:
     out: Dict[str, Path] = {}
@@ -19,21 +17,15 @@ def _env_paths() -> Dict[str, Path]:
     if mp:
         parts = [p for p in mp.split(":") if p.strip()]
         for i, p in enumerate(parts):
-            lab = (
-                "doc"
-                if ("doc" in p)
-                else ("passage" if "passage" in p else f"idx{i+1}")
-            )
+            lab = "doc" if ("doc" in p) else ("passage" if "passage" in p else f"idx{i+1}")
             out[lab] = Path(p).resolve()
         return out
 
     # 2) Explicit singles
     doc = os.getenv("RETRIEVER_INDEX_DIR_DOC")
     pas = os.getenv("RETRIEVER_INDEX_DIR_PASSAGE")
-    if doc:
-        out["doc"] = Path(doc).resolve()
-    if pas:
-        out["passage"] = Path(pas).resolve()
+    if doc: out["doc"] = Path(doc).resolve()
+    if pas: out["passage"] = Path(pas).resolve()
     if out:
         return out
 
@@ -55,7 +47,6 @@ def _env_paths() -> Dict[str, Path]:
     out["doc"] = (base / "index").resolve()
     return out
 
-
 def _labels_and_paths() -> List[Tuple[str, Path]]:
     env = _env_paths()
     items = list(env.items())
@@ -64,21 +55,17 @@ def _labels_and_paths() -> List[Tuple[str, Path]]:
     items.sort(key=lambda kv: order.get(kv[0], 2))
     return items
 
-
 # ------------------------------ Caches ---------------------------------------
 
 _BUNDLES: Dict[Path, Dict[str, Any]] = {}
 _VECS: Dict[Path, Tuple[Any, Any]] = {}
-
 
 def reload_caches() -> bool:
     _BUNDLES.clear()
     _VECS.clear()
     return True
 
-
 # ------------------------------ Utils ----------------------------------------
-
 
 def _ensure_texts_metas(bundle: dict) -> dict:
     X = bundle.get("matrix")
@@ -86,7 +73,7 @@ def _ensure_texts_metas(bundle: dict) -> dict:
 
     texts = bundle.get("texts")
     metas = bundle.get("metas")
-    rows = bundle.get("rows")
+    rows  = bundle.get("rows")
 
     if rows and not texts:
         try:
@@ -97,10 +84,8 @@ def _ensure_texts_metas(bundle: dict) -> dict:
         metas = rows
 
     def _as_list(x, n, fill):
-        if x is None:
-            return [fill() for _ in range(n)]
-        if isinstance(x, tuple):
-            x = list(x)
+        if x is None: return [fill() for _ in range(n)]
+        if isinstance(x, tuple): x = list(x)
         if isinstance(x, dict):
             try:
                 if all(str(k).isdigit() for k in x.keys()):
@@ -130,13 +115,11 @@ def _ensure_texts_metas(bundle: dict) -> dict:
     bundle["texts"] = texts
     bundle["metas"] = metas
     bundle["vec"] = bundle.get("vectorizer")
-    bundle["nn"] = bundle.get("matrix")
+    bundle["nn"]  = bundle.get("matrix")
     return bundle
 
-
 def _pick_from_sequence(obj):
-    mat = vec = None
-    texts = metas = None
+    mat = vec = None; texts = metas = None
     for x in obj:
         try:
             if hasattr(x, "shape"):
@@ -151,7 +134,6 @@ def _pick_from_sequence(obj):
             pass
     return mat, vec, texts, metas
 
-
 def _vectorizer_from_vocab_obj(vobj):
     try:
         from sklearn.feature_extraction.text import TfidfVectorizer
@@ -165,35 +147,26 @@ def _vectorizer_from_vocab_obj(vobj):
         return None
     return TfidfVectorizer(vocabulary=vocab_map)
 
-
 # ------------------------------ Loaders --------------------------------------
 
-
 def _load_tfidf_for(idx: Path, force: bool = False) -> Dict[str, Any]:
-    if not isinstance(idx, Path):
-        idx = Path(idx)
+    if not isinstance(idx, Path): idx = Path(idx)
     idx = idx.resolve()
-    if idx in _BUNDLES and not force:
-        return _BUNDLES[idx]
+    if idx in _BUNDLES and not force: return _BUNDLES[idx]
 
-    pkl = idx / "tfidf.pkl"
-    npz = idx / "tfidf.npz"
-    vecj = idx / "vectorizer.joblib"
+    pkl   = idx / "tfidf.pkl"
+    npz   = idx / "tfidf.npz"
+    vecj  = idx / "vectorizer.joblib"
     vocab = idx / "vocab.json"
 
     print(f"[retriever] Using INDEX_DIR={idx}")
     prefer_npz = os.getenv("RETRIEVER_PREFER_NPZ", "1").lower() in {"1", "true", "yes"}
-    disable_pkl = os.getenv("RETRIEVER_DISABLE_PICKLE", "").lower() in {
-        "1",
-        "true",
-        "yes",
-    }
+    disable_pkl = os.getenv("RETRIEVER_DISABLE_PICKLE", "").lower() in {"1", "true", "yes"}
 
     # --- NPZ first if preferred ---
     if prefer_npz and npz.exists():
         try:
             from scipy.sparse import load_npz  # type: ignore
-
             X = load_npz(npz)
         except Exception:
             f = np.load(npz)
@@ -218,12 +191,10 @@ def _load_tfidf_for(idx: Path, force: bool = False) -> Dict[str, Any]:
             bundle = {"kind": "matrix", "matrix": X, "vectorizer": vectorizer}
             # sanity-check shapes
             try:
-                n_cols = int(getattr(X, "shape", (0, 0))[1]) if X is not None else 0
+                n_cols = int(getattr(X, "shape", (0,0))[1]) if X is not None else 0
                 vocab_size = int(len(getattr(vectorizer, "vocabulary_", {}) or {}))
                 if vocab_size and n_cols and vocab_size != n_cols:
-                    print(
-                        f"[retriever] WARN: matrix_cols={n_cols} != vocab_size={vocab_size} @ {idx}"
-                    )
+                    print(f"[retriever] WARN: matrix_cols={n_cols} != vocab_size={vocab_size} @ {idx}")
             except Exception as _e:
                 print(f"[retriever] shape check warn: {_e}")
 
@@ -236,9 +207,7 @@ def _load_tfidf_for(idx: Path, force: bool = False) -> Dict[str, Any]:
         try:
             obj = joblib.load(pkl)
         except Exception as e:
-            print(
-                f"[retriever] Failed to load {pkl}: {e}. Will try npz/vectorizer fallbacks."
-            )
+            print(f"[retriever] Failed to load {pkl}: {e}. Will try npz/vectorizer fallbacks.")
             obj = None
 
         # dict format
@@ -265,15 +234,12 @@ def _load_tfidf_for(idx: Path, force: bool = False) -> Dict[str, Any]:
             if X is not None and vectorizer is not None:
                 bundle = {"kind": "matrix", "matrix": X, "vectorizer": vectorizer}
                 for k in ("texts", "metas", "rows", "license", "titles"):
-                    if k in obj:
-                        bundle[k] = obj[k]
+                    if k in obj: bundle[k] = obj[k]
                 try:
-                    n_cols = int(getattr(X, "shape", (0, 0))[1]) if X is not None else 0
+                    n_cols = int(getattr(X, "shape", (0,0))[1]) if X is not None else 0
                     vocab_size = int(len(getattr(vectorizer, "vocabulary_", {}) or {}))
                     if vocab_size and n_cols and vocab_size != n_cols:
-                        print(
-                            f"[retriever] WARN: matrix_cols={n_cols} != vocab_size={vocab_size} @ {idx}"
-                        )
+                        print(f"[retriever] WARN: matrix_cols={n_cols} != vocab_size={vocab_size} @ {idx}")
                 except Exception as _e:
                     print(f"[retriever] shape check warn: {_e}")
                 _BUNDLES[idx] = _ensure_texts_metas(bundle)
@@ -284,18 +250,14 @@ def _load_tfidf_for(idx: Path, force: bool = False) -> Dict[str, Any]:
         if isinstance(obj, (list, tuple)):
             X, vectorizer, texts, metas = _pick_from_sequence(obj)
             if X is not None and vectorizer is not None:
-                bundle = {"kind": "matrix", "matrix": X, "vectorizer": vectorizer}
-                if texts is not None:
-                    bundle["texts"] = texts
-                if metas is not None:
-                    bundle["metas"] = metas
+                bundle = {"kind":"matrix","matrix": X, "vectorizer": vectorizer}
+                if texts is not None: bundle["texts"] = texts
+                if metas is not None: bundle["metas"] = metas
                 try:
-                    n_cols = int(getattr(X, "shape", (0, 0))[1]) if X is not None else 0
+                    n_cols = int(getattr(X, "shape", (0,0))[1]) if X is not None else 0
                     vocab_size = int(len(getattr(vectorizer, "vocabulary_", {}) or {}))
                     if vocab_size and n_cols and vocab_size != n_cols:
-                        print(
-                            f"[retriever] WARN: matrix_cols={n_cols} != vocab_size={vocab_size} @ {idx}"
-                        )
+                        print(f"[retriever] WARN: matrix_cols={n_cols} != vocab_size={vocab_size} @ {idx}")
                 except Exception as _e:
                     print(f"[retriever] shape check warn: {_e}")
                 _BUNDLES[idx] = _ensure_texts_metas(bundle)
@@ -305,7 +267,6 @@ def _load_tfidf_for(idx: Path, force: bool = False) -> Dict[str, Any]:
     if npz.exists():
         try:
             from scipy.sparse import load_npz  # type: ignore
-
             X = load_npz(npz)
         except Exception:
             f = np.load(npz)
@@ -329,7 +290,7 @@ def _load_tfidf_for(idx: Path, force: bool = False) -> Dict[str, Any]:
         if vectorizer is None:
             raise RuntimeError(f"Found {npz} but no vectorizer.joblib or vocab.json")
 
-        bundle = {"kind": "matrix", "matrix": X, "vectorizer": vectorizer}
+        bundle = {"kind":"matrix","matrix": X, "vectorizer": vectorizer}
         _BUNDLES[idx] = _ensure_texts_metas(bundle)
         return _BUNDLES[idx]
 
@@ -338,16 +299,11 @@ def _load_tfidf_for(idx: Path, force: bool = False) -> Dict[str, Any]:
         f"Expected tfidf.pkl (dict/tuple) or tfidf.npz + vectorizer.joblib/vocab.json."
     )
 
-
 def _get_vec_nn(idx: Path) -> Tuple[Any, Any]:
-    if idx in _VECS:
-        return _VECS[idx]
+    if idx in _VECS: return _VECS[idx]
     tf = _load_tfidf_for(idx)
-    vec = tf.get("vectorizer")
-    nn = tf.get("matrix")
-    _VECS[idx] = (vec, nn)
-    return _VECS[idx]
-
+    vec = tf.get("vectorizer"); nn = tf.get("matrix")
+    _VECS[idx] = (vec, nn); return _VECS[idx]
 
 def _build_query_vec(vec, query: str):
     try:
@@ -356,7 +312,6 @@ def _build_query_vec(vec, query: str):
         if hasattr(vec, "encode"):
             return vec.encode([query])
         raise
-
 
 def _cosine_sim(qv, M):
     try:
@@ -374,7 +329,7 @@ def _cosine_sim(qv, M):
 
     # 2) Sparse matrix path
     if sp is not None and sp.issparse(M):
-        tmp = M @ q.reshape(-1, 1)  # this is usually a dense ndarray
+        tmp = M @ q.reshape(-1, 1)          # this is usually a dense ndarray
         if sp.issparse(tmp):
             s = tmp.toarray().ravel()
         else:
@@ -391,23 +346,16 @@ def _cosine_sim(qv, M):
     row_norms = np.linalg.norm(Md, axis=1) + 1e-8
     return (Md @ q.reshape(-1, 1)).ravel() / row_norms
 
-
 def _topk(scores: np.ndarray, k: int) -> np.ndarray:
-    k = max(1, int(k))
-    k = min(k, scores.shape[0])
+    k = max(1, int(k)); k = min(k, scores.shape[0])
     idx = np.argpartition(scores, -k)[-k:]
     return idx[np.argsort(scores[idx])[::-1]]
 
-
 def _safe_float(v, default):
-    try:
-        return float(v)
-    except Exception:
-        return float(default)
-
+    try: return float(v)
+    except Exception: return float(default)
 
 # ------------------------------ Public API -----------------------------------
-
 
 def search(query: str, k: int = 5, **kwargs) -> Dict[str, Any]:
     merged: List[Dict[str, Any]] = []
@@ -417,11 +365,11 @@ def search(query: str, k: int = 5, **kwargs) -> Dict[str, Any]:
     if not label_paths:
         return {"query": query, "k": k, "hits": []}
 
-    want_both = (level in ("both", "all")) or (level == "auto" and len(label_paths) > 1)
+    want_both = (level in ("both","all")) or (level == "auto" and len(label_paths) > 1)
     if want_both:
         targets: List[Tuple[str, Path]] = label_paths
     else:
-        targets = [next(((l, p) for l, p in label_paths if l == level), label_paths[0])]
+        targets = [next(((l,p) for l,p in label_paths if l==level), label_paths[0])]
 
     k_doc = int(kwargs.get("k_doc", k))
     k_pas = int(kwargs.get("k_passage", k))
@@ -434,7 +382,7 @@ def search(query: str, k: int = 5, **kwargs) -> Dict[str, Any]:
         vec, nn = _get_vec_nn(idx_path)
         qv = _build_query_vec(vec, query)
         scores = _cosine_sim(qv, nn)
-        if scores.size == 0:
+        if scores.size == 0: 
             continue
         kk = k_doc if lab == "doc" else (k_pas if lab == "passage" else k_other)
         top = _topk(scores, kk)
@@ -451,58 +399,43 @@ def search(query: str, k: int = 5, **kwargs) -> Dict[str, Any]:
             i = int(i)
             meta = metas[i] if i < len(metas) else {}
             txt = (texts[i] if i < len(texts) else "") or ""
-            merged.append(
-                {
-                    "i": i,
-                    "score": float(sc * weight),
-                    "text": txt[:1200],
-                    "meta": meta,
-                    "level": lab,
-                    "index_dir": str(idx_path),
-                }
-            )
+            merged.append({
+                "i": i,
+                "score": float(sc * weight),
+                "text": txt[:1200],
+                "meta": meta,
+                "level": lab,
+                "index_dir": str(idx_path),
+            })
 
     if not merged:
         return {"query": query, "k": k, "hits": []}
 
     merged.sort(key=lambda h: h["score"], reverse=True)
-    merged = merged[: max(1, int(k))]
-    return {
-        "query": query,
-        "k": k,
-        "level": level,
-        "hits": merged,
-        "levels": [lv for lv, _ in label_paths],
-    }
-
+    merged = merged[:max(1, int(k))]
+    return {"query": query, "k": k, "level": level, "hits": merged, "levels": [lv for lv,_ in label_paths]}
 
 def health() -> Dict[str, Any]:
     info = {"ok": True, "indexes": []}
     for lab, p in _labels_and_paths():
         try:
             tf = _load_tfidf_for(p)
-            nn = tf.get("matrix")
-            vec = tf.get("vectorizer")
-            n_rows, n_cols = getattr(nn, "shape", (0, 0)) or (0, 0)
+            nn = tf.get("matrix"); vec = tf.get("vectorizer")
+            n_rows, n_cols = (getattr(nn, "shape", (0,0)) or (0,0))
             vocab_size = int(len(getattr(vec, "vocabulary_", {}) or {}))
-            info["indexes"].append(
-                {
-                    "label": lab,
-                    "path": str(p),
-                    "docs": int(n_rows),
-                    "matrix_cols": int(n_cols),
-                    "vocab_size": vocab_size,
-                }
-            )
+            info["indexes"].append({
+                "label": lab, "path": str(p),
+                "docs": int(n_rows),
+                "matrix_cols": int(n_cols),
+                "vocab_size": vocab_size
+            })
         except Exception as e:
             info["indexes"].append({"label": lab, "path": str(p), "error": str(e)})
     if not info["indexes"]:
         return {"ok": False, "error": "no index dirs found"}
     return info
 
-
 # -------- Back-compat shim for old /reload handlers --------
-
 
 def _load_tfidf(force: bool = False) -> List[Dict[str, Any]]:
     warmed = []
@@ -516,19 +449,9 @@ def _load_tfidf(force: bool = False) -> List[Dict[str, Any]]:
             warmed.append({"label": label, "path": str(path), "error": str(e)})
     return warmed
 
-
 if __name__ == "__main__":
     print("[retriever] paths:", _env_paths())
     print("[retriever] health:", json.dumps(health(), indent=2))
-    print(
-        "[retriever] doc:",
-        json.dumps(search("cobalt nanowire synthesis", k=3, level="doc"), indent=2),
-    )
-    print(
-        "[retriever] passage:",
-        json.dumps(search("cobalt nanowire synthesis", k=3, level="passage"), indent=2),
-    )
-    print(
-        "[retriever] both:",
-        json.dumps(search("cobalt nanowire synthesis", k=5, level="both"), indent=2),
-    )
+    print("[retriever] doc:", json.dumps(search("cobalt nanowire synthesis", k=3, level="doc"), indent=2))
+    print("[retriever] passage:", json.dumps(search("cobalt nanowire synthesis", k=3, level="passage"), indent=2))
+    print("[retriever] both:", json.dumps(search("cobalt nanowire synthesis", k=5, level="both"), indent=2))

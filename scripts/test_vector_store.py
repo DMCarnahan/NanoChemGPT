@@ -24,7 +24,7 @@ def test_vector_store_operations():
 
         import time
 
-        start_time = time.time()
+        time.time()
 
         # Set a timeout for this operation
         import threading
@@ -78,7 +78,7 @@ def test_sentence_transformers():
 
         # Try encoding
         start = time.time()
-        embeddings = model.encode(["test sentence"])
+        model.encode(["test sentence"])
         elapsed = time.time() - start
         print(f"✅ Encoding completed in {elapsed:.1f}s")
 

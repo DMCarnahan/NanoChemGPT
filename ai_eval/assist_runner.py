@@ -184,7 +184,7 @@ def force_schema(task, ex, obj, fallback_hints):
                     k += 1
                     if 0 <= st < en <= len(text):
                         eout.append({"start": st, "end": en, "label": lab, "eid": eid})
-                except:
+                except Exception:
                     continue
         valid_ids = {e["eid"] for e in eout}
         rout = []
@@ -196,7 +196,7 @@ def force_schema(task, ex, obj, fallback_hints):
                     lab = str(r["label"])
                     if h in valid_ids and t in valid_ids:
                         rout.append({"head": h, "tail": t, "label": lab})
-                except:
+                except Exception:
                     continue
         return {"id": idv, "text": text, "entities": eout, "relations": rout}
     if task == "bio":
@@ -406,7 +406,6 @@ def main():
                 row = {"id": ex["id"], "text": ex["text"], "spans": hints["entities"]}
             elif args.task == "rel":
                 ents = []
-                used = set()
                 k = 1
                 for e in hints["entities"]:
                     try:
@@ -419,7 +418,7 @@ def main():
                             ents.append(
                                 {"start": st, "end": en, "label": lab, "eid": eid}
                             )
-                    except:
+                    except Exception:
                         continue
                 row = {
                     "id": ex["id"],

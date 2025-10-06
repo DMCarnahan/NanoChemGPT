@@ -68,11 +68,6 @@ def _embed_openai(texts: List[str], model: str) -> np.ndarray:
     return np.vstack(vecs)
 
 
-from typing import List, Optional
-
-import numpy as np
-
-
 def _embed_st(
     texts: List[str],
     model: str,

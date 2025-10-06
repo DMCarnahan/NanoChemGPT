@@ -472,7 +472,7 @@ def main():
             )
 
             # Map back to original dedup format, preserving enhanced metadata
-            relevance_map = {i: paper for i, paper in enumerate(enhanced_papers)}
+            {i: paper for i, paper in enumerate(enhanced_papers)}
             filtered_dedup = []
 
             for i, rec in enumerate(dedup):

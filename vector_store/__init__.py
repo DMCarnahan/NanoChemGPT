@@ -113,7 +113,7 @@ def _encode_openai(texts: List[str]) -> np.ndarray:
                 resp = client.embeddings.create(model=OPENAI_EMB, input=chunk)
                 out.extend(e.embedding for e in resp.data)
                 break
-            except Exception as e:
+            except Exception:
                 if attempt == 2:
                     raise
                 time.sleep(0.5 * (attempt + 1))
@@ -567,8 +567,12 @@ def search(
         dv = _encode(texts)  # (n,d)
 
         d = dv.shape[1]
-        tmp = faiss.IndexFlatIP(d)
+        # use the lazily-imported faiss backend (imported as `_faiss` at module top)
+        if not HAS_FAISS or _faiss is None:
+            raise RuntimeError("faiss is not available; cannot perform local search")
+        tmp = _faiss.IndexFlatIP(d)
         tmp.add(dv)
+
         D, I = tmp.search(qv, min(max(k * 2, k), len(texts)))  # a little wider
 
         # 4) Collect candidates

@@ -4,9 +4,10 @@
 Usage: python scripts/extract_changelog.py --path CHANGELOG.md
 Prints the extracted content to stdout.
 """
+
+from pathlib import Path
 import argparse
 import re
-from pathlib import Path
 
 
 def extract(text: str) -> str:
@@ -18,7 +19,7 @@ def extract(text: str) -> str:
     sub = re.search(r"(?m)^###\s*.*$", block)
     if sub:
         start = sub.start()
-        rest = block[start+1:]
+        rest = block[start + 1 :]
         next_sub = re.search(r"(?m)^###\s*.*$", rest)
         if next_sub:
             end = start + 1 + next_sub.start()
@@ -31,7 +32,7 @@ def extract(text: str) -> str:
     return content
 
 
-def main():
+def main() -> None:
     p = argparse.ArgumentParser()
     p.add_argument("--path", default="CHANGELOG.md")
     args = p.parse_args()

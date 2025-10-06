@@ -13,7 +13,6 @@ def render_protocol_md(facts: Dict) -> str:
     parts = []
     if facts.get("materials"):
         parts.append("## Materials")
-        mats = []
         for m in facts["materials"]:
             parts.append(
                 f"- **{m.get('name')}** — {m.get('role')} ({m.get('concentration')}, {m.get('volume')})"

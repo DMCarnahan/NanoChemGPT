@@ -44,7 +44,7 @@ def search_eupmc(query: str, since_year=None, max_results=25) -> List[Dict[str, 
         r = httpx.get(EPMC_SEARCH, params=params, timeout=45.0)
         try:
             r.raise_for_status()
-        except httpx.HTTPStatusError as e:
+        except httpx.HTTPStatusError:
             # Retry with tiny page if server rejected the request
             if r.status_code == 400:
                 params["pageSize"] = 25
@@ -53,7 +53,7 @@ def search_eupmc(query: str, since_year=None, max_results=25) -> List[Dict[str, 
             else:
                 raise
         js = r.json()
-    except Exception as e:
+    except Exception:
         # Surface a minimal, traceable error structure in-band if caller wants to log it
         return []
 

@@ -24,7 +24,7 @@ def search_arxiv(query: str, max_results: int = 6, start: int = 0) -> List[Dict]
     r = httpx.get(ARXIV_ENDPOINT, params=params, timeout=30.0)
     try:
         r.raise_for_status()
-    except httpx.HTTPStatusError as e:
+    except httpx.HTTPStatusError:
         # Try a safe fallback with tiny page size if arXiv rejects the request
         if r.status_code == 400:
             params["max_results"] = 5

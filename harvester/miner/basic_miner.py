@@ -113,7 +113,7 @@ class BasicMiner:
                 cand = "en_core_web_sm"
         try:
             self.nlp = spacy.load(cand)
-        except Exception as e:
+        except Exception:
             # Final fallback to small English model
             self.nlp = spacy.load("en_core_web_sm")
 

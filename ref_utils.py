@@ -240,7 +240,6 @@ def dedupe_refs(
         if isinstance(r.get("authors"), list):
             r["authors"] = ", ".join(r["authors"])
 
-    by_key = {}  # (doi|pmid|arxiv|titlekey) -> kept_ref
     kept = []
     merge_map: Dict[int, int] = {}
     groups: List[List[int]] = []
