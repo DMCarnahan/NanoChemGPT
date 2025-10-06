@@ -406,6 +406,27 @@ def _safe_float(v, default):
 
 
 # ------------------------------ Public API -----------------------------------
+def _ensure_tfidf_index(idx_path: Path):
+    """Attempt to build a minimal TF-IDF index if missing."""
+    from pathlib import Path as _P
+
+    if (idx_path / "tfidf.pkl").exists() or (idx_path / "tfidf.npz").exists():
+        return
+    bundle_jsonl = Path("harvester/out_auto/bundle.jsonl")
+    if not bundle_jsonl.exists():
+        logger.warning("[retriever] cannot auto-build tfidf: %s missing", bundle_jsonl)
+        return
+    try:
+        from retriever.index_jsonl import build_tfidf_for_jsonl
+    except Exception:
+        logger.warning("[retriever] build_tfidf_for_jsonl not available")
+        return
+    try:
+        idx_path.mkdir(parents=True, exist_ok=True)
+        logger.info("[retriever] auto-building tfidf for %s", idx_path)
+        build_tfidf_for_jsonl(str(bundle_jsonl), str(idx_path))
+    except Exception as e:
+        logger.warning("[retriever] auto-build failed: %s", e)
 
 
 def search(query: str, k: int = 5, **kwargs) -> Dict[str, Any]:
@@ -429,6 +450,7 @@ def search(query: str, k: int = 5, **kwargs) -> Dict[str, Any]:
     w_pas = _safe_float(kwargs.get("w_passage", os.getenv("WEIGHT_PASSAGE", 0.4)), 0.4)
 
     for lab, idx_path in targets:
+        _ensure_tfidf_index(idx_path)
         tf = _load_tfidf_for(idx_path)
         vec, nn = _get_vec_nn(idx_path)
         qv = _build_query_vec(vec, query)
