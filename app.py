@@ -2111,13 +2111,36 @@ def ask():
     if verbatim_mode:
         # attachments_ctx was built from best chunks; concatenate them and clean
         raw_verbatim_text = _clean_verbatim_block(attachments_ctx)
+        try:
+            from app_utils.pdf_utils import normalize_pdf_text as _nv
+            cleaned = _nv(raw_verbatim_text)
+            # Remove lines still dominated by interpunct artifacts (>40% middot-like chars)
+            filtered_lines = []
+            for line in cleaned.splitlines():
+                core = line.strip()
+                if not core:
+                    filtered_lines.append(line)
+                    continue
+                total = len(core)
+                dots = sum(core.count(ch) for ch in "·∙•⋅●")
+                if total and dots / total > 0.4:
+                    # attempt collapse: remove separators and keep if something meaningful remains
+                    collapsed = core
+                    for ch in "·∙•⋅●":
+                        collapsed = collapsed.replace(ch, "")
+                    # keep collapsed if it yields multi-letter words; else drop
+                    if len(collapsed.replace(" ", "")) >= 6:
+                        filtered_lines.append(collapsed)
+                    # else drop line entirely
+                else:
+                    filtered_lines.append(line)
+            raw_verbatim_text = "\n".join(filtered_lines).strip()
+        except Exception:
+            pass
 
     # Early return for verbatim mode - skip LLM processing entirely
     if verbatim_mode and raw_verbatim_text:
-        answer = (
-            "## Experimental procedure (verbatim from attachment)\n\n"
-            + raw_verbatim_text
-        )
+        answer = "## Experimental procedure (verbatim from attachment)\n\n" + raw_verbatim_text
         rationale = (
             "Returned exactly as written in the attached document (verbatim mode)."
         )
