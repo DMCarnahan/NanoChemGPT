@@ -91,6 +91,50 @@ def search(req: SearchRequest, request: Request):
             w_passage=req.w_passage,
         )
     except Exception as e:
+        # Lazy auto-build + graceful degradation path for missing TF-IDF index
+        missing_msg = "No TF-IDF index found" in str(e)
+        if missing_msg:
+            try:
+                # Attempt to build indexes for each configured label path
+                from .retriever import _labels_and_paths, _ensure_tfidf_index
+
+                built_any = False
+                for _lab, _p in _labels_and_paths():
+                    before = (_p / "tfidf.pkl").exists() or (_p / "tfidf.npz").exists()
+                    _ensure_tfidf_index(_p)
+                    after = (_p / "tfidf.pkl").exists() or (_p / "tfidf.npz").exists()
+                    built_any = built_any or (after and not before)
+                if built_any:
+                    # Retry once after attempted build
+                    try:
+                        return R.search(
+                            query=req.query,
+                            k=req.k,
+                            level=req.level,
+                            k_doc=req.k_doc,
+                            k_passage=req.k_passage,
+                            w_doc=req.w_doc,
+                            w_passage=req.w_passage,
+                        )
+                    except Exception:  # fall through to generic handling
+                        pass
+            except Exception as auto_e:  # building attempt failed
+                logger.warning("[retriever][auto-build] attempt failed: %s", auto_e)
+
+            # Return a 200 with advisory instead of 500
+            return JSONResponse(
+                status_code=200,
+                content={
+                    "ok": False,
+                    "query": req.query,
+                    "hits": [],
+                    "warning": "tfidf_index_missing",
+                    "detail": (
+                        "TF-IDF index missing or unreadable; build with "
+                        "python retriever/index_jsonl.py --bundle <bundle.jsonl> --index_dir retriever/index_doc"
+                    ),
+                },
+            )
         debug = (
             request.query_params.get("debug") == "1"
             or request.headers.get("X-Debug") == "1"

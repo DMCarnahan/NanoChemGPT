@@ -39,14 +39,24 @@ def save_attachment(file: FileStorage, max_pages: int | None = None) -> dict:
 
     if meta["kind"] == "pdf":
         try:
-            from app_utils.paths import extract_pdf_text as _extract_pdf_text
-
-            txt, n_pages = _extract_pdf_text(
-                dest,
-                max_pages=max_pages or int(os.environ.get("ATTACH_MAX_PAGES", "40")),
-            )
-            (ATTACH_DIR / f"{aid}.txt").write_text(txt, encoding="utf-8")
-            meta.update({"n_pages": n_pages, "n_chars": len(txt)})
+            try:
+                from app_utils.pdf_utils import extract_pdf_text as _extract_pdf_text
+            except Exception:
+                # Final fallback: define a noop extractor
+                def _extract_pdf_text(_p, max_pages=40):  # type: ignore
+                    return ("", 0)
+            fail_marker = ATTACH_DIR / f"{aid}.fail"
+            if fail_marker.exists():
+                logger.debug("[attachments] skipping extraction (cached fail) %s", dest)
+            else:
+                txt, n_pages = _extract_pdf_text(
+                    dest,
+                    max_pages=max_pages or int(os.environ.get("ATTACH_MAX_PAGES", "40")),
+                )
+                (ATTACH_DIR / f"{aid}.txt").write_text(txt, encoding="utf-8")
+                meta.update({"n_pages": n_pages, "n_chars": len(txt)})
+                if not txt:
+                    fail_marker.write_text("empty", encoding="utf-8")
         except Exception as e:
             logger.warning("[attachments] pdf extract failed for %s: %s", dest, e)
     return meta
@@ -80,12 +90,21 @@ def read_attachment_text(aid: str, max_pages: int | None = None) -> str:
     for pth in ATTACH_DIR.glob(f"{aid}__*"):
         if pth.suffix.lower() == ".pdf":
             try:
-                from app_utils.paths import extract_pdf_text as _extract_pdf_text
-
+                try:
+                    from app_utils.pdf_utils import extract_pdf_text as _extract_pdf_text
+                except Exception:
+                    def _extract_pdf_text(_p, max_pages=40):  # type: ignore
+                        return ("", 0)
+                fail_marker = pth.parent / (pth.stem.split("__")[0] + ".fail")
+                if fail_marker.exists():
+                    logger.debug("[attachments] cached fail read %s", pth)
+                    return ""
                 txt, _ = _extract_pdf_text(
                     pth,
                     max_pages=max_pages or int(os.environ.get("ATTACH_MAX_PAGES", "40")),
                 )
+                if not txt:
+                    fail_marker.write_text("empty", encoding="utf-8")
                 return txt
             except Exception as e:
                 logger.debug("[attachments] pdf read fail %s: %s", pth, e)

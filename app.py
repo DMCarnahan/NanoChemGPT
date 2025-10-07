@@ -103,6 +103,7 @@ from app_utils.constants import (
     ATTACH_DIR, UPLOADS_DIR, LOOKUP_UPLOAD_DIR, BUILTIN_DIR,
     HARVEST_OUT_DIR, INDEX_DIR, BUNDLE_AUTO, ENABLE_AUTO_HARVEST
 )
+from app_utils.uploads import read_attachment_text
 
 # Prefer simple, explicit module-level path constants so static analysis
 # tools can reason about them. Resolution order:
@@ -914,6 +915,14 @@ def _extract_used_markers(*texts: str) -> dict:
         "tags": tag_counts,
         "has_ctx": any(tag_counts[k] > 0 for k in ("CTX", "PARSED", "DB")),
     }
+
+# Attachment text retrieval ----------------------------------------------------
+@app.get("/attachment_text/<aid>")
+def attachment_text(aid: str):
+    txt = read_attachment_text(aid)
+    meta = {"id": aid, "n_chars": len(txt)}
+    snippet = txt[:1200]
+    return {"ok": True, "meta": meta, "snippet": snippet, "truncated": len(txt) > len(snippet)}
 
 
 def build_references_payload(
