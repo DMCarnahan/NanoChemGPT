@@ -25,7 +25,7 @@ This runs, in order:
 
 ## Determinism
 
-- We recommend pinning all library versions in `requirements.txt` and setting seeds where applicable.
+- Recommendation: pin all library versions in `requirements.txt` and set seeds where applicable.
 - Use `os.environ.get("PYTHONHASHSEED","0")` or export `PYTHONHASHSEED=0` in `.env` for stable hashing behavior if needed.
 
 ## Artifacts

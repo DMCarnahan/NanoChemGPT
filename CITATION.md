@@ -2,7 +2,7 @@
 
 ## Software Citation
 
-If you use NanoChemGPT in your research, please cite:
+If NanoChemGPT is used in research, cite as follows:
 
 ```bibtex
 @software{carnahan2024nanochemgpt,
@@ -29,7 +29,7 @@ If you use NanoChemGPT in your research, please cite:
 
 ## Methodology Citations
 
-If you use specific components or methodologies from NanoChemGPT, please also cite the relevant foundational work:
+If specific components or methodologies from NanoChemGPT are used, also cite the relevant foundational work:
 
 ### Literature Mining and RAG
 ```bibtex
@@ -71,7 +71,7 @@ If you use specific components or methodologies from NanoChemGPT, please also ci
 
 ## Dataset Citations
 
-If you use the evaluation datasets provided with NanoChemGPT:
+If the evaluation datasets provided with NanoChemGPT are used:
 
 ```bibtex
 @dataset{carnahan2024nanochemgpt_eval,
@@ -87,7 +87,7 @@ If you use the evaluation datasets provided with NanoChemGPT:
 ## Model Citations
 
 ### spaCy NER Model
-If you use the custom nanochemistry NER model:
+If the custom nanochemistry NER model is used:
 
 ```bibtex
 @model{carnahan2024nanochemgpt_ner,
@@ -121,7 +121,7 @@ NanoChemGPT builds upon several open-source libraries. Key dependencies include:
 - **numpy**: Numerical computing
 - **lxml**: XML/HTML processing
 
-Please cite these dependencies appropriately in your work.
+These dependencies should also be cited appropriately in related publications.
 
 ## Usage Examples in Academic Writing
 
@@ -136,11 +136,11 @@ Please cite these dependencies appropriately in your work.
 
 ## Contributing to Citations
 
-If you publish work using NanoChemGPT, please:
+When publishing work using NanoChemGPT:
 
-1. **Notify us**: Send an email with your publication details
+1. **Notification (optional)**: An email with publication details may be sent
 2. **Share results**: Consider contributing evaluation results back to the project
-3. **Provide feedback**: Help us improve the system for future research
+3. **Feedback (optional)**: Feedback can help improve the system for future research
 
 ## License and Usage Rights
 

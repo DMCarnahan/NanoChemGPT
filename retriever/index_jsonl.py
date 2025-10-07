@@ -74,7 +74,7 @@ def _pick_meta(rec: Dict) -> Dict:
         or rec.get("oa_url")
     )
 
-    # URL: prefer explicit PDF/URL, include your 'urls':{'pdf':...}
+    # URL: prefer explicit PDF/URL, include a 'urls':{'pdf':...}
     url = (
         meta.get("pdf_url")
         or meta.get("url")
@@ -94,7 +94,7 @@ def _pick_meta(rec: Dict) -> Dict:
                 year = v[:4]
                 break
 
-    # Authors: prefer list from meta; fall back to your helper/legacy fields
+    # Authors: prefer list from meta; fall back to legacy helper fields
     authors = meta.get("authors")
     if not authors:
         authors = _author_names(rec.get("authors") or rec.get("authorships") or []) or (

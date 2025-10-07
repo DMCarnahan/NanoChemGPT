@@ -6,7 +6,10 @@ from typing import Any, Dict, List, Tuple
 
 import joblib
 import numpy as np
+import logging
 
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 # ------------------------------ Path resolution ------------------------------
 
 
@@ -412,7 +415,8 @@ def _ensure_tfidf_index(idx_path: Path):
 
     if (idx_path / "tfidf.pkl").exists() or (idx_path / "tfidf.npz").exists():
         return
-    bundle_jsonl = Path("harvester/out_auto/bundle.jsonl")
+    harvest_dir = Path(os.getenv("HARVEST_OUT_DIR", "harvester/out_auto"))
+    bundle_jsonl = harvest_dir / "bundle.jsonl"
     if not bundle_jsonl.exists():
         logger.warning("[retriever] cannot auto-build tfidf: %s missing", bundle_jsonl)
         return

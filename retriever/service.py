@@ -174,6 +174,15 @@ def startup():
             _build_index_from_bundle(BUNDLE_PATH)
         except Exception as e:
             log.error("Bootstrap build failed: %s", e)
+    # Optional FAISS auto-build (explicit rebuild) if env set and bundle exists
+    if os.getenv("AUTOBUILD_FAISS", "0").lower() in {"1", "true", "yes"}:
+        try:
+            if BUNDLE_PATH.exists() and BUNDLE_PATH.stat().st_size > 0:
+                if _state.get("index") is None or int(getattr(_state["index"], "ntotal", 0) or 0) == 0:
+                    log.info("[autobuild-faiss] rebuilding from bundle %s", BUNDLE_PATH)
+                    _build_index_from_bundle(BUNDLE_PATH)
+        except Exception as e:
+            log.warning("[autobuild-faiss] failed: %s", e)
 
 
 class SearchIn(BaseModel):
@@ -206,11 +215,12 @@ def reindex(bundle_path: Optional[str] = None, text_key: str = "text"):
 def search(inp: Optional[SearchIn] = Body(default=None)):
     q = inp.q_text() if inp else ""
     if not q:
-        return {"hits": []}
+        return {"hits": [], "warning": "empty_query"}
 
     idx = _state["index"]
     if idx is None or int(getattr(idx, "ntotal", 0) or 0) <= 0:
-        return {"hits": []}
+        log.warning("[retriever] search fallback: no index loaded (q=%r)", q)
+        return {"hits": [], "warning": "no_index"}
 
     # Clamp k to index size (and >=1)
     ntotal = int(getattr(idx, "ntotal", 0) or 0)

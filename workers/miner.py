@@ -1,4 +1,5 @@
 import json
+import os
 import logging
 import subprocess
 import sys
@@ -17,14 +18,15 @@ def run_miner(payload: dict):
 
     root = Path(__file__).resolve().parents[1]  # project root (/app)
     harvester = root / "harvester" / "harvester.py"
-    bundle = root / "harvester" / "out_auto" / "bundle.jsonl"
-    merged = root / "harvester" / "out_auto" / "bundle_with_methods.jsonl"
+    harvest_dir = Path(os.getenv("HARVEST_OUT_DIR", root / "harvester" / "out_auto"))
+    bundle = harvest_dir / "bundle.jsonl"
+    merged = harvest_dir / "bundle_with_methods.jsonl"
     add_fallback = root / "scripts" / "bundle_add_fallback.py"
     indexer = root / "retriever" / "index_jsonl.py"
     index_dir = root / "retriever" / "index"
 
     # 1) harvest
-    cfg = f"out_dir: {str(root/'harvester'/'out_auto')}\nqueries:\n- {json.dumps(q)}\nsince_year: 2016\nmax_results_per_source: 6\n"
+    cfg = f"out_dir: {str(harvest_dir)}\nqueries:\n- {json.dumps(q)}\nsince_year: 2016\nmax_results_per_source: 6\n"
     cfg_path = root / f".miner_{int(time.time())}.yaml"
     cfg_path.write_text(cfg, encoding="utf-8")
     subprocess.check_call([sys.executable, str(harvester), "--config", str(cfg_path)])

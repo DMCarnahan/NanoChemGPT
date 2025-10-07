@@ -1,5 +1,6 @@
 import os
 import traceback
+import logging
 from typing import Any, Dict, Optional
 
 from fastapi import FastAPI, HTTPException, Request
@@ -9,6 +10,10 @@ from pydantic import BaseModel
 from . import retriever as R
 
 app = FastAPI(title="Retriever API", version="1.1.0-debug")
+
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 
 class SearchRequest(BaseModel):
@@ -93,11 +98,11 @@ def search(req: SearchRequest, request: Request):
         )
         tb = "".join(traceback.format_exc())
 
-        # Always log the error so you can see it in container logs
+    # Always log the error so it appears in container logs
         print(f"[retriever][error] {e}\n{tb}")
 
         if debug:
-            # Return JSON with traceback so you can see it from any client
+            # Return JSON with traceback for visibility from any client
             return JSONResponse(
                 status_code=500,
                 content={

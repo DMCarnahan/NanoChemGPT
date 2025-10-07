@@ -102,7 +102,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Upgrading to 1.0.0 from 0.9.x
 
-1. **Environment Variables**: Update your `.env` file with new configuration options:
+1. **Environment Variables**: Update the project `.env` file with new configuration options:
    ```bash
    # New in 1.0.0
    ENABLE_ENHANCED_CITATIONS=true
@@ -121,7 +121,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
    response = requests.post("/ask", data=data, files=files)
    ```
 
-3. **Dependencies**: Update your requirements:
+3. **Dependencies**: Update the dependency specifications:
    ```bash
    pip install -r requirements.txt
    ```
@@ -164,7 +164,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 When contributing changes:
 
-1. **Add entries**: Update the [Unreleased] section with your changes
+1. **Add entries**: Update the [Unreleased] section with the relevant changes
 2. **Categorize properly**: Use Added, Changed, Deprecated, Removed, Fixed, or Security
 3. **Be descriptive**: Explain what changed and why it matters to users
 4. **Include breaking changes**: Clearly mark any breaking changes

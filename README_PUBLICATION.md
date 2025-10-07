@@ -103,7 +103,7 @@ NanoChemGPT/
 4. **Configure environment**:
    ```bash
    cp env.example .env
-   # Edit .env with your API keys and configurations
+  # Edit .env with required API keys and configurations
    ```
 
 5. **Run the application**:
@@ -290,7 +290,7 @@ curl -X POST "http://localhost:5000/ask" \
 # Test Q&A functionality
 curl -X POST "http://localhost:5000/ask" \
   -H "Content-Type: application/json" \
-  -d '{"question": "How do I synthesize gold nanoparticles?"}'
+  -d '{"question": "How can gold nanoparticles be synthesized?"}'
 
 # Test method transcription
 curl -X POST "http://localhost:5000/transcribe" \
@@ -424,7 +424,7 @@ def custom_metric(predictions: List, gold: List) -> float:
 
 ## 🤝 Contributing
 
-We welcome contributions! Please see our [Contributing Guidelines](CONTRIBUTING.md) for details.
+Contributions are welcome. See the [Contributing Guidelines](CONTRIBUTING.md) for details.
 
 ### Development Setup
 
@@ -444,7 +444,7 @@ We welcome contributions! Please see our [Contributing Guidelines](CONTRIBUTING.
 
 ## 📚 Citation
 
-If you use NanoChemGPT in your research, please cite:
+If NanoChemGPT is used in research, cite as follows:
 
 ```bibtex
 @software{carnahan2024nanochemgpt,

@@ -7,7 +7,7 @@ Model availability in CI
 ------------------------
 - The repository may include a spaCy model under `harvester/miner/ner_model/model-best`. When present in the checked-out branch, CI will prefer this model and set `SPACY_MODEL` to that path for the miner-integration job.
 - If the model directory is not present in the runner, the CI workflow falls back to downloading `en_core_web_sm` (spaCy small) and uses it for integration tests.
-- If you prefer not to commit model artifacts to the repo, consider one of:
+- For teams that prefer not to commit model artifacts to the repository, consider one of:
   - Hosting the model files in a release or S3 and adding a workflow step to download and extract them in the job.
   - Storing model files via Git LFS and ensuring the runner has LFS enabled.
 
@@ -47,10 +47,10 @@ pytest -q
 
 Notes
 -----
-- If you have a local compiled `faiss` built against an old NumPy, prefer installing `numpy<2` into the venv to avoid `_ARRAY_API` incompatibilities.
+- When using a locally compiled `faiss` built against an older NumPy, install `numpy<2` in the virtual environment to avoid `_ARRAY_API` incompatibilities.
 - CI uses pinned versions in the miner-integration job; check `.github/workflows/ci.yml` for the exact setup.
 
-If you want, I can also add an explicit workflow step that downloads the model from a release or S3 and keeps large model files out of the repository.
+An explicit workflow step can be added (on request) to download the model from a release or object storage and keep large model files out of the repository.
 Running miner integration tests
 ===============================
 
@@ -77,7 +77,7 @@ Local setup
    # The model in this repo was trained with spaCy 3.7.4. Install that version to avoid warnings.
    pip install "spacy==3.7.4"
 
-4. (Optional) If you don't have the `model-best` directory present, place a spaCy pipeline
+4. (Optional) If the `model-best` directory is absent, place a spaCy pipeline
    directory at `harvester/miner/ner_model/model-best` (this repo includes a model-best entry).
 
 Run the miner integration test
@@ -91,6 +91,6 @@ python -m pytest -q tests/test_miner_integration.py -o addopts=
 Notes
 -----
 - CI is configured to set `SPACY_MODEL` to the repo `harvester/miner/ner_model/model-best`
-  when present. If you update the model, consider pinning the spaCy version accordingly.
+   when present. When the model is updated, consider pinning the spaCy version accordingly.
 - For deterministic integration runs, the test compares miner output against a small
   expected-output fixture when the model-best is present.

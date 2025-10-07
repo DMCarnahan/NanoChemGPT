@@ -1,3 +1,50 @@
+## Railway Deployment
+
+The application can run on Railway using a single service (FastAPI+Flask via `main_asgi:app`).
+### Recommended Environment Variables
+
+| Variable | Purpose | Example |
+|----------|---------|---------|
+| PORT | Service port Railway binds | 8000 |
+| OPENAI_API_KEY | OpenAI API key (optional if using local models) | sk-... |
+| ENABLE_AUTO_HARVEST | Auto-trigger mining when retrieval thin | true |
+| HARVEST_OUT_DIR | Writable harvest output directory | /workspace/harvest_out |
+| RETRIEVER_INDEX_DIR_DOC | TF-IDF index directory | /workspace/retriever/index_doc |
+| ATTACH_DIR | Attachments directory | /workspace/data/attachments |
+| AUTOBUILD_FAISS | Build FAISS (vector) index at startup if bundle available | 1 |
+| AUTOBUILD_TFIDF | (Implicit) provided by startup hook (already active) | 1 |
+| SPACY_MODEL | Path to spaCy model for NER | harvester/miner/ner_model/model-best |
+
+Mount a persistent volume (Railway: service settings) mapped to `/workspace` so harvested bundles and indexes survive restarts.
+
+### Build & Start Commands
+
+Railway Build Command:
+```
+pip install -U pip
+pip install -r requirements.txt
+python -m spacy validate || true
+```
+
+Railway Start Command:
+```
+python main_asgi.py
+```
+
+### First Deployment Checklist
+1. Set env vars above (at least `OPENAI_API_KEY`, `ENABLE_AUTO_HARVEST`, `HARVEST_OUT_DIR`).
+2. Deploy once; check logs for `[preflight]` messages.
+3. If `bundle.jsonl` present but no TF-IDF index, startup hook will build it automatically.
+4. For FAISS vector search, set `AUTOBUILD_FAISS=1` and redeploy.
+5. Hit `/healthz` to view composite status JSON.
+
+### Troubleshooting
+| Symptom | Likely Cause | Fix |
+|---------|--------------|-----|
+| `no_index` warnings in retriever responses | TF-IDF/FAISS not built yet | Provide bundle / enable auto-build / run index script manually |
+| Permission denied writing harvest | `HARVEST_OUT_DIR` not writable | Point to `/workspace/harvest_out` and ensure volume mounted |
+| 500 from retriever early | No index and old version without graceful fallback | Redeploy current version |
+
 # NanoChemGPT
 
 _A domain‑specific RAG system and text‑mining pipeline for nanochemistry synthesis, reasoning, and structured protocol generation._
@@ -151,7 +198,7 @@ scripts/
 ### Installation
 ```bash
 # clone
-git clone <your-fork-or-origin> nanochemgpt
+git clone <fork-or-origin-url> nanochemgpt
 cd nanochemgpt
 
 # create env
@@ -233,7 +280,7 @@ USER ${APP_USER}
 # RUN python retriever/index_jsonl.py --input harvester/out_auto/bundle.jsonl --output retriever/index_doc || true
 ```
 
-You can override any directory via environment variables at runtime:
+Any directory can be overridden via environment variables at runtime:
 
 | Purpose | Env Var | Default (relative) |
 |---------|---------|--------------------|
@@ -256,7 +303,7 @@ On startup a lightweight preflight logs warnings if TF-IDF artifacts are missing
 python retriever/index_jsonl.py --input harvester/out_auto/bundle.jsonl --output retriever/index_doc
 ```
 
-You can then bake the generated `retriever/index_doc` directory into an image layer for faster cold starts.
+The generated `retriever/index_doc` directory can then be baked into an image layer for faster cold starts.
 
 Secrets required for automation
 - `PYPI_API_TOKEN` — PyPI API token for publishing wheels (required to publish automatically).
@@ -311,7 +358,7 @@ python -c "from vector_store.uploads_vector import UploadsVectorSearch as U; \
 U.from_folder('uploads', index_dir='data/uploads_index')"
 ```
 
-> Tip: If you see `UploadsVectorSearch.from_folder() got an unexpected keyword argument 'backend'`,
+> Tip: When encountering `UploadsVectorSearch.from_folder() got an unexpected keyword argument 'backend'`,
 > pin the correct function signature or pass backends via env vars instead of kwargs.
 
 
@@ -331,7 +378,7 @@ uvicorn app.app:asgi --host $HOST --port $PORT --reload
 ```
 
 ### Production
-Use `gunicorn` or your platform’s process manager (Railway/Render/Docker). Ensure `.env` is supplied.
+Use `gunicorn` or a platform process manager (Railway/Render/Docker). Ensure `.env` is supplied.
 
 
 ## API
@@ -383,7 +430,7 @@ askBtn?.addEventListener('click', async () => {
   renderRefsFromData(data);  // pass the full response object
 });
 ```
-> If you mistakenly call `renderRefsFromData(json)` but your function expects `data`, make sure the variable names align. Also verify button IDs exist in the DOM and no other handler swallows the click.
+> If `renderRefsFromData(json)` is invoked while a function expects `data`, ensure the variable names align. Also verify button IDs exist in the DOM and no other handler consumes the click event.
 
 **Downloads**
 If the Convert/Export buttons return `200 OK` but the browser doesn’t download a file, ensure the response sets:
@@ -441,8 +488,8 @@ python ai_eval/grader.py -c configs/eval_span.json
 
 
 ## spaCy Models
-- Place your trained model at `harvester/miner/ner_model/model-best/` (or set `SPACY_MODEL`).
-- To train/update: follow your project’s spaCy config; export to `model-best`.
+- Place a trained model at `harvester/miner/ner_model/model-best/` (or set `SPACY_MODEL`).
+- To train or update: follow the project spaCy configuration; export to `model-best`.
 
 
 ## Troubleshooting
@@ -483,7 +530,7 @@ UploadsVectorSearch.from_folder() got an unexpected keyword argument 'backend'
 **Which stores are queried?**
 Uploads → KB → Mechanistic, in a configurable order. `top_k` controls depth per store.
 
-**Can I use local embeddings only?**
+**Is it possible to use local embeddings only?**
 Yes: set `EMBED_BACKEND=sentence-transformers` and `EMBED_MODEL=sentence-transformers/all-MiniLM-L6-v2`.
 
 **Where are eval reports saved?**

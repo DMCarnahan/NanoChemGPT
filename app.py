@@ -1,3 +1,45 @@
+from __future__ import annotations
+
+"""Main Flask application for NanoChemGPT.
+Handles API endpoints, configuration, and integration with search, database, and LLM services.
+"""
+from flask import Flask, request, jsonify, abort, render_template, send_file, g
+import os
+from pathlib import Path
+app = Flask(__name__)
+
+# Composite health endpoint ----------------------------------------------------
+@app.get("/healthz")
+def healthz():
+    from app_utils.constants import (
+        ATTACH_DIR,
+        UPLOADS_DIR,
+        HARVEST_OUT_DIR,
+        INDEX_DIR,
+        ENABLE_AUTO_HARVEST,
+    )
+    bundle = Path(HARVEST_OUT_DIR) / "bundle.jsonl"
+    tfidf_ok = any(
+        (Path(INDEX_DIR) / n).exists() for n in ("tfidf.pkl", "tfidf.npz")
+    )
+    faiss_idx = Path(INDEX_DIR) / "index.faiss"
+    faiss_ok = faiss_idx.exists() and faiss_idx.stat().st_size > 0
+    openai_key = bool(os.getenv("OPENAI_API_KEY"))
+    return {
+        "ok": True,
+        "paths": {
+            "attach": str(ATTACH_DIR),
+            "uploads": str(UPLOADS_DIR),
+            "harvest": str(HARVEST_OUT_DIR),
+            "index": str(INDEX_DIR),
+        },
+        "bundle_present": bundle.exists() and bundle.stat().st_size > 0,
+        "tfidf_index": tfidf_ok,
+        "faiss_index": faiss_ok,
+        "auto_harvest": ENABLE_AUTO_HARVEST,
+        "openai_configured": openai_key,
+        "version": os.getenv("GIT_SHA", "unknown"),
+    }
 """
 app.py
 -----
@@ -12,8 +54,6 @@ Handles API endpoints, configuration, and integration with search, database, and
 # into `app_utils` modules completes. This will be removed in a follow-up
 # commit once the file no longer references legacy globals.
 # noqa: F821
-
-from __future__ import annotations
 
 # Standard library imports
 import os
@@ -59,6 +99,10 @@ from ref_utils import (
     format_references_block,
 )
 from app_utils import paths as _paths
+from app_utils.constants import (
+    ATTACH_DIR, UPLOADS_DIR, LOOKUP_UPLOAD_DIR, BUILTIN_DIR,
+    HARVEST_OUT_DIR, INDEX_DIR, BUNDLE_AUTO, ENABLE_AUTO_HARVEST
+)
 
 # Prefer simple, explicit module-level path constants so static analysis
 # tools can reason about them. Resolution order:
@@ -386,6 +430,36 @@ RETRIEVER_URL = os.getenv(
     "RETRIEVER_URL", f"http://localhost:{os.getenv('PORT','8000')}/retriever"
 )
 
+# --- Harvest out_auto symlink (if HARVEST_OUT_DIR differs) --------------------
+def _ensure_harvest_symlink():
+    try:
+        from app_utils.constants import HARVEST_OUT_DIR as _HOUT
+    except Exception:
+        return
+    legacy = _ROOT / "harvester" / "out_auto"
+    try:
+        if legacy.exists():
+            # If it's already a dir/symlink we leave it; optionally could realign
+            return
+        legacy.parent.mkdir(parents=True, exist_ok=True)
+        # Attempt to create symlink; on Windows without admin this may fail -> fallback copy
+        try:
+            legacy.symlink_to(Path(_HOUT))
+            app.logger.info("[harvest] symlink created %s -> %s", legacy, _HOUT)
+        except Exception as e:
+            # Fallback: create directory if missing (won't mirror updates)
+            app.logger.warning(
+                "[harvest] symlink failed (%s); creating directory %s", e, legacy
+            )
+            legacy.mkdir(parents=True, exist_ok=True)
+    except Exception as e:
+        try:
+            app.logger.debug("[harvest] symlink setup skipped: %s", e)
+        except Exception:
+            pass
+
+_ensure_harvest_symlink()
+
 # --- Retriever index preflight ------------------------------------------------
 def _preflight_retriever_indexes():
     """Check presence of expected TF-IDF / vector index artifacts and log guidance.
@@ -403,7 +477,7 @@ def _preflight_retriever_indexes():
         expected_any = ["tfidf.pkl", "tfidf.npz", "vectorizer.joblib"]
         if not doc_dir.exists():
             app.logger.warning(
-                f"[preflight] Retriever doc index dir missing: {doc_dir}. Build via: python retriever/index_jsonl.py --input harvester/out_auto/bundle.jsonl --output retriever/index_doc"
+                f"[preflight] Retriever doc index dir missing: {doc_dir}. Build via: python retriever/index_jsonl.py --input {HARVEST_OUT_DIR}/bundle.jsonl --output retriever/index_doc"
             )
             return
         present = {p.name for p in doc_dir.glob("*")}
@@ -429,6 +503,49 @@ def _preflight_retriever_indexes():
             print(f"[preflight] retriever index check failed: {e}")
 
 _preflight_retriever_indexes()
+
+# --- Startup TF-IDF auto-build (doc-level) ------------------------------------
+def _maybe_autobuild_tfidf():
+    """If doc index is empty and bundle exists, attempt a minimal TF-IDF build.
+
+    This mirrors retriever.retriever._ensure_tfidf_index logic but runs inside
+    the Flask app so first queries are less likely to hit an empty retriever.
+    """
+    try:
+        idx_dir = Path(os.getenv("RETRIEVER_INDEX_DIR_DOC", _ROOT / "retriever" / "index_doc"))
+        has_artifacts = any(
+            (idx_dir / name).exists() for name in ("tfidf.pkl", "tfidf.npz")
+        )
+        if has_artifacts:
+            return
+        from app_utils.constants import HARVEST_OUT_DIR as _HOUT
+        bundle = Path(_HOUT) / "bundle.jsonl"
+        if not bundle.exists() or bundle.stat().st_size == 0:
+            app.logger.info(
+                "[preflight] skipping tfidf autobuild (bundle missing or empty at %s)",
+                bundle,
+            )
+            return
+        try:
+            from retriever.index_jsonl import build_tfidf_for_jsonl
+        except Exception:
+            app.logger.warning(
+                "[preflight] build_tfidf_for_jsonl unavailable; cannot autobuild"
+            )
+            return
+        idx_dir.mkdir(parents=True, exist_ok=True)
+        app.logger.info("[preflight] auto-building TF-IDF index -> %s", idx_dir)
+        try:
+            build_tfidf_for_jsonl(str(bundle), str(idx_dir))
+        except Exception as e:
+            app.logger.warning("[preflight] tfidf autobuild failed: %s", e)
+    except Exception as e:
+        try:
+            app.logger.debug("[preflight] autobuild skipped: %s", e)
+        except Exception:
+            pass
+
+_maybe_autobuild_tfidf()
 
 
 def retriever_search(
@@ -1410,7 +1527,11 @@ def ask():
         import tempfile, os, sys, subprocess, json
 
         ROOT = Path(__file__).resolve().parent
-        out_dir = ROOT / "harvester" / "out_auto"
+        try:
+            from app_utils.constants import HARVEST_OUT_DIR as _HARVEST_OUT_DIR_CONST
+            out_dir = Path(_HARVEST_OUT_DIR_CONST)
+        except Exception:
+            out_dir = ROOT / "harvester" / "out_auto"
         out_dir.mkdir(parents=True, exist_ok=True)
 
         # ------------- config -------------
@@ -2391,8 +2512,6 @@ def ask():
         "refs_used": refs_used_s,
         "candidates": candidates_s,
         "index_map": index_map_s,
-        "context_present": bool(context_joined),
-        "mining_enqueued": enqueued,
     }
     if isinstance(refs_payload_s, dict):
         response_payload.update(refs_payload_s)

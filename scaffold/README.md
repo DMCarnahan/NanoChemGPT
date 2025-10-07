@@ -42,7 +42,7 @@ Create a `.env` from the provided example and adjust as needed.
 - `EMBED_BACKEND` — `openai` or `sentence-transformers`.
 - `EMBED_MODEL` — model id for the chosen backend.
 - `OPENAI_EMB` — embedding model (if using OpenAI).
-- `SPACY_MODEL` — path to your trained spaCy NER (e.g., `harvester/miner/ner_model/model-best`).
+- `SPACY_MODEL` — path to a trained spaCy NER (e.g., `harvester/miner/ner_model/model-best`).
 - *(Add keys for external services if used:)* `GROBID_URL`, `OPENALEX_BASE`, etc.
 
 ## Endpoints
@@ -54,7 +54,7 @@ Create a `.env` from the provided example and adjust as needed.
 ## Notes
 
 - Python **3.11** is assumed for local runs and in the `Dockerfile`.
-- If you're on Railway/Render, rely on **runtime env vars** (not `railway.json`). This repo reads `os.environ` at runtime.
+- On Railway/Render deployments, rely on **runtime environment variables** (not `railway.json`). The application reads `os.environ` at runtime.
 - For Python 3.12 + recursive JSON extraction, prefer `regex` package over stdlib `re`.
 
 ## Citation & Grounding (for the paper/demo)

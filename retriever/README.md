@@ -4,7 +4,7 @@ This is a drop‑in upgrade of the earlier retriever. It adds **semantic embeddi
 - **OpenAI** (`text-embedding-3-large` by default)
 - **Sentence‑Transformers** (local, default `allenai-specter`)
 
-You can run **TF‑IDF**, **Embeddings**, or a **Hybrid** (alpha*embedding + (1-alpha)*tfidf).
+The service can run **TF‑IDF**, **Embeddings**, or a **Hybrid** (alpha*embedding + (1-alpha)*tfidf).
 
 ## Setup
 ```bash
@@ -14,7 +14,7 @@ pip install openai>=1.30.0         # for OpenAI embeddings (requires OPENAI_API_
 pip install sentence-transformers   # for local embeddings
 ```
 
-## 1) Build the index from your harvested bundle
+## 1) Build the index from a harvested bundle
 ```bash
 python index_jsonl.py --bundle ../nanochem_harvester/out/bundle.jsonl --index_dir ./index   --embed-backend openai --embed-model text-embedding-3-large   
 ```
@@ -31,7 +31,7 @@ uvicorn app:app --host 0.0.0.0 --port 8000
 # OpenAPI: http://localhost:8000/docs
 ```
 
-## 3) Query from your GPT Action
+## 3) Query from a GPT Action
 - Use `POST /search` with JSON:
 ```json
 {"query":"hot-injection synthesis of PbS quantum dots","k":5,"mode":"hybrid","alpha":0.7}

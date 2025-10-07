@@ -40,7 +40,7 @@ def get_db():
         # Q&A – keep existing text index; avoid OptionsConflict noise
         try:
             _db.qa.create_index([("created_at", 1)])
-            # If you already have a text index on question, this might raise code 85 -> ignore
+            # If a text index on question already exists, this may raise code 85 -> ignore
             _db.qa.create_index(
                 [("question", "text"), ("answer", "text")],
                 default_language="english",
@@ -54,7 +54,7 @@ def get_db():
             else:
                 print("[mongo] qa text index warning:", e)
 
-        # Parsed – ensure a text index exists (this was missing in your logs)
+    # Parsed – ensure a text index exists (previous deployments lacked this)
         try:
             _db.parsed.create_index([("created_at", 1)])
             _db.parsed.create_index(

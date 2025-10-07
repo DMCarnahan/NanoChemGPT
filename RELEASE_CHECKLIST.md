@@ -43,7 +43,7 @@ Post-release
 Secrets and automation
 - Add `PYPI_API_TOKEN` as a repository secret to allow `release.yml` to publish to PyPI/TesPyPI via Twine.
 - Add `GITHUB_TOKEN` (provided by GitHub Actions automatically) for basic registry writes; for GHCR write access create a `GHCR_PAT` or allow `GITHUB_TOKEN` to write packages.
-- Add optional `DOCKERHUB_USERNAME` and `DOCKERHUB_TOKEN` repo secrets if you want to push images to Docker Hub.
+- Optional: add `DOCKERHUB_USERNAME` and `DOCKERHUB_TOKEN` repository secrets to enable pushing images to Docker Hub.
 
 Docker publish notes
 - The repository includes a `Dockerfile` and a `docker-image.yml` workflow that will build and push to `ghcr.io/${{ github.repository }}` when a tag is pushed. To enable Docker Hub publishing, add `DOCKERHUB_USERNAME` and `DOCKERHUB_TOKEN` secrets.
@@ -51,7 +51,7 @@ Docker publish notes
 Automated release notes
 - Add the following repository secrets:
   - `PYPI_API_TOKEN` — a PyPI API token with upload permissions.
-  - (optional) `PUBLISH_REPOSITORY_URL` — if you prefer TestPyPI or custom repository URL.
+  - (optional) `PUBLISH_REPOSITORY_URL` — used when publishing to TestPyPI or a custom repository URL.
   - (optional) `GHCR_PAT` or rely on `GITHUB_TOKEN` for GHCR pushes.
   - (optional) `DOCKERHUB_USERNAME` and `DOCKERHUB_TOKEN` — to enable Docker Hub pushes from the `docker-image.yml` workflow.
 
