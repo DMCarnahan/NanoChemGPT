@@ -2357,7 +2357,72 @@ def ask():
         try:
             proc_text = _extract_procedure_block(answer)
             if proc_text and len(proc_text) > 10:
-                robot_operations = convert_text_to_robot_ops(proc_text)
+                # Primary path: assume answer contains a well-formed protocol with '3. **Procedure**'
+                try:
+                    robot_operations = convert_text_to_robot_ops(proc_text)
+                except Exception as primary_error:
+                    # Fallback: salvage unstructured synthesis text.
+                    # 1) Slice out synthesis subsection (e.g., 2.1 Synthesis ... until next 2.x heading)
+                    import re as _re
+                    def _slice_synthesis(txt: str) -> str:
+                        try:
+                            m = _re.search(r"(^|\n)\s*2\.1[^\n]{0,40}synthesi[sd].*?(?=\n\s*2\.2\b|\n\s*3\.|$)", txt, _re.I | _re.S)
+                            if m:
+                                return m.group(0)
+                        except Exception:
+                            pass
+                        return txt
+                    sliced = _slice_synthesis(proc_text)
+                    # 2) Collect candidate lines (verbs / reagent patterns)
+                    lines = [l for l in sliced.splitlines() if l.strip()]
+                    KEY_VERBS = r"add|pour|introduce|titr|stir|heat|maintain|hold|cool|filter|wash|dry|centrifuge|decant|resuspend|collect|transfer|dissolv|prepare|monitor|adjust"
+                    REAGENT_HINT = _re.compile(r"\b(\d+(?:\.\d+)?\s*(?:mL|ml|g|mg|mol|mmol|M|°C|deg|C)|pH\s*\d+(?:\.\d+)?)\b")
+                    keep = []
+                    for ln in lines:
+                        low = ln.lower()
+                        if _re.search(KEY_VERBS, low) or REAGENT_HINT.search(ln):
+                            keep.append(ln.rstrip())
+                    salvage = "\n".join(keep) if keep else sliced
+                    # 3) Merge hard-wrapped multi-line sentences before numbering:
+                    # Join lines that do not end with a sentence terminator and look like mid-sentence continuations.
+                    merged = []
+                    buf = []
+                    SENT_END = _re.compile(r"[\.;:!?]$")
+                    for raw_line in salvage.splitlines():
+                        line = raw_line.strip()
+                        if not line:
+                            continue
+                        buf.append(line)
+                        if SENT_END.search(line) or len(line) > 160:
+                            merged.append(" ".join(buf))
+                            buf = []
+                    if buf:
+                        merged.append(" ".join(buf))
+                    # 4) Split merged text into coarse sentence fragments (preserve units & pH tokens)
+                    frags = []
+                    for mline in merged:
+                        # Avoid splitting inside chemical formulas by using a conservative regex
+                        parts = _re.split(r"(?<=[a-z0-9°])\.\s+(?=[A-Z0-9])", mline)
+                        for p in parts:
+                            p = p.strip()
+                            if not p:
+                                continue
+                            frags.append(p)
+                    # 5) Number and ensure trailing period
+                    numbered = []
+                    for i, seg in enumerate(frags, start=1):
+                        if not seg.endswith('.'):
+                            seg += '.'
+                        numbered.append(f"{i}. {seg}")
+                    pseudo = "1. **Procedure**:\n" + "\n".join(numbered) if numbered else salvage
+                    try:
+                        robot_operations = convert_text_to_robot_ops(pseudo)
+                        if isinstance(robot_operations, dict):
+                            robot_operations.setdefault('meta', {})['fallback_used'] = True
+                            robot_operations['meta']['fallback_primary_error'] = str(primary_error)
+                            robot_operations['meta']['fallback_slice_used'] = sliced is not proc_text
+                    except Exception as fallback_error:
+                        robot_ops_error = f"primary:{primary_error}; fallback:{fallback_error}"
         except Exception as e:
             robot_ops_error = str(e)
 
