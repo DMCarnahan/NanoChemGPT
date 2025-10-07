@@ -410,42 +410,75 @@ def _safe_float(v, default):
 
 # ------------------------------ Public API -----------------------------------
 try:
-    from app_utils.constants import HARVEST_OUT_DIR, BUNDLE_AUTO
+    from app_utils.constants import HARVEST_OUT_DIR as _CONST_HARVEST_OUT_DIR, BUNDLE_AUTO as _CONST_BUNDLE_AUTO
 except Exception:
-    HARVEST_OUT_DIR = Path("harvester/out_auto")
-    BUNDLE_AUTO = str(HARVEST_OUT_DIR / "bundle.jsonl")
+    _CONST_HARVEST_OUT_DIR = Path("harvester/out_auto")
+    _CONST_BUNDLE_AUTO = str(_CONST_HARVEST_OUT_DIR / "bundle.jsonl")
 
 
 def _resolve_bundle_path() -> Path:
-    primary = Path(BUNDLE_AUTO).resolve()
+    """Resolve the harvest bundle JSONL path dynamically.
+
+    Resolution order (first existing wins):
+    1. BUNDLE_AUTO / BUNDLE_AUTO_PATH env variable (evaluated at call time)
+    2. HARVEST_OUT_DIR env variable (joined with bundle.jsonl) OR constant imported value
+    3. Constant fallback (harvester/out_auto/bundle.jsonl)
+
+    Returns a Path (may be non-existent) – callers decide on existence handling.
+    """
+    env_auto = os.getenv("BUNDLE_AUTO") or os.getenv("BUNDLE_AUTO_PATH")
+    harvest_dir_env = os.getenv("HARVEST_OUT_DIR")
+    harvest_dir = Path(harvest_dir_env).resolve() if harvest_dir_env else _CONST_HARVEST_OUT_DIR
+
+    # Primary candidate from env or constant
+    primary = Path(env_auto or os.getenv("BUNDLE_AUTO_PATH") or _CONST_BUNDLE_AUTO).resolve()
+    # If an explicit HARVEST_OUT_DIR env is set, prefer its bundle over the static constant
+    env_harvest_bundle = (harvest_dir / "bundle.jsonl").resolve()
+    if harvest_dir_env:
+        if env_harvest_bundle.exists():
+            return env_harvest_bundle
+        # If env harvest dir specified but bundle not there and primary exists, use primary
+        if primary.exists():
+            return primary
+        return env_harvest_bundle  # non-existent path (signals env intent)
+
+    # No explicit harvest env; fall back to primary if it exists
     if primary.exists():
         return primary
-    fallback = (HARVEST_OUT_DIR / "bundle.jsonl").resolve()
-    if fallback.exists():
-        logger.info("[retriever][autobuild] using fallback bundle %s", fallback)
-        return fallback
-    logger.warning(
-        "[retriever][autobuild] bundle missing (primary=%s fallback=%s)",
-        primary,
-        fallback,
-    )
-    return primary  # non-existent path (signals missing)
+    # Finally return primary (non-existent) to signal missing
+    return primary
+
+
+_MISSING_BUNDLE_WARNED: bool = False
+_AUTO_BUILD_ATTEMPTED: set[Path] = set()
 
 def _ensure_tfidf_index(idx_path: Path):
+    """Ensure a TF-IDF index exists, attempting a lazy auto-build.
+
+    Suppresses repeated missing-bundle warnings and avoids repeated build attempts
+    for the same index directory within a single process.
+    """
+    global _MISSING_BUNDLE_WARNED
     if (idx_path / "tfidf.pkl").exists() or (idx_path / "tfidf.npz").exists():
         return
+    if idx_path in _AUTO_BUILD_ATTEMPTED:
+        return
     bundle = _resolve_bundle_path()
+    harvest_bundle_hint = (_CONST_HARVEST_OUT_DIR / "bundle.jsonl").resolve()
     if not bundle.exists():
-        logger.warning(
-            "[retriever] cannot auto-build tfidf: bundle missing (checked %s and %s)",
-            bundle,
-            HARVEST_OUT_DIR / "bundle.jsonl",
-        )
+        if not _MISSING_BUNDLE_WARNED:
+            logger.warning(
+                "[retriever] cannot auto-build tfidf: bundle missing (primary=%s fallback=%s)",
+                bundle,
+                harvest_bundle_hint,
+            )
+            _MISSING_BUNDLE_WARNED = True
         return
     try:
         from retriever.index_jsonl import build_tfidf_for_jsonl
     except Exception:
-        logger.warning("[retriever] build_tfidf_for_jsonl unavailable")
+        if not _MISSING_BUNDLE_WARNED:
+            logger.warning("[retriever] build_tfidf_for_jsonl unavailable")
         return
     try:
         idx_path.mkdir(parents=True, exist_ok=True)
@@ -453,6 +486,8 @@ def _ensure_tfidf_index(idx_path: Path):
         build_tfidf_for_jsonl(str(bundle), str(idx_path))
     except Exception as e:
         logger.warning("[retriever] auto-build failed: %s", e)
+    finally:
+        _AUTO_BUILD_ATTEMPTED.add(idx_path)
 
 
 def search(query: str, k: int = 5, **kwargs) -> Dict[str, Any]:

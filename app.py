@@ -2303,6 +2303,41 @@ def ask():
         a, r = _split_reasoning(strip_references_block(_s(raw)))
         answer, rationale = _s(a), _s(r)
 
+    # Optional robot operations conversion (Option A)
+    want_robot_ops = False
+    try:
+        if request.args.get("robot_ops") in {"1", "true", "yes", "on"}:
+            want_robot_ops = True
+        if request.is_json:
+            body = request.get_json(silent=True) or {}
+            if isinstance(body, dict) and body.get("robot_ops"):
+                want_robot_ops = True
+    except Exception:
+        pass
+
+    robot_operations = None
+    robot_ops_error = None
+    def _extract_procedure_block(protocol_text: str) -> str:
+        # Extract content after '3. **Procedure**' marker down to end or next numbered section.
+        try:
+            import re as _re
+            m = _re.search(r"3\. \*\*Procedure\*\*\n\[(.*?)\]\n", protocol_text, _re.S)
+            if m:
+                return m.group(1).strip()
+            # fallback: capture everything after marker line
+            m2 = _re.search(r"3\. \*\*Procedure\*\*\n(.+)$", protocol_text, _re.S)
+            return m2.group(1).strip() if m2 else protocol_text
+        except Exception:
+            return protocol_text
+
+    if want_robot_ops and mode != "reasoning":
+        try:
+            proc_text = _extract_procedure_block(answer)
+            if proc_text and len(proc_text) > 10:
+                robot_operations = convert_text_to_robot_ops(proc_text)
+        except Exception as e:
+            robot_ops_error = str(e)
+
     # ---------- Build references payload (using deduped refs_all) ----------
 
     # ---------- Build references payload (single-pass; no extra dedupe) ----------
@@ -2522,6 +2557,16 @@ def ask():
         "candidates": candidates_s,
         "index_map": index_map_s,
     }
+    # Attach robot operations if produced
+    try:
+        if 'robot_operations' in locals() and robot_operations:
+            response_payload['robot_operations'] = robot_operations
+            # Alias for external expectation of key name
+            response_payload['robot_rules'] = robot_operations
+        if 'robot_ops_error' in locals() and robot_ops_error:
+            response_payload['robot_ops_error'] = robot_ops_error
+    except Exception:
+        pass
     if isinstance(refs_payload_s, dict):
         response_payload.update(refs_payload_s)
     return jsonify(response_payload)
