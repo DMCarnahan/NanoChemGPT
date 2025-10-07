@@ -18,6 +18,15 @@ def normalize_pdf_text(s: str) -> str:
     # Collapse mid-dots
     s = re.sub(r"(?<=\w)[·∙•](?=\w)", "", s)
     s = s.replace("∙", "").replace("•", "").replace("·", "")
+    # Some PDFs extract as interpunct-prefixed letters: "·m·a·g·n"; remove leading interpuncts before alphanumerics
+    # Pattern: start or whitespace followed by sequences of interpunct + letter
+    s = re.sub(r"(?:^|\s)([·∙•]+)(?=\w)", lambda m: m.group(0).replace(m.group(1), ""), s)
+    # Remove any residual isolated interpuncts adjacent to word boundaries
+    s = re.sub(r"[·∙•]+(?=\s)|(?<=\s)[·∙•]+", "", s)
+    # High-density safety: if more than 5% of characters are still interpuncts, strip all of them
+    interpunct_ratio = s.count("·") / max(1, len(s))
+    if interpunct_ratio > 0.05:
+        s = s.replace("·", "")
     s = s.replace("\x03", "·")
     # Normalize whitespace/hyphenation across line breaks
     s = re.sub(r"-\s*\n\s*", "", s)

@@ -409,26 +409,48 @@ def _safe_float(v, default):
 
 
 # ------------------------------ Public API -----------------------------------
-def _ensure_tfidf_index(idx_path: Path):
-    """Attempt to build a minimal TF-IDF index if missing."""
-    from pathlib import Path as _P
+try:
+    from app_utils.constants import HARVEST_OUT_DIR, BUNDLE_AUTO
+except Exception:
+    HARVEST_OUT_DIR = Path("harvester/out_auto")
+    BUNDLE_AUTO = str(HARVEST_OUT_DIR / "bundle.jsonl")
 
+
+def _resolve_bundle_path() -> Path:
+    primary = Path(BUNDLE_AUTO).resolve()
+    if primary.exists():
+        return primary
+    fallback = (HARVEST_OUT_DIR / "bundle.jsonl").resolve()
+    if fallback.exists():
+        logger.info("[retriever][autobuild] using fallback bundle %s", fallback)
+        return fallback
+    logger.warning(
+        "[retriever][autobuild] bundle missing (primary=%s fallback=%s)",
+        primary,
+        fallback,
+    )
+    return primary  # non-existent path (signals missing)
+
+def _ensure_tfidf_index(idx_path: Path):
     if (idx_path / "tfidf.pkl").exists() or (idx_path / "tfidf.npz").exists():
         return
-    harvest_dir = Path(os.getenv("HARVEST_OUT_DIR", "harvester/out_auto"))
-    bundle_jsonl = harvest_dir / "bundle.jsonl"
-    if not bundle_jsonl.exists():
-        logger.warning("[retriever] cannot auto-build tfidf: %s missing", bundle_jsonl)
+    bundle = _resolve_bundle_path()
+    if not bundle.exists():
+        logger.warning(
+            "[retriever] cannot auto-build tfidf: bundle missing (checked %s and %s)",
+            bundle,
+            HARVEST_OUT_DIR / "bundle.jsonl",
+        )
         return
     try:
         from retriever.index_jsonl import build_tfidf_for_jsonl
     except Exception:
-        logger.warning("[retriever] build_tfidf_for_jsonl not available")
+        logger.warning("[retriever] build_tfidf_for_jsonl unavailable")
         return
     try:
         idx_path.mkdir(parents=True, exist_ok=True)
-        logger.info("[retriever] auto-building tfidf for %s", idx_path)
-        build_tfidf_for_jsonl(str(bundle_jsonl), str(idx_path))
+        logger.info("[retriever] auto-building tfidf index -> %s (bundle=%s)", idx_path, bundle)
+        build_tfidf_for_jsonl(str(bundle), str(idx_path))
     except Exception as e:
         logger.warning("[retriever] auto-build failed: %s", e)
 
