@@ -81,6 +81,8 @@ _A domain‑specific RAG system and text‑mining pipeline for nanochemistry syn
 - [Building Indexes & Datasets](#building-indexes--datasets)
 - [Running the App](#running-the-app)
 - [API](#api)
+ - [Structured Protocol Conversion & Fallback](#structured-protocol-conversion--fallback)
+ - [Retriever Permission Fallback](#retriever-permission-fallback)
 - [Front‑End](#front-end)
 - [Evaluation (ai_eval)](#evaluation-ai_eval)
 - [spaCy Models](#spacy-models)
@@ -400,6 +402,72 @@ Unified Q&A endpoint.
 {
   "answer": "...",
   "rationale": "...",
+## Structured Protocol Conversion & Fallback
+When calling `/ask` with `{"mode": "robot"}` (or the UI Robot Mode toggle), the system attempts to convert a free‑text synthesis procedure into a structured JSON under the key `robot_operations`.
+
+### Primary Conversion Flow
+1. Extract a procedure block (heuristics over headings like "Procedure", "Synthesis", or numbered sections).
+2. Run the text through `convert_text_to_robot_ops()` which:
+  - Splits into steps.
+  - Detects actions (e.g., pick_up, pour, place, heat, cool, mix, wait, wash, filter, transfer).
+  - Normalizes quantities, temperatures, times, pH, and container references.
+3. Attach metadata (`meta`) including timing and counts.
+
+### Quality Heuristic
+Some inputs superficially parse but yield low‑information output (e.g., 1–2 generic steps, no distinct actions, or missing ops arrays). A heuristic `_is_poor_robot_doc()` scores the primary parse and—if deemed low quality—forces a fallback salvage pipeline even without an exception. Triggered cases are marked with `meta.fallback_quality_triggered = true`.
+
+### Salvage (Fallback) Pipeline
+Activated if the primary conversion throws or quality is poor:
+1. Optional section slice: attempt to isolate a subsection like `2.1 Synthesis ...` using a conservative regex (stops at next heading or section boundary).
+2. Verb / reagent filtering: retain lines containing synthesis verbs (add, stir, heat, maintain, cool, centrifuge, filter, wash, dry, transfer, dissolve, prepare, adjust, etc.) or quantitative tokens (amounts, temperatures, pH).
+3. Hard‑wrap merge: join lines that were visually wrapped in PDFs but belong to the same sentence (no terminal punctuation).
+4. Fragment segmentation: cautiously split on sentence ends while avoiding chemical tokens.
+5. Pseudo numbering: generate `1.`, `2.`, ... lines ensuring each ends with a period, prepended by a synthetic heading (`**Procedure**`).
+6. Re‑parse via the same converter.
+7. Compare scores `(num_steps, num_distinct_actions, total_ops)` against the primary parse—replace only if improved.
+
+### Metadata Fields
+When fallback runs, the following keys appear in `robot_operations.meta`:
+| Field | Meaning |
+|-------|---------|
+| `fallback_used` | Salvage pipeline executed (and possibly replaced primary). |
+| `fallback_primary_error` | Exception message from primary pass (if any). |
+| `fallback_slice_used` | True if a subsection slice (e.g., 2.1) was applied. |
+| `fallback_quality_triggered` | Heuristic forced salvage despite no exception. |
+| `fallback_improved` | Salvage score strictly better than primary. |
+| `fallback_old_score` | 3‑tuple (steps, distinct actions, ops) for primary. |
+| `fallback_new_score` | 3‑tuple for salvage output. |
+
+These fields enable downstream auditing, analytics, or dataset curation (e.g., filtering only improved protocols).
+
+### Error Propagation
+If both primary and fallback fail, `robot_operations` may be absent and an error string is folded into the main response diagnostics (implementation logs a combined `primary:<err>; fallback:<err>` message). Tests ensure graceful degradation without 500 responses solely due to conversion failures.
+
+### Extending
+To refine:
+- Add verbs to the salvage regex.
+- Tune quality thresholds in `_is_poor_robot_doc()` (currently length/action count based).
+- Introduce an environment variable gate (future enhancement) to disable heuristic triggers for deterministic evaluation.
+
+## Retriever Permission Fallback
+When building TF‑IDF indexes lazily (auto‑build on demand) the application may lack permission to create the target directory (e.g., read‑only mounted layer). The function `_ensure_tfidf_index()` now:
+1. Attempts `mkdir` on the configured index path.
+2. On `PermissionError`, constructs a fallback path under the system temp dir (default `/tmp/nanochem_indexes/<index_name>` or overridden via `RETRIEVER_FALLBACK_DIR`).
+3. Logs a warning: `[retriever] permission denied for <orig>; falling back to <fallback>`.
+4. Proceeds to build artifacts (`tfidf.pkl` / `tfidf.npz`) there, ensuring retrieval queries still function.
+
+This prevents failures in minimal, locked‑down container images (e.g., distroless or rootless Docker). For production environments where silent fallback is undesirable, you can enforce a hard failure by (future option) disabling the fallback via an environment switch or by asserting writability in a preflight script.
+
+### Observability & Testing
+Unit tests simulate a permission denial and assert the fallback directory contains the built index. Monitor logs for the warning above to detect unexpected redirections in staging/production.
+
+### Related Env Vars
+| Variable | Purpose | Default |
+|----------|---------|---------|
+| `RETRIEVER_FALLBACK_DIR` | Root for fallback TF‑IDF index directories | `/tmp/nanochem_indexes` |
+
+If you need to inspect which directory was actually used at runtime, query the log stream or (future improvement) expose a diagnostic endpoint returning the active index paths.
+
   "references": [
     {"id": 1, "title": "...", "url": "...", "year": 2017},
     {"id": 2, "title": "..."}

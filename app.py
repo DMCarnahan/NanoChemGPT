@@ -2360,6 +2360,30 @@ def ask():
                 # Primary path: assume answer contains a well-formed protocol with '3. **Procedure**'
                 try:
                     robot_operations = convert_text_to_robot_ops(proc_text)
+                    # Quality heuristic: determine if the primary parse is too trivial to be useful.
+                    def _is_poor_robot_doc(doc: dict) -> bool:
+                        if not isinstance(doc, dict):
+                            return True
+                        steps = doc.get("steps") or []
+                        if not steps:
+                            return True
+                        # Single very short step
+                        if len(steps) == 1 and len((steps[0].get("raw") or "")) < 120:
+                            return True
+                        # All steps have empty or missing ops
+                        if all(not (s.get("ops") or []) for s in steps):
+                            return True
+                        actions = {
+                            (s.get("action") or "").lower() for s in steps if s.get("action")
+                        }
+                        if len(actions) < 2:
+                            return True
+                        return False
+
+                    quality_triggered = False
+                    if _is_poor_robot_doc(robot_operations):
+                        quality_triggered = True
+                        raise RuntimeError("primary robot doc low quality")
                 except Exception as primary_error:
                     # Fallback: salvage unstructured synthesis text.
                     # 1) Slice out synthesis subsection (e.g., 2.1 Synthesis ... until next 2.x heading)
@@ -2416,11 +2440,36 @@ def ask():
                         numbered.append(f"{i}. {seg}")
                     pseudo = "1. **Procedure**:\n" + "\n".join(numbered) if numbered else salvage
                     try:
-                        robot_operations = convert_text_to_robot_ops(pseudo)
-                        if isinstance(robot_operations, dict):
-                            robot_operations.setdefault('meta', {})['fallback_used'] = True
-                            robot_operations['meta']['fallback_primary_error'] = str(primary_error)
-                            robot_operations['meta']['fallback_slice_used'] = sliced is not proc_text
+                        salvage_doc = convert_text_to_robot_ops(pseudo)
+                        # Decide if salvage improves quality (more steps OR more actions OR ops now present)
+                        def _score(doc: dict):
+                            steps = doc.get('steps') or []
+                            actions = {(s.get('action') or '').lower() for s in steps if s.get('action')}
+                            ops_count = sum(len(s.get('ops') or []) for s in steps)
+                            return (len(steps), len(actions), ops_count)
+                        if isinstance(robot_operations, dict) and isinstance(salvage_doc, dict):
+                            old_score = _score(robot_operations)
+                            new_score = _score(salvage_doc)
+                            improved = new_score > old_score
+                            if improved:
+                                robot_operations = salvage_doc
+                            meta = robot_operations.setdefault('meta', {})
+                            meta['fallback_used'] = True
+                            meta['fallback_primary_error'] = str(primary_error)
+                            meta['fallback_slice_used'] = sliced is not proc_text
+                            meta['fallback_quality_triggered'] = 'quality_triggered' in locals() and quality_triggered
+                            meta['fallback_improved'] = improved
+                            meta['fallback_old_score'] = old_score
+                            meta['fallback_new_score'] = new_score
+                        else:
+                            robot_operations = salvage_doc
+                            if isinstance(robot_operations, dict):
+                                meta = robot_operations.setdefault('meta', {})
+                                meta['fallback_used'] = True
+                                meta['fallback_primary_error'] = str(primary_error)
+                                meta['fallback_slice_used'] = sliced is not proc_text
+                                meta['fallback_quality_triggered'] = 'quality_triggered' in locals() and quality_triggered
+                                meta['fallback_improved'] = True
                     except Exception as fallback_error:
                         robot_ops_error = f"primary:{primary_error}; fallback:{fallback_error}"
         except Exception as e:

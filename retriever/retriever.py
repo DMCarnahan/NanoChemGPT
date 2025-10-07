@@ -481,7 +481,23 @@ def _ensure_tfidf_index(idx_path: Path):
             logger.warning("[retriever] build_tfidf_for_jsonl unavailable")
         return
     try:
-        idx_path.mkdir(parents=True, exist_ok=True)
+        try:
+            idx_path.mkdir(parents=True, exist_ok=True)
+        except PermissionError:
+            # Fallback to a writable tmp path
+            tmp_root = Path(os.getenv("RETRIEVER_FALLBACK_DIR", "/tmp/nanochem_indexes"))
+            fallback = tmp_root / idx_path.name
+            try:
+                fallback.mkdir(parents=True, exist_ok=True)
+                logger.warning(
+                    "[retriever] permission denied for %s; falling back to %s", idx_path, fallback
+                )
+                idx_path = fallback
+            except Exception as pe2:
+                logger.warning(
+                    "[retriever] fallback index dir creation failed (%s): %s", fallback, pe2
+                )
+                return
         logger.info("[retriever] auto-building tfidf index -> %s (bundle=%s)", idx_path, bundle)
         build_tfidf_for_jsonl(str(bundle), str(idx_path))
     except Exception as e:
