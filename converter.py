@@ -216,6 +216,14 @@ def apply_postprocessing(doc: dict) -> dict:
         print("[converter] _run_post_polish error:", repr(e))
 
     _rebuild_micro_plan(doc)
+    # Defensive pass: remove any residual zero-minute waits from micro_plan & per-step micro_ops/ops
+    if isinstance(doc.get("micro_plan"), list):
+        doc["micro_plan"] = [m for m in doc["micro_plan"] if not (m.get("verb") == "wait" and int(m.get("minutes") or 0) == 0)]
+    for st in doc.get("steps", []) or []:
+        if isinstance(st.get("micro_ops"), list):
+            st["micro_ops"] = [m for m in st["micro_ops"] if not (m.get("verb") == "wait" and int(m.get("minutes") or 0) == 0)]
+        if isinstance(st.get("ops"), list):
+            st["ops"] = [o for o in st["ops"] if not (o.get("op") == "wait" and int(o.get("minutes") or 0) == 0)]
     _tidy_registry(doc)
 
     _sanity_assertions(doc)
