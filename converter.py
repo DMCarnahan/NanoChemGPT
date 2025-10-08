@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import os
 import pathlib
 import re
 import unicodedata
@@ -2999,6 +3000,101 @@ def expand_ops_to_micro(
     return out
 
 
+# -------- Minimal primitive reduction (pick_up, place, pour, set) --------
+_MIN_ALLOWED = {"pick_up", "place", "pour", "set"}
+
+_GENERIC_DEVICE_MAP_DEFAULT = {
+    "HP1": "hotplate",
+    "SP1": "stir_plate",
+    "CF1": "centrifuge",
+    "OV1": "oven",
+    "VP1": "vacuum_pump",
+    "VX1": "vortexer",
+    "SN1": "sonicator",
+}
+
+
+def _derive_minimal_micro_plan(doc: dict, allow_wait: bool = False) -> tuple[list[dict], list[dict]]:
+    """Derive a reduced micro plan containing only primitive verbs a simple robot supports.
+
+    Rules:
+    - Keep verbs in {_MIN_ALLOWED} verbatim.
+    - wait → dropped (timing captured separately) unless allow_wait=True.
+    - start/stop → set (device, param=power, value=on/off).
+    - vortex/resuspend/sonicate/centrifuge sequences already expanded earlier; we drop
+      auxiliary verbs (vortex, start, stop) and keep preceding pick/place/set.
+    - Decant / add_wash_solvent etc. are already decomposed into pick/place/pour.
+    - Consecutive duplicates collapsed.
+
+    Returns (min_plan, delays) where delays is a list of timing annotations:
+       {"after_index": <index in min_plan (1-based)>, "minutes": X, "original_step_index": Y}
+    """
+    original = doc.get("micro_plan") or []
+    min_plan: list[dict] = []
+    delays: list[dict] = []
+
+    # Optional generic mapping for devices, activated via MIN_PLAN_MAP_GENERIC=1
+    want_map = os.getenv("MIN_PLAN_MAP_GENERIC", "").lower() in {"1", "true", "yes"}
+    dev_map = _GENERIC_DEVICE_MAP_DEFAULT if want_map else {}
+
+    for entry in original:
+        if not isinstance(entry, dict):
+            continue
+        verb = entry.get("verb")
+        if verb == "wait":
+            mins = entry.get("minutes")
+            if mins is not None and not allow_wait and min_plan:
+                delays.append(
+                    {
+                        "after_index": len(min_plan),
+                        "minutes": mins,
+                        "original_step_index": entry.get("step_index"),
+                    }
+                )
+            elif allow_wait:
+                # Optionally keep as set pseudo-op for timing
+                min_plan.append(
+                    {
+                        "verb": "set",
+                        "device": "scheduler",
+                        "param": "delay_minutes",
+                        "value": mins,
+                        "step_index": entry.get("step_index"),
+                    }
+                )
+            continue
+        if verb in ("start", "stop"):
+            dev = entry.get("device") or "device"
+            min_plan.append(
+                {
+                    "verb": "set",
+                    "device": dev,
+                    "param": "power",
+                    "value": "on" if verb == "start" else "off",
+                    "step_index": entry.get("step_index"),
+                }
+            )
+            continue
+        if verb in _MIN_ALLOWED:
+            # Shallow copy & strip extraneous keys that aren't needed for primitive execution
+            keep = {k: v for k, v in entry.items() if k in {"verb", "object", "from", "to", "device", "param", "value", "amount", "unit", "volume", "volume_units", "rate", "step_index"}}
+            # Apply device remap
+            if want_map and keep.get("device") in dev_map:
+                keep["device"] = dev_map[keep["device"]]
+            min_plan.append(keep)
+            continue
+        # Ignore other verbs (vortex, decant already decomposed, etc.)
+        # They should have produced primitive children earlier.
+        continue
+
+    # Collapse consecutive duplicates
+    collapsed: list[dict] = []
+    for item in min_plan:
+        if not collapsed or item != collapsed[-1]:
+            collapsed.append(item)
+    return collapsed, delays
+
+
 def convert_text_to_robot_ops(text: str) -> Dict:
     hardware = parse_hardware(text)
     vessels = VesselRegistry(hardware)
@@ -3704,6 +3800,21 @@ def convert_text_to_robot_ops(text: str) -> Dict:
         "steps": records,
     }
     result = apply_postprocessing(result)
+    try:
+        # Always derive minimal primitive plan; can be disabled via env var if desired
+        disable = os.getenv("DISABLE_MIN_PRIMITIVE_PLAN", "").lower() in {"1", "true", "yes"}
+        if not disable:
+            allow_wait = os.getenv("MIN_PLAN_ALLOW_WAIT", "").lower() in {"1", "true", "yes"}
+            min_plan, delays = _derive_minimal_micro_plan(result, allow_wait=allow_wait)
+            result["micro_plan_min"] = min_plan
+            if delays:
+                result.setdefault("timing_delays", delays)
+            meta = result.setdefault("meta", {})
+            meta["min_primitive_plan"] = True
+            meta["min_plan_wait_mode"] = "inline" if allow_wait else "delays"
+    except Exception as _e:
+        # Non-fatal; continue with original result
+        pass
     return result
 
 
