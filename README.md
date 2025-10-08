@@ -479,6 +479,7 @@ Some labs deploy liquid handlers or simple robot arms that can only execute a ve
 | `DISABLE_MIN_PRIMITIVE_PLAN` | Skip derivation of `micro_plan_min` | off |
 | `MIN_PLAN_ALLOW_WAIT` | Keep waits inline as `set(device="scheduler", param="delay_minutes", value=...)` instead of emitting `timing_delays` | off |
 | `MIN_PLAN_MAP_GENERIC` | Remap device IDs (HP1→`hotplate`, SP1→`stir_plate`, CF1→`centrifuge`, etc.) for hardware‑agnostic output | off |
+| `KEEP_SOLUTION_TERM` | Retain literal word `solution` in normalized reagent `name` (always preserved in `display_name`) | off |
 
 **Example Snippet:**
 ```jsonc
@@ -504,6 +505,49 @@ Automated tests (`tests/test_min_plan.py`, `tests/test_min_plan_enrichment.py`) 
 - Dissolve steps preserve full solute naming (e.g., hydrates like `FeSO4·7H2O`).
 
 If you modify the extraction logic, update or extend these tests to prevent regressions.
+
+#### Provenance & Summary (New)
+
+Two additions enhance auditability and downstream analytics of the reduced plan:
+
+1. `collapsed_from_steps`: Any consecutive duplicate `set` actions (same device + param + value) are merged. The surviving action includes a list of the original `step_index` values under this key so source procedural context is not lost.
+2. `meta.min_plan_summary`: Aggregate metrics summarizing the minimal plan contents:
+   - `unique_objects`, `unique_devices`
+   - Verb counts: `pours`, `sets`, `pick_ups`, `places`
+   - `total` primitive actions
+   - `has_oven_set` boolean flag (presence of an oven temperature set)
+
+Example excerpt illustrating both:
+```jsonc
+"micro_plan_min": [
+  {"verb": "pick_up", "object": "V1", "step_index": 2},
+  {"verb": "pour", "src": "V1", "dst": "R3", "step_index": 2},
+  {"verb": "place", "object": "V1", "location": "bench", "step_index": 2},
+  {"verb": "set", "device": "HP1", "param": "temperature_C", "value": 80, "collapsed_from_steps": [3,4], "step_index": 3}
+],
+"meta": {
+  "min_plan_summary": {
+    "unique_objects": 1,
+    "unique_devices": 1,
+    "pours": 1,
+    "sets": 1,
+    "pick_ups": 1,
+    "places": 1,
+    "total": 4,
+    "has_oven_set": false
+  }
+}
+```
+
+#### Reagent Solution Term Retention
+
+Reagent parsing normalizes names by default (dropping a trailing word `solution`) while storing the full textual form in `display_name` and annotating a boolean `is_solution`. To retain the literal word `solution` in the normalized `name`, set:
+
+```
+KEEP_SOLUTION_TERM=1
+```
+
+This can be useful for workflows where the presence of the word itself drives downstream heuristics or UI labeling.
 
 ## Retriever Permission Fallback
 When building TF‑IDF indexes lazily (auto‑build on demand) the application may lack permission to create the target directory (e.g., read‑only mounted layer). The function `_ensure_tfidf_index()` now:

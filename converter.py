@@ -417,6 +417,16 @@ def _rebuild_step_micro_ops(step, devices, defaults, step_index):
                     "step_index": step_index,
                 }
             ]
+        elif typ == "transfer":
+            # Generic material transfer not already specialized: represent as pick_up → pour → place
+            src = op.get("from") or op.get("source") or step.get("source_vessel") or step.get("vessel") or "V1"
+            dst = op.get("to") or op.get("target") or step.get("target_vessel") or step.get("vessel") or "V1"
+            if src and dst and src != dst:
+                m += [
+                    {"verb": "pick_up", "object": src, "step_index": step_index},
+                    {"verb": "pour", "from": src, "to": dst, "step_index": step_index},
+                    {"verb": "place", "object": src, "to": "bench", "step_index": step_index},
+                ]
 
         elif typ == "resuspend":
             tube = op.get("tube") or step.get("vessel", "V2_tube")
@@ -570,11 +580,19 @@ def _rebuild_micro_plan(doc: dict) -> None:
     out = []
     for st in doc.get("steps", []):
         idx = st.get("index")
+        if idx is None:
+            # Sequentially assign if missing
+            next_idx = (doc.get("_auto_step_idx") or 0) + 1
+            doc["_auto_step_idx"] = next_idx
+            idx = next_idx
+            st["index"] = idx
         for m in st.get("micro_ops") or []:
             if m.get("verb") in allowed and validate_action(m):
                 mm = dict(m)
                 mm["step_index"] = idx  # enforce correct index
-                out.append(mm)
+                # Filter out zero-minute waits early
+                if not (mm.get("verb") == "wait" and int(mm.get("minutes", 0) or 0) == 0):
+                    out.append(mm)
     # de-dup consecutive identical ops
     flat = []
     for m in out:
@@ -1844,7 +1862,28 @@ def parse_reagent_phrase_to_struct(s: str) -> dict:
     if m:
         val = float(m.group("val"))
         unit = _canon_unit(m.group("unit"))
-        name = m.group("name").strip()
+        # Preserve full name (remove trailing 'solution' if present but keep chemical tokens)
+        full_name = m.group("name").strip()
+        # display_name keeps original (minus trailing period if any)
+        display_name = full_name.rstrip('.')
+        is_solution = bool(re.search(r"\bsolution$", full_name, flags=re.I)) or bool(re.search(r"\bsolution\b", s, flags=re.I))
+        # 'name' field: drop trailing 'solution' and surrounding parentheses tokens only, keep chemical words
+        keep_solution = os.getenv("KEEP_SOLUTION_TERM", "1").lower() in {"1","true","yes"}
+        name = full_name if keep_solution else re.sub(r"\bsolution$","", full_name, flags=re.I)
+        name = re.sub(r"\s*\([^)]*\)", "", name).strip()
+        # Salvage: if name collapsed to a single token but original phrase contains more words before a parenthesis or 'solution'
+        if len(name.split()) == 1:
+            tail_match = re.search(rf"{re.escape(name)}\s+([A-Za-z][A-Za-z0-9\- ]*(?:\([^)]*\))?(?:\s+solution)?)", s, flags=re.I)
+            if tail_match:
+                recovered = f"{name} {tail_match.group(1).strip()}".strip()
+                # Update display_name if it was truncated
+                if recovered.lower() not in display_name.lower():
+                    display_name = recovered
+                # Recompute stripped chemical name (without trailing 'solution')
+                nm2 = re.sub(r"\bsolution$","", recovered, flags=re.I)
+                nm2 = re.sub(r"\s*\([^)]*\)", "", nm2).strip()
+                if nm2:
+                    name = nm2
         solvent = (m.group("solvent") or "").strip() or None
         approx = approx or bool(m.group("approx"))
         return {
@@ -1859,6 +1898,8 @@ def parse_reagent_phrase_to_struct(s: str) -> dict:
             "solvent": solvent,
             "approx": approx,
             "original": original,
+            "is_solution": is_solution,
+            "display_name": display_name,
         }
 
     # 2) Try leading amount pattern
@@ -3100,11 +3141,32 @@ def _derive_minimal_micro_plan(doc: dict, allow_wait: bool = False) -> tuple[lis
         # They should have produced primitive children earlier.
         continue
 
-    # Collapse consecutive duplicates
+    # Collapse consecutive duplicates and redundant identical set(device,param,value) with provenance
     collapsed: list[dict] = []
     for item in min_plan:
-        if not collapsed or item != collapsed[-1]:
-            collapsed.append(item)
+        if collapsed:
+            prev = collapsed[-1]
+            if item == prev:
+                # exact duplicate – provenance merge
+                prev.setdefault("collapsed_from_steps", set()).add(item.get("step_index"))
+                continue
+            if (
+                item.get("verb") == prev.get("verb") == "set"
+                and item.get("device") == prev.get("device")
+                and item.get("param") == prev.get("param")
+                and item.get("value") == prev.get("value")
+            ):
+                prev.setdefault("collapsed_from_steps", set()).add(item.get("step_index"))
+                continue
+        collapsed.append(item)
+    # Normalize provenance sets to sorted lists
+    for it in collapsed:
+        if isinstance(it.get("collapsed_from_steps"), set):
+            steps = {s for s in it["collapsed_from_steps"] if s is not None}
+            if steps:
+                it["collapsed_from_steps"] = sorted(steps)
+            else:
+                del it["collapsed_from_steps"]
     return collapsed, delays
 
 
@@ -3867,6 +3929,20 @@ def convert_text_to_robot_ops(text: str) -> Dict:
             if any(op.get("op") in {"transfer", "add_solute", "add_solvent"} for st in result.get("steps", []) for op in (st.get("ops") or [])):
                 if not any(x.get("verb") == "pour" for x in min_plan):
                     meta["min_plan_warning"] = "no_pour_found_but_transfer_ops_present"
+            # Summary metrics
+            verbs = [a.get("verb") for a in min_plan]
+            objects = {a.get("object") for a in min_plan if a.get("object")}
+            devices = {a.get("device") for a in min_plan if a.get("device")}
+            meta["min_plan_summary"] = {
+                "unique_objects": len(objects),
+                "unique_devices": len(devices),
+                "pours": verbs.count("pour"),
+                "sets": verbs.count("set"),
+                "pick_ups": verbs.count("pick_up"),
+                "places": verbs.count("place"),
+                "total": len(min_plan),
+                "has_oven_set": any(a.get("device") in {"OV1","oven"} and a.get("param") == "temperature_C" for a in min_plan),
+            }
     except Exception as _e:
         # Non-fatal; continue with original result
         pass
