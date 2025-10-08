@@ -449,6 +449,62 @@ To refine:
 - Tune quality thresholds in `_is_poor_robot_doc()` (currently length/action count based).
 - Introduce an environment variable gate (future enhancement) to disable heuristic triggers for deterministic evaluation.
 
+### Minimal Primitive Micro Plan (`micro_plan_min`)
+Some labs deploy liquid handlers or simple robot arms that can only execute a very small action vocabulary. The converter now automatically derives a reduced primitive plan alongside the full `micro_plan` whenever protocol conversion succeeds.
+
+**Purpose:** Provide an immediately executable action list limited to: `pick_up`, `place`, `pour`, `set` (plus optional synthesized timing as delays) so that low‑capability robots can still run the procedure without needing to interpret higher‑level verbs (e.g., `start`, `stop`, `vortex`, `centrifuge`).
+
+**Generated Keys:**
+- `micro_plan_min`: ordered list of primitive actions
+- `timing_delays`: (present only if waits were removed) list of objects `{after_index, minutes, original_step_index}` indicating when to pause
+- `meta.min_primitive_plan`: boolean flag
+- `meta.min_plan_wait_mode`: `delays` (default) or `inline` (if waits mapped to synthetic set ops)
+- `meta.min_plan_counts`: summaries `{primitives, delays}`
+- `meta.min_plan_warning`: optional warning such as `no_pour_found_but_transfer_ops_present`
+
+**Transformation Rules:**
+1. Keep only verbs in `{pick_up, place, pour, set}`.
+2. Convert `start` → `set(power=on)`, `stop` → `set(power=off)` for the same device.
+3. Drop `wait` actions and encode them in `timing_delays` (unless explicitly kept via env var).
+4. Discard auxiliary verbs (`vortex`, `decant_supernatant` etc.) because they have already been decomposed into primitive pours/picks earlier in normalization.
+5. Collapse consecutive duplicate primitive actions.
+6. Backfill missing `step_index` fields so each primitive knows its source procedural step.
+7. Suppress zero‑minute waits entirely.
+
+**Oven Temperature Guarantee:** For any drying/oven step a corresponding `set` action with `param=temperature_C` is preserved in both the full and minimal plans (unless the final step explicitly calls for ambient drying, in which case oven/vacuum ops are filtered out).
+
+**Environment Variables:**
+| Variable | Effect | Default |
+|----------|--------|---------|
+| `DISABLE_MIN_PRIMITIVE_PLAN` | Skip derivation of `micro_plan_min` | off |
+| `MIN_PLAN_ALLOW_WAIT` | Keep waits inline as `set(device="scheduler", param="delay_minutes", value=...)` instead of emitting `timing_delays` | off |
+| `MIN_PLAN_MAP_GENERIC` | Remap device IDs (HP1→`hotplate`, SP1→`stir_plate`, CF1→`centrifuge`, etc.) for hardware‑agnostic output | off |
+
+**Example Snippet:**
+```jsonc
+"micro_plan_min": [
+  {"verb": "pick_up", "object": "FeSO4·7H2O", "step_index": 1},
+  {"verb": "pour", "from": "FeSO4·7H2O", "to": "Beaker (V1)", "amount": 0.5, "unit": "g", "step_index": 1},
+  {"verb": "place", "object": "FeSO4·7H2O", "to": "bench", "step_index": 1},
+  {"verb": "pick_up", "object": "deionized water", "step_index": 1},
+  {"verb": "pour", "from": "deionized water", "to": "Beaker (V1)", "volume": 25, "volume_units": "mL", "step_index": 1},
+  {"verb": "place", "object": "deionized water", "to": "bench", "step_index": 1},
+  {"verb": "set", "device": "hotplate", "param": "temperature_C", "value": 60, "step_index": 4}
+],
+"timing_delays": [
+  {"after_index": 7, "minutes": 30, "original_step_index": 4}
+]
+```
+
+**Validation Tests:**
+Automated tests (`tests/test_min_plan.py`, `tests/test_min_plan_enrichment.py`) assert:
+- At least one `pour` exists if transfer/add ops were parsed.
+- No zero‑minute delays are emitted.
+- Drying steps contribute an oven temperature set in the reduced plan.
+- Dissolve steps preserve full solute naming (e.g., hydrates like `FeSO4·7H2O`).
+
+If you modify the extraction logic, update or extend these tests to prevent regressions.
+
 ## Retriever Permission Fallback
 When building TF‑IDF indexes lazily (auto‑build on demand) the application may lack permission to create the target directory (e.g., read‑only mounted layer). The function `_ensure_tfidf_index()` now:
 1. Attempts `mkdir` on the configured index path.

@@ -580,8 +580,11 @@ def _rebuild_micro_plan(doc: dict) -> None:
     for m in out:
         if not flat or flat[-1] != m:
             flat.append(m)
-    # ensure no oven/vacuum ops when ambient is requested
-    flat = [m for m in flat if m.get("device") not in {"OV1", "VP1"}]
+    # Only drop oven/vacuum ops if the protocol explicitly requests ambient drying in the final step
+    last_step_raw = (doc.get("steps", [])[-1].get("raw", "") if doc.get("steps") else "").lower()
+    want_ambient = "ambient" in last_step_raw and ("dry" in last_step_raw or "drying" in last_step_raw)
+    if want_ambient:
+        flat = [m for m in flat if m.get("device") not in {"OV1", "VP1"}]
     doc["micro_plan"] = flat
 
 
@@ -2494,8 +2497,10 @@ def detect_transfer_explicit(line: str) -> Optional[Dict]:
 
 def detect_dissolve(line: str) -> Optional[Dict]:
     s = strip_tags(_clean_unicode(line.strip()))
+    # Allow optional 'of' after volume, allow hydrate dot characters, tolerate missing final period.
+    # Example: "Dissolve 0.5 g FeSO4·7H2O in 25 mL deionized water" OR "Dissolve 0.5 g ... in 25 mL of deionized water".
     m = re.search(
-        r"\bdissolv\w*\s+(?P<amount>[\d\.]+)\s*(?P<unit>mg|g|µg|kg)\s+of\s+(?P<solute>.+?)\s+in\s+(?P<vol>[\d\.]+)\s*(?P<vunit>µ?u?L|mL|ml|l|L)\s+of\s+(?P<solvent>[^.;,]+)",
+        r"\bdissolv\w*\s+(?P<amount>[\d\.]+)\s*(?P<unit>mg|g|µg|kg)\s+(?:of\s+)?(?P<solute>.+?)\s+in\s+(?P<vol>[\d\.]+)\s*(?P<vunit>µ?u?L|mL|ml|l|L)\s+(?:of\s+)?(?P<solvent>[^.;,]+)",
         s,
         re.I,
     )
@@ -3037,10 +3042,18 @@ def _derive_minimal_micro_plan(doc: dict, allow_wait: bool = False) -> tuple[lis
     want_map = os.getenv("MIN_PLAN_MAP_GENERIC", "").lower() in {"1", "true", "yes"}
     dev_map = _GENERIC_DEVICE_MAP_DEFAULT if want_map else {}
 
+    # Backfill step indices if missing (based on appearance order aligned with steps length)
+    steps_len = len(doc.get("steps") or [])
+    next_idx = 1
     for entry in original:
         if not isinstance(entry, dict):
             continue
         verb = entry.get("verb")
+        if entry.get("step_index") in (None, "") and steps_len:
+            entry["step_index"] = min(next_idx, steps_len)
+        if entry.get("verb") == "wait" and entry.get("minutes") == 0:
+            # Skip zero-minute waits entirely
+            continue
         if verb == "wait":
             mins = entry.get("minutes")
             if mins is not None and not allow_wait and min_plan:
@@ -3722,8 +3735,29 @@ def convert_text_to_robot_ops(text: str) -> Dict:
             records.append(record)
 
     # Build micro-ops per step and a flattened micro plan
-    for rec in records:
+    for idx, rec in enumerate(records, start=1):
         rec["micro_ops"] = expand_ops_to_micro(rec.get("ops", []), vessels, hardware)
+        # Guarantee oven set micro for drying/oven steps before waits
+        if any(op.get("op") == "move_to_oven" for op in (rec.get("ops") or [])):
+            has_set = any(m.get("verb") == "set" and (m.get("device") in {"OV1", "oven", vessels.hardware[0]["id"] if vessels.hardware else "OV1"}) for m in rec["micro_ops"])
+            if not has_set:
+                # Insert a synthetic set if missing
+                rec["micro_ops"].insert(
+                    0,
+                    {
+                        "verb": "set",
+                        "device": "OV1",
+                        "param": "temperature_C",
+                        "value": next(
+                            (op.get("value") for op in rec.get("ops", []) if op.get("param") == "temperature_C"),
+                            60,
+                        ),
+                        "step_index": idx,
+                    },
+                )
+        # Ensure dissolve with solute captured is not lost: if action=dissolve ensure solute present in reagents
+        if rec.get("action") == "dissolve" and rec.get("solute") and rec.get("solute") not in rec.get("reagents", []):
+            rec.setdefault("reagents", []).append(rec["solute"])
 
     micro_plan = []
     for i, rec in enumerate(records, 1):
@@ -3771,6 +3805,22 @@ def convert_text_to_robot_ops(text: str) -> Dict:
                             "context_vessel": ctx,
                         }
                     )
+            # Preserve pour for add_solute/add_solvent inside ops (if not already a transfer)
+            if op.get("op") in {"add_solute", "add_solvent"}:
+                dst_label = _label_for_vessel(op.get("vessel", ""), vessels, hardware)
+                src_label = op.get("reagent") or op.get("solute") or op.get("solvent") or op.get("reagent") or "reagent"
+                micro_plan.append({"verb": "pick_up", "object": src_label, "from": "bench", "step_index": i, "context_vessel": rec.get("vessel")})
+                pour_entry = {"verb": "pour", "from": src_label, "to": dst_label, "step_index": i, "context_vessel": rec.get("vessel")}
+                if op.get("volume") is not None:
+                    pour_entry["volume"] = op.get("volume")
+                if op.get("volume_units"):
+                    pour_entry["volume_units"] = op.get("volume_units")
+                if op.get("amount") is not None:
+                    pour_entry["amount"] = op.get("amount")
+                if op.get("unit"):
+                    pour_entry["unit"] = op.get("unit")
+                micro_plan.append(pour_entry)
+                micro_plan.append({"verb": "place", "object": src_label, "to": "bench", "step_index": i, "context_vessel": rec.get("vessel")})
 
         # --- 2) Copy through any authored micro_ops EXCEPT 'note add_*' markers ---
         for micro in rec.get("micro_ops", []):
@@ -3812,6 +3862,11 @@ def convert_text_to_robot_ops(text: str) -> Dict:
             meta = result.setdefault("meta", {})
             meta["min_primitive_plan"] = True
             meta["min_plan_wait_mode"] = "inline" if allow_wait else "delays"
+            meta["min_plan_counts"] = {"primitives": len(min_plan), "delays": len(result.get("timing_delays", []))}
+            # Assert at least one pour if any transfer/add ops existed
+            if any(op.get("op") in {"transfer", "add_solute", "add_solvent"} for st in result.get("steps", []) for op in (st.get("ops") or [])):
+                if not any(x.get("verb") == "pour" for x in min_plan):
+                    meta["min_plan_warning"] = "no_pour_found_but_transfer_ops_present"
     except Exception as _e:
         # Non-fatal; continue with original result
         pass
