@@ -224,7 +224,61 @@ def apply_postprocessing(doc: dict) -> dict:
             st["micro_ops"] = [m for m in st["micro_ops"] if not (m.get("verb") == "wait" and int(m.get("minutes") or 0) == 0)]
         if isinstance(st.get("ops"), list):
             st["ops"] = [o for o in st["ops"] if not (o.get("op") == "wait" and int(o.get("minutes") or 0) == 0)]
+    # Ensure oven move has pick_up + place primitives
+    has_oven_place = any(m.get("verb") == "place" and m.get("to") in {"OV1", "oven"} for m in doc.get("micro_plan", []))
+    has_oven_set = any(m.get("verb") == "set" and m.get("device") in {"OV1", "oven"} and m.get("param") == "temperature_C" for m in doc.get("micro_plan", []))
+    if has_oven_set and not has_oven_place:
+        insert_at = next((i for i,m in enumerate(doc.get("micro_plan", [])) if m.get("verb") == "set" and m.get("device") in {"OV1", "oven"}), len(doc.get("micro_plan", [])))
+        tube_label = "V1_tube"
+        mp_list = doc.get("micro_plan", [])
+        mp_list.insert(insert_at, {"verb": "place", "object": tube_label, "to": "OV1", "step_index": len(doc.get("steps") or [])})
+        mp_list.insert(insert_at, {"verb": "pick_up", "object": tube_label, "from": "rack", "step_index": len(doc.get("steps") or [])})
+        # Oven safety: if we have a place directly to an oven without prior pick_up in same step, synthesize one
+        # Scan tail slice of this step's appended ops.
+        step_slice = [a for a in mp_list if a.get("step_index") == len(doc.get("steps") or [])]
+        for idx_local, act in enumerate(step_slice):
+            if act.get("verb") == "place" and act.get("to") in {"OV1","oven"}:
+                if idx_local == 0 or step_slice[idx_local-1].get("verb") != "pick_up":
+                    # Insert synthetic pick_up before this place in global micro_plan
+                    # Need to find global index
+                    global_pos = mp_list.index(act)
+                    obj = act.get("object")
+                    mp_list.insert(global_pos, {"verb":"pick_up","object":obj,"from":"rack","step_index":len(doc.get("steps") or [])})
     _tidy_registry(doc)
+
+    # Unify naming: convert vN_bottle objects to VN if that vessel id exists
+    vessel_ids = {st.get("vessel") for st in doc.get("steps", []) if st.get("vessel")}
+    def _norm_name(x):
+        if not isinstance(x, str):
+            return x
+        m = re.fullmatch(r"v(\d+)_bottle", x)
+        if m:
+            cand = f"V{m.group(1)}"
+            if cand in vessel_ids:
+                return cand
+        return x
+    for a in doc.get("micro_plan", []) or []:
+        if a.get("verb") in {"pick_up", "place", "pour"}:
+            if "object" in a:
+                a["object"] = _norm_name(a.get("object"))
+            if "from" in a:
+                a["from"] = _norm_name(a.get("from"))
+            if a.get("verb") == "pour" and "to" in a:
+                a["to"] = _norm_name(a.get("to"))
+    for st in doc.get("steps", []) or []:
+        for mo in st.get("micro_ops", []) or []:
+            if mo.get("verb") in {"pick_up", "place", "pour"}:
+                if "object" in mo:
+                    mo["object"] = _norm_name(mo.get("object"))
+                if "from" in mo:
+                    mo["from"] = _norm_name(mo.get("from"))
+                if mo.get("verb") == "pour" and "to" in mo:
+                    mo["to"] = _norm_name(mo.get("to"))
+
+    # Strip step-level minutes == 0
+    for st in doc.get("steps", []) or []:
+        if st.get("minutes") == 0:
+            st.pop("minutes", None)
 
     _sanity_assertions(doc)
 
@@ -324,6 +378,19 @@ def _rebuild_step_micro_ops(step, devices, defaults, step_index):
 
     for op in step.get("ops", []):
         typ = op.get("op")
+
+        # Generic set passthrough (e.g., autotitrator rate, arbitrary device params)
+        if typ == "set" and op.get("device") and ("param" in op):
+            m += [
+                {
+                    "verb": "set",
+                    "device": op.get("device"),
+                    "param": op.get("param"),
+                    "value": op.get("value"),
+                    "step_index": step_index,
+                }
+            ]
+            continue
 
         if typ == "move_to_stir_plate":
             m += [
@@ -611,7 +678,21 @@ def _rebuild_micro_plan(doc: dict) -> None:
     want_ambient = "ambient" in last_step_raw and ("dry" in last_step_raw or "drying" in last_step_raw)
     if want_ambient:
         flat = [m for m in flat if m.get("device") not in {"OV1", "VP1"}]
-    doc["micro_plan"] = flat
+    # Enforce oven placement preceded by pick_up within same step
+    enforced = []
+    for i, act in enumerate(flat):
+        if act.get("verb") == "place" and act.get("to") in {"OV1","oven"}:
+            # Look back for same-step pick_up immediately prior in enforced
+            if not enforced or enforced[-1].get("verb") != "pick_up" or enforced[-1].get("step_index") != act.get("step_index"):
+                # Synthesize pick_up
+                enforced.append({
+                    "verb": "pick_up",
+                    "object": act.get("object") or "V2_tube",
+                    "from": "rack",
+                    "step_index": act.get("step_index")
+                })
+        enforced.append(act)
+    doc["micro_plan"] = enforced
 
 
 def _rebuild_micro_from_ops(doc):
@@ -2378,16 +2459,19 @@ def detect_add_solvent(line: str) -> Optional[Dict]:
 
 def detect_add(line: str) -> Optional[Dict]:
     s = strip_tags(_clean_unicode(line.strip()))
-    m = re.search(
-        r"\b(add|charge)\s+(?:the\s+)?(?P<src>.+?)\s+to\s+(?:the\s+)?(?P<dst>.+?)\b",
-        s,
-        re.I,
-    )
+    # Allow optional leading instrumentation clause e.g. 'Using an autotitrator,'
+    s2 = re.sub(r"^using an autotitrator,?\s*", "", s, flags=re.I)
+    m = re.search(r"\b(add|charge)\s+(?:the\s+)?(?P<src>.+?)\s+to\s+(?:the\s+)?(?P<dst>.+?)\b", s2, re.I)
     if not m:
         return None
-    rate = "slow" if re.search(r"\b(dropwise|slow)\b", s, re.I) else "normal"
-    at_temp = find_temp_c(s)
-    over_min = find_minutes(s)
+    rate_match = None
+    # Capture explicit controlled rate like '5 mL/min'
+    m_rate = re.search(r"(\d+(?:\.\d+)?)\s*mL\s*/\s*min", s2, re.I)
+    if m_rate:
+        rate_match = f"{m_rate.group(1)} mL/min"
+    rate = rate_match or ("slow" if re.search(r"\b(dropwise|slow)\b", s2, re.I) else "normal")
+    at_temp = find_temp_c(s2)
+    over_min = find_minutes(s2)
     return {
         "action": "add",
         "source_name": m.group("src").strip(),
@@ -3010,9 +3094,12 @@ def _micro_for_op(
         return m
 
     if typ == "move_to_oven":
+        tube = op.get("tube") or "tube"
+        oven_label = op.get("oven_id") or "OV1" or "oven"
+        # Ensure we generate a pick_up before placing into oven to satisfy primitive expectations
         m += [
-            {"verb": "pick_up", "object": op.get("tube") or "tube", "from": "rack"},
-            {"verb": "place", "object": op.get("tube") or "tube", "to": "oven"},
+            {"verb": "pick_up", "object": tube, "from": "rack"},
+            {"verb": "place", "object": tube, "to": oven_label},
         ]
         return m
 
@@ -3175,17 +3262,70 @@ def _derive_minimal_micro_plan(doc: dict, allow_wait: bool = False) -> tuple[lis
                 it["collapsed_from_steps"] = sorted(steps)
             else:
                 del it["collapsed_from_steps"]
-    return collapsed, delays
+    # Non-consecutive idempotent set collapse
+    seen_sets = {}
+    final: list[dict] = []
+    for it in collapsed:
+        if it.get("verb") == "set" and all(k in it for k in ("device", "param", "value")):
+            key = (it["device"], it["param"], json.dumps(it.get("value"), sort_keys=True))
+            if key in seen_sets:
+                prev = seen_sets[key]
+                prev.setdefault("collapsed_from_steps", [])
+                si = it.get("step_index")
+                if si is not None and si not in prev["collapsed_from_steps"]:
+                    prev["collapsed_from_steps"].append(si)
+                continue
+            else:
+                seen_sets[key] = it
+        final.append(it)
+    return final, delays
 
 
 def convert_text_to_robot_ops(text: str) -> Dict:
     hardware = parse_hardware(text)
+    # Synthetic hardware inference: if autotitrator mentioned but not declared, add one
+    if re.search(r"autotitrator", text, flags=re.I) and not any((isinstance(h, dict) and (h.get("name") or "").lower().startswith("autotitrator")) for h in hardware):
+        hardware.append({"id": "AT1", "name": "Autotitrator", "type": "device"})
     vessels = VesselRegistry(hardware)
     records: List[Dict] = []
 
     steps = extract_steps(text)
+    # Fallback: if no structured numbered Procedure steps were found, treat the whole text as a single free-form step
+    if not steps and text and text.strip():
+        steps = [text.strip()]
 
     for step in steps:
+        # Broad simple dry detector (must precede other generic fallbacks)
+        simple_dry = None
+        if re.search(r"\bdry\b", step, flags=re.I) and re.search(r"oven", step, flags=re.I) and re.search(r"\d+\s*°?\s*C", step, flags=re.I):
+            m_temp = re.search(r"(\d+(?:\.\d+)?)\s*°?\s*C", step, flags=re.I)
+            m_dur = re.search(r"for\s+(\d+(?:\.\d+)?)\s*(h|hr|hrs|hour|hours|m|min|mins|minute|minutes)\b", step, flags=re.I)
+            if m_temp:
+                temp_val = float(m_temp.group(1))
+                dur_m = None
+                if m_dur:
+                    qty = float(m_dur.group(1)); unit = m_dur.group(2).lower()
+                    dur_m = qty * (60 if unit.startswith('h') else 1)
+                simple_dry = {"temp": temp_val, "minutes": int(dur_m) if dur_m is not None else None}
+        if simple_dry:
+            target_vessel = vessels.primary_vessel or vessels.ensure_glassware("Beaker")
+            ops_list = [
+                {"op": "move_to_oven", "oven_id": DEVICE_IDS.get("oven_id", "OV1"), "tube": f"{target_vessel}_tube"},
+                {"op": "set", "device": DEVICE_IDS.get("oven_id", "OV1"), "param": "temperature_C", "value": simple_dry["temp"]},
+            ]
+            if simple_dry.get("minutes"):
+                ops_list.append({"op": "wait", "minutes": simple_dry["minutes"]})
+            record = {
+                "action": "postprocess",
+                "vessel": target_vessel,
+                "reagents": [],
+                "temperature_C": simple_dry["temp"],
+                "minutes": simple_dry.get("minutes"),
+                "ops": ops_list,
+                "raw": step,
+            }
+            records.append(record)
+            continue
         # Weighing
         weigh = detect_weigh(step)
         if weigh:
@@ -3393,6 +3533,14 @@ def convert_text_to_robot_ops(text: str) -> Dict:
             dst_key = re.sub(r"^\bthe\b\s+", "", add["target_name"], flags=re.I).strip()
             src_vid = vessels.ensure_glassware(src_key)
             dst_vid = vessels.ensure_glassware(dst_key)
+            rate_ml_min = None
+            if add.get("rate") and re.search(r"ml\s*/\s*min", add["rate"], flags=re.I):
+                m_rate = re.search(r"([0-9]+(?:\.[0-9]+)?)\s*ml\s*/\s*min", add["rate"], flags=re.I)
+                if m_rate:
+                    try:
+                        rate_ml_min = float(m_rate.group(1))
+                    except Exception:
+                        rate_ml_min = None
             record = {
                 "action": "add",
                 "source_vessel": src_vid,
@@ -3411,8 +3559,73 @@ def convert_text_to_robot_ops(text: str) -> Dict:
                 ),
                 "raw": step,
             }
+            # Inject autotitrator rate set if hardware includes autotitrator and rate parsed
+            if rate_ml_min is not None:
+                auto_id = next((h.get("id") for h in hardware if isinstance(h, dict) and (h.get("name") or "").lower().startswith("autotitrator")), None)
+                if auto_id:
+                    record["ops"].insert(0, {"op": "set", "device": auto_id, "param": "rate_ml_per_min", "value": rate_ml_min})
             _normalize_reagents_inplace(record)
             _add_structured_reagents_inplace(record)
+            records.append(record)
+            continue
+
+        # Simple heating fallback (if not captured by structured detectors)
+        # Patterns: Heat ... to 45 C, Continue heating at 45 C, Maintain temperature at 45 C for X minutes
+        m_heat = re.search(r"(heat|continue heating|maintain(?: temperature)?)\s+(?:the\s+)?(?:mixture|solution|temperature|it)?[^\.]*?(?:to|at)\s+(\d+(?:\.\d+)?)\s*°?C", step, flags=re.I)
+        if m_heat:
+            temp_val = float(m_heat.group(2)) if m_heat.group(2) else None
+            dur_m = None
+            m_dur = re.search(r"for\s+(\d+(?:\.\d+)?)\s*(minutes?|min|hours?|h)\b", step, flags=re.I)
+            if m_dur:
+                qty = float(m_dur.group(1))
+                unit = m_dur.group(2).lower()
+                dur_m = qty * (60 if unit.startswith("h") else 1)
+            target_vessel = vessels.primary_vessel or vessels.ensure_glassware("Beaker")
+            ops_list = []
+            if temp_val is not None:
+                ops_list.append({"op": "set", "device": DEVICE_IDS["hotplate_id"], "param": "temperature_C", "value": temp_val})
+            if dur_m is not None:
+                ops_list.append({"op": "wait", "minutes": int(dur_m)})
+            if ops_list:
+                record = {
+                    "action": "heat_hold",
+                    "vessel": target_vessel,
+                    "reagents": [],
+                    "temperature_C": temp_val,
+                    "minutes": int(dur_m) if dur_m is not None else None,
+                    "ops": ops_list,
+                    "raw": step,
+                }
+                records.append(record)
+                continue
+
+        # Simple drying fallback: Dry ... in an oven at 50 C for 1 hour
+        m_dry = re.search(r"dry\b[^\.]*?oven[^\.]*?(\d+(?:\.\d+)?)\s*°?C([^\.]*)", step, flags=re.I)
+        if m_dry:
+            temp_val = float(m_dry.group(1))
+            tail = m_dry.group(2)
+            dur_m = None
+            m_dur = re.search(r"for\s+(\d+(?:\.\d+)?)\s*(minutes?|min|hours?|h)\b", tail, flags=re.I)
+            if m_dur:
+                qty = float(m_dur.group(1))
+                unit = m_dur.group(2).lower()
+                dur_m = qty * (60 if unit.startswith("h") else 1)
+            target_vessel = vessels.primary_vessel or vessels.ensure_glassware("Beaker")
+            ops_list = [
+                {"op": "move_to_oven", "oven_id": DEVICE_IDS.get("oven_id", "OV1"), "tube": f"{target_vessel}_tube"},
+                {"op": "set", "device": DEVICE_IDS.get("oven_id", "OV1"), "param": "temperature_C", "value": temp_val},
+            ]
+            if dur_m is not None:
+                ops_list.append({"op": "wait", "minutes": int(dur_m)})
+            record = {
+                "action": "postprocess",
+                "vessel": target_vessel,
+                "reagents": [],
+                "temperature_C": temp_val,
+                "minutes": int(dur_m) if dur_m is not None else None,
+                "ops": ops_list,
+                "raw": step,
+            }
             records.append(record)
             continue
 
@@ -3530,6 +3743,11 @@ def convert_text_to_robot_ops(text: str) -> Dict:
                 "ops": ops_for_postproc(target_vessel, wd),
                 "raw": step,
             }
+            # If drying includes an oven temperature but no move_to_oven op, synthesize it
+            has_temp = any(op.get("op") == "set" and op.get("param") == "temperature_C" for op in record["ops"])
+            has_move = any(op.get("op") == "move_to_oven" for op in record["ops"])
+            if has_temp and not has_move:
+                record["ops"].insert(0, {"op": "move_to_oven", "oven_id": DEVICE_IDS.get("oven_id", "OV1"), "tube": f"{target_vessel}_tube"})
             _normalize_reagents_inplace(record)
             _add_structured_reagents_inplace(record)
             records.append(record)
@@ -3919,6 +4137,12 @@ def convert_text_to_robot_ops(text: str) -> Dict:
         "defaults": DEFAULTS,
         "steps": records,
     }
+    # Ensure any oven place has a preceding pick_up in raw micro_plan (pre-normalization)
+    mp = result.get("micro_plan", [])
+    for idx, act in enumerate(list(mp)):
+        if act.get("verb") == "place" and act.get("to") in {"OV1","oven"}:
+            if idx == 0 or mp[idx-1].get("verb") != "pick_up":
+                mp.insert(idx, {"verb":"pick_up","object": act.get("object"), "from":"rack", "step_index": act.get("step_index")})
     result = apply_postprocessing(result)
     try:
         # Always derive minimal primitive plan; can be disabled via env var if desired
