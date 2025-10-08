@@ -172,6 +172,217 @@ def _tidy_registry(doc: dict) -> None:
             reg.pop(k, None)
 
 
+def _normalize_execution_pass(doc: dict) -> None:
+    """Execution-focused normalization applied late in the pipeline.
+
+    Goals:
+      1. Canonical naming for devices / destinations (e.g., "water bath" -> hotplate id).
+      2. Ensure any temperature set on HP1 (or hotplate synonym) is preceded by a placement.
+      3. Standardize provenance fields (collapsed_from_steps) ordering & de-duplication.
+      4. Augment units metadata for set operations (temperature_C, rpm, rate_mL_per_min).
+      5. Fill implicit volume/mass unit fields on pours if value present.
+    """
+    devices = doc.get("devices", {}) or {}
+    hp_id = devices.get("hotplate_id", "HP1")
+    ov_id = devices.get("oven_id", "OV1")
+    cf_id = devices.get("centrifuge_id", "CF1")
+
+    device_synonyms = {
+        "water bath": hp_id,
+        "water_bath": hp_id,
+        "hot plate": hp_id,
+        "hotplate": hp_id,
+        "oven": ov_id,
+        "centrifuge": cf_id,
+    }
+
+    def canon_loc(loc: str | None) -> str | None:
+        if not isinstance(loc, str):
+            return loc
+        key = loc.strip().lower()
+        return device_synonyms.get(key, loc)
+
+    mp = doc.get("micro_plan") or []
+
+    # 1) Canonicalize place destinations and object names for from/to fields
+    for act in mp:
+        if act.get("verb") == "place" and "to" in act:
+            act["to"] = canon_loc(act.get("to"))
+        if act.get("verb") == "set" and "device" in act:
+            act["device"] = canon_loc(act.get("device"))
+        # Normalize pour endpoints referencing synonyms
+        if act.get("verb") == "pour":
+            if "to" in act:
+                act["to"] = canon_loc(act.get("to"))
+            if "from" in act:
+                act["from"] = act.get("from")
+
+    # 2) Ensure placement before any temperature set on hotplate if missing within same step
+    by_step: dict[int, list[dict]] = {}
+    for a in mp:
+        by_step.setdefault(a.get("step_index"), []).append(a)
+    for step_idx, acts in by_step.items():
+        for i, a in enumerate(list(acts)):
+            if (
+                a.get("verb") == "set"
+                and a.get("device") == hp_id
+                and a.get("param") == "temperature_C"
+            ):
+                # Scan backwards for a place of the primary reaction vessel to hp_id
+                already = any(
+                    b.get("verb") == "place"
+                    and b.get("to") == hp_id
+                    and b.get("step_index") == step_idx
+                    for b in acts[:i]
+                )
+                if not already:
+                    # Insert synthetic pick_up + place before this set globally
+                    vessel = "V1"
+                    # compute global index of action a
+                    try:
+                        gpos = mp.index(a)
+                    except ValueError:
+                        gpos = None
+                    if gpos is not None:
+                        mp.insert(
+                            gpos,
+                            {
+                                "verb": "pick_up",
+                                "object": vessel,
+                                "from": "bench",
+                                "step_index": step_idx,
+                            },
+                        )
+                        mp.insert(
+                            gpos + 1,
+                            {
+                                "verb": "place",
+                                "object": vessel,
+                                "to": hp_id,
+                                "step_index": step_idx,
+                            },
+                        )
+
+    # 3) Provenance standardization
+    for a in mp:
+        if "collapsed_from_steps" in a and isinstance(a["collapsed_from_steps"], list):
+            uniq = sorted({int(x) for x in a["collapsed_from_steps"] if isinstance(x, (int, float))})
+            # Remove self if redundant and already represented by step_index
+            if a.get("step_index") in uniq and len(uniq) > 1:
+                # keep self first for readability
+                uniq = [a.get("step_index")] + [u for u in uniq if u != a.get("step_index")]
+            a["collapsed_from_steps"] = uniq
+
+    # 4) Units augmentation for set operations
+    for a in mp:
+        if a.get("verb") == "set":
+            param = a.get("param")
+            if param == "temperature_C":
+                a.setdefault("unit", "C")
+            elif param == "rpm":
+                a.setdefault("unit", "rpm")
+            elif param == "rate_mL_per_min":
+                a.setdefault("unit", "mL/min")
+
+    # 5) Fill pour mass/volume units if missing
+    for a in mp:
+        if a.get("verb") == "pour":
+            if "volume" in a and a.get("volume") is not None:
+                a.setdefault("volume_units", "mL")
+            if "mass" in a and a.get("mass") is not None:
+                a.setdefault("mass_units", "mg")
+
+    # Assign back (mp is mutated in place already)
+    doc["micro_plan"] = mp
+
+
+def _executor_validate_and_repair(doc: dict) -> None:
+    """Validate & repair final micro_plan to guarantee executor readability.
+
+    Invariants enforced (schema executor.v1):
+      - Allowed verbs set; unknown verbs dropped.
+      - Each 'set' of temperature_C requires prior place of primary vessel on device in same step.
+      - Every 'set' has a 'unit'.
+      - Every 'pour' has either (volume & volume_units) or (mass & mass_units) OR is flagged qualitative=True.
+      - Synthetic pick_up/place inserted if missing for required temperature sets.
+      - Provide provenance summary & repair list at doc['_executor'].
+    """
+    mp = list(doc.get("micro_plan") or [])
+    allowed_verbs = {"pick_up","place","pour","set","wait","start","stop","vortex","decant"}
+    repairs: list[str] = []
+    devices = doc.get("devices", {}) or {}
+    hp_id = devices.get("hotplate_id", "HP1")
+    primary_vessel = "V1"
+
+    # Build per-step list for contextual insertion
+    by_step: dict[int, list[dict]] = {}
+    for a in mp:
+        by_step.setdefault(a.get("step_index"), []).append(a)
+
+    # Pass 1: drop unknown verbs
+    filtered = []
+    for a in mp:
+        if a.get("verb") not in allowed_verbs:
+            repairs.append(f"dropped_unknown_verb:{a.get('verb')}")
+            continue
+        filtered.append(a)
+    mp = filtered
+
+    # Pass 2: ensure hotplate temperature sets have placement
+    i = 0
+    while i < len(mp):
+        a = mp[i]
+        if a.get("verb") == "set" and a.get("device") == hp_id and a.get("param") == "temperature_C":
+            step_idx = a.get("step_index")
+            # look back in same step for place to hp_id
+            has_place = any(
+                b.get("verb") == "place" and b.get("to") == hp_id and b.get("step_index") == step_idx
+                for b in mp[max(0, i-6):i]
+            )
+            if not has_place:
+                # insert pick_up + place directly before this set
+                pick = {"verb":"pick_up","object":primary_vessel,"from":"bench","step_index":step_idx}
+                place = {"verb":"place","object":primary_vessel,"to":hp_id,"step_index":step_idx}
+                mp.insert(i, pick)
+                mp.insert(i+1, place)
+                repairs.append("inserted_hotplate_pickup_place")
+                i += 2  # advance past inserted
+                continue
+        i += 1
+
+    # Pass 3: units for set
+    for a in mp:
+        if a.get("verb") == "set":
+            param = a.get("param")
+            if param == "temperature_C" and not a.get("unit"):
+                a["unit"] = "C"; repairs.append("annotated_unit_C")
+            elif param == "rpm" and not a.get("unit"):
+                a["unit"] = "rpm"; repairs.append("annotated_unit_rpm")
+            elif param == "rate_mL_per_min" and not a.get("unit"):
+                a["unit"] = "mL/min"; repairs.append("annotated_unit_rate")
+
+    # Pass 4: pour quantitative / qualitative tagging
+    for a in mp:
+        if a.get("verb") == "pour":
+            has_vol = a.get("volume") is not None
+            has_mass = a.get("mass") is not None
+            if has_vol and not a.get("volume_units"):
+                a["volume_units"] = "mL"; repairs.append("default_volume_units_mL")
+            if has_mass and not a.get("mass_units"):
+                a["mass_units"] = "mg"; repairs.append("default_mass_units_mg")
+            if not has_vol and not has_mass:
+                a.setdefault("qualitative", True)
+
+    # Summarize validity (simple heuristic: no unknown verbs after filtering)
+    doc["micro_plan"] = mp
+    doc["_executor"] = {
+        "schema_version": "executor.v1",
+        "repairs": repairs,
+        "valid": True,
+        "micro_actions": len(mp),
+    }
+
+
 def apply_postprocessing(doc: dict) -> dict:
     global _BANNER_SHOWN
     if not _BANNER_SHOWN:
@@ -281,6 +492,16 @@ def apply_postprocessing(doc: dict) -> dict:
             st.pop("minutes", None)
 
     _sanity_assertions(doc)
+
+    # Late execution-focused normalization pass
+    try:
+        _normalize_execution_pass(doc)
+    except Exception as e:
+        print("[converter] _normalize_execution_pass error:", repr(e))
+    try:
+        _executor_validate_and_repair(doc)
+    except Exception as e:
+        print("[converter] _executor_validate_and_repair error:", repr(e))
 
     return doc
 

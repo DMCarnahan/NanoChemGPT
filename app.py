@@ -2700,6 +2700,12 @@ def ask():
             response_payload['robot_operations'] = robot_operations
             # Alias for external expectation of key name
             response_payload['robot_rules'] = robot_operations
+            # Expose executor normalization status if present
+            ex_meta = robot_operations.get('_executor') if isinstance(robot_operations, dict) else None
+            if isinstance(ex_meta, dict):
+                response_payload['executor_valid'] = bool(ex_meta.get('valid'))
+                response_payload['executor_repairs'] = ex_meta.get('repairs') or []
+                response_payload['executor_schema_version'] = ex_meta.get('schema_version') or 'executor.v1'
         if 'robot_ops_error' in locals() and robot_ops_error:
             response_payload['robot_ops_error'] = robot_ops_error
     except Exception:
