@@ -21,8 +21,12 @@ def test_naming_unification():
 def test_autotitrator_rate_set():
     text = "Using an autotitrator, add reagent B to vessel V3 at a controlled rate of 5 mL/min while stirring for 10 minutes."
     doc = convert_text_to_robot_ops(text)
-    # look for a set op with rate_ml_per_min
-    assert any(a.get('verb')=='set' and a.get('param')=='rate_ml_per_min' for a in doc.get('micro_plan', [])) or any(op.get('op')=='set' and op.get('param')=='rate_ml_per_min' for st in doc.get('steps', []) for op in st.get('ops') or [])
+    # look for a set op with rate param (canonical or legacy)
+    has_rate = (
+        any(a.get('verb')=='set' and a.get('param') in {'rate_mL_per_min','rate_ml_per_min'} for a in doc.get('micro_plan', []))
+        or any(op.get('op')=='set' and op.get('param') in {'rate_mL_per_min','rate_ml_per_min'} for st in doc.get('steps', []) for op in (st.get('ops') or []))
+    )
+    assert has_rate
 
 
 def test_cross_step_idempotent_set_collapse():

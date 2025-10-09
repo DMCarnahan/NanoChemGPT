@@ -129,6 +129,29 @@ Main endpoint for question answering with retrieval-augmented generation.
 }
 ```
 
+##### Robot Operations Normalization & Executor Metadata (New)
+When `mode` is `"robot"` or using the UI Robot Mode, the response may include a `robot_operations` object. The converter applies a normalization pass and then an executor validation/repair pass to ensure executor-readiness:
+
+- Vessel aliasing (e.g., `vN_bottle` → `VN`, `vN_tube_bottle` → `VN_tube`).
+- Ensure `pick_up`/`place` before `set` on ovens/hotplates.
+- Add missing units to `set` parameters (`temperature_C`, `stir_rpm`, `rate_mL_per_min`).
+- Canonicalize autotitrator rate parameter names to `rate_mL_per_min` with unit `mL/min`.
+- Collapse adjacent duplicate `set` operations across steps (tracks `collapsed_from_steps`).
+- Strip zero-minute waits.
+
+The API surfaces executor metadata at the top-level for convenience when `robot_operations` is present:
+
+```jsonc
+{
+  "robot_operations": { "_executor": { "schema_version": "v1", "valid": true, "repairs": [] } },
+  "executor_valid": true,
+  "executor_schema_version": "v1",
+  "executor_repairs": []
+}
+```
+
+Clients can rely on `executor_valid == true` indicating the plan should be consumable by the executor without further transformation.
+
 #### POST `/ask` (with file upload)
 
 Submit questions with file attachments for context.

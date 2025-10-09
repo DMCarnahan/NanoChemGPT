@@ -24,7 +24,7 @@ def test_structured_drying_numbered():
 
 def test_autotitrator_variant_phrase():
     doc = convert_text_to_robot_ops('Autotitrator-assisted addition: add solution A to vessel V2 at 2.5 mL/min while stirring for 5 minutes.')
-    assert any(a.get('verb')=='set' and a.get('param')=='rate_ml_per_min' and a.get('value')==2.5 for a in doc.get('micro_plan', []))
+    assert any(a.get('verb')=='set' and a.get('param') in {'rate_mL_per_min','rate_ml_per_min'} and a.get('value')==2.5 for a in doc.get('micro_plan', []))
 
 
 def test_temperature_set_provenance_collapse():

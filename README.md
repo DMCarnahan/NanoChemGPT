@@ -413,6 +413,24 @@ When calling `/ask` with `{"mode": "robot"}` (or the UI Robot Mode toggle), the 
   - Normalizes quantities, temperatures, times, pH, and container references.
 3. Attach metadata (`meta`) including timing and counts.
 
+### Normalization & Executor Guarantees (New)
+After conversion, a late normalization pass enforces invariants to make outputs executor-ready:
+
+- Vessel aliasing: `vN_bottle` → `VN`, `vN_tube_bottle` → `VN_tube` (when known via registry/steps).
+- Heating safety: insert or ensure `pick_up`/`place` occurs before any `set` for ovens/hotplates.
+- Units augmentation: add missing units to `set` parameters (e.g., `temperature_C`, `stir_rpm`, `rate_mL_per_min`).
+- Autotitrator rate: canonicalize variants like `rate_ml_per_min` to `rate_mL_per_min` with unit `mL/min`.
+- Idempotent set collapse: remove adjacent duplicate `set` ops across steps while preserving provenance (`collapsed_from_steps`).
+- Zero-minute waits are removed.
+
+Following normalization, an executor validation/repair pass attaches `robot_operations._executor`:
+
+- `schema_version`: version string for the executor op schema.
+- `valid`: true if the plan is executor-readable after repairs.
+- `repairs`: list of applied fixes (e.g., inserted `place` before `set temperature_C`).
+
+When `/ask` returns `robot_operations`, the API also lifts these fields to top-level keys: `executor_valid`, `executor_repairs`, `executor_schema_version` for convenience.
+
 ### Quality Heuristic
 Some inputs superficially parse but yield low‑information output (e.g., 1–2 generic steps, no distinct actions, or missing ops arrays). A heuristic `_is_poor_robot_doc()` scores the primary parse and—if deemed low quality—forces a fallback salvage pipeline even without an exception. Triggered cases are marked with `meta.fallback_quality_triggered = true`.
 

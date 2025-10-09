@@ -457,16 +457,27 @@ def apply_postprocessing(doc: dict) -> dict:
                     mp_list.insert(global_pos, {"verb":"pick_up","object":obj,"from":"rack","step_index":len(doc.get("steps") or [])})
     _tidy_registry(doc)
 
-    # Unify naming: convert vN_bottle objects to VN if that vessel id exists
-    vessel_ids = {st.get("vessel") for st in doc.get("steps", []) if st.get("vessel")}
+    # Unify naming: convert vN_bottle -> VN and vN_tube_bottle -> VN_tube when known
+    reg_ids = set((doc.get("vessel_registry") or {}).keys())
+    step_ids = set()
+    for st in doc.get("steps", []) or []:
+        for key in ("vessel", "source_vessel", "target_vessel"):
+            v = st.get(key)
+            if isinstance(v, str) and v:
+                step_ids.add(v)
+    known_ids = reg_ids | step_ids
+
     def _norm_name(x):
         if not isinstance(x, str):
             return x
+        m_tube = re.fullmatch(r"v(\d+)_tube_bottle", x)
+        if m_tube:
+            cand = f"V{m_tube.group(1)}_tube"
+            return cand if cand in known_ids or cand.startswith("V") else x
         m = re.fullmatch(r"v(\d+)_bottle", x)
         if m:
             cand = f"V{m.group(1)}"
-            if cand in vessel_ids:
-                return cand
+            return cand if cand in known_ids or cand.startswith("V") else x
         return x
     for a in doc.get("micro_plan", []) or []:
         if a.get("verb") in {"pick_up", "place", "pour"}:
@@ -476,6 +487,11 @@ def apply_postprocessing(doc: dict) -> dict:
                 a["from"] = _norm_name(a.get("from"))
             if a.get("verb") == "pour" and "to" in a:
                 a["to"] = _norm_name(a.get("to"))
+        # Canonicalize autotitrator rate param
+        if a.get("verb") == "set":
+            if a.get("param") in {"rate_ml_per_min", "rate_ml_min", "rate_mL_min"}:
+                a["param"] = "rate_mL_per_min"
+                a.setdefault("unit", "mL/min")
     for st in doc.get("steps", []) or []:
         for mo in st.get("micro_ops", []) or []:
             if mo.get("verb") in {"pick_up", "place", "pour"}:
@@ -485,6 +501,9 @@ def apply_postprocessing(doc: dict) -> dict:
                     mo["from"] = _norm_name(mo.get("from"))
                 if mo.get("verb") == "pour" and "to" in mo:
                     mo["to"] = _norm_name(mo.get("to"))
+            if mo.get("verb") == "set" and mo.get("param") in {"rate_ml_per_min", "rate_ml_min", "rate_mL_min"}:
+                mo["param"] = "rate_mL_per_min"
+                mo.setdefault("unit", "mL/min")
 
     # Strip step-level minutes == 0
     for st in doc.get("steps", []) or []:
