@@ -45,13 +45,15 @@ def save_attachment(file: FileStorage, max_pages: int | None = None) -> dict:
                 # Final fallback: define a noop extractor
                 def _extract_pdf_text(_p, max_pages=40):  # type: ignore
                     return ("", 0)
+
             fail_marker = ATTACH_DIR / f"{aid}.fail"
             if fail_marker.exists():
                 logger.debug("[attachments] skipping extraction (cached fail) %s", dest)
             else:
                 txt, n_pages = _extract_pdf_text(
                     dest,
-                    max_pages=max_pages or int(os.environ.get("ATTACH_MAX_PAGES", "40")),
+                    max_pages=max_pages
+                    or int(os.environ.get("ATTACH_MAX_PAGES", "40")),
                 )
                 (ATTACH_DIR / f"{aid}.txt").write_text(txt, encoding="utf-8")
                 meta.update({"n_pages": n_pages, "n_chars": len(txt)})
@@ -91,17 +93,22 @@ def read_attachment_text(aid: str, max_pages: int | None = None) -> str:
         if pth.suffix.lower() == ".pdf":
             try:
                 try:
-                    from app_utils.pdf_utils import extract_pdf_text as _extract_pdf_text
+                    from app_utils.pdf_utils import (
+                        extract_pdf_text as _extract_pdf_text,
+                    )
                 except Exception:
+
                     def _extract_pdf_text(_p, max_pages=40):  # type: ignore
                         return ("", 0)
+
                 fail_marker = pth.parent / (pth.stem.split("__")[0] + ".fail")
                 if fail_marker.exists():
                     logger.debug("[attachments] cached fail read %s", pth)
                     return ""
                 txt, _ = _extract_pdf_text(
                     pth,
-                    max_pages=max_pages or int(os.environ.get("ATTACH_MAX_PAGES", "40")),
+                    max_pages=max_pages
+                    or int(os.environ.get("ATTACH_MAX_PAGES", "40")),
                 )
                 if not txt:
                     fail_marker.write_text("empty", encoding="utf-8")

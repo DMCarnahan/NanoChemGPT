@@ -178,7 +178,10 @@ def startup():
     if os.getenv("AUTOBUILD_FAISS", "0").lower() in {"1", "true", "yes"}:
         try:
             if BUNDLE_PATH.exists() and BUNDLE_PATH.stat().st_size > 0:
-                if _state.get("index") is None or int(getattr(_state["index"], "ntotal", 0) or 0) == 0:
+                if (
+                    _state.get("index") is None
+                    or int(getattr(_state["index"], "ntotal", 0) or 0) == 0
+                ):
                     log.info("[autobuild-faiss] rebuilding from bundle %s", BUNDLE_PATH)
                     _build_index_from_bundle(BUNDLE_PATH)
         except Exception as e:

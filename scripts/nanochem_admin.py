@@ -8,6 +8,7 @@ Usage:
 This script is intentionally lightweight (no external deps). It provides a few
 common maintenance actions for Railway or local ops.
 """
+
 from __future__ import annotations
 
 import argparse
@@ -21,9 +22,7 @@ def status():
     from app_utils.constants import HARVEST_OUT_DIR, INDEX_DIR
 
     bundle = Path(HARVEST_OUT_DIR) / "bundle.jsonl"
-    tfidf_any = any(
-        (Path(INDEX_DIR) / n).exists() for n in ("tfidf.pkl", "tfidf.npz")
-    )
+    tfidf_any = any((Path(INDEX_DIR) / n).exists() for n in ("tfidf.pkl", "tfidf.npz"))
     faiss_idx = Path(INDEX_DIR) / "index.faiss"
     info = {
         "bundle": str(bundle),

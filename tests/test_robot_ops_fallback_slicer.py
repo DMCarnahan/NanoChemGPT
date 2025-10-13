@@ -11,13 +11,19 @@ XRD, TEM and VSM measurements were performed.
 
 # Mimic fallback slice + merge by providing only raw unstructured text (no numbered procedure marker)
 
+
 def test_fallback_section_slicer_excludes_characterization():
-    doc = convert_text_to_robot_ops("1. **Procedure**:\n1. placeholder")  # warm up converter (caches)
+    doc = convert_text_to_robot_ops(
+        "1. **Procedure**:\n1. placeholder"
+    )  # warm up converter (caches)
 
     import re as _re
+
     raw = SYNTHESIS_BLOCK
     # slice manually (simulate _slice_synthesis): capture 2.1 up to 2.2
-    m = _re.search(r"(^|\n)\s*2\.1[^\n]{0,40}synthesi[sd].*?(?=\n\s*2\.2\b|$)", raw, _re.I | _re.S)
+    m = _re.search(
+        r"(^|\n)\s*2\.1[^\n]{0,40}synthesi[sd].*?(?=\n\s*2\.2\b|$)", raw, _re.I | _re.S
+    )
     sliced = m.group(0) if m else raw
     assert "Characterization" not in sliced, "Section slicer should exclude 2.2 content"
 
@@ -32,9 +38,12 @@ def test_line_merge_reduces_fragments():
     )
     # emulate merge algorithm
     import re as _re
+
     lines = [l for l in text.splitlines() if l.strip()]
     KEY_VERBS = r"add|pour|introduce|titr|stir|heat|maintain|hold|cool|filter|wash|dry|centrifuge|decant|resuspend|collect|transfer|dissolv|prepare|monitor|adjust"
-    REAGENT_HINT = _re.compile(r"\b(\d+(?:\.\d+)?\s*(?:mL|ml|g|mg|mol|mmol|M|°C|deg|C)|pH\s*\d+(?:\.\d+)?)\b")
+    REAGENT_HINT = _re.compile(
+        r"\b(\d+(?:\.\d+)?\s*(?:mL|ml|g|mg|mol|mmol|M|°C|deg|C)|pH\s*\d+(?:\.\d+)?)\b"
+    )
     keep = []
     for ln in lines:
         low = ln.lower()

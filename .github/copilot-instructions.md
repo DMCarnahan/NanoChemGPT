@@ -139,10 +139,7 @@ Long-running tasks (harvesting, mining) use `enqueue_text_mining_job()` for back
 - Functions: `validate_step()`, `convert_text_to_robot_ops()`
 - Operations: pick_up, pour, place, heat, cool, mix, wait with parameters
 
-### DuckDB Integration (`DuckDB/duck_searcher.py`)
-- Alternative search backend for structured reaction data
-- Env vars: `LOOKUP_DUCKDB_PATH`, `LOOKUP_DUCKDB_TABLE`, `LOOKUP_TEXT_COLS`
-- Pattern-based ILIKE queries across configured text columns
+<!-- DuckDB integration removed -->
 
 ### Mechanistic Reasoning (`mech_reasoning/`)
 - Domain-specific mechanistic knowledge base

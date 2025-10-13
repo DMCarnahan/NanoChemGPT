@@ -14,6 +14,12 @@ def test_no_zero_minute_waits():
         assert not (m.get("verb") == "wait" and int(m.get("minutes") or 0) == 0), m
     for st in doc.get("steps", []):
         for m in st.get("micro_ops", []) or []:
-            assert not (m.get("verb") == "wait" and int(m.get("minutes") or 0) == 0), (st.get("index"), m)
+            assert not (m.get("verb") == "wait" and int(m.get("minutes") or 0) == 0), (
+                st.get("index"),
+                m,
+            )
         for op in st.get("ops", []) or []:
-            assert not (op.get("op") == "wait" and int(op.get("minutes") or 0) == 0), (st.get("index"), op)
+            assert not (op.get("op") == "wait" and int(op.get("minutes") or 0) == 0), (
+                st.get("index"),
+                op,
+            )

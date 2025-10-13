@@ -10,6 +10,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 > Release candidate: branch `pr/ci-format-checks-2025-10-03` merged into `main`. All tests passed locally and CI format/test jobs completed successfully. Ready to tag and publish.
 
 
+### Removed
+- DuckDB integration fully removed from the codebase: deleted `DuckDB/` module and dropped the `duckdb` dependency from `requirements.txt`.
+
+### Changed
+- `app.py` no longer imports or references DuckDB lookup logic; table context injection and `table_refs` in responses were removed.
+- Documentation updated to reflect the removal of DuckDB and related lookup features.
+
+### Migration Notes
+- No action required for most users. If you previously relied on DuckDB-based table lookups, note that these features are now retired. Responses will no longer include `table_refs`, and any internal lookup helpers are now no-ops.
+
+
 ### Added
 - Comprehensive test suite with pytest framework
 - Publication-ready documentation structure

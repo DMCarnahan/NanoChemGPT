@@ -55,6 +55,7 @@ def normalize_pdf_text(s: str) -> str:
     hydrate_pattern = re.compile(
         rf"(([A-Z](?:[{sep_chars}]?[A-Za-z0-9]){{0,20}}))([{sep_chars}])((?:\d+)?H2O)"
     )
+
     # Replace all hydrate occurrences with placeholder for the dot
     def _protect_hydrate(m: re.Match) -> str:
         left_full, left_core, _dot, right = m.groups()
@@ -69,6 +70,7 @@ def normalize_pdf_text(s: str) -> str:
     adduct_pattern = re.compile(
         rf"([A-Z][A-Za-z0-9]{{0,12}})([{sep_chars}])(\d+[A-Z][A-Za-z0-9]*)"
     )
+
     def _protect_adduct(m: re.Match) -> str:
         return f"{m.group(1)}{HY_PLACEHOLDER}{m.group(3)}"
 
@@ -104,8 +106,20 @@ def normalize_pdf_text(s: str) -> str:
         nxt = m.group(2)
         combined = prev + nxt
         # Join if prev or next is short (<=4) OR combined appears morphological (endswith common suffix)
-        suffixes = ("tion", "sion", "ment", "ing", "able", "ible", "ally", "ness", "iate")
-        if nxt.islower() and (len(prev) <= 4 or any(combined.endswith(s) for s in suffixes)):
+        suffixes = (
+            "tion",
+            "sion",
+            "ment",
+            "ing",
+            "able",
+            "ible",
+            "ally",
+            "ness",
+            "iate",
+        )
+        if nxt.islower() and (
+            len(prev) <= 4 or any(combined.endswith(s) for s in suffixes)
+        ):
             return combined
         if prev.islower() and nxt.islower():
             return combined
@@ -122,7 +136,11 @@ def normalize_pdf_text(s: str) -> str:
 
 def extract_pdf_text(path: Path, max_pages: int = 40) -> Tuple[str, int]:
     t0 = time.time()
-    log: Dict[str, Any] = {"event": "pdf_extract", "file": path.name, "max_pages": max_pages}
+    log: Dict[str, Any] = {
+        "event": "pdf_extract",
+        "file": path.name,
+        "max_pages": max_pages,
+    }
     backend = None
     try:
         # Try pdfminer.six first
@@ -144,11 +162,13 @@ def extract_pdf_text(path: Path, max_pages: int = 40) -> Tuple[str, int]:
         _PdfReader = None
         try:
             from pypdf import PdfReader as _PdfReader  # type: ignore
+
             backend = "pypdf"
         except Exception as e_pypdf:
             log["pypdf_error"] = str(e_pypdf)
             try:
                 from PyPDF2 import PdfReader as _PdfReader  # type: ignore
+
                 backend = "PyPDF2"
             except Exception as e_pypdf2:
                 log["pypdf2_error"] = str(e_pypdf2)
@@ -168,7 +188,13 @@ def extract_pdf_text(path: Path, max_pages: int = 40) -> Tuple[str, int]:
                         out.append("")
                         log.setdefault("page_errors", 0)
                         log["page_errors"] += 1
-                log.update({"ok": True, "backend": backend, "pages": min(len(pages), max_pages)})
+                log.update(
+                    {
+                        "ok": True,
+                        "backend": backend,
+                        "pages": min(len(pages), max_pages),
+                    }
+                )
                 return (normalize_pdf_text("\n".join(out)), len(pages))
             except Exception as e_reader:
                 log["reader_error"] = str(e_reader)

@@ -288,7 +288,7 @@ Any directory can be overridden via environment variables at runtime:
 |---------|---------|--------------------|
 | Attachments (uploaded PDFs/text) | `ATTACH_DIR` | `data/attachments` |
 | Raw uploads (generic) | `UPLOADS_DIR` | `data/uploads` |
-| Lookup uploads (DuckDB table sources) | `LOOKUP_UPLOAD_DIR` | `data/lookup_uploads` |
+| Lookup uploads | `LOOKUP_UPLOAD_DIR` | `data/lookup_uploads` |
 | Built‑in seed files | `BUILTIN_DIR` | `builtin` |
 | Vector / TF-IDF indexes | `INDEX_DIR` | `retriever/index_doc` |
 

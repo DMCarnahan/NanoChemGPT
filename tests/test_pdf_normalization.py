@@ -35,4 +35,3 @@ def test_whitespace_and_hyphenation():
 
 def test_empty_input():
     assert normalize_pdf_text("") == ""
-

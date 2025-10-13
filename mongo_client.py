@@ -54,7 +54,7 @@ def get_db():
             else:
                 print("[mongo] qa text index warning:", e)
 
-    # Parsed – ensure a text index exists (previous deployments lacked this)
+        # Parsed – ensure a text index exists (previous deployments lacked this)
         try:
             _db.parsed.create_index([("created_at", 1)])
             _db.parsed.create_index(

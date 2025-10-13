@@ -15,6 +15,7 @@ Usage:
   python scripts/cleanup_workspace.py            # standard cleanup
   python scripts/cleanup_workspace.py --purge-dist  # also remove dist/
 """
+
 from __future__ import annotations
 
 import argparse
@@ -40,7 +41,9 @@ def remove_dir(p: Path):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--purge-dist", action="store_true", help="Also remove dist/ directory")
+    ap.add_argument(
+        "--purge-dist", action="store_true", help="Also remove dist/ directory"
+    )
     args = ap.parse_args()
 
     for name in TARGET_DIRS + CACHE_DIRS:

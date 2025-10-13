@@ -410,7 +410,10 @@ def _safe_float(v, default):
 
 # ------------------------------ Public API -----------------------------------
 try:
-    from app_utils.constants import HARVEST_OUT_DIR as _CONST_HARVEST_OUT_DIR, BUNDLE_AUTO as _CONST_BUNDLE_AUTO
+    from app_utils.constants import (
+        HARVEST_OUT_DIR as _CONST_HARVEST_OUT_DIR,
+        BUNDLE_AUTO as _CONST_BUNDLE_AUTO,
+    )
 except Exception:
     _CONST_HARVEST_OUT_DIR = Path("harvester/out_auto")
     _CONST_BUNDLE_AUTO = str(_CONST_HARVEST_OUT_DIR / "bundle.jsonl")
@@ -428,10 +431,14 @@ def _resolve_bundle_path() -> Path:
     """
     env_auto = os.getenv("BUNDLE_AUTO") or os.getenv("BUNDLE_AUTO_PATH")
     harvest_dir_env = os.getenv("HARVEST_OUT_DIR")
-    harvest_dir = Path(harvest_dir_env).resolve() if harvest_dir_env else _CONST_HARVEST_OUT_DIR
+    harvest_dir = (
+        Path(harvest_dir_env).resolve() if harvest_dir_env else _CONST_HARVEST_OUT_DIR
+    )
 
     # Primary candidate from env or constant
-    primary = Path(env_auto or os.getenv("BUNDLE_AUTO_PATH") or _CONST_BUNDLE_AUTO).resolve()
+    primary = Path(
+        env_auto or os.getenv("BUNDLE_AUTO_PATH") or _CONST_BUNDLE_AUTO
+    ).resolve()
     # If an explicit HARVEST_OUT_DIR env is set, prefer its bundle over the static constant
     env_harvest_bundle = (harvest_dir / "bundle.jsonl").resolve()
     if harvest_dir_env:
@@ -451,6 +458,7 @@ def _resolve_bundle_path() -> Path:
 
 _MISSING_BUNDLE_WARNED: bool = False
 _AUTO_BUILD_ATTEMPTED: set[Path] = set()
+
 
 def _ensure_tfidf_index(idx_path: Path):
     """Ensure a TF-IDF index exists, attempting a lazy auto-build.
@@ -485,20 +493,28 @@ def _ensure_tfidf_index(idx_path: Path):
             idx_path.mkdir(parents=True, exist_ok=True)
         except PermissionError:
             # Fallback to a writable tmp path
-            tmp_root = Path(os.getenv("RETRIEVER_FALLBACK_DIR", "/tmp/nanochem_indexes"))
+            tmp_root = Path(
+                os.getenv("RETRIEVER_FALLBACK_DIR", "/tmp/nanochem_indexes")
+            )
             fallback = tmp_root / idx_path.name
             try:
                 fallback.mkdir(parents=True, exist_ok=True)
                 logger.warning(
-                    "[retriever] permission denied for %s; falling back to %s", idx_path, fallback
+                    "[retriever] permission denied for %s; falling back to %s",
+                    idx_path,
+                    fallback,
                 )
                 idx_path = fallback
             except Exception as pe2:
                 logger.warning(
-                    "[retriever] fallback index dir creation failed (%s): %s", fallback, pe2
+                    "[retriever] fallback index dir creation failed (%s): %s",
+                    fallback,
+                    pe2,
                 )
                 return
-        logger.info("[retriever] auto-building tfidf index -> %s (bundle=%s)", idx_path, bundle)
+        logger.info(
+            "[retriever] auto-building tfidf index -> %s (bundle=%s)", idx_path, bundle
+        )
         build_tfidf_for_jsonl(str(bundle), str(idx_path))
     except Exception as e:
         logger.warning("[retriever] auto-build failed: %s", e)

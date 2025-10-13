@@ -4,6 +4,7 @@ import json
 import os
 import pathlib
 import re
+from functools import lru_cache
 import unicodedata
 from typing import Any, Dict, List, Optional, Tuple
 
@@ -266,11 +267,19 @@ def _normalize_execution_pass(doc: dict) -> None:
     # 3) Provenance standardization
     for a in mp:
         if "collapsed_from_steps" in a and isinstance(a["collapsed_from_steps"], list):
-            uniq = sorted({int(x) for x in a["collapsed_from_steps"] if isinstance(x, (int, float))})
+            uniq = sorted(
+                {
+                    int(x)
+                    for x in a["collapsed_from_steps"]
+                    if isinstance(x, (int, float))
+                }
+            )
             # Remove self if redundant and already represented by step_index
             if a.get("step_index") in uniq and len(uniq) > 1:
                 # keep self first for readability
-                uniq = [a.get("step_index")] + [u for u in uniq if u != a.get("step_index")]
+                uniq = [a.get("step_index")] + [
+                    u for u in uniq if u != a.get("step_index")
+                ]
             a["collapsed_from_steps"] = uniq
 
     # 4) Units augmentation for set operations
@@ -308,7 +317,17 @@ def _executor_validate_and_repair(doc: dict) -> None:
       - Provide provenance summary & repair list at doc['_executor'].
     """
     mp = list(doc.get("micro_plan") or [])
-    allowed_verbs = {"pick_up","place","pour","set","wait","start","stop","vortex","decant"}
+    allowed_verbs = {
+        "pick_up",
+        "place",
+        "pour",
+        "set",
+        "wait",
+        "start",
+        "stop",
+        "vortex",
+        "decant",
+    }
     repairs: list[str] = []
     devices = doc.get("devices", {}) or {}
     hp_id = devices.get("hotplate_id", "HP1")
@@ -332,19 +351,35 @@ def _executor_validate_and_repair(doc: dict) -> None:
     i = 0
     while i < len(mp):
         a = mp[i]
-        if a.get("verb") == "set" and a.get("device") == hp_id and a.get("param") == "temperature_C":
+        if (
+            a.get("verb") == "set"
+            and a.get("device") == hp_id
+            and a.get("param") == "temperature_C"
+        ):
             step_idx = a.get("step_index")
             # look back in same step for place to hp_id
             has_place = any(
-                b.get("verb") == "place" and b.get("to") == hp_id and b.get("step_index") == step_idx
-                for b in mp[max(0, i-6):i]
+                b.get("verb") == "place"
+                and b.get("to") == hp_id
+                and b.get("step_index") == step_idx
+                for b in mp[max(0, i - 6) : i]
             )
             if not has_place:
                 # insert pick_up + place directly before this set
-                pick = {"verb":"pick_up","object":primary_vessel,"from":"bench","step_index":step_idx}
-                place = {"verb":"place","object":primary_vessel,"to":hp_id,"step_index":step_idx}
+                pick = {
+                    "verb": "pick_up",
+                    "object": primary_vessel,
+                    "from": "bench",
+                    "step_index": step_idx,
+                }
+                place = {
+                    "verb": "place",
+                    "object": primary_vessel,
+                    "to": hp_id,
+                    "step_index": step_idx,
+                }
                 mp.insert(i, pick)
-                mp.insert(i+1, place)
+                mp.insert(i + 1, place)
                 repairs.append("inserted_hotplate_pickup_place")
                 i += 2  # advance past inserted
                 continue
@@ -355,11 +390,14 @@ def _executor_validate_and_repair(doc: dict) -> None:
         if a.get("verb") == "set":
             param = a.get("param")
             if param == "temperature_C" and not a.get("unit"):
-                a["unit"] = "C"; repairs.append("annotated_unit_C")
+                a["unit"] = "C"
+                repairs.append("annotated_unit_C")
             elif param == "rpm" and not a.get("unit"):
-                a["unit"] = "rpm"; repairs.append("annotated_unit_rpm")
+                a["unit"] = "rpm"
+                repairs.append("annotated_unit_rpm")
             elif param == "rate_mL_per_min" and not a.get("unit"):
-                a["unit"] = "mL/min"; repairs.append("annotated_unit_rate")
+                a["unit"] = "mL/min"
+                repairs.append("annotated_unit_rate")
 
     # Pass 4: pour quantitative / qualitative tagging
     for a in mp:
@@ -367,9 +405,11 @@ def _executor_validate_and_repair(doc: dict) -> None:
             has_vol = a.get("volume") is not None
             has_mass = a.get("mass") is not None
             if has_vol and not a.get("volume_units"):
-                a["volume_units"] = "mL"; repairs.append("default_volume_units_mL")
+                a["volume_units"] = "mL"
+                repairs.append("default_volume_units_mL")
             if has_mass and not a.get("mass_units"):
-                a["mass_units"] = "mg"; repairs.append("default_mass_units_mg")
+                a["mass_units"] = "mg"
+                repairs.append("default_mass_units_mg")
             if not has_vol and not has_mass:
                 a.setdefault("qualitative", True)
 
@@ -429,32 +469,85 @@ def apply_postprocessing(doc: dict) -> dict:
     _rebuild_micro_plan(doc)
     # Defensive pass: remove any residual zero-minute waits from micro_plan & per-step micro_ops/ops
     if isinstance(doc.get("micro_plan"), list):
-        doc["micro_plan"] = [m for m in doc["micro_plan"] if not (m.get("verb") == "wait" and int(m.get("minutes") or 0) == 0)]
+        doc["micro_plan"] = [
+            m
+            for m in doc["micro_plan"]
+            if not (m.get("verb") == "wait" and int(m.get("minutes") or 0) == 0)
+        ]
     for st in doc.get("steps", []) or []:
         if isinstance(st.get("micro_ops"), list):
-            st["micro_ops"] = [m for m in st["micro_ops"] if not (m.get("verb") == "wait" and int(m.get("minutes") or 0) == 0)]
+            st["micro_ops"] = [
+                m
+                for m in st["micro_ops"]
+                if not (m.get("verb") == "wait" and int(m.get("minutes") or 0) == 0)
+            ]
         if isinstance(st.get("ops"), list):
-            st["ops"] = [o for o in st["ops"] if not (o.get("op") == "wait" and int(o.get("minutes") or 0) == 0)]
+            st["ops"] = [
+                o
+                for o in st["ops"]
+                if not (o.get("op") == "wait" and int(o.get("minutes") or 0) == 0)
+            ]
     # Ensure oven move has pick_up + place primitives
-    has_oven_place = any(m.get("verb") == "place" and m.get("to") in {"OV1", "oven"} for m in doc.get("micro_plan", []))
-    has_oven_set = any(m.get("verb") == "set" and m.get("device") in {"OV1", "oven"} and m.get("param") == "temperature_C" for m in doc.get("micro_plan", []))
+    has_oven_place = any(
+        m.get("verb") == "place" and m.get("to") in {"OV1", "oven"}
+        for m in doc.get("micro_plan", [])
+    )
+    has_oven_set = any(
+        m.get("verb") == "set"
+        and m.get("device") in {"OV1", "oven"}
+        and m.get("param") == "temperature_C"
+        for m in doc.get("micro_plan", [])
+    )
     if has_oven_set and not has_oven_place:
-        insert_at = next((i for i,m in enumerate(doc.get("micro_plan", [])) if m.get("verb") == "set" and m.get("device") in {"OV1", "oven"}), len(doc.get("micro_plan", [])))
+        insert_at = next(
+            (
+                i
+                for i, m in enumerate(doc.get("micro_plan", []))
+                if m.get("verb") == "set" and m.get("device") in {"OV1", "oven"}
+            ),
+            len(doc.get("micro_plan", [])),
+        )
         tube_label = "V1_tube"
         mp_list = doc.get("micro_plan", [])
-        mp_list.insert(insert_at, {"verb": "place", "object": tube_label, "to": "OV1", "step_index": len(doc.get("steps") or [])})
-        mp_list.insert(insert_at, {"verb": "pick_up", "object": tube_label, "from": "rack", "step_index": len(doc.get("steps") or [])})
+        mp_list.insert(
+            insert_at,
+            {
+                "verb": "place",
+                "object": tube_label,
+                "to": "OV1",
+                "step_index": len(doc.get("steps") or []),
+            },
+        )
+        mp_list.insert(
+            insert_at,
+            {
+                "verb": "pick_up",
+                "object": tube_label,
+                "from": "rack",
+                "step_index": len(doc.get("steps") or []),
+            },
+        )
         # Oven safety: if we have a place directly to an oven without prior pick_up in same step, synthesize one
         # Scan tail slice of this step's appended ops.
-        step_slice = [a for a in mp_list if a.get("step_index") == len(doc.get("steps") or [])]
+        step_slice = [
+            a for a in mp_list if a.get("step_index") == len(doc.get("steps") or [])
+        ]
         for idx_local, act in enumerate(step_slice):
-            if act.get("verb") == "place" and act.get("to") in {"OV1","oven"}:
-                if idx_local == 0 or step_slice[idx_local-1].get("verb") != "pick_up":
+            if act.get("verb") == "place" and act.get("to") in {"OV1", "oven"}:
+                if idx_local == 0 or step_slice[idx_local - 1].get("verb") != "pick_up":
                     # Insert synthetic pick_up before this place in global micro_plan
                     # Need to find global index
                     global_pos = mp_list.index(act)
                     obj = act.get("object")
-                    mp_list.insert(global_pos, {"verb":"pick_up","object":obj,"from":"rack","step_index":len(doc.get("steps") or [])})
+                    mp_list.insert(
+                        global_pos,
+                        {
+                            "verb": "pick_up",
+                            "object": obj,
+                            "from": "rack",
+                            "step_index": len(doc.get("steps") or []),
+                        },
+                    )
     _tidy_registry(doc)
 
     # Unify naming: convert vN_bottle -> VN and vN_tube_bottle -> VN_tube when known
@@ -467,18 +560,24 @@ def apply_postprocessing(doc: dict) -> dict:
                 step_ids.add(v)
     known_ids = reg_ids | step_ids
 
+    # Precompile vessel alias patterns
+    RE_VTUBE = re.compile(r"^v(\d+)_tube_bottle$")
+    RE_VBOTTLE = re.compile(r"^v(\d+)_bottle$")
+
+    @lru_cache(maxsize=256)
     def _norm_name(x):
         if not isinstance(x, str):
             return x
-        m_tube = re.fullmatch(r"v(\d+)_tube_bottle", x)
+        m_tube = RE_VTUBE.match(x)
         if m_tube:
             cand = f"V{m_tube.group(1)}_tube"
             return cand if cand in known_ids or cand.startswith("V") else x
-        m = re.fullmatch(r"v(\d+)_bottle", x)
+        m = RE_VBOTTLE.match(x)
         if m:
             cand = f"V{m.group(1)}"
             return cand if cand in known_ids or cand.startswith("V") else x
         return x
+
     for a in doc.get("micro_plan", []) or []:
         if a.get("verb") in {"pick_up", "place", "pour"}:
             if "object" in a:
@@ -501,7 +600,11 @@ def apply_postprocessing(doc: dict) -> dict:
                     mo["from"] = _norm_name(mo.get("from"))
                 if mo.get("verb") == "pour" and "to" in mo:
                     mo["to"] = _norm_name(mo.get("to"))
-            if mo.get("verb") == "set" and mo.get("param") in {"rate_ml_per_min", "rate_ml_min", "rate_mL_min"}:
+            if mo.get("verb") == "set" and mo.get("param") in {
+                "rate_ml_per_min",
+                "rate_ml_min",
+                "rate_mL_min",
+            }:
                 mo["param"] = "rate_mL_per_min"
                 mo.setdefault("unit", "mL/min")
 
@@ -734,13 +837,30 @@ def _rebuild_step_micro_ops(step, devices, defaults, step_index):
             ]
         elif typ == "transfer":
             # Generic material transfer not already specialized: represent as pick_up → pour → place
-            src = op.get("from") or op.get("source") or step.get("source_vessel") or step.get("vessel") or "V1"
-            dst = op.get("to") or op.get("target") or step.get("target_vessel") or step.get("vessel") or "V1"
+            src = (
+                op.get("from")
+                or op.get("source")
+                or step.get("source_vessel")
+                or step.get("vessel")
+                or "V1"
+            )
+            dst = (
+                op.get("to")
+                or op.get("target")
+                or step.get("target_vessel")
+                or step.get("vessel")
+                or "V1"
+            )
             if src and dst and src != dst:
                 m += [
                     {"verb": "pick_up", "object": src, "step_index": step_index},
                     {"verb": "pour", "from": src, "to": dst, "step_index": step_index},
-                    {"verb": "place", "object": src, "to": "bench", "step_index": step_index},
+                    {
+                        "verb": "place",
+                        "object": src,
+                        "to": "bench",
+                        "step_index": step_index,
+                    },
                 ]
 
         elif typ == "resuspend":
@@ -906,7 +1026,9 @@ def _rebuild_micro_plan(doc: dict) -> None:
                 mm = dict(m)
                 mm["step_index"] = idx  # enforce correct index
                 # Filter out zero-minute waits early
-                if not (mm.get("verb") == "wait" and int(mm.get("minutes", 0) or 0) == 0):
+                if not (
+                    mm.get("verb") == "wait" and int(mm.get("minutes", 0) or 0) == 0
+                ):
                     out.append(mm)
     # de-dup consecutive identical ops
     flat = []
@@ -914,23 +1036,33 @@ def _rebuild_micro_plan(doc: dict) -> None:
         if not flat or flat[-1] != m:
             flat.append(m)
     # Only drop oven/vacuum ops if the protocol explicitly requests ambient drying in the final step
-    last_step_raw = (doc.get("steps", [])[-1].get("raw", "") if doc.get("steps") else "").lower()
-    want_ambient = "ambient" in last_step_raw and ("dry" in last_step_raw or "drying" in last_step_raw)
+    last_step_raw = (
+        doc.get("steps", [])[-1].get("raw", "") if doc.get("steps") else ""
+    ).lower()
+    want_ambient = "ambient" in last_step_raw and (
+        "dry" in last_step_raw or "drying" in last_step_raw
+    )
     if want_ambient:
         flat = [m for m in flat if m.get("device") not in {"OV1", "VP1"}]
     # Enforce oven placement preceded by pick_up within same step
     enforced = []
     for i, act in enumerate(flat):
-        if act.get("verb") == "place" and act.get("to") in {"OV1","oven"}:
+        if act.get("verb") == "place" and act.get("to") in {"OV1", "oven"}:
             # Look back for same-step pick_up immediately prior in enforced
-            if not enforced or enforced[-1].get("verb") != "pick_up" or enforced[-1].get("step_index") != act.get("step_index"):
+            if (
+                not enforced
+                or enforced[-1].get("verb") != "pick_up"
+                or enforced[-1].get("step_index") != act.get("step_index")
+            ):
                 # Synthesize pick_up
-                enforced.append({
-                    "verb": "pick_up",
-                    "object": act.get("object") or "V2_tube",
-                    "from": "rack",
-                    "step_index": act.get("step_index")
-                })
+                enforced.append(
+                    {
+                        "verb": "pick_up",
+                        "object": act.get("object") or "V2_tube",
+                        "from": "rack",
+                        "step_index": act.get("step_index"),
+                    }
+                )
         enforced.append(act)
     doc["micro_plan"] = enforced
 
@@ -2194,22 +2326,36 @@ def parse_reagent_phrase_to_struct(s: str) -> dict:
         # Preserve full name (remove trailing 'solution' if present but keep chemical tokens)
         full_name = m.group("name").strip()
         # display_name keeps original (minus trailing period if any)
-        display_name = full_name.rstrip('.')
-        is_solution = bool(re.search(r"\bsolution$", full_name, flags=re.I)) or bool(re.search(r"\bsolution\b", s, flags=re.I))
+        display_name = full_name.rstrip(".")
+        is_solution = bool(re.search(r"\bsolution$", full_name, flags=re.I)) or bool(
+            re.search(r"\bsolution\b", s, flags=re.I)
+        )
         # 'name' field: drop trailing 'solution' and surrounding parentheses tokens only, keep chemical words
-        keep_solution = os.getenv("KEEP_SOLUTION_TERM", "1").lower() in {"1","true","yes"}
-        name = full_name if keep_solution else re.sub(r"\bsolution$","", full_name, flags=re.I)
+        keep_solution = os.getenv("KEEP_SOLUTION_TERM", "1").lower() in {
+            "1",
+            "true",
+            "yes",
+        }
+        name = (
+            full_name
+            if keep_solution
+            else re.sub(r"\bsolution$", "", full_name, flags=re.I)
+        )
         name = re.sub(r"\s*\([^)]*\)", "", name).strip()
         # Salvage: if name collapsed to a single token but original phrase contains more words before a parenthesis or 'solution'
         if len(name.split()) == 1:
-            tail_match = re.search(rf"{re.escape(name)}\s+([A-Za-z][A-Za-z0-9\- ]*(?:\([^)]*\))?(?:\s+solution)?)", s, flags=re.I)
+            tail_match = re.search(
+                rf"{re.escape(name)}\s+([A-Za-z][A-Za-z0-9\- ]*(?:\([^)]*\))?(?:\s+solution)?)",
+                s,
+                flags=re.I,
+            )
             if tail_match:
                 recovered = f"{name} {tail_match.group(1).strip()}".strip()
                 # Update display_name if it was truncated
                 if recovered.lower() not in display_name.lower():
                     display_name = recovered
                 # Recompute stripped chemical name (without trailing 'solution')
-                nm2 = re.sub(r"\bsolution$","", recovered, flags=re.I)
+                nm2 = re.sub(r"\bsolution$", "", recovered, flags=re.I)
                 nm2 = re.sub(r"\s*\([^)]*\)", "", nm2).strip()
                 if nm2:
                     name = nm2
@@ -2701,7 +2847,11 @@ def detect_add(line: str) -> Optional[Dict]:
     s = strip_tags(_clean_unicode(line.strip()))
     # Allow optional leading instrumentation clause e.g. 'Using an autotitrator,'
     s2 = re.sub(r"^using an autotitrator,?\s*", "", s, flags=re.I)
-    m = re.search(r"\b(add|charge)\s+(?:the\s+)?(?P<src>.+?)\s+to\s+(?:the\s+)?(?P<dst>.+?)\b", s2, re.I)
+    m = re.search(
+        r"\b(add|charge)\s+(?:the\s+)?(?P<src>.+?)\s+to\s+(?:the\s+)?(?P<dst>.+?)\b",
+        s2,
+        re.I,
+    )
     if not m:
         return None
     rate_match = None
@@ -2709,7 +2859,9 @@ def detect_add(line: str) -> Optional[Dict]:
     m_rate = re.search(r"(\d+(?:\.\d+)?)\s*mL\s*/\s*min", s2, re.I)
     if m_rate:
         rate_match = f"{m_rate.group(1)} mL/min"
-    rate = rate_match or ("slow" if re.search(r"\b(dropwise|slow)\b", s2, re.I) else "normal")
+    rate = rate_match or (
+        "slow" if re.search(r"\b(dropwise|slow)\b", s2, re.I) else "normal"
+    )
     at_temp = find_temp_c(s2)
     over_min = find_minutes(s2)
     return {
@@ -3395,7 +3547,9 @@ _GENERIC_DEVICE_MAP_DEFAULT = {
 }
 
 
-def _derive_minimal_micro_plan(doc: dict, allow_wait: bool = False) -> tuple[list[dict], list[dict]]:
+def _derive_minimal_micro_plan(
+    doc: dict, allow_wait: bool = False
+) -> tuple[list[dict], list[dict]]:
     """Derive a reduced micro plan containing only primitive verbs a simple robot supports.
 
     Rules:
@@ -3466,7 +3620,26 @@ def _derive_minimal_micro_plan(doc: dict, allow_wait: bool = False) -> tuple[lis
             continue
         if verb in _MIN_ALLOWED:
             # Shallow copy & strip extraneous keys that aren't needed for primitive execution
-            keep = {k: v for k, v in entry.items() if k in {"verb", "object", "from", "to", "device", "param", "value", "amount", "unit", "volume", "volume_units", "rate", "step_index"}}
+            keep = {
+                k: v
+                for k, v in entry.items()
+                if k
+                in {
+                    "verb",
+                    "object",
+                    "from",
+                    "to",
+                    "device",
+                    "param",
+                    "value",
+                    "amount",
+                    "unit",
+                    "volume",
+                    "volume_units",
+                    "rate",
+                    "step_index",
+                }
+            }
             # Apply device remap
             if want_map and keep.get("device") in dev_map:
                 keep["device"] = dev_map[keep["device"]]
@@ -3483,7 +3656,9 @@ def _derive_minimal_micro_plan(doc: dict, allow_wait: bool = False) -> tuple[lis
             prev = collapsed[-1]
             if item == prev:
                 # exact duplicate – provenance merge
-                prev.setdefault("collapsed_from_steps", set()).add(item.get("step_index"))
+                prev.setdefault("collapsed_from_steps", set()).add(
+                    item.get("step_index")
+                )
                 continue
             if (
                 item.get("verb") == prev.get("verb") == "set"
@@ -3491,7 +3666,9 @@ def _derive_minimal_micro_plan(doc: dict, allow_wait: bool = False) -> tuple[lis
                 and item.get("param") == prev.get("param")
                 and item.get("value") == prev.get("value")
             ):
-                prev.setdefault("collapsed_from_steps", set()).add(item.get("step_index"))
+                prev.setdefault("collapsed_from_steps", set()).add(
+                    item.get("step_index")
+                )
                 continue
         collapsed.append(item)
     # Normalize provenance sets to sorted lists
@@ -3506,8 +3683,14 @@ def _derive_minimal_micro_plan(doc: dict, allow_wait: bool = False) -> tuple[lis
     seen_sets = {}
     final: list[dict] = []
     for it in collapsed:
-        if it.get("verb") == "set" and all(k in it for k in ("device", "param", "value")):
-            key = (it["device"], it["param"], json.dumps(it.get("value"), sort_keys=True))
+        if it.get("verb") == "set" and all(
+            k in it for k in ("device", "param", "value")
+        ):
+            key = (
+                it["device"],
+                it["param"],
+                json.dumps(it.get("value"), sort_keys=True),
+            )
             if key in seen_sets:
                 prev = seen_sets[key]
                 prev.setdefault("collapsed_from_steps", [])
@@ -3524,7 +3707,13 @@ def _derive_minimal_micro_plan(doc: dict, allow_wait: bool = False) -> tuple[lis
 def convert_text_to_robot_ops(text: str) -> Dict:
     hardware = parse_hardware(text)
     # Synthetic hardware inference: if autotitrator mentioned but not declared, add one
-    if re.search(r"autotitrator", text, flags=re.I) and not any((isinstance(h, dict) and (h.get("name") or "").lower().startswith("autotitrator")) for h in hardware):
+    if re.search(r"autotitrator", text, flags=re.I) and not any(
+        (
+            isinstance(h, dict)
+            and (h.get("name") or "").lower().startswith("autotitrator")
+        )
+        for h in hardware
+    ):
         hardware.append({"id": "AT1", "name": "Autotitrator", "type": "device"})
     vessels = VesselRegistry(hardware)
     records: List[Dict] = []
@@ -3537,21 +3726,42 @@ def convert_text_to_robot_ops(text: str) -> Dict:
     for step in steps:
         # Broad simple dry detector (must precede other generic fallbacks)
         simple_dry = None
-        if re.search(r"\bdry\b", step, flags=re.I) and re.search(r"oven", step, flags=re.I) and re.search(r"\d+\s*°?\s*C", step, flags=re.I):
+        if (
+            re.search(r"\bdry\b", step, flags=re.I)
+            and re.search(r"oven", step, flags=re.I)
+            and re.search(r"\d+\s*°?\s*C", step, flags=re.I)
+        ):
             m_temp = re.search(r"(\d+(?:\.\d+)?)\s*°?\s*C", step, flags=re.I)
-            m_dur = re.search(r"for\s+(\d+(?:\.\d+)?)\s*(h|hr|hrs|hour|hours|m|min|mins|minute|minutes)\b", step, flags=re.I)
+            m_dur = re.search(
+                r"for\s+(\d+(?:\.\d+)?)\s*(h|hr|hrs|hour|hours|m|min|mins|minute|minutes)\b",
+                step,
+                flags=re.I,
+            )
             if m_temp:
                 temp_val = float(m_temp.group(1))
                 dur_m = None
                 if m_dur:
-                    qty = float(m_dur.group(1)); unit = m_dur.group(2).lower()
-                    dur_m = qty * (60 if unit.startswith('h') else 1)
-                simple_dry = {"temp": temp_val, "minutes": int(dur_m) if dur_m is not None else None}
+                    qty = float(m_dur.group(1))
+                    unit = m_dur.group(2).lower()
+                    dur_m = qty * (60 if unit.startswith("h") else 1)
+                simple_dry = {
+                    "temp": temp_val,
+                    "minutes": int(dur_m) if dur_m is not None else None,
+                }
         if simple_dry:
             target_vessel = vessels.primary_vessel or vessels.ensure_glassware("Beaker")
             ops_list = [
-                {"op": "move_to_oven", "oven_id": DEVICE_IDS.get("oven_id", "OV1"), "tube": f"{target_vessel}_tube"},
-                {"op": "set", "device": DEVICE_IDS.get("oven_id", "OV1"), "param": "temperature_C", "value": simple_dry["temp"]},
+                {
+                    "op": "move_to_oven",
+                    "oven_id": DEVICE_IDS.get("oven_id", "OV1"),
+                    "tube": f"{target_vessel}_tube",
+                },
+                {
+                    "op": "set",
+                    "device": DEVICE_IDS.get("oven_id", "OV1"),
+                    "param": "temperature_C",
+                    "value": simple_dry["temp"],
+                },
             ]
             if simple_dry.get("minutes"):
                 ops_list.append({"op": "wait", "minutes": simple_dry["minutes"]})
@@ -3775,7 +3985,9 @@ def convert_text_to_robot_ops(text: str) -> Dict:
             dst_vid = vessels.ensure_glassware(dst_key)
             rate_ml_min = None
             if add.get("rate") and re.search(r"ml\s*/\s*min", add["rate"], flags=re.I):
-                m_rate = re.search(r"([0-9]+(?:\.[0-9]+)?)\s*ml\s*/\s*min", add["rate"], flags=re.I)
+                m_rate = re.search(
+                    r"([0-9]+(?:\.[0-9]+)?)\s*ml\s*/\s*min", add["rate"], flags=re.I
+                )
                 if m_rate:
                     try:
                         rate_ml_min = float(m_rate.group(1))
@@ -3801,9 +4013,25 @@ def convert_text_to_robot_ops(text: str) -> Dict:
             }
             # Inject autotitrator rate set if hardware includes autotitrator and rate parsed
             if rate_ml_min is not None:
-                auto_id = next((h.get("id") for h in hardware if isinstance(h, dict) and (h.get("name") or "").lower().startswith("autotitrator")), None)
+                auto_id = next(
+                    (
+                        h.get("id")
+                        for h in hardware
+                        if isinstance(h, dict)
+                        and (h.get("name") or "").lower().startswith("autotitrator")
+                    ),
+                    None,
+                )
                 if auto_id:
-                    record["ops"].insert(0, {"op": "set", "device": auto_id, "param": "rate_ml_per_min", "value": rate_ml_min})
+                    record["ops"].insert(
+                        0,
+                        {
+                            "op": "set",
+                            "device": auto_id,
+                            "param": "rate_ml_per_min",
+                            "value": rate_ml_min,
+                        },
+                    )
             _normalize_reagents_inplace(record)
             _add_structured_reagents_inplace(record)
             records.append(record)
@@ -3811,11 +4039,17 @@ def convert_text_to_robot_ops(text: str) -> Dict:
 
         # Simple heating fallback (if not captured by structured detectors)
         # Patterns: Heat ... to 45 C, Continue heating at 45 C, Maintain temperature at 45 C for X minutes
-        m_heat = re.search(r"(heat|continue heating|maintain(?: temperature)?)\s+(?:the\s+)?(?:mixture|solution|temperature|it)?[^\.]*?(?:to|at)\s+(\d+(?:\.\d+)?)\s*°?C", step, flags=re.I)
+        m_heat = re.search(
+            r"(heat|continue heating|maintain(?: temperature)?)\s+(?:the\s+)?(?:mixture|solution|temperature|it)?[^\.]*?(?:to|at)\s+(\d+(?:\.\d+)?)\s*°?C",
+            step,
+            flags=re.I,
+        )
         if m_heat:
             temp_val = float(m_heat.group(2)) if m_heat.group(2) else None
             dur_m = None
-            m_dur = re.search(r"for\s+(\d+(?:\.\d+)?)\s*(minutes?|min|hours?|h)\b", step, flags=re.I)
+            m_dur = re.search(
+                r"for\s+(\d+(?:\.\d+)?)\s*(minutes?|min|hours?|h)\b", step, flags=re.I
+            )
             if m_dur:
                 qty = float(m_dur.group(1))
                 unit = m_dur.group(2).lower()
@@ -3823,7 +4057,14 @@ def convert_text_to_robot_ops(text: str) -> Dict:
             target_vessel = vessels.primary_vessel or vessels.ensure_glassware("Beaker")
             ops_list = []
             if temp_val is not None:
-                ops_list.append({"op": "set", "device": DEVICE_IDS["hotplate_id"], "param": "temperature_C", "value": temp_val})
+                ops_list.append(
+                    {
+                        "op": "set",
+                        "device": DEVICE_IDS["hotplate_id"],
+                        "param": "temperature_C",
+                        "value": temp_val,
+                    }
+                )
             if dur_m is not None:
                 ops_list.append({"op": "wait", "minutes": int(dur_m)})
             if ops_list:
@@ -3840,20 +4081,33 @@ def convert_text_to_robot_ops(text: str) -> Dict:
                 continue
 
         # Simple drying fallback: Dry ... in an oven at 50 C for 1 hour
-        m_dry = re.search(r"dry\b[^\.]*?oven[^\.]*?(\d+(?:\.\d+)?)\s*°?C([^\.]*)", step, flags=re.I)
+        m_dry = re.search(
+            r"dry\b[^\.]*?oven[^\.]*?(\d+(?:\.\d+)?)\s*°?C([^\.]*)", step, flags=re.I
+        )
         if m_dry:
             temp_val = float(m_dry.group(1))
             tail = m_dry.group(2)
             dur_m = None
-            m_dur = re.search(r"for\s+(\d+(?:\.\d+)?)\s*(minutes?|min|hours?|h)\b", tail, flags=re.I)
+            m_dur = re.search(
+                r"for\s+(\d+(?:\.\d+)?)\s*(minutes?|min|hours?|h)\b", tail, flags=re.I
+            )
             if m_dur:
                 qty = float(m_dur.group(1))
                 unit = m_dur.group(2).lower()
                 dur_m = qty * (60 if unit.startswith("h") else 1)
             target_vessel = vessels.primary_vessel or vessels.ensure_glassware("Beaker")
             ops_list = [
-                {"op": "move_to_oven", "oven_id": DEVICE_IDS.get("oven_id", "OV1"), "tube": f"{target_vessel}_tube"},
-                {"op": "set", "device": DEVICE_IDS.get("oven_id", "OV1"), "param": "temperature_C", "value": temp_val},
+                {
+                    "op": "move_to_oven",
+                    "oven_id": DEVICE_IDS.get("oven_id", "OV1"),
+                    "tube": f"{target_vessel}_tube",
+                },
+                {
+                    "op": "set",
+                    "device": DEVICE_IDS.get("oven_id", "OV1"),
+                    "param": "temperature_C",
+                    "value": temp_val,
+                },
             ]
             if dur_m is not None:
                 ops_list.append({"op": "wait", "minutes": int(dur_m)})
@@ -3984,10 +4238,20 @@ def convert_text_to_robot_ops(text: str) -> Dict:
                 "raw": step,
             }
             # If drying includes an oven temperature but no move_to_oven op, synthesize it
-            has_temp = any(op.get("op") == "set" and op.get("param") == "temperature_C" for op in record["ops"])
+            has_temp = any(
+                op.get("op") == "set" and op.get("param") == "temperature_C"
+                for op in record["ops"]
+            )
             has_move = any(op.get("op") == "move_to_oven" for op in record["ops"])
             if has_temp and not has_move:
-                record["ops"].insert(0, {"op": "move_to_oven", "oven_id": DEVICE_IDS.get("oven_id", "OV1"), "tube": f"{target_vessel}_tube"})
+                record["ops"].insert(
+                    0,
+                    {
+                        "op": "move_to_oven",
+                        "oven_id": DEVICE_IDS.get("oven_id", "OV1"),
+                        "tube": f"{target_vessel}_tube",
+                    },
+                )
             _normalize_reagents_inplace(record)
             _add_structured_reagents_inplace(record)
             records.append(record)
@@ -4267,7 +4531,18 @@ def convert_text_to_robot_ops(text: str) -> Dict:
         rec["micro_ops"] = expand_ops_to_micro(rec.get("ops", []), vessels, hardware)
         # Guarantee oven set micro for drying/oven steps before waits
         if any(op.get("op") == "move_to_oven" for op in (rec.get("ops") or [])):
-            has_set = any(m.get("verb") == "set" and (m.get("device") in {"OV1", "oven", vessels.hardware[0]["id"] if vessels.hardware else "OV1"}) for m in rec["micro_ops"])
+            has_set = any(
+                m.get("verb") == "set"
+                and (
+                    m.get("device")
+                    in {
+                        "OV1",
+                        "oven",
+                        vessels.hardware[0]["id"] if vessels.hardware else "OV1",
+                    }
+                )
+                for m in rec["micro_ops"]
+            )
             if not has_set:
                 # Insert a synthetic set if missing
                 rec["micro_ops"].insert(
@@ -4277,14 +4552,22 @@ def convert_text_to_robot_ops(text: str) -> Dict:
                         "device": "OV1",
                         "param": "temperature_C",
                         "value": next(
-                            (op.get("value") for op in rec.get("ops", []) if op.get("param") == "temperature_C"),
+                            (
+                                op.get("value")
+                                for op in rec.get("ops", [])
+                                if op.get("param") == "temperature_C"
+                            ),
                             60,
                         ),
                         "step_index": idx,
                     },
                 )
         # Ensure dissolve with solute captured is not lost: if action=dissolve ensure solute present in reagents
-        if rec.get("action") == "dissolve" and rec.get("solute") and rec.get("solute") not in rec.get("reagents", []):
+        if (
+            rec.get("action") == "dissolve"
+            and rec.get("solute")
+            and rec.get("solute") not in rec.get("reagents", [])
+        ):
             rec.setdefault("reagents", []).append(rec["solute"])
 
     micro_plan = []
@@ -4336,9 +4619,29 @@ def convert_text_to_robot_ops(text: str) -> Dict:
             # Preserve pour for add_solute/add_solvent inside ops (if not already a transfer)
             if op.get("op") in {"add_solute", "add_solvent"}:
                 dst_label = _label_for_vessel(op.get("vessel", ""), vessels, hardware)
-                src_label = op.get("reagent") or op.get("solute") or op.get("solvent") or op.get("reagent") or "reagent"
-                micro_plan.append({"verb": "pick_up", "object": src_label, "from": "bench", "step_index": i, "context_vessel": rec.get("vessel")})
-                pour_entry = {"verb": "pour", "from": src_label, "to": dst_label, "step_index": i, "context_vessel": rec.get("vessel")}
+                src_label = (
+                    op.get("reagent")
+                    or op.get("solute")
+                    or op.get("solvent")
+                    or op.get("reagent")
+                    or "reagent"
+                )
+                micro_plan.append(
+                    {
+                        "verb": "pick_up",
+                        "object": src_label,
+                        "from": "bench",
+                        "step_index": i,
+                        "context_vessel": rec.get("vessel"),
+                    }
+                )
+                pour_entry = {
+                    "verb": "pour",
+                    "from": src_label,
+                    "to": dst_label,
+                    "step_index": i,
+                    "context_vessel": rec.get("vessel"),
+                }
                 if op.get("volume") is not None:
                     pour_entry["volume"] = op.get("volume")
                 if op.get("volume_units"):
@@ -4348,7 +4651,15 @@ def convert_text_to_robot_ops(text: str) -> Dict:
                 if op.get("unit"):
                     pour_entry["unit"] = op.get("unit")
                 micro_plan.append(pour_entry)
-                micro_plan.append({"verb": "place", "object": src_label, "to": "bench", "step_index": i, "context_vessel": rec.get("vessel")})
+                micro_plan.append(
+                    {
+                        "verb": "place",
+                        "object": src_label,
+                        "to": "bench",
+                        "step_index": i,
+                        "context_vessel": rec.get("vessel"),
+                    }
+                )
 
         # --- 2) Copy through any authored micro_ops EXCEPT 'note add_*' markers ---
         for micro in rec.get("micro_ops", []):
@@ -4380,15 +4691,31 @@ def convert_text_to_robot_ops(text: str) -> Dict:
     # Ensure any oven place has a preceding pick_up in raw micro_plan (pre-normalization)
     mp = result.get("micro_plan", [])
     for idx, act in enumerate(list(mp)):
-        if act.get("verb") == "place" and act.get("to") in {"OV1","oven"}:
-            if idx == 0 or mp[idx-1].get("verb") != "pick_up":
-                mp.insert(idx, {"verb":"pick_up","object": act.get("object"), "from":"rack", "step_index": act.get("step_index")})
+        if act.get("verb") == "place" and act.get("to") in {"OV1", "oven"}:
+            if idx == 0 or mp[idx - 1].get("verb") != "pick_up":
+                mp.insert(
+                    idx,
+                    {
+                        "verb": "pick_up",
+                        "object": act.get("object"),
+                        "from": "rack",
+                        "step_index": act.get("step_index"),
+                    },
+                )
     result = apply_postprocessing(result)
     try:
         # Always derive minimal primitive plan; can be disabled via env var if desired
-        disable = os.getenv("DISABLE_MIN_PRIMITIVE_PLAN", "").lower() in {"1", "true", "yes"}
+        disable = os.getenv("DISABLE_MIN_PRIMITIVE_PLAN", "").lower() in {
+            "1",
+            "true",
+            "yes",
+        }
         if not disable:
-            allow_wait = os.getenv("MIN_PLAN_ALLOW_WAIT", "").lower() in {"1", "true", "yes"}
+            allow_wait = os.getenv("MIN_PLAN_ALLOW_WAIT", "").lower() in {
+                "1",
+                "true",
+                "yes",
+            }
             min_plan, delays = _derive_minimal_micro_plan(result, allow_wait=allow_wait)
             result["micro_plan_min"] = min_plan
             if delays:
@@ -4396,9 +4723,16 @@ def convert_text_to_robot_ops(text: str) -> Dict:
             meta = result.setdefault("meta", {})
             meta["min_primitive_plan"] = True
             meta["min_plan_wait_mode"] = "inline" if allow_wait else "delays"
-            meta["min_plan_counts"] = {"primitives": len(min_plan), "delays": len(result.get("timing_delays", []))}
+            meta["min_plan_counts"] = {
+                "primitives": len(min_plan),
+                "delays": len(result.get("timing_delays", [])),
+            }
             # Assert at least one pour if any transfer/add ops existed
-            if any(op.get("op") in {"transfer", "add_solute", "add_solvent"} for st in result.get("steps", []) for op in (st.get("ops") or [])):
+            if any(
+                op.get("op") in {"transfer", "add_solute", "add_solvent"}
+                for st in result.get("steps", [])
+                for op in (st.get("ops") or [])
+            ):
                 if not any(x.get("verb") == "pour" for x in min_plan):
                     meta["min_plan_warning"] = "no_pour_found_but_transfer_ops_present"
             # Summary metrics
@@ -4413,7 +4747,11 @@ def convert_text_to_robot_ops(text: str) -> Dict:
                 "pick_ups": verbs.count("pick_up"),
                 "places": verbs.count("place"),
                 "total": len(min_plan),
-                "has_oven_set": any(a.get("device") in {"OV1","oven"} and a.get("param") == "temperature_C" for a in min_plan),
+                "has_oven_set": any(
+                    a.get("device") in {"OV1", "oven"}
+                    and a.get("param") == "temperature_C"
+                    for a in min_plan
+                ),
             }
     except Exception as _e:
         # Non-fatal; continue with original result

@@ -6,7 +6,9 @@ Handles API endpoints, configuration, and integration with search, database, and
 from flask import Flask, request, jsonify, abort, render_template, send_file, g
 import os
 from pathlib import Path
+
 app = Flask(__name__)
+
 
 # Composite health endpoint ----------------------------------------------------
 @app.get("/healthz")
@@ -18,10 +20,9 @@ def healthz():
         INDEX_DIR,
         ENABLE_AUTO_HARVEST,
     )
+
     bundle = Path(HARVEST_OUT_DIR) / "bundle.jsonl"
-    tfidf_ok = any(
-        (Path(INDEX_DIR) / n).exists() for n in ("tfidf.pkl", "tfidf.npz")
-    )
+    tfidf_ok = any((Path(INDEX_DIR) / n).exists() for n in ("tfidf.pkl", "tfidf.npz"))
     faiss_idx = Path(INDEX_DIR) / "index.faiss"
     faiss_ok = faiss_idx.exists() and faiss_idx.stat().st_size > 0
     openai_key = bool(os.getenv("OPENAI_API_KEY"))
@@ -40,6 +41,8 @@ def healthz():
         "openai_configured": openai_key,
         "version": os.getenv("GIT_SHA", "unknown"),
     }
+
+
 """
 app.py
 -----
@@ -59,11 +62,11 @@ Handles API endpoints, configuration, and integration with search, database, and
 import os
 import io
 import re
+RE_REF_BLOCK = re.compile(r"##\s*References[\s\S]*", re.I)
 import glob
 import json
 import logging
 import threading
-import uuid
 from datetime import datetime
 from pathlib import Path
 from functools import lru_cache
@@ -89,7 +92,6 @@ from vector_store.uploads_vector import UploadsVectorSearch
 from converter import validate_step, convert_text_to_robot_ops
 from mongo_client import get_db
 from decider.miner_queue import enqueue_text_mining_job
-from DuckDB.duck_searcher import get_duck_searcher
 from ref_utils import (
     dedupe_and_rerank,
     extract_used_ref_indexes,
@@ -100,8 +102,13 @@ from ref_utils import (
 )
 from app_utils import paths as _paths
 from app_utils.constants import (
-    ATTACH_DIR, UPLOADS_DIR, LOOKUP_UPLOAD_DIR, BUILTIN_DIR,
-    HARVEST_OUT_DIR, INDEX_DIR, BUNDLE_AUTO, ENABLE_AUTO_HARVEST
+    ATTACH_DIR,
+    UPLOADS_DIR,
+    LOOKUP_UPLOAD_DIR,
+    BUILTIN_DIR,
+    HARVEST_OUT_DIR,
+    INDEX_DIR,
+    BUNDLE_AUTO,
 )
 from app_utils.uploads import read_attachment_text
 
@@ -150,6 +157,7 @@ CONST_BUILTIN_DIR = BUILTIN_DIR
 CONST_INDEX_DIR = INDEX_DIR
 CONST_BUNDLE_AUTO = BUNDLE_AUTO
 
+
 # --- Writable directory safety fallback -------------------------------------
 def _ensure_writable(path: Path, name: str) -> Path:
     """Ensure directory exists and is writable; fallback to temp if needed.
@@ -175,6 +183,7 @@ def _ensure_writable(path: Path, name: str) -> Path:
         pass
     # Fallback
     import tempfile, uuid as _uuid
+
     base = Path(tempfile.gettempdir()) / "nanochem"
     try:
         base.mkdir(parents=True, exist_ok=True)
@@ -189,6 +198,7 @@ def _ensure_writable(path: Path, name: str) -> Path:
     except Exception:
         pass
     return alt
+
 
 # Apply fallback for key directories (skip if env explicitly marked NO_FALLBACK)
 if os.getenv("NANOCHEM_DISABLE_DIR_FALLBACK", "0") != "1":
@@ -357,68 +367,7 @@ def _inject_base_path():
     g.base_path = request.script_root or ""
 
 
-# ──────────────── DuckDB setup ──────────────── #
-
-
-def maybe_build_duckdb():
-    """
-    Create a .duckdb from Parquet once if DUCKDB_BOOTSTRAP=1 and files exist.
-    Initializes the DuckDB database for tabular data search.
-    """
-    if os.getenv("DUCKDB_BOOTSTRAP", "0").lower() not in ("1", "true", "yes"):
-        app.logger.info("[duckdb-init] skipped (DUCKDB_BOOTSTRAP not set)")
-        return
-    parq_glob = os.getenv("LOOKUP_PARQUET_GLOB")
-    db_path = os.getenv("LOOKUP_DUCKDB_PATH")
-    tbl = os.getenv("LOOKUP_DUCKDB_TABLE", "reactions")
-    if not (parq_glob and db_path):
-        app.logger.info(
-            "[duckdb-init] missing LOOKUP_PARQUET_GLOB or LOOKUP_DUCKDB_PATH"
-        )
-        return
-    matches = glob.glob(parq_glob, recursive=True)
-    if not matches:
-        app.logger.warning("[duckdb-init] no parquet matched %r", parq_glob)
-        return
-    if os.path.exists(db_path) and os.path.getsize(db_path) > 0:
-        app.logger.info("[duckdb-init] db exists at %s (not rebuilding)", db_path)
-        return
-    try:
-        import duckdb, pathlib
-
-        pathlib.Path(db_path).parent.mkdir(parents=True, exist_ok=True)
-        con = duckdb.connect(db_path)
-        con.execute(
-            f"CREATE TABLE {tbl} AS SELECT * FROM read_parquet('{parq_glob}', hive_partitioning=1)"
-        )
-        con.execute("CHECKPOINT")
-        result = con.execute(f"SELECT COUNT(*) FROM {tbl}").fetchone()
-        rows = result[0] if result else 0
-        app.logger.info("[duckdb-init] created %s rows=%d table=%s", db_path, rows, tbl)
-    except Exception as e:
-        app.logger.warning("[duckdb-init] build failed: %s", e)
-
-
-maybe_build_duckdb()
-
-LOOKUP = None
-try:
-    LOOKUP = get_duck_searcher()
-    if LOOKUP:
-        view = getattr(LOOKUP, "view", None)
-        con = getattr(LOOKUP, "con", None)
-        if view and con:
-            try:
-                nrows = con.execute(f"SELECT COUNT(*) FROM {view}").fetchone()[0]
-                app.logger.info("[dataset_search] view '%s' rows=%s", view, nrows)
-            except Exception:
-                app.logger.info(
-                    "[dataset_search] DuckDB connected (row count probe failed)"
-                )
-    else:
-        app.logger.warning("[dataset_search] no LOOKUP source configured")
-except Exception as e:
-    app.logger.warning("[dataset_search] init failed: %s", e)
+# DuckDB integration removed: previously optional structured table lookup is no longer initialized.
 
 # ──────────────── OpenAI client ──────────────── #
 _no_proxy = httpx.Client(trust_env=False, timeout=120.0)
@@ -430,6 +379,7 @@ client = (
 RETRIEVER_URL = os.getenv(
     "RETRIEVER_URL", f"http://localhost:{os.getenv('PORT','8000')}/retriever"
 )
+
 
 # --- Harvest out_auto symlink (if HARVEST_OUT_DIR differs) --------------------
 def _ensure_harvest_symlink():
@@ -459,7 +409,9 @@ def _ensure_harvest_symlink():
         except Exception:
             pass
 
+
 _ensure_harvest_symlink()
+
 
 # --- Retriever index preflight ------------------------------------------------
 def _preflight_retriever_indexes():
@@ -503,7 +455,9 @@ def _preflight_retriever_indexes():
         except Exception:
             print(f"[preflight] retriever index check failed: {e}")
 
+
 _preflight_retriever_indexes()
+
 
 # --- Startup TF-IDF auto-build (doc-level) ------------------------------------
 def _maybe_autobuild_tfidf():
@@ -513,13 +467,16 @@ def _maybe_autobuild_tfidf():
     the Flask app so first queries are less likely to hit an empty retriever.
     """
     try:
-        idx_dir = Path(os.getenv("RETRIEVER_INDEX_DIR_DOC", _ROOT / "retriever" / "index_doc"))
+        idx_dir = Path(
+            os.getenv("RETRIEVER_INDEX_DIR_DOC", _ROOT / "retriever" / "index_doc")
+        )
         has_artifacts = any(
             (idx_dir / name).exists() for name in ("tfidf.pkl", "tfidf.npz")
         )
         if has_artifacts:
             return
         from app_utils.constants import HARVEST_OUT_DIR as _HOUT
+
         bundle = Path(_HOUT) / "bundle.jsonl"
         if not bundle.exists() or bundle.stat().st_size == 0:
             app.logger.info(
@@ -545,6 +502,7 @@ def _maybe_autobuild_tfidf():
             app.logger.debug("[preflight] autobuild skipped: %s", e)
         except Exception:
             pass
+
 
 _maybe_autobuild_tfidf()
 
@@ -584,7 +542,6 @@ def retriever_search(
 
 # ──────────────── Utilities ──────────────── #
 from app_utils.pdf_utils import (
-    extract_pdf_text as _extract_pdf_text,
     clean_attachment_text as _clean_attachment_text,
     normalize_pdf_text as _normalize_pdf_text,
 )
@@ -916,13 +873,19 @@ def _extract_used_markers(*texts: str) -> dict:
         "has_ctx": any(tag_counts[k] > 0 for k in ("CTX", "PARSED", "DB")),
     }
 
+
 # Attachment text retrieval ----------------------------------------------------
 @app.get("/attachment_text/<aid>")
 def attachment_text(aid: str):
     txt = read_attachment_text(aid)
     meta = {"id": aid, "n_chars": len(txt)}
     snippet = txt[:1200]
-    return {"ok": True, "meta": meta, "snippet": snippet, "truncated": len(txt) > len(snippet)}
+    return {
+        "ok": True,
+        "meta": meta,
+        "snippet": snippet,
+        "truncated": len(txt) > len(snippet),
+    }
 
 
 def build_references_payload(
@@ -971,11 +934,7 @@ def cached_vs_search(q):
 
 @lru_cache(maxsize=128)
 def cached_lookup_query(q):
-    if LOOKUP is not None:
-        try:
-            return LOOKUP.query(q, topk=5)
-        except Exception:
-            return None
+    # DuckDB lookup removed; keep function for compatibility returning None
     return None
 
 
@@ -1342,29 +1301,9 @@ def ask():
     except Exception as e:
         app.logger.warning(f"[/ask] uploads_ctx warn: {e}")
 
-    # ----------------- DuckDB (LOOKUP) → table context -----------------
+    # DuckDB table lookup removed
     table_ctx = ""
     table_refs = []
-    if LOOKUP is not None:
-        try:
-            hits_tbl = LOOKUP.query(question, topk=5)
-            rows = hits_tbl.to_dict(orient="records")
-            lines = []
-            for i, row in enumerate(rows, start=1):
-                solvent = row.get("solvent") or row.get("solvent_system")
-                temp = row.get("temp_C") or row.get("temperature_C")
-                time_h = row.get("time_h") or row.get("duration_h")
-                note = row.get("notes") or ""
-                line = f"[T{i}] solvent={_s(solvent)}; temp_C={_s(temp)}; time_h={_s(time_h)}; {_s(note)}".strip()
-                lines.append(line)
-                url = row.get("url") or (
-                    row.get("doi") and f"https://doi.org/{row['doi']}"
-                )
-                if url:
-                    table_refs.append({"title": f"Table row {i}", "url": url})
-            table_ctx = "\n".join(lines)
-        except Exception as e:
-            app.logger.warning(f"[/ask] LOOKUP query error: {e}")
 
     def _split_reasoning(raw: str) -> tuple[str, str]:
         if not raw:
@@ -1538,6 +1477,7 @@ def ask():
         ROOT = Path(__file__).resolve().parent
         try:
             from app_utils.constants import HARVEST_OUT_DIR as _HARVEST_OUT_DIR_CONST
+
             out_dir = Path(_HARVEST_OUT_DIR_CONST)
         except Exception:
             out_dir = ROOT / "harvester" / "out_auto"
@@ -2113,6 +2053,7 @@ def ask():
         raw_verbatim_text = _clean_verbatim_block(attachments_ctx)
         try:
             from app_utils.pdf_utils import normalize_pdf_text as _nv
+
             cleaned = _nv(raw_verbatim_text)
             # Remove lines still dominated by interpunct artifacts (>40% middot-like chars)
             filtered_lines = []
@@ -2140,7 +2081,10 @@ def ask():
 
     # Early return for verbatim mode - skip LLM processing entirely
     if verbatim_mode and raw_verbatim_text:
-        answer = "## Experimental procedure (verbatim from attachment)\n\n" + raw_verbatim_text
+        answer = (
+            "## Experimental procedure (verbatim from attachment)\n\n"
+            + raw_verbatim_text
+        )
         rationale = (
             "Returned exactly as written in the attached document (verbatim mode)."
         )
@@ -2162,8 +2106,7 @@ def ask():
     # then whatever else you collect
     if uploads_ctx:
         ctx_parts.append("<<<CTX_UPLOADS>>>\n" + uploads_ctx)
-    if table_ctx:
-        ctx_parts.append("<<<CTX_TABLES>>>\n" + table_ctx)
+    # no table_ctx section
     if kb_ctx:
         ctx_parts.append("<<<CTX_KB>>>\n" + kb_ctx)
     if web_ctx:
@@ -2258,7 +2201,7 @@ def ask():
     )
 
     def strip_references_block(text: str) -> str:
-        return re.sub(r"##\s*References[\s\S]*", "", text, flags=re.I).strip()
+        return RE_REF_BLOCK.sub("", text).strip()
 
     if mode == "reasoning":
         prompt = (
@@ -2358,10 +2301,12 @@ def ask():
 
     robot_operations = None
     robot_ops_error = None
+
     def _extract_procedure_block(protocol_text: str) -> str:
         # Extract content after '3. **Procedure**' marker down to end or next numbered section.
         try:
             import re as _re
+
             m = _re.search(r"3\. \*\*Procedure\*\*\n\[(.*?)\]\n", protocol_text, _re.S)
             if m:
                 return m.group(1).strip()
@@ -2378,6 +2323,7 @@ def ask():
                 # Primary path: assume answer contains a well-formed protocol with '3. **Procedure**'
                 try:
                     robot_operations = convert_text_to_robot_ops(proc_text)
+
                     # Quality heuristic: determine if the primary parse is too trivial to be useful.
                     def _is_poor_robot_doc(doc: dict) -> bool:
                         if not isinstance(doc, dict):
@@ -2392,7 +2338,9 @@ def ask():
                         if all(not (s.get("ops") or []) for s in steps):
                             return True
                         actions = {
-                            (s.get("action") or "").lower() for s in steps if s.get("action")
+                            (s.get("action") or "").lower()
+                            for s in steps
+                            if s.get("action")
                         }
                         if len(actions) < 2:
                             return True
@@ -2406,19 +2354,27 @@ def ask():
                     # Fallback: salvage unstructured synthesis text.
                     # 1) Slice out synthesis subsection (e.g., 2.1 Synthesis ... until next 2.x heading)
                     import re as _re
+
                     def _slice_synthesis(txt: str) -> str:
                         try:
-                            m = _re.search(r"(^|\n)\s*2\.1[^\n]{0,40}synthesi[sd].*?(?=\n\s*2\.2\b|\n\s*3\.|$)", txt, _re.I | _re.S)
+                            m = _re.search(
+                                r"(^|\n)\s*2\.1[^\n]{0,40}synthesi[sd].*?(?=\n\s*2\.2\b|\n\s*3\.|$)",
+                                txt,
+                                _re.I | _re.S,
+                            )
                             if m:
                                 return m.group(0)
                         except Exception:
                             pass
                         return txt
+
                     sliced = _slice_synthesis(proc_text)
                     # 2) Collect candidate lines (verbs / reagent patterns)
                     lines = [l for l in sliced.splitlines() if l.strip()]
                     KEY_VERBS = r"add|pour|introduce|titr|stir|heat|maintain|hold|cool|filter|wash|dry|centrifuge|decant|resuspend|collect|transfer|dissolv|prepare|monitor|adjust"
-                    REAGENT_HINT = _re.compile(r"\b(\d+(?:\.\d+)?\s*(?:mL|ml|g|mg|mol|mmol|M|°C|deg|C)|pH\s*\d+(?:\.\d+)?)\b")
+                    REAGENT_HINT = _re.compile(
+                        r"\b(\d+(?:\.\d+)?\s*(?:mL|ml|g|mg|mol|mmol|M|°C|deg|C)|pH\s*\d+(?:\.\d+)?)\b"
+                    )
                     keep = []
                     for ln in lines:
                         low = ln.lower()
@@ -2453,43 +2409,62 @@ def ask():
                     # 5) Number and ensure trailing period
                     numbered = []
                     for i, seg in enumerate(frags, start=1):
-                        if not seg.endswith('.'):
-                            seg += '.'
+                        if not seg.endswith("."):
+                            seg += "."
                         numbered.append(f"{i}. {seg}")
-                    pseudo = "1. **Procedure**:\n" + "\n".join(numbered) if numbered else salvage
+                    pseudo = (
+                        "1. **Procedure**:\n" + "\n".join(numbered)
+                        if numbered
+                        else salvage
+                    )
                     try:
                         salvage_doc = convert_text_to_robot_ops(pseudo)
+
                         # Decide if salvage improves quality (more steps OR more actions OR ops now present)
                         def _score(doc: dict):
-                            steps = doc.get('steps') or []
-                            actions = {(s.get('action') or '').lower() for s in steps if s.get('action')}
-                            ops_count = sum(len(s.get('ops') or []) for s in steps)
+                            steps = doc.get("steps") or []
+                            actions = {
+                                (s.get("action") or "").lower()
+                                for s in steps
+                                if s.get("action")
+                            }
+                            ops_count = sum(len(s.get("ops") or []) for s in steps)
                             return (len(steps), len(actions), ops_count)
-                        if isinstance(robot_operations, dict) and isinstance(salvage_doc, dict):
+
+                        if isinstance(robot_operations, dict) and isinstance(
+                            salvage_doc, dict
+                        ):
                             old_score = _score(robot_operations)
                             new_score = _score(salvage_doc)
                             improved = new_score > old_score
                             if improved:
                                 robot_operations = salvage_doc
-                            meta = robot_operations.setdefault('meta', {})
-                            meta['fallback_used'] = True
-                            meta['fallback_primary_error'] = str(primary_error)
-                            meta['fallback_slice_used'] = sliced is not proc_text
-                            meta['fallback_quality_triggered'] = 'quality_triggered' in locals() and quality_triggered
-                            meta['fallback_improved'] = improved
-                            meta['fallback_old_score'] = old_score
-                            meta['fallback_new_score'] = new_score
+                            meta = robot_operations.setdefault("meta", {})
+                            meta["fallback_used"] = True
+                            meta["fallback_primary_error"] = str(primary_error)
+                            meta["fallback_slice_used"] = sliced is not proc_text
+                            meta["fallback_quality_triggered"] = (
+                                "quality_triggered" in locals() and quality_triggered
+                            )
+                            meta["fallback_improved"] = improved
+                            meta["fallback_old_score"] = old_score
+                            meta["fallback_new_score"] = new_score
                         else:
                             robot_operations = salvage_doc
                             if isinstance(robot_operations, dict):
-                                meta = robot_operations.setdefault('meta', {})
-                                meta['fallback_used'] = True
-                                meta['fallback_primary_error'] = str(primary_error)
-                                meta['fallback_slice_used'] = sliced is not proc_text
-                                meta['fallback_quality_triggered'] = 'quality_triggered' in locals() and quality_triggered
-                                meta['fallback_improved'] = True
+                                meta = robot_operations.setdefault("meta", {})
+                                meta["fallback_used"] = True
+                                meta["fallback_primary_error"] = str(primary_error)
+                                meta["fallback_slice_used"] = sliced is not proc_text
+                                meta["fallback_quality_triggered"] = (
+                                    "quality_triggered" in locals()
+                                    and quality_triggered
+                                )
+                                meta["fallback_improved"] = True
                     except Exception as fallback_error:
-                        robot_ops_error = f"primary:{primary_error}; fallback:{fallback_error}"
+                        robot_ops_error = (
+                            f"primary:{primary_error}; fallback:{fallback_error}"
+                        )
         except Exception as e:
             robot_ops_error = str(e)
 
@@ -2685,7 +2660,7 @@ def ask():
                 "index_map": index_map_s,
                 "kb_refs_count": len(kb_refs_raw),
                 "web_refs_count": len(web_refs),
-                "table_refs": table_refs,
+                # table_refs removed
                 "context_present": bool(context_joined),
                 "mining_enqueued": enqueued,
             }
@@ -2714,18 +2689,24 @@ def ask():
     }
     # Attach robot operations if produced
     try:
-        if 'robot_operations' in locals() and robot_operations:
-            response_payload['robot_operations'] = robot_operations
+        if "robot_operations" in locals() and robot_operations:
+            response_payload["robot_operations"] = robot_operations
             # Alias for external expectation of key name
-            response_payload['robot_rules'] = robot_operations
+            response_payload["robot_rules"] = robot_operations
             # Expose executor normalization status if present
-            ex_meta = robot_operations.get('_executor') if isinstance(robot_operations, dict) else None
+            ex_meta = (
+                robot_operations.get("_executor")
+                if isinstance(robot_operations, dict)
+                else None
+            )
             if isinstance(ex_meta, dict):
-                response_payload['executor_valid'] = bool(ex_meta.get('valid'))
-                response_payload['executor_repairs'] = ex_meta.get('repairs') or []
-                response_payload['executor_schema_version'] = ex_meta.get('schema_version') or 'executor.v1'
-        if 'robot_ops_error' in locals() and robot_ops_error:
-            response_payload['robot_ops_error'] = robot_ops_error
+                response_payload["executor_valid"] = bool(ex_meta.get("valid"))
+                response_payload["executor_repairs"] = ex_meta.get("repairs") or []
+                response_payload["executor_schema_version"] = (
+                    ex_meta.get("schema_version") or "executor.v1"
+                )
+        if "robot_ops_error" in locals() and robot_ops_error:
+            response_payload["robot_ops_error"] = robot_ops_error
     except Exception:
         pass
     if isinstance(refs_payload_s, dict):
@@ -2737,7 +2718,6 @@ def ask():
 
 # --- PDF text normalization ---
 from app_utils.pdf_utils import (
-    extract_pdf_text as _extract_pdf_text,
     clean_attachment_text as _clean_attachment_text,
     normalize_pdf_text as _normalize_pdf_text,
 )

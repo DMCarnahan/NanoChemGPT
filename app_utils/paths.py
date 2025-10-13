@@ -29,6 +29,7 @@ def ensure_dirs(*paths: Path) -> None:
         except Exception:
             pass
 
+
 def resolve_harvest_out_dir() -> Tuple[Path, bool]:
     primary = Path(os.getenv("HARVEST_OUT_DIR", "harvester/out_auto")).resolve()
     try:

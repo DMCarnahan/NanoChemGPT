@@ -142,7 +142,7 @@ def search(req: SearchRequest, request: Request):
         )
         tb = "".join(traceback.format_exc())
 
-    # Always log the error so it appears in container logs
+        # Always log the error so it appears in container logs
         print(f"[retriever][error] {e}\n{tb}")
 
         if debug:
