@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-import re, json, pathlib, unicodedata, time
+import re, json, pathlib, unicodedata, time, copy
 from typing import List, Dict, Optional, Any, Tuple
 
 DEFAULTS = {
@@ -125,11 +125,15 @@ def parse_reagent_phrase_to_struct(s: str) -> dict:
       - '0.1 M HAuCl4 in water'
     Returns a dict with keys:
       name, amount, amount_unit, amount_range, alt_amount, alt_unit,
-      concentration, conc_unit, solvent, approx, original
+      concentration, conc_unit, solvent, approx, original, is_solution, display_name
     """
     original = s
     s = strip_tags(_clean_unicode((s or "").strip()))
     approx = bool(_APPROX_WORD_RX.search(s))
+    
+    # Check if this appears to be a solution
+    is_solution = bool(re.search(r"\bsolution\b", s, re.I))
+    display_name = original  # Keep original for display
 
     # 1) Try concentration pattern first
     m = _CONC_RX.search(s)
@@ -150,7 +154,9 @@ def parse_reagent_phrase_to_struct(s: str) -> dict:
             "conc_unit": unit,
             "solvent": solvent,
             "approx": approx,
-            "original": original
+            "original": original,
+            "is_solution": True,  # Concentration patterns are always solutions
+            "display_name": display_name
         }
 
     # 2) Try leading amount pattern
@@ -186,7 +192,9 @@ def parse_reagent_phrase_to_struct(s: str) -> dict:
             "conc_unit": None,
             "solvent": None,
             "approx": approx,
-            "original": original
+            "original": original,
+            "is_solution": is_solution,
+            "display_name": display_name
         }
 
     # 3) Fallback: just return name
@@ -201,7 +209,9 @@ def parse_reagent_phrase_to_struct(s: str) -> dict:
         "conc_unit": None,
         "solvent": None,
         "approx": approx,
-        "original": original
+        "original": original,
+        "is_solution": is_solution,
+        "display_name": display_name
     }
 
 def _clean_unicode(s: str) -> str:
@@ -522,6 +532,15 @@ def detect_wash_dry(line: str) -> Optional[List[Dict]]:
         ops.append({"action":"oven_dry","temperature_C":temp,"minutes":minutes})
     return ops or None
 
+def detect_oven_dry(line: str) -> Optional[Dict]:
+    """Detect oven drying operations specifically"""
+    s = strip_tags(_clean_unicode(line.strip()))
+    if re.search(r"\b(dry|oven)\b", s, re.I):
+        temp = find_temp_c(s) or 80.0  # Default to 80C for oven
+        minutes = find_minutes(s) or 120.0  # Default to 2 hours
+        return {"action": "oven_dry", "temperature_C": temp, "minutes": minutes}
+    return None
+
 def detect_resuspend(line: str) -> Optional[Dict]:
     s = strip_tags(_clean_unicode(line.strip()))
     if re.search(r"\bresuspend\b", s, re.I):
@@ -824,17 +843,19 @@ def validate_execution_plan(plan: Dict) -> List[str]:
 
 # -------- Postprocessing and micro-plan generation --------
 def apply_postprocessing(doc: Dict) -> Dict:
+    """Normalize and enrich a raw conversion document into a consistent micro-plan.
+
+    Responsibilities:
+      1. Build `micro_plan` from per-step ops / micro_ops when absent.
+      2. Canonicalize device aliases (e.g. hot plate -> HP1, oven -> OV1).
+      3. Add missing units (temperature °C, volumes) for downstream stability.
+      4. Inject pick_up/place operations when a device operation requires relocation.
+      5. Preserve provenance (`collapsed_from_steps`) if present; ensure uniqueness.
+      6. Append inferred autotitrator rate set operations if a titration context implies a rate.
+      7. Record repair actions under `_executor['repairs']`.
+
+    The function augments but does not remove semantic user-intended operations.
     """
-    Apply postprocessing normalization to a document.
-    
-    This function:
-    1. Builds micro_plan from steps if missing/incomplete
-    2. Adds pick_up and place actions before device operations
-    3. Annotates units on operations 
-    4. Canonicalizes device names
-    5. Adds executor metadata and repair tracking
-    """
-    import copy
     result = copy.deepcopy(doc)
     
     # Device name canonicalization mapping
@@ -870,11 +891,29 @@ def apply_postprocessing(doc: Dict) -> Dict:
                     micro_op = copy.deepcopy(op)
                     # Convert "op" to "verb" for micro format
                     if "op" in micro_op:
-                        micro_op["verb"] = micro_op.pop("op")
+                        op_name = micro_op.pop("op")
+                        
+                        # Handle special oven operations
+                        if op_name == "move_to_oven":
+                            # Convert to pick_up and place operations
+                            pickup_op = {
+                                "verb": "pick_up",
+                                "object": micro_op.get("tube", "sample"),
+                                "step_index": step_idx
+                            }
+                            place_op = {
+                                "verb": "place", 
+                                "object": micro_op.get("tube", "sample"),
+                                "to": "oven",
+                                "step_index": step_idx
+                            }
+                            step_micro_ops.extend([pickup_op, place_op])
+                            continue
+                        else:
+                            micro_op["verb"] = op_name
+                    
                     micro_op["step_index"] = step_idx
-                    step_micro_ops.append(micro_op)
-            
-            # Add step_index to all micro_ops
+                    step_micro_ops.append(micro_op)            # Add step_index to all micro_ops
             for micro_op in step_micro_ops:
                 if "step_index" not in micro_op:
                     micro_op["step_index"] = step_idx
@@ -986,8 +1025,168 @@ def apply_postprocessing(doc: Dict) -> Dict:
     # Update the result
     result["micro_plan"] = enhanced_micro_plan
     result["_executor"] = executor_metadata
+
+    # Autotitrator rate set insertion if a titration step present and no rate set op
+    try:
+        has_rate = any(
+            op.get("verb") == "set" and op.get("param") in {"rate_mL_per_min", "rate_ml_per_min"}
+            for op in result["micro_plan"]
+        )
+        if not has_rate:
+            titration_steps = [s for s in result.get("steps", []) if s.get("action") == "titrate_to_ph"]
+            if titration_steps:
+                rate_val = None
+                for st in titration_steps:
+                    for op in st.get("ops", []) or []:
+                        if op.get("op") == "titrate_to_ph" and op.get("rate_ml_per_min") is not None:
+                            rate_val = op.get("rate_ml_per_min")
+                            break
+                    if rate_val is not None:
+                        break
+                if rate_val is not None:
+                    rate_op = {
+                        "verb": "set",
+                        "device": result.get("devices", {}).get("autotitrator_id", "AT1"),
+                        "param": "rate_mL_per_min",
+                        "value": rate_val,
+                        "step_index": titration_steps[0].get("index", 1)
+                    }
+                    # Prepend for visibility
+                    result["micro_plan"].insert(0, rate_op)
+                    executor_metadata["repairs"].append("inserted_autotitrator_rate_set")
+    except Exception:
+        pass
+
+    # Fallback: generic autotitrator mention with rate pattern in raw steps
+    if not any(op.get("verb") == "set" and op.get("param") in {"rate_mL_per_min", "rate_ml_per_min"} for op in result["micro_plan"]):
+        rate_rx = re.compile(r"rate(?: of)?\s+([0-9]+(?:\.[0-9]+)?)\s*mL\s*/\s*min", re.I)
+        for idx, st in enumerate(result.get("steps", []), 1):
+            raw = st.get("raw", "") or ""
+            if "autotitrator" in raw.lower():
+                m = rate_rx.search(raw)
+                if m:
+                    rate_val = float(m.group(1))
+                    result["micro_plan"].insert(0, {
+                        "verb": "set",
+                        "device": result.get("devices", {}).get("autotitrator_id", "AT1"),
+                        "param": "rate_mL_per_min",
+                        "value": rate_val,
+                        "step_index": idx
+                    })
+                    executor_metadata["repairs"].append("inserted_autotitrator_rate_set_fallback")
+                    break
     
     return result
+
+# -------- Minimal plan generation --------
+def generate_minimal_plan(doc: Dict) -> Tuple[List[Dict], List[Dict]]:
+    """Create a compressed minimal micro plan and timing delays from `micro_plan`.
+
+    Returns:
+      (micro_plan_min, timing_delays)
+
+    Behaviors:
+      * Keep only primitive actionable verbs.
+      * Convert add_solvent to pour entries.
+      * Collapse consecutive identical temperature set operations (aggregate provenance).
+      * Map generic device IDs when MIN_PLAN_MAP_GENERIC=1.
+      * Suppress zero-minute waits.
+    """
+    import os
+    
+    micro_plan = doc.get("micro_plan", [])
+    micro_plan_min = []
+    timing_delays = []
+    
+    # Environment variable to control device mapping
+    map_generic = os.environ.get("MIN_PLAN_MAP_GENERIC") == "1"
+    
+    # Device mapping for generic names
+    device_mapping = {
+        "HP1": "hotplate",
+        "SP1": "stir_plate", 
+        "OV1": "oven",
+        "CF1": "centrifuge"
+    }
+    
+    # First pass: collapse idempotent consecutive set operations (temperature_C) across steps
+    collapsed_plan: List[Dict] = []
+    last_key = None
+    provenance_map = {}
+    for op in micro_plan:
+        verb = op.get("verb")
+        if verb == "set" and op.get("param") == "temperature_C":
+            key = (op.get("param"), op.get("value"))
+            if key == last_key:
+                # accumulate provenance
+                entry = collapsed_plan[-1]
+                steps_list = entry.setdefault("collapsed_from_steps", [])
+                step_idx = op.get("step_index")
+                if step_idx and step_idx not in steps_list:
+                    steps_list.append(step_idx)
+                continue  # skip adding duplicate
+            else:
+                last_key = key
+        else:
+            if verb != "wait":
+                last_key = None
+        collapsed_plan.append(op)
+
+    # Replace micro_plan with collapsed version for further minimal extraction
+    micro_plan = collapsed_plan
+
+    for op in micro_plan:
+        verb = op.get("verb")
+        
+        # Include only primitive operations in minimal plan
+        if verb in {"pick_up", "place", "pour", "set"}:
+            min_op = op.copy()
+            
+            # Ensure step_index is present
+            if "step_index" not in min_op:
+                min_op["step_index"] = 1
+            
+            # Apply device mapping if enabled
+            if map_generic and "device" in min_op and min_op["device"] in device_mapping:
+                min_op["device"] = device_mapping[min_op["device"]]
+            
+            micro_plan_min.append(min_op)
+        
+        # Extract timing information for delays
+        if verb == "wait" and "minutes" in op:
+            minutes = op["minutes"]
+            if minutes > 0:  # Suppress zero-minute delays
+                delay = {
+                    "verb": "wait",
+                    "minutes": minutes,
+                    "step_index": op.get("step_index", 1)
+                }
+                timing_delays.append(delay)
+        
+        # Also check for operations with implicit timing
+        if verb == "set" and op.get("param") == "temperature_C":
+            # Look for associated wait operations in the same step
+            step_idx = op.get("step_index", 1)
+            for check_op in micro_plan:
+                if (check_op.get("verb") == "wait" and 
+                    check_op.get("step_index") == step_idx and
+                    check_op.get("minutes", 0) > 0):
+                    # Already handled above in wait section
+                    pass
+    
+    # Convert add_solvent operations to pour for minimal plan
+    for step in doc.get("steps", []):
+        for op in step.get("ops", []):
+            if op.get("op") == "add_solvent" and "volume" in op:
+                pour_op = {
+                    "verb": "pour",
+                    "volume": op["volume"],
+                    "volume_units": op.get("volume_units", "mL"),
+                    "step_index": step.get("index", 1)
+                }
+                micro_plan_min.append(pour_op)
+    
+    return micro_plan_min, timing_delays
 
 # -------- Main converter --------
 def convert_text_to_robot_ops(text: str) -> Dict:
@@ -996,8 +1195,37 @@ def convert_text_to_robot_ops(text: str) -> Dict:
     records: List[Dict] = []
 
     steps = extract_steps(text)
+    
+    # If no steps extracted, treat entire text as single step
+    if not steps and text.strip():
+        steps = [text.strip()]
 
     for step in steps:
+        step_lc = step.lower()
+        # Autotitrator rate detection (simple heuristic)
+        rate_match = None
+        if "autotitrator" in step_lc:
+            rate_match = re.search(r"rate(?: of)?\s+([0-9]+(?:\.[0-9]+)?)\s*mL\s*/\s*min", step_lc)
+        if rate_match:
+            rate_val = float(rate_match.group(1))
+            target_vessel = vessels.primary_vessel or vessels.ensure_glassware("V3")
+            record = {
+                "action": "autotitrator_add",
+                "vessel": target_vessel,
+                "rate_ml_per_min": rate_val,
+                "duration_minutes": 0.0,
+                "ops": [
+                    {"op": "set", "device": DEVICE_IDS.get("autotitrator_id", "AT1"), "param": "rate_mL_per_min", "value": rate_val}
+                ],
+                "raw": step,
+                "reagents": []
+            }
+            _normalize_reagents_inplace(record)
+            _add_structured_reagents_inplace(record)
+            records.append(record)
+            # Continue parsing subsequent features in same line (do not continue) so heat/wait can also be captured
+            # but ensure we don't double-add for titration control; if full titration detection triggers later it will append another step.
+        
         # Weighing
         weigh = detect_weigh(step)
         if weigh:
@@ -1228,6 +1456,28 @@ def convert_text_to_robot_ops(text: str) -> Dict:
         if wd:
             target_vessel = vessels.primary_vessel or vessels.ensure_glassware("Beaker")
             record = {"action":"postprocess","vessel":target_vessel,"reagents":[],"ops":ops_for_postproc(target_vessel,wd), "raw": step}
+            _normalize_reagents_inplace(record)
+            _add_structured_reagents_inplace(record)
+            records.append(record)
+            continue
+
+        # Oven drying (separate from wash_dry for better detection)
+        oven_dry = detect_oven_dry(step)
+        if oven_dry:
+            target_vessel = vessels.primary_vessel or vessels.ensure_glassware("Beaker")
+            record = {
+                "action": "oven_dry",
+                "vessel": target_vessel,
+                "temperature_C": oven_dry["temperature_C"],
+                "minutes": oven_dry["minutes"],
+                "ops": [
+                    {"op": "move_to_oven", "tube": f"{target_vessel}_tube", "oven_id": DEVICE_IDS["oven_id"]},
+                    {"op": "set_oven_temperature", "oven_id": DEVICE_IDS["oven_id"], "temperature_C": oven_dry["temperature_C"]},
+                    {"op": "wait", "minutes": oven_dry["minutes"]}
+                ],
+                "raw": step,
+                "reagents": []
+            }
             _normalize_reagents_inplace(record)
             _add_structured_reagents_inplace(record)
             records.append(record)
@@ -1478,7 +1728,8 @@ def convert_text_to_robot_ops(text: str) -> Dict:
             _add_structured_reagents_inplace(record)
             records.append(record)
 
-    return {
+    # Create the base result
+    result = {
         "hardware": hardware,
         "vessel_registry": vessels.as_dict(),
         "vessel_contents": vessels.contents_dict(),
@@ -1487,6 +1738,36 @@ def convert_text_to_robot_ops(text: str) -> Dict:
         "defaults": DEFAULTS,
         "steps": records,
     }
+    
+    # Apply postprocessing to generate micro_plan
+    result = apply_postprocessing(result)
+
+    # Inject inferred temperature set operations for heating/maintain phrases lacking explicit set
+    temp_pattern = re.compile(r"(\d+(?:\.\d+)?)\s*(?:°?c|c)\b", re.I)
+    trigger_words = {"heat", "heating", "maintain", "continue"}
+    existing_temp_sets = {(op.get("value"), op.get("step_index")) for op in result.get("micro_plan", []) if op.get("verb") == "set" and op.get("param") == "temperature_C"}
+    for idx, st in enumerate(result.get("steps", []), 1):
+        raw_text = st.get("raw", "") or ""
+        tl = raw_text.lower()
+        if any(w in tl for w in trigger_words):
+            m = temp_pattern.search(raw_text)
+            if m:
+                val = float(m.group(1))
+                if (val, idx) not in existing_temp_sets:
+                    result["micro_plan"].append({
+                        "verb": "set",
+                        "param": "temperature_C",
+                        "value": val,
+                        "step_index": idx
+                    })
+                    existing_temp_sets.add((val, idx))
+    
+    # Generate minimal plan and timing delays
+    micro_plan_min, timing_delays = generate_minimal_plan(result)
+    result["micro_plan_min"] = micro_plan_min
+    result["timing_delays"] = timing_delays
+    
+    return result
 # -------- Validation helpers (unchanged API) --------
 def validate_step(text: str) -> Dict[str, Any]:
     if not isinstance(text, str): raise ValueError("input must be a string")
