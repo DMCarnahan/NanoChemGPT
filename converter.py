@@ -822,6 +822,173 @@ def validate_execution_plan(plan: Dict) -> List[str]:
     
     return errors
 
+# -------- Postprocessing and micro-plan generation --------
+def apply_postprocessing(doc: Dict) -> Dict:
+    """
+    Apply postprocessing normalization to a document.
+    
+    This function:
+    1. Builds micro_plan from steps if missing/incomplete
+    2. Adds pick_up and place actions before device operations
+    3. Annotates units on operations 
+    4. Canonicalizes device names
+    5. Adds executor metadata and repair tracking
+    """
+    import copy
+    result = copy.deepcopy(doc)
+    
+    # Device name canonicalization mapping
+    device_aliases = {
+        "water bath": "HP1",
+        "hotplate": "HP1", 
+        "hot plate": "HP1",
+        "heating plate": "HP1",
+        "stir plate": "SP1",
+        "stirrer": "SP1",
+        "centrifuge": "CF1",
+        "oven": "OV1"
+    }
+    
+    # Step 1: Build micro_plan from steps if needed
+    micro_plan = []
+    repairs = []
+    
+    # If we already have a micro_plan, use it as the starting point
+    if result.get("micro_plan"):
+        micro_plan = copy.deepcopy(result["micro_plan"])
+    else:
+        # Build from steps
+        for step_idx, step in enumerate(result.get("steps", []), 1):
+            step_micro_ops = []
+            
+            # Use existing micro_ops if available, otherwise build from ops
+            if step.get("micro_ops"):
+                step_micro_ops = copy.deepcopy(step["micro_ops"])
+            elif step.get("ops"):
+                # Convert ops to micro_ops format
+                for op in step["ops"]:
+                    micro_op = copy.deepcopy(op)
+                    # Convert "op" to "verb" for micro format
+                    if "op" in micro_op:
+                        micro_op["verb"] = micro_op.pop("op")
+                    micro_op["step_index"] = step_idx
+                    step_micro_ops.append(micro_op)
+            
+            # Add step_index to all micro_ops
+            for micro_op in step_micro_ops:
+                if "step_index" not in micro_op:
+                    micro_op["step_index"] = step_idx
+            
+            micro_plan.extend(step_micro_ops)
+    
+    # Step 2: Canonicalize device names
+    for micro_op in micro_plan:
+        if "device" in micro_op:
+            device = micro_op["device"]
+            if isinstance(device, str):
+                device_lower = device.lower().strip()
+                if device_lower in device_aliases:
+                    micro_op["device"] = device_aliases[device_lower]
+                    repairs.append(f"canonicalized_device_{device_lower.replace(' ', '_')}_to_{device_aliases[device_lower]}")
+    
+    # Step 3: Add units to operations
+    for micro_op in micro_plan:
+        verb = micro_op.get("verb")
+        
+        # Add temperature units
+        if verb == "set" and micro_op.get("param") == "temperature_C":
+            if "unit" not in micro_op:
+                micro_op["unit"] = "C"
+        
+        # Add volume units for pour operations
+        if verb == "pour" and "volume" in micro_op and "volume_units" not in micro_op:
+            micro_op["volume_units"] = "mL"
+        
+        # Add other common units
+        if verb == "add_solvent" and "volume" in micro_op and "volume_units" not in micro_op:
+            micro_op["volume_units"] = "mL"
+    
+    # Step 4: Add pick_up and place actions before device operations
+    enhanced_micro_plan = []
+    vessel_locations = {}  # Track where vessels are currently placed
+    
+    for i, micro_op in enumerate(micro_plan):
+        verb = micro_op.get("verb")
+        device = micro_op.get("device")
+        vessel = micro_op.get("vessel", "V1")  # Default vessel
+        
+        # Check if this operation requires vessel placement
+        needs_placement = (
+            verb == "set" and device in ["HP1", "SP1", "OV1"] or
+            verb in ["heat", "stir", "mix"] or
+            (verb == "pour" and device)
+        )
+        
+        if needs_placement and device:
+            current_location = vessel_locations.get(vessel)
+            
+            # If vessel is not on the required device, add pick_up and place
+            if current_location != device:
+                # Add pick_up if vessel is somewhere else
+                if current_location is not None:
+                    pickup_op = {
+                        "verb": "pick_up",
+                        "vessel": vessel,
+                        "from": current_location,
+                        "step_index": micro_op.get("step_index", 1)
+                    }
+                    enhanced_micro_plan.append(pickup_op)
+                    repairs.append(f"inserted_pickup_{vessel}_from_{current_location}")
+                else:
+                    pickup_op = {
+                        "verb": "pick_up", 
+                        "vessel": vessel,
+                        "step_index": micro_op.get("step_index", 1)
+                    }
+                    enhanced_micro_plan.append(pickup_op)
+                    repairs.append(f"inserted_pickup_{vessel}")
+                
+                # Add place operation
+                place_op = {
+                    "verb": "place",
+                    "vessel": vessel,
+                    "to": device,
+                    "step_index": micro_op.get("step_index", 1)
+                }
+                enhanced_micro_plan.append(place_op)
+                repairs.append(f"inserted_place_{vessel}_to_{device}")
+                
+                # Update vessel location tracking
+                vessel_locations[vessel] = device
+                
+                # Special handling for hotplate operations
+                if device == "HP1":
+                    repairs.append("inserted_hotplate_pickup_place")
+        
+        enhanced_micro_plan.append(micro_op)
+    
+    # Step 5: Handle provenance (collapsed_from_steps)
+    for micro_op in enhanced_micro_plan:
+        if "collapsed_from_steps" in micro_op:
+            # Ensure it's sorted and contains self
+            cfs = micro_op["collapsed_from_steps"]
+            if isinstance(cfs, list) and len(cfs) > 1:
+                micro_op["collapsed_from_steps"] = sorted(cfs)
+    
+    # Step 6: Add executor metadata
+    executor_metadata = {
+        "schema_version": "executor.v1",
+        "repairs": repairs,
+        "postprocessing_applied": True,
+        "timestamp": time.time()
+    }
+    
+    # Update the result
+    result["micro_plan"] = enhanced_micro_plan
+    result["_executor"] = executor_metadata
+    
+    return result
+
 # -------- Main converter --------
 def convert_text_to_robot_ops(text: str) -> Dict:
     hardware = parse_hardware(text)
