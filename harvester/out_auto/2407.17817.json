@@ -1,0 +1,45 @@
+{
+  "paper_id": "2407.17817",
+  "title": "Demystifying Verbatim Memorization in Large Language Models",
+  "authors": [
+    {
+      "name": "Jing Huang"
+    },
+    {
+      "name": "Diyi Yang"
+    },
+    {
+      "name": "Christopher Potts"
+    }
+  ],
+  "doi": "",
+  "source": "arxiv",
+  "urls": {
+    "pdf": "https://arxiv.org/pdf/2407.17817.pdf"
+  },
+  "license": null,
+  "access_route": "unknown",
+  "sections": [],
+  "extractions": {
+    "methods_paragraphs": [],
+    "entities": []
+  },
+  "relevance": {
+    "score": 0.0,
+    "breakdown": {},
+    "reasons": []
+  },
+  "meta": {
+    "title": "Demystifying Verbatim Memorization in Large Language Models",
+    "doi": "",
+    "url": "http://arxiv.org/abs/2407.17817v1",
+    "pdf_url": "https://arxiv.org/pdf/2407.17817.pdf",
+    "year": "2024",
+    "authors": [
+      "Jing Huang",
+      "Diyi Yang",
+      "Christopher Potts"
+    ]
+  },
+  "raw": "Demystifying Verbatim Memorization in Large Language Models"
+}

@@ -1,0 +1,41 @@
+{
+  "paper_id": "2104.13117",
+  "title": "A Verified Decision Procedure for Orders in Isabelle/HOL",
+  "authors": [
+    {
+      "name": "Lukas Stevens"
+    },
+    {
+      "name": "Tobias Nipkow"
+    }
+  ],
+  "doi": "",
+  "source": "arxiv",
+  "urls": {
+    "pdf": "https://arxiv.org/pdf/2104.13117.pdf"
+  },
+  "license": null,
+  "access_route": "unknown",
+  "sections": [],
+  "extractions": {
+    "methods_paragraphs": [],
+    "entities": []
+  },
+  "relevance": {
+    "score": 0.0,
+    "breakdown": {},
+    "reasons": []
+  },
+  "meta": {
+    "title": "A Verified Decision Procedure for Orders in Isabelle/HOL",
+    "doi": "",
+    "url": "http://arxiv.org/abs/2104.13117v2",
+    "pdf_url": "https://arxiv.org/pdf/2104.13117.pdf",
+    "year": "2021",
+    "authors": [
+      "Lukas Stevens",
+      "Tobias Nipkow"
+    ]
+  },
+  "raw": "A Verified Decision Procedure for Orders in Isabelle/HOL"
+}

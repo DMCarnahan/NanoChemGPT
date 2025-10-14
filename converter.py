@@ -58,7 +58,7 @@ _PAREN_AMOUNT_RX = re.compile(r"\(\s*(?P<val>\d+(?:\.\d+)?)\s*(?P<unit>µ?u?L|mL
 
 # Concentration form: 0.1 M HAuCl4 [in water]
 _CONC_RX = re.compile(
-    r"(?P<approx>[~≈])?\s*(?P<val>\d+(?:\.\d+)?)\s*(?P<unit>M|mM|µM|uM)\s+(?P<name>[^(),;]+?)(?:\s+in\s+(?P<solvent>[^(),;]+))?\b",
+    r"(?P<approx>[~≈])?\s*(?P<val>\d+(?:\.\d+)?)\s*(?P<unit>M|mM|µM|uM)\s+(?P<name>[^(),;]+(?:\s+[^(),;]+)*)(?:\s*\([^)]*\))?(?:\s+in\s+(?P<solvent>[^(),;]+))?\s*(?:\bsolution\b)?",
     re.I
 )
 
@@ -272,7 +272,7 @@ def find_minutes(t: str) -> Optional[float]:
         mins += float(m.group(1))/60.0; found=True
     for m in re.finditer(r"(\d+(?:\.\d+)?)\s*(?:hour|hr|hrs|h)\b", s, re.I):
         mins += float(m.group(1))*60.0; found=True
-    for m in re.finditer(r"(\d+(?:\.\d+)?)\s*(?:minute|min|mins|m)\b", s, re.I):
+    for m in re.finditer(r"(\d+(?:\.\d+)?)\s*(?:minutes?|mins?)\b", s, re.I):
         mins += float(m.group(1)); found=True
     return mins if found else None
 
@@ -491,7 +491,7 @@ def detect_stir(line: str) -> Optional[Dict]:
 
 def detect_heat(line: str) -> Optional[List[Dict]]:
     s = strip_tags(_clean_unicode(line.strip()))
-    if not re.search(r"\b(heat|maintain|hold)\b", s, re.I): return None
+    if not re.search(r"\b(heat|maintain|hold|continue\s+heat)", s, re.I): return None
     temp = find_temp_c(s) or DEFAULTS["room_temp_C"]
     minutes = find_minutes(s) or 60.0
     return [{"action":"heat_to","temperature_C": temp}, {"action":"hold","minutes": minutes}]
@@ -592,8 +592,9 @@ def detect_transfer_explicit(line: str) -> Optional[Dict]:
 
 def detect_dissolve(line: str) -> Optional[Dict]:
     s = strip_tags(_clean_unicode(line.strip()))
+    # Match "dissolve X g [of] Y in Z mL [of] solvent"
     m = re.search(
-        r"\bdissolv\w*\s+(?P<amount>[\d\.]+)\s*(?P<unit>mg|g|µg|kg)\s+of\s+(?P<solute>.+?)\s+in\s+(?P<vol>[\d\.]+)\s*(?P<vunit>µ?u?L|mL|ml|l|L)\s+of\s+(?P<solvent>[^.;,]+)",
+        r"\bdissolv\w*\s+(?P<amount>[\d\.]+)\s*(?P<unit>mg|g|µg|kg)\s+(?:of\s+)?(?P<solute>.+?)\s+in\s+(?P<vol>[\d\.]+)\s*(?P<vunit>µ?u?L|mL|ml|l|L)\s+(?:of\s+)?(?P<solvent>[^.;,]+)",
         s, re.I
     )
     if not m:
@@ -773,8 +774,8 @@ def extract_steps(markdown_text: str) -> List[str]:
     lines = markdown_text.splitlines()
     in_proc = False; steps = []; buf = []
     for line in lines:
-        # More flexible pattern to match procedure sections
-        if re.search(r"\*\*Procedure:?\*\*", line, re.I):
+        # More flexible pattern to match procedure sections (with or without bold markers)
+        if re.search(r"(?:\*\*)?Procedure:?(?:\*\*)?", line, re.I):
             in_proc = True
             continue
         if in_proc:
@@ -908,6 +909,40 @@ def apply_postprocessing(doc: Dict) -> Dict:
                                 "step_index": step_idx
                             }
                             step_micro_ops.extend([pickup_op, place_op])
+                            continue
+                        elif op_name == "set_oven_temperature":
+                            # Convert to set verb with proper parameters
+                            set_op = {
+                                "verb": "set",
+                                "device": micro_op.get("oven_id", "OV1"),
+                                "param": "temperature_C",
+                                "value": micro_op.get("temperature_C"),
+                                "step_index": step_idx
+                            }
+                            step_micro_ops.append(set_op)
+                            continue
+                        elif op_name == "set_hotplate_temperature":
+                            # Convert to set verb with proper parameters
+                            set_op = {
+                                "verb": "set",
+                                "device": micro_op.get("hotplate_id", "HP1"),
+                                "param": "temperature_C",
+                                "value": micro_op.get("temperature_C"),
+                                "step_index": step_idx
+                            }
+                            step_micro_ops.append(set_op)
+                            continue
+                        elif op_name == "add_solvent":
+                            # Convert add_solvent to pour operation
+                            pour_op = {
+                                "verb": "pour",
+                                "volume": micro_op.get("volume", 10),
+                                "volume_units": micro_op.get("volume_units", "mL"),
+                                "step_index": step_idx
+                            }
+                            if "solvent" in micro_op:
+                                pour_op["reagent"] = micro_op["solvent"]
+                            step_micro_ops.append(pour_op)
                             continue
                         else:
                             micro_op["verb"] = op_name
@@ -1059,7 +1094,7 @@ def apply_postprocessing(doc: Dict) -> Dict:
 
     # Fallback: generic autotitrator mention with rate pattern in raw steps
     if not any(op.get("verb") == "set" and op.get("param") in {"rate_mL_per_min", "rate_ml_per_min"} for op in result["micro_plan"]):
-        rate_rx = re.compile(r"rate(?: of)?\s+([0-9]+(?:\.[0-9]+)?)\s*mL\s*/\s*min", re.I)
+        rate_rx = re.compile(r"(?:rate(?: of)?|at)\s+([0-9]+(?:\.[0-9]+)?)\s*mL\s*/\s*min", re.I)
         for idx, st in enumerate(result.get("steps", []), 1):
             raw = st.get("raw", "") or ""
             if "autotitrator" in raw.lower():
@@ -1110,26 +1145,34 @@ def generate_minimal_plan(doc: Dict) -> Tuple[List[Dict], List[Dict]]:
     }
     
     # First pass: collapse idempotent consecutive set operations (temperature_C) across steps
+    # Strategy: Track set operations by (param, value) and keep only the first occurrence,
+    # accumulating provenance from subsequent duplicates
     collapsed_plan: List[Dict] = []
-    last_key = None
-    provenance_map = {}
+    seen_sets = {}  # key: (param, value, device) -> index in collapsed_plan
+    
     for op in micro_plan:
         verb = op.get("verb")
         if verb == "set" and op.get("param") == "temperature_C":
-            key = (op.get("param"), op.get("value"))
-            if key == last_key:
-                # accumulate provenance
-                entry = collapsed_plan[-1]
+            # Create a key that includes device to distinguish hotplate vs oven
+            device = op.get("device", "")
+            key = (op.get("param"), op.get("value"), device)
+            
+            if key in seen_sets:
+                # Duplicate found - accumulate provenance in the first occurrence
+                first_idx = seen_sets[key]
+                entry = collapsed_plan[first_idx]
                 steps_list = entry.setdefault("collapsed_from_steps", [])
                 step_idx = op.get("step_index")
                 if step_idx and step_idx not in steps_list:
                     steps_list.append(step_idx)
+                # Also add the original step_index if not present
+                if entry.get("step_index") and entry["step_index"] not in steps_list:
+                    steps_list.insert(0, entry["step_index"])
                 continue  # skip adding duplicate
             else:
-                last_key = key
-        else:
-            if verb != "wait":
-                last_key = None
+                # First occurrence of this set operation
+                seen_sets[key] = len(collapsed_plan)
+        
         collapsed_plan.append(op)
 
     # Replace micro_plan with collapsed version for further minimal extraction
@@ -1137,19 +1180,15 @@ def generate_minimal_plan(doc: Dict) -> Tuple[List[Dict], List[Dict]]:
 
     for op in micro_plan:
         verb = op.get("verb")
-        
         # Include only primitive operations in minimal plan
         if verb in {"pick_up", "place", "pour", "set"}:
             min_op = op.copy()
-            
             # Ensure step_index is present
             if "step_index" not in min_op:
                 min_op["step_index"] = 1
-            
             # Apply device mapping if enabled
             if map_generic and "device" in min_op and min_op["device"] in device_mapping:
                 min_op["device"] = device_mapping[min_op["device"]]
-            
             micro_plan_min.append(min_op)
         
         # Extract timing information for delays
@@ -1162,27 +1201,18 @@ def generate_minimal_plan(doc: Dict) -> Tuple[List[Dict], List[Dict]]:
                     "step_index": op.get("step_index", 1)
                 }
                 timing_delays.append(delay)
-        
-        # Also check for operations with implicit timing
-        if verb == "set" and op.get("param") == "temperature_C":
-            # Look for associated wait operations in the same step
-            step_idx = op.get("step_index", 1)
-            for check_op in micro_plan:
-                if (check_op.get("verb") == "wait" and 
-                    check_op.get("step_index") == step_idx and
-                    check_op.get("minutes", 0) > 0):
-                    # Already handled above in wait section
-                    pass
     
-    # Convert add_solvent operations to pour for minimal plan
+    # Convert add_solvent, add, transfer operations to pour for minimal plan
     for step in doc.get("steps", []):
+        step_idx = step.get("index", 1)
         for op in step.get("ops", []):
-            if op.get("op") == "add_solvent" and "volume" in op:
+            op_type = op.get("op")
+            if op_type in ["add_solvent", "add", "transfer"]:
                 pour_op = {
                     "verb": "pour",
-                    "volume": op["volume"],
+                    "volume": op.get("volume", 10),
                     "volume_units": op.get("volume_units", "mL"),
-                    "step_index": step.get("index", 1)
+                    "step_index": step_idx
                 }
                 micro_plan_min.append(pour_op)
     
@@ -1205,7 +1235,8 @@ def convert_text_to_robot_ops(text: str) -> Dict:
         # Autotitrator rate detection (simple heuristic)
         rate_match = None
         if "autotitrator" in step_lc:
-            rate_match = re.search(r"rate(?: of)?\s+([0-9]+(?:\.[0-9]+)?)\s*mL\s*/\s*min", step_lc)
+            # Match "rate X mL/min" or "at X mL/min"
+            rate_match = re.search(r"(?:rate(?: of)?|at)\s+([0-9]+(?:\.[0-9]+)?)\s*mL\s*/\s*min", step_lc)
         if rate_match:
             rate_val = float(rate_match.group(1))
             target_vessel = vessels.primary_vessel or vessels.ensure_glassware("V3")

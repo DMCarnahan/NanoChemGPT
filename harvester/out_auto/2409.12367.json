@@ -1,0 +1,61 @@
+{
+  "paper_id": "2409.12367",
+  "title": "Extracting Memorized Training Data via Decomposition",
+  "authors": [
+    {
+      "name": "Ellen Su"
+    },
+    {
+      "name": "Anu Vellore"
+    },
+    {
+      "name": "Amy Chang"
+    },
+    {
+      "name": "Raffaele Mura"
+    },
+    {
+      "name": "Blaine Nelson"
+    },
+    {
+      "name": "Paul Kassianik"
+    },
+    {
+      "name": "Amin Karbasi"
+    }
+  ],
+  "doi": "",
+  "source": "arxiv",
+  "urls": {
+    "pdf": "https://arxiv.org/pdf/2409.12367.pdf"
+  },
+  "license": null,
+  "access_route": "unknown",
+  "sections": [],
+  "extractions": {
+    "methods_paragraphs": [],
+    "entities": []
+  },
+  "relevance": {
+    "score": 0.0,
+    "breakdown": {},
+    "reasons": []
+  },
+  "meta": {
+    "title": "Extracting Memorized Training Data via Decomposition",
+    "doi": "",
+    "url": "http://arxiv.org/abs/2409.12367v2",
+    "pdf_url": "https://arxiv.org/pdf/2409.12367.pdf",
+    "year": "2024",
+    "authors": [
+      "Ellen Su",
+      "Anu Vellore",
+      "Amy Chang",
+      "Raffaele Mura",
+      "Blaine Nelson",
+      "Paul Kassianik",
+      "Amin Karbasi"
+    ]
+  },
+  "raw": "Extracting Memorized Training Data via Decomposition"
+}

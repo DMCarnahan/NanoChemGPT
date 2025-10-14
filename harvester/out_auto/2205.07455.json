@@ -1,0 +1,37 @@
+{
+  "paper_id": "2205.07455",
+  "title": "Reasoning about Procedures with Natural Language Processing: A Tutorial",
+  "authors": [
+    {
+      "name": "Li Zhang"
+    }
+  ],
+  "doi": "",
+  "source": "arxiv",
+  "urls": {
+    "pdf": "https://arxiv.org/pdf/2205.07455.pdf"
+  },
+  "license": null,
+  "access_route": "unknown",
+  "sections": [],
+  "extractions": {
+    "methods_paragraphs": [],
+    "entities": []
+  },
+  "relevance": {
+    "score": 0.0,
+    "breakdown": {},
+    "reasons": []
+  },
+  "meta": {
+    "title": "Reasoning about Procedures with Natural Language Processing: A Tutorial",
+    "doi": "",
+    "url": "http://arxiv.org/abs/2205.07455v1",
+    "pdf_url": "https://arxiv.org/pdf/2205.07455.pdf",
+    "year": "2022",
+    "authors": [
+      "Li Zhang"
+    ]
+  },
+  "raw": "Reasoning about Procedures with Natural Language Processing: A Tutorial"
+}

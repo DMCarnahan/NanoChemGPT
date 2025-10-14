@@ -1,0 +1,65 @@
+{
+  "paper_id": "2510.01671",
+  "title": "A Locally Executable AI System for Improving Preoperative Patient\n  Communication: A Multi-Domain Clinical Evaluation",
+  "authors": [
+    {
+      "name": "Motoki Sato"
+    },
+    {
+      "name": "Yuki Matsushita"
+    },
+    {
+      "name": "Hidekazu Takahashi"
+    },
+    {
+      "name": "Tomoaki Kakazu"
+    },
+    {
+      "name": "Sou Nagata"
+    },
+    {
+      "name": "Mizuho Ohnuma"
+    },
+    {
+      "name": "Atsushi Yoshikawa"
+    },
+    {
+      "name": "Masayuki Yamamura"
+    }
+  ],
+  "doi": "",
+  "source": "arxiv",
+  "urls": {
+    "pdf": "https://arxiv.org/pdf/2510.01671.pdf"
+  },
+  "license": null,
+  "access_route": "unknown",
+  "sections": [],
+  "extractions": {
+    "methods_paragraphs": [],
+    "entities": []
+  },
+  "relevance": {
+    "score": 0.0,
+    "breakdown": {},
+    "reasons": []
+  },
+  "meta": {
+    "title": "A Locally Executable AI System for Improving Preoperative Patient\n  Communication: A Multi-Domain Clinical Evaluation",
+    "doi": "",
+    "url": "http://arxiv.org/abs/2510.01671v1",
+    "pdf_url": "https://arxiv.org/pdf/2510.01671.pdf",
+    "year": "2025",
+    "authors": [
+      "Motoki Sato",
+      "Yuki Matsushita",
+      "Hidekazu Takahashi",
+      "Tomoaki Kakazu",
+      "Sou Nagata",
+      "Mizuho Ohnuma",
+      "Atsushi Yoshikawa",
+      "Masayuki Yamamura"
+    ]
+  },
+  "raw": "A Locally Executable AI System for Improving Preoperative Patient\n  Communication: A Multi-Domain Clinical Evaluation"
+}
