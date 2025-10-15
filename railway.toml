@@ -39,9 +39,9 @@ cmds = [
 cmd = "bash -lc ' \
   set -euo pipefail; \
   : ${PORT:=8000}; \
-  : ${BUNDLE_PATH:=/app/data/harvester/out_auto/bundle.jsonl}; \
-  : ${INDEX_DIR_DOC:=/app/retriever/index_doc}; \
-  : ${INDEX_DIR_PASSAGE:=/app/retriever/index_passage}; \
+  : ${BUNDLE_PATH:=/data/harvester/out_auto/bundle.jsonl}; \
+  : ${INDEX_DIR_DOC:=/data/vector_store_doc}; \
+  : ${INDEX_DIR_PASSAGE:=/data/vector_store_passage}; \
   export RETRIEVER_URL=http://127.0.0.1:${PORT}/retriever; \
   # Keep RETRIEVER_INDEX_DIR for legacy callers → point to DOC index by default \
   export RETRIEVER_INDEX_DIR=\"${INDEX_DIR_DOC}\"; \
