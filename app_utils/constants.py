@@ -18,7 +18,6 @@ def _mk(p: Path) -> Path:
 
 
 
-# Canonical writable dirs (env override -> fallback -> temp)
 ATTACH_DIR = _mk(Path(os.getenv("ATTACH_DIR", DATA_DIR / "attachments")))
 UPLOADS_DIR = _mk(Path(os.getenv("UPLOADS_DIR", DATA_DIR / "uploads")))
 LOOKUP_UPLOAD_DIR = _mk(Path(os.getenv("LOOKUP_UPLOAD_DIR", DATA_DIR / "lookup_uploads")))
@@ -28,6 +27,9 @@ INDEX_DIR = Path(os.getenv("INDEX_DIR", "/data/vector_store")).resolve()
 RETRIEVER_INDEX_DIR_DOC = Path(os.getenv("RETRIEVER_INDEX_DIR_DOC", "/data/vector_store_doc")).resolve()
 RETRIEVER_INDEX_DIR_PASSAGE = Path(os.getenv("RETRIEVER_INDEX_DIR_PASSAGE", "/data/vector_store_passage")).resolve()
 BUNDLE_PATH = os.getenv("BUNDLE_PATH", str(HARVEST_OUT_DIR / "bundle.jsonl"))
+
+# Auto bundle (harvester output JSONL)
+BUNDLE_AUTO = os.getenv("BUNDLE_AUTO", str(HARVEST_OUT_DIR / "bundle.jsonl"))
 LOOKUP_DUCKDB_PATH = os.getenv("LOOKUP_DUCKDB_PATH", "/data/reactions.duckdb")
 LOOKUP_DUCKDB_TABLE = os.getenv("LOOKUP_DUCKDB_TABLE", "reactions")
 LOOKUP_PARQUET_GLOB = os.getenv("LOOKUP_PARQUET_GLOB", "/data/*.parquet")
@@ -97,4 +99,5 @@ __all__ = [
     "PERSIST_INDEX",
     "ENABLE_AUTO_HARVEST",
     "ENABLE_ENHANCED_CITATIONS",
+    "BUNDLE_AUTO",
 ]
