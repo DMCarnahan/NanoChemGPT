@@ -47,6 +47,10 @@ python main_asgi.py
 
 # NanoChemGPT
 
+## Coverage Scope Note
+
+Test coverage is intentionally focused on `converter.py`, the core protocol conversion module. This approach ensures rapid feedback and maintainability, as converter.py is the critical path for protocol correctness. Other modules (harvester, retriever, etc.) are large and slow to test, so coverage is narrowed for practical reasons. See `pytest.ini` for details.
+
 _A domain‑specific RAG system and text‑mining pipeline for nanochemistry synthesis, reasoning, and structured protocol generation._
 
 > **📖 Publication-Ready Documentation**: For comprehensive documentation suitable for academic use, see [README_PUBLICATION.md](README_PUBLICATION.md)
