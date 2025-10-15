@@ -1,0 +1,69 @@
+{
+  "paper_id": "10.3389/fddev.2025.1627556",
+  "title": "Nickel nanoparticles: a novel platform for cancer-targeted delivery and multimodal therapy.",
+  "authors": [
+    {
+      "name": "Wang F"
+    },
+    {
+      "name": "Tong S"
+    },
+    {
+      "name": "Ma X"
+    },
+    {
+      "name": "Yang H"
+    },
+    {
+      "name": "Zhang T"
+    },
+    {
+      "name": "Wu K"
+    },
+    {
+      "name": "Wu J."
+    }
+  ],
+  "doi": "10.3389/fddev.2025.1627556",
+  "source": "eupmc",
+  "urls": {
+    "pdf": ""
+  },
+  "license": null,
+  "access_route": "unknown",
+  "sections": [],
+  "extractions": {
+    "methods_paragraphs": [],
+    "entities": []
+  },
+  "relevance": {
+    "score": 0.22499999999999998,
+    "breakdown": {
+      "content": 0.0,
+      "domain": 0.0,
+      "recency": 1.0,
+      "quality": 0.5,
+      "entities": 0.0
+    },
+    "reasons": [
+      "recent_publication"
+    ]
+  },
+  "meta": {
+    "title": "Nickel nanoparticles: a novel platform for cancer-targeted delivery and multimodal therapy.",
+    "doi": "10.3389/fddev.2025.1627556",
+    "url": "",
+    "pdf_url": "",
+    "year": "2025",
+    "authors": [
+      "Wang F",
+      "Tong S",
+      "Ma X",
+      "Yang H",
+      "Zhang T",
+      "Wu K",
+      "Wu J."
+    ]
+  },
+  "raw": "Nickel nanoparticles: a novel platform for cancer-targeted delivery and multimodal therapy."
+}

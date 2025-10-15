@@ -1,0 +1,53 @@
+{
+  "paper_id": "10.3390/jfb15110340",
+  "title": "Synthesis, Functionalization, and Biomedical Applications of Iron Oxide Nanoparticles (IONPs).",
+  "authors": [
+    {
+      "name": "Salehirozveh M"
+    },
+    {
+      "name": "Dehghani P"
+    },
+    {
+      "name": "Mijakovic I."
+    }
+  ],
+  "doi": "10.3390/jfb15110340",
+  "source": "eupmc",
+  "urls": {
+    "pdf": ""
+  },
+  "license": null,
+  "access_route": "unknown",
+  "sections": [],
+  "extractions": {
+    "methods_paragraphs": [],
+    "entities": []
+  },
+  "relevance": {
+    "score": 0.22499999999999998,
+    "breakdown": {
+      "content": 0.0,
+      "domain": 0.0,
+      "recency": 1.0,
+      "quality": 0.5,
+      "entities": 0.0
+    },
+    "reasons": [
+      "recent_publication"
+    ]
+  },
+  "meta": {
+    "title": "Synthesis, Functionalization, and Biomedical Applications of Iron Oxide Nanoparticles (IONPs).",
+    "doi": "10.3390/jfb15110340",
+    "url": "",
+    "pdf_url": "",
+    "year": "2024",
+    "authors": [
+      "Salehirozveh M",
+      "Dehghani P",
+      "Mijakovic I."
+    ]
+  },
+  "raw": "Synthesis, Functionalization, and Biomedical Applications of Iron Oxide Nanoparticles (IONPs)."
+}

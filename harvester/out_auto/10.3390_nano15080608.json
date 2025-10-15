@@ -1,0 +1,69 @@
+{
+  "paper_id": "10.3390/nano15080608",
+  "title": "Plasmon-Enhanced Photo-Luminescence Emission in Hybrid Metal-Perovskite Nanowires.",
+  "authors": [
+    {
+      "name": "Kuriakose T"
+    },
+    {
+      "name": "Sha H"
+    },
+    {
+      "name": "Wang Q"
+    },
+    {
+      "name": "Topcu G"
+    },
+    {
+      "name": "Romain X"
+    },
+    {
+      "name": "Yang S"
+    },
+    {
+      "name": "Taylor RA."
+    }
+  ],
+  "doi": "10.3390/nano15080608",
+  "source": "eupmc",
+  "urls": {
+    "pdf": ""
+  },
+  "license": null,
+  "access_route": "unknown",
+  "sections": [],
+  "extractions": {
+    "methods_paragraphs": [],
+    "entities": []
+  },
+  "relevance": {
+    "score": 0.22499999999999998,
+    "breakdown": {
+      "content": 0.0,
+      "domain": 0.0,
+      "recency": 1.0,
+      "quality": 0.5,
+      "entities": 0.0
+    },
+    "reasons": [
+      "recent_publication"
+    ]
+  },
+  "meta": {
+    "title": "Plasmon-Enhanced Photo-Luminescence Emission in Hybrid Metal-Perovskite Nanowires.",
+    "doi": "10.3390/nano15080608",
+    "url": "",
+    "pdf_url": "",
+    "year": "2025",
+    "authors": [
+      "Kuriakose T",
+      "Sha H",
+      "Wang Q",
+      "Topcu G",
+      "Romain X",
+      "Yang S",
+      "Taylor RA."
+    ]
+  },
+  "raw": "Plasmon-Enhanced Photo-Luminescence Emission in Hybrid Metal-Perovskite Nanowires."
+}

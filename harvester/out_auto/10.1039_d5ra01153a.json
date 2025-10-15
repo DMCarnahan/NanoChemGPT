@@ -1,0 +1,65 @@
+{
+  "paper_id": "10.1039/d5ra01153a",
+  "title": "Recent advancements and perspectives of photoresponsive inorganic nanomaterials for cancer phototherapy and diagnosis.",
+  "authors": [
+    {
+      "name": "Chen J"
+    },
+    {
+      "name": "Yu H"
+    },
+    {
+      "name": "Zheng T"
+    },
+    {
+      "name": "Zhang X"
+    },
+    {
+      "name": "Chen C"
+    },
+    {
+      "name": "Sun P."
+    }
+  ],
+  "doi": "10.1039/d5ra01153a",
+  "source": "eupmc",
+  "urls": {
+    "pdf": ""
+  },
+  "license": null,
+  "access_route": "unknown",
+  "sections": [],
+  "extractions": {
+    "methods_paragraphs": [],
+    "entities": []
+  },
+  "relevance": {
+    "score": 0.22499999999999998,
+    "breakdown": {
+      "content": 0.0,
+      "domain": 0.0,
+      "recency": 1.0,
+      "quality": 0.5,
+      "entities": 0.0
+    },
+    "reasons": [
+      "recent_publication"
+    ]
+  },
+  "meta": {
+    "title": "Recent advancements and perspectives of photoresponsive inorganic nanomaterials for cancer phototherapy and diagnosis.",
+    "doi": "10.1039/d5ra01153a",
+    "url": "",
+    "pdf_url": "",
+    "year": "2025",
+    "authors": [
+      "Chen J",
+      "Yu H",
+      "Zheng T",
+      "Zhang X",
+      "Chen C",
+      "Sun P."
+    ]
+  },
+  "raw": "Recent advancements and perspectives of photoresponsive inorganic nanomaterials for cancer phototherapy and diagnosis."
+}

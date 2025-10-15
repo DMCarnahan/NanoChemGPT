@@ -1,0 +1,65 @@
+{
+  "paper_id": "10.2147/ijn.s504318",
+  "title": "Advancements in Nanomedicine for the Diagnosis and Treatment of Kidney Stones.",
+  "authors": [
+    {
+      "name": "Wang Y"
+    },
+    {
+      "name": "Yang J"
+    },
+    {
+      "name": "Amier Y"
+    },
+    {
+      "name": "Yuan D"
+    },
+    {
+      "name": "Xun Y"
+    },
+    {
+      "name": "Yu X."
+    }
+  ],
+  "doi": "10.2147/ijn.s504318",
+  "source": "eupmc",
+  "urls": {
+    "pdf": ""
+  },
+  "license": null,
+  "access_route": "unknown",
+  "sections": [],
+  "extractions": {
+    "methods_paragraphs": [],
+    "entities": []
+  },
+  "relevance": {
+    "score": 0.22499999999999998,
+    "breakdown": {
+      "content": 0.0,
+      "domain": 0.0,
+      "recency": 1.0,
+      "quality": 0.5,
+      "entities": 0.0
+    },
+    "reasons": [
+      "recent_publication"
+    ]
+  },
+  "meta": {
+    "title": "Advancements in Nanomedicine for the Diagnosis and Treatment of Kidney Stones.",
+    "doi": "10.2147/ijn.s504318",
+    "url": "",
+    "pdf_url": "",
+    "year": "2025",
+    "authors": [
+      "Wang Y",
+      "Yang J",
+      "Amier Y",
+      "Yuan D",
+      "Xun Y",
+      "Yu X."
+    ]
+  },
+  "raw": "Advancements in Nanomedicine for the Diagnosis and Treatment of Kidney Stones."
+}

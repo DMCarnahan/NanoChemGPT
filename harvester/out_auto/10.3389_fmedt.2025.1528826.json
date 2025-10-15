@@ -1,0 +1,81 @@
+{
+  "paper_id": "10.3389/fmedt.2025.1528826",
+  "title": "Integrating computational insights in gold nanoparticle-mediated drug delivery: enhancing efficacy and precision.",
+  "authors": [
+    {
+      "name": "Alalmaie A"
+    },
+    {
+      "name": "Alshahrani HT"
+    },
+    {
+      "name": "Alqahtani M"
+    },
+    {
+      "name": "Alshahrani Z"
+    },
+    {
+      "name": "Alahmari S"
+    },
+    {
+      "name": "Asiri A"
+    },
+    {
+      "name": "Alqadi B"
+    },
+    {
+      "name": "Alshahrani A"
+    },
+    {
+      "name": "Alshahrani S"
+    },
+    {
+      "name": "Akhter MH."
+    }
+  ],
+  "doi": "10.3389/fmedt.2025.1528826",
+  "source": "eupmc",
+  "urls": {
+    "pdf": ""
+  },
+  "license": null,
+  "access_route": "unknown",
+  "sections": [],
+  "extractions": {
+    "methods_paragraphs": [],
+    "entities": []
+  },
+  "relevance": {
+    "score": 0.22499999999999998,
+    "breakdown": {
+      "content": 0.0,
+      "domain": 0.0,
+      "recency": 1.0,
+      "quality": 0.5,
+      "entities": 0.0
+    },
+    "reasons": [
+      "recent_publication"
+    ]
+  },
+  "meta": {
+    "title": "Integrating computational insights in gold nanoparticle-mediated drug delivery: enhancing efficacy and precision.",
+    "doi": "10.3389/fmedt.2025.1528826",
+    "url": "",
+    "pdf_url": "",
+    "year": "2025",
+    "authors": [
+      "Alalmaie A",
+      "Alshahrani HT",
+      "Alqahtani M",
+      "Alshahrani Z",
+      "Alahmari S",
+      "Asiri A",
+      "Alqadi B",
+      "Alshahrani A",
+      "Alshahrani S",
+      "Akhter MH."
+    ]
+  },
+  "raw": "Integrating computational insights in gold nanoparticle-mediated drug delivery: enhancing efficacy and precision."
+}

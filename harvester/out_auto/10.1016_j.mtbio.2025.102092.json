@@ -1,0 +1,57 @@
+{
+  "paper_id": "10.1016/j.mtbio.2025.102092",
+  "title": "Multidimensional advances in neural interface technology for peripheral nerve repair: From material innovation to clinical translation.",
+  "authors": [
+    {
+      "name": "Wu J"
+    },
+    {
+      "name": "Han Q"
+    },
+    {
+      "name": "Gui D"
+    },
+    {
+      "name": "Qian Y."
+    }
+  ],
+  "doi": "10.1016/j.mtbio.2025.102092",
+  "source": "eupmc",
+  "urls": {
+    "pdf": ""
+  },
+  "license": null,
+  "access_route": "unknown",
+  "sections": [],
+  "extractions": {
+    "methods_paragraphs": [],
+    "entities": []
+  },
+  "relevance": {
+    "score": 0.22499999999999998,
+    "breakdown": {
+      "content": 0.0,
+      "domain": 0.0,
+      "recency": 1.0,
+      "quality": 0.5,
+      "entities": 0.0
+    },
+    "reasons": [
+      "recent_publication"
+    ]
+  },
+  "meta": {
+    "title": "Multidimensional advances in neural interface technology for peripheral nerve repair: From material innovation to clinical translation.",
+    "doi": "10.1016/j.mtbio.2025.102092",
+    "url": "",
+    "pdf_url": "",
+    "year": "2025",
+    "authors": [
+      "Wu J",
+      "Han Q",
+      "Gui D",
+      "Qian Y."
+    ]
+  },
+  "raw": "Multidimensional advances in neural interface technology for peripheral nerve repair: From material innovation to clinical translation."
+}

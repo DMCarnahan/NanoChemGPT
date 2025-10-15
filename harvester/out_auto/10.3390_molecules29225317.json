@@ -1,0 +1,61 @@
+{
+  "paper_id": "10.3390/molecules29225317",
+  "title": "Facile Synthesis of Fluorescent Carbon Quantum Dots with High Product Yield Using a Solid-Phase Strategy.",
+  "authors": [
+    {
+      "name": "Ren H"
+    },
+    {
+      "name": "Qi F"
+    },
+    {
+      "name": "Feng X"
+    },
+    {
+      "name": "Liu J"
+    },
+    {
+      "name": "Zhao Y."
+    }
+  ],
+  "doi": "10.3390/molecules29225317",
+  "source": "eupmc",
+  "urls": {
+    "pdf": ""
+  },
+  "license": null,
+  "access_route": "unknown",
+  "sections": [],
+  "extractions": {
+    "methods_paragraphs": [],
+    "entities": []
+  },
+  "relevance": {
+    "score": 0.22499999999999998,
+    "breakdown": {
+      "content": 0.0,
+      "domain": 0.0,
+      "recency": 1.0,
+      "quality": 0.5,
+      "entities": 0.0
+    },
+    "reasons": [
+      "recent_publication"
+    ]
+  },
+  "meta": {
+    "title": "Facile Synthesis of Fluorescent Carbon Quantum Dots with High Product Yield Using a Solid-Phase Strategy.",
+    "doi": "10.3390/molecules29225317",
+    "url": "",
+    "pdf_url": "",
+    "year": "2024",
+    "authors": [
+      "Ren H",
+      "Qi F",
+      "Feng X",
+      "Liu J",
+      "Zhao Y."
+    ]
+  },
+  "raw": "Facile Synthesis of Fluorescent Carbon Quantum Dots with High Product Yield Using a Solid-Phase Strategy."
+}

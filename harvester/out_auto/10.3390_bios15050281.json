@@ -1,0 +1,73 @@
+{
+  "paper_id": "10.3390/bios15050281",
+  "title": "Optical-Electronic Skin Based on Tea Polyphenol for Dual Signal Wearable Sensing.",
+  "authors": [
+    {
+      "name": "Xu JL"
+    },
+    {
+      "name": "Zhao G"
+    },
+    {
+      "name": "Wang J"
+    },
+    {
+      "name": "Tang A"
+    },
+    {
+      "name": "Liu JT"
+    },
+    {
+      "name": "Zhu Z"
+    },
+    {
+      "name": "Zhang Q"
+    },
+    {
+      "name": "Tian Y."
+    }
+  ],
+  "doi": "10.3390/bios15050281",
+  "source": "eupmc",
+  "urls": {
+    "pdf": ""
+  },
+  "license": null,
+  "access_route": "unknown",
+  "sections": [],
+  "extractions": {
+    "methods_paragraphs": [],
+    "entities": []
+  },
+  "relevance": {
+    "score": 0.22499999999999998,
+    "breakdown": {
+      "content": 0.0,
+      "domain": 0.0,
+      "recency": 1.0,
+      "quality": 0.5,
+      "entities": 0.0
+    },
+    "reasons": [
+      "recent_publication"
+    ]
+  },
+  "meta": {
+    "title": "Optical-Electronic Skin Based on Tea Polyphenol for Dual Signal Wearable Sensing.",
+    "doi": "10.3390/bios15050281",
+    "url": "",
+    "pdf_url": "",
+    "year": "2025",
+    "authors": [
+      "Xu JL",
+      "Zhao G",
+      "Wang J",
+      "Tang A",
+      "Liu JT",
+      "Zhu Z",
+      "Zhang Q",
+      "Tian Y."
+    ]
+  },
+  "raw": "Optical-Electronic Skin Based on Tea Polyphenol for Dual Signal Wearable Sensing."
+}

@@ -27,7 +27,21 @@
   "access_route": "unknown",
   "sections": [],
   "extractions": {
-    "methods_paragraphs": []
+    "methods_paragraphs": [],
+    "entities": []
+  },
+  "relevance": {
+    "score": 0.22499999999999998,
+    "breakdown": {
+      "content": 0.0,
+      "domain": 0.0,
+      "recency": 1.0,
+      "quality": 0.5,
+      "entities": 0.0
+    },
+    "reasons": [
+      "recent_publication"
+    ]
   },
   "meta": {
     "title": "Synthesis and Characterization of Temperature- and &lt;i&gt;pH&lt;/i&gt;-Responsive PIA-b-PNIPAM@Fe&lt;sub&gt;3&lt;/sub&gt;O&lt;sub&gt;4&lt;/sub&gt; Nanocomposites.",

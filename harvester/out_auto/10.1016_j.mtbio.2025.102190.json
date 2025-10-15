@@ -1,0 +1,77 @@
+{
+  "paper_id": "10.1016/j.mtbio.2025.102190",
+  "title": "Advances in nanomaterials for enhancing cGAS-STING pathway mediated anti-tumor treatment.",
+  "authors": [
+    {
+      "name": "Wu R"
+    },
+    {
+      "name": "Wang J"
+    },
+    {
+      "name": "Li D"
+    },
+    {
+      "name": "Li A"
+    },
+    {
+      "name": "Yoo KH"
+    },
+    {
+      "name": "Liu Z"
+    },
+    {
+      "name": "Wei W"
+    },
+    {
+      "name": "Wang Z"
+    },
+    {
+      "name": "Feng D."
+    }
+  ],
+  "doi": "10.1016/j.mtbio.2025.102190",
+  "source": "eupmc",
+  "urls": {
+    "pdf": ""
+  },
+  "license": null,
+  "access_route": "unknown",
+  "sections": [],
+  "extractions": {
+    "methods_paragraphs": [],
+    "entities": []
+  },
+  "relevance": {
+    "score": 0.22499999999999998,
+    "breakdown": {
+      "content": 0.0,
+      "domain": 0.0,
+      "recency": 1.0,
+      "quality": 0.5,
+      "entities": 0.0
+    },
+    "reasons": [
+      "recent_publication"
+    ]
+  },
+  "meta": {
+    "title": "Advances in nanomaterials for enhancing cGAS-STING pathway mediated anti-tumor treatment.",
+    "doi": "10.1016/j.mtbio.2025.102190",
+    "url": "",
+    "pdf_url": "",
+    "year": "2025",
+    "authors": [
+      "Wu R",
+      "Wang J",
+      "Li D",
+      "Li A",
+      "Yoo KH",
+      "Liu Z",
+      "Wei W",
+      "Wang Z",
+      "Feng D."
+    ]
+  },
+  "raw": "Advances in nanomaterials for enhancing cGAS-STING pathway mediated anti-tumor treatment."
+}

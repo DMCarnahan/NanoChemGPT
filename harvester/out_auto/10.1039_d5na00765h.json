@@ -1,0 +1,156 @@
+{
+  "paper_id": "10.1039/d5na00765h",
+  "title": "Plasmonic Au-TiO&lt;sub&gt;2&lt;/sub&gt; nanowire/nanotube heterostructures for multifunctional photocatalysis: dye and pesticide degradation, water splitting, and antibacterial activity.",
+  "authors": [
+    {
+      "name": "Uyen NN"
+    },
+    {
+      "name": "Toan NC"
+    },
+    {
+      "name": "Truong N"
+    },
+    {
+      "name": "Tu LA"
+    },
+    {
+      "name": "Le PH."
+    }
+  ],
+  "doi": "10.1039/d5na00765h",
+  "source": "eupmc",
+  "urls": {
+    "pdf": ""
+  },
+  "license": null,
+  "access_route": "unknown",
+  "sections": [
+    {
+      "heading": "fulltext",
+      "text": "grating and order-sorting filters. In aging instruments, filter switching near ~590–610 nm can"
+    },
+    {
+      "heading": "fulltext",
+      "text": "Separation was carried out on an Acquity UPLC BEH C18 column (130 Å, 1.7 µm, 2.1 mm ×"
+    },
+    {
+      "heading": "fulltext",
+      "text": "100 mm; Waters Corporation, Milford, MA, USA). The mobile phase was composed of:"
+    },
+    {
+      "heading": "fulltext",
+      "text": "a Ho Chi Minh City University of Technology-VNUHCM, 268 Ly Thuong Kiet Street, Dien"
+    },
+    {
+      "heading": "fulltext",
+      "text": "The  flow  rate  was  consistently  maintained  at  0.25  mL/min  throughout  the  analysis.  The"
+    }
+  ],
+  "extractions": {
+    "methods_paragraphs": [
+      {
+        "text": "grating and order-sorting filters. In aging instruments, filter switching near ~590–610 nm can",
+        "operations": [
+          {
+            "op_type": "filter",
+            "sentence": "In aging instruments, filter switching near ~590–610 nm can",
+            "start_char": 57,
+            "end_char": 63,
+            "materials": [],
+            "params": {}
+          }
+        ],
+        "expanded": [
+          {
+            "op_type": "filter",
+            "steps": [
+              "Perform operation 'filter' as described: In aging instruments, filter switching near ~590–610 nm can"
+            ]
+          }
+        ]
+      },
+      {
+        "text": "Separation was carried out on an Acquity UPLC BEH C18 column (130 Å, 1.7 µm, 2.1 mm ×",
+        "operations": [],
+        "expanded": []
+      },
+      {
+        "text": "100 mm; Waters Corporation, Milford, MA, USA). The mobile phase was composed of:",
+        "operations": [],
+        "expanded": []
+      },
+      {
+        "text": "a Ho Chi Minh City University of Technology-VNUHCM, 268 Ly Thuong Kiet Street, Dien",
+        "operations": [],
+        "expanded": []
+      },
+      {
+        "text": "The  flow  rate  was  consistently  maintained  at  0.25  mL/min  throughout  the  analysis.  The",
+        "operations": [
+          {
+            "op_type": "heat",
+            "sentence": "The  flow  rate  was  consistently  maintained  at  0.25  mL/min  throughout  the  analysis.",
+            "start_char": 36,
+            "end_char": 46,
+            "materials": [],
+            "params": {
+              "amounts": [
+                "0.25  mL"
+              ]
+            }
+          }
+        ],
+        "expanded": [
+          {
+            "op_type": "heat",
+            "steps": [
+              "Place the reaction vessel on a hotplate.",
+              "Ramp to the target temperature.",
+              "Maintain the target temperature for the specified time."
+            ]
+          }
+        ]
+      },
+      {
+        "text": "The abrupt reduction in absorbance around 600 nm is observed in all spectra. This feature",
+        "operations": [],
+        "expanded": []
+      },
+      {
+        "text": "absorption band at 650–664 nm, which was used to evaluate photocatalytic degradation. Thus,",
+        "operations": [],
+        "expanded": []
+      }
+    ],
+    "entities": []
+  },
+  "relevance": {
+    "score": 0.22499999999999998,
+    "breakdown": {
+      "content": 0.0,
+      "domain": 0.0,
+      "recency": 1.0,
+      "quality": 0.5,
+      "entities": 0.0
+    },
+    "reasons": [
+      "recent_publication"
+    ]
+  },
+  "meta": {
+    "title": "Plasmonic Au-TiO&lt;sub&gt;2&lt;/sub&gt; nanowire/nanotube heterostructures for multifunctional photocatalysis: dye and pesticide degradation, water splitting, and antibacterial activity.",
+    "doi": "10.1039/d5na00765h",
+    "url": "",
+    "pdf_url": "",
+    "year": "2025",
+    "authors": [
+      "Uyen NN",
+      "Toan NC",
+      "Truong N",
+      "Tu LA",
+      "Le PH."
+    ]
+  },
+  "raw": "Supporting Information\n\nPlasmonic  Au–TiO2  Nanowire/Nanotube  Heterostructures \n\nfor  Multifunctional \n\nPhotocatalysis:  Dye  and  Pesticide  Degradation,  Water  Splitting,  and  Antibacterial \n\nActivity\n\nNgo Ngoc Uyena,b, Nguyen Chi Toanc,d,e Nguyen Truongf, Ly Anh Tua, Phuoc Huu Leb,c,d,*\n\na Ho Chi Minh City University of Technology-VNUHCM, 268 Ly Thuong Kiet Street, Dien \n\nHong Ward, Ho Chi Minh City 70000, Vietnam\n\nb  Department  of  Mathematics–Physics–Informatics,  Faculty  of  Basic  Sciences,  Can  Tho \n\nUniversity of Medicine and Pharmacy, 179 Nguyen Van Cu Street, Can Tho City 94000, Vietnam\n\nc International Ph.D. Program in Plasma and Thin Film Technology, Ming Chi University of \n\nTechnology, New Taipei City 243303, Taiwan\n\nd Center for Plasma and Thin Film Technologies, Ming Chi University of Technology, New \n\nTaipei City 243303, Taiwan\n\ne Faculty of Pharmacy and Nursing, Tay Do University, 68 Tran Chien Street, Can Tho City, \n\nVietnam\n\nf  Mekonglab  Testing  Center-  NHONHO  Technology  Company  Limited,  K2-17  Vo  Nguyen \n\nGiap street, Can Tho City 94000, Vietnam. \n\n*Corresponding author’s e-mail: phle@mail.mcut.edu.tw  \n\nSupplementaryInformation(SI)forNanoscaleAdvances.Thisjournalis©TheRoyalSocietyofChemistry2025 \n \n\fS1. Material synthesis, characterization techniques, and experimental procedures\n\nFigure  S1.  Schematic  representation  of  the  synthesis,  characterization,  and  experimental \n\nmethodology.\n\n\fS2. Instrumentation and LC-MS/MS Conditions\n\nThe UPLC-MS/MS system (Acquity H-Class, Waters, Milford, MA, USA), equipped with a \n\ntriple  quadrupole  mass  detector  (Xevo-TQD,  Waters,  Milford,  MA,  USA)  and  utilizing \n\nelectrospray  ionization  (ESI),  was  employed  for  both  qualitative  and  quantitative  pesticide \n\nanalysis. It was also used to determine the degradation rates of methiocarb (MTC), carbofuran \n\n(CBF), carbaryl (CBR), and dimethoate (DMT) at various reaction intervals (0, 5, 10, 15, 20, \n\nand 25 minutes).\n\nSeparation was carried out on an Acquity UPLC BEH C18 column (130 Å, 1.7 µm, 2.1 mm × \n\n100 mm; Waters Corporation, Milford, MA, USA). The mobile phase was composed of:\n\nChannel B: 5 mM ammonium formate in 0.1% formic acid methanol.\n\nChannel D: 5 mM ammonium formate in 0.1% formic acid water.\n\nThe  flow  rate  was  consistently  maintained  at  0.25  mL/min  throughout  the  analysis.  The \n\ngradient elution program followed these steps (see Table S1):\n\nInitial conditions: 10% B for 0.25 minutes\n\nRamp to 80% B over 3 minutes\n\nIncrease to 90% B by 4 minutes\n\nReset to 10% B at 4.1 minutes\n\nHold at 10% B until method completion at 8 minutes\n\nFor pesticide extraction and analysis of MTC, CBF, CBR, and DMT, methanol (99% purity, \n\nMerck)  and  deionized  water  were  used  as  solvents.  These  conditions  ensured  optimal \n\nseparation and precise quantification of the analytes.\n\nTable S1. The mobile phase program (mL/min) for the pesticide analysis.\n\nFlow (mL/min)\n\nTime (min)\n\n0.25\n\n0.25\n\n0.25\n\n0.25\n\n0.25\n\n0.25\n\n3.00\n\n4.00\n\n4.10\n\n8.00\n\nA\n\n0\n\n0\n\n0\n\n0\n\n0\n\nB\n\n10\n\n80\n\n90\n\n10\n\n10\n\nC\n\n0\n\n0\n\n0\n\n0\n\n0\n\nD\n\n90\n\n20\n\n10\n\n90\n\n90\n\n\fMass Spectrometry Conditions\n\nMass  spectrometric  analysis  was  performed  in  positive  electron  ionization  (ESI)  mode, \n\nemploying  Multiple  Reaction  Monitoring  (MRM)  for  the  targeted  detection  of  the  pesticide \n\ncompounds. The key operating parameters were as follows:\n\nCapillary voltage: 3 kV\n\nDesolvation temperature: 500°C\n\nDesolvation gas flow: 1000 L/h\n\nCone gas flow: 10 L/h\n\nThe  specific  MS/MS  parameters  for  DMT  are  detailed  in  Table  S2.  These  optimized \n\nconditions provided enhanced sensitivity and precision in the detection of the analytes.\n\nTable S2. Specific MS/MS for carbaryl (CBR), carbofuran (CBF), methiocarb (MTC), and \n\ndimethoate (DMT) analytes.\n\nCompound\n\nParent (Da)\n\nDaughter (Da)\n\nCone (V)\n\nColl (eV)\n\nCarbaryl\n\nCarbaryl\n\nCarbofuran\n\nCarbofuran\n\nMethiocarb\n\nMethiocarb\n\nDimethoate\n\nDimethoate\n\n202.1\n\n202.1\n\n222.1\n\n222.1\n\n226\n\n226\n\n230.1\n\n230.1\n\n117\n\n145*\n\n123\n\n165.1*\n\n121\n\n169*\n\n125*\n\n199\n\n20\n\n20\n\n25\n\n25\n\n25\n\n25\n\n20\n\n20\n\n25\n\n10\n\n20\n\n10\n\n20\n\n10\n\n10\n\n20\n\nThe ions marked with an asterisk (*) are used as quantifier ions.\n\n\fS3. Photolysis and photocatalysis degradation methylene blue (MB) by TNWs/TNAs and \n\nAu–TNWs/TNAs\n\nFigure S2. (a, b, c) The time-dependent absorption spectra of MB under UV-Vis irradiation \n\nduring photolysis and photocatalysis using TNWs/TNAs and Au–TNWs/TNAs.\n\nFigure  S3.  (a,  b,  c,  d)  Changes  in  the  absorption  spectra  of  MB  under  UV-Vis  irradiation \n\nduring photolysis and photocatalysis using Au-TNWs/TNAs over four recycling cycles.\n\nThe abrupt reduction in absorbance around 600 nm is observed in all spectra. This feature \n\nis not related to the chemical nature of methylene blue (MB) or the formation of degradation \n\nintermediates,  as  it  also  appears  in  the  initial  MB  solution.  Instead,  it  arises  from  an \n\ninstrumentation  artifact  of  our  UV–Vis  spectrophotometer,  which  employs  a  diffraction \n\ngrating and order-sorting filters. In aging instruments, filter switching near ~590–610 nm can \n\ncause a temporary mismatch between the sample and reference beams, producing a sharp dip \n\n\fin  the  spectrum.  Importantly,  this  artifact  does  not  interfere  with  the  characteristic  MB \n\nabsorption band at 650–664 nm, which was used to evaluate photocatalytic degradation. Thus, \n\nthe accuracy of the results and the conclusions of this work are not affected. \n\nS4.  MRM  chromatogram  of  methiocarb  (MTC),  carbofuran  (CBF),  carbaryl  (CBR), \n\nand dimethoate (DMT) by photocatalysics (Au-TNWs/TNAs)\n\nOverall,  after  photocatalysis  processes  using  Au-TNWs/TNAs,  the  intensities  of  the  MRM \n\npeaks  gradually  decreased  over  time,  indicating  a  reduction  in  the  concentrations  of \n\nmethiocarb (MTC), carbofuran (CBF), carbaryl (CBR), and dimethoate (DMT). \n\nTable S3. The analyte signal at various sampling times during photocatalysis processes using \n\nAu-TNWs/TNAs.\n\nPhotocatalysis \n\nRetention time \n\nreaction time\n\n(min)\n\nArea\n\nConcentration (ppb)\n\n0 min\n\n5 min\n\n10 min\n\n15 min\n\n20 min\n\n25 min\n\n0 min\n\n5 min\n\n10 min\n\n15 min\n\n20 min\n\n25 min\n\n0 min\n\n5 min\n\n10 min\n\n15 min\n\n20 min\n\n25 min\n\nMethiocarb\n\n754765\n\n11717\n\n1241\n\n520\n\n254\n\n181\n\nCarbofuran\n\n1691965\n\n701165\n\n248394\n\n60335\n\n16385\n\n3486\n\nCarbaryl\n\n847188\n\n583389\n\n382914\n\n239055\n\n133678\n\n64769\n\n4.94\n\n4.94 \n\n4.94 \n\n4.94 \n\n4.95\n\n4.95\n\n4.38\n\n4.38\n\n4.38\n\n4.39\n\n4.38\n\n4.39\n\n4.48\n\n4.48\n\n4.48\n\n4.48\n\n4.48\n\n4.48\n\n200.00\n\n3.10\n\n0.33\n\n0.14\n\n0.07\n\n0.05\n\n200.00\n\n82.88\n\n29.36\n\n7.13\n\n1.94\n\n0.41\n\n200.00\n\n137.72\n\n90.40\n\n56.44\n\n31.56\n\n15.29\n\n\f0 min\n\n5 min\n\n10 min\n\n15 min\n\n20 min\n\n25 min\n\nDimethoate\n\n77843\n\n31205\n\n9216\n\n2459\n\n740\n\n106\n\n3.79\n\n3.78\n\n3.77\n\n3.79\n\n3.79\n\n3.79\n\n200.00\n\n80.18\n\n23.68\n\n6.32\n\n1.90\n\n0.27\n\n\fFigure S4. MRM chromatogram of (a) methiocarb (MTC). (b) carbofuran (CBF). (c) carbaryl (CBR). and (d) dimethoate (DMT) by photocatalysics using Au-TNWs/TNAs.\n\n\f"
+}

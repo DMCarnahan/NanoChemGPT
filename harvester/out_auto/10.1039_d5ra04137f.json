@@ -1,0 +1,73 @@
+{
+  "paper_id": "10.1039/d5ra04137f",
+  "title": "Nanomaterial-enabled drug delivery systems for circadian medicine: bridging direct rhythm modulation and chronotherapy.",
+  "authors": [
+    {
+      "name": "Zeeshan M"
+    },
+    {
+      "name": "Hu J"
+    },
+    {
+      "name": "Mao CX"
+    },
+    {
+      "name": "Danish A"
+    },
+    {
+      "name": "Xiong Y"
+    },
+    {
+      "name": "Irshad MS"
+    },
+    {
+      "name": "Dao VD"
+    },
+    {
+      "name": "Liu Z."
+    }
+  ],
+  "doi": "10.1039/d5ra04137f",
+  "source": "eupmc",
+  "urls": {
+    "pdf": ""
+  },
+  "license": null,
+  "access_route": "unknown",
+  "sections": [],
+  "extractions": {
+    "methods_paragraphs": [],
+    "entities": []
+  },
+  "relevance": {
+    "score": 0.22499999999999998,
+    "breakdown": {
+      "content": 0.0,
+      "domain": 0.0,
+      "recency": 1.0,
+      "quality": 0.5,
+      "entities": 0.0
+    },
+    "reasons": [
+      "recent_publication"
+    ]
+  },
+  "meta": {
+    "title": "Nanomaterial-enabled drug delivery systems for circadian medicine: bridging direct rhythm modulation and chronotherapy.",
+    "doi": "10.1039/d5ra04137f",
+    "url": "",
+    "pdf_url": "",
+    "year": "2025",
+    "authors": [
+      "Zeeshan M",
+      "Hu J",
+      "Mao CX",
+      "Danish A",
+      "Xiong Y",
+      "Irshad MS",
+      "Dao VD",
+      "Liu Z."
+    ]
+  },
+  "raw": "Nanomaterial-enabled drug delivery systems for circadian medicine: bridging direct rhythm modulation and chronotherapy."
+}

@@ -1,0 +1,53 @@
+{
+  "paper_id": "10.3390/nano14231918",
+  "title": "Vibrational Spectrum of Magnesium Monochalcogenide Nanoparticles.",
+  "authors": [
+    {
+      "name": "Aravantinos-Zafiris N"
+    },
+    {
+      "name": "Michos FI"
+    },
+    {
+      "name": "Sigalas MM."
+    }
+  ],
+  "doi": "10.3390/nano14231918",
+  "source": "eupmc",
+  "urls": {
+    "pdf": ""
+  },
+  "license": null,
+  "access_route": "unknown",
+  "sections": [],
+  "extractions": {
+    "methods_paragraphs": [],
+    "entities": []
+  },
+  "relevance": {
+    "score": 0.22499999999999998,
+    "breakdown": {
+      "content": 0.0,
+      "domain": 0.0,
+      "recency": 1.0,
+      "quality": 0.5,
+      "entities": 0.0
+    },
+    "reasons": [
+      "recent_publication"
+    ]
+  },
+  "meta": {
+    "title": "Vibrational Spectrum of Magnesium Monochalcogenide Nanoparticles.",
+    "doi": "10.3390/nano14231918",
+    "url": "",
+    "pdf_url": "",
+    "year": "2024",
+    "authors": [
+      "Aravantinos-Zafiris N",
+      "Michos FI",
+      "Sigalas MM."
+    ]
+  },
+  "raw": "Vibrational Spectrum of Magnesium Monochalcogenide Nanoparticles."
+}

@@ -1,0 +1,65 @@
+{
+  "paper_id": "10.3390/nano15080631",
+  "title": "Intelligent Systems for Inorganic Nanomaterial Synthesis.",
+  "authors": [
+    {
+      "name": "Han C"
+    },
+    {
+      "name": "Dong X"
+    },
+    {
+      "name": "Zhang W"
+    },
+    {
+      "name": "Huang X"
+    },
+    {
+      "name": "Gong L"
+    },
+    {
+      "name": "Su C."
+    }
+  ],
+  "doi": "10.3390/nano15080631",
+  "source": "eupmc",
+  "urls": {
+    "pdf": ""
+  },
+  "license": null,
+  "access_route": "unknown",
+  "sections": [],
+  "extractions": {
+    "methods_paragraphs": [],
+    "entities": []
+  },
+  "relevance": {
+    "score": 0.22499999999999998,
+    "breakdown": {
+      "content": 0.0,
+      "domain": 0.0,
+      "recency": 1.0,
+      "quality": 0.5,
+      "entities": 0.0
+    },
+    "reasons": [
+      "recent_publication"
+    ]
+  },
+  "meta": {
+    "title": "Intelligent Systems for Inorganic Nanomaterial Synthesis.",
+    "doi": "10.3390/nano15080631",
+    "url": "",
+    "pdf_url": "",
+    "year": "2025",
+    "authors": [
+      "Han C",
+      "Dong X",
+      "Zhang W",
+      "Huang X",
+      "Gong L",
+      "Su C."
+    ]
+  },
+  "raw": "Intelligent Systems for Inorganic Nanomaterial Synthesis."
+}

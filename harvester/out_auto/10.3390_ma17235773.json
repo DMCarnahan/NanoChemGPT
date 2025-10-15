@@ -1,0 +1,69 @@
+{
+  "paper_id": "10.3390/ma17235773",
+  "title": "Nanoparticle-Composed Photosensitive Thin Films Based on ZnO.",
+  "authors": [
+    {
+      "name": "Dilova T"
+    },
+    {
+      "name": "Dikovska A"
+    },
+    {
+      "name": "Baeva A"
+    },
+    {
+      "name": "Atanasova G"
+    },
+    {
+      "name": "Avdeev G"
+    },
+    {
+      "name": "Genova T"
+    },
+    {
+      "name": "Nedyalkov N."
+    }
+  ],
+  "doi": "10.3390/ma17235773",
+  "source": "eupmc",
+  "urls": {
+    "pdf": ""
+  },
+  "license": null,
+  "access_route": "unknown",
+  "sections": [],
+  "extractions": {
+    "methods_paragraphs": [],
+    "entities": []
+  },
+  "relevance": {
+    "score": 0.22499999999999998,
+    "breakdown": {
+      "content": 0.0,
+      "domain": 0.0,
+      "recency": 1.0,
+      "quality": 0.5,
+      "entities": 0.0
+    },
+    "reasons": [
+      "recent_publication"
+    ]
+  },
+  "meta": {
+    "title": "Nanoparticle-Composed Photosensitive Thin Films Based on ZnO.",
+    "doi": "10.3390/ma17235773",
+    "url": "",
+    "pdf_url": "",
+    "year": "2024",
+    "authors": [
+      "Dilova T",
+      "Dikovska A",
+      "Baeva A",
+      "Atanasova G",
+      "Avdeev G",
+      "Genova T",
+      "Nedyalkov N."
+    ]
+  },
+  "raw": "Nanoparticle-Composed Photosensitive Thin Films Based on ZnO."
+}

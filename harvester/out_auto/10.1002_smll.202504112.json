@@ -1,0 +1,77 @@
+{
+  "paper_id": "10.1002/smll.202504112",
+  "title": "Microstructural Engineering of Conductive MOF Nanocrystals for Multifunctional Heterostructures.",
+  "authors": [
+    {
+      "name": "Park JS"
+    },
+    {
+      "name": "Yang SM"
+    },
+    {
+      "name": "Park D"
+    },
+    {
+      "name": "Park YJ"
+    },
+    {
+      "name": "Sim YJ"
+    },
+    {
+      "name": "Nam HJ"
+    },
+    {
+      "name": "Kim SE"
+    },
+    {
+      "name": "Kim JH"
+    },
+    {
+      "name": "Yang SJ."
+    }
+  ],
+  "doi": "10.1002/smll.202504112",
+  "source": "eupmc",
+  "urls": {
+    "pdf": ""
+  },
+  "license": null,
+  "access_route": "unknown",
+  "sections": [],
+  "extractions": {
+    "methods_paragraphs": [],
+    "entities": []
+  },
+  "relevance": {
+    "score": 0.22499999999999998,
+    "breakdown": {
+      "content": 0.0,
+      "domain": 0.0,
+      "recency": 1.0,
+      "quality": 0.5,
+      "entities": 0.0
+    },
+    "reasons": [
+      "recent_publication"
+    ]
+  },
+  "meta": {
+    "title": "Microstructural Engineering of Conductive MOF Nanocrystals for Multifunctional Heterostructures.",
+    "doi": "10.1002/smll.202504112",
+    "url": "",
+    "pdf_url": "",
+    "year": "2025",
+    "authors": [
+      "Park JS",
+      "Yang SM",
+      "Park D",
+      "Park YJ",
+      "Sim YJ",
+      "Nam HJ",
+      "Kim SE",
+      "Kim JH",
+      "Yang SJ."
+    ]
+  },
+  "raw": "Microstructural Engineering of Conductive MOF Nanocrystals for Multifunctional Heterostructures."
+}

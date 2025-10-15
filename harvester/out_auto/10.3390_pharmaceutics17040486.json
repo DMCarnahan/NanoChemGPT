@@ -1,0 +1,100 @@
+{
+  "paper_id": "10.3390/pharmaceutics17040486",
+  "title": "Nanoparticle-Based Dry Powder Inhaler Containing Ciprofloxacin for Enhanced Targeted Antibacterial Therapy.",
+  "authors": [
+    {
+      "name": "Party P"
+    },
+    {
+      "name": "Klement ML"
+    },
+    {
+      "name": "Gaudio BM"
+    },
+    {
+      "name": "Sorrenti M"
+    },
+    {
+      "name": "Ambrus R."
+    }
+  ],
+  "doi": "10.3390/pharmaceutics17040486",
+  "source": "eupmc",
+  "urls": {
+    "pdf": ""
+  },
+  "license": null,
+  "access_route": "unknown",
+  "sections": [
+    {
+      "heading": "metadata",
+      "text": "Nanoparticle-Based Dry Powder Inhaler Containing Ciprofloxacin for Enhanced Targeted Antibacterial Therapy."
+    }
+  ],
+  "extractions": {
+    "methods_paragraphs": [
+      {
+        "text": "Nanoparticle-Based Dry Powder Inhaler Containing Ciprofloxacin for Enhanced Targeted Antibacterial Therapy.",
+        "operations": [
+          {
+            "op_type": "dry",
+            "sentence": "Nanoparticle-Based Dry Powder Inhaler Containing Ciprofloxacin for Enhanced Targeted Antibacterial Therapy.",
+            "start_char": 19,
+            "end_char": 22,
+            "materials": [
+              "Nanoparticle-Based",
+              "Based Dry Powder Inhaler Containing"
+            ],
+            "params": {}
+          }
+        ],
+        "expanded": [
+          {
+            "op_type": "dry",
+            "steps": [
+              "Perform operation 'dry' as described: Nanoparticle-Based Dry Powder Inhaler Containing Ciprofloxacin for Enhanced Targeted Antibacterial Therapy."
+            ]
+          }
+        ]
+      }
+    ],
+    "entities": [
+      {
+        "label": "MATERIAL",
+        "text": "Nanoparticle-Based"
+      },
+      {
+        "label": "MATERIAL",
+        "text": "Based Dry Powder Inhaler Containing"
+      }
+    ]
+  },
+  "relevance": {
+    "score": 0.22499999999999998,
+    "breakdown": {
+      "content": 0.0,
+      "domain": 0.0,
+      "recency": 1.0,
+      "quality": 0.5,
+      "entities": 0.0
+    },
+    "reasons": [
+      "recent_publication"
+    ]
+  },
+  "meta": {
+    "title": "Nanoparticle-Based Dry Powder Inhaler Containing Ciprofloxacin for Enhanced Targeted Antibacterial Therapy.",
+    "doi": "10.3390/pharmaceutics17040486",
+    "url": "",
+    "pdf_url": "",
+    "year": "2025",
+    "authors": [
+      "Party P",
+      "Klement ML",
+      "Gaudio BM",
+      "Sorrenti M",
+      "Ambrus R."
+    ]
+  },
+  "raw": "Nanoparticle-Based Dry Powder Inhaler Containing Ciprofloxacin for Enhanced Targeted Antibacterial Therapy."
+}

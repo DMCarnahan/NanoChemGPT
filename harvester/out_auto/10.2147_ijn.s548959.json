@@ -1,0 +1,61 @@
+{
+  "paper_id": "10.2147/ijn.s548959",
+  "title": "Recent Trends in Biomedical Applications of Cu&lt;sub&gt;2&lt;/sub&gt;MX&lt;sub&gt;4&lt;/sub&gt;-Based Nanocomposites: An Updated Review.",
+  "authors": [
+    {
+      "name": "Gangadhar L"
+    },
+    {
+      "name": "Sana SS"
+    },
+    {
+      "name": "Mishra V"
+    },
+    {
+      "name": "Venkatesan R"
+    },
+    {
+      "name": "Kim SC, Al-Tabakha MM."
+    }
+  ],
+  "doi": "10.2147/ijn.s548959",
+  "source": "eupmc",
+  "urls": {
+    "pdf": ""
+  },
+  "license": null,
+  "access_route": "unknown",
+  "sections": [],
+  "extractions": {
+    "methods_paragraphs": [],
+    "entities": []
+  },
+  "relevance": {
+    "score": 0.22499999999999998,
+    "breakdown": {
+      "content": 0.0,
+      "domain": 0.0,
+      "recency": 1.0,
+      "quality": 0.5,
+      "entities": 0.0
+    },
+    "reasons": [
+      "recent_publication"
+    ]
+  },
+  "meta": {
+    "title": "Recent Trends in Biomedical Applications of Cu&lt;sub&gt;2&lt;/sub&gt;MX&lt;sub&gt;4&lt;/sub&gt;-Based Nanocomposites: An Updated Review.",
+    "doi": "10.2147/ijn.s548959",
+    "url": "",
+    "pdf_url": "",
+    "year": "2025",
+    "authors": [
+      "Gangadhar L",
+      "Sana SS",
+      "Mishra V",
+      "Venkatesan R",
+      "Kim SC, Al-Tabakha MM."
+    ]
+  },
+  "raw": "Recent Trends in Biomedical Applications of Cu&lt;sub&gt;2&lt;/sub&gt;MX&lt;sub&gt;4&lt;/sub&gt;-Based Nanocomposites: An Updated Review."
+}

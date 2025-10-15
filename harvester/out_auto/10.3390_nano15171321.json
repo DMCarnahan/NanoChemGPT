@@ -1,0 +1,73 @@
+{
+  "paper_id": "10.3390/nano15171321",
+  "title": "Chiral Rare Earth Nanomaterials: Synthesis, Optical Properties, and Potential Applications.",
+  "authors": [
+    {
+      "name": "Zhao L"
+    },
+    {
+      "name": "Liang P"
+    },
+    {
+      "name": "Zhao H"
+    },
+    {
+      "name": "Hu R"
+    },
+    {
+      "name": "Xu Y"
+    },
+    {
+      "name": "Chen F"
+    },
+    {
+      "name": "Wang X"
+    },
+    {
+      "name": "Yao Y."
+    }
+  ],
+  "doi": "10.3390/nano15171321",
+  "source": "eupmc",
+  "urls": {
+    "pdf": ""
+  },
+  "license": null,
+  "access_route": "unknown",
+  "sections": [],
+  "extractions": {
+    "methods_paragraphs": [],
+    "entities": []
+  },
+  "relevance": {
+    "score": 0.22499999999999998,
+    "breakdown": {
+      "content": 0.0,
+      "domain": 0.0,
+      "recency": 1.0,
+      "quality": 0.5,
+      "entities": 0.0
+    },
+    "reasons": [
+      "recent_publication"
+    ]
+  },
+  "meta": {
+    "title": "Chiral Rare Earth Nanomaterials: Synthesis, Optical Properties, and Potential Applications.",
+    "doi": "10.3390/nano15171321",
+    "url": "",
+    "pdf_url": "",
+    "year": "2025",
+    "authors": [
+      "Zhao L",
+      "Liang P",
+      "Zhao H",
+      "Hu R",
+      "Xu Y",
+      "Chen F",
+      "Wang X",
+      "Yao Y."
+    ]
+  },
+  "raw": "Chiral Rare Earth Nanomaterials: Synthesis, Optical Properties, and Potential Applications."
+}

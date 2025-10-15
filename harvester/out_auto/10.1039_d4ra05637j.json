@@ -1,0 +1,69 @@
+{
+  "paper_id": "10.1039/d4ra05637j",
+  "title": "Bismuth-based nanoparticles and nanocomposites: synthesis and applications.",
+  "authors": [
+    {
+      "name": "Kumar S"
+    },
+    {
+      "name": "Premkumar M"
+    },
+    {
+      "name": "Giri J"
+    },
+    {
+      "name": "Hasnain SMM"
+    },
+    {
+      "name": "Zairov R"
+    },
+    {
+      "name": "Wu J"
+    },
+    {
+      "name": "Huang Z."
+    }
+  ],
+  "doi": "10.1039/d4ra05637j",
+  "source": "eupmc",
+  "urls": {
+    "pdf": ""
+  },
+  "license": null,
+  "access_route": "unknown",
+  "sections": [],
+  "extractions": {
+    "methods_paragraphs": [],
+    "entities": []
+  },
+  "relevance": {
+    "score": 0.22499999999999998,
+    "breakdown": {
+      "content": 0.0,
+      "domain": 0.0,
+      "recency": 1.0,
+      "quality": 0.5,
+      "entities": 0.0
+    },
+    "reasons": [
+      "recent_publication"
+    ]
+  },
+  "meta": {
+    "title": "Bismuth-based nanoparticles and nanocomposites: synthesis and applications.",
+    "doi": "10.1039/d4ra05637j",
+    "url": "",
+    "pdf_url": "",
+    "year": "2024",
+    "authors": [
+      "Kumar S",
+      "Premkumar M",
+      "Giri J",
+      "Hasnain SMM",
+      "Zairov R",
+      "Wu J",
+      "Huang Z."
+    ]
+  },
+  "raw": "Bismuth-based nanoparticles and nanocomposites: synthesis and applications."
+}

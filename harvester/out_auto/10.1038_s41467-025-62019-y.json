@@ -1194,6 +1194,393 @@
           }
         ]
       }
+    ],
+    "entities": [
+      {
+        "label": "MATERIAL",
+        "text": "NPs34"
+      },
+      {
+        "label": "MATERIAL",
+        "text": "water"
+      },
+      {
+        "label": "MATERIAL",
+        "text": "ammonium persulfate"
+      },
+      {
+        "label": "TEMP",
+        "text": "60°C"
+      },
+      {
+        "label": "TIME",
+        "text": "16 h"
+      },
+      {
+        "label": "MATERIAL",
+        "text": "water"
+      },
+      {
+        "label": "MATERIAL",
+        "text": "ammonium persulfate"
+      },
+      {
+        "label": "TEMP",
+        "text": "60°C"
+      },
+      {
+        "label": "TIME",
+        "text": "16 h"
+      },
+      {
+        "label": "MATERIAL",
+        "text": "NaOH"
+      },
+      {
+        "label": "MATERIAL",
+        "text": "ChNWs"
+      },
+      {
+        "label": "MATERIAL",
+        "text": "NaBH₄"
+      },
+      {
+        "label": "TEMP",
+        "text": "117°C"
+      },
+      {
+        "label": "TIME",
+        "text": "18 h"
+      },
+      {
+        "label": "MATERIAL",
+        "text": "DDA"
+      },
+      {
+        "label": "MATERIAL",
+        "text": "water"
+      },
+      {
+        "label": "MATERIAL",
+        "text": "DDA"
+      },
+      {
+        "label": "MATERIAL",
+        "text": "a white powder (5.7"
+      },
+      {
+        "label": "MATERIAL",
+        "text": "NaOH"
+      },
+      {
+        "label": "MATERIAL",
+        "text": "ChNCs"
+      },
+      {
+        "label": "MATERIAL",
+        "text": "supersaturated potassium sulfate solution to"
+      },
+      {
+        "label": "MATERIAL",
+        "text": "water"
+      },
+      {
+        "label": "MATERIAL",
+        "text": "ChsNWs"
+      },
+      {
+        "label": "MATERIAL",
+        "text": "HAuCl4"
+      },
+      {
+        "label": "MATERIAL",
+        "text": "\naqueous solution),"
+      },
+      {
+        "label": "TIME",
+        "text": "10 min"
+      },
+      {
+        "label": "MATERIAL",
+        "text": "water"
+      },
+      {
+        "label": "MATERIAL",
+        "text": "ChsNWs"
+      },
+      {
+        "label": "MATERIAL",
+        "text": "HAuCl4"
+      },
+      {
+        "label": "MATERIAL",
+        "text": "\naqueous solution),"
+      },
+      {
+        "label": "TIME",
+        "text": "10 min"
+      },
+      {
+        "label": "MATERIAL",
+        "text": "NaBH4"
+      },
+      {
+        "label": "MATERIAL",
+        "text": "dilute NaBH4 solution (1.5"
+      },
+      {
+        "label": "TIME",
+        "text": "2 h"
+      },
+      {
+        "label": "MATERIAL",
+        "text": "NaBH4"
+      },
+      {
+        "label": "MATERIAL",
+        "text": "dilute NaBH4 solution (1.5"
+      },
+      {
+        "label": "TIME",
+        "text": "2 h"
+      },
+      {
+        "label": "MATERIAL",
+        "text": "TiO2"
+      },
+      {
+        "label": "MATERIAL",
+        "text": "water"
+      },
+      {
+        "label": "MATERIAL",
+        "text": "titanium oxysulfate"
+      },
+      {
+        "label": "MATERIAL",
+        "text": "oxysulfate aqueous solution (1.8"
+      },
+      {
+        "label": "TEMP",
+        "text": "70°C"
+      },
+      {
+        "label": "TIME",
+        "text": "1 h"
+      },
+      {
+        "label": "MATERIAL",
+        "text": "TiO2"
+      },
+      {
+        "label": "MATERIAL",
+        "text": "water"
+      },
+      {
+        "label": "MATERIAL",
+        "text": "titanium oxysulfate"
+      },
+      {
+        "label": "MATERIAL",
+        "text": "oxysulfate aqueous solution (1.8"
+      },
+      {
+        "label": "TEMP",
+        "text": "70°C"
+      },
+      {
+        "label": "TIME",
+        "text": "1 h"
+      },
+      {
+        "label": "MATERIAL",
+        "text": "TiO2"
+      },
+      {
+        "label": "MATERIAL",
+        "text": "water"
+      },
+      {
+        "label": "MATERIAL",
+        "text": "titanium oxysulfate"
+      },
+      {
+        "label": "MATERIAL",
+        "text": "oxysulfate aqueous solution (1.8"
+      },
+      {
+        "label": "TEMP",
+        "text": "70°C"
+      },
+      {
+        "label": "TIME",
+        "text": "1 h"
+      },
+      {
+        "label": "MATERIAL",
+        "text": "methanol"
+      },
+      {
+        "label": "MATERIAL",
+        "text": "methanol"
+      },
+      {
+        "label": "MATERIAL",
+        "text": "FITC"
+      },
+      {
+        "label": "MATERIAL",
+        "text": "methanol"
+      },
+      {
+        "label": "MATERIAL",
+        "text": "the ChsNW solution."
+      },
+      {
+        "label": "MATERIAL",
+        "text": "Brij C10"
+      },
+      {
+        "label": "TEMP",
+        "text": "50°C"
+      },
+      {
+        "label": "MATERIAL",
+        "text": "Brij C10"
+      },
+      {
+        "label": "TEMP",
+        "text": "50°C"
+      },
+      {
+        "label": "MATERIAL",
+        "text": "NiCl2"
+      },
+      {
+        "label": "MATERIAL",
+        "text": "NiCl2 aqueous solution (0.8"
+      },
+      {
+        "label": "TEMP",
+        "text": "50°C"
+      },
+      {
+        "label": "TIME",
+        "text": "3 h"
+      },
+      {
+        "label": "TEMP",
+        "text": "50°C"
+      },
+      {
+        "label": "TIME",
+        "text": "3 h"
+      },
+      {
+        "label": "TIME",
+        "text": "3 h"
+      },
+      {
+        "label": "TIME",
+        "text": "3 h"
+      },
+      {
+        "label": "MATERIAL",
+        "text": "isopropyl alcohol"
+      },
+      {
+        "label": "TIME",
+        "text": "10 min"
+      },
+      {
+        "label": "MATERIAL",
+        "text": "isopropyl alcohol"
+      },
+      {
+        "label": "TIME",
+        "text": "10 min"
+      },
+      {
+        "label": "MATERIAL",
+        "text": "water"
+      },
+      {
+        "label": "MATERIAL",
+        "text": "DI"
+      },
+      {
+        "label": "MATERIAL",
+        "text": "water"
+      },
+      {
+        "label": "MATERIAL",
+        "text": "v) solution of polymeric"
+      },
+      {
+        "label": "MATERIAL",
+        "text": "of chitosan powder into 50"
+      },
+      {
+        "label": "MATERIAL",
+        "text": "The solution was stirred"
+      },
+      {
+        "label": "MATERIAL",
+        "text": "ﬁnal"
+      },
+      {
+        "label": "TIME",
+        "text": "1 min"
+      },
+      {
+        "label": "MATERIAL",
+        "text": "DI"
+      },
+      {
+        "label": "MATERIAL",
+        "text": "water"
+      },
+      {
+        "label": "MATERIAL",
+        "text": "isopropanol"
+      },
+      {
+        "label": "TIME",
+        "text": "1 min"
+      },
+      {
+        "label": "TIME",
+        "text": "1 min"
+      },
+      {
+        "label": "MATERIAL",
+        "text": "water"
+      },
+      {
+        "label": "MATERIAL",
+        "text": "water"
+      },
+      {
+        "label": "MATERIAL",
+        "text": "acetone"
+      },
+      {
+        "label": "TIME",
+        "text": "10 min"
+      }
+    ]
+  },
+  "relevance": {
+    "score": 0.22499999999999998,
+    "breakdown": {
+      "content": 0.0,
+      "domain": 0.0,
+      "recency": 1.0,
+      "quality": 0.5,
+      "entities": 0.0
+    },
+    "reasons": [
+      "recent_publication"
     ]
   },
   "meta": {

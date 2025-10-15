@@ -409,14 +409,27 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--config", required=True)
     args = ap.parse_args()
+
     cfg = yaml.safe_load(Path(args.config).read_text(encoding="utf-8"))
+
+    # Coerce all relevant config values to correct types
+    for key, typ, default in [
+        ("min_year", int, 2018),
+        ("quality_threshold", float, 0.4),
+        ("max_papers", int, 150),
+        ("max_results_per_source", int, 50),
+        ("since_year", int, 2000),
+    ]:
+        if key in cfg:
+            try:
+                cfg[key] = typ(cfg[key])
+            except Exception:
+                cfg[key] = default
+        else:
+            cfg[key] = default
 
     out_dir = Path(cfg["out_dir"])
     ensure_dir(out_dir)
-
-    # Coerce types for numeric config values
-    cfg["max_results_per_source"] = int(cfg.get("max_results_per_source", 50))
-    cfg["since_year"] = int(cfg.get("since_year", 2000))
 
     all_meta = []
     for q in cfg["queries"]:
@@ -461,9 +474,9 @@ def main():
 
             # Apply enhanced relevance with current config
             relevance_config = {
-                "min_year": cfg.get("min_year", cfg.get("since_year", 2018)),
-                "quality_threshold": cfg.get("quality_threshold", 0.4),
-                "max_papers": cfg.get("max_papers", len(dedup)),
+                "min_year": int(cfg.get("min_year", cfg.get("since_year", 2018))),
+                "quality_threshold": float(cfg.get("quality_threshold", 0.4)),
+                "max_papers": int(cfg.get("max_papers", len(dedup))),
                 "queries": cfg.get("queries", []),
             }
 

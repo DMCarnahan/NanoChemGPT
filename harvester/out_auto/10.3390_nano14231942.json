@@ -1,0 +1,57 @@
+{
+  "paper_id": "10.3390/nano14231942",
+  "title": "Carbon-Nanotube-Based Superhydrophobic Magnetic Nanomaterial as Absorbent for Rapid and Efficient Oil/Water Separation.",
+  "authors": [
+    {
+      "name": "Kudaibergenova RM"
+    },
+    {
+      "name": "Roman FF"
+    },
+    {
+      "name": "Silva AS"
+    },
+    {
+      "name": "Sugurbekova GK."
+    }
+  ],
+  "doi": "10.3390/nano14231942",
+  "source": "eupmc",
+  "urls": {
+    "pdf": ""
+  },
+  "license": null,
+  "access_route": "unknown",
+  "sections": [],
+  "extractions": {
+    "methods_paragraphs": [],
+    "entities": []
+  },
+  "relevance": {
+    "score": 0.22499999999999998,
+    "breakdown": {
+      "content": 0.0,
+      "domain": 0.0,
+      "recency": 1.0,
+      "quality": 0.5,
+      "entities": 0.0
+    },
+    "reasons": [
+      "recent_publication"
+    ]
+  },
+  "meta": {
+    "title": "Carbon-Nanotube-Based Superhydrophobic Magnetic Nanomaterial as Absorbent for Rapid and Efficient Oil/Water Separation.",
+    "doi": "10.3390/nano14231942",
+    "url": "",
+    "pdf_url": "",
+    "year": "2024",
+    "authors": [
+      "Kudaibergenova RM",
+      "Roman FF",
+      "Silva AS",
+      "Sugurbekova GK."
+    ]
+  },
+  "raw": "Carbon-Nanotube-Based Superhydrophobic Magnetic Nanomaterial as Absorbent for Rapid and Efficient Oil/Water Separation."
+}

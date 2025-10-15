@@ -10,6 +10,6 @@ out_dir: "harvester/out_auto"
 
 # Enhanced relevance filtering settings
 enable_enhanced_relevance: true
-min_year: 2020                    # Minimum publication year for relevance
-quality_threshold: 0.4            # Relevance score threshold (0.0-1.0)
+min_year: 2000                    # Minimum publication year for relevance
+quality_threshold: 0.2            # Relevance score threshold (0.0-1.0)
 max_papers: 150                   # Maximum papers to retain after filtering

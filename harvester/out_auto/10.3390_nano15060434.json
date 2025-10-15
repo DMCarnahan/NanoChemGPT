@@ -1,0 +1,65 @@
+{
+  "paper_id": "10.3390/nano15060434",
+  "title": "Utilizing Nanomaterials in Microfluidic Devices for Disease Detection and Treatment.",
+  "authors": [
+    {
+      "name": "Tian Z"
+    },
+    {
+      "name": "Fu Y"
+    },
+    {
+      "name": "Dang Z"
+    },
+    {
+      "name": "Guo T"
+    },
+    {
+      "name": "Li W"
+    },
+    {
+      "name": "Zhang J."
+    }
+  ],
+  "doi": "10.3390/nano15060434",
+  "source": "eupmc",
+  "urls": {
+    "pdf": ""
+  },
+  "license": null,
+  "access_route": "unknown",
+  "sections": [],
+  "extractions": {
+    "methods_paragraphs": [],
+    "entities": []
+  },
+  "relevance": {
+    "score": 0.22499999999999998,
+    "breakdown": {
+      "content": 0.0,
+      "domain": 0.0,
+      "recency": 1.0,
+      "quality": 0.5,
+      "entities": 0.0
+    },
+    "reasons": [
+      "recent_publication"
+    ]
+  },
+  "meta": {
+    "title": "Utilizing Nanomaterials in Microfluidic Devices for Disease Detection and Treatment.",
+    "doi": "10.3390/nano15060434",
+    "url": "",
+    "pdf_url": "",
+    "year": "2025",
+    "authors": [
+      "Tian Z",
+      "Fu Y",
+      "Dang Z",
+      "Guo T",
+      "Li W",
+      "Zhang J."
+    ]
+  },
+  "raw": "Utilizing Nanomaterials in Microfluidic Devices for Disease Detection and Treatment."
+}

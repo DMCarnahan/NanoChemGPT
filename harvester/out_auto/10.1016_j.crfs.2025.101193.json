@@ -1,0 +1,69 @@
+{
+  "paper_id": "10.1016/j.crfs.2025.101193",
+  "title": "Thiol-ene click reaction aptamer sensor based on MWCNT-COOH/MOF-818 composite for highly sensitive detection of foodborne pathogenic bacteria.",
+  "authors": [
+    {
+      "name": "Chi H"
+    },
+    {
+      "name": "Xiao Y"
+    },
+    {
+      "name": "Ning H"
+    },
+    {
+      "name": "Zhang X"
+    },
+    {
+      "name": "Chen H"
+    },
+    {
+      "name": "Tang J"
+    },
+    {
+      "name": "Wen X."
+    }
+  ],
+  "doi": "10.1016/j.crfs.2025.101193",
+  "source": "eupmc",
+  "urls": {
+    "pdf": ""
+  },
+  "license": null,
+  "access_route": "unknown",
+  "sections": [],
+  "extractions": {
+    "methods_paragraphs": [],
+    "entities": []
+  },
+  "relevance": {
+    "score": 0.22499999999999998,
+    "breakdown": {
+      "content": 0.0,
+      "domain": 0.0,
+      "recency": 1.0,
+      "quality": 0.5,
+      "entities": 0.0
+    },
+    "reasons": [
+      "recent_publication"
+    ]
+  },
+  "meta": {
+    "title": "Thiol-ene click reaction aptamer sensor based on MWCNT-COOH/MOF-818 composite for highly sensitive detection of foodborne pathogenic bacteria.",
+    "doi": "10.1016/j.crfs.2025.101193",
+    "url": "",
+    "pdf_url": "",
+    "year": "2025",
+    "authors": [
+      "Chi H",
+      "Xiao Y",
+      "Ning H",
+      "Zhang X",
+      "Chen H",
+      "Tang J",
+      "Wen X."
+    ]
+  },
+  "raw": "Thiol-ene click reaction aptamer sensor based on MWCNT-COOH/MOF-818 composite for highly sensitive detection of foodborne pathogenic bacteria."
+}

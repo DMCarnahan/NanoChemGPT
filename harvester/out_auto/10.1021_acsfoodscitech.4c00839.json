@@ -1,0 +1,45 @@
+{
+  "paper_id": "10.1021/acsfoodscitech.4c00839",
+  "title": "Pickering Emulsions as Catalytic Systems in Food Applications.",
+  "authors": [
+    {
+      "name": "Narciso JO, Soliva-Fortuny R, Salvía-Trujillo L, Martín-Belloso O."
+    }
+  ],
+  "doi": "10.1021/acsfoodscitech.4c00839",
+  "source": "eupmc",
+  "urls": {
+    "pdf": ""
+  },
+  "license": null,
+  "access_route": "unknown",
+  "sections": [],
+  "extractions": {
+    "methods_paragraphs": [],
+    "entities": []
+  },
+  "relevance": {
+    "score": 0.22499999999999998,
+    "breakdown": {
+      "content": 0.0,
+      "domain": 0.0,
+      "recency": 1.0,
+      "quality": 0.5,
+      "entities": 0.0
+    },
+    "reasons": [
+      "recent_publication"
+    ]
+  },
+  "meta": {
+    "title": "Pickering Emulsions as Catalytic Systems in Food Applications.",
+    "doi": "10.1021/acsfoodscitech.4c00839",
+    "url": "",
+    "pdf_url": "",
+    "year": "2025",
+    "authors": [
+      "Narciso JO, Soliva-Fortuny R, Salvía-Trujillo L, Martín-Belloso O."
+    ]
+  },
+  "raw": "Pickering Emulsions as Catalytic Systems in Food Applications."
+}

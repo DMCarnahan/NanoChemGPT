@@ -1,0 +1,57 @@
+{
+  "paper_id": "10.2147/ijn.s526497",
+  "title": "Tumor Microenvironment-Responsive Nanoparticles: Promising Cancer PTT Carriers.",
+  "authors": [
+    {
+      "name": "Sun H"
+    },
+    {
+      "name": "Li Y"
+    },
+    {
+      "name": "Xue M"
+    },
+    {
+      "name": "Feng D."
+    }
+  ],
+  "doi": "10.2147/ijn.s526497",
+  "source": "eupmc",
+  "urls": {
+    "pdf": ""
+  },
+  "license": null,
+  "access_route": "unknown",
+  "sections": [],
+  "extractions": {
+    "methods_paragraphs": [],
+    "entities": []
+  },
+  "relevance": {
+    "score": 0.22499999999999998,
+    "breakdown": {
+      "content": 0.0,
+      "domain": 0.0,
+      "recency": 1.0,
+      "quality": 0.5,
+      "entities": 0.0
+    },
+    "reasons": [
+      "recent_publication"
+    ]
+  },
+  "meta": {
+    "title": "Tumor Microenvironment-Responsive Nanoparticles: Promising Cancer PTT Carriers.",
+    "doi": "10.2147/ijn.s526497",
+    "url": "",
+    "pdf_url": "",
+    "year": "2025",
+    "authors": [
+      "Sun H",
+      "Li Y",
+      "Xue M",
+      "Feng D."
+    ]
+  },
+  "raw": "Tumor Microenvironment-Responsive Nanoparticles: Promising Cancer PTT Carriers."
+}

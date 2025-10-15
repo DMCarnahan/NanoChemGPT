@@ -1,0 +1,53 @@
+{
+  "paper_id": "10.3390/nano15181443",
+  "title": "Tuning Ag Loading and Particle Size in Ag@g-C&lt;sub&gt;3&lt;/sub&gt;N&lt;sub&gt;4&lt;/sub&gt; Photocatalysts for Selective CO&lt;sub&gt;2&lt;/sub&gt; Conversion to CO and CH&lt;sub&gt;4&lt;/sub&gt;.",
+  "authors": [
+    {
+      "name": "Liu S"
+    },
+    {
+      "name": "Li N"
+    },
+    {
+      "name": "Zhou Q."
+    }
+  ],
+  "doi": "10.3390/nano15181443",
+  "source": "eupmc",
+  "urls": {
+    "pdf": ""
+  },
+  "license": null,
+  "access_route": "unknown",
+  "sections": [],
+  "extractions": {
+    "methods_paragraphs": [],
+    "entities": []
+  },
+  "relevance": {
+    "score": 0.22499999999999998,
+    "breakdown": {
+      "content": 0.0,
+      "domain": 0.0,
+      "recency": 1.0,
+      "quality": 0.5,
+      "entities": 0.0
+    },
+    "reasons": [
+      "recent_publication"
+    ]
+  },
+  "meta": {
+    "title": "Tuning Ag Loading and Particle Size in Ag@g-C&lt;sub&gt;3&lt;/sub&gt;N&lt;sub&gt;4&lt;/sub&gt; Photocatalysts for Selective CO&lt;sub&gt;2&lt;/sub&gt; Conversion to CO and CH&lt;sub&gt;4&lt;/sub&gt;.",
+    "doi": "10.3390/nano15181443",
+    "url": "",
+    "pdf_url": "",
+    "year": "2025",
+    "authors": [
+      "Liu S",
+      "Li N",
+      "Zhou Q."
+    ]
+  },
+  "raw": "Tuning Ag Loading and Particle Size in Ag@g-C&lt;sub&gt;3&lt;/sub&gt;N&lt;sub&gt;4&lt;/sub&gt; Photocatalysts for Selective CO&lt;sub&gt;2&lt;/sub&gt; Conversion to CO and CH&lt;sub&gt;4&lt;/sub&gt;."
+}

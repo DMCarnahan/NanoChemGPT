@@ -1,0 +1,65 @@
+{
+  "paper_id": "10.1039/d4ra05340k",
+  "title": "Zinc oxide/tin oxide nanoflower-based asymmetric supercapacitors for enhanced energy storage devices.",
+  "authors": [
+    {
+      "name": "Molahalli V"
+    },
+    {
+      "name": "Soman G"
+    },
+    {
+      "name": "Bhat VS"
+    },
+    {
+      "name": "Shetty A"
+    },
+    {
+      "name": "Alodhayb A"
+    },
+    {
+      "name": "Hegde G."
+    }
+  ],
+  "doi": "10.1039/d4ra05340k",
+  "source": "eupmc",
+  "urls": {
+    "pdf": ""
+  },
+  "license": null,
+  "access_route": "unknown",
+  "sections": [],
+  "extractions": {
+    "methods_paragraphs": [],
+    "entities": []
+  },
+  "relevance": {
+    "score": 0.22499999999999998,
+    "breakdown": {
+      "content": 0.0,
+      "domain": 0.0,
+      "recency": 1.0,
+      "quality": 0.5,
+      "entities": 0.0
+    },
+    "reasons": [
+      "recent_publication"
+    ]
+  },
+  "meta": {
+    "title": "Zinc oxide/tin oxide nanoflower-based asymmetric supercapacitors for enhanced energy storage devices.",
+    "doi": "10.1039/d4ra05340k",
+    "url": "",
+    "pdf_url": "",
+    "year": "2024",
+    "authors": [
+      "Molahalli V",
+      "Soman G",
+      "Bhat VS",
+      "Shetty A",
+      "Alodhayb A",
+      "Hegde G."
+    ]
+  },
+  "raw": "Zinc oxide/tin oxide nanoflower-based asymmetric supercapacitors for enhanced energy storage devices."
+}

@@ -1,0 +1,85 @@
+{
+  "paper_id": "10.3390/cimb47090711",
+  "title": "Smart Red Blood Cell Carriers: A Nanotechnological Approach to Cancer Drug Delivery.",
+  "authors": [
+    {
+      "name": "Tsamesidis I"
+    },
+    {
+      "name": "Dryllis G"
+    },
+    {
+      "name": "Fortis SP"
+    },
+    {
+      "name": "Sphicas A"
+    },
+    {
+      "name": "Konstantinidou V"
+    },
+    {
+      "name": "Chatzidimitriou M"
+    },
+    {
+      "name": "Mitka S"
+    },
+    {
+      "name": "Trapali M"
+    },
+    {
+      "name": "Skepastianos P"
+    },
+    {
+      "name": "Kriebardis AG"
+    },
+    {
+      "name": "Pessach I."
+    }
+  ],
+  "doi": "10.3390/cimb47090711",
+  "source": "eupmc",
+  "urls": {
+    "pdf": ""
+  },
+  "license": null,
+  "access_route": "unknown",
+  "sections": [],
+  "extractions": {
+    "methods_paragraphs": [],
+    "entities": []
+  },
+  "relevance": {
+    "score": 0.22499999999999998,
+    "breakdown": {
+      "content": 0.0,
+      "domain": 0.0,
+      "recency": 1.0,
+      "quality": 0.5,
+      "entities": 0.0
+    },
+    "reasons": [
+      "recent_publication"
+    ]
+  },
+  "meta": {
+    "title": "Smart Red Blood Cell Carriers: A Nanotechnological Approach to Cancer Drug Delivery.",
+    "doi": "10.3390/cimb47090711",
+    "url": "",
+    "pdf_url": "",
+    "year": "2025",
+    "authors": [
+      "Tsamesidis I",
+      "Dryllis G",
+      "Fortis SP",
+      "Sphicas A",
+      "Konstantinidou V",
+      "Chatzidimitriou M",
+      "Mitka S",
+      "Trapali M",
+      "Skepastianos P",
+      "Kriebardis AG",
+      "Pessach I."
+    ]
+  },
+  "raw": "Smart Red Blood Cell Carriers: A Nanotechnological Approach to Cancer Drug Delivery."
+}

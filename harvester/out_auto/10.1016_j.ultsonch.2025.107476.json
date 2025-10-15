@@ -1,0 +1,77 @@
+{
+  "paper_id": "10.1016/j.ultsonch.2025.107476",
+  "title": "Hierarchical porous carbon biochar nanotubes encapsulated metal nanocrystals with a strong metal-carbon interaction for high-performance supercapacitors.",
+  "authors": [
+    {
+      "name": "Idris Abdu H"
+    },
+    {
+      "name": "Mahmood SA"
+    },
+    {
+      "name": "Aboudou T"
+    },
+    {
+      "name": "Guo Y"
+    },
+    {
+      "name": "Nian LN"
+    },
+    {
+      "name": "Xiaowei L"
+    },
+    {
+      "name": "Ziyu L"
+    },
+    {
+      "name": "Jlassi K, El-Demellawi JK"
+    },
+    {
+      "name": "Eid K."
+    }
+  ],
+  "doi": "10.1016/j.ultsonch.2025.107476",
+  "source": "eupmc",
+  "urls": {
+    "pdf": ""
+  },
+  "license": null,
+  "access_route": "unknown",
+  "sections": [],
+  "extractions": {
+    "methods_paragraphs": [],
+    "entities": []
+  },
+  "relevance": {
+    "score": 0.22499999999999998,
+    "breakdown": {
+      "content": 0.0,
+      "domain": 0.0,
+      "recency": 1.0,
+      "quality": 0.5,
+      "entities": 0.0
+    },
+    "reasons": [
+      "recent_publication"
+    ]
+  },
+  "meta": {
+    "title": "Hierarchical porous carbon biochar nanotubes encapsulated metal nanocrystals with a strong metal-carbon interaction for high-performance supercapacitors.",
+    "doi": "10.1016/j.ultsonch.2025.107476",
+    "url": "",
+    "pdf_url": "",
+    "year": "2025",
+    "authors": [
+      "Idris Abdu H",
+      "Mahmood SA",
+      "Aboudou T",
+      "Guo Y",
+      "Nian LN",
+      "Xiaowei L",
+      "Ziyu L",
+      "Jlassi K, El-Demellawi JK",
+      "Eid K."
+    ]
+  },
+  "raw": "Hierarchical porous carbon biochar nanotubes encapsulated metal nanocrystals with a strong metal-carbon interaction for high-performance supercapacitors."
+}

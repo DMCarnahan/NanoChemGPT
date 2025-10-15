@@ -1,0 +1,76 @@
+{
+  "paper_id": "10.1039/d5ra04502a",
+  "title": "Carbon nanotubes/lithium ferrite nanocomposites: magnetic and electrochemical optimization for enhanced H&lt;sub&gt;2&lt;/sub&gt;O&lt;sub&gt;2&lt;/sub&gt; sensing.",
+  "authors": [
+    {
+      "name": "Ouda E"
+    },
+    {
+      "name": "Yousf N"
+    },
+    {
+      "name": "Elzwawy A"
+    },
+    {
+      "name": "Magar HS"
+    },
+    {
+      "name": "Hassan RYA, El-Ashry M"
+    },
+    {
+      "name": "Duraia EM."
+    }
+  ],
+  "doi": "10.1039/d5ra04502a",
+  "source": "eupmc",
+  "urls": {
+    "pdf": ""
+  },
+  "license": null,
+  "access_route": "unknown",
+  "sections": [
+    {
+      "heading": "fulltext",
+      "text": "4Biosensors Research Lab, Zewail City of Science and Technology, 6th October City, Giza 12578, Egypt\n5 Laboratories Manager, Faculty of Medicine, Suez Canal University, Ismailia 41522, Egypt\n."
+    }
+  ],
+  "extractions": {
+    "methods_paragraphs": [
+      {
+        "text": "4Biosensors Research Lab, Zewail City of Science and Technology, 6th October City, Giza 12578, Egypt\n5 Laboratories Manager, Faculty of Medicine, Suez Canal University, Ismailia 41522, Egypt\n.",
+        "operations": [],
+        "expanded": []
+      }
+    ],
+    "entities": []
+  },
+  "relevance": {
+    "score": 0.22499999999999998,
+    "breakdown": {
+      "content": 0.0,
+      "domain": 0.0,
+      "recency": 1.0,
+      "quality": 0.5,
+      "entities": 0.0
+    },
+    "reasons": [
+      "recent_publication"
+    ]
+  },
+  "meta": {
+    "title": "Carbon nanotubes/lithium ferrite nanocomposites: magnetic and electrochemical optimization for enhanced H&lt;sub&gt;2&lt;/sub&gt;O&lt;sub&gt;2&lt;/sub&gt; sensing.",
+    "doi": "10.1039/d5ra04502a",
+    "url": "",
+    "pdf_url": "",
+    "year": "2025",
+    "authors": [
+      "Ouda E",
+      "Yousf N",
+      "Elzwawy A",
+      "Magar HS",
+      "Hassan RYA, El-Ashry M",
+      "Duraia EM."
+    ]
+  },
+  "raw": "Carbon Nanotube/Lithium Ferrite Nanocomposite: Magnetic and Electrochemical Optimization for \n\nEnhanced H₂O₂ Sensing\n\nEmtinan Ouda1, Nehad Yousf1,5, Amir Elzwawy2*, Hend S. Magar3, Rabeay Y. A. Hassan4, Magdy El-Ashry1, and \n\nEl-Shazly M. Duraia1\n\n1Physics Department, Faculty of Science, Suez Canal University, Ismailia 41522, Egypt.\n2Ceramics Department, Advanced Materials Technology and Mineral Resources Research Institute, National \nResearch Centre (NRC), 33 El Bohouth St., Dokki, Giza, 12622, Egypt.\n\n3Applied Organic Chemistry Department, National Research Centre (NRC), 33 El Bohouth St., Dokki, Giza, 12622, \nEgypt. \n\n4Biosensors Research Lab, Zewail City of Science and Technology, 6th October City, Giza 12578, Egypt\n5 Laboratories Manager, Faculty of Medicine, Suez Canal University, Ismailia 41522, Egypt\n.\n\n*Corresponding author: email aa.elzwawy@nrc.sci.eg; elzwawy1@gmail.com \n\nTable 1S. The  assessed crystallinity of the prepared nanomaterials\n\nnanomaterials\n\nAreaC (crystalline peaks) Area (all peaks) Crystallinity\n\nCNTs\nLi2Fe3O5 (LFO)\nCNTs/LFO (0.5%)\nCNTs/LFO (1%)\nCNTs/LFO (2%)\n\n1845.24\n2093.6\n2592.4\n3117.5\n2746.9\n\n5187.4\n5152.6\n6056.7\n6451.5\n5913\n\n (XC) %\n26.23\n28.89\n29.97\n32.57\n31.71\n\nTable 2S.  The structural parameters computed for the nanoparticles that were synthesized \n\nstructure\n\n(nm)\n\n𝐷𝜈\nFrom Sherrer’s \nanalysis\n2.5\n23.73\n24.42\n24.35\n24.49\n\n𝛿\n (nm-2)\ndislocation \ndensity\n0.16\n0.0017\n0.00167\n0.00168\n0.00166\n\nCNTs\nLi2Fe3O5 (LFO)\nCNTs/LFO (0.5%)\nCNTs/LFO (1%)\nCNTs/LFO (2%)\nTable 3S. The magnetic parameters received from the magnetic hysteresis loop\n\n1\n0.06882\n0.53\n0.51\n0.03713\n\n𝐷𝜈\n(nm)\nFrom \nW-H analysis\n2.1\n22.5\n23.4\n23.5\n23.9\n\n(𝜀)\nStrain from   \nW–H analysis\n\nStructure\n\nSaturation \n\nHc \n\nHc \n\nCoercivity \n\nRemanent \n\nSquareness\n\nmagnetization\n\n(left)\n\n(right)\n\n(G)\n\nmagnetization\n\n(emu/g)\n\n(G)\n\n(G)\n\nCNTs\n\nLFO\n\nCNTs/LFO (0.5%)\n\nCNTs/LFO (1%)\n\nCNTs/LFO (2%)\n\n0.6\n\n35.77\n\n14.40\n\n20.95\n\n25.07\n\n-691.3\n\n1109.2\n\n-16.30\n\n27.35\n\n-21.64\n\n40.58\n\n-35.21\n\n33.73\n\n-17.14\n\n78.64\n\n900\n\n21.83\n\n31.11\n\n34.47\n\n47.89\n\n(emu/g)\n\n0.187\n\n3.18\n\n1.35\n\n4.5\n\n2.29\n\n0.311\n\n0.088\n\n0.093\n\n0.214\n\n0.091\n\nSupplementaryInformation(SI)forRSCAdvances.Thisjournalis©TheRoyalSocietyofChemistry2025 \n\fTable 4S. The modified electrodes using the produced nanomaterials yielded the electrochemical \n\nparameters (CV & EIS). These values are taken from the impedimetric and voltammetric studies \n\nmentioned above.\n\nElectrode type\n\nIa\n\nIc\n\nE oxd.\n\nE\n\nred.\n\nΔEp\n\nR\n\ns\n\nR\n\nct (1)\n\nW\n\nSC\n\nC\n\n(µF)\n\nCNTs\n\nLFO\n\n(µA)\n\n(µA)\n\n(V)\n\n(V)\n\n(V)\n\n(Ω)\n\n(Ω)\n\n(Ω)\n\n(F/g)\n\n225.6\n\n-238.6\n\n0.313\n\n0.0015\n\n0.157\n\n74.6\n\n80.5\n\n121.6\n\n171.4\n\n121.61802\n\n127.04\n\n-135.12\n\n0.334\n\n0.0152\n\n0.174\n\n33.4\n\n1150.3\n\n72.5\n\n189.6\n\n52.54385\n\nCNTs-LFO 0.5\n\n349.5\n\n-357.6\n\n0.329\n\n-0.040\n\n0.144\n\n112.6\n\n50.3\n\n136.2\n\n72.6\n\n118.02871\n\nCNT-LFO 1.0\n\n179.01\n\n-192.10\n\n0.22\n\n0.0711\n\n0.144\n\n214.3\n\n205.9\n\n112.5\n\n94.2\n\n88.89111\n\nCNTs-LFO 2.0\n\n168.6\n\n-176.7\n\n0.356\n\n-0.102\n\n0.127\n\n391.8\n\n700.9\n\n95.3\n\n168.2\n\n83.83291\n\nTable 5S. Comparison for different electrodes used for hydrogen peroxide (H2O2) detection, based on applied \n\nMaterials \n\nCNT-NiCo2O4 \nNiCo2O4/RGO\nMnCo2O3/CNTs\nrGo-Pt\nCo3O4\nCoFe2O4/ CNTs\nPt/rGO-CNT \n\nPol(azureA)-PtNPs\nCo3O4-rGO\nCNTs/LFO\n\npotential, linear range, and detection limit.\n\nElectrode \ntype \n\nBuffer pH\n\nApplied \nPotential \n\nSPE\nGCE\nSPE\nGCE\nSPE\nGCE\nPaper \nelectrode\nSPE\nGCE\nSPE\n\nPBS\nPBS\nPBS\nPBS\n-\nPBS\n-\n\nPBS\n-\nPBS\n\n7.4\n7.0\n7.4\n7.0\n-\n7.0\n-\n\n7.4\n-\n7.4\n\n0.7\n-0.4\n0.7\n-0.08\n1.0\n0.3\n-0.25\n\n0.1\n-0.19\n0.7\n\nLinear \nrange \n(µM)\n2.5-275\n5-3000\n0.1-180\n0.5-3475\n0.1-50\n0.5-50\n0.1-25\n\nDetection \nLimit\n(µM)\n0.01\n0.41\n0.1\n0.2\n0.145\n0.05\n0.1\n\n0-300\n15-675\n0.01 -500\n\n0.052\n2.4\n0.005\n\nRef.\n\n1\n\n2 \n3\n\n4\n\n5\n\n6\n\n7\n\n8\n\n9\n\nThis \nwork\n\n\fTable 6S. Peroxide detection in real waste water samples using CNTs/LFO sensor.\n\nperoxide concentration\nµM\n\nRSD \n(%)\n\nRecovery \n(%)\n\nAdded\n\nFound\n\n5\n10\n20\n30\n\n5.1\n9.8\n19.9\n29.7\n\n0.19\n0.62\n1.38\n2.96\n\n102\n98\n99.5\n99\n\nReferences :\n\n1\n\n2\n\n3\n\n4\n\n5\n\n6\n\n7\n\n8\n\n9\n\nEl-shazly M. Duraia a, B. M. Adebiyi, S. Das, H. S. Magar, G. W. Beall and R. Y. A. \n\nHassan, Phys. E Low-dimensional Syst. Nanostructures, 2024, 159, 115902.\n\nM. Wang, C. Wang, Y. Liu, B. Hu, L. He, Y. Ma, Z. Zhang, B. Cui and M. Du, \n\nMicrochim. Acta, 2020, 187, 436–450.\n\nNehad Yousf, Emtinan Ouda, Hend S. Magar, Rabeay Y. A. Hassan, S.A. Mansour, El-\n\nShazly M. Duraia, J. Electrochem. Soc., 2022, 169, 47518.\n\nY. Zhang, X. Bai, X. Wang, K. K. Shiu, Y. Zhu and H. Jiang, Anal. Chem., 2014, 86, \n\n9459–9465.\n\nS. Barkaoui, M. Haddaoui, H. Dhaouadi, N. Raouafi and F. Touati, J. Solid State Chem., \n\n2015, 228, 226–231.\n\nS. Sahoo, P. K. Sahoo, S. Manna and A. K. Satpati, J. Electroanal. Chem., 2020, 876, \n\n114504.\n\nY. Sun, K. He, Z. Zhang, A. Zhou and H. Duan, Biosens. Bioelectron., 2015, 68, 358–364.\n\nR. Jiménez-Pérez, J. González-Rodríguez, M. I. González-Sánchez, B. Gómez-Monedero \n\nand E. Valero, Sensors Actuators, B Chem., 2019, 298, 126878.\n\nL. Kong, Z. Ren, N. Zheng, S. Du, J. Wu, J. Tang and H. Fu, Nano Res., 2015, 8, 469–\n\n480.\n\n\f"
+}

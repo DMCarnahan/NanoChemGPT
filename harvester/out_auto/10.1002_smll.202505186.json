@@ -1,0 +1,61 @@
+{
+  "paper_id": "10.1002/smll.202505186",
+  "title": "Hetero-Functionalization of Carbon Nanotubes Termini with Single-Molecule Control.",
+  "authors": [
+    {
+      "name": "Hong W"
+    },
+    {
+      "name": "Lambert B"
+    },
+    {
+      "name": "Mengrani Z"
+    },
+    {
+      "name": "Cognet L"
+    },
+    {
+      "name": "Palma M."
+    }
+  ],
+  "doi": "10.1002/smll.202505186",
+  "source": "eupmc",
+  "urls": {
+    "pdf": ""
+  },
+  "license": null,
+  "access_route": "unknown",
+  "sections": [],
+  "extractions": {
+    "methods_paragraphs": [],
+    "entities": []
+  },
+  "relevance": {
+    "score": 0.22499999999999998,
+    "breakdown": {
+      "content": 0.0,
+      "domain": 0.0,
+      "recency": 1.0,
+      "quality": 0.5,
+      "entities": 0.0
+    },
+    "reasons": [
+      "recent_publication"
+    ]
+  },
+  "meta": {
+    "title": "Hetero-Functionalization of Carbon Nanotubes Termini with Single-Molecule Control.",
+    "doi": "10.1002/smll.202505186",
+    "url": "",
+    "pdf_url": "",
+    "year": "2025",
+    "authors": [
+      "Hong W",
+      "Lambert B",
+      "Mengrani Z",
+      "Cognet L",
+      "Palma M."
+    ]
+  },
+  "raw": "Hetero-Functionalization of Carbon Nanotubes Termini with Single-Molecule Control."
+}

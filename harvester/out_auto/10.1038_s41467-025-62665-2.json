@@ -447,6 +447,229 @@
           }
         ]
       }
+    ],
+    "entities": [
+      {
+        "label": "MATERIAL",
+        "text": "H2O"
+      },
+      {
+        "label": "MATERIAL",
+        "text": "NH3"
+      },
+      {
+        "label": "MATERIAL",
+        "text": "KNO3"
+      },
+      {
+        "label": "MATERIAL",
+        "text": "water"
+      },
+      {
+        "label": "MATERIAL",
+        "text": "K2IrCl6"
+      },
+      {
+        "label": "MATERIAL",
+        "text": "NH3·H2O"
+      },
+      {
+        "label": "TEMP",
+        "text": "25°C"
+      },
+      {
+        "label": "TIME",
+        "text": "3 h"
+      },
+      {
+        "label": "MATERIAL",
+        "text": "H2O"
+      },
+      {
+        "label": "MATERIAL",
+        "text": "NH3"
+      },
+      {
+        "label": "MATERIAL",
+        "text": "KNO3"
+      },
+      {
+        "label": "MATERIAL",
+        "text": "water"
+      },
+      {
+        "label": "MATERIAL",
+        "text": "K2IrCl6"
+      },
+      {
+        "label": "MATERIAL",
+        "text": "NH3·H2O"
+      },
+      {
+        "label": "TEMP",
+        "text": "25°C"
+      },
+      {
+        "label": "TIME",
+        "text": "3 h"
+      },
+      {
+        "label": "MATERIAL",
+        "text": "H2O"
+      },
+      {
+        "label": "MATERIAL",
+        "text": "NH3"
+      },
+      {
+        "label": "MATERIAL",
+        "text": "KNO3"
+      },
+      {
+        "label": "MATERIAL",
+        "text": "water"
+      },
+      {
+        "label": "MATERIAL",
+        "text": "K2IrCl6"
+      },
+      {
+        "label": "MATERIAL",
+        "text": "NH3·H2O"
+      },
+      {
+        "label": "TEMP",
+        "text": "25°C"
+      },
+      {
+        "label": "TIME",
+        "text": "3 h"
+      },
+      {
+        "label": "MATERIAL",
+        "text": "The resulting precursor was transferred"
+      },
+      {
+        "label": "TEMP",
+        "text": "450°C"
+      },
+      {
+        "label": "TIME",
+        "text": "0.5 h"
+      },
+      {
+        "label": "MATERIAL",
+        "text": "IrO2"
+      },
+      {
+        "label": "MATERIAL",
+        "text": "water"
+      },
+      {
+        "label": "TEMP",
+        "text": "60°C"
+      },
+      {
+        "label": "MATERIAL",
+        "text": "IrO2"
+      },
+      {
+        "label": "MATERIAL",
+        "text": "water"
+      },
+      {
+        "label": "TEMP",
+        "text": "60°C"
+      },
+      {
+        "label": "TIME",
+        "text": "1 s"
+      },
+      {
+        "label": "MATERIAL",
+        "text": "The powder samples\n"
+      },
+      {
+        "label": "TEMP",
+        "text": "120°C"
+      },
+      {
+        "label": "TIME",
+        "text": "6 h"
+      },
+      {
+        "label": "MATERIAL",
+        "text": "water"
+      },
+      {
+        "label": "TEMP",
+        "text": "80°C"
+      },
+      {
+        "label": "MATERIAL",
+        "text": "water"
+      },
+      {
+        "label": "TEMP",
+        "text": "80°C"
+      },
+      {
+        "label": "MATERIAL",
+        "text": "water"
+      },
+      {
+        "label": "MATERIAL",
+        "text": "water"
+      },
+      {
+        "label": "MATERIAL",
+        "text": "IrO2"
+      },
+      {
+        "label": "MATERIAL",
+        "text": "water"
+      },
+      {
+        "label": "MATERIAL",
+        "text": "isopropanol"
+      },
+      {
+        "label": "MATERIAL",
+        "text": "in a solution of 800"
+      },
+      {
+        "label": "MATERIAL",
+        "text": "μL Naﬁon solution (5"
+      },
+      {
+        "label": "MATERIAL",
+        "text": "GCE"
+      },
+      {
+        "label": "TEMP",
+        "text": "90°C"
+      },
+      {
+        "label": "TIME",
+        "text": "24 h"
+      },
+      {
+        "label": "MATERIAL",
+        "text": "\niridium oxide."
+      }
+    ]
+  },
+  "relevance": {
+    "score": 0.22499999999999998,
+    "breakdown": {
+      "content": 0.0,
+      "domain": 0.0,
+      "recency": 1.0,
+      "quality": 0.5,
+      "entities": 0.0
+    },
+    "reasons": [
+      "recent_publication"
     ]
   },
   "meta": {

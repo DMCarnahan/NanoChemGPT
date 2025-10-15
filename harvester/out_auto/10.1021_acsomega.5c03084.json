@@ -1,0 +1,98 @@
+{
+  "paper_id": "10.1021/acsomega.5c03084",
+  "title": "Growth of Carbon Nanotubes Using Mixed-Metal Catalysts That Include Heavy Refractory Metals as Catalyst Stabilizers.",
+  "authors": [
+    {
+      "name": "Park W"
+    },
+    {
+      "name": "Boebinger MG"
+    },
+    {
+      "name": "Collins L"
+    },
+    {
+      "name": "Puretzky AA"
+    },
+    {
+      "name": "Ivanov IN"
+    },
+    {
+      "name": "Geohegan DB"
+    },
+    {
+      "name": "Bronikowski MJ."
+    }
+  ],
+  "doi": "10.1021/acsomega.5c03084",
+  "source": "eupmc",
+  "urls": {
+    "pdf": ""
+  },
+  "license": null,
+  "access_route": "unknown",
+  "sections": [
+    {
+      "heading": "metadata",
+      "text": "Growth of Carbon Nanotubes Using Mixed-Metal Catalysts That Include Heavy Refractory Metals as Catalyst Stabilizers."
+    }
+  ],
+  "extractions": {
+    "methods_paragraphs": [
+      {
+        "text": "Growth of Carbon Nanotubes Using Mixed-Metal Catalysts That Include Heavy Refractory Metals as Catalyst Stabilizers.",
+        "operations": [
+          {
+            "op_type": "stir",
+            "sentence": "Growth of Carbon Nanotubes Using Mixed-Metal Catalysts That Include Heavy Refractory Metals as Catalyst Stabilizers.",
+            "start_char": 33,
+            "end_char": 38,
+            "materials": [],
+            "params": {}
+          }
+        ],
+        "expanded": [
+          {
+            "op_type": "stir",
+            "steps": [
+              "Place the reaction vessel on a stir plate.",
+              "Set the stirrer to an appropriate speed.",
+              "Stir for the specified time."
+            ]
+          }
+        ]
+      }
+    ],
+    "entities": []
+  },
+  "relevance": {
+    "score": 0.22499999999999998,
+    "breakdown": {
+      "content": 0.0,
+      "domain": 0.0,
+      "recency": 1.0,
+      "quality": 0.5,
+      "entities": 0.0
+    },
+    "reasons": [
+      "recent_publication"
+    ]
+  },
+  "meta": {
+    "title": "Growth of Carbon Nanotubes Using Mixed-Metal Catalysts That Include Heavy Refractory Metals as Catalyst Stabilizers.",
+    "doi": "10.1021/acsomega.5c03084",
+    "url": "",
+    "pdf_url": "",
+    "year": "2025",
+    "authors": [
+      "Park W",
+      "Boebinger MG",
+      "Collins L",
+      "Puretzky AA",
+      "Ivanov IN",
+      "Geohegan DB",
+      "Bronikowski MJ."
+    ]
+  },
+  "raw": "Growth of Carbon Nanotubes Using Mixed-Metal Catalysts That Include Heavy Refractory Metals as Catalyst Stabilizers."
+}

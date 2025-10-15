@@ -1,0 +1,65 @@
+{
+  "paper_id": "10.1021/acsabm.5c01029",
+  "title": "Magnetomechanical Detachment of Bacterial Biofilms Using Anisotropic Magnetic Iron Oxide Nanochains.",
+  "authors": [
+    {
+      "name": "Šavli M, Černila M"
+    },
+    {
+      "name": "Caf M, Zahirović A, Zaveršek N"
+    },
+    {
+      "name": "Nemec S"
+    },
+    {
+      "name": "Stojanov S, Klančnik A, Sabotič J"
+    },
+    {
+      "name": "Kralj S"
+    },
+    {
+      "name": "Berlec A."
+    }
+  ],
+  "doi": "10.1021/acsabm.5c01029",
+  "source": "eupmc",
+  "urls": {
+    "pdf": ""
+  },
+  "license": null,
+  "access_route": "unknown",
+  "sections": [],
+  "extractions": {
+    "methods_paragraphs": [],
+    "entities": []
+  },
+  "relevance": {
+    "score": 0.22499999999999998,
+    "breakdown": {
+      "content": 0.0,
+      "domain": 0.0,
+      "recency": 1.0,
+      "quality": 0.5,
+      "entities": 0.0
+    },
+    "reasons": [
+      "recent_publication"
+    ]
+  },
+  "meta": {
+    "title": "Magnetomechanical Detachment of Bacterial Biofilms Using Anisotropic Magnetic Iron Oxide Nanochains.",
+    "doi": "10.1021/acsabm.5c01029",
+    "url": "",
+    "pdf_url": "",
+    "year": "2025",
+    "authors": [
+      "Šavli M, Černila M",
+      "Caf M, Zahirović A, Zaveršek N",
+      "Nemec S",
+      "Stojanov S, Klančnik A, Sabotič J",
+      "Kralj S",
+      "Berlec A."
+    ]
+  },
+  "raw": "Magnetomechanical Detachment of Bacterial Biofilms Using Anisotropic Magnetic Iron Oxide Nanochains."
+}

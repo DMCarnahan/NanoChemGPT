@@ -1,0 +1,57 @@
+{
+  "paper_id": "10.1021/acsomega.5c05589",
+  "title": "Nanoengineered Enzyme Immobilization: Toward Biomedical, Orthopedic, and Biofuel Applications.",
+  "authors": [
+    {
+      "name": "Ma X"
+    },
+    {
+      "name": "Pronay TS"
+    },
+    {
+      "name": "Gao B"
+    },
+    {
+      "name": "Zhao J."
+    }
+  ],
+  "doi": "10.1021/acsomega.5c05589",
+  "source": "eupmc",
+  "urls": {
+    "pdf": ""
+  },
+  "license": null,
+  "access_route": "unknown",
+  "sections": [],
+  "extractions": {
+    "methods_paragraphs": [],
+    "entities": []
+  },
+  "relevance": {
+    "score": 0.22499999999999998,
+    "breakdown": {
+      "content": 0.0,
+      "domain": 0.0,
+      "recency": 1.0,
+      "quality": 0.5,
+      "entities": 0.0
+    },
+    "reasons": [
+      "recent_publication"
+    ]
+  },
+  "meta": {
+    "title": "Nanoengineered Enzyme Immobilization: Toward Biomedical, Orthopedic, and Biofuel Applications.",
+    "doi": "10.1021/acsomega.5c05589",
+    "url": "",
+    "pdf_url": "",
+    "year": "2025",
+    "authors": [
+      "Ma X",
+      "Pronay TS",
+      "Gao B",
+      "Zhao J."
+    ]
+  },
+  "raw": "Nanoengineered Enzyme Immobilization: Toward Biomedical, Orthopedic, and Biofuel Applications."
+}

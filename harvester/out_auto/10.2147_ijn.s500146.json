@@ -1,0 +1,57 @@
+{
+  "paper_id": "10.2147/ijn.s500146",
+  "title": "Nanomaterials: Promising Tools for the Diagnosis and Treatment of Myocardial Infarction.",
+  "authors": [
+    {
+      "name": "Ge Y"
+    },
+    {
+      "name": "Wu L"
+    },
+    {
+      "name": "Mei S"
+    },
+    {
+      "name": "Wu J."
+    }
+  ],
+  "doi": "10.2147/ijn.s500146",
+  "source": "eupmc",
+  "urls": {
+    "pdf": ""
+  },
+  "license": null,
+  "access_route": "unknown",
+  "sections": [],
+  "extractions": {
+    "methods_paragraphs": [],
+    "entities": []
+  },
+  "relevance": {
+    "score": 0.22499999999999998,
+    "breakdown": {
+      "content": 0.0,
+      "domain": 0.0,
+      "recency": 1.0,
+      "quality": 0.5,
+      "entities": 0.0
+    },
+    "reasons": [
+      "recent_publication"
+    ]
+  },
+  "meta": {
+    "title": "Nanomaterials: Promising Tools for the Diagnosis and Treatment of Myocardial Infarction.",
+    "doi": "10.2147/ijn.s500146",
+    "url": "",
+    "pdf_url": "",
+    "year": "2025",
+    "authors": [
+      "Ge Y",
+      "Wu L",
+      "Mei S",
+      "Wu J."
+    ]
+  },
+  "raw": "Nanomaterials: Promising Tools for the Diagnosis and Treatment of Myocardial Infarction."
+}

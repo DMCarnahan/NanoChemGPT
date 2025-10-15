@@ -172,6 +172,97 @@
           }
         ]
       }
+    ],
+    "entities": [
+      {
+        "label": "MATERIAL",
+        "text": "PG"
+      },
+      {
+        "label": "MATERIAL",
+        "text": "CDs"
+      },
+      {
+        "label": "MATERIAL",
+        "text": "water"
+      },
+      {
+        "label": "MATERIAL",
+        "text": "leaves\npowder was taken"
+      },
+      {
+        "label": "TEMP",
+        "text": "60°C"
+      },
+      {
+        "label": "TIME",
+        "text": "15 min"
+      },
+      {
+        "label": "MATERIAL",
+        "text": "of the solution changed from"
+      },
+      {
+        "label": "TEMP",
+        "text": "120°C"
+      },
+      {
+        "label": "TIME",
+        "text": "24 h"
+      },
+      {
+        "label": "MATERIAL",
+        "text": "of the solution changed from"
+      },
+      {
+        "label": "TEMP",
+        "text": "120°C"
+      },
+      {
+        "label": "TIME",
+        "text": "24 h"
+      },
+      {
+        "label": "MATERIAL",
+        "text": "of the solution changed from"
+      },
+      {
+        "label": "TEMP",
+        "text": "120°C"
+      },
+      {
+        "label": "TIME",
+        "text": "24 h"
+      },
+      {
+        "label": "TIME",
+        "text": "5  min"
+      },
+      {
+        "label": "MATERIAL",
+        "text": "AgNO3"
+      },
+      {
+        "label": "MATERIAL",
+        "text": "water"
+      },
+      {
+        "label": "MATERIAL",
+        "text": "-CDs solution to\n"
+      }
+    ]
+  },
+  "relevance": {
+    "score": 0.22499999999999998,
+    "breakdown": {
+      "content": 0.0,
+      "domain": 0.0,
+      "recency": 1.0,
+      "quality": 0.5,
+      "entities": 0.0
+    },
+    "reasons": [
+      "recent_publication"
     ]
   },
   "meta": {

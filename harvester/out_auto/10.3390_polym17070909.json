@@ -1,0 +1,57 @@
+{
+  "paper_id": "10.3390/polym17070909",
+  "title": "ABS Nanocomposites for Advanced Technical and Biomedical Applications.",
+  "authors": [
+    {
+      "name": "Lapčík L, Vašina M"
+    },
+    {
+      "name": "Murtaja Y"
+    },
+    {
+      "name": "Sepetcioglu H, Lapčíková B, Ovsík M, Staněk M, Karagöz İ"
+    },
+    {
+      "name": "Vadanagekar AS."
+    }
+  ],
+  "doi": "10.3390/polym17070909",
+  "source": "eupmc",
+  "urls": {
+    "pdf": ""
+  },
+  "license": null,
+  "access_route": "unknown",
+  "sections": [],
+  "extractions": {
+    "methods_paragraphs": [],
+    "entities": []
+  },
+  "relevance": {
+    "score": 0.22499999999999998,
+    "breakdown": {
+      "content": 0.0,
+      "domain": 0.0,
+      "recency": 1.0,
+      "quality": 0.5,
+      "entities": 0.0
+    },
+    "reasons": [
+      "recent_publication"
+    ]
+  },
+  "meta": {
+    "title": "ABS Nanocomposites for Advanced Technical and Biomedical Applications.",
+    "doi": "10.3390/polym17070909",
+    "url": "",
+    "pdf_url": "",
+    "year": "2025",
+    "authors": [
+      "Lapčík L, Vašina M",
+      "Murtaja Y",
+      "Sepetcioglu H, Lapčíková B, Ovsík M, Staněk M, Karagöz İ",
+      "Vadanagekar AS."
+    ]
+  },
+  "raw": "ABS Nanocomposites for Advanced Technical and Biomedical Applications."
+}

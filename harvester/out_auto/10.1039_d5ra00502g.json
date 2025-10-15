@@ -1,0 +1,57 @@
+{
+  "paper_id": "10.1039/d5ra00502g",
+  "title": "Study of carbon matrix and hybrid nanocomposite for greenhouse gas storage.",
+  "authors": [
+    {
+      "name": "Ben Mansour N"
+    },
+    {
+      "name": "Hjiri M"
+    },
+    {
+      "name": "Djeridi W"
+    },
+    {
+      "name": "El Mir L."
+    }
+  ],
+  "doi": "10.1039/d5ra00502g",
+  "source": "eupmc",
+  "urls": {
+    "pdf": ""
+  },
+  "license": null,
+  "access_route": "unknown",
+  "sections": [],
+  "extractions": {
+    "methods_paragraphs": [],
+    "entities": []
+  },
+  "relevance": {
+    "score": 0.22499999999999998,
+    "breakdown": {
+      "content": 0.0,
+      "domain": 0.0,
+      "recency": 1.0,
+      "quality": 0.5,
+      "entities": 0.0
+    },
+    "reasons": [
+      "recent_publication"
+    ]
+  },
+  "meta": {
+    "title": "Study of carbon matrix and hybrid nanocomposite for greenhouse gas storage.",
+    "doi": "10.1039/d5ra00502g",
+    "url": "",
+    "pdf_url": "",
+    "year": "2025",
+    "authors": [
+      "Ben Mansour N",
+      "Hjiri M",
+      "Djeridi W",
+      "El Mir L."
+    ]
+  },
+  "raw": "Study of carbon matrix and hybrid nanocomposite for greenhouse gas storage."
+}

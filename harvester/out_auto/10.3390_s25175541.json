@@ -1,0 +1,65 @@
+{
+  "paper_id": "10.3390/s25175541",
+  "title": "Advances in the Electrochemical Detection of Antibiotics: Modified Materials, Wearable Sensors, and Future Prospects.",
+  "authors": [
+    {
+      "name": "Gong X"
+    },
+    {
+      "name": "Li Y"
+    },
+    {
+      "name": "Li X"
+    },
+    {
+      "name": "Hu J"
+    },
+    {
+      "name": "Zhou X"
+    },
+    {
+      "name": "Yang X."
+    }
+  ],
+  "doi": "10.3390/s25175541",
+  "source": "eupmc",
+  "urls": {
+    "pdf": ""
+  },
+  "license": null,
+  "access_route": "unknown",
+  "sections": [],
+  "extractions": {
+    "methods_paragraphs": [],
+    "entities": []
+  },
+  "relevance": {
+    "score": 0.22499999999999998,
+    "breakdown": {
+      "content": 0.0,
+      "domain": 0.0,
+      "recency": 1.0,
+      "quality": 0.5,
+      "entities": 0.0
+    },
+    "reasons": [
+      "recent_publication"
+    ]
+  },
+  "meta": {
+    "title": "Advances in the Electrochemical Detection of Antibiotics: Modified Materials, Wearable Sensors, and Future Prospects.",
+    "doi": "10.3390/s25175541",
+    "url": "",
+    "pdf_url": "",
+    "year": "2025",
+    "authors": [
+      "Gong X",
+      "Li Y",
+      "Li X",
+      "Hu J",
+      "Zhou X",
+      "Yang X."
+    ]
+  },
+  "raw": "Advances in the Electrochemical Detection of Antibiotics: Modified Materials, Wearable Sensors, and Future Prospects."
+}

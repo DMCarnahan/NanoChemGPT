@@ -1,0 +1,69 @@
+{
+  "paper_id": "10.1039/d4na00623b",
+  "title": "Photocatalytic deposition of noble metals on 0D, 1D, and 2D TiO<sub>2</sub> structures: a review.",
+  "authors": [
+    {
+      "name": "Veziroglu S"
+    },
+    {
+      "name": "Shondo J"
+    },
+    {
+      "name": "Tjardts T"
+    },
+    {
+      "name": "Sarwar TB, Sünbül A"
+    },
+    {
+      "name": "Mishra YK"
+    },
+    {
+      "name": "Faupel F"
+    },
+    {
+      "name": "Aktas OC."
+    }
+  ],
+  "doi": "10.1039/d4na00623b",
+  "source": "eupmc",
+  "urls": {
+    "pdf": ""
+  },
+  "license": null,
+  "access_route": "unknown",
+  "sections": [],
+  "extractions": {
+    "methods_paragraphs": [],
+    "entities": []
+  },
+  "relevance": {
+    "score": 0.22499999999999998,
+    "breakdown": {
+      "content": 0.0,
+      "domain": 0.0,
+      "recency": 1.0,
+      "quality": 0.5,
+      "entities": 0.0
+    },
+    "reasons": [
+      "recent_publication"
+    ]
+  },
+  "meta": {
+    "title": "Photocatalytic deposition of noble metals on 0D, 1D, and 2D TiO<sub>2</sub> structures: a review.",
+    "doi": "10.1039/d4na00623b",
+    "url": "",
+    "pdf_url": "",
+    "year": "2024",
+    "authors": [
+      "Veziroglu S",
+      "Shondo J",
+      "Tjardts T",
+      "Sarwar TB, Sünbül A",
+      "Mishra YK",
+      "Faupel F",
+      "Aktas OC."
+    ]
+  },
+  "raw": "Photocatalytic deposition of noble metals on 0D, 1D, and 2D TiO<sub>2</sub> structures: a review."
+}

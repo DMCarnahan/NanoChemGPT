@@ -960,6 +960,273 @@
           }
         ]
       }
+    ],
+    "entities": [
+      {
+        "label": "MATERIAL",
+        "text": "duction of precursor mixtures into"
+      },
+      {
+        "label": "MATERIAL",
+        "text": "oleylamine"
+      },
+      {
+        "label": "MATERIAL",
+        "text": "the  solution,  "
+      },
+      {
+        "label": "MATERIAL",
+        "text": "the  precursor  in"
+      },
+      {
+        "label": "MATERIAL",
+        "text": "injecting another precursor several times"
+      },
+      {
+        "label": "MATERIAL",
+        "text": "oleylamine"
+      },
+      {
+        "label": "MATERIAL",
+        "text": "the  solution,  "
+      },
+      {
+        "label": "MATERIAL",
+        "text": "the  precursor  in"
+      },
+      {
+        "label": "MATERIAL",
+        "text": "injecting another precursor several times"
+      },
+      {
+        "label": "MATERIAL",
+        "text": "oleylamine"
+      },
+      {
+        "label": "MATERIAL",
+        "text": "the  solution,  "
+      },
+      {
+        "label": "MATERIAL",
+        "text": "the  precursor  in"
+      },
+      {
+        "label": "MATERIAL",
+        "text": "injecting another precursor several times"
+      },
+      {
+        "label": "MATERIAL",
+        "text": "QDSSCs"
+      },
+      {
+        "label": "MATERIAL",
+        "text": "CH3"
+      },
+      {
+        "label": "MATERIAL",
+        "text": "oleylamine"
+      },
+      {
+        "label": "TEMP",
+        "text": "220 °C"
+      },
+      {
+        "label": "MATERIAL",
+        "text": "QY"
+      },
+      {
+        "label": "MATERIAL",
+        "text": "InP"
+      },
+      {
+        "label": "MATERIAL",
+        "text": "QDs"
+      },
+      {
+        "label": "MATERIAL",
+        "text": "ZnS"
+      },
+      {
+        "label": "MATERIAL",
+        "text": "water"
+      },
+      {
+        "label": "MATERIAL",
+        "text": "Ga(OAc)₃"
+      },
+      {
+        "label": "MATERIAL",
+        "text": "effective zinc precursor, \n"
+      },
+      {
+        "label": "MATERIAL",
+        "text": "crystal \nsolution is mixed"
+      },
+      {
+        "label": "MATERIAL",
+        "text": "quantum dot precursor solution at"
+      },
+      {
+        "label": "MATERIAL",
+        "text": "GQDs"
+      },
+      {
+        "label": "MATERIAL",
+        "text": "water"
+      },
+      {
+        "label": "MATERIAL",
+        "text": "nitric acid"
+      },
+      {
+        "label": "MATERIAL",
+        "text": "water"
+      },
+      {
+        "label": "MATERIAL",
+        "text": "CIS"
+      },
+      {
+        "label": "MATERIAL",
+        "text": "QDs"
+      },
+      {
+        "label": "MATERIAL",
+        "text": "CuS \nnanoparticles,  "
+      },
+      {
+        "label": "MATERIAL",
+        "text": "OLA"
+      },
+      {
+        "label": "MATERIAL",
+        "text": "CuInS2"
+      },
+      {
+        "label": "MATERIAL",
+        "text": "PL"
+      },
+      {
+        "label": "MATERIAL",
+        "text": "InP"
+      },
+      {
+        "label": "MATERIAL",
+        "text": "QDs"
+      },
+      {
+        "label": "MATERIAL",
+        "text": "ZnS"
+      },
+      {
+        "label": "MATERIAL",
+        "text": "PLQY"
+      },
+      {
+        "label": "MATERIAL",
+        "text": "PL"
+      },
+      {
+        "label": "MATERIAL",
+        "text": "EQE"
+      },
+      {
+        "label": "MATERIAL",
+        "text": "GQDs"
+      },
+      {
+        "label": "MATERIAL",
+        "text": ")  solution-processing"
+      },
+      {
+        "label": "MATERIAL",
+        "text": "of  graphene  with"
+      },
+      {
+        "label": "MATERIAL",
+        "text": "CIS"
+      },
+      {
+        "label": "MATERIAL",
+        "text": "PCE"
+      },
+      {
+        "label": "MATERIAL",
+        "text": "TiO2"
+      },
+      {
+        "label": "MATERIAL",
+        "text": "CIS photoconductive film in a"
+      },
+      {
+        "label": "MATERIAL",
+        "text": "CIS"
+      },
+      {
+        "label": "MATERIAL",
+        "text": "TiO2"
+      },
+      {
+        "label": "MATERIAL",
+        "text": "CIS"
+      },
+      {
+        "label": "MATERIAL",
+        "text": "PCE"
+      },
+      {
+        "label": "MATERIAL",
+        "text": "TiO2"
+      },
+      {
+        "label": "MATERIAL",
+        "text": "CIS"
+      },
+      {
+        "label": "MATERIAL",
+        "text": "PCE"
+      },
+      {
+        "label": "MATERIAL",
+        "text": "TiO2"
+      },
+      {
+        "label": "MATERIAL",
+        "text": "CIS"
+      },
+      {
+        "label": "MATERIAL",
+        "text": "IPCE"
+      },
+      {
+        "label": "MATERIAL",
+        "text": "TiO2"
+      },
+      {
+        "label": "MATERIAL",
+        "text": "QDSSCs"
+      },
+      {
+        "label": "MATERIAL",
+        "text": "PCE"
+      },
+      {
+        "label": "MATERIAL",
+        "text": "PCE"
+      }
+    ]
+  },
+  "relevance": {
+    "score": 0.22499999999999998,
+    "breakdown": {
+      "content": 0.0,
+      "domain": 0.0,
+      "recency": 1.0,
+      "quality": 0.5,
+      "entities": 0.0
+    },
+    "reasons": [
+      "recent_publication"
     ]
   },
   "meta": {

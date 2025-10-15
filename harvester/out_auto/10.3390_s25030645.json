@@ -1,0 +1,65 @@
+{
+  "paper_id": "10.3390/s25030645",
+  "title": "Cellulose-Based Electrochemical Sensors.",
+  "authors": [
+    {
+      "name": "Sheraz M"
+    },
+    {
+      "name": "Sun XF"
+    },
+    {
+      "name": "Siddiqui A"
+    },
+    {
+      "name": "Wang Y"
+    },
+    {
+      "name": "Hu S"
+    },
+    {
+      "name": "Sun R."
+    }
+  ],
+  "doi": "10.3390/s25030645",
+  "source": "eupmc",
+  "urls": {
+    "pdf": ""
+  },
+  "license": null,
+  "access_route": "unknown",
+  "sections": [],
+  "extractions": {
+    "methods_paragraphs": [],
+    "entities": []
+  },
+  "relevance": {
+    "score": 0.22499999999999998,
+    "breakdown": {
+      "content": 0.0,
+      "domain": 0.0,
+      "recency": 1.0,
+      "quality": 0.5,
+      "entities": 0.0
+    },
+    "reasons": [
+      "recent_publication"
+    ]
+  },
+  "meta": {
+    "title": "Cellulose-Based Electrochemical Sensors.",
+    "doi": "10.3390/s25030645",
+    "url": "",
+    "pdf_url": "",
+    "year": "2025",
+    "authors": [
+      "Sheraz M",
+      "Sun XF",
+      "Siddiqui A",
+      "Wang Y",
+      "Hu S",
+      "Sun R."
+    ]
+  },
+  "raw": "Cellulose-Based Electrochemical Sensors."
+}

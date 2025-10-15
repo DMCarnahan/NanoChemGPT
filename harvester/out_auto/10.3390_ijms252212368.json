@@ -1,0 +1,57 @@
+{
+  "paper_id": "10.3390/ijms252212368",
+  "title": "Convergence of Nanotechnology and Machine Learning: The State of the Art, Challenges, and Perspectives.",
+  "authors": [
+    {
+      "name": "Tripathy A"
+    },
+    {
+      "name": "Patne AY"
+    },
+    {
+      "name": "Mohapatra S"
+    },
+    {
+      "name": "Mohapatra SS."
+    }
+  ],
+  "doi": "10.3390/ijms252212368",
+  "source": "eupmc",
+  "urls": {
+    "pdf": ""
+  },
+  "license": null,
+  "access_route": "unknown",
+  "sections": [],
+  "extractions": {
+    "methods_paragraphs": [],
+    "entities": []
+  },
+  "relevance": {
+    "score": 0.22499999999999998,
+    "breakdown": {
+      "content": 0.0,
+      "domain": 0.0,
+      "recency": 1.0,
+      "quality": 0.5,
+      "entities": 0.0
+    },
+    "reasons": [
+      "recent_publication"
+    ]
+  },
+  "meta": {
+    "title": "Convergence of Nanotechnology and Machine Learning: The State of the Art, Challenges, and Perspectives.",
+    "doi": "10.3390/ijms252212368",
+    "url": "",
+    "pdf_url": "",
+    "year": "2024",
+    "authors": [
+      "Tripathy A",
+      "Patne AY",
+      "Mohapatra S",
+      "Mohapatra SS."
+    ]
+  },
+  "raw": "Convergence of Nanotechnology and Machine Learning: The State of the Art, Challenges, and Perspectives."
+}

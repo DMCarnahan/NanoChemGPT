@@ -1,0 +1,77 @@
+{
+  "paper_id": "10.3390/molecules30051078",
+  "title": "MOF-Derived N-Doped Carbon Nanotube-Confined Ni Nanoparticles for the Simultaneous Electrochemical Detection of Cu²⁺ and Hg²⁺ with High Sensitivity and Stability.",
+  "authors": [
+    {
+      "name": "Li J"
+    },
+    {
+      "name": "Chen L"
+    },
+    {
+      "name": "Qiao Y"
+    },
+    {
+      "name": "Li L"
+    },
+    {
+      "name": "Li X"
+    },
+    {
+      "name": "Deng L"
+    },
+    {
+      "name": "Duan X"
+    },
+    {
+      "name": "Chen H"
+    },
+    {
+      "name": "Gao Y."
+    }
+  ],
+  "doi": "10.3390/molecules30051078",
+  "source": "eupmc",
+  "urls": {
+    "pdf": ""
+  },
+  "license": null,
+  "access_route": "unknown",
+  "sections": [],
+  "extractions": {
+    "methods_paragraphs": [],
+    "entities": []
+  },
+  "relevance": {
+    "score": 0.22499999999999998,
+    "breakdown": {
+      "content": 0.0,
+      "domain": 0.0,
+      "recency": 1.0,
+      "quality": 0.5,
+      "entities": 0.0
+    },
+    "reasons": [
+      "recent_publication"
+    ]
+  },
+  "meta": {
+    "title": "MOF-Derived N-Doped Carbon Nanotube-Confined Ni Nanoparticles for the Simultaneous Electrochemical Detection of Cu²⁺ and Hg²⁺ with High Sensitivity and Stability.",
+    "doi": "10.3390/molecules30051078",
+    "url": "",
+    "pdf_url": "",
+    "year": "2025",
+    "authors": [
+      "Li J",
+      "Chen L",
+      "Qiao Y",
+      "Li L",
+      "Li X",
+      "Deng L",
+      "Duan X",
+      "Chen H",
+      "Gao Y."
+    ]
+  },
+  "raw": "MOF-Derived N-Doped Carbon Nanotube-Confined Ni Nanoparticles for the Simultaneous Electrochemical Detection of Cu²⁺ and Hg²⁺ with High Sensitivity and Stability."
+}

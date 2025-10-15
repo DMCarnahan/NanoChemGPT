@@ -1,0 +1,61 @@
+{
+  "paper_id": "10.3390/nano14141192",
+  "title": "Langmuir-Blodgett Transfer of Nanocrystal Monolayers: Layer Compaction, Layer Compression, and Lattice Stretching of the Transferred Layer.",
+  "authors": [
+    {
+      "name": "Patel RN"
+    },
+    {
+      "name": "Goodfellow B"
+    },
+    {
+      "name": "Heitsch AT"
+    },
+    {
+      "name": "Smilgies DM"
+    },
+    {
+      "name": "Korgel BA."
+    }
+  ],
+  "doi": "10.3390/nano14141192",
+  "source": "eupmc",
+  "urls": {
+    "pdf": ""
+  },
+  "license": null,
+  "access_route": "unknown",
+  "sections": [],
+  "extractions": {
+    "methods_paragraphs": [],
+    "entities": []
+  },
+  "relevance": {
+    "score": 0.22499999999999998,
+    "breakdown": {
+      "content": 0.0,
+      "domain": 0.0,
+      "recency": 1.0,
+      "quality": 0.5,
+      "entities": 0.0
+    },
+    "reasons": [
+      "recent_publication"
+    ]
+  },
+  "meta": {
+    "title": "Langmuir-Blodgett Transfer of Nanocrystal Monolayers: Layer Compaction, Layer Compression, and Lattice Stretching of the Transferred Layer.",
+    "doi": "10.3390/nano14141192",
+    "url": "",
+    "pdf_url": "",
+    "year": "2024",
+    "authors": [
+      "Patel RN",
+      "Goodfellow B",
+      "Heitsch AT",
+      "Smilgies DM",
+      "Korgel BA."
+    ]
+  },
+  "raw": "Langmuir-Blodgett Transfer of Nanocrystal Monolayers: Layer Compaction, Layer Compression, and Lattice Stretching of the Transferred Layer."
+}

@@ -1,0 +1,77 @@
+{
+  "paper_id": "10.3390/nano15070561",
+  "title": "Unlocking the Potential of Mg-Doped Rare Earth Manganites: Machine Learning-Guided Synthesis and Insights into Structural and Optical Properties.",
+  "authors": [
+    {
+      "name": "Ben Messaoud CL"
+    },
+    {
+      "name": "Hebboul Z"
+    },
+    {
+      "name": "Lefkaier K"
+    },
+    {
+      "name": "Draoui A"
+    },
+    {
+      "name": "Ben Kamri AL, Goumri-Said S"
+    },
+    {
+      "name": "Kanoun MB"
+    },
+    {
+      "name": "Silva RS"
+    },
+    {
+      "name": "Alonso JA"
+    },
+    {
+      "name": "Laurent S."
+    }
+  ],
+  "doi": "10.3390/nano15070561",
+  "source": "eupmc",
+  "urls": {
+    "pdf": ""
+  },
+  "license": null,
+  "access_route": "unknown",
+  "sections": [],
+  "extractions": {
+    "methods_paragraphs": [],
+    "entities": []
+  },
+  "relevance": {
+    "score": 0.22499999999999998,
+    "breakdown": {
+      "content": 0.0,
+      "domain": 0.0,
+      "recency": 1.0,
+      "quality": 0.5,
+      "entities": 0.0
+    },
+    "reasons": [
+      "recent_publication"
+    ]
+  },
+  "meta": {
+    "title": "Unlocking the Potential of Mg-Doped Rare Earth Manganites: Machine Learning-Guided Synthesis and Insights into Structural and Optical Properties.",
+    "doi": "10.3390/nano15070561",
+    "url": "",
+    "pdf_url": "",
+    "year": "2025",
+    "authors": [
+      "Ben Messaoud CL",
+      "Hebboul Z",
+      "Lefkaier K",
+      "Draoui A",
+      "Ben Kamri AL, Goumri-Said S",
+      "Kanoun MB",
+      "Silva RS",
+      "Alonso JA",
+      "Laurent S."
+    ]
+  },
+  "raw": "Unlocking the Potential of Mg-Doped Rare Earth Manganites: Machine Learning-Guided Synthesis and Insights into Structural and Optical Properties."
+}

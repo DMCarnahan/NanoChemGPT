@@ -206,6 +206,10 @@ class EnhancedRelevanceFilter:
 
     def score_recency(self, year: Optional[int]) -> float:
         """Score based on publication recency."""
+        try:
+            year = int(year)
+        except Exception:
+            return 0.0
         if not year or year < self.min_year:
             return 0.0
 

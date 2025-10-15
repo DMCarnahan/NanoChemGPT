@@ -1,0 +1,128 @@
+{
+  "paper_id": "10.1039/d5ra03545g",
+  "title": "ZnO electrocatalyst integrated onto carbon paper for efficient non-aqueous Li-O&lt;sub&gt;2&lt;/sub&gt; batteries.",
+  "authors": [
+    {
+      "name": "Kang I"
+    },
+    {
+      "name": "Kim S"
+    },
+    {
+      "name": "Lee SM"
+    },
+    {
+      "name": "Jeong SH"
+    },
+    {
+      "name": "Ki HJ"
+    },
+    {
+      "name": "Lee UJ"
+    },
+    {
+      "name": "Ko JH"
+    },
+    {
+      "name": "Son BJ"
+    },
+    {
+      "name": "Kang J."
+    }
+  ],
+  "doi": "10.1039/d5ra03545g",
+  "source": "eupmc",
+  "urls": {
+    "pdf": ""
+  },
+  "license": null,
+  "access_route": "unknown",
+  "sections": [
+    {
+      "heading": "fulltext",
+      "text": "Figure S2. XRD patterns of ZnO powder (zinc acetate dihydrate powder heated at 400"
+    }
+  ],
+  "extractions": {
+    "methods_paragraphs": [
+      {
+        "text": "Figure S2. XRD patterns of ZnO powder (zinc acetate dihydrate powder heated at 400",
+        "operations": [
+          {
+            "op_type": "heat",
+            "sentence": "XRD patterns of ZnO powder (zinc acetate dihydrate powder heated at 400",
+            "start_char": 69,
+            "end_char": 75,
+            "materials": [
+              "XRD",
+              "ZnO",
+              "of ZnO powder (zinc",
+              "(zinc acetate dihydrate powder"
+            ],
+            "params": {}
+          }
+        ],
+        "expanded": [
+          {
+            "op_type": "heat",
+            "steps": [
+              "Place the reaction vessel on a hotplate.",
+              "Ramp to the target temperature.",
+              "Maintain the target temperature for the specified time."
+            ]
+          }
+        ]
+      }
+    ],
+    "entities": [
+      {
+        "label": "MATERIAL",
+        "text": "XRD"
+      },
+      {
+        "label": "MATERIAL",
+        "text": "ZnO"
+      },
+      {
+        "label": "MATERIAL",
+        "text": "of ZnO powder (zinc"
+      },
+      {
+        "label": "MATERIAL",
+        "text": "(zinc acetate dihydrate powder"
+      }
+    ]
+  },
+  "relevance": {
+    "score": 0.22499999999999998,
+    "breakdown": {
+      "content": 0.0,
+      "domain": 0.0,
+      "recency": 1.0,
+      "quality": 0.5,
+      "entities": 0.0
+    },
+    "reasons": [
+      "recent_publication"
+    ]
+  },
+  "meta": {
+    "title": "ZnO electrocatalyst integrated onto carbon paper for efficient non-aqueous Li-O&lt;sub&gt;2&lt;/sub&gt; batteries.",
+    "doi": "10.1039/d5ra03545g",
+    "url": "",
+    "pdf_url": "",
+    "year": "2025",
+    "authors": [
+      "Kang I",
+      "Kim S",
+      "Lee SM",
+      "Jeong SH",
+      "Ki HJ",
+      "Lee UJ",
+      "Ko JH",
+      "Son BJ",
+      "Kang J."
+    ]
+  },
+  "raw": "ZnO electrocatalyst integrated onto carbon paper \nfor efficient non-aqueous Li‒O2 batteries\n\nInhan Kang, Sehun Kim, Su Min Lee, Se Hyun Jeong, Hyeong Ju Ki, Ui Jin Lee, Jae Hyung \nKo, Byung Jun Son, Sungjin Kim* and Jungwon Kang*\n\nDepartment of Advanced Materials Science and Engineering, Mokpo National University, 61 dorim-ri, 1666 \nYeongsan-ro, Cheonggye-myeon, Muan-gun, Jeonnam, South Korea\n\n*Corresponding author: ksj840711@gmail.com, jwkang17@mokpo.ac.kr\n\nSupplementaryInformation(SI)forRSCAdvances.Thisjournalis©TheRoyalSocietyofChemistry2025\fSupplementary Information\n\nFigure S1. XRD patterns of ZnO on P50 and pristine P50\n\n\fFigure S2. XRD patterns of ZnO powder (zinc acetate dihydrate powder heated at 400 \n\n℃ in air) \n\n\fFigure S3. Energy Efficiency of P50 and ZnO on P50 at a current density of 0.1 mAh\n\n\f"
+}

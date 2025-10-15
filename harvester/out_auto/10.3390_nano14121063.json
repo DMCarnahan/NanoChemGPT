@@ -1,0 +1,61 @@
+{
+  "paper_id": "10.3390/nano14121063",
+  "title": "Understanding of Lanthanide-Doped Core-Shell Structure at the Nanoscale Level.",
+  "authors": [
+    {
+      "name": "Zhao Q"
+    },
+    {
+      "name": "Tian X"
+    },
+    {
+      "name": "Ren L"
+    },
+    {
+      "name": "Su Y"
+    },
+    {
+      "name": "Su Q."
+    }
+  ],
+  "doi": "10.3390/nano14121063",
+  "source": "eupmc",
+  "urls": {
+    "pdf": ""
+  },
+  "license": null,
+  "access_route": "unknown",
+  "sections": [],
+  "extractions": {
+    "methods_paragraphs": [],
+    "entities": []
+  },
+  "relevance": {
+    "score": 0.22499999999999998,
+    "breakdown": {
+      "content": 0.0,
+      "domain": 0.0,
+      "recency": 1.0,
+      "quality": 0.5,
+      "entities": 0.0
+    },
+    "reasons": [
+      "recent_publication"
+    ]
+  },
+  "meta": {
+    "title": "Understanding of Lanthanide-Doped Core-Shell Structure at the Nanoscale Level.",
+    "doi": "10.3390/nano14121063",
+    "url": "",
+    "pdf_url": "",
+    "year": "2024",
+    "authors": [
+      "Zhao Q",
+      "Tian X",
+      "Ren L",
+      "Su Y",
+      "Su Q."
+    ]
+  },
+  "raw": "Understanding of Lanthanide-Doped Core-Shell Structure at the Nanoscale Level."
+}
