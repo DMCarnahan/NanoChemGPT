@@ -6,7 +6,7 @@ scipy==1.11.4
 # ---- ML / NLP ----
 --extra-index-url https://download.pytorch.org/whl/cpu
 torch==2.2.2+cpu
-scikit-learn==1.4.2
+scikit-learn>=1.7.2
 
 sentence-transformers==2.6.1
 transformers==4.40.2
