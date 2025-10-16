@@ -53,20 +53,29 @@ cmd = "bash -lc ' \
   echo \"[start] INDEX_DIR_DOC=$INDEX_DIR_DOC\"; \
   echo \"[start] INDEX_DIR_PASSAGE=$INDEX_DIR_PASSAGE\"; \
   mkdir -p \"$(dirname \"$BUNDLE_PATH\")\" \"$INDEX_DIR_DOC\" \"$INDEX_DIR_PASSAGE\"; \
+  # Optional TF-IDF purge/rebuild for sklearn version alignment \
+  if [ "${REBUILD_TFIDF:-0}" = "1" ]; then \
+    echo "[start] REBUILD_TFIDF=1 (PURGE_TFIDF=${PURGE_TFIDF:-0})"; \
+    python scripts/rebuild_tfidf.py || true; \
+  fi; \
   if [ ! -s \"$BUNDLE_PATH\" ] && [ -f \"/app/data/harvester/out_auto/seed_bundle.jsonl\" ]; then \
     cp /app/data/harvester/out_auto/seed_bundle.jsonl \"$BUNDLE_PATH\" && \
     echo \"[start] Seeded bundle -> $BUNDLE_PATH\"; \
   fi; \
-  if [ -s \"$BUNDLE_PATH\" ]; then \
-    echo \"[start] Building DOC index (SPECTER)...\"; \
-    EMBED_BACKEND=st EMBED_MODEL=\"${EMBED_MODEL_DOC:-allenai/specter}\" \
-      python retriever/index_jsonl.py --bundle \"$BUNDLE_PATH\" --index_dir \"$INDEX_DIR_DOC\" || true; \
-    echo \"[start] Building PASSAGE index (MPNet)...\"; \
-    EMBED_BACKEND=st EMBED_MODEL=\"${EMBED_MODEL_PASSAGE:-multi-qa-mpnet-base-dot-v1}\" \
-      python retriever/index_jsonl.py --bundle \"$BUNDLE_PATH\" --index_dir \"$INDEX_DIR_PASSAGE\" || true; \
-  else \
-    echo \"[start] No bundle at $BUNDLE_PATH; skipping index\"; \
-  fi; \
+    if [ "${REBUILD_TFIDF:-0}" = "1" ]; then \
+      echo "[start] Skipping normal index build (REBUILD_TFIDF active)"; \
+    else \
+      if [ -s "$BUNDLE_PATH" ]; then \
+        echo "[start] Building DOC index (SPECTER)..."; \
+        EMBED_BACKEND=st EMBED_MODEL="${EMBED_MODEL_DOC:-allenai/specter}" \
+          python retriever/index_jsonl.py --bundle "$BUNDLE_PATH" --index_dir "$INDEX_DIR_DOC" || true; \
+        echo "[start] Building PASSAGE index (MPNet)..."; \
+        EMBED_BACKEND=st EMBED_MODEL="${EMBED_MODEL_PASSAGE:-multi-qa-mpnet-base-dot-v1}" \
+          python retriever/index_jsonl.py --bundle "$BUNDLE_PATH" --index_dir "$INDEX_DIR_PASSAGE" || true; \
+      else \
+        echo "[start] No bundle at $BUNDLE_PATH; skipping index"; \
+      fi; \
+    fi; \
   gunicorn -k uvicorn.workers.UvicornWorker -w 2 --threads 2 --timeout 90 \
     --worker-tmp-dir /dev/shm -b 0.0.0.0:${PORT} main_asgi:app \
 '"
