@@ -7,7 +7,7 @@
 
 **NanoChemGPT** is a comprehensive retrieval-augmented generation (RAG) system specifically designed for nanochemistry literature mining, synthesis protocol generation, and mechanistic reasoning. The system combines automated literature harvesting, vector-based retrieval, and large language model reasoning to provide citation-grounded answers and structured synthesis protocols.
 
-## 🔬 Key Features
+## Key Features
 
 - **Literature-Grounded RAG**: Retrieval-augmented generation with automatic citation tracking and reference formatting
 - **Automated Literature Mining**: EU-PMC and ArXiv harvesting with relevance filtering and NER-based entity extraction
@@ -19,7 +19,7 @@
 - **Verbatim Mode**: Exact text reproduction from uploaded documents when requested
 - **Multiple Vector Stores**: Supports uploads, knowledge base, and mechanistic reasoning contexts
 
-## 🏗️ Architecture Overview
+## Architecture Overview
 
 ```mermaid
 graph TB
@@ -39,7 +39,7 @@ graph TB
     M --> N[Structured Output]
 ```
 
-## 📁 Project Structure
+## Project Structure
 
 ```
 NanoChemGPT/
@@ -71,8 +71,6 @@ NanoChemGPT/
 ├── static/            # CSS, JavaScript, and assets
 └── scripts/          # Utility and maintenance scripts
 ```
-
-## 🚀 Quick Start
 
 ### Prerequisites
 
@@ -118,7 +116,7 @@ NanoChemGPT/
 6. **Access the interface**:
    Open http://localhost:5000 (development) or http://localhost:8000 (production)
 
-## ⚙️ Configuration
+## Configuration
 
 ### Environment Variables
 
@@ -146,7 +144,7 @@ RETRIEVER_INDEX_DIRS="/path/to/index1,/path/to/index2"
 RETRIEVER_INDEX_DIR_DOC="/path/to/document/index"
 ```
 
-## 📊 Data Pipeline
+## Data Pipeline
 
 ### Literature Harvesting
 
@@ -189,7 +187,7 @@ All datasets use JSONL format for consistency:
 }
 ```
 
-## 🔧 API Reference
+## API Reference
 
 ### Core Endpoints
 
@@ -282,7 +280,7 @@ curl -X POST "http://localhost:5000/ask" \
   -F "file=@protocol.pdf"
 ```
 
-## � Quick Testing
+## Quick Testing
 
 ### Basic API Tests
 
@@ -308,7 +306,7 @@ python scripts/test_transcribe_integration.py
 pytest tests/ -v --cov=. --cov-report=html
 ```
 
-## �🧪 Evaluation Framework
+## Evaluation Framework
 
 ### Metrics and Tasks
 
@@ -335,148 +333,5 @@ python ai_eval/assist_runner.py \
 python ai_eval/grader.py --config ai_eval/configs/eval_span.yaml
 ```
 
-### Custom Evaluation Datasets
-
-Create domain-specific evaluation datasets:
-
-```json
-{
-  "text": "Heat the gold precursor to 200°C for 1 hour",
-  "entities": [
-    {"label": "MATERIAL", "start": 10, "end": 23, "text": "gold precursor"},
-    {"label": "TEMP", "start": 27, "end": 33, "text": "200°C"},
-    {"label": "TIME", "start": 38, "end": 44, "text": "1 hour"}
-  ]
-}
-```
-
-## 🔬 Scientific Applications
-
-### Use Cases
-
-1. **Literature Review**: Automated synthesis protocol extraction from papers
-2. **Protocol Optimization**: Scale-aware synthesis planning and validation
-3. **Mechanistic Analysis**: Reasoning about synthesis pathways and conditions
-4. **Knowledge Discovery**: Finding novel synthesis routes and optimizations
-5. **Laboratory Automation**: Converting protocols to robot-executable instructions
-
-### Publication Support
-
-NanoChemGPT supports reproducible research through:
-
-- **Citation Tracking**: Automatic reference extraction and formatting
-- **Provenance**: Full traceability from query to source literature
-- **Versioning**: Snapshot capability for experimental reproducibility
-- **Export Formats**: Support for academic reference managers
-
-## 🧩 Extending the System
-
-### Adding New Data Sources
-
-1. **Create harvester module**:
-   ```python
-   # harvester/new_source_api.py
-   def harvest_new_source(query: str, max_results: int) -> List[Dict]:
-       # Implementation
-       pass
-   ```
-
-2. **Update configuration**:
-   ```yaml
-   # harvester/config.yaml
-   data_sources:
-     new_source:
-       enabled: true
-       api_key: "${NEW_SOURCE_API_KEY}"
-       base_url: "https://api.newsource.com"
-   ```
-
-3. **Register with main harvester**:
-   ```python
-   # harvester/harvester.py
-   from .new_source_api import harvest_new_source
-   ```
-
-### Custom NER Models
-
-Train domain-specific NER models:
-
-```bash
-# Prepare training data
-python harvester/miner/prepare_training_data.py --input custom_dataset.jsonl
-
-# Train model
-python -m spacy train config.cfg --output ./output --paths.train train.spacy --paths.dev dev.spacy
-
-# Update configuration
-export SPACY_MODEL=./output/model-best
-```
-
-### Adding Evaluation Metrics
-
-```python
-# ai_eval/custom_metrics.py
-def custom_metric(predictions: List, gold: List) -> float:
-    """Implement custom evaluation metric"""
-    # Your implementation
-    return score
-```
-
-## 🤝 Contributing
-
-Contributions are welcome. See the [Contributing Guidelines](CONTRIBUTING.md) for details.
-
-### Development Setup
-
-1. **Fork the repository**
-2. **Create feature branch**: `git checkout -b feature-name`
-3. **Install development dependencies**: `pip install -r requirements-dev.txt`
-4. **Run tests**: `python -m pytest tests/`
-5. **Submit pull request**
-
-### Code Quality Standards
-
-- **Type hints**: All functions must include type annotations
-- **Docstrings**: Google-style docstrings for all public methods
-- **Testing**: Minimum 80% code coverage
-- **Formatting**: Black code formatting with line length 88
-- **Linting**: flake8 compliance
-
-## 📚 Citation
-
-If NanoChemGPT is used in research, cite as follows:
-
-```bibtex
-@software{carnahan2024nanochemgpt,
-  author = {Carnahan, D. Michael},
-  title = {NanoChemGPT: Domain-Specific RAG for Nanochemistry Literature Mining and Synthesis Planning},
-  year = {2024},
-  publisher = {GitHub},
-  url = {https://github.com/DMCarnahan/NanoChemGPT},
-  version = {1.0.0}
-}
-```
-
-## 📄 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## 🆘 Support
-
-- **Documentation**: [Wiki](https://github.com/DMCarnahan/NanoChemGPT/wiki)
-- **Issues**: [GitHub Issues](https://github.com/DMCarnahan/NanoChemGPT/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/DMCarnahan/NanoChemGPT/discussions)
-- **Email**: dcarnahan@example.com
-
-## 🗺️ Roadmap
-
-- [ ] Multi-language support for international literature
-- [ ] Real-time collaboration features
-- [ ] Advanced visualization for synthesis pathways
-- [ ] Integration with laboratory information systems
-- [ ] Machine learning for protocol optimization
-- [ ] Extended support for other chemistry domains
-
----
 
 **NanoChemGPT** - Advancing nanochemistry research through intelligent literature mining and automated synthesis planning.
