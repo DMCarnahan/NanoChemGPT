@@ -22,16 +22,16 @@
 ## Architecture Overview
 
 ```mermaid
-graph TB
+graph LR
     A[User Query] --> B[Intent Classification]
     B --> C[Sufficiency Judge]
     C --> D{Sufficient Data?}
-    D -->|No| E[Literature Harvester]
+    D -- "No" --> E[Literature Harvester]
     E --> F[EU-PMC/ArXiv APIs]
     F --> G[NER Processing]
     G --> H[FAISS Indexing]
     H --> I[Vector Retrieval]
-    D -->|Yes| I
+    D -- "Yes" --> I
     I --> J[Context Assembly]
     J --> K[LLM Reasoning]
     K --> L[Citation Extraction]
