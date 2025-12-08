@@ -332,6 +332,3 @@ python ai_eval/assist_runner.py \
 # Generate evaluation report
 python ai_eval/grader.py --config ai_eval/configs/eval_span.yaml
 ```
-
-
-**NanoChemGPT** - Advancing nanochemistry research through intelligent literature mining and automated synthesis planning.
