@@ -843,6 +843,22 @@ def validate_execution_plan(plan: Dict) -> List[str]:
     return errors
 
 # -------- Postprocessing and micro-plan generation --------
+def _assign_unique_action_step_indices(actions: List[Dict], *, start_at: int = 1) -> int:
+    """Renumber an emitted action stream so every action has a unique ``step_index``.
+
+    The original parser-level ``step_index`` is preserved as ``source_step_index``
+    for traceability. Returns the next available index after the last action.
+    """
+    next_index = start_at
+    for action in actions:
+        original_index = action.get("step_index")
+        if original_index is not None and "source_step_index" not in action:
+            action["source_step_index"] = original_index
+        action["step_index"] = next_index
+        next_index += 1
+    return next_index
+
+
 def apply_postprocessing(doc: Dict) -> Dict:
     """Normalize and enrich a raw conversion document into a consistent micro-plan.
 
@@ -1162,12 +1178,13 @@ def generate_minimal_plan(doc: Dict) -> Tuple[List[Dict], List[Dict]]:
                 first_idx = seen_sets[key]
                 entry = collapsed_plan[first_idx]
                 steps_list = entry.setdefault("collapsed_from_steps", [])
-                step_idx = op.get("step_index")
-                if step_idx and step_idx not in steps_list:
-                    steps_list.append(step_idx)
-                # Also add the original step_index if not present
-                if entry.get("step_index") and entry["step_index"] not in steps_list:
-                    steps_list.insert(0, entry["step_index"])
+                source_step_idx = op.get("source_step_index", op.get("step_index"))
+                if source_step_idx and source_step_idx not in steps_list:
+                    steps_list.append(source_step_idx)
+                # Also add the original source step_index if not present
+                entry_source_idx = entry.get("source_step_index", entry.get("step_index"))
+                if entry_source_idx and entry_source_idx not in steps_list:
+                    steps_list.insert(0, entry_source_idx)
                 continue  # skip adding duplicate
             else:
                 # First occurrence of this set operation
@@ -1203,8 +1220,9 @@ def generate_minimal_plan(doc: Dict) -> Tuple[List[Dict], List[Dict]]:
                 timing_delays.append(delay)
     
     # Convert add_solvent, add, transfer operations to pour for minimal plan
+    next_min_step_index = max((op.get("step_index", 0) for op in micro_plan_min), default=0) + 1
     for step in doc.get("steps", []):
-        step_idx = step.get("index", 1)
+        source_step_idx = step.get("index")
         for op in step.get("ops", []):
             op_type = op.get("op")
             if op_type in ["add_solvent", "add", "transfer"]:
@@ -1212,9 +1230,12 @@ def generate_minimal_plan(doc: Dict) -> Tuple[List[Dict], List[Dict]]:
                     "verb": "pour",
                     "volume": op.get("volume", 10),
                     "volume_units": op.get("volume_units", "mL"),
-                    "step_index": step_idx
+                    "step_index": next_min_step_index
                 }
+                if source_step_idx is not None:
+                    pour_op["source_step_index"] = source_step_idx
                 micro_plan_min.append(pour_op)
+                next_min_step_index += 1
     
     return micro_plan_min, timing_delays
 
@@ -1793,8 +1814,12 @@ def convert_text_to_robot_ops(text: str) -> Dict:
                     })
                     existing_temp_sets.add((val, idx))
     
-    # Generate minimal plan and timing delays
+    # Renumber emitted actions so every action has a unique step_index.
+    _assign_unique_action_step_indices(result["micro_plan"])
+
+    # Generate minimal plan and timing delays from the renumbered micro plan.
     micro_plan_min, timing_delays = generate_minimal_plan(result)
+    _assign_unique_action_step_indices(micro_plan_min)
     result["micro_plan_min"] = micro_plan_min
     result["timing_delays"] = timing_delays
     
