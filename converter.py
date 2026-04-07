@@ -1,3 +1,4 @@
+
 from __future__ import annotations
 
 import copy
@@ -389,6 +390,7 @@ class VesselRegistry:
 def extract_steps(markdown_text: str) -> List[str]:
     lines = markdown_text.splitlines()
     in_proc = False
+    saw_numbered = False
     steps: List[str] = []
     buf: List[str] = []
 
@@ -397,27 +399,33 @@ def extract_steps(markdown_text: str) -> List[str]:
             in_proc = True
             continue
 
-        if in_proc:
-            if FENCE_START_RX.match(line) or NON_PROC_HEAD_RX.match(line):
+        if FENCE_START_RX.match(line) or NON_PROC_HEAD_RX.match(line):
+            if in_proc or saw_numbered:
                 break
-            if re.match(r"\s*\d+\.\s", line):
-                if buf:
-                    steps.append(" ".join(buf).strip())
-                    buf = []
-                buf.append(re.sub(r"^\s*\d+\.\s*", "", line).strip())
-            else:
-                if line.strip() and not line.strip().startswith("```"):
-                    buf.append(line.strip())
+
+        if re.match(r"\s*\d+\.\s", line):
+            saw_numbered = True
+            if buf:
+                steps.append(" ".join(buf).strip())
+                buf = []
+            buf.append(re.sub(r"^\s*\d+\.\s*", "", line).strip())
+            continue
+
+        if (in_proc or saw_numbered) and line.strip() and not line.strip().startswith("```"):
+            buf.append(line.strip())
 
     if buf:
         steps.append(" ".join(buf).strip())
 
-    if not steps and markdown_text.strip():
+    if steps:
+        return [strip_tags(s) for s in steps if s.strip()]
+
+    if markdown_text.strip():
         cleaned = strip_tags(markdown_text.strip())
         if cleaned:
             return [cleaned]
 
-    return [strip_tags(s) for s in steps if s.strip()]
+    return []
 
 
 _WORD_NUMBERS = {
@@ -563,6 +571,32 @@ def detect_stir(line: str) -> Optional[Dict[str, Any]]:
         "minutes": minutes if minutes is not None else 60.0,
         "temperature_C": temp if temp is not None else DEFAULTS["room_temp_C"],
     }
+
+
+def detect_heat_hold(line: str) -> Optional[Dict[str, Any]]:
+    s = strip_tags(_clean_unicode(line.strip().rstrip(".")))
+    if not re.search(r"\b(heat|maintain|hold|continue\s+heating?|water\s+bath)\b", s, re.I):
+        return None
+    temp = find_temp_c(s)
+    minutes = find_minutes(s)
+    if temp is None and minutes is None:
+        return None
+    return {
+        "action": "heat_hold",
+        "temperature_C": temp if temp is not None else DEFAULTS["room_temp_C"],
+        "minutes": minutes if minutes is not None else 0.0,
+        "device": "water bath" if re.search(r"\bwater\s+bath\b", s, re.I) else "HP1",
+    }
+
+
+def detect_autotitrator_rate(line: str) -> Optional[Dict[str, Any]]:
+    s = strip_tags(_clean_unicode(line.strip().rstrip(".")))
+    if not re.search(r"\b(autotitrator|titrat)\b", s, re.I):
+        return None
+    m = re.search(r"(?:rate(?:\s+of)?|at)\s+([0-9]+(?:\.[0-9]+)?)\s*mL\s*/\s*min", s, re.I)
+    if not m:
+        return None
+    return {"action": "autotitrator_rate", "rate_mL_per_min": float(m.group(1))}
 
 
 def detect_explicit_postprocess(line: str) -> Optional[Dict[str, Any]]:
@@ -728,6 +762,9 @@ def semantic_parse_step(step: str) -> Dict[str, Any]:
         detect_prepare_and_add_reagent_solution,
         detect_explicit_postprocess,
         detect_redisperse,
+        detect_heat_hold,
+        detect_autotitrator_rate,
+        detect_oven_dry,
         detect_stir,
         detect_solution_prep,
         detect_dissolve,
@@ -872,6 +909,66 @@ def _emit_stir(step: Dict[str, Any], vessel: str) -> Dict[str, Any]:
         "rpm": step["rpm"],
         "minutes": step["minutes"],
         "ops": [{"op": "wait", "minutes": step["minutes"]}],
+        "reagents": [],
+        "reagents_structured": [],
+    }
+
+
+def _emit_heat_hold(step: Dict[str, Any], vessel: str) -> Dict[str, Any]:
+    return {
+        "action": "heat_hold",
+        "raw": step["raw"],
+        "vessel": vessel,
+        "temperature_C": step["temperature_C"],
+        "minutes": step["minutes"],
+        "ops": [
+            {
+                "op": "set",
+                "device": step.get("device", "HP1"),
+                "param": "temperature_C",
+                "value": step["temperature_C"],
+                "unit": "C",
+                "vessel": vessel,
+            },
+            {"op": "wait", "minutes": step["minutes"]},
+        ],
+        "reagents": [],
+        "reagents_structured": [],
+    }
+
+
+def _emit_autotitrator_rate(step: Dict[str, Any], vessel: str) -> Dict[str, Any]:
+    return {
+        "action": "autotitrator_rate",
+        "raw": step["raw"],
+        "vessel": vessel,
+        "rate_mL_per_min": step["rate_mL_per_min"],
+        "ops": [
+            {
+                "op": "set",
+                "device": "AT1",
+                "param": "rate_mL_per_min",
+                "value": step["rate_mL_per_min"],
+            }
+        ],
+        "reagents": [],
+        "reagents_structured": [],
+    }
+
+
+def _emit_oven_dry(step: Dict[str, Any], vessel: str) -> Dict[str, Any]:
+    tube = f"{vessel}_tube"
+    return {
+        "action": "oven_dry",
+        "raw": step["raw"],
+        "vessel": vessel,
+        "temperature_C": step["temperature_C"],
+        "minutes": step["minutes"],
+        "ops": [
+            {"op": "move_to_oven", "tube": tube, "oven_id": DEVICE_IDS["oven_id"]},
+            {"op": "set_oven_temperature", "oven_id": DEVICE_IDS["oven_id"], "temperature_C": step["temperature_C"], "tube": tube},
+            {"op": "wait", "minutes": step["minutes"]},
+        ],
         "reagents": [],
         "reagents_structured": [],
     }
@@ -1099,6 +1196,12 @@ def emit_steps(semantic_steps: List[Dict[str, Any]], vessels: VesselRegistry) ->
             record = _emit_add_reagent_solution(step, primary)
         elif action == "stir":
             record = _emit_stir(step, primary)
+        elif action == "heat_hold":
+            record = _emit_heat_hold(step, primary)
+        elif action == "autotitrator_rate":
+            record = _emit_autotitrator_rate(step, primary)
+        elif action == "oven_dry":
+            record = _emit_oven_dry(step, primary)
         elif action == "postprocess":
             record = _emit_postprocess(step, primary)
         elif action == "redisperse":
@@ -1312,40 +1415,64 @@ def _micro_from_ops(steps: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
 def _infer_micro_from_raw(steps: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
     inferred: List[Dict[str, Any]] = []
     for source_step_index, step in enumerate(steps, start=1):
+        action = step.get('action')
         raw = step.get('raw', '') or ''
         s = strip_tags(_clean_unicode(raw))
+
+        # Avoid duplicating primitives already emitted from semantic steps.
+        if action in {'heat_hold', 'autotitrator_rate', 'oven_dry'}:
+            continue
+
         # Heat / maintain / water bath instructions
-        if re.search(r"\b(heat|maintain|hold|continue\s+heating?)\b", s, re.I):
+        if action not in {'add_solvent'} and re.search(r"\b(heat|maintain|hold|continue\s+heating?|water\s+bath)\b", s, re.I):
             temp = find_temp_c(s)
             minutes = find_minutes(s)
             device = 'HP1'
             if re.search(r'water\s+bath', s, re.I):
                 device = 'water bath'
             if temp is not None:
-                inferred.append({'verb': 'set', 'device': device, 'param': 'temperature_C', 'value': temp, 'unit': 'C', 'source_step_index': source_step_index})
+                inferred.append({
+                    'verb': 'set',
+                    'device': device,
+                    'param': 'temperature_C',
+                    'value': temp,
+                    'unit': 'C',
+                    'source_step_index': source_step_index,
+                })
             if minutes:
                 inferred.append({'verb': 'wait', 'minutes': minutes, 'source_step_index': source_step_index})
+
         # Stir-only instructions with duration
-        if re.search(r"\bstir\b", s, re.I) and not re.search(r"\bheat\b", s, re.I):
+        if re.search(r"\bstir\b", s, re.I) and not re.search(r"\b(heat|oven|dry)\b", s, re.I):
             minutes = find_minutes(s)
             temp = find_temp_c(s)
             if temp is not None:
-                inferred.append({'verb': 'set', 'device': 'HP1', 'param': 'temperature_C', 'value': temp, 'unit': 'C', 'source_step_index': source_step_index})
+                inferred.append({
+                    'verb': 'set',
+                    'device': 'HP1',
+                    'param': 'temperature_C',
+                    'value': temp,
+                    'unit': 'C',
+                    'source_step_index': source_step_index,
+                })
             if minutes:
                 inferred.append({'verb': 'wait', 'minutes': minutes, 'source_step_index': source_step_index})
+
         # Solvent / reagent additions -> pour primitive
-        m_add_solvent = re.search(r"\badd\s+(\d+(?:\.\d+)?)\s*(µ?u?L|mL|ml|L|l)?\s*(?:of\s+)?([^.;]+?)\s+to\b", s, re.I)
-        if m_add_solvent:
-            inferred.append({
-                'verb': 'pour',
-                'reagent': _clean_solvent_tail(m_add_solvent.group(3).strip()),
-                'volume': float(m_add_solvent.group(1)),
-                'volume_units': m_add_solvent.group(2) or 'mL',
-                'vessel': step.get('vessel', 'V1'),
-                'source_step_index': source_step_index,
-            })
-        elif re.search(r"\btransfer\b", s, re.I):
-            inferred.append({'verb': 'pour', 'vessel': step.get('vessel', 'V1'), 'source_step_index': source_step_index})
+        if action not in {'add', 'add_solvent', 'transfer'}:
+            m_add_solvent = re.search(r"\badd\s+(\d+(?:\.\d+)?)\s*(µ?u?L|mL|ml|L|l)?\s*(?:of\s+)?([^.;]+?)\s+to\b", s, re.I)
+            if m_add_solvent:
+                inferred.append({
+                    'verb': 'pour',
+                    'reagent': _clean_solvent_tail(m_add_solvent.group(3).strip()),
+                    'volume': float(m_add_solvent.group(1)),
+                    'volume_units': m_add_solvent.group(2) or 'mL',
+                    'vessel': step.get('vessel', 'V1'),
+                    'source_step_index': source_step_index,
+                })
+            elif re.search(r"\btransfer\b", s, re.I):
+                inferred.append({'verb': 'pour', 'vessel': step.get('vessel', 'V1'), 'source_step_index': source_step_index})
+
         # Oven drying
         oven = detect_oven_dry(s)
         if oven:
@@ -1356,12 +1483,16 @@ def _infer_micro_from_raw(steps: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
                 {'verb': 'set', 'device': 'OV1', 'param': 'temperature_C', 'value': oven['temperature_C'], 'unit': 'C', 'source_step_index': source_step_index},
                 {'verb': 'wait', 'minutes': oven['minutes'], 'source_step_index': source_step_index},
             ])
+
         # Autotitrator rate
         m_rate = re.search(r"(?:rate(?:\s+of)?|at)\s+([0-9]+(?:\.[0-9]+)?)\s*mL\s*/\s*min", s, re.I)
         if (re.search(r'autotitrator', s, re.I) or re.search(r'titrat', s, re.I)) and m_rate:
             inferred.append({
-                'verb': 'set', 'device': 'AT1', 'param': 'rate_mL_per_min',
-                'value': float(m_rate.group(1)), 'source_step_index': source_step_index,
+                'verb': 'set',
+                'device': 'AT1',
+                'param': 'rate_mL_per_min',
+                'value': float(m_rate.group(1)),
+                'source_step_index': source_step_index,
             })
     return inferred
 
