@@ -225,45 +225,66 @@ def _add_structured_reagents_inplace(record: Dict[str, Any]) -> None:
         ]
 
 
-def find_temp_c(text: str) -> Optional[float]:
-    s = _clean_unicode(text)
+def _temperature_candidates_c(text: str) -> List[float]:
+    s = _clean_unicode(text or "")
+    s = s.replace("℃", "°C").replace("℉", "°F").replace("◦", "°").replace("º", "°")
+
+    vals: List[float] = []
+
     if re.search(r"\breflux\b", s, re.I):
-        return 100.0
+        vals.append(100.0)
     if re.search(r"\bboil(?:ing)?\b", s, re.I):
-        return 100.0
+        vals.append(100.0)
     if re.search(r"\bice\s*bath\b", s, re.I):
-        return 0.0
+        vals.append(0.0)
 
-    # Temperature ranges like 45-50 C, 45–50 °C, or 45 to 50 C.
-    m_range = re.search(
-        r"(-?\d+(?:\.\d+)?)\s*(?:-|–|to)\s*(-?\d+(?:\.\d+)?)\s*°?\s*([CFK])\b",
-        s,
-        re.I,
-    )
-    if m_range:
-        val = float(m_range.group(1))
-        unit = m_range.group(3).upper()
+    range_patterns = [
+        re.compile(r"(-?\d+(?:\.\d+)?)\s*(?:-|–|—|~|to)\s*(-?\d+(?:\.\d+)?)\s*(?:°\s*)?([CFK])\b", re.I),
+        re.compile(r"(-?\d+(?:\.\d+)?)\s*°\s*(?:-|–|—|~|to)\s*(-?\d+(?:\.\d+)?)\s*°?\s*([CFK])\b", re.I),
+    ]
+    for rx in range_patterns:
+        for m in rx.finditer(s):
+            for idx in (1, 2):
+                v = float(m.group(idx))
+                unit = m.group(3).upper()
+                if unit == "C":
+                    vals.append(v)
+                elif unit == "F":
+                    vals.append((v - 32.0) * 5.0 / 9.0)
+                elif unit == "K":
+                    vals.append(v - 273.15)
+
+    s_single = s
+    for rx in range_patterns:
+        s_single = rx.sub(" ", s_single)
+
+    for m in re.finditer(r"(?<![\d])(-?\d+(?:\.\d+)?)\s*(?:°\s*)?([CFK])\b", s_single, re.I):
+        v = float(m.group(1))
+        unit = m.group(2).upper()
         if unit == "C":
-            return val
-        if unit == "F":
-            return (val - 32.0) * 5.0 / 9.0
-        if unit == "K":
-            return val - 273.15
-        return None
+            vals.append(v)
+        elif unit == "F":
+            vals.append((v - 32.0) * 5.0 / 9.0)
+        elif unit == "K":
+            vals.append(v - 273.15)
 
-    m = re.search(r"(-?\d+(?:\.\d+)?)\s*°?\s*([CFK])\b", s, re.I)
-    if not m:
-        if re.search(r"\b(rt|room\s*temp(?:erature)?)\b", s, re.I):
-            return DEFAULTS["room_temp_C"]
-        return None
-    val = float(m.group(1))
-    unit = m.group(2).upper()
-    if unit == "C":
-        return val
-    if unit == "F":
-        return (val - 32.0) * 5.0 / 9.0
-    if unit == "K":
-        return val - 273.15
+    for m in re.finditer(r"(?<![\d])(-?\d+(?:\.\d+)?)\s*(?:°\s*)?(celsius|centigrade)\b", s_single, re.I):
+        vals.append(float(m.group(1)))
+
+    out: List[float] = []
+    for v in vals:
+        if v not in out:
+            out.append(v)
+    return out
+
+
+def find_temp_c(text: str) -> Optional[float]:
+    vals = _temperature_candidates_c(text)
+    if vals:
+        return vals[0]
+    s = _clean_unicode(text or "")
+    if re.search(r"\b(rt|room\s*temp(?:erature)?)\b", s, re.I):
+        return DEFAULTS["room_temp_C"]
     return None
 
 
@@ -1644,14 +1665,20 @@ def apply_postprocessing(doc: Dict[str, Any]) -> Dict[str, Any]:
                 micro_plan.append({'verb': 'place', 'vessel': f"{step.get('vessel', 'V1')}_tube", 'to': 'oven', 'device': 'OV1', 'source_step_index': i})
                 repairs.append('added_oven_pickup_place_fallback')
             if not has_temp and find_temp_c(raw) is not None:
-                micro_plan.append({'verb': 'set', 'device': 'OV1', 'param': 'temperature_C', 'value': find_temp_c(raw), 'unit': 'C', 'source_step_index': i})
+                temp_candidates = _temperature_candidates_c(raw)
+                if temp_candidates:
+                    micro_plan.append({'verb': 'set', 'device': 'OV1', 'param': 'temperature_C', 'value': temp_candidates[0], 'unit': 'C', 'source_step_index': i})
                 repairs.append('added_oven_temperature_fallback')
-        elif not has_temp and find_temp_c(raw) is not None:
-            device = 'HP1'
-            if re.search(r'water\s+bath', raw, re.I):
-                device = 'water bath'
-            micro_plan.append({'verb': 'set', 'device': device, 'param': 'temperature_C', 'value': find_temp_c(raw), 'unit': 'C', 'source_step_index': i})
-            repairs.append('added_temperature_fallback')
+        elif not has_temp:
+            temp_candidates = _temperature_candidates_c(raw)
+            if temp_candidates:
+                device = 'HP1'
+                if re.search(r'water\s+bath', raw, re.I):
+                    device = 'water bath'
+                elif re.search(r'\boven\b', raw, re.I):
+                    device = 'OV1'
+                micro_plan.append({'verb': 'set', 'device': device, 'param': 'temperature_C', 'value': temp_candidates[0], 'unit': 'C', 'source_step_index': i})
+                repairs.append('added_temperature_fallback')
         if re.search(r'\bph\b', raw, re.I) and not any(op.get('source_step_index') == i and op.get('verb') == 'monitor_ph' for op in micro_plan):
             micro_plan.append({'verb': 'monitor_ph', 'device': 'PH1', 'vessel': step.get('vessel', 'V1'), 'source_step_index': i})
             repairs.append('added_ph_monitor_fallback')
