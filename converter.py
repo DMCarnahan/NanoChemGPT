@@ -233,6 +233,24 @@ def find_temp_c(text: str) -> Optional[float]:
         return 100.0
     if re.search(r"\bice\s*bath\b", s, re.I):
         return 0.0
+
+    # Temperature ranges like 45-50 C, 45–50 °C, or 45 to 50 C.
+    m_range = re.search(
+        r"(-?\d+(?:\.\d+)?)\s*(?:-|–|to)\s*(-?\d+(?:\.\d+)?)\s*°?\s*([CFK])\b",
+        s,
+        re.I,
+    )
+    if m_range:
+        val = float(m_range.group(1))
+        unit = m_range.group(3).upper()
+        if unit == "C":
+            return val
+        if unit == "F":
+            return (val - 32.0) * 5.0 / 9.0
+        if unit == "K":
+            return val - 273.15
+        return None
+
     m = re.search(r"(-?\d+(?:\.\d+)?)\s*°?\s*([CFK])\b", s, re.I)
     if not m:
         if re.search(r"\b(rt|room\s*temp(?:erature)?)\b", s, re.I):
