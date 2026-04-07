@@ -1,9 +1,14 @@
 from __future__ import annotations
 
-import re, json, pathlib, unicodedata, time, copy
-from typing import List, Dict, Optional, Any, Tuple
+import copy
+import json
+import pathlib
+import re
+import unicodedata
+from typing import Any, Dict, List, Optional, Tuple
 
-DEFAULTS = {
+
+DEFAULTS: Dict[str, Any] = {
     "stir_rpm": 700,
     "centrifuge_rpm": 4000,
     "centrifuge_minutes": 10,
@@ -11,7 +16,7 @@ DEFAULTS = {
     "room_temp_C": 25.0,
 }
 
-DEVICE_IDS = {
+DEVICE_IDS: Dict[str, str] = {
     "stir_plate_id": "SP1",
     "hotplate_id": "HP1",
     "centrifuge_id": "CF1",
@@ -22,182 +27,156 @@ DEVICE_IDS = {
     "autotitrator_id": "AT1",
 }
 
-FENCE_START_RX = re.compile(r"^\s*```")                    # start of any fenced block
+INLINE_TAG_RX = re.compile(r"\s*\[(?:CTX|DB|PARSED|GEN|\d+)\]\s*", re.I)
+FENCE_START_RX = re.compile(r"^\s*```")
 NON_PROC_HEAD_RX = re.compile(
     r"^\s*#{1,6}\s*(references?|sources?|bibliography|rationale|reasoning|notes|discussion|supplementary|appendix|acknowledge?ments?)\b",
-    re.I
+    re.I,
 )
-INLINE_TAG_RX = re.compile(r"\s*\[(?:CTX|DB|PARSED|GEN|\d+)\]\s*", re.I)
 
-# quantities like: 0.5 mmol | 58 mg | 10 mL | 1–2 mmol (range ok)
-_AMOUNT_UNIT = r"(?:~?\d+(?:[.\u2013\u2014-]\d+)?\s*(?:µ?u?L|mL|ml|L|l|mg|g|µg|ug|mol|mmol|µmol|umol)\b)"
+_UNIT_CANON = {
+    "l": "L",
+    "L": "L",
+    "ml": "mL",
+    "mL": "mL",
+    "ul": "µL",
+    "uL": "µL",
+    "µl": "µL",
+    "µL": "µL",
+    "g": "g",
+    "mg": "mg",
+    "µg": "µg",
+    "ug": "µg",
+    "kg": "kg",
+    "mol": "mol",
+    "mmol": "mmol",
+    "µmol": "µmol",
+    "umol": "µmol",
+    "M": "M",
+    "m": "M",
+    "mM": "mM",
+    "mm": "mM",
+    "µM": "µM",
+    "uM": "µM",
+    "wt%": "wt%",
+    "vol%": "vol%",
+}
 
-# split boundary: comma / + / "and" / "along with" / "together with"
-# only split if the next token looks like a fresh quantity+unit
+_AMOUNT_UNIT = r"(?:~?\d+(?:[.\u2013\u2014-]\d+)?\s*(?:µ?u?L|mL|ml|L|l|mg|g|kg|µg|ug|mol|mmol|µmol|umol)\b)"
 SPLIT_BOUNDARY_RX = re.compile(
     rf"\s*(?:,|\+|\band\b|\balong with\b|\btogether with\b)\s*(?=(?:{_AMOUNT_UNIT}))",
     re.I,
 )
-
-# Canonicalize unit spellings
-_UNIT_CANON = {
-    "l": "L", "L": "L",
-    "ml": "mL", "mL": "mL",
-    "ul": "µL", "uL": "µL", "µl": "µL", "µL": "µL",
-    "g": "g", "mg": "mg", "µg": "µg", "ug": "µg",
-    "mol": "mol", "mmol": "mmol", "µmol": "µmol", "umol": "µmol",
-    "m": "M", "M": "M", "mm": "mM", "mM": "mM", "µM": "µM", "uM": "µM",
-    "wt%": "wt%", "vol%": "vol%"
-}
-
-# Amount (mass/volume/moles) like: 98 mg | 10 mL | 0.5 mmol | 1–2 mmol
-_AMOUNT_RE = r"(?P<approx>[~≈])?\s*(?P<val>\d+(?:\.\d+)?(?:[–-]\d+(?:\.\d+)?)?)\s*(?P<unit>µ?u?L|mL|ml|L|l|mg|g|µg|ug|mol|mmol|µmol|umol)\b"
-
-# Secondary amount in parentheses: (98 mg), (10 mL)
-_PAREN_AMOUNT_RX = re.compile(r"\(\s*(?P<val>\d+(?:\.\d+)?)\s*(?P<unit>µ?u?L|mL|ml|L|l|mg|g|µg|ug|mol|mmol|µmol|umol)\s*\)")
-
-# Concentration form: 0.1 M HAuCl4 [in water]
+_AMOUNT_RE = r"(?P<approx>[~≈])?\s*(?P<val>\d+(?:\.\d+)?(?:[–-]\d+(?:\.\d+)?)?)\s*(?P<unit>µ?u?L|mL|ml|L|l|mg|g|kg|µg|ug|mol|mmol|µmol|umol)\b"
+_PAREN_AMOUNT_RX = re.compile(r"\(\s*(?P<val>\d+(?:\.\d+)?)\s*(?P<unit>µ?u?L|mL|ml|L|l|mg|g|kg|µg|ug|mol|mmol|µmol|umol)\s*\)")
 _CONC_RX = re.compile(
     r"(?P<approx>[~≈])?\s*(?P<val>\d+(?:\.\d+)?)\s*(?P<unit>M|mM|µM|uM)\s+(?P<name>[^(),;]+(?:\s+[^(),;]+)*)(?:\s*\([^)]*\))?(?:\s+in\s+(?P<solvent>[^(),;]+))?\s*(?:\bsolution\b)?",
-    re.I
+    re.I,
 )
-
-# Leading amount form: 98 mg PVP | 0.5 mmol of copper(II) acetate ...
-_LEAD_AMT_RX = re.compile(
-    rf"{_AMOUNT_RE}" + r"\s*(?:of\s+)?(?P<name>.+?)\s*(?P<paren>\([^)]*\))?\s*$",
-    re.I
-)
-
-# Loose "about/approximately" flags anywhere
+_LEAD_AMT_RX = re.compile(rf"{_AMOUNT_RE}" + r"\s*(?:of\s+)?(?P<name>.+?)\s*(?P<paren>\([^)]*\))?\s*$", re.I)
 _APPROX_WORD_RX = re.compile(r"\b(about|approximately|approx\.)\b", re.I)
 
-def _canon_unit(u: str) -> str:
-    return _UNIT_CANON.get((u or "").strip(), (u or "").strip())
+DEFAULT_HARDWARE: List[Dict[str, Any]] = [
+    {"id": "H1", "name": "Magnetic stirrer", "type": "hardware", "capacity": None},
+    {"id": "H2", "name": "Centrifuge", "type": "hardware", "capacity": None},
+    {"id": "H3", "name": "Centrifuge tubes", "type": "hardware", "capacity": None},
+    {"id": "H4", "name": "Beaker", "type": "beaker", "capacity": None},
+    {"id": "H5", "name": "Pipettes", "type": "hardware", "capacity": None},
+]
 
-def _to_float_range(s: str) -> tuple[float, float] | tuple[float, None]:
-    """Parse '1–2' or '1-2' into (1.0, 2.0); else single -> (x, None)."""
-    s = s.replace("–", "-")
-    if "-" in s and not s.startswith("-"):
-        a, b = s.split("-", 1)
-        try:
-            return (float(a), float(b))
-        except Exception:
-            pass
-    try:
-        return (float(s), None)
-    except Exception:
-        return (None, None)
+
+def _clean_unicode(s: str) -> str:
+    s = unicodedata.normalize("NFKC", s or "")
+    return s.replace("° ", "°").replace("–", "-").replace("—", "-")
+
 
 def strip_tags(s: str) -> str:
     s = _clean_unicode(s)
     s = re.sub(r"`{3,}.*$", "", s)
     s = INLINE_TAG_RX.sub(" ", s)
-    s = re.sub(r"</?[^>]+>", "", s)   # <-- new
-    s = s.replace("**","").replace("__","")
+    s = re.sub(r"</?[^>]+>", "", s)
+    s = s.replace("**", "").replace("__", "")
     s = re.sub(r"\s{2,}", " ", s)
     return s.strip()
 
-def split_reagent_phrases(text: str) -> list[str]:
-    """
-    Split a multi-reagent phrase into separate items:
-    e.g., '0.5 mmol Cu(OAc)2 (98 mg) and 0.5 mmol PVP (58 mg)'
-      -> ['0.5 mmol Cu(OAc)2 (98 mg)', '0.5 mmol PVP (58 mg)']
-    Only splits where a new quantity+unit begins; avoids over-splitting names.
-    """
+
+def _canon_unit(u: str) -> str:
+    return _UNIT_CANON.get((u or "").strip(), (u or "").strip())
+
+
+def _to_float_range(s: str) -> tuple[Optional[float], Optional[float]]:
+    s = (s or "").replace("–", "-")
+    if "-" in s and not s.startswith("-"):
+        a, b = s.split("-", 1)
+        try:
+            return float(a), float(b)
+        except Exception:
+            pass
+    try:
+        return float(s), None
+    except Exception:
+        return None, None
+
+
+def split_reagent_phrases(text: str) -> List[str]:
     s = (text or "").strip()
     if not s:
         return []
-    parts = re.split(SPLIT_BOUNDARY_RX, s)
-    out = []
-    for p in parts:
-        p = p.strip().strip(",").strip()
-        if p:
-            out.append(p)
-    return out
+    return [p.strip().strip(",") for p in re.split(SPLIT_BOUNDARY_RX, s) if p.strip().strip(",")]
 
-def parse_reagent_phrase_to_struct(s: str) -> dict:
-    """
-    Parse a single reagent phrase into a structured dict.
-    Supports:
-      - '0.5 mmol copper(II) acetate monohydrate (98 mg)'
-      - '98 mg PVP'
-      - '10 mL ethylene glycol'
-      - '0.1 M HAuCl4 in water'
-    Returns a dict with keys:
-      name, amount, amount_unit, amount_range, alt_amount, alt_unit,
-      concentration, conc_unit, solvent, approx, original, is_solution, display_name
-    """
+
+def parse_reagent_phrase_to_struct(s: str) -> Dict[str, Any]:
     original = s
-    s = strip_tags(_clean_unicode((s or "").strip()))
+    s = strip_tags((s or "").strip())
     approx = bool(_APPROX_WORD_RX.search(s))
-    
-    # Check if this appears to be a solution
     is_solution = bool(re.search(r"\bsolution\b", s, re.I))
-    display_name = original  # Keep original for display
+    display_name = original
 
-    # 1) Try concentration pattern first
     m = _CONC_RX.search(s)
     if m:
-        val = float(m.group("val"))
-        unit = _canon_unit(m.group("unit"))
-        name = m.group("name").strip()
-        solvent = (m.group("solvent") or "").strip() or None
-        approx = approx or bool(m.group("approx"))
         return {
-            "name": name,
+            "name": m.group("name").strip(),
             "amount": None,
             "amount_unit": None,
             "amount_range": None,
             "alt_amount": None,
             "alt_unit": None,
-            "concentration": val,
-            "conc_unit": unit,
-            "solvent": solvent,
-            "approx": approx,
+            "concentration": float(m.group("val")),
+            "conc_unit": _canon_unit(m.group("unit")),
+            "solvent": (m.group("solvent") or "").strip() or None,
+            "approx": approx or bool(m.group("approx")),
             "original": original,
-            "is_solution": True,  # Concentration patterns are always solutions
-            "display_name": display_name
+            "is_solution": True,
+            "display_name": display_name,
         }
 
-    # 2) Try leading amount pattern
     m = _LEAD_AMT_RX.match(s)
     if m:
-        rng = _to_float_range(m.group("val"))
-        amount = rng[0]
-        amount_range = None
-        if rng[1] is not None:
-            amount_range = [rng[0], rng[1]]
-
-        unit = _canon_unit(m.group("unit"))
-        name = (m.group("name") or "").strip().strip(",;")
-        approx = approx or bool(m.group("approx"))
-
-        # Optional secondary amount in parentheses
+        low, high = _to_float_range(m.group("val"))
+        amount_range = [low, high] if high is not None else None
         alt_amount = None
         alt_unit = None
-        par = m.group("paren") or ""
-        pm = _PAREN_AMOUNT_RX.search(par)
+        paren = m.group("paren") or ""
+        pm = _PAREN_AMOUNT_RX.search(paren)
         if pm:
             alt_amount = float(pm.group("val"))
             alt_unit = _canon_unit(pm.group("unit"))
-
         return {
-            "name": name,
-            "amount": amount,
-            "amount_unit": unit,
+            "name": (m.group("name") or "").strip().strip(",;"),
+            "amount": low,
+            "amount_unit": _canon_unit(m.group("unit")),
             "amount_range": amount_range,
             "alt_amount": alt_amount,
             "alt_unit": alt_unit,
             "concentration": None,
             "conc_unit": None,
             "solvent": None,
-            "approx": approx,
+            "approx": approx or bool(m.group("approx")),
             "original": original,
             "is_solution": is_solution,
-            "display_name": display_name
+            "display_name": display_name,
         }
 
-    # 3) Fallback: just return name
     return {
         "name": s,
         "amount": None,
@@ -211,96 +190,90 @@ def parse_reagent_phrase_to_struct(s: str) -> dict:
         "approx": approx,
         "original": original,
         "is_solution": is_solution,
-        "display_name": display_name
+        "display_name": display_name,
     }
 
-def _clean_unicode(s: str) -> str:
-    s = unicodedata.normalize("NFKC", s)
-    return s.replace("° ", "°").replace("–", "-").replace("—", "-")
 
-def _normalize_reagents_inplace(record: dict) -> None:
-    # reagents: flatten and split strings
+def _normalize_reagents_inplace(record: Dict[str, Any]) -> None:
     reag = record.get("reagents", [])
-    flat: list[str] = []
+    flat: List[str] = []
     for item in (reag if isinstance(reag, list) else [reag]):
         if isinstance(item, str):
             flat.extend(split_reagent_phrases(item))
         elif item:
-            # preserve dicts/structured entries 
             flat.append(item)
     record["reagents"] = flat
 
-    solute_str = record.get("solute", "")
-    if isinstance(solute_str, str) and solute_str.strip():
-        record["solutes"] = split_reagent_phrases(solute_str)
+    solute = record.get("solute", "")
+    if isinstance(solute, str) and solute.strip():
+        record["solutes"] = split_reagent_phrases(solute)
 
-def _add_structured_reagents_inplace(record: dict) -> None:
-    """
-    Populate record['reagents_structured'] from record['reagents'] (strings).
-    Also populate record['solutes_structured'] from record['solutes'] if present.
-    """
+
+def _add_structured_reagents_inplace(record: Dict[str, Any]) -> None:
     reag = record.get("reagents", []) or []
     if not isinstance(reag, list):
         reag = [reag]
-    record["reagents_structured"] = [parse_reagent_phrase_to_struct(x) for x in reag if isinstance(x, str) and x.strip()]
+    record["reagents_structured"] = [
+        parse_reagent_phrase_to_struct(x) for x in reag if isinstance(x, str) and x.strip()
+    ]
 
     solutes = record.get("solutes", []) or []
     if isinstance(solutes, list) and solutes:
-        record["solutes_structured"] = [parse_reagent_phrase_to_struct(x) for x in solutes if isinstance(x, str) and x.strip()]
+        record["solutes_structured"] = [
+            parse_reagent_phrase_to_struct(x) for x in solutes if isinstance(x, str) and x.strip()
+        ]
 
-# -------- Units parsing --------
-def find_temp_c(t: str) -> Optional[float]:
-    s = _clean_unicode(t)
-    if re.search(r"\breflux\b", s, re.I): return 100.0
-    if re.search(r"\bboil(?:ing)?\b", s, re.I): return 100.0
-    if re.search(r"\bice\s*bath\b", s, re.I): return 0.0
+
+def find_temp_c(text: str) -> Optional[float]:
+    s = _clean_unicode(text)
+    if re.search(r"\breflux\b", s, re.I):
+        return 100.0
+    if re.search(r"\bboil(?:ing)?\b", s, re.I):
+        return 100.0
+    if re.search(r"\bice\s*bath\b", s, re.I):
+        return 0.0
     m = re.search(r"(-?\d+(?:\.\d+)?)\s*°?\s*([CFK])\b", s, re.I)
     if not m:
-        if re.search(r"\b(rt|room\s*temp(?:erature)?)\b", s, re.I): return DEFAULTS["room_temp_C"]
+        if re.search(r"\b(rt|room\s*temp(?:erature)?)\b", s, re.I):
+            return DEFAULTS["room_temp_C"]
         return None
-    val = float(m.group(1)); unit = m.group(2).upper()
-    if unit == "C": return val
-    if unit == "F": return (val - 32.0) * 5.0/9.0
-    if unit == "K": return val - 273.15
+    val = float(m.group(1))
+    unit = m.group(2).upper()
+    if unit == "C":
+        return val
+    if unit == "F":
+        return (val - 32.0) * 5.0 / 9.0
+    if unit == "K":
+        return val - 273.15
     return None
 
-def find_minutes(t: str) -> Optional[float]:
-    s = _clean_unicode(t)
-    mins = 0.0; found=False
-    if re.search(r"\bover\s*night\b", s, re.I): return 12*60.0
+
+def find_minutes(text: str) -> Optional[float]:
+    s = _clean_unicode(text)
+    found = False
+    minutes = 0.0
+    if re.search(r"\bover\s*night\b", s, re.I):
+        return 12 * 60.0
     for m in re.finditer(r"(\d+(?:\.\d+)?)\s*(?:second|sec|s)\b", s, re.I):
-        mins += float(m.group(1))/60.0; found=True
+        minutes += float(m.group(1)) / 60.0
+        found = True
     for m in re.finditer(r"(\d+(?:\.\d+)?)\s*(?:hour|hr|hrs|h)\b", s, re.I):
-        mins += float(m.group(1))*60.0; found=True
+        minutes += float(m.group(1)) * 60.0
+        found = True
     for m in re.finditer(r"(\d+(?:\.\d+)?)\s*(?:minutes?|mins?)\b", s, re.I):
-        mins += float(m.group(1)); found=True
-    return mins if found else None
+        minutes += float(m.group(1))
+        found = True
+    return minutes if found else None
 
-def _parse_vol_ml(text: str) -> Optional[float]:
-    s = _clean_unicode(text)
-    m = re.search(r"(\d+(?:\.\d+)?)\s*(µ?u?L|mL|ml|L|l)\b", s)
-    if not m: return None
-    val = float(m.group(1)); unit = m.group(2).lower()
-    if unit in ("µl","ul"): return val/1000.0
-    return val if unit=="ml" else val*1000.0
 
-def _parse_conc(text: str) -> Optional[Tuple[float,str]]:
-    s = _clean_unicode(text)
-    m = re.search(r"(\d+(?:\.\d+)?)\s*(m?M|%\s*w/?v|%\s*v/?v|%)\b", s, re.I)
-    if not m: return None
-    v = float(m.group(1)); u = m.group(2).replace(" ", "").lower()
-    if u == "m": u = "M"
-    if u == "mm": u = "mM"
-    return v, u
-
-# -------- Hardware parsing --------
-def parse_hardware(markdown_text: str) -> List[Dict]:
+def parse_hardware(markdown_text: str) -> List[Dict[str, Any]]:
     lines = markdown_text.splitlines()
-    items = []
+    items: List[Dict[str, Any]] = []
     in_hw = False
     for line in lines:
         if re.match(r"\s*1\.\s*\*\*Hardware\s*&\s*Glassware\*\*:", line, re.I):
-            in_hw = True; continue
+            in_hw = True
+            continue
         if in_hw:
             if line.strip().startswith("2.") or re.match(r"\s*2\.\s*\*\*", line):
                 break
@@ -309,1565 +282,1033 @@ def parse_hardware(markdown_text: str) -> List[Dict]:
                 m = re.match(r"(Beakers?|Flasks?)\s*\((.+?)\)", entry, re.I)
                 if m:
                     base = "beaker" if "beaker" in m.group(1).lower() else "flask"
-                    sizes = m.group(2)
-                    parts = re.split(r"\s*(?:and|,)\s*", sizes)
-                    for p in parts:
-                        cap = p.strip()
-                        items.append({"name": f"{m.group(1).split()[0].title()} {cap}", "type": base, "capacity": cap})
+                    parts = re.split(r"\s*(?:and|,)\s*", m.group(2))
+                    for part in parts:
+                        items.append(
+                            {
+                                "name": f"{m.group(1).split()[0].title()} {part.strip()}",
+                                "type": base,
+                                "capacity": part.strip(),
+                            }
+                        )
                 else:
                     capm = re.search(r"(\d+)\s*(µ?u?L|mL|L)\b", entry, re.I)
                     cap = capm.group(0) if capm else None
                     typ = "beaker" if "beaker" in entry.lower() else ("flask" if "flask" in entry.lower() else "hardware")
                     nm = entry if typ == "hardware" else (f"{typ.title()} {cap}" if cap else typ.title())
                     items.append({"name": nm, "type": typ, "capacity": cap})
-    out = []
-    for i, it in enumerate(items, 1):
-        it2 = dict(it); it2["id"] = f"H{i}"
-        out.append(it2)
+    if not items:
+        return copy.deepcopy(DEFAULT_HARDWARE)
+    out: List[Dict[str, Any]] = []
+    for i, item in enumerate(items, start=1):
+        row = dict(item)
+        row["id"] = f"H{i}"
+        out.append(row)
     return out
 
+
 def _capacity_to_ml(cap: Optional[str]) -> Optional[float]:
-    if not cap: return None
+    if not cap:
+        return None
     m = re.match(r"(\d+(?:\.\d+)?)\s*(µ?u?L|mL|L)\b", cap, re.I)
-    if not m: return None
-    val = float(m.group(1)); unit = m.group(2).lower()
-    if unit in ("µl","ul"): return val/1000.0
-    return val if unit=="ml" else val*1000.0
+    if not m:
+        return None
+    val = float(m.group(1))
+    unit = m.group(2).lower()
+    if unit in ("µl", "ul"):
+        return val / 1000.0
+    if unit == "ml":
+        return val
+    return val * 1000.0
+
 
 class VesselRegistry:
-    def __init__(self, hardware: List[Dict]):
-        self._vid_to_label: Dict[str,str] = {}
-        self._label_to_vid: Dict[str,str] = {}
-        self._vid_to_hid: Dict[str,str] = {}
-        self._vessel_contents: Dict[str,str] = {}
-        self.contents: Dict[str, List[Dict]] = {}  # Track detailed contents
+    def __init__(self, hardware: List[Dict[str, Any]]) -> None:
+        self.hardware = hardware
         self._counter = 0
         self.primary_vessel: Optional[str] = None
-        self.hardware = hardware
+        self._vid_to_label: Dict[str, str] = {}
+        self._label_to_vid: Dict[str, str] = {}
+        self._vid_to_hid: Dict[str, str] = {}
+        self.contents_summary: Dict[str, str] = {}
+        self.contents_detailed: Dict[str, Any] = {}
 
     def _new_vid(self) -> str:
         self._counter += 1
         return f"V{self._counter}"
 
-    def add_content(self, vessel_id: str, reagent: str, amount: float, unit: str):
-        """Track contents added to vessels"""
-        if vessel_id not in self.contents:
-            self.contents[vessel_id] = []
-        self.contents[vessel_id].append({
-            "reagent": reagent,
-            "amount": amount, 
-            "unit": unit,
-            "timestamp": time.time()
-        })
-
-    def get_vessel_contents(self, vessel_id: str) -> List[Dict]:
-        """Get all contents of a vessel"""
-        return self.contents.get(vessel_id, [])
-
-    def _pick_glass_for_volume(self, vol_ml: Optional[float], preferred: Optional[str]=None) -> Optional[Dict]:
-        types = (preferred.lower(),) if preferred else ("beaker","flask")
-        choices = [h for h in self.hardware if h.get("type") in types]
-        if not choices: return None
+    def _pick_glass_for_volume(self, vol_ml: Optional[float]) -> Optional[Dict[str, Any]]:
+        choices = [h for h in self.hardware if h.get("type") in {"beaker", "flask"}]
+        if not choices:
+            return None
         if vol_ml is None:
             return sorted(choices, key=lambda h: (_capacity_to_ml(h.get("capacity")) or 1e9))[0]
-        target = vol_ml*1.5
+        target = vol_ml * 1.5
         candidates = [(h, _capacity_to_ml(h.get("capacity")) or 1e12) for h in choices]
-        candidates = [c for c in candidates if c[1] >= target]
-        if candidates:
-            h,_ = sorted(candidates, key=lambda x: x[1])[0]; return h
-        h,_ = sorted([(h, _capacity_to_ml(h.get("capacity")) or 0) for h in choices], key=lambda x: x[1], reverse=True)[0]
-        return h
+        viable = [pair for pair in candidates if pair[1] >= target]
+        if viable:
+            return sorted(viable, key=lambda x: x[1])[0][0]
+        return sorted(candidates, key=lambda x: x[1], reverse=True)[0][0]
 
-    def ensure_glassware(self, label: str, *, prefer_capacity_ml: Optional[float]=None, explicit_hardware_hint: Optional[str]=None) -> str:
-        key = label.lower().strip()
+    def ensure_glassware(
+        self,
+        label: str,
+        *,
+        prefer_capacity_ml: Optional[float] = None,
+        explicit_hardware_hint: Optional[str] = None,
+    ) -> str:
+        key = (label or "Beaker").lower().strip()
         if key in self._label_to_vid:
             return self._label_to_vid[key]
         vid = self._new_vid()
         hw_id = None
-        preferred = None
         if explicit_hardware_hint:
             for h in self.hardware:
                 if explicit_hardware_hint.lower() in h["name"].lower():
-                    hw_id = h["id"]; preferred = h.get("type"); break
+                    hw_id = h["id"]
+                    break
         if hw_id is None:
-            chosen = self._pick_glass_for_volume(prefer_capacity_ml, preferred)
-            if chosen: hw_id = chosen["id"]
-        self._vid_to_label[vid] = label
+            chosen = self._pick_glass_for_volume(prefer_capacity_ml)
+            if chosen:
+                hw_id = chosen["id"]
+        self._vid_to_label[vid] = label or "Beaker"
         self._label_to_vid[key] = vid
-        if hw_id: self._vid_to_hid[vid] = hw_id
-        if self.primary_vessel is None: self.primary_vessel = vid
+        if hw_id:
+            self._vid_to_hid[vid] = hw_id
+        if self.primary_vessel is None:
+            self.primary_vessel = vid
         return vid
 
-    def map_contents(self, vid: str, contents: str): self._vessel_contents[vid] = contents
-    def vessel_hardware(self, vid: str) -> Optional[str]: return self._vid_to_hid.get(vid)
-    def as_dict(self) -> Dict[str, str]: return dict(self._vid_to_label)
-    def contents_dict(self) -> Dict[str, str]: return dict(self._vessel_contents)
+    def vessel_hardware(self, vid: str) -> Optional[str]:
+        return self._vid_to_hid.get(vid)
 
-# -------- Pattern detectors --------
-_CONC_UNIT_RX = r"(?:M|m|mM|%\s*w/?v|%\s*v/?v|%)"
+    def as_dict(self) -> Dict[str, str]:
+        return dict(self._vid_to_label)
+
+
+def extract_steps(markdown_text: str) -> List[str]:
+    lines = markdown_text.splitlines()
+    in_proc = False
+    steps: List[str] = []
+    buf: List[str] = []
+
+    for line in lines:
+        if re.search(r"(?:\*\*)?Procedure:?(?:\*\*)?", line, re.I):
+            in_proc = True
+            continue
+
+        if in_proc:
+            if FENCE_START_RX.match(line) or NON_PROC_HEAD_RX.match(line):
+                break
+            if re.match(r"\s*\d+\.\s", line):
+                if buf:
+                    steps.append(" ".join(buf).strip())
+                    buf = []
+                buf.append(re.sub(r"^\s*\d+\.\s*", "", line).strip())
+            else:
+                if line.strip() and not line.strip().startswith("```"):
+                    buf.append(line.strip())
+
+    if buf:
+        steps.append(" ".join(buf).strip())
+
+    if not steps and markdown_text.strip():
+        cleaned = strip_tags(markdown_text.strip())
+        if cleaned:
+            return [cleaned]
+
+    return [strip_tags(s) for s in steps if s.strip()]
+
+
+_WORD_NUMBERS = {
+    "one": 1,
+    "two": 2,
+    "three": 3,
+    "four": 4,
+    "five": 5,
+}
+
+
+def _parse_repeat_count(text: str, default: int = 1) -> int:
+    s = (text or "").lower()
+    m = re.search(r"(\d+)\s*(?:x|×|times?|washes?)", s)
+    if m:
+        return int(m.group(1))
+    for word, value in _WORD_NUMBERS.items():
+        if re.search(rf"\b{word}\b\s+times?", s) or re.search(rf"\b{word}\b\s+washes?\b", s):
+            return value
+    return default
+
+
+def _split_substeps(step: str) -> List[str]:
+    return [x.strip() for x in re.split(r"\band\b|;|(?<!\d)\.(?!\d)", step) if x.strip()]
+
 
 def _clean_solvent_tail(solvent: str) -> str:
-    solvent = strip_tags(solvent.strip().rstrip(",."))
+    solvent = strip_tags((solvent or "").strip().rstrip(",."))
     solvent = solvent.split(" in ")[0].strip()
     return solvent
 
-def detect_solution_prep(line: str) -> Optional[Dict]:
-    s = strip_tags(_clean_unicode(line.strip().rstrip(".")))
-    pats = [
-        re.compile(
-            rf"""prepare\s+a\s+([\d\.]+)\s*({_CONC_UNIT_RX})\s+(?P<xname>.+?)\s+solution\s+
-                by\s+dissolving\s+(?P<solute>.+?)\s+in\s+(?P<vol>[\d\.]+)\s*(?P<vunit>µ?u?L|mL|ml|l|L)\s+of\s+(?P<solvent>.+?)\s*(?:in\b|$)""",
-            re.I|re.X),
-        re.compile(
-            rf"""dissolv\w*\s+(?P<solute>.+?)\s+in\s+(?P<vol>[\d\.]+)\s*(?P<vunit>µ?u?L|mL|ml|l|L)\s+of\s+(?P<solvent>.+?)\s+
-                to\s+(?:make|form|yield|obtain)\s+a\s+([\d\.]+)\s*({_CONC_UNIT_RX})\s+.+?\s+solution""",
-            re.I|re.X),
-        re.compile(
-            r"dissolv\w*\s+(?P<solute>.+?)\s+in\s+(?P<vol>[\d\.]+)\s*(?P<vunit>µ?u?L|mL|ml|l|L)\s+of\s+(?P<solvent>.+?)(?:\.|$)",
-            re.I
-        ),
-    ]
-    for rx in pats:
-        m = rx.search(s)
-        if m:
-            solute = m.groupdict().get("solute","").strip()
-            vol = float(m.group("vol"))
-            vunit = m.group("vunit")
-            solvent = _clean_solvent_tail(m.group("solvent"))
-            hint = None
-            mh = re.search(r"in a\s+(\d+\s*(?:µ?u?L|mL|L)\s+(?:glass\s+)?(?:beaker|flask))", s, re.I)
-            if mh: hint = mh.group(1)
-            conc_val, conc_unit = None, None
-            conc_match = re.search(r"(\d+(?:\.\d+)?)\s*(M|mM|%)\s+solution", s)
-            if conc_match:
-                conc_val = float(conc_match.group(1))
-                conc_unit = conc_match.group(2)
-            return {
-                "action":"dispense",
-                "solute":solute,
-                "solvent":solvent,
-                "concentration":conc_val,
-                "concentration_units":conc_unit,
-                "volume":vol,
-                "volume_units":vunit,
-                "hardware_hint":hint
-            }
-    return None
 
-def detect_add_solvent(line: str) -> Optional[Dict]:
-    s = strip_tags(_clean_unicode(line.strip()))
+def _slug_token(s: str) -> str:
+    slug = re.sub(r"[^a-zA-Z0-9]+", "_", s.strip().lower())
+    slug = re.sub(r"_+", "_", slug).strip("_")
+    return slug
+
+
+def _extract_concentration_components(text: str) -> List[Dict[str, Any]]:
+    comps: List[Dict[str, Any]] = []
+    pattern = re.compile(
+        r"(?P<val>\d+(?:\.\d+)?)\s*(?P<unit>M|mM|µM|uM)\s+of\s+(?P<name>[^,.;]+?)(?=(?:\s+and\s+\d+(?:\.\d+)?\s*(?:M|mM|µM|uM)\s+of\s+)|(?:\s+in\s+)|$)",
+        re.I,
+    )
+    for m in pattern.finditer(text):
+        comps.append(
+            {
+                "name": m.group("name").strip(),
+                "concentration": float(m.group("val")),
+                "conc_unit": _canon_unit(m.group("unit")),
+            }
+        )
+    return comps
+
+
+def detect_prepare_solution_components(line: str) -> Optional[Dict[str, Any]]:
+    s = strip_tags(_clean_unicode(line.strip().rstrip(".")))
+    if not re.search(r"\b(dissolv\w*|prepare)\b", s, re.I):
+        return None
+    if not re.search(r"\bto\s+prepare\b|\bprecursor solution\b|\bmetal precursor solution\b", s, re.I):
+        return None
+
+    solvent_match = re.search(r"\bin\s+([A-Za-z][^.;]+?)(?:\s+to\s+prepare|$)", s, re.I)
+    components = _extract_concentration_components(s)
+    if not components or not solvent_match:
+        return None
+
+    solvent = _clean_solvent_tail(solvent_match.group(1))
+    return {
+        "action": "prepare_solution",
+        "components": components,
+        "solvent": solvent,
+        "description": f"metal precursor solution in {solvent}",
+    }
+
+
+def detect_prepare_and_add_solution(line: str) -> Optional[Dict[str, Any]]:
+    s = strip_tags(_clean_unicode(line.strip().rstrip(".")))
     m = re.search(
-        r"\badd\s+(?P<vol>[\d\.]+)\s*(?P<vunit>µ?u?L|mL|ml|l|L)\s+of\s+(?P<solvent>.+?)\s+to\s+(?:the\s+)?(?:solution|mixture|suspension|dispersion)\b",
-        s, re.I
+        r"\bprepare\s+a\s+(?P<val>\d+(?:\.\d+)?)\s*(?P<unit>M|mM|µM|uM)\s+solution\s+of\s+(?P<reagent>[^,.;]+?)\s+in\s+(?P<solvent>[^,.;]+?)\s+and\s+(?:combine|add|mix)\s+(?:it\s+)?with\b",
+        s,
+        re.I,
+    )
+    if not m:
+        return None
+    return {
+        "action": "add_prepared_solution",
+        "reagent": m.group("reagent").strip(),
+        "solvent": _clean_solvent_tail(m.group("solvent")),
+        "concentration": float(m.group("val")),
+        "conc_unit": _canon_unit(m.group("unit")),
+        "with_stirring": bool(re.search(r"\bstirr", s, re.I)),
+    }
+
+
+def detect_add_solvent(line: str) -> Optional[Dict[str, Any]]:
+    s = strip_tags(_clean_unicode(line.strip().rstrip(".")))
+    m = re.search(
+        r"\badd\s+(?P<vol>\d+(?:\.\d+)?)\s*(?P<vunit>µ?u?L|mL|ml|L|l)\s+of\s+(?P<solvent>.+?)\s+to\s+(?:the\s+)?(?:solution|mixture|suspension|dispersion)\b",
+        s,
+        re.I,
     )
     if not m:
         return None
     return {
         "action": "add_solvent",
+        "solvent": m.group("solvent").strip(),
         "volume": float(m.group("vol")),
         "volume_units": m.group("vunit"),
-        "solvent": m.group("solvent").strip()
+        "minutes": find_minutes(s),
+        "with_stirring": bool(re.search(r"\bstirr", s, re.I)),
     }
 
-def detect_add(line: str) -> Optional[Dict]:
-    s = strip_tags(_clean_unicode(line.strip()))
-    m = re.search(r"\b(add|charge)\s+(?:the\s+)?(?P<src>.+?)\s+to\s+(?:the\s+)?(?P<dst>.+?)\b", s, re.I)
+
+def detect_prepare_and_add_reagent_solution(line: str) -> Optional[Dict[str, Any]]:
+    s = strip_tags(_clean_unicode(line.strip().rstrip(".")))
+    m = re.search(
+        r"\bprepare\s+an?\s+(?P<solvent>[^\s]+)\s+solution\s+of\s+(?P<reagent>[^,.;]+?)\s+and\s+add\s+it\s+to\b",
+        s,
+        re.I,
+    )
     if not m:
         return None
-    rate = "slow" if re.search(r"\b(dropwise|slow)\b", s, re.I) else "normal"
-    at_temp = find_temp_c(s)
-    over_min = find_minutes(s)
-    return {"action":"add","source_name":m.group("src").strip(),"target_name":m.group("dst").strip(),"rate":rate,"temperature_C":at_temp,"minutes":over_min}
+    return {
+        "action": "add_reagent_solution",
+        "reagent": m.group("reagent").strip(),
+        "solvent": m.group("solvent").strip(),
+        "with_stirring": bool(re.search(r"\bstirr", s, re.I)),
+    }
 
-def detect_stir(line: str) -> Optional[Dict]:
-    s = strip_tags(_clean_unicode(line.strip()))
-    if not re.search(r"\bstir", s, re.I): return None
-    rpm = None
-    mr = re.search(r"(\d{2,5})\s*rpm\b", s, re.I)
-    if mr: rpm = int(mr.group(1))
-    minutes = find_minutes(s) or 60.0
-    temp = find_temp_c(s) or DEFAULTS["room_temp_C"]
-    return {"action":"stir","rpm": rpm or DEFAULTS["stir_rpm"], "minutes": minutes, "temperature_C": temp}
 
-def detect_heat(line: str) -> Optional[List[Dict]]:
-    s = strip_tags(_clean_unicode(line.strip()))
-    if not re.search(r"\b(heat|maintain|hold|continue\s+heat)", s, re.I): return None
-    temp = find_temp_c(s) or DEFAULTS["room_temp_C"]
-    minutes = find_minutes(s) or 60.0
-    return [{"action":"heat_to","temperature_C": temp}, {"action":"hold","minutes": minutes}]
+def detect_stir(line: str) -> Optional[Dict[str, Any]]:
+    s = strip_tags(_clean_unicode(line.strip().rstrip(".")))
+    if not re.search(r"\bstir", s, re.I):
+        return None
+    m_rpm = re.search(r"(\d{2,5})\s*rpm\b", s, re.I)
+    rpm = int(m_rpm.group(1)) if m_rpm else DEFAULTS["stir_rpm"]
+    minutes = find_minutes(s)
+    temp = find_temp_c(s)
+    return {
+        "action": "stir",
+        "rpm": rpm,
+        "minutes": minutes if minutes is not None else 60.0,
+        "temperature_C": temp if temp is not None else DEFAULTS["room_temp_C"],
+    }
 
-def detect_cool(line: str) -> Optional[Dict]:
-    s = strip_tags(_clean_unicode(line.strip()))
-    if re.search(r"\b(ice\s*bath|cool)\b", s, re.I):
-        temp = 0.0 if "ice" in s.lower() else (find_temp_c(s) or DEFAULTS["room_temp_C"])
-        return {"action":"cool_to","temperature_C": temp}
-    return None
 
-def detect_sonicate(line: str) -> Optional[Dict]:
-    s = strip_tags(_clean_unicode(line.strip()))
-    if re.search(r"\bsonicat", s, re.I):
-        return {"action":"sonicate","minutes": find_minutes(s) or 10.0}
-    return None
+def detect_explicit_postprocess(line: str) -> Optional[Dict[str, Any]]:
+    s = strip_tags(_clean_unicode(line.strip().rstrip(".")))
+    if not re.search(r"\bcentrifug", s, re.I) and not re.search(r"\bwash\b", s, re.I):
+        return None
 
-def detect_filter(line: str) -> Optional[List[Dict]]:
-    s = strip_tags(_clean_unicode(line.strip()))
-    if re.search(r"\b(vacuum\s*filter|filter\b)", s, re.I):
-        ops = [{"action":"filter"}]
-        if "vacuum" in s.lower(): ops.append({"action":"apply_vacuum"})
-        return ops
-    return None
+    solvent_match = re.search(
+        r"with\s+(?P<vol>\d+(?:\.\d+)?)\s*(?P<vunit>µ?u?L|mL|ml|L|l)\s+of\s+(?P<solvent>[^,.;]+)",
+        s,
+        re.I,
+    )
+    centrifuge_match = re.search(
+        r"centrifug\w*.*?(?P<mins>\d+(?:\.\d+)?)\s*(?:minutes?|mins?)\s+at\s+(?P<rpm>\d+)\s*rpm",
+        s,
+        re.I,
+    )
+    if not solvent_match and not centrifuge_match:
+        return None
 
-def detect_wash_dry(line: str) -> Optional[List[Dict]]:
-    s = strip_tags(_clean_unicode(line.strip()))
-    ops = []
-    if "wash" in s.lower():
-        n = 1
-        mw = re.search(r"(\d+)\s*[x×]\s*wash", s, re.I)
-        if mw: n = int(mw.group(1))
-        wash_solvent = "deionized water" if re.search(r"\b(di\s*water|deionized\s*water)\b", s, re.I) else "wash solvent"
-        for _ in range(n):
-            ops += [{"action":"add_wash_solvent","solvent":wash_solvent}, {"action":"resuspend"}, {"action":"centrifuge","rpm":DEFAULTS["centrifuge_rpm"],"minutes":DEFAULTS["centrifuge_minutes"]}, {"action":"decant_supernatant"}]
-    if "dry" in s.lower() or "oven" in s.lower():
-        temp = find_temp_c(s) or 60.0; minutes = find_minutes(s) or 120.0
-        ops.append({"action":"oven_dry","temperature_C":temp,"minutes":minutes})
-    return ops or None
+    return {
+        "action": "postprocess",
+        "wash_count": _parse_repeat_count(s, default=1),
+        "wash_solvent": _clean_solvent_tail(solvent_match.group("solvent")) if solvent_match else "wash solvent",
+        "wash_volume": float(solvent_match.group("vol")) if solvent_match else None,
+        "wash_volume_units": solvent_match.group("vunit") if solvent_match else None,
+        "centrifuge_minutes": float(centrifuge_match.group("mins")) if centrifuge_match else DEFAULTS["centrifuge_minutes"],
+        "centrifuge_rpm": int(centrifuge_match.group("rpm")) if centrifuge_match else DEFAULTS["centrifuge_rpm"],
+    }
 
-def detect_oven_dry(line: str) -> Optional[Dict]:
-    """Detect oven drying operations specifically"""
-    s = strip_tags(_clean_unicode(line.strip()))
-    if re.search(r"\b(dry|oven)\b", s, re.I):
-        temp = find_temp_c(s) or 80.0  # Default to 80C for oven
-        minutes = find_minutes(s) or 120.0  # Default to 2 hours
-        return {"action": "oven_dry", "temperature_C": temp, "minutes": minutes}
-    return None
 
-def detect_resuspend(line: str) -> Optional[Dict]:
-    s = strip_tags(_clean_unicode(line.strip()))
-    if re.search(r"\bresuspend\b", s, re.I):
-        return {"action": "resuspend"}
-    return None
+def detect_redisperse(line: str) -> Optional[Dict[str, Any]]:
+    s = strip_tags(_clean_unicode(line.strip().rstrip(".")))
+    if not re.search(r"\b(disperse|redisperse)\b", s, re.I):
+        return None
+    m = re.search(r"\bin\s+(?P<solvent>[^,.;]+)", s, re.I)
+    solvent = _clean_solvent_tail(m.group("solvent")) if m else None
+    return {"action": "redisperse", "solvent": solvent}
 
-def detect_collect(line: str) -> Optional[Dict]:
-    s = strip_tags(_clean_unicode(line.strip()))
-    if re.search(r"\bcollect\b", s, re.I):
-        return {"action": "collect"}
-    return None
 
-def detect_discard(line: str) -> Optional[Dict]:
-    s = strip_tags(_clean_unicode(line.strip()))
-    if re.search(r"\bdiscard\b", s, re.I):
-        return {"action": "discard"}
-    return None
-
-def detect_transfer(line: str) -> Optional[Dict]:
-    s = strip_tags(_clean_unicode(line.strip()))
-    m = re.search(r"\btransfer\b.*\bto\b\s+(?P<target>.+)", s, re.I)
-    if m:
-        return {"action": "transfer", "target": m.group("target").strip()}
-    return None
-
-def detect_weigh(line: str) -> Optional[Dict]:
-    s = strip_tags(_clean_unicode(line.strip()))
-    m = re.search(r"\bweigh\s+(?P<amount>[\d\.]+)\s*(?P<unit>mg|g|µg|kg)\s+of\s+(?P<reagent>.+?)(?:\.|$)", s, re.I)
-    if m:
-        return {
-            "action": "weigh",
-            "reagent": m.group("reagent").strip(),
-            "amount": float(m.group("amount")),
-            "unit": m.group("unit")
-        }
-    return None
-
-def detect_transfer_explicit(line: str) -> Optional[Dict]:
-    s = strip_tags(_clean_unicode(line.strip()))
-    m = re.search(r"\btransfer\s+(?:it|the\s+mixture|solution|precipitate)?\s*(?:into|to)\s+(?P<target>.+?)(?:\.|$)", s, re.I)
-    if m:
-        return {
-            "action": "transfer",
-            "target": m.group("target").strip()
-        }
+def detect_solution_prep(line: str) -> Optional[Dict[str, Any]]:
+    s = strip_tags(_clean_unicode(line.strip().rstrip(".")))
+    patterns = [
+        re.compile(
+            r"prepare\s+a\s+([\d\.]+)\s*(M|mM|µM|uM)\s+.+?\s+solution\s+by\s+dissolving\s+(?P<solute>.+?)\s+in\s+(?P<vol>[\d\.]+)\s*(?P<vunit>µ?u?L|mL|ml|L|l)\s+of\s+(?P<solvent>.+?)\s*(?:in\b|$)",
+            re.I,
+        ),
+        re.compile(
+            r"dissolv\w*\s+(?P<solute>.+?)\s+in\s+(?P<vol>[\d\.]+)\s*(?P<vunit>µ?u?L|mL|ml|L|l)\s+of\s+(?P<solvent>.+?)\s+to\s+(?:make|form|yield|obtain)\s+a\s+([\d\.]+)\s*(M|mM|µM|uM|%)\s+.+?\s+solution",
+            re.I,
+        ),
+    ]
+    for rx in patterns:
+        m = rx.search(s)
+        if m:
+            conc_match = re.search(r"(\d+(?:\.\d+)?)\s*(M|mM|µM|uM|%)\s+.+?\s+solution", s, re.I)
+            return {
+                "action": "prepare_solution",
+                "solute": m.group("solute").strip(),
+                "solvent": _clean_solvent_tail(m.group("solvent")),
+                "concentration": float(conc_match.group(1)) if conc_match else None,
+                "concentration_units": _canon_unit(conc_match.group(2)) if conc_match else None,
+                "volume": float(m.group("vol")),
+                "volume_units": m.group("vunit"),
+                "hardware_hint": None,
+            }
     return None
 
 
-
-def detect_dissolve(line: str) -> Optional[Dict]:
-    s = strip_tags(_clean_unicode(line.strip()))
-    # Match "dissolve X g [of] Y in Z mL [of] solvent"
+def detect_dissolve(line: str) -> Optional[Dict[str, Any]]:
+    s = strip_tags(_clean_unicode(line.strip().rstrip(".")))
     m = re.search(
-        r"\bdissolv\w*\s+(?P<amount>[\d\.]+)\s*(?P<unit>mg|g|µg|kg)\s+(?:of\s+)?(?P<solute>.+?)\s+in\s+(?P<vol>[\d\.]+)\s*(?P<vunit>µ?u?L|mL|ml|l|L)\s+(?:of\s+)?(?P<solvent>[^.;,]+)",
-        s, re.I
+        r"\bdissolv\w*\s+(?P<amount>[\d\.]+)\s*(?P<unit>mg|g|kg|µg|ug)\s+(?:of\s+)?(?P<solute>.+?)\s+in\s+(?P<vol>[\d\.]+)\s*(?P<vunit>µ?u?L|mL|ml|L|l)\s+(?:of\s+)?(?P<solvent>[^.;,]+)",
+        s,
+        re.I,
     )
     if not m:
         return None
 
-    solute = m.group("solute").strip()
     solvent_captured = _clean_solvent_tail(m.group("solvent").strip())
     vol1 = float(m.group("vol"))
     vunit1 = m.group("vunit")
-
-    extras = []
+    extras: List[Dict[str, Any]] = []
     inline = solvent_captured
     while True:
-        exm = re.search(r"(.*?)(?:,\s*)?(?:and\s+)([\d\.]+)\s*(µ?u?L|mL|ml|l|L)\s+of\s+([^,;]+)$", inline, re.I)
+        exm = re.search(
+            r"(.*?)(?:,\s*)?(?:and\s+)([\d\.]+)\s*(µ?u?L|mL|ml|L|l)\s+of\s+([^,;]+)$",
+            inline,
+            re.I,
+        )
         if not exm:
             break
         base = exm.group(1).strip()
-        vol2 = float(exm.group(2)); vunit2 = exm.group(3)
-        solv2 = _clean_solvent_tail(exm.group(4).strip())
-        extras.insert(0, {"name": solv2, "volume": vol2, "volume_units": vunit2})
+        extras.insert(
+            0,
+            {
+                "name": _clean_solvent_tail(exm.group(4).strip()),
+                "volume": float(exm.group(2)),
+                "volume_units": exm.group(3),
+            },
+        )
         inline = base
     solvent1 = inline
 
-    hint = None
-    mh = re.search(r"in\s+(?:a|the)\s+(\d+\s*(?:µ?u?L|mL|L)\s+(?:glass\s+)?(?:beaker|flask|round-?bottom\s+flask))", s, re.I)
-    if mh:
-        hint = mh.group(1)
-
-    result = {
+    result: Dict[str, Any] = {
         "action": "dissolve",
-        "solute": solute,
+        "solute": m.group("solute").strip(),
         "amount": float(m.group("amount")),
         "unit": m.group("unit"),
         "solvent": solvent1 if not extras else solvent1 + " + " + " + ".join(e["name"] for e in extras),
         "volume": vol1,
         "volume_units": vunit1,
-        "hardware_hint": hint,
-    }
-    if extras:
-        result["solvents"] = [{"name": solvent1, "volume": vol1, "volume_units": vunit1}] + extras
-    return result
-
-    solute = m.group("solute").strip()
-    solvent1 = _clean_solvent_tail(m.group("solvent").strip())
-    # handle inline extra solvents like "ethylene glycol and 5 mL of water"
-    extras = []
-    inline = solvent1
-    # repeatedly peel off trailing ", and 5 mL of X" or "and 5 mL of X"
-    while True:
-        exm = re.search(r"(.*?)(?:,\s*)?(?:and\s+)([\d\.]+)\s*(µ?u?L|mL|ml|l|L)\s+of\s+([^,;]+)$", inline, re.I)
-        if not exm:
-            break
-        base = exm.group(1).strip()
-        vol2 = float(exm.group(2)); vunit2 = exm.group(3)
-        solv2 = _clean_solvent_tail(exm.group(4).strip())
-        extras.insert(0, {"name": solv2, "volume": vol2, "volume_units": vunit2})
-        inline = base
-    solvent1 = inline
-
-    vol1 = float(m.group("vol"))
-    vunit1 = m.group("vunit")
-
-    hint = None
-    mh = re.search(r"in\s+(?:a|the)\s+(\d+\s*(?:µ?u?L|mL|L)\s+(?:glass\s+)?(?:beaker|flask|round-?bottom\s+flask))", s, re.I)
-    if mh:
-        hint = mh.group(1)
-
-    result = {
-        "action": "dissolve",
-        "solute": solute,
-        "amount": float(m.group("amount")),
-        "unit": m.group("unit"),
-        "solvent": solvent1 if not extras else solvent1 + " + " + " + ".join(e["name"] for e in extras),
-        "volume": vol1,
-        "volume_units": vunit1,
-        "hardware_hint": hint,
     }
     if extras:
         result["solvents"] = [{"name": solvent1, "volume": vol1, "volume_units": vunit1}] + extras
     return result
 
 
-def detect_filter_isolate(line: str) -> Optional[Dict]:
-    s = strip_tags(_clean_unicode(line.strip()))
-    if re.search(r"\b(isolate|collect|obtain)\s+(?:the\s+)?(precipitate|solid|product)", s, re.I):
-        return {"action": "isolate"}
-    return None
+def detect_transfer(line: str) -> Optional[Dict[str, Any]]:
+    s = strip_tags(_clean_unicode(line.strip().rstrip(".")))
+    m = re.search(r"\btransfer\b.*\b(?:into|to)\b\s+(?P<target>.+)$", s, re.I)
+    if not m:
+        return None
+    return {"action": "transfer", "target": m.group("target").strip()}
 
-def detect_ph_monitoring(step: str) -> Optional[Dict]:
-    """Detect pH monitoring operations"""
-    s = strip_tags(_clean_unicode(step.strip()))
-    if re.search(r"\bmonitor.*ph\b|\bph.*monitor\b", s, re.I):
-        return {
-            "action": "monitor_ph",
-            "continuous": True,
-            "target_ph": None,
-            "interval_seconds": 30
-        }
-    return None
 
-def detect_titration_control(step: str) -> Optional[Dict]:
-    """Detect controlled titration operations"""
-    s = strip_tags(_clean_unicode(step.strip()))
-    ph_match = re.search(r"stop.*addition.*ph\s*reaches?\s*(\d+(?:\.\d+)?)", s, re.I)
-    if ph_match:
-        return {
-            "action": "titrate_to_ph",
-            "target_ph": float(ph_match.group(1)),
-            "reagent": "NaOH",
-            "max_volume_ml": 50,
-            "rate_ml_per_min": 0.5
-        }
-    return None
+def detect_weigh(line: str) -> Optional[Dict[str, Any]]:
+    s = strip_tags(_clean_unicode(line.strip().rstrip(".")))
+    m = re.search(r"\bweigh\s+(?P<amount>[\d\.]+)\s*(?P<unit>mg|g|kg|µg|ug)\s+of\s+(?P<reagent>.+)$", s, re.I)
+    if not m:
+        return None
+    return {
+        "action": "weigh",
+        "reagent": m.group("reagent").strip(),
+        "amount": float(m.group("amount")),
+        "unit": m.group("unit"),
+    }
 
-# -------- Ops builders --------
-def ops_for_dispense(vessel: str, hardware_id: Optional[str], solute: str, solvent: str, volume_val: float, volume_unit: str) -> List[Dict]:
-    return [
-        {"op":"ensure_vessel","vessel":vessel,"hardware_id":hardware_id},
-        {"op":"add_solute","vessel":vessel,"reagent":solute},
-        {"op":"add_solvent","vessel":vessel,"solvent":solvent,"volume":volume_val,"volume_units":volume_unit},
+
+def detect_generic_add(line: str) -> Optional[Dict[str, Any]]:
+    s = strip_tags(_clean_unicode(line.strip().rstrip(".")))
+    m = re.search(r"\b(add|charge)\s+(?:the\s+)?(?P<src>.+?)\s+to\s+(?:the\s+)?(?P<dst>.+?)\b", s, re.I)
+    if not m:
+        return None
+    src = m.group("src").strip()
+    if src.lower() in {"it", "this", "that"}:
+        return None
+    return {
+        "action": "add",
+        "source_name": src,
+        "target_name": m.group("dst").strip(),
+        "rate": "slow" if re.search(r"\b(dropwise|slow)\b", s, re.I) else "normal",
+        "temperature_C": find_temp_c(s),
+        "minutes": find_minutes(s),
+    }
+
+
+def semantic_parse_step(step: str) -> Dict[str, Any]:
+    detectors = [
+        detect_prepare_solution_components,
+        detect_prepare_and_add_solution,
+        detect_add_solvent,
+        detect_prepare_and_add_reagent_solution,
+        detect_explicit_postprocess,
+        detect_redisperse,
+        detect_stir,
+        detect_solution_prep,
+        detect_dissolve,
+        detect_weigh,
+        detect_transfer,
+        detect_generic_add,
     ]
+    for detector in detectors:
+        parsed = detector(step)
+        if parsed:
+            parsed["raw"] = step
+            return parsed
 
-def ops_for_add(src_v: str, dst_v: str, rate: str, rpm: Optional[int]=None, temperature_C: Optional[float]=None, minutes: Optional[float]=None) -> List[Dict]:
-    ops = [
-        {"op":"move_to_stir_plate","vessel":dst_v,"stir_plate_id":DEVICE_IDS["stir_plate_id"]},
-        {"op":"set_stir_rate","vessel":dst_v,"rpm": rpm or DEFAULTS["stir_rpm"]},
-    ]
-    if temperature_C is not None:
-        ops.append({"op":"set_hotplate_temperature","hotplate_id":DEVICE_IDS["hotplate_id"],"temperature_C":temperature_C})
-    ops.append({"op":"transfer","from":src_v,"to":dst_v,"rate":rate})
-    if minutes:
-        ops.append({"op":"wait","minutes":minutes})
-    return ops
+    target_vessel = "V1"
+    record: Dict[str, Any] = {"action": "process", "vessel": target_vessel, "reagents": [], "ops": [], "raw": step}
+    substeps = _split_substeps(step)
+    if len(substeps) > 1:
+        fragments: List[Dict[str, Any]] = []
+        for sub in substeps:
+            parsed = semantic_parse_step(sub)
+            if parsed.get("action") != "process":
+                fragments.append(parsed)
+        if fragments:
+            return {"action": "composite", "parts": fragments, "raw": step}
+    return record
 
-def ops_for_stir(vessel: str, minutes: float, rpm: int, temp_C: float) -> List[Dict]:
-    return [
-        {"op":"move_to_stir_plate","vessel":vessel,"stir_plate_id":DEVICE_IDS["stir_plate_id"]},
-        {"op":"set_stir_rate","vessel":vessel,"rpm":rpm},
-        {"op":"set_hotplate_temperature","hotplate_id":DEVICE_IDS["hotplate_id"],"temperature_C":temp_C},
-        {"op":"wait","minutes":minutes},
-    ]
 
-def ops_for_heat(vessel: str, temp_C: float, minutes: float) -> List[Dict]:
-    return [
-        {"op":"set_hotplate_temperature","hotplate_id":DEVICE_IDS["hotplate_id"],"temperature_C":temp_C},
-        {"op":"wait","minutes":minutes},
-    ]
+def semantic_parse(text: str, vessels: VesselRegistry) -> Tuple[List[Dict[str, Any]], Dict[str, Any]]:
+    steps = extract_steps(text)
+    records: List[Dict[str, Any]] = []
+    context: Dict[str, Any] = {"prepared_tokens": {}}
 
-def ops_for_postproc(vessel: str, actions: List[Dict]) -> List[Dict]:
-    ops = []
-    for a in actions:
-        if a["action"]=="cool_to":
-            ops.append({"op":"set_hotplate_temperature","hotplate_id":DEVICE_IDS["hotplate_id"],"temperature_C":a["temperature_C"]})
-        elif a["action"]=="centrifuge":
-            ops.append({"op":"transfer_to_centrifuge_tube","from":vessel,"to":f"{vessel}_tube"})
-            ops.append({"op":"centrifuge","centrifuge_id":DEVICE_IDS["centrifuge_id"],"rpm":a["rpm"],"minutes":a["minutes"]})
-        elif a["action"]=="decant_supernatant":
-            ops.append({"op":"decant_supernatant","tube":f"{vessel}_tube"})
-        elif a["action"]=="add_wash_solvent":
-            ops.append({"op":"add_wash_solvent","tube":f"{vessel}_tube","solvent":a["solvent"]})
-        elif a["action"]=="resuspend":
-            ops.append({"op":"resuspend","tube":f"{vessel}_tube"})
-        elif a["action"]=="oven_dry":
-            ops.append({"op":"move_to_oven","tube":f"{vessel}_tube","oven_id":DEVICE_IDS["oven_id"]})
-            ops.append({"op":"set_oven_temperature","oven_id":DEVICE_IDS["oven_id"],"temperature_C":a["temperature_C"]})
-            ops.append({"op":"wait","minutes":a["minutes"]})
-        elif a["action"]=="filter":
-            ops.append({"op":"setup_filtration"})
-        elif a["action"]=="apply_vacuum":
-            ops.append({"op":"start_vacuum","vacuum_pump_id":DEVICE_IDS["vacuum_pump_id"]})
-        elif a["action"]=="sonicate":
-            ops.append({"op":"sonicate","sonicator_id":DEVICE_IDS["sonicator_id"],"minutes":a.get("minutes",10.0)})
-    return ops
-
-# -------- Step extraction --------
-def extract_steps(markdown_text: str) -> List[str]:
-    lines = markdown_text.splitlines()
-    in_proc = False; steps = []; buf = []
-    for line in lines:
-        # More flexible pattern to match procedure sections (with or without bold markers)
-        if re.search(r"(?:\*\*)?Procedure:?(?:\*\*)?", line, re.I):
-            in_proc = True
+    for step in steps:
+        parsed = semantic_parse_step(step)
+        if parsed.get("action") == "composite":
+            for part in parsed["parts"]:
+                records.append(part)
             continue
-        if in_proc:
-            # hard stops to avoid pulling rich-text sections
-            if FENCE_START_RX.match(line) or NON_PROC_HEAD_RX.match(line):
-                break
+        records.append(parsed)
 
-            if re.match(r"\s*\d+\.\s", line):
-                if buf:
-                    steps.append(" ".join(buf).strip()); buf = []
-                buf.append(re.sub(r"^\s*\d+\.\s*", "", line).strip())
-            else:
-                # ignore empty or fence continuation lines if any slipped in
-                if line.strip() and not line.strip().startswith("```"):
-                    buf.append(line.strip())
-    if buf:
-        steps.append(" ".join(buf).strip())
-    return [strip_tags(s) for s in steps if s.strip()]
-
-# -------- Validation --------
-def validate_execution_plan(plan: Dict) -> List[str]:
-    """Validate execution plan for safety and completeness"""
-    errors = []
-    
-    # Check device parameter bounds
-    for step in plan.get("micro_plan", []):
-        if step.get("verb") == "set":
-            device = step.get("device")
-            param = step.get("param") 
-            value = step.get("value")
-            
-            if device == "HP1" and param == "temperature_C":
-                if value > 200:  # Safety limit
-                    errors.append(f"Temperature {value}°C exceeds safety limit of 200°C")
-                if value < -20:
-                    errors.append(f"Temperature {value}°C below safety limit of -20°C")
-            
-            if device == "SP1" and param == "rpm":
-                if value > 2000:  # Equipment limit
-                    errors.append(f"Stir speed {value} rpm exceeds equipment limit of 2000 rpm")
-                if value < 0:
-                    errors.append(f"Stir speed {value} rpm cannot be negative")
-            
-            if device == "OV1" and param == "temperature_C":
-                if value > 300:  # Oven safety limit
-                    errors.append(f"Oven temperature {value}°C exceeds safety limit of 300°C")
-    
-    # Check for missing critical operations
-    process_steps = [s for s in plan.get("steps", []) if s.get("action") == "process"]
-    for step in process_steps:
-        if not step.get("micro_ops") and not step.get("ops"):
-            errors.append(f"Process step has no executable operations: {step.get('raw', '')[:50]}...")
-    
-    # Check for required devices
-    required_devices = set()
-    for step in plan.get("micro_plan", []):
-        if step.get("device"):
-            required_devices.add(step.get("device"))
-    
-    available_devices = set(plan.get("devices", {}).values())
-    missing_devices = required_devices - available_devices
-    for device in missing_devices:
-        errors.append(f"Required device {device} not available in device registry")
-    
-    return errors
-
-# -------- Postprocessing and micro-plan generation --------
-def _assign_unique_action_step_indices(actions: List[Dict], *, start_at: int = 1) -> int:
-    """Renumber an emitted action stream so every action has a unique ``step_index``.
-
-    The original parser-level ``step_index`` is preserved as ``source_step_index``
-    for traceability. Returns the next available index after the last action.
-    """
-    next_index = start_at
-    for action in actions:
-        original_index = action.get("step_index")
-        if original_index is not None and "source_step_index" not in action:
-            action["source_step_index"] = original_index
-        action["step_index"] = next_index
-        next_index += 1
-    return next_index
+    return records, context
 
 
-def apply_postprocessing(doc: Dict) -> Dict:
-    """Normalize and enrich a raw conversion document into a consistent micro-plan.
+def _ensure_primary_vessel(vessels: VesselRegistry) -> str:
+    return vessels.primary_vessel or vessels.ensure_glassware("Beaker")
 
-    Responsibilities:
-      1. Build `micro_plan` from per-step ops / micro_ops when absent.
-      2. Canonicalize device aliases (e.g. hot plate -> HP1, oven -> OV1).
-      3. Add missing units (temperature °C, volumes) for downstream stability.
-      4. Inject pick_up/place operations when a device operation requires relocation.
-      5. Preserve provenance (`collapsed_from_steps`) if present; ensure uniqueness.
-      6. Append inferred autotitrator rate set operations if a titration context implies a rate.
-      7. Record repair actions under `_executor['repairs']`.
 
-    The function augments but does not remove semantic user-intended operations.
-    """
-    result = copy.deepcopy(doc)
-    
-    # Device name canonicalization mapping
-    device_aliases = {
-        "water bath": "HP1",
-        "hotplate": "HP1", 
-        "hot plate": "HP1",
-        "heating plate": "HP1",
-        "stir plate": "SP1",
-        "stirrer": "SP1",
-        "centrifuge": "CF1",
-        "oven": "OV1"
-    }
-    
-    # Step 1: Build micro_plan from steps if needed
-    micro_plan = []
-    repairs = []
-    
-    # If we already have a micro_plan, use it as the starting point
-    if result.get("micro_plan"):
-        micro_plan = copy.deepcopy(result["micro_plan"])
-    else:
-        # Build from steps
-        for step_idx, step in enumerate(result.get("steps", []), 1):
-            step_micro_ops = []
-            
-            # Use existing micro_ops if available, otherwise build from ops
-            if step.get("micro_ops"):
-                step_micro_ops = copy.deepcopy(step["micro_ops"])
-            elif step.get("ops"):
-                # Convert ops to micro_ops format
-                for op in step["ops"]:
-                    micro_op = copy.deepcopy(op)
-                    # Convert "op" to "verb" for micro format
-                    if "op" in micro_op:
-                        op_name = micro_op.pop("op")
-                        
-                        # Handle special oven operations
-                        if op_name == "move_to_oven":
-                            # Convert to pick_up and place operations
-                            pickup_op = {
-                                "verb": "pick_up",
-                                "object": micro_op.get("tube", "sample"),
-                                "step_index": step_idx
-                            }
-                            place_op = {
-                                "verb": "place", 
-                                "object": micro_op.get("tube", "sample"),
-                                "to": "oven",
-                                "step_index": step_idx
-                            }
-                            step_micro_ops.extend([pickup_op, place_op])
-                            continue
-                        elif op_name == "set_oven_temperature":
-                            # Convert to set verb with proper parameters
-                            set_op = {
-                                "verb": "set",
-                                "device": micro_op.get("oven_id", "OV1"),
-                                "param": "temperature_C",
-                                "value": micro_op.get("temperature_C"),
-                                "step_index": step_idx
-                            }
-                            step_micro_ops.append(set_op)
-                            continue
-                        elif op_name == "set_hotplate_temperature":
-                            # Convert to set verb with proper parameters
-                            set_op = {
-                                "verb": "set",
-                                "device": micro_op.get("hotplate_id", "HP1"),
-                                "param": "temperature_C",
-                                "value": micro_op.get("temperature_C"),
-                                "step_index": step_idx
-                            }
-                            step_micro_ops.append(set_op)
-                            continue
-                        elif op_name == "add_solvent":
-                            # Convert add_solvent to pour operation
-                            pour_op = {
-                                "verb": "pour",
-                                "volume": micro_op.get("volume", 10),
-                                "volume_units": micro_op.get("volume_units", "mL"),
-                                "step_index": step_idx
-                            }
-                            if "solvent" in micro_op:
-                                pour_op["reagent"] = micro_op["solvent"]
-                            step_micro_ops.append(pour_op)
-                            continue
-                        else:
-                            micro_op["verb"] = op_name
-                    
-                    micro_op["step_index"] = step_idx
-                    step_micro_ops.append(micro_op)            # Add step_index to all micro_ops
-            for micro_op in step_micro_ops:
-                if "step_index" not in micro_op:
-                    micro_op["step_index"] = step_idx
-            
-            micro_plan.extend(step_micro_ops)
-    
-    # Step 2: Canonicalize device names
-    for micro_op in micro_plan:
-        if "device" in micro_op:
-            device = micro_op["device"]
-            if isinstance(device, str):
-                device_lower = device.lower().strip()
-                if device_lower in device_aliases:
-                    micro_op["device"] = device_aliases[device_lower]
-                    repairs.append(f"canonicalized_device_{device_lower.replace(' ', '_')}_to_{device_aliases[device_lower]}")
-    
-    # Step 3: Add units to operations
-    for micro_op in micro_plan:
-        verb = micro_op.get("verb")
-        
-        # Add temperature units
-        if verb == "set" and micro_op.get("param") == "temperature_C":
-            if "unit" not in micro_op:
-                micro_op["unit"] = "C"
-        
-        # Add volume units for pour operations
-        if verb == "pour" and "volume" in micro_op and "volume_units" not in micro_op:
-            micro_op["volume_units"] = "mL"
-        
-        # Add other common units
-        if verb == "add_solvent" and "volume" in micro_op and "volume_units" not in micro_op:
-            micro_op["volume_units"] = "mL"
-    
-    # Step 4: Add pick_up and place actions before device operations
-    enhanced_micro_plan = []
-    vessel_locations = {}  # Track where vessels are currently placed
-    
-    for i, micro_op in enumerate(micro_plan):
-        verb = micro_op.get("verb")
-        device = micro_op.get("device")
-        vessel = micro_op.get("vessel", "V1")  # Default vessel
-        
-        # Check if this operation requires vessel placement
-        needs_placement = (
-            verb == "set" and device in ["HP1", "SP1", "OV1"] or
-            verb in ["heat", "stir", "mix"] or
-            (verb == "pour" and device)
+def _emit_prepare_solution(step: Dict[str, Any], vessel: str) -> Tuple[Dict[str, Any], Optional[Dict[str, Any]]]:
+    components = step["components"]
+    solvent = step["solvent"]
+    ops: List[Dict[str, Any]] = []
+    reagents: List[str] = []
+    detailed_components: List[Dict[str, Any]] = []
+
+    for comp in components:
+        ops.append({"op": "pour", "reagent": comp["name"], "vessel": vessel})
+        reagents.append(comp["name"])
+        detailed_components.append(
+            {
+                "name": comp["name"],
+                "display_name": comp["name"],
+                "concentration": comp["concentration"],
+                "conc_unit": comp["conc_unit"],
+                "solvent": solvent,
+            }
         )
-        
-        if needs_placement and device:
-            current_location = vessel_locations.get(vessel)
-            
-            # If vessel is not on the required device, add pick_up and place
-            if current_location != device:
-                # Add pick_up if vessel is somewhere else
-                if current_location is not None:
-                    pickup_op = {
-                        "verb": "pick_up",
-                        "vessel": vessel,
-                        "from": current_location,
-                        "step_index": micro_op.get("step_index", 1)
-                    }
-                    enhanced_micro_plan.append(pickup_op)
-                    repairs.append(f"inserted_pickup_{vessel}_from_{current_location}")
-                else:
-                    pickup_op = {
-                        "verb": "pick_up", 
-                        "vessel": vessel,
-                        "step_index": micro_op.get("step_index", 1)
-                    }
-                    enhanced_micro_plan.append(pickup_op)
-                    repairs.append(f"inserted_pickup_{vessel}")
-                
-                # Add place operation
-                place_op = {
-                    "verb": "place",
-                    "vessel": vessel,
-                    "to": device,
-                    "step_index": micro_op.get("step_index", 1)
-                }
-                enhanced_micro_plan.append(place_op)
-                repairs.append(f"inserted_place_{vessel}_to_{device}")
-                
-                # Update vessel location tracking
-                vessel_locations[vessel] = device
-                
-                # Special handling for hotplate operations
-                if device == "HP1":
-                    repairs.append("inserted_hotplate_pickup_place")
-        
-        enhanced_micro_plan.append(micro_op)
-    
-    # Step 5: Handle provenance (collapsed_from_steps)
-    for micro_op in enhanced_micro_plan:
-        if "collapsed_from_steps" in micro_op:
-            # Ensure it's sorted and contains self
-            cfs = micro_op["collapsed_from_steps"]
-            if isinstance(cfs, list) and len(cfs) > 1:
-                micro_op["collapsed_from_steps"] = sorted(cfs)
-    
-    # Step 6: Add executor metadata
-    executor_metadata = {
-        "schema_version": "executor.v1",
-        "repairs": repairs,
-        "postprocessing_applied": True,
-        "timestamp": time.time()
+    ops.append({"op": "pour", "solvent": solvent, "vessel": vessel})
+    reagents.append(solvent)
+    detail = {
+        "description": step.get("description", f"prepared solution in {solvent}"),
+        "components": detailed_components + [{"name": solvent, "display_name": solvent, "role": "solvent"}],
     }
-    
-    # Update the result
-    result["micro_plan"] = enhanced_micro_plan
-    result["_executor"] = executor_metadata
+    record = {
+        "action": "prepare_solution",
+        "raw": step["raw"],
+        "vessel": vessel,
+        "ops": ops,
+        "reagents": reagents,
+    }
+    return record, detail
 
-    # Autotitrator rate set insertion if a titration step present and no rate set op
-    try:
-        has_rate = any(
-            op.get("verb") == "set" and op.get("param") in {"rate_mL_per_min", "rate_ml_per_min"}
-            for op in result["micro_plan"]
+
+def _emit_add_prepared_solution(step: Dict[str, Any], vessel: str) -> Dict[str, Any]:
+    reagent_token = f"{_slug_token(step['reagent'])}_solution_in_{_slug_token(step['solvent'])}"
+    ops = [
+        {"op": "move_to_stir_plate", "stir_plate_id": DEVICE_IDS["stir_plate_id"], "vessel": vessel},
+        {"op": "set_stir_rate", "vessel": vessel, "rpm": DEFAULTS["stir_rpm"], "inferred": True},
+        {"op": "pour", "reagent": reagent_token, "vessel": vessel},
+    ]
+    return {
+        "action": "add",
+        "raw": step["raw"],
+        "vessel": vessel,
+        "rpm": DEFAULTS["stir_rpm"],
+        "ops": ops,
+        "reagents": [step["reagent"], step["solvent"]],
+    }
+
+
+def _emit_add_solvent(step: Dict[str, Any], vessel: str) -> Dict[str, Any]:
+    ops: List[Dict[str, Any]] = [
+        {
+            "op": "pour",
+            "reagent": step["solvent"],
+            "vessel": vessel,
+            "volume": step["volume"],
+            "volume_units": step["volume_units"],
+        }
+    ]
+    if step.get("minutes") is not None:
+        ops.append({"op": "wait", "minutes": step["minutes"]})
+    return {
+        "action": "add_solvent",
+        "raw": step["raw"],
+        "vessel": vessel,
+        "solvent": step["solvent"],
+        "volume": step["volume"],
+        "volume_units": step["volume_units"],
+        "ops": ops,
+        "reagents": [step["solvent"]],
+    }
+
+
+def _emit_add_reagent_solution(step: Dict[str, Any], vessel: str) -> Dict[str, Any]:
+    token = f"{_slug_token(step['reagent'])}_{_slug_token(step['solvent'])}_solution"
+    ops = [{"op": "pour", "reagent": token, "vessel": vessel}]
+    return {
+        "action": "add",
+        "raw": step["raw"],
+        "vessel": vessel,
+        "with_stirring": step.get("with_stirring", True),
+        "ops": ops,
+        "reagents": [f"{step['reagent']} aqueous solution" if step["solvent"].lower() == "aqueous" else f"{step['reagent']} {step['solvent']} solution"],
+    }
+
+
+def _emit_stir(step: Dict[str, Any], vessel: str) -> Dict[str, Any]:
+    return {
+        "action": "stir",
+        "raw": step["raw"],
+        "vessel": vessel,
+        "rpm": step["rpm"],
+        "minutes": step["minutes"],
+        "ops": [{"op": "wait", "minutes": step["minutes"]}],
+        "reagents": [],
+        "reagents_structured": [],
+    }
+
+
+def _emit_postprocess(step: Dict[str, Any], vessel: str) -> Dict[str, Any]:
+    ops: List[Dict[str, Any]] = [
+        {"op": "transfer_to_centrifuge_tube", "from": vessel, "to": f"{vessel}_tube"},
+        {
+            "op": "centrifuge",
+            "centrifuge_id": DEVICE_IDS["centrifuge_id"],
+            "tube": f"{vessel}_tube",
+            "minutes": step["centrifuge_minutes"],
+            "rpm": step["centrifuge_rpm"],
+            "inferred": True,
+        },
+        {
+            "op": "decant_supernatant",
+            "tube": f"{vessel}_tube",
+            "executable": False,
+            "review_required": True,
+            "review_reason": "unsupported_phase_separation_primitive",
+        },
+    ]
+    for wash_cycle in range(1, step["wash_count"] + 1):
+        ops.append(
+            {
+                "op": "pour",
+                "reagent": step["wash_solvent"],
+                "vessel": f"{vessel}_tube",
+                "volume": step["wash_volume"],
+                "volume_units": step.get("wash_volume_units") or "mL",
+                "wash_cycle": wash_cycle,
+            }
         )
-        if not has_rate:
-            titration_steps = [s for s in result.get("steps", []) if s.get("action") == "titrate_to_ph"]
-            if titration_steps:
-                rate_val = None
-                for st in titration_steps:
-                    for op in st.get("ops", []) or []:
-                        if op.get("op") == "titrate_to_ph" and op.get("rate_ml_per_min") is not None:
-                            rate_val = op.get("rate_ml_per_min")
-                            break
-                    if rate_val is not None:
-                        break
-                if rate_val is not None:
-                    rate_op = {
-                        "verb": "set",
-                        "device": result.get("devices", {}).get("autotitrator_id", "AT1"),
-                        "param": "rate_mL_per_min",
-                        "value": rate_val,
-                        "step_index": titration_steps[0].get("index", 1)
-                    }
-                    # Prepend for visibility
-                    result["micro_plan"].insert(0, rate_op)
-                    executor_metadata["repairs"].append("inserted_autotitrator_rate_set")
-    except Exception:
-        pass
+        ops.append(
+            {
+                "op": "resuspend",
+                "tube": f"{vessel}_tube",
+                "wash_cycle": wash_cycle,
+                "executable": False,
+                "review_required": True,
+                "review_reason": "unsupported_dispersion_primitive",
+            }
+        )
+        ops.append(
+            {
+                "op": "centrifuge",
+                "centrifuge_id": DEVICE_IDS["centrifuge_id"],
+                "tube": f"{vessel}_tube",
+                "minutes": step["centrifuge_minutes"],
+                "rpm": step["centrifuge_rpm"],
+                "wash_cycle": wash_cycle,
+            }
+        )
+        ops.append(
+            {
+                "op": "decant_supernatant",
+                "tube": f"{vessel}_tube",
+                "wash_cycle": wash_cycle,
+                "executable": False,
+                "review_required": True,
+                "review_reason": "unsupported_phase_separation_primitive",
+            }
+        )
 
-    # Fallback: generic autotitrator mention with rate pattern in raw steps
-    if not any(op.get("verb") == "set" and op.get("param") in {"rate_mL_per_min", "rate_ml_per_min"} for op in result["micro_plan"]):
-        rate_rx = re.compile(r"(?:rate(?: of)?|at)\s+([0-9]+(?:\.[0-9]+)?)\s*mL\s*/\s*min", re.I)
-        for idx, st in enumerate(result.get("steps", []), 1):
-            raw = st.get("raw", "") or ""
-            if "autotitrator" in raw.lower():
-                m = rate_rx.search(raw)
-                if m:
-                    rate_val = float(m.group(1))
-                    result["micro_plan"].insert(0, {
-                        "verb": "set",
-                        "device": result.get("devices", {}).get("autotitrator_id", "AT1"),
-                        "param": "rate_mL_per_min",
-                        "value": rate_val,
-                        "step_index": idx
-                    })
-                    executor_metadata["repairs"].append("inserted_autotitrator_rate_set_fallback")
-                    break
-    
-    return result
+    return {
+        "action": "postprocess",
+        "raw": step["raw"],
+        "vessel": vessel,
+        "ops": ops,
+        "reagents": [step["wash_solvent"]],
+        "reagents_structured": [
+            {
+                "name": step["wash_solvent"],
+                "display_name": step["wash_solvent"].title() if step["wash_solvent"].islower() else step["wash_solvent"],
+                "original": f"{step['wash_volume']} {step.get('wash_volume_units') or 'mL'} of {step['wash_solvent']}",
+                "amount": step["wash_volume"],
+                "amount_unit": step.get("wash_volume_units") or "mL",
+                "repetitions": step["wash_count"],
+            }
+        ],
+    }
 
-# -------- Minimal plan generation --------
-def generate_minimal_plan(doc: Dict) -> Tuple[List[Dict], List[Dict]]:
-    """Create a compressed minimal micro plan and timing delays from `micro_plan`.
 
-    Returns:
-      (micro_plan_min, timing_delays)
+def _emit_redisperse(step: Dict[str, Any], vessel: str) -> Dict[str, Any]:
+    redisperse_vessel = f"{vessel}_tube"
+    solvent = step.get("solvent") or "solvent"
+    return {
+        "action": "redisperse",
+        "raw": step["raw"],
+        "vessel": redisperse_vessel,
+        "ops": [
+            {"op": "pour", "reagent": solvent, "vessel": redisperse_vessel},
+            {
+                "op": "resuspend",
+                "tube": redisperse_vessel,
+                "executable": False,
+                "review_required": True,
+                "review_reason": "unsupported_dispersion_primitive",
+            },
+        ],
+        "reagents": [solvent],
+    }
 
-    Behaviors:
-      * Keep only primitive actionable verbs.
-      * Convert add_solvent to pour entries.
-      * Collapse consecutive identical temperature set operations (aggregate provenance).
-      * Map generic device IDs when MIN_PLAN_MAP_GENERIC=1.
-      * Suppress zero-minute waits.
-    """
-    import os
-    
+
+def _emit_solution_prep(step: Dict[str, Any], vessels: VesselRegistry) -> Dict[str, Any]:
+    vol_ml = step["volume"] * (
+        0.001 if step["volume_units"].lower() in ("µl", "ul") else (1.0 if step["volume_units"].lower() == "ml" else 1000.0)
+    )
+    explicit = step.get("hardware_hint")
+    label = explicit if explicit else "Beaker"
+    vid = vessels.ensure_glassware(label, prefer_capacity_ml=vol_ml, explicit_hardware_hint=explicit)
+    ops = [
+        {"op": "pour", "reagent": step["solute"], "vessel": vid},
+        {"op": "pour", "solvent": step["solvent"], "vessel": vid, "volume": step["volume"], "volume_units": step["volume_units"]},
+    ]
+    record = {
+        "action": "prepare_solution",
+        "raw": step["raw"],
+        "vessel": vid,
+        "solute": step["solute"],
+        "solvent": step["solvent"],
+        "concentration": step.get("concentration"),
+        "concentration_units": step.get("concentration_units"),
+        "volume": step["volume"],
+        "volume_units": step["volume_units"],
+        "reagents": [step["solute"], step["solvent"]],
+        "ops": ops,
+    }
+    return record
+
+
+def _emit_dissolve(step: Dict[str, Any], vessel: str) -> Dict[str, Any]:
+    solvents = step.get("solvents") or [{"name": step["solvent"], "volume": step["volume"], "volume_units": step["volume_units"]}]
+    ops = [{"op": "add_solute", "vessel": vessel, "reagent": step["solute"], "amount": step["amount"], "unit": step["unit"]}]
+    ops.extend(
+        {"op": "add_solvent", "vessel": vessel, "reagent": s["name"], "volume": s["volume"], "volume_units": s["volume_units"]}
+        for s in solvents
+    )
+    ops.append({"op": "stir", "vessel": vessel, "rpm": DEFAULTS["stir_rpm"], "minutes": 2})
+    return {
+        "action": "dissolve",
+        "raw": step["raw"],
+        "vessel": vessel,
+        "solute": step["solute"],
+        "amount": step["amount"],
+        "unit": step["unit"],
+        "solvent": step["solvent"],
+        "volume": step["volume"],
+        "volume_units": step["volume_units"],
+        "reagents": [step["solute"]] + [s["name"] for s in solvents],
+        "ops": ops,
+    }
+
+
+def _emit_weigh(step: Dict[str, Any], vessel: str) -> Dict[str, Any]:
+    return {
+        "action": "weigh",
+        "raw": step["raw"],
+        "vessel": vessel,
+        "reagent": step["reagent"],
+        "amount": step["amount"],
+        "unit": step["unit"],
+        "reagents": [step["reagent"]],
+        "ops": [{"op": "weigh", "reagent": step["reagent"], "amount": step["amount"], "unit": step["unit"]}],
+    }
+
+
+def _emit_transfer(step: Dict[str, Any], vessel: str) -> Dict[str, Any]:
+    return {
+        "action": "transfer",
+        "raw": step["raw"],
+        "vessel": vessel,
+        "reagents": [],
+        "ops": [{"op": "transfer", "to": step["target"], "tube": f"{vessel}_tube"}],
+    }
+
+
+def _emit_generic_add(step: Dict[str, Any], vessel: str) -> Dict[str, Any]:
+    src = step["source_name"]
+    dst = step["target_name"]
+    src_vid = vessel if "mixture" in src.lower() or "solution" in src.lower() else vessel
+    dst_vid = vessel if "mixture" in dst.lower() or "solution" in dst.lower() else vessel
+    ops = [
+        {"op": "move_to_stir_plate", "stir_plate_id": DEVICE_IDS["stir_plate_id"], "vessel": dst_vid},
+        {"op": "set_stir_rate", "vessel": dst_vid, "rpm": DEFAULTS["stir_rpm"]},
+        {"op": "transfer", "from": src_vid, "to": dst_vid, "rate": step["rate"]},
+    ]
+    if step.get("minutes") is not None:
+        ops.append({"op": "wait", "minutes": step["minutes"]})
+    return {
+        "action": "add",
+        "raw": step["raw"],
+        "source_vessel": src_vid,
+        "target_vessel": dst_vid,
+        "reagents": [src],
+        "with_stirring": True,
+        "rate": step["rate"],
+        "temperature_C": step.get("temperature_C"),
+        "minutes": step.get("minutes"),
+        "ops": ops,
+    }
+
+
+def _emit_fallback(step: Dict[str, Any], vessel: str) -> Dict[str, Any]:
+    return {"action": "process", "raw": step["raw"], "vessel": vessel, "reagents": [], "ops": []}
+
+
+def emit_steps(semantic_steps: List[Dict[str, Any]], vessels: VesselRegistry) -> List[Dict[str, Any]]:
+    emitted: List[Dict[str, Any]] = []
+    primary = _ensure_primary_vessel(vessels)
+
+    for idx, step in enumerate(semantic_steps, start=1):
+        action = step["action"]
+        detail_payload = None
+
+        if action == "prepare_solution" and step.get("components"):
+            record, detail_payload = _emit_prepare_solution(step, primary)
+        elif action == "add_prepared_solution":
+            record = _emit_add_prepared_solution(step, primary)
+        elif action == "add_solvent":
+            record = _emit_add_solvent(step, primary)
+        elif action == "add_reagent_solution":
+            record = _emit_add_reagent_solution(step, primary)
+        elif action == "stir":
+            record = _emit_stir(step, primary)
+        elif action == "postprocess":
+            record = _emit_postprocess(step, primary)
+        elif action == "redisperse":
+            record = _emit_redisperse(step, primary)
+        elif action == "prepare_solution":
+            record = _emit_solution_prep(step, vessels)
+        elif action == "dissolve":
+            record = _emit_dissolve(step, primary)
+        elif action == "weigh":
+            record = _emit_weigh(step, primary)
+        elif action == "transfer":
+            record = _emit_transfer(step, primary)
+        elif action == "add":
+            record = _emit_generic_add(step, primary)
+        else:
+            record = _emit_fallback(step, primary)
+
+        _normalize_reagents_inplace(record)
+        if "reagents_structured" not in record:
+            _add_structured_reagents_inplace(record)
+        emitted.append(record)
+
+        if detail_payload is not None:
+            vessels.contents_detailed[primary] = {
+                "description": detail_payload["description"],
+                "prepared_in_source_step": idx,
+                "components": detail_payload["components"],
+            }
+
+    return emitted
+
+
+def build_micro_plan(steps: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    micro_plan: List[Dict[str, Any]] = []
+    next_index = 1
+    for source_step_index, step in enumerate(steps, start=1):
+        for op in step.get("ops", []):
+            mp = copy.deepcopy(op)
+            verb = mp.pop("op")
+            mp["verb"] = verb
+            mp["source_step_index"] = source_step_index
+            mp["step_index"] = next_index
+            next_index += 1
+            if mp.get("verb") == "set" and mp.get("param") == "temperature_C" and "unit" not in mp:
+                mp["unit"] = "C"
+            micro_plan.append(mp)
+    return micro_plan
+
+
+def generate_minimal_plan(doc: Dict[str, Any]) -> Tuple[List[Dict[str, Any]], List[Dict[str, Any]]]:
     micro_plan = doc.get("micro_plan", [])
-    micro_plan_min = []
-    timing_delays = []
-    
-    # Environment variable to control device mapping
-    map_generic = os.environ.get("MIN_PLAN_MAP_GENERIC") == "1"
-    
-    # Device mapping for generic names
-    device_mapping = {
-        "HP1": "hotplate",
-        "SP1": "stir_plate", 
-        "OV1": "oven",
-        "CF1": "centrifuge"
-    }
-    
-    # First pass: collapse idempotent consecutive set operations (temperature_C) across steps
-    # Strategy: Track set operations by (param, value) and keep only the first occurrence,
-    # accumulating provenance from subsequent duplicates
-    collapsed_plan: List[Dict] = []
-    seen_sets = {}  # key: (param, value, device) -> index in collapsed_plan
-    
+    micro_plan_min: List[Dict[str, Any]] = []
+    timing_delays: List[Dict[str, Any]] = []
+
+    seen_sets: Dict[Tuple[Any, Any, Any], int] = {}
     for op in micro_plan:
         verb = op.get("verb")
         if verb == "set" and op.get("param") == "temperature_C":
-            # Create a key that includes device to distinguish hotplate vs oven
-            device = op.get("device", "")
-            key = (op.get("param"), op.get("value"), device)
-            
+            key = (op.get("param"), op.get("value"), op.get("device"))
             if key in seen_sets:
-                # Duplicate found - accumulate provenance in the first occurrence
-                first_idx = seen_sets[key]
-                entry = collapsed_plan[first_idx]
+                idx = seen_sets[key]
+                entry = micro_plan_min[idx]
                 steps_list = entry.setdefault("collapsed_from_steps", [])
-                source_step_idx = op.get("source_step_index", op.get("step_index"))
-                if source_step_idx and source_step_idx not in steps_list:
-                    steps_list.append(source_step_idx)
-                # Also add the original source step_index if not present
-                entry_source_idx = entry.get("source_step_index", entry.get("step_index"))
-                if entry_source_idx and entry_source_idx not in steps_list:
-                    steps_list.insert(0, entry_source_idx)
-                continue  # skip adding duplicate
-            else:
-                # First occurrence of this set operation
-                seen_sets[key] = len(collapsed_plan)
-        
-        collapsed_plan.append(op)
+                src = op.get("source_step_index")
+                if src is not None and src not in steps_list:
+                    steps_list.append(src)
+                continue
 
-    # Replace micro_plan with collapsed version for further minimal extraction
-    micro_plan = collapsed_plan
-
-    for op in micro_plan:
-        verb = op.get("verb")
-        # Include only primitive operations in minimal plan
         if verb in {"pick_up", "place", "pour", "set"}:
-            min_op = op.copy()
-            # Ensure step_index is present
-            if "step_index" not in min_op:
-                min_op["step_index"] = 1
-            # Apply device mapping if enabled
-            if map_generic and "device" in min_op and min_op["device"] in device_mapping:
-                min_op["device"] = device_mapping[min_op["device"]]
-            micro_plan_min.append(min_op)
-        
-        # Extract timing information for delays
-        if verb == "wait" and "minutes" in op:
-            minutes = op["minutes"]
-            if minutes > 0:  # Suppress zero-minute delays
-                delay = {
+            entry = copy.deepcopy(op)
+            if verb == "set" and op.get("param") == "temperature_C":
+                seen_sets[(op.get("param"), op.get("value"), op.get("device"))] = len(micro_plan_min)
+            micro_plan_min.append(entry)
+
+        if verb == "wait" and op.get("minutes", 0) > 0:
+            timing_delays.append(
+                {
+                    "step_index": op["step_index"],
                     "verb": "wait",
-                    "minutes": minutes,
-                    "step_index": op.get("step_index", 1)
+                    "minutes": op["minutes"],
                 }
-                timing_delays.append(delay)
-    
-    # Convert add_solvent, add, transfer operations to pour for minimal plan
-    next_min_step_index = max((op.get("step_index", 0) for op in micro_plan_min), default=0) + 1
-    for step in doc.get("steps", []):
-        source_step_idx = step.get("index")
-        for op in step.get("ops", []):
-            op_type = op.get("op")
-            if op_type in ["add_solvent", "add", "transfer"]:
-                pour_op = {
-                    "verb": "pour",
-                    "volume": op.get("volume", 10),
-                    "volume_units": op.get("volume_units", "mL"),
-                    "step_index": next_min_step_index
-                }
-                if source_step_idx is not None:
-                    pour_op["source_step_index"] = source_step_idx
-                micro_plan_min.append(pour_op)
-                next_min_step_index += 1
-    
+            )
+
     return micro_plan_min, timing_delays
 
-# -------- Main converter --------
-def convert_text_to_robot_ops(text: str) -> Dict:
+
+def validate_execution_plan(plan: Dict[str, Any]) -> List[str]:
+    errors: List[str] = []
+    for step in plan.get("micro_plan", []):
+        if step.get("verb") == "set":
+            device = step.get("device")
+            param = step.get("param")
+            value = step.get("value")
+            if device == "HP1" and param == "temperature_C":
+                if value > 200:
+                    errors.append(f"Temperature {value}°C exceeds safety limit of 200°C")
+                if value < -20:
+                    errors.append(f"Temperature {value}°C below safety limit of -20°C")
+            if device == "SP1" and param == "rpm":
+                if value > 2000:
+                    errors.append(f"Stir speed {value} rpm exceeds equipment limit of 2000 rpm")
+                if value < 0:
+                    errors.append(f"Stir speed {value} rpm cannot be negative")
+            if device == "OV1" and param == "temperature_C" and value > 300:
+                errors.append(f"Oven temperature {value}°C exceeds safety limit of 300°C")
+
+    available_devices = set(plan.get("devices", {}).values())
+    for step in plan.get("micro_plan", []):
+        if step.get("device") and step["device"] not in available_devices:
+            errors.append(f"Required device {step['device']} not available in device registry")
+    return errors
+
+
+def convert_text_to_robot_ops(text: str) -> Dict[str, Any]:
     hardware = parse_hardware(text)
     vessels = VesselRegistry(hardware)
-    records: List[Dict] = []
+    primary_vessel = vessels.ensure_glassware("Beaker")
+    semantic_steps, _context = semantic_parse(text, vessels)
+    records = emit_steps(semantic_steps, vessels)
 
-    steps = extract_steps(text)
-    
-    # If no steps extracted, treat entire text as single step
-    if not steps and text.strip():
-        steps = [text.strip()]
-
-    for step in steps:
-        step_lc = step.lower()
-        # Autotitrator rate detection (simple heuristic)
-        rate_match = None
-        if "autotitrator" in step_lc:
-            # Match "rate X mL/min" or "at X mL/min"
-            rate_match = re.search(r"(?:rate(?: of)?|at)\s+([0-9]+(?:\.[0-9]+)?)\s*mL\s*/\s*min", step_lc)
-        if rate_match:
-            rate_val = float(rate_match.group(1))
-            target_vessel = vessels.primary_vessel or vessels.ensure_glassware("V3")
-            record = {
-                "action": "autotitrator_add",
-                "vessel": target_vessel,
-                "rate_ml_per_min": rate_val,
-                "duration_minutes": 0.0,
-                "ops": [
-                    {"op": "set", "device": DEVICE_IDS.get("autotitrator_id", "AT1"), "param": "rate_mL_per_min", "value": rate_val}
-                ],
-                "raw": step,
-                "reagents": []
-            }
-            _normalize_reagents_inplace(record)
-            _add_structured_reagents_inplace(record)
-            records.append(record)
-            # Continue parsing subsequent features in same line (do not continue) so heat/wait can also be captured
-            # but ensure we don't double-add for titration control; if full titration detection triggers later it will append another step.
-        
-        # Weighing
-        weigh = detect_weigh(step)
-        if weigh:
-            target_vessel = vessels.primary_vessel or vessels.ensure_glassware("Beaker")
-            # Track content addition
-            vessels.add_content(target_vessel, weigh["reagent"], weigh["amount"], weigh["unit"])
-            record = {
-                "action": "weigh",
-                "vessel": target_vessel,
-                "reagent": weigh["reagent"],
-                "amount": weigh["amount"],
-                "unit": weigh["unit"],
-                "ops": [{"op": "weigh", "reagent": weigh["reagent"], "amount": weigh["amount"], "unit": weigh["unit"]}],
-                "raw": step,
-                "reagents": [weigh["reagent"]]
-            }
-            _normalize_reagents_inplace(record)
-            _add_structured_reagents_inplace(record)
-            records.append(record)
-            continue
-
-        # Transfer (explicit)
-        transfer_exp = detect_transfer_explicit(step)
-        if transfer_exp:
-            target_vessel = vessels.ensure_glassware(transfer_exp["target"])
-            record = {
-                "action": "transfer",
-                "vessel": target_vessel,
-                "ops": [{"op": "transfer", "to": transfer_exp["target"], "tube": f"{target_vessel}_tube"}],
-                "raw": step,
-                "reagents": []
-            }
-            _normalize_reagents_inplace(record)
-            _add_structured_reagents_inplace(record)
-            records.append(record)
-            continue
-
-        # Dissolve
-        dissolve = detect_dissolve(step)
-        if dissolve:
-            target_vessel = vessels.primary_vessel or vessels.ensure_glassware("Beaker")
-            # Track content additions
-            vessels.add_content(target_vessel, dissolve["solute"], dissolve["amount"], dissolve["unit"])
-            for comp in (dissolve.get("solvents") or [{"name": dissolve["solvent"], "volume": dissolve["volume"], "volume_units": dissolve["volume_units"]}]):
-                vessels.add_content(target_vessel, comp["name"], comp.get("volume", 0), comp.get("volume_units", "mL"))
-            record = {
-                "action": "dissolve",
-                "vessel": target_vessel,
-                "solute": dissolve["solute"],
-                "amount": dissolve["amount"],
-                "unit": dissolve["unit"],
-                "solvent": dissolve["solvent"],
-                "volume": dissolve["volume"],
-                "volume_units": dissolve["volume_units"],
-                "ops": [
-                    {"op": "add_solute", "vessel": target_vessel, "reagent": dissolve["solute"], "amount": dissolve["amount"], "unit": dissolve["unit"]},
-                    *([
-                        {"op": "add_solvent", "vessel": target_vessel, "reagent": comp["name"], "volume": comp["volume"], "volume_units": comp["volume_units"]}
-                        for comp in (dissolve.get("solvents") or [{"name": dissolve["solvent"], "volume": dissolve["volume"], "volume_units": dissolve["volume_units"]}])
-                    ]),
-                    {"op": "stir", "vessel": target_vessel, "rpm": DEFAULTS["stir_rpm"], "minutes": 2}
-                ],
-                "raw": step,
-                "reagents": [dissolve["solute"]] + [comp["name"] for comp in (dissolve.get("solvents") or [{"name": dissolve["solvent"]}])]
-            }
-            _normalize_reagents_inplace(record)
-            _add_structured_reagents_inplace(record)
-            records.append(record)
-            continue
-
-        # Isolate/filter
-        isolate = detect_filter_isolate(step)
-        if isolate:
-            target_vessel = vessels.primary_vessel or vessels.ensure_glassware("Beaker")
-            record = {
-                "action": "isolate",
-                "vessel": target_vessel,
-                "ops": [{"op": "filter", "vessel": target_vessel}, {"op": "collect", "vessel": target_vessel}],
-                "raw": step,
-                "reagents": []
-            }
-            _normalize_reagents_inplace(record)
-            _add_structured_reagents_inplace(record)
-            records.append(record)
-            continue
-
-        # Solution preparation
-        prep = detect_solution_prep(step)
-        if prep:
-            vol_ml = prep["volume"] * (0.001 if prep["volume_units"].lower() in ("µl","ul") else (1.0 if prep["volume_units"].lower()=="ml" else 1000.0))
-            explicit = prep.get("hardware_hint")
-            label = explicit if explicit else "Beaker"
-            vid = vessels.ensure_glassware(label, prefer_capacity_ml=vol_ml, explicit_hardware_hint=explicit)
-            vessels.map_contents(vid, f"{prep['solvent']} {prep['concentration']} {prep['concentration_units']} solution of {prep['solute']}")
-            hw_id = vessels.vessel_hardware(vid)
-            record = {
-                "action":"dispense",
-                "vessel": vid,
-                "hardware_id": hw_id,
-                "solute": prep["solute"],
-                "solvent": prep["solvent"],
-                "concentration": prep["concentration"],
-                "concentration_units": prep["concentration_units"],
-                "volume": prep["volume"],
-                "volume_units": prep["volume_units"],
-                "reagents": [prep["solute"], prep["solvent"]],
-                "ops": ops_for_dispense(vid, hw_id, prep["solute"], prep["solvent"], prep["volume"], prep["volume_units"]),
-                "raw": step,
-            }
-            _normalize_reagents_inplace(record)
-            _add_structured_reagents_inplace(record)
-            records.append(record)
-            continue
-
-        # Additions (with optional temp/rate/time)
-        solv = detect_add_solvent(step)
-        if solv:
-            target_vessel = vessels.primary_vessel or vessels.ensure_glassware("Beaker")
-            record = {
-                "action": "add_solvent",
-                "vessel": target_vessel,
-                "solvent": solv["solvent"],
-                "volume": solv["volume"],
-                "volume_units": solv["volume_units"],
-                "reagents": [solv["solvent"]],
-                "ops": [{"op": "add_solvent", "vessel": target_vessel, "solvent": solv["solvent"],
-                        "volume": solv["volume"], "volume_units": solv["volume_units"]}],
-                "raw": step
-            }
-            _normalize_reagents_inplace(record)
-            _add_structured_reagents_inplace(record)
-            records.append(record)
-            continue
-
-        add = detect_add(step)
-        if add:
-            src_key = re.sub(r"^\bthe\b\s+","",add["source_name"], flags=re.I).strip()
-            dst_key = re.sub(r"^\bthe\b\s+","",add["target_name"], flags=re.I).strip()
-            src_vid = vessels.ensure_glassware(src_key) if "beaker" in src_key.lower() or "flask" in src_key.lower() else (vessels.primary_vessel or vessels.ensure_glassware("Beaker"))
-            dst_vid = vessels.ensure_glassware(dst_key) if "beaker" in dst_key.lower() or "flask" in dst_key.lower() else (vessels.primary_vessel or vessels.ensure_glassware("Beaker"))
-            record = {
-                "action": "add",
-                "source_vessel": src_vid,
-                "target_vessel": dst_vid,
-                "reagents": [src_key],
-                "with_stirring": True,
-                "rate": add["rate"],
-                "temperature_C": add.get("temperature_C"),
-                "minutes": add.get("minutes"),
-                "ops": ops_for_add(src_vid, dst_vid, add["rate"], temperature_C=add.get("temperature_C"), minutes=add.get("minutes")),
-                "raw": step,
-            }
-            _normalize_reagents_inplace(record)
-            _add_structured_reagents_inplace(record)
-            records.append(record)
-            continue
-
-        # Stirring
-        st = detect_stir(step)
-        if st:
-            target_vessel = vessels.primary_vessel or vessels.ensure_glassware("Beaker")
-            record = {
-                "action":"stir","vessel":target_vessel,"reagents":[],
-                "minutes":st["minutes"], "temperature_C":st["temperature_C"], "rpm":st["rpm"],
-                "ops":ops_for_stir(target_vessel, st["minutes"], st["rpm"], st["temperature_C"]), "raw": step
-            }
-            _normalize_reagents_inplace(record)
-            _add_structured_reagents_inplace(record)
-            records.append(record)
-            continue
-
-        # Heating
-        ht = detect_heat(step)
-        if ht:
-            target_vessel = vessels.primary_vessel or vessels.ensure_glassware("Beaker")
-            temp = ht[0]["temperature_C"]; minutes = ht[1]["minutes"]
-            record = {
-                "action":"heat_hold","vessel":target_vessel,"reagents":[],
-                "minutes": minutes, "temperature_C": temp,
-                "ops": ops_for_heat(target_vessel, temp, minutes), "raw": step
-            }
-            _normalize_reagents_inplace(record)
-            _add_structured_reagents_inplace(record)
-            records.append(record)
-            continue
-
-        # Cooling
-        cl = detect_cool(step)
-        if cl:
-            target_vessel = vessels.primary_vessel or vessels.ensure_glassware("Beaker")
-            record = {
-                "action":"cool_to","vessel":target_vessel,"reagents":[],
-                "temperature_C": cl["temperature_C"],
-                "ops": [{"op":"set_hotplate_temperature","hotplate_id":DEVICE_IDS["hotplate_id"],"temperature_C":cl["temperature_C"]}],
-                "raw": step
-            }
-            _normalize_reagents_inplace(record)
-            _add_structured_reagents_inplace(record)
-            records.append(record)
-            continue
-
-        # Sonication
-        so = detect_sonicate(step)
-        if so:
-            target_vessel = vessels.primary_vessel or vessels.ensure_glassware("Beaker")
-            record = {
-                "action":"sonicate","vessel":target_vessel,"reagents":[],
-                "minutes": so["minutes"],
-                "ops": [{"op":"sonicate","sonicator_id":DEVICE_IDS["sonicator_id"],"minutes":so["minutes"]}],
-                "raw": step
-            }
-            _normalize_reagents_inplace(record)
-            _add_structured_reagents_inplace(record)
-            records.append(record)
-            continue
-
-        # Filtration / washing / drying
-        filt = detect_filter(step)
-        if filt:
-            target_vessel = vessels.primary_vessel or vessels.ensure_glassware("Beaker")
-            record = {"action":"postprocess","vessel":target_vessel,"reagents":[],"ops":ops_for_postproc(target_vessel,filt), "raw": step}
-            _normalize_reagents_inplace(record)
-            _add_structured_reagents_inplace(record)
-            records.append(record)
-            continue
-
-        wd = detect_wash_dry(step)
-        if wd:
-            target_vessel = vessels.primary_vessel or vessels.ensure_glassware("Beaker")
-            record = {"action":"postprocess","vessel":target_vessel,"reagents":[],"ops":ops_for_postproc(target_vessel,wd), "raw": step}
-            _normalize_reagents_inplace(record)
-            _add_structured_reagents_inplace(record)
-            records.append(record)
-            continue
-
-        # Oven drying (separate from wash_dry for better detection)
-        oven_dry = detect_oven_dry(step)
-        if oven_dry:
-            target_vessel = vessels.primary_vessel or vessels.ensure_glassware("Beaker")
-            record = {
-                "action": "oven_dry",
-                "vessel": target_vessel,
-                "temperature_C": oven_dry["temperature_C"],
-                "minutes": oven_dry["minutes"],
-                "ops": [
-                    {"op": "move_to_oven", "tube": f"{target_vessel}_tube", "oven_id": DEVICE_IDS["oven_id"]},
-                    {"op": "set_oven_temperature", "oven_id": DEVICE_IDS["oven_id"], "temperature_C": oven_dry["temperature_C"]},
-                    {"op": "wait", "minutes": oven_dry["minutes"]}
-                ],
-                "raw": step,
-                "reagents": []
-            }
-            _normalize_reagents_inplace(record)
-            _add_structured_reagents_inplace(record)
-            records.append(record)
-            continue
-
-        # Resuspend
-        res = detect_resuspend(step)
-        if res:
-            target_vessel = vessels.primary_vessel or vessels.ensure_glassware("Beaker")
-            record = {
-                "action": "resuspend",
-                "vessel": target_vessel,
-                "ops": [{"op": "resuspend", "tube": f"{target_vessel}_tube"}],
-                "raw": step,
-                "reagents": []
-            }
-            _normalize_reagents_inplace(record)
-            _add_structured_reagents_inplace(record)
-            records.append(record)
-            continue
-
-        # Collect
-        col = detect_collect(step)
-        if col:
-            target_vessel = vessels.primary_vessel or vessels.ensure_glassware("Beaker")
-            record = {
-                "action": "collect",
-                "vessel": target_vessel,
-                "ops": [{"op": "collect", "tube": f"{target_vessel}_tube"}],
-                "raw": step,
-                "reagents": []
-            }
-            _normalize_reagents_inplace(record)
-            _add_structured_reagents_inplace(record)
-            records.append(record)
-            continue
-
-        # Discard
-        dis = detect_discard(step)
-        if dis:
-            target_vessel = vessels.primary_vessel or vessels.ensure_glassware("Beaker")
-            record = {
-                "action": "discard",
-                "vessel": target_vessel,
-                "ops": [{"op": "discard_supernatant", "tube": f"{target_vessel}_tube"}],
-                "raw": step,
-                "reagents": []
-            }
-            _normalize_reagents_inplace(record)
-            _add_structured_reagents_inplace(record)
-            records.append(record)
-            continue
-
-        # pH Monitoring
-        ph_mon = detect_ph_monitoring(step)
-        if ph_mon:
-            target_vessel = vessels.primary_vessel or vessels.ensure_glassware("Beaker")
-            record = {
-                "action": "monitor_ph",
-                "vessel": target_vessel,
-                "continuous": ph_mon["continuous"],
-                "target_ph": ph_mon["target_ph"],
-                "interval_seconds": ph_mon["interval_seconds"],
-                "ops": [
-                    {"op": "monitor_ph", "ph_meter_id": DEVICE_IDS["ph_meter_id"], 
-                     "vessel": target_vessel, "interval_seconds": ph_mon["interval_seconds"]}
-                ],
-                "raw": step,
-                "reagents": []
-            }
-            _normalize_reagents_inplace(record)
-            _add_structured_reagents_inplace(record)
-            records.append(record)
-            continue
-
-        # Titration Control
-        titration = detect_titration_control(step)
-        if titration:
-            target_vessel = vessels.primary_vessel or vessels.ensure_glassware("Beaker")
-            record = {
-                "action": "titrate_to_ph",
-                "vessel": target_vessel,
-                "target_ph": titration["target_ph"],
-                "reagent": titration["reagent"],
-                "max_volume_ml": titration["max_volume_ml"],
-                "rate_ml_per_min": titration["rate_ml_per_min"],
-                "ops": [
-                    {"op": "titrate_to_ph", "autotitrator_id": DEVICE_IDS["autotitrator_id"],
-                     "ph_meter_id": DEVICE_IDS["ph_meter_id"], "vessel": target_vessel,
-                     "reagent": titration["reagent"], "target_ph": titration["target_ph"],
-                     "max_volume_ml": titration["max_volume_ml"], "rate_ml_per_min": titration["rate_ml_per_min"]}
-                ],
-                "raw": step,
-                "reagents": [titration["reagent"]]
-            }
-            _normalize_reagents_inplace(record)
-            _add_structured_reagents_inplace(record)
-            records.append(record)
-            continue
-
-        # Transfer
-        tra = detect_transfer(step)
-        if tra:
-            target_vessel = vessels.primary_vessel or vessels.ensure_glassware("Beaker")
-            record = {
-                "action": "transfer",
-                "vessel": target_vessel,
-                "ops": [{"op": "transfer", "to": tra["target"], "tube": f"{target_vessel}_tube"}],
-                "raw": step,
-                "reagents": []
-            }
-            _normalize_reagents_inplace(record)
-            _add_structured_reagents_inplace(record)
-            records.append(record)
-            continue
-
-        # Fallback generic process node
-        target_vessel = vessels.primary_vessel or vessels.ensure_glassware("Beaker")
-        substeps = re.split(r"\band\b|;|\.", step)
-        for sub in substeps:
-            sub = sub.strip()
-            if not sub: continue
-            # Try all detectors again for each substep
-            weigh = detect_weigh(sub)
-            if weigh:
-                record = {
-                    "action": "weigh",
-                    "vessel": target_vessel,
-                    "reagent": weigh["reagent"],
-                    "amount": weigh["amount"],
-                    "unit": weigh["unit"],
-                    "ops": [{"op": "weigh", "reagent": weigh["reagent"], "amount": weigh["amount"], "unit": weigh["unit"]}],
-                    "raw": sub,
-                    "reagents": [weigh["reagent"]]
-                }
-                _normalize_reagents_inplace(record)
-                _add_structured_reagents_inplace(record)
-                records.append(record)
-                continue
-            transfer_exp = detect_transfer_explicit(sub)
-            if transfer_exp:
-                record = {
-                    "action": "transfer",
-                    "vessel": target_vessel,
-                    "ops": [{"op": "transfer", "to": transfer_exp["target"], "tube": f"{target_vessel}_tube"}],
-                    "raw": sub,
-                    "reagents": []
-                }
-                _normalize_reagents_inplace(record)
-                _add_structured_reagents_inplace(record)
-                records.append(record)
-                continue
-            dissolve = detect_dissolve(sub)
-            if dissolve:
-                record = {
-                    "action": "dissolve",
-                    "vessel": target_vessel,
-                    "solute": dissolve["solute"],
-                    "amount": dissolve["amount"],
-                    "unit": dissolve["unit"],
-                    "solvent": dissolve["solvent"],
-                    "volume": dissolve["volume"],
-                    "volume_units": dissolve["volume_units"],
-                    "ops": [
-                    {"op": "add_solute", "vessel": target_vessel, "reagent": dissolve["solute"], "amount": dissolve["amount"], "unit": dissolve["unit"]},
-                    *([
-                        {"op": "add_solvent", "vessel": target_vessel, "reagent": comp["name"], "volume": comp["volume"], "volume_units": comp["volume_units"]}
-                        for comp in (dissolve.get("solvents") or [{"name": dissolve["solvent"], "volume": dissolve["volume"], "volume_units": dissolve["volume_units"]}])
-                    ]),
-                    {"op": "stir", "vessel": target_vessel, "rpm": DEFAULTS["stir_rpm"], "minutes": 2}
-                ],
-                    "raw": sub,
-                    "reagents": [dissolve["solute"]] + [comp["name"] for comp in (dissolve.get("solvents") or [{"name": dissolve["solvent"]}])]
-                }
-                _normalize_reagents_inplace(record)
-                _add_structured_reagents_inplace(record)
-                records.append(record)
-                continue
-            isolate = detect_filter_isolate(sub)
-            if isolate:
-                record = {
-                    "action": "isolate",
-                    "vessel": target_vessel,
-                    "ops": [{"op": "filter", "vessel": target_vessel}, {"op": "collect", "vessel": target_vessel}],
-                    "raw": sub,
-                    "reagents": []
-                }
-                _normalize_reagents_inplace(record)
-                _add_structured_reagents_inplace(record)
-                records.append(record)
-                continue
-            # ...existing fallback detectors (resuspend, collect, discard, transfer)...
-            res = detect_resuspend(sub)
-            if res:
-                record = {
-                    "action": "resuspend",
-                    "vessel": target_vessel,
-                    "ops": [{"op": "resuspend", "tube": f"{target_vessel}_tube"}],
-                    "raw": sub,
-                    "reagents": []
-                }
-                _normalize_reagents_inplace(record)
-                _add_structured_reagents_inplace(record)
-                records.append(record)
-                continue
-            col = detect_collect(sub)
-            if col:
-                record = {
-                    "action": "collect",
-                    "vessel": target_vessel,
-                    "ops": [{"op": "collect", "tube": f"{target_vessel}_tube"}],
-                    "raw": sub,
-                    "reagents": []
-                }
-                _normalize_reagents_inplace(record)
-                _add_structured_reagents_inplace(record)
-                records.append(record)
-                continue
-            dis = detect_discard(sub)
-            if dis:
-                record = {
-                    "action": "discard",
-                    "vessel": target_vessel,
-                    "ops": [{"op": "discard_supernatant", "tube": f"{target_vessel}_tube"}],
-                    "raw": sub,
-                    "reagents": []
-                }
-                _normalize_reagents_inplace(record)
-                _add_structured_reagents_inplace(record)
-                records.append(record)
-                continue
-            tra = detect_transfer(sub)
-            if tra:
-                record = {
-                    "action": "transfer",
-                    "vessel": target_vessel,
-                    "ops": [{"op": "transfer", "to": tra["target"], "tube": f"{target_vessel}_tube"}],
-                    "raw": sub,
-                    "reagents": []
-                }
-                _normalize_reagents_inplace(record)
-                _add_structured_reagents_inplace(record)
-                records.append(record)
-                continue
-            # If still nothing, add as process
-            record = {"action": "process", "vessel": target_vessel, "reagents": [], "ops": [], "raw": sub}
-            _normalize_reagents_inplace(record)
-            _add_structured_reagents_inplace(record)
-            records.append(record)
-
-    # Create the base result
-    result = {
+    result: Dict[str, Any] = {
+        "_executor": {
+            "schema_version": "executor.v1",
+            "converter": "converter_v2",
+            "postprocessing_applied": False,
+            "repairs": [],
+        },
+        "devices": {
+            "centrifuge_id": DEVICE_IDS["centrifuge_id"],
+            "stir_plate_id": DEVICE_IDS["stir_plate_id"],
+        },
         "hardware": hardware,
-        "vessel_registry": vessels.as_dict(),
-        "vessel_contents": vessels.contents_dict(),
-        "vessel_contents_detailed": vessels.contents,  # Add detailed tracking
-        "devices": DEVICE_IDS,
-        "defaults": DEFAULTS,
+        "vessel_registry": vessels.as_dict() or {primary_vessel: "Beaker"},
+        "vessel_contents_detailed": vessels.contents_detailed,
         "steps": records,
     }
-    
-    # Apply postprocessing to generate micro_plan
-    result = apply_postprocessing(result)
 
-    # Inject inferred temperature set operations for heating/maintain phrases lacking explicit set
-    temp_pattern = re.compile(r"(\d+(?:\.\d+)?)\s*(?:°?c|c)\b", re.I)
-    trigger_words = {"heat", "heating", "maintain", "continue"}
-    existing_temp_sets = {(op.get("value"), op.get("step_index")) for op in result.get("micro_plan", []) if op.get("verb") == "set" and op.get("param") == "temperature_C"}
-    for idx, st in enumerate(result.get("steps", []), 1):
-        raw_text = st.get("raw", "") or ""
-        tl = raw_text.lower()
-        if any(w in tl for w in trigger_words):
-            m = temp_pattern.search(raw_text)
-            if m:
-                val = float(m.group(1))
-                if (val, idx) not in existing_temp_sets:
-                    result["micro_plan"].append({
-                        "verb": "set",
-                        "param": "temperature_C",
-                        "value": val,
-                        "step_index": idx
-                    })
-                    existing_temp_sets.add((val, idx))
-    
-    # Renumber emitted actions so every action has a unique step_index.
-    _assign_unique_action_step_indices(result["micro_plan"])
+    if "V1" not in result["vessel_registry"]:
+        result["vessel_registry"]["V1"] = "Beaker"
+    if any(step.get("action") == "postprocess" for step in records):
+        result["vessel_registry"].setdefault("V1_tube", "Centrifuge Tube")
 
-    # Generate minimal plan and timing delays from the renumbered micro plan.
+    micro_plan = build_micro_plan(records)
+    result["micro_plan"] = micro_plan
     micro_plan_min, timing_delays = generate_minimal_plan(result)
-    _assign_unique_action_step_indices(micro_plan_min)
     result["micro_plan_min"] = micro_plan_min
     result["timing_delays"] = timing_delays
-    
+
+    errors = validate_execution_plan(result)
+    if errors:
+        result["_executor"]["validation_errors"] = errors
+
     return result
-# -------- Validation helpers (unchanged API) --------
+
+
 def validate_step(text: str) -> Dict[str, Any]:
-    if not isinstance(text, str): raise ValueError("input must be a string")
+    if not isinstance(text, str):
+        raise ValueError("input must be a string")
     raw = text.strip()
-    if not raw: raise ValueError("input text is empty")
+    if not raw:
+        raise ValueError("input text is empty")
     try:
         obj = json.loads(raw)
-        if isinstance(obj, dict): return obj
+        if isinstance(obj, dict):
+            return obj
         raise ValueError("JSON input must be an object")
     except json.JSONDecodeError:
         pass
     data: Dict[str, Any] = {}
     for lineno, line in enumerate(raw.splitlines(), start=1):
-        if not line.strip(): continue
+        if not line.strip():
+            continue
         if ":" not in line:
             raise ValueError(f"line {lineno}: missing ':' separator")
         key, value = line.split(":", 1)
-        key = key.strip(); value = value.strip()
-        if not key: raise ValueError(f"line {lineno}: key is empty")
+        key = key.strip()
+        value = value.strip()
+        if not key:
+            raise ValueError(f"line {lineno}: key is empty")
         data[key] = value
-    if not data: raise ValueError("no key:value pairs found")
+    if not data:
+        raise ValueError("no key:value pairs found")
     return data
+
 
 def validate_file(path: str) -> List[Dict[str, Any]]:
     p = pathlib.Path(path)
-    if not p.exists(): raise ValueError(f"file '{path}' does not exist")
+    if not p.exists():
+        raise ValueError(f"file '{path}' does not exist")
     items: List[Dict[str, Any]] = []
     with p.open("r", encoding="utf-8", errors="ignore") as fh:
         for lineno, line in enumerate(fh, start=1):
-            if not line.strip(): continue
+            if not line.strip():
+                continue
             try:
                 item = validate_step(line)
-            except ValueError as ve:
-                raise ValueError(f"{p.name}:{lineno}: {ve}") from None
+            except ValueError as exc:
+                raise ValueError(f"{p.name}:{lineno}: {exc}") from None
             items.append(item)
     return items
 
-# -------- CLI --------
+
 if __name__ == "__main__":
-    import argparse, sys
+    import argparse
+
     ap = argparse.ArgumentParser(description="Convert a TXT/MD protocol to robot JSON ops")
     ap.add_argument("path", help="Input file path")
     ap.add_argument("-o", "--out", default="-", help="Output JSON path (default stdout)")
     args = ap.parse_args()
+
     txt = pathlib.Path(args.path).read_text(encoding="utf-8", errors="ignore")
     obj = convert_text_to_robot_ops(txt)
     js = json.dumps(obj, indent=2, ensure_ascii=False)
