@@ -1185,6 +1185,164 @@ def generate_minimal_plan(doc: Dict[str, Any]) -> Tuple[List[Dict[str, Any]], Li
     return micro_plan_min, timing_delays
 
 
+
+# -------- Compatibility exports for legacy tests --------
+def detect_oven_dry(line: str) -> Optional[Dict[str, Any]]:
+    """Legacy detector kept for test compatibility.
+
+    Returns an oven_dry action for phrases containing oven/dry with optional
+    temperature and duration extraction.
+    """
+    s = strip_tags(_clean_unicode((line or '').strip()))
+    if not re.search(r"\b(?:oven|dry(?:ing)?|dried)\b", s, re.I):
+        return None
+    temp = find_temp_c(s)
+    minutes = find_minutes(s)
+    return {
+        "action": "oven_dry",
+        "temperature_C": temp if temp is not None else 80.0,
+        "minutes": minutes if minutes is not None else 120.0,
+    }
+
+
+def _legacy_ops_to_micro_ops(step_ops: List[Dict[str, Any]], step_idx: int) -> List[Dict[str, Any]]:
+    micro_ops: List[Dict[str, Any]] = []
+    for op in step_ops or []:
+        item = copy.deepcopy(op)
+        op_name = item.pop('op', None)
+        if not op_name:
+            continue
+
+        if op_name == 'set_hotplate_temperature':
+            micro_ops.append({
+                'verb': 'set',
+                'device': item.get('hotplate_id', 'HP1'),
+                'param': 'temperature_C',
+                'value': item.get('temperature_C'),
+                'unit': 'C',
+                'step_index': step_idx,
+            })
+        elif op_name == 'set_oven_temperature':
+            micro_ops.append({
+                'verb': 'set',
+                'device': item.get('oven_id', 'OV1'),
+                'param': 'temperature_C',
+                'value': item.get('temperature_C'),
+                'unit': 'C',
+                'step_index': step_idx,
+            })
+        elif op_name == 'add_solvent':
+            micro_ops.append({
+                'verb': 'pour',
+                'vessel': item.get('vessel', 'V1'),
+                'reagent': item.get('solvent') or item.get('reagent'),
+                'volume': item.get('volume'),
+                'volume_units': item.get('volume_units', 'mL'),
+                'step_index': step_idx,
+            })
+        elif op_name == 'move_to_oven':
+            micro_ops.append({
+                'verb': 'pick_up',
+                'vessel': item.get('tube') or item.get('vessel', 'V1'),
+                'step_index': step_idx,
+            })
+            micro_ops.append({
+                'verb': 'place',
+                'vessel': item.get('tube') or item.get('vessel', 'V1'),
+                'to': item.get('oven_id', 'OV1'),
+                'step_index': step_idx,
+            })
+        else:
+            item['verb'] = op_name
+            item.setdefault('step_index', step_idx)
+            micro_ops.append(item)
+    return micro_ops
+
+
+def apply_postprocessing(doc: Dict[str, Any]) -> Dict[str, Any]:
+    """Compatibility normalizer used by legacy tests.
+
+    It performs a narrow normalization pass:
+      * rebuild micro_plan from steps[*].ops when absent
+      * canonicalize device aliases like ``water bath`` -> ``HP1``
+      * default temperature set units to ``C``
+      * default pour volume units from add_solvent-derived ops to ``mL``
+      * insert ``pick_up`` and ``place`` immediately before hotplate set ops
+      * attach ``_executor`` metadata with repairs list
+    """
+    result = copy.deepcopy(doc or {})
+    repairs: List[str] = []
+
+    device_aliases = {
+        'water bath': 'HP1',
+        'hot plate': 'HP1',
+        'hotplate': 'HP1',
+        'heating plate': 'HP1',
+        'stir plate': 'SP1',
+        'stirrer': 'SP1',
+        'centrifuge': 'CF1',
+        'oven': 'OV1',
+    }
+
+    micro_plan = copy.deepcopy(result.get('micro_plan') or [])
+    if not micro_plan:
+        for step_idx, step in enumerate(result.get('steps', []), start=1):
+            if step.get('micro_ops'):
+                ops = copy.deepcopy(step['micro_ops'])
+                for op in ops:
+                    op.setdefault('step_index', step_idx)
+                micro_plan.extend(ops)
+            elif step.get('ops'):
+                micro_plan.extend(_legacy_ops_to_micro_ops(step.get('ops', []), step_idx))
+        if micro_plan:
+            repairs.append('rebuilt_micro_plan_from_steps')
+
+    # canonicalize and fill defaults
+    for op in micro_plan:
+        device = op.get('device')
+        if isinstance(device, str):
+            mapped = device_aliases.get(device.lower().strip())
+            if mapped and mapped != device:
+                op['device'] = mapped
+                repairs.append(f'canonicalized_device_{device.lower().replace(" ", "_")}_to_{mapped}')
+        if op.get('verb') == 'set' and op.get('param') == 'temperature_C':
+            op.setdefault('unit', 'C')
+        if op.get('verb') == 'pour' and op.get('volume') is not None:
+            op.setdefault('volume_units', 'mL')
+
+    # insert hotplate pick_up/place immediately before set operations
+    enhanced: List[Dict[str, Any]] = []
+    for op in micro_plan:
+        if op.get('verb') == 'set' and op.get('device') == 'HP1' and op.get('param') == 'temperature_C':
+            vessel = op.get('vessel', 'V1')
+            need_insert = True
+            if len(enhanced) >= 2:
+                prev2, prev1 = enhanced[-2], enhanced[-1]
+                need_insert = not (
+                    prev2.get('verb') == 'pick_up' and prev2.get('vessel') == vessel and
+                    prev1.get('verb') == 'place' and prev1.get('vessel') == vessel and prev1.get('to') == 'HP1'
+                )
+            if need_insert:
+                enhanced.append({'verb': 'pick_up', 'vessel': vessel, 'step_index': op.get('step_index', 1)})
+                enhanced.append({'verb': 'place', 'vessel': vessel, 'to': 'HP1', 'step_index': op.get('step_index', 1)})
+                repairs.append('inserted_hotplate_pickup_place')
+        enhanced.append(op)
+
+    # ensure deterministic unique step indexes
+    next_idx = 1
+    for op in enhanced:
+        if 'source_step_index' not in op and 'step_index' in op:
+            op['source_step_index'] = op['step_index']
+        op['step_index'] = next_idx
+        next_idx += 1
+
+    result['micro_plan'] = enhanced
+    result.setdefault('_executor', {})
+    result['_executor']['schema_version'] = 'executor.v1'
+    result['_executor']['repairs'] = repairs
+    result['_executor']['postprocessing_applied'] = True
+    return result
+
 def validate_execution_plan(plan: Dict[str, Any]) -> List[str]:
     errors: List[str] = []
     for step in plan.get("micro_plan", []):
