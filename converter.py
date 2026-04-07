@@ -598,6 +598,13 @@ def detect_autotitrator_rate(line: str) -> Optional[Dict[str, Any]]:
         return None
     return {"action": "autotitrator_rate", "rate_mL_per_min": float(m.group(1))}
 
+def detect_ph_monitoring(line: str) -> Optional[Dict[str, Any]]:
+    s = strip_tags(_clean_unicode(line.strip().rstrip(".")))
+    if not re.search(r"\bph\b", s, re.I):
+        return None
+    return {"action": "monitor_ph", "continuous": True, "interval_seconds": 30}
+
+
 
 def detect_explicit_postprocess(line: str) -> Optional[Dict[str, Any]]:
     s = strip_tags(_clean_unicode(line.strip().rstrip(".")))
@@ -764,6 +771,7 @@ def semantic_parse_step(step: str) -> Dict[str, Any]:
         detect_redisperse,
         detect_heat_hold,
         detect_autotitrator_rate,
+        detect_ph_monitoring,
         detect_oven_dry,
         detect_stir,
         detect_solution_prep,
@@ -955,6 +963,27 @@ def _emit_autotitrator_rate(step: Dict[str, Any], vessel: str) -> Dict[str, Any]
         "reagents_structured": [],
     }
 
+
+
+
+def _emit_monitor_ph(step: Dict[str, Any], vessel: str) -> Dict[str, Any]:
+    return {
+        "action": "monitor_ph",
+        "raw": step["raw"],
+        "vessel": vessel,
+        "continuous": True,
+        "interval_seconds": step.get("interval_seconds", 30),
+        "ops": [
+            {
+                "op": "monitor_ph",
+                "ph_meter_id": DEVICE_IDS["ph_meter_id"],
+                "vessel": vessel,
+                "interval_seconds": step.get("interval_seconds", 30),
+            }
+        ],
+        "reagents": [],
+        "reagents_structured": [],
+    }
 
 def _emit_oven_dry(step: Dict[str, Any], vessel: str) -> Dict[str, Any]:
     tube = f"{vessel}_tube"
@@ -1200,6 +1229,8 @@ def emit_steps(semantic_steps: List[Dict[str, Any]], vessels: VesselRegistry) ->
             record = _emit_heat_hold(step, primary)
         elif action == "autotitrator_rate":
             record = _emit_autotitrator_rate(step, primary)
+        elif action == "monitor_ph":
+            record = _emit_monitor_ph(step, primary)
         elif action == "oven_dry":
             record = _emit_oven_dry(step, primary)
         elif action == "postprocess":
@@ -1381,7 +1412,7 @@ def _micro_from_ops(steps: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
             if op_name == 'move_to_oven':
                 obj = raw.get('tube') or raw.get('vessel') or 'V1_tube'
                 micro.append({'verb': 'pick_up', 'vessel': obj, 'source_step_index': source_step_index})
-                micro.append({'verb': 'place', 'vessel': obj, 'to': 'OV1', 'device': 'OV1', 'source_step_index': source_step_index})
+                micro.append({'verb': 'place', 'vessel': obj, 'to': 'oven', 'device': 'OV1', 'source_step_index': source_step_index})
                 continue
             if op_name == 'add_solvent':
                 entry = {
@@ -1479,10 +1510,19 @@ def _infer_micro_from_raw(steps: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
             tube = f"{step.get('vessel', 'V1')}_tube"
             inferred.extend([
                 {'verb': 'pick_up', 'vessel': tube, 'source_step_index': source_step_index},
-                {'verb': 'place', 'vessel': tube, 'to': 'OV1', 'device': 'OV1', 'source_step_index': source_step_index},
+                {'verb': 'place', 'vessel': tube, 'to': 'oven', 'device': 'OV1', 'source_step_index': source_step_index},
                 {'verb': 'set', 'device': 'OV1', 'param': 'temperature_C', 'value': oven['temperature_C'], 'unit': 'C', 'source_step_index': source_step_index},
                 {'verb': 'wait', 'minutes': oven['minutes'], 'source_step_index': source_step_index},
             ])
+
+        # pH monitoring fallback
+        if re.search(r'\bph\b', s, re.I):
+            inferred.append({
+                'verb': 'monitor_ph',
+                'device': 'PH1',
+                'vessel': step.get('vessel', 'V1'),
+                'source_step_index': source_step_index,
+            })
 
         # Autotitrator rate
         m_rate = re.search(r"(?:rate(?:\s+of)?|at)\s+([0-9]+(?:\.[0-9]+)?)\s*mL\s*/\s*min", s, re.I)
@@ -1494,6 +1534,15 @@ def _infer_micro_from_raw(steps: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
                 'value': float(m_rate.group(1)),
                 'source_step_index': source_step_index,
             })
+
+        # Generic final fallback: any remaining explicit temperature should yield a set op.
+        if find_temp_c(s) is not None and not any(op.get('source_step_index') == source_step_index and op.get('verb') == 'set' and op.get('param') == 'temperature_C' for op in inferred):
+            temp = find_temp_c(s)
+            device = 'OV1' if re.search(r'\boven\b', s, re.I) else ('water bath' if re.search(r'water\s+bath', s, re.I) else 'HP1')
+            inferred.append({'verb': 'set', 'device': device, 'param': 'temperature_C', 'value': temp, 'unit': 'C', 'source_step_index': source_step_index})
+            minutes = find_minutes(s)
+            if minutes and not any(op.get('source_step_index') == source_step_index and op.get('verb') == 'wait' for op in inferred):
+                inferred.append({'verb': 'wait', 'minutes': minutes, 'source_step_index': source_step_index})
     return inferred
 
 
@@ -1512,7 +1561,7 @@ def _insert_required_placements(micro_plan: List[Dict[str, Any]]) -> Tuple[List[
                 )
                 if not already:
                     out.append({'verb': 'pick_up', 'vessel': vessel, 'source_step_index': op.get('source_step_index')})
-                    out.append({'verb': 'place', 'vessel': vessel, 'to': device, 'device': device, 'source_step_index': op.get('source_step_index')})
+                    out.append({'verb': 'place', 'vessel': vessel, 'to': ('oven' if device == 'OV1' else device), 'device': device, 'source_step_index': op.get('source_step_index')})
                     repairs.append(f"inserted_pickup_place_before_{device}_set")
                 op = copy.deepcopy(op)
                 op['device'] = device
@@ -1561,11 +1610,39 @@ def apply_postprocessing(doc: Dict[str, Any]) -> Dict[str, Any]:
         if op.get('verb') == 'pour' and op.get('volume') is not None and 'volume_units' not in op:
             op['volume_units'] = 'mL'
         if op.get('verb') == 'place' and op.get('to') == 'oven':
-            op['to'] = 'OV1'
-            op['device'] = 'OV1'
+            op.setdefault('device', 'OV1')
 
     micro_plan, placement_repairs = _insert_required_placements(micro_plan)
     repairs.extend(placement_repairs)
+
+    # Final coverage pass for oven placement / temperature and generic temperature or pH fallback.
+    for i, step in enumerate(steps, start=1):
+        raw = strip_tags(_clean_unicode(step.get('raw', '') or ''))
+        has_temp = any(op.get('source_step_index') == i and op.get('verb') == 'set' and op.get('param') == 'temperature_C' for op in micro_plan)
+        has_place = any(op.get('source_step_index') == i and op.get('verb') == 'place' and (op.get('to') == 'oven' or op.get('device') == 'OV1') for op in micro_plan)
+        if re.search(r'\boven\b', raw, re.I):
+            if not has_place:
+                micro_plan.append({'verb': 'pick_up', 'vessel': f"{step.get('vessel', 'V1')}_tube", 'source_step_index': i})
+                micro_plan.append({'verb': 'place', 'vessel': f"{step.get('vessel', 'V1')}_tube", 'to': 'oven', 'device': 'OV1', 'source_step_index': i})
+                repairs.append('added_oven_pickup_place_fallback')
+            if not has_temp and find_temp_c(raw) is not None:
+                micro_plan.append({'verb': 'set', 'device': 'OV1', 'param': 'temperature_C', 'value': find_temp_c(raw), 'unit': 'C', 'source_step_index': i})
+                repairs.append('added_oven_temperature_fallback')
+        elif not has_temp and find_temp_c(raw) is not None:
+            device = 'HP1'
+            if re.search(r'water\s+bath', raw, re.I):
+                device = 'water bath'
+            micro_plan.append({'verb': 'set', 'device': device, 'param': 'temperature_C', 'value': find_temp_c(raw), 'unit': 'C', 'source_step_index': i})
+            repairs.append('added_temperature_fallback')
+        if re.search(r'\bph\b', raw, re.I) and not any(op.get('source_step_index') == i and op.get('verb') == 'monitor_ph' for op in micro_plan):
+            micro_plan.append({'verb': 'monitor_ph', 'device': 'PH1', 'vessel': step.get('vessel', 'V1'), 'source_step_index': i})
+            repairs.append('added_ph_monitor_fallback')
+
+    # Re-canonicalize after fallback additions.
+    for op in micro_plan:
+        if 'device' in op:
+            op['device'] = _canonicalize_device_name(op.get('device'))
+
     _assign_unique_action_step_indices(micro_plan)
     result['micro_plan'] = micro_plan
 
@@ -1608,7 +1685,7 @@ def apply_postprocessing(doc: Dict[str, Any]) -> Dict[str, Any]:
             next_idx += 1
         if action == 'oven_dry' and not any(op.get('source_step_index') == i and op.get('verb') == 'place' for op in micro_plan_min):
             dev = 'oven' if map_generic else 'OV1'
-            micro_plan_min.append({'verb': 'place', 'device': dev, 'to': dev, 'source_step_index': i, 'step_index': next_idx}); next_idx += 1
+            micro_plan_min.append({'verb': 'place', 'device': dev, 'to': 'oven', 'source_step_index': i, 'step_index': next_idx}); next_idx += 1
             micro_plan_min.append({'verb': 'set', 'device': dev, 'param': 'temperature_C', 'value': step.get('temperature_C', 80), 'unit': 'C', 'source_step_index': i, 'step_index': next_idx}); next_idx += 1
 
     _assign_unique_action_step_indices(micro_plan_min)
