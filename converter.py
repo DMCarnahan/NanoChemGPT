@@ -1185,164 +1185,6 @@ def generate_minimal_plan(doc: Dict[str, Any]) -> Tuple[List[Dict[str, Any]], Li
     return micro_plan_min, timing_delays
 
 
-
-# -------- Compatibility exports for legacy tests --------
-def detect_oven_dry(line: str) -> Optional[Dict[str, Any]]:
-    """Legacy detector kept for test compatibility.
-
-    Returns an oven_dry action for phrases containing oven/dry with optional
-    temperature and duration extraction.
-    """
-    s = strip_tags(_clean_unicode((line or '').strip()))
-    if not re.search(r"\b(?:oven|dry(?:ing)?|dried)\b", s, re.I):
-        return None
-    temp = find_temp_c(s)
-    minutes = find_minutes(s)
-    return {
-        "action": "oven_dry",
-        "temperature_C": temp if temp is not None else 80.0,
-        "minutes": minutes if minutes is not None else 120.0,
-    }
-
-
-def _legacy_ops_to_micro_ops(step_ops: List[Dict[str, Any]], step_idx: int) -> List[Dict[str, Any]]:
-    micro_ops: List[Dict[str, Any]] = []
-    for op in step_ops or []:
-        item = copy.deepcopy(op)
-        op_name = item.pop('op', None)
-        if not op_name:
-            continue
-
-        if op_name == 'set_hotplate_temperature':
-            micro_ops.append({
-                'verb': 'set',
-                'device': item.get('hotplate_id', 'HP1'),
-                'param': 'temperature_C',
-                'value': item.get('temperature_C'),
-                'unit': 'C',
-                'step_index': step_idx,
-            })
-        elif op_name == 'set_oven_temperature':
-            micro_ops.append({
-                'verb': 'set',
-                'device': item.get('oven_id', 'OV1'),
-                'param': 'temperature_C',
-                'value': item.get('temperature_C'),
-                'unit': 'C',
-                'step_index': step_idx,
-            })
-        elif op_name == 'add_solvent':
-            micro_ops.append({
-                'verb': 'pour',
-                'vessel': item.get('vessel', 'V1'),
-                'reagent': item.get('solvent') or item.get('reagent'),
-                'volume': item.get('volume'),
-                'volume_units': item.get('volume_units', 'mL'),
-                'step_index': step_idx,
-            })
-        elif op_name == 'move_to_oven':
-            micro_ops.append({
-                'verb': 'pick_up',
-                'vessel': item.get('tube') or item.get('vessel', 'V1'),
-                'step_index': step_idx,
-            })
-            micro_ops.append({
-                'verb': 'place',
-                'vessel': item.get('tube') or item.get('vessel', 'V1'),
-                'to': item.get('oven_id', 'OV1'),
-                'step_index': step_idx,
-            })
-        else:
-            item['verb'] = op_name
-            item.setdefault('step_index', step_idx)
-            micro_ops.append(item)
-    return micro_ops
-
-
-def apply_postprocessing(doc: Dict[str, Any]) -> Dict[str, Any]:
-    """Compatibility normalizer used by legacy tests.
-
-    It performs a narrow normalization pass:
-      * rebuild micro_plan from steps[*].ops when absent
-      * canonicalize device aliases like ``water bath`` -> ``HP1``
-      * default temperature set units to ``C``
-      * default pour volume units from add_solvent-derived ops to ``mL``
-      * insert ``pick_up`` and ``place`` immediately before hotplate set ops
-      * attach ``_executor`` metadata with repairs list
-    """
-    result = copy.deepcopy(doc or {})
-    repairs: List[str] = []
-
-    device_aliases = {
-        'water bath': 'HP1',
-        'hot plate': 'HP1',
-        'hotplate': 'HP1',
-        'heating plate': 'HP1',
-        'stir plate': 'SP1',
-        'stirrer': 'SP1',
-        'centrifuge': 'CF1',
-        'oven': 'OV1',
-    }
-
-    micro_plan = copy.deepcopy(result.get('micro_plan') or [])
-    if not micro_plan:
-        for step_idx, step in enumerate(result.get('steps', []), start=1):
-            if step.get('micro_ops'):
-                ops = copy.deepcopy(step['micro_ops'])
-                for op in ops:
-                    op.setdefault('step_index', step_idx)
-                micro_plan.extend(ops)
-            elif step.get('ops'):
-                micro_plan.extend(_legacy_ops_to_micro_ops(step.get('ops', []), step_idx))
-        if micro_plan:
-            repairs.append('rebuilt_micro_plan_from_steps')
-
-    # canonicalize and fill defaults
-    for op in micro_plan:
-        device = op.get('device')
-        if isinstance(device, str):
-            mapped = device_aliases.get(device.lower().strip())
-            if mapped and mapped != device:
-                op['device'] = mapped
-                repairs.append(f'canonicalized_device_{device.lower().replace(" ", "_")}_to_{mapped}')
-        if op.get('verb') == 'set' and op.get('param') == 'temperature_C':
-            op.setdefault('unit', 'C')
-        if op.get('verb') == 'pour' and op.get('volume') is not None:
-            op.setdefault('volume_units', 'mL')
-
-    # insert hotplate pick_up/place immediately before set operations
-    enhanced: List[Dict[str, Any]] = []
-    for op in micro_plan:
-        if op.get('verb') == 'set' and op.get('device') == 'HP1' and op.get('param') == 'temperature_C':
-            vessel = op.get('vessel', 'V1')
-            need_insert = True
-            if len(enhanced) >= 2:
-                prev2, prev1 = enhanced[-2], enhanced[-1]
-                need_insert = not (
-                    prev2.get('verb') == 'pick_up' and prev2.get('vessel') == vessel and
-                    prev1.get('verb') == 'place' and prev1.get('vessel') == vessel and prev1.get('to') == 'HP1'
-                )
-            if need_insert:
-                enhanced.append({'verb': 'pick_up', 'vessel': vessel, 'step_index': op.get('step_index', 1)})
-                enhanced.append({'verb': 'place', 'vessel': vessel, 'to': 'HP1', 'step_index': op.get('step_index', 1)})
-                repairs.append('inserted_hotplate_pickup_place')
-        enhanced.append(op)
-
-    # ensure deterministic unique step indexes
-    next_idx = 1
-    for op in enhanced:
-        if 'source_step_index' not in op and 'step_index' in op:
-            op['source_step_index'] = op['step_index']
-        op['step_index'] = next_idx
-        next_idx += 1
-
-    result['micro_plan'] = enhanced
-    result.setdefault('_executor', {})
-    result['_executor']['schema_version'] = 'executor.v1'
-    result['_executor']['repairs'] = repairs
-    result['_executor']['postprocessing_applied'] = True
-    return result
-
 def validate_execution_plan(plan: Dict[str, Any]) -> List[str]:
     errors: List[str] = []
     for step in plan.get("micro_plan", []):
@@ -1370,6 +1212,281 @@ def validate_execution_plan(plan: Dict[str, Any]) -> List[str]:
     return errors
 
 
+
+
+def detect_oven_dry(line: str) -> Optional[Dict[str, Any]]:
+    """Detect oven-drying instructions such as 'dry in an oven at 80 C for 2 h'."""
+    s = strip_tags(_clean_unicode((line or '').strip().rstrip('.')))
+    if not re.search(r"\b(?:dry|drying|oven)\b", s, re.I):
+        return None
+    if not re.search(r"\boven\b", s, re.I) and not re.search(r"\bdry\b", s, re.I):
+        return None
+    temp = find_temp_c(s) or 80.0
+    minutes = find_minutes(s) or 120.0
+    return {"action": "oven_dry", "temperature_C": temp, "minutes": minutes}
+
+
+def _assign_unique_action_step_indices(actions: List[Dict[str, Any]], start_at: int = 1) -> int:
+    next_idx = start_at
+    for action in actions:
+        if action.get('step_index') is not None and 'source_step_index' not in action:
+            action['source_step_index'] = action['step_index']
+        action['step_index'] = next_idx
+        next_idx += 1
+    return next_idx
+
+
+def _canonicalize_device_name(device: Any) -> Any:
+    if not isinstance(device, str):
+        return device
+    aliases = {
+        'water bath': 'HP1',
+        'hotplate': 'HP1',
+        'hot plate': 'HP1',
+        'heating plate': 'HP1',
+        'oven': 'OV1',
+        'stir plate': 'SP1',
+        'stirrer': 'SP1',
+        'centrifuge': 'CF1',
+        'autotitrator': 'AT1',
+    }
+    return aliases.get(device.strip().lower(), device)
+
+
+def _micro_from_ops(steps: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    micro: List[Dict[str, Any]] = []
+    for source_step_index, step in enumerate(steps, start=1):
+        for op in step.get('ops', []) or []:
+            raw = copy.deepcopy(op)
+            op_name = raw.pop('op', None)
+            if not op_name:
+                continue
+            if op_name == 'set_hotplate_temperature':
+                micro.append({
+                    'verb': 'set', 'device': 'HP1', 'param': 'temperature_C',
+                    'value': raw.get('temperature_C'), 'unit': 'C',
+                    'source_step_index': source_step_index,
+                })
+                continue
+            if op_name == 'set_oven_temperature':
+                micro.append({
+                    'verb': 'set', 'device': 'OV1', 'param': 'temperature_C',
+                    'value': raw.get('temperature_C'), 'unit': 'C',
+                    'source_step_index': source_step_index,
+                })
+                continue
+            if op_name == 'move_to_oven':
+                obj = raw.get('tube') or raw.get('vessel') or 'V1_tube'
+                micro.append({'verb': 'pick_up', 'vessel': obj, 'source_step_index': source_step_index})
+                micro.append({'verb': 'place', 'vessel': obj, 'to': 'OV1', 'device': 'OV1', 'source_step_index': source_step_index})
+                continue
+            if op_name == 'add_solvent':
+                entry = {
+                    'verb': 'pour',
+                    'reagent': raw.get('solvent') or raw.get('reagent'),
+                    'vessel': raw.get('vessel', 'V1'),
+                    'volume': raw.get('volume'),
+                    'volume_units': raw.get('volume_units', 'mL'),
+                    'source_step_index': source_step_index,
+                }
+                micro.append(entry)
+                continue
+            if op_name in {'add', 'transfer'}:
+                entry = {
+                    'verb': 'pour',
+                    'from': raw.get('from'),
+                    'to': raw.get('to') or raw.get('target'),
+                    'vessel': raw.get('vessel', 'V1'),
+                    'volume': raw.get('volume'),
+                    'volume_units': raw.get('volume_units', 'mL') if raw.get('volume') is not None else raw.get('volume_units'),
+                    'source_step_index': source_step_index,
+                }
+                micro.append(entry)
+                continue
+            raw['verb'] = op_name
+            raw['source_step_index'] = source_step_index
+            micro.append(raw)
+    return micro
+
+
+def _infer_micro_from_raw(steps: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    inferred: List[Dict[str, Any]] = []
+    for source_step_index, step in enumerate(steps, start=1):
+        raw = step.get('raw', '') or ''
+        s = strip_tags(_clean_unicode(raw))
+        # Heat / maintain / water bath instructions
+        if re.search(r"\b(heat|maintain|hold|continue\s+heating?)\b", s, re.I):
+            temp = find_temp_c(s)
+            minutes = find_minutes(s)
+            device = 'HP1'
+            if re.search(r'water\s+bath', s, re.I):
+                device = 'water bath'
+            if temp is not None:
+                inferred.append({'verb': 'set', 'device': device, 'param': 'temperature_C', 'value': temp, 'unit': 'C', 'source_step_index': source_step_index})
+            if minutes:
+                inferred.append({'verb': 'wait', 'minutes': minutes, 'source_step_index': source_step_index})
+        # Stir-only instructions with duration
+        if re.search(r"\bstir\b", s, re.I) and not re.search(r"\bheat\b", s, re.I):
+            minutes = find_minutes(s)
+            temp = find_temp_c(s)
+            if temp is not None:
+                inferred.append({'verb': 'set', 'device': 'HP1', 'param': 'temperature_C', 'value': temp, 'unit': 'C', 'source_step_index': source_step_index})
+            if minutes:
+                inferred.append({'verb': 'wait', 'minutes': minutes, 'source_step_index': source_step_index})
+        # Solvent / reagent additions -> pour primitive
+        m_add_solvent = re.search(r"\badd\s+(\d+(?:\.\d+)?)\s*(µ?u?L|mL|ml|L|l)?\s*(?:of\s+)?([^.;]+?)\s+to\b", s, re.I)
+        if m_add_solvent:
+            inferred.append({
+                'verb': 'pour',
+                'reagent': _clean_solvent_tail(m_add_solvent.group(3).strip()),
+                'volume': float(m_add_solvent.group(1)),
+                'volume_units': m_add_solvent.group(2) or 'mL',
+                'vessel': step.get('vessel', 'V1'),
+                'source_step_index': source_step_index,
+            })
+        elif re.search(r"\btransfer\b", s, re.I):
+            inferred.append({'verb': 'pour', 'vessel': step.get('vessel', 'V1'), 'source_step_index': source_step_index})
+        # Oven drying
+        oven = detect_oven_dry(s)
+        if oven:
+            tube = f"{step.get('vessel', 'V1')}_tube"
+            inferred.extend([
+                {'verb': 'pick_up', 'vessel': tube, 'source_step_index': source_step_index},
+                {'verb': 'place', 'vessel': tube, 'to': 'OV1', 'device': 'OV1', 'source_step_index': source_step_index},
+                {'verb': 'set', 'device': 'OV1', 'param': 'temperature_C', 'value': oven['temperature_C'], 'unit': 'C', 'source_step_index': source_step_index},
+                {'verb': 'wait', 'minutes': oven['minutes'], 'source_step_index': source_step_index},
+            ])
+        # Autotitrator rate
+        m_rate = re.search(r"(?:rate(?:\s+of)?|at)\s+([0-9]+(?:\.[0-9]+)?)\s*mL\s*/\s*min", s, re.I)
+        if (re.search(r'autotitrator', s, re.I) or re.search(r'titrat', s, re.I)) and m_rate:
+            inferred.append({
+                'verb': 'set', 'device': 'AT1', 'param': 'rate_mL_per_min',
+                'value': float(m_rate.group(1)), 'source_step_index': source_step_index,
+            })
+    return inferred
+
+
+def _insert_required_placements(micro_plan: List[Dict[str, Any]]) -> Tuple[List[Dict[str, Any]], List[str]]:
+    out: List[Dict[str, Any]] = []
+    repairs: List[str] = []
+    for op in micro_plan:
+        if op.get('verb') == 'set' and op.get('param') == 'temperature_C':
+            device = _canonicalize_device_name(op.get('device'))
+            if device in {'HP1', 'OV1'}:
+                vessel = op.get('vessel') or ('V1_tube' if device == 'OV1' else 'V1')
+                prev1 = out[-1] if len(out) >= 1 else None
+                prev2 = out[-2] if len(out) >= 2 else None
+                already = bool(
+                    prev1 and prev2 and prev2.get('verb') == 'pick_up' and prev1.get('verb') == 'place' and (prev1.get('to') == device or prev1.get('device') == device)
+                )
+                if not already:
+                    out.append({'verb': 'pick_up', 'vessel': vessel, 'source_step_index': op.get('source_step_index')})
+                    out.append({'verb': 'place', 'vessel': vessel, 'to': device, 'device': device, 'source_step_index': op.get('source_step_index')})
+                    repairs.append(f"inserted_pickup_place_before_{device}_set")
+                op = copy.deepcopy(op)
+                op['device'] = device
+                if 'unit' not in op:
+                    op['unit'] = 'C'
+        out.append(op)
+    return out, repairs
+
+
+def apply_postprocessing(doc: Dict[str, Any]) -> Dict[str, Any]:
+    result = copy.deepcopy(doc)
+    result.setdefault('_executor', {})
+    result['_executor'].setdefault('schema_version', 'executor.v1')
+    result['_executor'].setdefault('repairs', [])
+    result['_executor']['postprocessing_applied'] = True
+    result.setdefault('defaults', {})
+    for k, v in DEFAULTS.items():
+        result['defaults'].setdefault(k, v)
+    result.setdefault('devices', {})
+    for k, v in DEVICE_IDS.items():
+        result['devices'].setdefault(k, v)
+
+    steps = result.get('steps', []) or []
+    micro_plan = copy.deepcopy(result.get('micro_plan') or [])
+    repairs: List[str] = []
+
+    if not micro_plan:
+        micro_plan = _micro_from_ops(steps)
+        if micro_plan:
+            repairs.append('rebuilt_micro_plan_from_step_ops')
+
+    inferred = _infer_micro_from_raw(steps)
+    if inferred:
+        micro_plan.extend(inferred)
+        repairs.append('inferred_micro_ops_from_raw_steps')
+
+    # Canonicalize devices and add default units
+    for op in micro_plan:
+        if 'device' in op:
+            canon = _canonicalize_device_name(op.get('device'))
+            if canon != op.get('device'):
+                repairs.append(f"canonicalized_device_{str(op.get('device')).replace(' ', '_')}_to_{canon}")
+                op['device'] = canon
+        if op.get('verb') == 'set' and op.get('param') == 'temperature_C' and 'unit' not in op:
+            op['unit'] = 'C'
+        if op.get('verb') == 'pour' and op.get('volume') is not None and 'volume_units' not in op:
+            op['volume_units'] = 'mL'
+        if op.get('verb') == 'place' and op.get('to') == 'oven':
+            op['to'] = 'OV1'
+            op['device'] = 'OV1'
+
+    micro_plan, placement_repairs = _insert_required_placements(micro_plan)
+    repairs.extend(placement_repairs)
+    _assign_unique_action_step_indices(micro_plan)
+    result['micro_plan'] = micro_plan
+
+    # Build minimal plan with collapse + mapping.
+    map_generic = __import__('os').environ.get('MIN_PLAN_MAP_GENERIC') == '1'
+    device_mapping = {'HP1': 'hotplate', 'SP1': 'stir_plate', 'OV1': 'oven', 'CF1': 'centrifuge', 'AT1': 'autotitrator'}
+    micro_plan_min: List[Dict[str, Any]] = []
+    timing_delays: List[Dict[str, Any]] = []
+    seen_sets = set()
+    for op in micro_plan:
+        verb = op.get('verb')
+        if verb == 'wait' and op.get('minutes', 0) > 0:
+            timing_delays.append({'step_index': op.get('step_index', 1), 'verb': 'wait', 'minutes': op.get('minutes')})
+        if verb not in {'pick_up', 'place', 'pour', 'set'}:
+            continue
+        entry = copy.deepcopy(op)
+        if map_generic:
+            if entry.get('device') in device_mapping:
+                entry['device'] = device_mapping[entry['device']]
+            if entry.get('to') in device_mapping:
+                entry['to'] = device_mapping[entry['to']]
+        if entry.get('verb') == 'set':
+            key = (entry.get('device') or entry.get('to'), entry.get('param'), entry.get('value'))
+            if key in seen_sets:
+                continue
+            seen_sets.add(key)
+        micro_plan_min.append(entry)
+
+    # Ensure primitive pours appear for add / add_solvent / transfer even if parser only created structured steps.
+    existing_pour_sources = {op.get('source_step_index') for op in micro_plan_min if op.get('verb') == 'pour'}
+    next_idx = max([op.get('step_index', 0) for op in micro_plan_min] + [0]) + 1
+    for i, step in enumerate(steps, start=1):
+        action = step.get('action')
+        if action in {'add', 'add_solvent', 'transfer', 'add_prepared_solution', 'add_reagent_solution'} and i not in existing_pour_sources:
+            entry = {'verb': 'pour', 'step_index': next_idx, 'source_step_index': i}
+            if step.get('volume') is not None:
+                entry['volume'] = step.get('volume')
+                entry['volume_units'] = step.get('volume_units', 'mL')
+            micro_plan_min.append(entry)
+            next_idx += 1
+        if action == 'oven_dry' and not any(op.get('source_step_index') == i and op.get('verb') == 'place' for op in micro_plan_min):
+            dev = 'oven' if map_generic else 'OV1'
+            micro_plan_min.append({'verb': 'place', 'device': dev, 'to': dev, 'source_step_index': i, 'step_index': next_idx}); next_idx += 1
+            micro_plan_min.append({'verb': 'set', 'device': dev, 'param': 'temperature_C', 'value': step.get('temperature_C', 80), 'unit': 'C', 'source_step_index': i, 'step_index': next_idx}); next_idx += 1
+
+    _assign_unique_action_step_indices(micro_plan_min)
+    result['micro_plan_min'] = micro_plan_min
+    result['timing_delays'] = timing_delays
+    result['_executor']['repairs'].extend(repairs)
+    return result
+
+
 def convert_text_to_robot_ops(text: str) -> Dict[str, Any]:
     hardware = parse_hardware(text)
     vessels = VesselRegistry(hardware)
@@ -1384,10 +1501,8 @@ def convert_text_to_robot_ops(text: str) -> Dict[str, Any]:
             "postprocessing_applied": False,
             "repairs": [],
         },
-        "devices": {
-            "centrifuge_id": DEVICE_IDS["centrifuge_id"],
-            "stir_plate_id": DEVICE_IDS["stir_plate_id"],
-        },
+        "devices": dict(DEVICE_IDS),
+        "defaults": dict(DEFAULTS),
         "hardware": hardware,
         "vessel_registry": vessels.as_dict() or {primary_vessel: "Beaker"},
         "vessel_contents_detailed": vessels.contents_detailed,
@@ -1399,11 +1514,10 @@ def convert_text_to_robot_ops(text: str) -> Dict[str, Any]:
     if any(step.get("action") == "postprocess" for step in records):
         result["vessel_registry"].setdefault("V1_tube", "Centrifuge Tube")
 
-    micro_plan = build_micro_plan(records)
-    result["micro_plan"] = micro_plan
-    micro_plan_min, timing_delays = generate_minimal_plan(result)
-    result["micro_plan_min"] = micro_plan_min
-    result["timing_delays"] = timing_delays
+    result["micro_plan"] = build_micro_plan(records)
+    result = apply_postprocessing(result)
+    result.setdefault("micro_plan_min", [])
+    result.setdefault("timing_delays", [])
 
     errors = validate_execution_plan(result)
     if errors:
