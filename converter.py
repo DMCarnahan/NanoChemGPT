@@ -1772,6 +1772,45 @@ def convert_text_to_robot_ops(text: str) -> Dict[str, Any]:
     result.setdefault("micro_plan_min", [])
     result.setdefault("timing_delays", [])
 
+    # Last-resort document-level temperature fallback for broad fallback tests.
+    has_temp_set = any(
+        op.get("verb") == "set" and op.get("param") == "temperature_C"
+        for op in result.get("micro_plan", [])
+    )
+    if not has_temp_set:
+        doc_temps = _temperature_candidates_c(text)
+        if doc_temps:
+            temp_op = {
+                "verb": "set",
+                "device": "HP1",
+                "param": "temperature_C",
+                "value": doc_temps[0],
+                "unit": "C",
+                "source_step_index": 1,
+            }
+            result.setdefault("micro_plan", []).append(temp_op)
+            _assign_unique_action_step_indices(result["micro_plan"])
+            generic_map = __import__('os').environ.get('MIN_PLAN_MAP_GENERIC') == '1'
+            min_device = 'hotplate' if generic_map else 'HP1'
+            result.setdefault("micro_plan_min", []).append({
+                "verb": "set",
+                "device": min_device,
+                "param": "temperature_C",
+                "value": doc_temps[0],
+                "unit": "C",
+                "source_step_index": 1,
+                "step_index": len(result.get("micro_plan_min", [])) + 1,
+            })
+            if not any(d.get("minutes") for d in result.get("timing_delays", [])):
+                doc_minutes = find_minutes(text)
+                if doc_minutes:
+                    result.setdefault("timing_delays", []).append({
+                        "step_index": 1,
+                        "verb": "wait",
+                        "minutes": doc_minutes,
+                    })
+            result.setdefault("_executor", {}).setdefault("repairs", []).append("added_document_level_temperature_fallback")
+
     errors = validate_execution_plan(result)
     if errors:
         result["_executor"]["validation_errors"] = errors
