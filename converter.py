@@ -431,46 +431,133 @@ class VesselRegistry:
         return dict(self._vid_to_label)
 
 
+
+def _strip_markdown_prefix(line: str) -> str:
+    s = strip_tags(line.strip())
+    s = re.sub(r"^\s*[-*•]\s+", "", s)
+    s = re.sub(r"^\s*\d+\.\s+", "", s)
+    return s.strip()
+
+
+def _is_section_heading_line(line: str) -> bool:
+    s = strip_tags(line.strip())
+    if not s:
+        return False
+    if re.search(r"\bprocedure\b\s*:?$", s, re.I):
+        return True
+    return s.endswith(":")
+
+
+def _clean_step_text(text: str) -> str:
+    s = strip_tags(_clean_unicode(text or ""))
+    s = re.sub(r"\s+", " ", s).strip(" -•\t")
+    return s
+
+
 def extract_steps(markdown_text: str) -> List[str]:
     lines = markdown_text.splitlines()
     in_proc = False
-    saw_numbered = False
+    saw_proc_header = False
     steps: List[str] = []
-    buf: List[str] = []
+    current_section: Optional[str] = None
+    last_step_idx: Optional[int] = None
 
-    for line in lines:
-        if re.search(r"(?:\*\*)?Procedure:?(?:\*\*)?", line, re.I):
+    for raw_line in lines:
+        stripped = raw_line.strip()
+        if not stripped:
+            last_step_idx = None
+            continue
+
+        plain = strip_tags(stripped)
+
+        if re.search(r"(?:^|\b)procedure\b\s*:?$", plain, re.I):
             in_proc = True
+            saw_proc_header = True
+            current_section = None
+            last_step_idx = None
             continue
 
-        if FENCE_START_RX.match(line) or NON_PROC_HEAD_RX.match(line):
-            if in_proc or saw_numbered:
-                break
-
-        if re.match(r"\s*\d+\.\s", line):
-            saw_numbered = True
-            if buf:
-                steps.append(" ".join(buf).strip())
-                buf = []
-            buf.append(re.sub(r"^\s*\d+\.\s*", "", line).strip())
+        if not in_proc and saw_proc_header:
             continue
 
-        if (in_proc or saw_numbered) and line.strip() and not line.strip().startswith("```"):
-            buf.append(line.strip())
+        if not in_proc:
+            continue
 
-    if buf:
-        steps.append(" ".join(buf).strip())
+        if re.match(r"^\s*\d+\.\s*", stripped):
+            content = _strip_markdown_prefix(stripped)
+            if _is_section_heading_line(content):
+                heading = content.rstrip(":").strip()
+                if not re.search(r"\bprocedure\b", heading, re.I) and not _is_non_procedure_step_text(heading + ":"):
+                    current_section = heading
+                last_step_idx = None
+                continue
+            candidate = _clean_step_text(content)
+            if candidate and not _is_non_procedure_step_text(candidate):
+                if current_section and not candidate.lower().startswith(current_section.lower()):
+                    candidate = f"{current_section}: {candidate}"
+                steps.append(candidate)
+                last_step_idx = len(steps) - 1
+                continue
+
+        if re.match(r"^\s*[-*•]\s+", stripped):
+            candidate = _clean_step_text(_strip_markdown_prefix(stripped))
+            if candidate and not _is_non_procedure_step_text(candidate):
+                if current_section and not candidate.lower().startswith(current_section.lower()):
+                    candidate = f"{current_section}: {candidate}"
+                steps.append(candidate)
+                last_step_idx = len(steps) - 1
+            continue
+
+        if _is_section_heading_line(plain):
+            heading = plain.rstrip(":").strip()
+            if not _is_non_procedure_step_text(heading + ":"):
+                current_section = heading
+            last_step_idx = None
+            continue
+
+        if last_step_idx is not None:
+            extra = _clean_step_text(plain)
+            if extra:
+                steps[last_step_idx] = f"{steps[last_step_idx]} {extra}".strip()
+            continue
+
+        candidate = _clean_step_text(plain)
+        if candidate and not _is_non_procedure_step_text(candidate):
+            if current_section and not candidate.lower().startswith(current_section.lower()):
+                candidate = f"{current_section}: {candidate}"
+            steps.append(candidate)
+            last_step_idx = len(steps) - 1
 
     if steps:
-        cleaned_steps = [strip_tags(s) for s in steps if s.strip()]
-        return [s for s in cleaned_steps if not _is_non_procedure_step_text(s)]
+        return [s for s in steps if s and not _is_non_procedure_step_text(s)]
 
-    if markdown_text.strip():
-        cleaned = strip_tags(markdown_text.strip())
-        if cleaned and not _is_non_procedure_step_text(cleaned):
-            return [cleaned]
+    fallback_steps: List[str] = []
+    last_idx: Optional[int] = None
+    for raw_line in lines:
+        stripped = raw_line.strip()
+        if not stripped:
+            last_idx = None
+            continue
+        plain = strip_tags(stripped)
+        if _is_non_procedure_step_text(plain):
+            last_idx = None
+            continue
+        if re.match(r"^\s*(?:\d+\.|[-*•])\s+", stripped):
+            candidate = _clean_step_text(_strip_markdown_prefix(stripped))
+            if candidate:
+                fallback_steps.append(candidate)
+                last_idx = len(fallback_steps) - 1
+            continue
+        if last_idx is not None:
+            extra = _clean_step_text(plain)
+            if extra:
+                fallback_steps[last_idx] = f"{fallback_steps[last_idx]} {extra}".strip()
 
-    return []
+    if fallback_steps:
+        return fallback_steps
+
+    cleaned = _clean_step_text(markdown_text)
+    return [cleaned] if cleaned and not _is_non_procedure_step_text(cleaned) else []
 
 
 _WORD_NUMBERS = {
@@ -480,7 +567,6 @@ _WORD_NUMBERS = {
     "four": 4,
     "five": 5,
 }
-
 
 def _parse_repeat_count(text: str, default: int = 1) -> int:
     s = (text or "").lower()
@@ -658,6 +744,75 @@ def detect_prepare_and_add_reagent_solution(line: str) -> Optional[Dict[str, Any
     }
 
 
+
+def detect_prepare_solution_from_amounts(line: str) -> Optional[Dict[str, Any]]:
+    s = strip_tags(_clean_unicode(line.strip().rstrip(".")))
+    if not re.search(r"\bdissolv\w*\b", s, re.I):
+        return None
+    m = re.search(
+        r"\bdissolv\w*\s+(?P<solutes>.+?)\s+in\s+(?P<vol>\d+(?:\.\d+)?)\s*(?P<vunit>µ?u?L|mL|ml|L|l)\s+of\s+(?P<solvent>.+?)(?:\s+in\s+(?P<hardware>\d+\s*mL\s+[^.;]+))?$",
+        s,
+        re.I,
+    )
+    if not m:
+        return None
+    structured = [parse_reagent_phrase_to_struct(p) for p in split_reagent_phrases(m.group("solutes")) if p]
+    if len(structured) < 2:
+        return None
+    return {
+        "action": "prepare_solution_from_amounts",
+        "solutes": structured,
+        "solvent": _clean_solvent_tail(m.group("solvent")),
+        "volume": float(m.group("vol")),
+        "volume_units": m.group("vunit"),
+        "hardware_hint": m.group("hardware"),
+    }
+
+
+def detect_add_measured_reagent(line: str) -> Optional[Dict[str, Any]]:
+    s = strip_tags(_clean_unicode(line.strip().rstrip(".")))
+    m = re.search(
+        r"\badd\s+(?P<amount>\d+(?:\.\d+)?)\s*(?P<unit>mg|g|kg|µg|ug|mmol|mol|µmol|umol)\s+of\s+(?P<reagent>[^,.;]+?)\s+to\s+(?:the\s+)?(?P<target>solution|mixture|flask|reaction mixture)\b",
+        s,
+        re.I,
+    )
+    if not m:
+        return None
+    return {
+        "action": "add_measured_reagent",
+        "reagent": m.group("reagent").strip(),
+        "amount": float(m.group("amount")),
+        "unit": _canon_unit(m.group("unit")),
+        "target_name": m.group("target").strip(),
+        "with_stirring": bool(re.search(r"\bstirr", s, re.I)),
+        "temperature_C": find_temp_c(s),
+        "minutes": find_minutes(s),
+    }
+
+
+def _extract_wash_sequence(text: str) -> List[Dict[str, Any]]:
+    s = strip_tags(_clean_unicode(text))
+    seq: List[Dict[str, Any]] = []
+    for m in re.finditer(
+        r"(?:(?:with|followed by)\s+)?(?P<vol>\d+(?:\.\d+)?)\s*(?P<vunit>µ?u?L|mL|ml|L|l)\s+of\s+(?P<solvent>[^,.;]+)",
+        s,
+        re.I,
+    ):
+        seq.append({
+            "solvent": _clean_solvent_tail(m.group("solvent")),
+            "volume": float(m.group("vol")),
+            "volume_units": m.group("vunit"),
+        })
+    deduped: List[Dict[str, Any]] = []
+    seen = set()
+    for item in seq:
+        key = (item["solvent"].lower(), item["volume"], item["volume_units"].lower())
+        if key not in seen:
+            deduped.append(item)
+            seen.add(key)
+    return deduped
+
+
 def detect_stir(line: str) -> Optional[Dict[str, Any]]:
     s = strip_tags(_clean_unicode(line.strip().rstrip(".")))
     if not re.search(r"\bstir", s, re.I):
@@ -707,34 +862,36 @@ def detect_ph_monitoring(line: str) -> Optional[Dict[str, Any]]:
 
 
 
+
 def detect_explicit_postprocess(line: str) -> Optional[Dict[str, Any]]:
     s = strip_tags(_clean_unicode(line.strip().rstrip(".")))
-    if not re.search(r"\bcentrifug", s, re.I) and not re.search(r"\bwash\b", s, re.I):
+    if not re.search(r"\bcentrifug|\bwash\b|\bsupernatant\b", s, re.I):
         return None
 
-    solvent_match = re.search(
-        r"with\s+(?P<vol>\d+(?:\.\d+)?)\s*(?P<vunit>µ?u?L|mL|ml|L|l)\s+of\s+(?P<solvent>[^,.;]+)",
-        s,
-        re.I,
-    )
-    centrifuge_match = re.search(
-        r"centrifug\w*.*?(?P<mins>\d+(?:\.\d+)?)\s*(?:minutes?|mins?)\s+at\s+(?P<rpm>\d+)\s*rpm",
-        s,
-        re.I,
-    )
-    if not solvent_match and not centrifuge_match:
+    centrifuge_rpm = None
+    centrifuge_minutes = None
+
+    m1 = re.search(r"centrifug\w*.*?\bat\s+(?P<rpm>\d+)\s*rpm\s+for\s+(?P<mins>\d+(?:\.\d+)?)\s*(?:minutes?|mins?)", s, re.I)
+    m2 = re.search(r"centrifug\w*.*?\bfor\s+(?P<mins>\d+(?:\.\d+)?)\s*(?:minutes?|mins?)\s+at\s+(?P<rpm>\d+)\s*rpm", s, re.I)
+    m = m1 or m2
+    if m:
+        centrifuge_rpm = int(m.group("rpm"))
+        centrifuge_minutes = float(m.group("mins"))
+
+    wash_sequence = _extract_wash_sequence(s)
+    if not wash_sequence and centrifuge_rpm is None and centrifuge_minutes is None:
         return None
 
     return {
         "action": "postprocess",
-        "wash_count": _parse_repeat_count(s, default=1),
-        "wash_solvent": _clean_solvent_tail(solvent_match.group("solvent")) if solvent_match else "wash solvent",
-        "wash_volume": float(solvent_match.group("vol")) if solvent_match else None,
-        "wash_volume_units": solvent_match.group("vunit") if solvent_match else None,
-        "centrifuge_minutes": float(centrifuge_match.group("mins")) if centrifuge_match else DEFAULTS["centrifuge_minutes"],
-        "centrifuge_rpm": int(centrifuge_match.group("rpm")) if centrifuge_match else DEFAULTS["centrifuge_rpm"],
+        "wash_count": _parse_repeat_count(s, default=1) if wash_sequence else 0,
+        "wash_sequence": wash_sequence,
+        "wash_solvent": wash_sequence[0]["solvent"] if wash_sequence else None,
+        "wash_volume": wash_sequence[0]["volume"] if wash_sequence else None,
+        "wash_volume_units": wash_sequence[0]["volume_units"] if wash_sequence else None,
+        "centrifuge_minutes": centrifuge_minutes if centrifuge_minutes is not None else DEFAULTS["centrifuge_minutes"],
+        "centrifuge_rpm": centrifuge_rpm if centrifuge_rpm is not None else DEFAULTS["centrifuge_rpm"],
     }
-
 
 def detect_redisperse(line: str) -> Optional[Dict[str, Any]]:
     s = strip_tags(_clean_unicode(line.strip().rstrip(".")))
@@ -862,11 +1019,14 @@ def detect_generic_add(line: str) -> Optional[Dict[str, Any]]:
     }
 
 
+
 def semantic_parse_step(step: str) -> Dict[str, Any]:
     detectors = [
         detect_prepare_solution_components,
+        detect_prepare_solution_from_amounts,
         detect_prepare_and_add_solution,
         detect_add_solvent,
+        detect_add_measured_reagent,
         detect_prepare_and_add_reagent_solution,
         detect_explicit_postprocess,
         detect_redisperse,
@@ -874,9 +1034,9 @@ def semantic_parse_step(step: str) -> Dict[str, Any]:
         detect_autotitrator_rate,
         detect_ph_monitoring,
         detect_oven_dry,
-        detect_stir,
         detect_solution_prep,
         detect_dissolve,
+        detect_stir,
         detect_weigh,
         detect_transfer,
         detect_generic_add,
@@ -900,7 +1060,6 @@ def semantic_parse_step(step: str) -> Dict[str, Any]:
             return {"action": "composite", "parts": fragments, "raw": step}
     return record
 
-
 def semantic_parse(text: str, vessels: VesselRegistry) -> Tuple[List[Dict[str, Any]], Dict[str, Any]]:
     steps = extract_steps(text)
     records: List[Dict[str, Any]] = []
@@ -922,6 +1081,84 @@ def semantic_parse(text: str, vessels: VesselRegistry) -> Tuple[List[Dict[str, A
 
 def _ensure_primary_vessel(vessels: VesselRegistry) -> str:
     return vessels.primary_vessel or vessels.ensure_glassware("Beaker")
+
+
+
+def _emit_prepare_solution_from_amounts(step: Dict[str, Any], vessels: VesselRegistry) -> Tuple[Dict[str, Any], Optional[Dict[str, Any]]]:
+    solvent = step["solvent"]
+    volume = step["volume"]
+    volume_units = step["volume_units"]
+    vol_ml = volume * (0.001 if volume_units.lower() in ("µl", "ul") else (1.0 if volume_units.lower() == "ml" else 1000.0))
+    vid = vessels.ensure_glassware(step.get("hardware_hint") or "Beaker", prefer_capacity_ml=vol_ml, explicit_hardware_hint=step.get("hardware_hint"))
+    ops: List[Dict[str, Any]] = []
+    reagents: List[str] = []
+    structured: List[Dict[str, Any]] = []
+    detail_components: List[Dict[str, Any]] = []
+
+    for sol in step["solutes"]:
+        ops.append({"op": "pour", "reagent": sol["name"], "vessel": vid})
+        reagents.append(sol["name"])
+        struct = {
+            "name": sol["name"],
+            "display_name": _display_name_for(sol["name"]),
+            "original": sol.get("original") or sol["name"],
+        }
+        if sol.get("amount") is not None:
+            struct["amount"] = sol["amount"]
+        if sol.get("amount_unit") is not None:
+            struct["amount_unit"] = sol["amount_unit"]
+        structured.append(struct)
+        detail_components.append({"name": sol["name"], "display_name": _display_name_for(sol["name"])})
+    ops.append({"op": "pour", "reagent": solvent, "vessel": vid, "volume": volume, "volume_units": volume_units})
+    reagents.append(solvent)
+    structured.append({"name": solvent, "display_name": _display_name_for(solvent), "original": f"{volume} {volume_units} of {solvent}", "amount": volume, "amount_unit": volume_units})
+    detail_components.append({"name": solvent, "display_name": _display_name_for(solvent), "role": "solvent"})
+
+    record = {
+        "action": "prepare_solution",
+        "raw": step["raw"],
+        "vessel": vid,
+        "solvent": solvent,
+        "volume": volume,
+        "volume_units": volume_units,
+        "reagents": reagents,
+        "reagents_structured": structured,
+        "ops": ops,
+    }
+    detail = {
+        "description": f"prepared mixture in {solvent}",
+        "components": detail_components,
+    }
+    return record, detail
+
+
+def _emit_add_measured_reagent(step: Dict[str, Any], vessel: str) -> Dict[str, Any]:
+    ops: List[Dict[str, Any]] = []
+    if step.get("with_stirring"):
+        ops.extend([
+            {"op": "move_to_stir_plate", "stir_plate_id": DEVICE_IDS["stir_plate_id"], "vessel": vessel},
+            {"op": "set_stir_rate", "vessel": vessel, "rpm": DEFAULTS["stir_rpm"], "inferred": True},
+        ])
+    ops.append({"op": "pour", "reagent": step["reagent"], "vessel": vessel, "amount": step["amount"], "amount_unit": step["unit"]})
+    if step.get("minutes"):
+        ops.append({"op": "wait", "minutes": step["minutes"]})
+    return {
+        "action": "add",
+        "raw": step["raw"],
+        "vessel": vessel,
+        "with_stirring": step.get("with_stirring", False),
+        "temperature_C": step.get("temperature_C"),
+        "minutes": step.get("minutes"),
+        "reagents": [step["reagent"]],
+        "reagents_structured": [{
+            "name": step["reagent"],
+            "display_name": _display_name_for(step["reagent"]),
+            "original": f"{step['amount']} {step['unit']} of {step['reagent']}",
+            "amount": step["amount"],
+            "amount_unit": step["unit"],
+        }],
+        "ops": ops,
+    }
 
 
 def _emit_prepare_solution(step: Dict[str, Any], vessel: str) -> Tuple[Dict[str, Any], Optional[Dict[str, Any]]]:
@@ -1080,7 +1317,7 @@ def _emit_heat_hold(step: Dict[str, Any], vessel: str) -> Dict[str, Any]:
                 "unit": "C",
                 "vessel": vessel,
             },
-            {"op": "wait", "minutes": step["minutes"]},
+            *([{"op": "wait", "minutes": step["minutes"]}] if step["minutes"] and step["minutes"] > 0 else []),
         ],
         "reagents": [],
         "reagents_structured": [],
@@ -1145,6 +1382,7 @@ def _emit_oven_dry(step: Dict[str, Any], vessel: str) -> Dict[str, Any]:
     }
 
 
+
 def _emit_postprocess(step: Dict[str, Any], vessel: str) -> Dict[str, Any]:
     ops: List[Dict[str, Any]] = [
         {"op": "transfer_to_centrifuge_tube", "from": vessel, "to": f"{vessel}_tube"},
@@ -1164,66 +1402,80 @@ def _emit_postprocess(step: Dict[str, Any], vessel: str) -> Dict[str, Any]:
             "review_reason": "unsupported_phase_separation_primitive",
         },
     ]
+    wash_sequence = step.get("wash_sequence") or []
+    if not wash_sequence and step.get("wash_solvent"):
+        wash_sequence = [{
+            "solvent": step["wash_solvent"],
+            "volume": step.get("wash_volume"),
+            "volume_units": step.get("wash_volume_units") or "mL",
+        }] if step.get("wash_count", 0) > 0 else []
+
     for wash_cycle in range(1, step["wash_count"] + 1):
-        ops.append(
-            {
-                "op": "pour",
-                "reagent": step["wash_solvent"],
-                "vessel": f"{vessel}_tube",
-                "volume": step["wash_volume"],
-                "volume_units": step.get("wash_volume_units") or "mL",
-                "wash_cycle": wash_cycle,
-            }
-        )
-        ops.append(
-            {
-                "op": "resuspend",
-                "tube": f"{vessel}_tube",
-                "wash_cycle": wash_cycle,
-                "executable": False,
-                "review_required": True,
-                "review_reason": "unsupported_dispersion_primitive",
-            }
-        )
-        ops.append(
-            {
-                "op": "centrifuge",
-                "centrifuge_id": DEVICE_IDS["centrifuge_id"],
-                "tube": f"{vessel}_tube",
-                "minutes": step["centrifuge_minutes"],
-                "rpm": step["centrifuge_rpm"],
-                "wash_cycle": wash_cycle,
-            }
-        )
-        ops.append(
-            {
-                "op": "decant_supernatant",
-                "tube": f"{vessel}_tube",
-                "wash_cycle": wash_cycle,
-                "executable": False,
-                "review_required": True,
-                "review_reason": "unsupported_phase_separation_primitive",
-            }
-        )
+        for wash in wash_sequence:
+            ops.append(
+                {
+                    "op": "pour",
+                    "reagent": wash["solvent"],
+                    "vessel": f"{vessel}_tube",
+                    "volume": wash.get("volume"),
+                    "volume_units": wash.get("volume_units") or "mL",
+                    "wash_cycle": wash_cycle,
+                }
+            )
+            ops.append(
+                {
+                    "op": "resuspend",
+                    "tube": f"{vessel}_tube",
+                    "wash_cycle": wash_cycle,
+                    "executable": False,
+                    "review_required": True,
+                    "review_reason": "unsupported_dispersion_primitive",
+                }
+            )
+            ops.append(
+                {
+                    "op": "centrifuge",
+                    "centrifuge_id": DEVICE_IDS["centrifuge_id"],
+                    "tube": f"{vessel}_tube",
+                    "minutes": step["centrifuge_minutes"],
+                    "rpm": step["centrifuge_rpm"],
+                    "wash_cycle": wash_cycle,
+                }
+            )
+            ops.append(
+                {
+                    "op": "decant_supernatant",
+                    "tube": f"{vessel}_tube",
+                    "wash_cycle": wash_cycle,
+                    "executable": False,
+                    "review_required": True,
+                    "review_reason": "unsupported_phase_separation_primitive",
+                }
+            )
+
+    reagents = [wash["solvent"] for wash in wash_sequence]
+    reagents_structured = []
+    for wash in wash_sequence:
+        entry = {
+            "name": wash["solvent"],
+            "display_name": _display_name_for(wash["solvent"]),
+            "original": f"{wash.get('volume')} {wash.get('volume_units') or 'mL'} of {wash['solvent']}",
+            "repetitions": step["wash_count"],
+        }
+        if wash.get("volume") is not None:
+            entry["amount"] = wash["volume"]
+        if wash.get("volume_units") is not None:
+            entry["amount_unit"] = wash["volume_units"]
+        reagents_structured.append(entry)
 
     return {
         "action": "postprocess",
         "raw": step["raw"],
         "vessel": vessel,
         "ops": ops,
-        "reagents": [step["wash_solvent"]],
-        "reagents_structured": [
-            {
-                "name": step["wash_solvent"],
-                "display_name": _display_name_for(step["wash_solvent"]),
-                "original": f"{step['wash_volume']} {step.get('wash_volume_units') or 'mL'} of {step['wash_solvent']}",
-                "amount": step["wash_volume"],
-                "amount_unit": step.get("wash_volume_units") or "mL",
-                "repetitions": step["wash_count"],
-            }
-        ],
+        "reagents": reagents,
+        "reagents_structured": reagents_structured,
     }
-
 
 def _emit_redisperse(step: Dict[str, Any], vessel: str) -> Dict[str, Any]:
     redisperse_vessel = f"{vessel}_tube"
@@ -1360,8 +1612,12 @@ def emit_steps(semantic_steps: List[Dict[str, Any]], vessels: VesselRegistry) ->
 
         if action == "prepare_solution" and step.get("components"):
             record, detail_payload = _emit_prepare_solution(step, primary)
+        elif action == "prepare_solution_from_amounts":
+            record, detail_payload = _emit_prepare_solution_from_amounts(step, vessels)
         elif action == "add_prepared_solution":
             record = _emit_add_prepared_solution(step, primary)
+        elif action == "add_measured_reagent":
+            record = _emit_add_measured_reagent(step, primary)
         elif action == "add_solvent":
             record = _emit_add_solvent(step, primary)
         elif action == "add_reagent_solution":
