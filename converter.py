@@ -299,13 +299,13 @@ def find_minutes(text: str) -> Optional[float]:
     minutes = 0.0
     if re.search(r"\bover\s*night\b", s, re.I):
         return 12 * 60.0
-    for m in re.finditer(r"(\d+(?:\.\d+)?)\s*(?:second|sec|s)\b", s, re.I):
+    for m in re.finditer(r"(\d+(?:\.\d+)?)\s*(?:seconds?|secs?)\b", s, re.I):
         minutes += float(m.group(1)) / 60.0
         found = True
-    for m in re.finditer(r"(\d+(?:\.\d+)?)\s*(?:hour|hr|hrs|h)\b", s, re.I):
+    for m in re.finditer(r"(\d+(?:\.\d+)?)\s*(?:hours?|hrs?|h)\b", s, re.I):
         minutes += float(m.group(1)) * 60.0
         found = True
-    for m in re.finditer(r"(\d+(?:\.\d+)?)\s*(?:minutes?|mins?)\b", s, re.I):
+    for m in re.finditer(r"(\d+(?:\.\d+)?)\s*(?:minutes?|mins?|min)\b", s, re.I):
         minutes += float(m.group(1))
         found = True
     return minutes if found else None
@@ -778,14 +778,15 @@ def detect_add_measured_reagent(line: str) -> Optional[Dict[str, Any]]:
     )
     if not m:
         return None
+    explicit_temps = _temperature_candidates_c(s)
     return {
         "action": "add_measured_reagent",
         "reagent": m.group("reagent").strip(),
         "amount": float(m.group("amount")),
         "unit": _canon_unit(m.group("unit")),
         "target_name": m.group("target").strip(),
-        "with_stirring": bool(re.search(r"\bstirr", s, re.I)),
-        "temperature_C": find_temp_c(s),
+        "with_stirring": bool(re.search(r"\bstir", s, re.I)),
+        "temperature_C": explicit_temps[0] if explicit_temps else None,
         "minutes": find_minutes(s),
     }
 
@@ -891,6 +892,7 @@ def detect_explicit_postprocess(line: str) -> Optional[Dict[str, Any]]:
         "wash_volume_units": wash_sequence[0]["volume_units"] if wash_sequence else None,
         "centrifuge_minutes": centrifuge_minutes if centrifuge_minutes is not None else DEFAULTS["centrifuge_minutes"],
         "centrifuge_rpm": centrifuge_rpm if centrifuge_rpm is not None else DEFAULTS["centrifuge_rpm"],
+        "centrifuge_explicit": centrifuge_rpm is not None and centrifuge_minutes is not None,
     }
 
 def detect_redisperse(line: str) -> Optional[Dict[str, Any]]:
@@ -1076,7 +1078,43 @@ def semantic_parse(text: str, vessels: VesselRegistry) -> Tuple[List[Dict[str, A
             continue
         records.append(parsed)
 
+    records = _normalize_semantic_steps(records)
     return records, context
+
+
+def _normalize_semantic_steps(records: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    normalized: List[Dict[str, Any]] = []
+    last_explicit_centrifuge: Optional[Tuple[float, int]] = None
+
+    for step in records:
+        current = copy.deepcopy(step)
+
+        if current.get("action") == "heat_hold":
+            mins = current.get("minutes")
+            raw = current.get("raw", "")
+            if (mins is None or mins == 0) and find_minutes(raw):
+                current["minutes"] = find_minutes(raw)
+
+        if current.get("action") == "oven_dry":
+            mins = current.get("minutes")
+            raw = current.get("raw", "")
+            if (mins is None or mins <= 120) and find_minutes(raw):
+                current["minutes"] = find_minutes(raw)
+
+        if current.get("action") == "postprocess":
+            raw = current.get("raw", "")
+            explicit_match_1 = re.search(r"centrifug\w*.*?\bat\s+(?P<rpm>\d+)\s*rpm\s+for\s+(?P<mins>\d+(?:\.\d+)?)\s*(?:minutes?|mins?)", raw, re.I)
+            explicit_match_2 = re.search(r"centrifug\w*.*?\bfor\s+(?P<mins>\d+(?:\.\d+)?)\s*(?:minutes?|mins?)\s+at\s+(?P<rpm>\d+)\s*rpm", raw, re.I)
+            explicit_match = explicit_match_1 or explicit_match_2
+            if explicit_match:
+                last_explicit_centrifuge = (float(explicit_match.group("mins")), int(explicit_match.group("rpm")))
+            elif current.get("wash_sequence") and last_explicit_centrifuge is not None:
+                current["centrifuge_minutes"] = last_explicit_centrifuge[0]
+                current["centrifuge_rpm"] = last_explicit_centrifuge[1]
+
+        normalized.append(current)
+
+    return normalized
 
 
 def _ensure_primary_vessel(vessels: VesselRegistry) -> str:
@@ -1392,7 +1430,7 @@ def _emit_postprocess(step: Dict[str, Any], vessel: str) -> Dict[str, Any]:
             "tube": f"{vessel}_tube",
             "minutes": step["centrifuge_minutes"],
             "rpm": step["centrifuge_rpm"],
-            "inferred": True,
+            "inferred": not bool(step.get("centrifuge_explicit")),
         },
         {
             "op": "decant_supernatant",
@@ -1669,15 +1707,34 @@ def build_micro_plan(steps: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
     next_index = 1
     for source_step_index, step in enumerate(steps, start=1):
         for op in step.get("ops", []):
-            mp = copy.deepcopy(op)
-            verb = mp.pop("op")
-            mp["verb"] = verb
-            mp["source_step_index"] = source_step_index
-            mp["step_index"] = next_index
-            next_index += 1
-            if mp.get("verb") == "set" and mp.get("param") == "temperature_C" and "unit" not in mp:
-                mp["unit"] = "C"
-            micro_plan.append(mp)
+            raw = copy.deepcopy(op)
+            verb = raw.pop("op")
+            expanded: List[Dict[str, Any]] = []
+
+            if verb == "move_to_oven":
+                tube = raw.get("tube", "V1_tube")
+                expanded.append({"verb": "pick_up", "vessel": tube, "source_step_index": source_step_index})
+                expanded.append({"verb": "place", "vessel": tube, "to": "oven", "device": "OV1", "source_step_index": source_step_index})
+            elif verb == "set_oven_temperature":
+                expanded.append({
+                    "verb": "set",
+                    "device": "OV1",
+                    "param": "temperature_C",
+                    "value": raw.get("temperature_C"),
+                    "unit": "C",
+                    "source_step_index": source_step_index,
+                })
+            else:
+                raw["verb"] = verb
+                raw["source_step_index"] = source_step_index
+                expanded.append(raw)
+
+            for mp in expanded:
+                mp["step_index"] = next_index
+                next_index += 1
+                if mp.get("verb") == "set" and mp.get("param") == "temperature_C" and "unit" not in mp:
+                    mp["unit"] = "C"
+                micro_plan.append(mp)
     return micro_plan
 
 
@@ -1855,7 +1912,8 @@ def _infer_micro_from_raw(steps: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
 
         # Heat / maintain / water bath instructions
         if action not in {'add_solvent'} and re.search(r"\b(heat|maintain|hold|continue\s+heating?|water\s+bath)\b", s, re.I):
-            temp = find_temp_c(s)
+            temp_candidates = _temperature_candidates_c(s)
+            temp = temp_candidates[0] if temp_candidates else None
             minutes = find_minutes(s)
             device = 'HP1'
             if re.search(r'water\s+bath', s, re.I):
@@ -1875,7 +1933,8 @@ def _infer_micro_from_raw(steps: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
         # Stir-only instructions with duration
         if action not in {'stir', 'add_solvent'} and re.search(r"\bstir\b", s, re.I) and not re.search(r"\b(heat|oven|dry)\b", s, re.I):
             minutes = find_minutes(s)
-            temp = find_temp_c(s)
+            explicit_temps = _temperature_candidates_c(s)
+            temp = explicit_temps[0] if explicit_temps else None
             if temp is not None:
                 inferred.append({
                     'verb': 'set',
@@ -1935,8 +1994,9 @@ def _infer_micro_from_raw(steps: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
             })
 
         # Generic final fallback: any remaining explicit temperature should yield a set op.
-        if find_temp_c(s) is not None and not any(op.get('source_step_index') == source_step_index and op.get('verb') == 'set' and op.get('param') == 'temperature_C' for op in inferred):
-            temp = find_temp_c(s)
+        temp_candidates = _temperature_candidates_c(s)
+        if temp_candidates and not any(op.get('source_step_index') == source_step_index and op.get('verb') == 'set' and op.get('param') == 'temperature_C' for op in inferred):
+            temp = temp_candidates[0]
             device = 'OV1' if re.search(r'\boven\b', s, re.I) else ('water bath' if re.search(r'water\s+bath', s, re.I) else 'HP1')
             inferred.append({'verb': 'set', 'device': device, 'param': 'temperature_C', 'value': temp, 'unit': 'C', 'source_step_index': source_step_index})
             minutes = find_minutes(s)
@@ -2056,8 +2116,20 @@ def apply_postprocessing(doc: Dict[str, Any]) -> Dict[str, Any]:
     # Final coverage pass for oven placement / temperature and generic temperature or pH fallback.
     for i, step in enumerate(steps, start=1):
         raw = strip_tags(_clean_unicode(step.get('raw', '') or ''))
-        has_temp = any(op.get('source_step_index') == i and op.get('verb') == 'set' and op.get('param') == 'temperature_C' for op in micro_plan)
-        has_place = any(op.get('source_step_index') == i and op.get('verb') == 'place' and (op.get('to') == 'oven' or op.get('device') == 'OV1') for op in micro_plan)
+        has_temp = any(
+            op.get('source_step_index') == i and (
+                (op.get('verb') == 'set' and op.get('param') == 'temperature_C') or
+                (op.get('verb') == 'set_oven_temperature')
+            )
+            for op in micro_plan
+        )
+        has_place = any(
+            op.get('source_step_index') == i and (
+                (op.get('verb') == 'place' and (op.get('to') == 'oven' or op.get('device') == 'OV1')) or
+                (op.get('verb') == 'move_to_oven')
+            )
+            for op in micro_plan
+        )
         if re.search(r'\boven\b', raw, re.I):
             if not has_place:
                 micro_plan.append({'verb': 'pick_up', 'vessel': f"{step.get('vessel', 'V1')}_tube", 'source_step_index': i})
