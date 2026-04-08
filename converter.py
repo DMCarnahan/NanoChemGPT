@@ -846,6 +846,24 @@ def detect_heat_hold(line: str) -> Optional[Dict[str, Any]]:
     }
 
 
+def detect_cool(line: str) -> Optional[Dict[str, Any]]:
+    s = strip_tags(_clean_unicode(line.strip().rstrip(".")))
+    if not re.search(r"\bcool|cooling|allow .* to cool\b", s, re.I):
+        return None
+    if not re.search(r"\broom\s*temperature|rt|naturally|ice\s*bath|cool\b", s, re.I):
+        return None
+    temp = find_temp_c(s)
+    if temp is None and re.search(r"\b(rt|room\s*temp(?:erature)?)\b", s, re.I):
+        temp = DEFAULTS["room_temp_C"]
+    if temp is None and re.search(r"\bice\s*bath\b", s, re.I):
+        temp = 0.0
+    return {
+        "action": "cool_to",
+        "temperature_C": temp if temp is not None else DEFAULTS["room_temp_C"],
+        "minutes": find_minutes(s),
+    }
+
+
 def detect_autotitrator_rate(line: str) -> Optional[Dict[str, Any]]:
     s = strip_tags(_clean_unicode(line.strip().rstrip(".")))
     if not re.search(r"\b(autotitrator|titrat)\b", s, re.I):
@@ -1030,6 +1048,7 @@ def semantic_parse_step(step: str) -> Dict[str, Any]:
         detect_add_solvent,
         detect_add_measured_reagent,
         detect_prepare_and_add_reagent_solution,
+        detect_cool,
         detect_explicit_postprocess,
         detect_redisperse,
         detect_heat_hold,
@@ -1111,6 +1130,10 @@ def _normalize_semantic_steps(records: List[Dict[str, Any]]) -> List[Dict[str, A
             elif current.get("wash_sequence") and last_explicit_centrifuge is not None:
                 current["centrifuge_minutes"] = last_explicit_centrifuge[0]
                 current["centrifuge_rpm"] = last_explicit_centrifuge[1]
+
+            prev = normalized[-1] if normalized else None
+            if prev and prev.get("action") == "postprocess" and not prev.get("wash_sequence") and current.get("wash_sequence"):
+                current["skip_initial_transfer"] = True
 
         normalized.append(current)
 
@@ -1339,6 +1362,22 @@ def _emit_stir(step: Dict[str, Any], vessel: str) -> Dict[str, Any]:
     }
 
 
+def _emit_cool_to(step: Dict[str, Any], vessel: str) -> Dict[str, Any]:
+    rec = {
+        "action": "cool_to",
+        "raw": step["raw"],
+        "vessel": vessel,
+        "temperature_C": step.get("temperature_C", DEFAULTS["room_temp_C"]),
+        "reagents": [],
+        "reagents_structured": [],
+        "ops": [],
+    }
+    if step.get("minutes"):
+        rec["minutes"] = step["minutes"]
+        rec["ops"] = [{"op": "wait", "minutes": step["minutes"]}]
+    return rec
+
+
 def _emit_heat_hold(step: Dict[str, Any], vessel: str) -> Dict[str, Any]:
     return {
         "action": "heat_hold",
@@ -1422,24 +1461,26 @@ def _emit_oven_dry(step: Dict[str, Any], vessel: str) -> Dict[str, Any]:
 
 
 def _emit_postprocess(step: Dict[str, Any], vessel: str) -> Dict[str, Any]:
-    ops: List[Dict[str, Any]] = [
-        {"op": "transfer_to_centrifuge_tube", "from": vessel, "to": f"{vessel}_tube"},
-        {
-            "op": "centrifuge",
-            "centrifuge_id": DEVICE_IDS["centrifuge_id"],
-            "tube": f"{vessel}_tube",
-            "minutes": step["centrifuge_minutes"],
-            "rpm": step["centrifuge_rpm"],
-            "inferred": not bool(step.get("centrifuge_explicit")),
-        },
-        {
-            "op": "decant_supernatant",
-            "tube": f"{vessel}_tube",
-            "executable": False,
-            "review_required": True,
-            "review_reason": "unsupported_phase_separation_primitive",
-        },
-    ]
+    ops: List[Dict[str, Any]] = []
+    if not step.get("skip_initial_transfer"):
+        ops.extend([
+            {"op": "transfer_to_centrifuge_tube", "from": vessel, "to": f"{vessel}_tube"},
+            {
+                "op": "centrifuge",
+                "centrifuge_id": DEVICE_IDS["centrifuge_id"],
+                "tube": f"{vessel}_tube",
+                "minutes": step["centrifuge_minutes"],
+                "rpm": step["centrifuge_rpm"],
+                "inferred": not bool(step.get("centrifuge_explicit")),
+            },
+            {
+                "op": "decant_supernatant",
+                "tube": f"{vessel}_tube",
+                "executable": False,
+                "review_required": True,
+                "review_reason": "unsupported_phase_separation_primitive",
+            },
+        ])
     wash_sequence = step.get("wash_sequence") or []
     if not wash_sequence and step.get("wash_solvent"):
         wash_sequence = [{
@@ -1662,6 +1703,8 @@ def emit_steps(semantic_steps: List[Dict[str, Any]], vessels: VesselRegistry) ->
             record = _emit_add_reagent_solution(step, primary)
         elif action == "stir":
             record = _emit_stir(step, primary)
+        elif action == "cool_to":
+            record = _emit_cool_to(step, primary)
         elif action == "heat_hold":
             record = _emit_heat_hold(step, primary)
         elif action == "autotitrator_rate":
@@ -1948,7 +1991,7 @@ def _infer_micro_from_raw(steps: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
                 inferred.append({'verb': 'wait', 'minutes': minutes, 'source_step_index': source_step_index})
 
         # Solvent / reagent additions -> pour primitive
-        if action not in {'add', 'add_solvent', 'transfer'}:
+        if action not in {'add', 'add_solvent', 'transfer', 'postprocess', 'cool_to'}:
             m_add_solvent = re.search(r"\badd\s+(\d+(?:\.\d+)?)\s*(µ?u?L|mL|ml|L|l)?\s*(?:of\s+)?([^.;]+?)\s+to\b", s, re.I)
             if m_add_solvent:
                 inferred.append({
@@ -2036,35 +2079,69 @@ def _dedupe_micro_ops(micro_plan: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
 def _insert_required_placements(micro_plan: List[Dict[str, Any]]) -> Tuple[List[Dict[str, Any]], List[str]]:
     out: List[Dict[str, Any]] = []
     repairs: List[str] = []
+    vessel_locations: Dict[str, str] = {}
+    picked_up: set[str] = set()
     for op in micro_plan:
-        if op.get('verb') == 'set' and op.get('param') == 'temperature_C':
+        op = copy.deepcopy(op)
+        verb = op.get('verb')
+        vessel = op.get('vessel') or (op.get('tube') if isinstance(op.get('tube'), str) else None)
+        if verb == 'pick_up' and vessel:
+            picked_up.add(vessel)
+            out.append(op)
+            continue
+        if verb == 'place' and vessel:
+            dest = _canonicalize_device_name(op.get('device') or op.get('to'))
+            if dest:
+                vessel_locations[vessel] = dest
+                op['device'] = dest if dest in {'HP1','OV1','SP1','CF1','AT1'} else op.get('device')
+            out.append(op)
+            continue
+        if verb == 'move_to_oven':
+            tube = op.get('tube')
+            if tube:
+                vessel_locations[tube] = 'OV1'
+            out.append(op)
+            continue
+        if verb == 'move_to_stir_plate' and vessel:
+            vessel_locations[vessel] = 'SP1'
+            out.append(op)
+            continue
+        if verb == 'set' and op.get('param') == 'temperature_C':
             device = _canonicalize_device_name(op.get('device'))
             if device in {'HP1', 'OV1'}:
-                vessel = op.get('vessel') or ('V1_tube' if device == 'OV1' else 'V1')
-                prev1 = out[-1] if len(out) >= 1 else None
-                prev2 = out[-2] if len(out) >= 2 else None
-                already = bool(
-                    prev1 and prev2 and prev2.get('verb') == 'pick_up' and prev1.get('verb') == 'place' and (prev1.get('to') == device or prev1.get('device') == device)
-                )
-                if not already:
-                    out.append({'verb': 'pick_up', 'vessel': vessel, 'source_step_index': op.get('source_step_index')})
-                    out.append({'verb': 'place', 'vessel': vessel, 'to': ('oven' if device == 'OV1' else device), 'device': device, 'source_step_index': op.get('source_step_index')})
+                target_vessel = vessel or ('V1_tube' if device == 'OV1' else 'V1')
+                if vessel_locations.get(target_vessel) != device:
+                    if target_vessel not in picked_up:
+                        out.append({'verb': 'pick_up', 'vessel': target_vessel, 'source_step_index': op.get('source_step_index')})
+                    out.append({'verb': 'place', 'vessel': target_vessel, 'to': ('oven' if device == 'OV1' else device), 'device': device, 'source_step_index': op.get('source_step_index')})
                     repairs.append(f"inserted_pickup_place_before_{device}_set")
-                op = copy.deepcopy(op)
+                    vessel_locations[target_vessel] = device
+                    picked_up.discard(target_vessel)
                 op['device'] = device
-                if 'unit' not in op:
-                    op['unit'] = 'C'
+                op.setdefault('unit', 'C')
+                if vessel is None:
+                    op['vessel'] = target_vessel
         out.append(op)
+        if verb == 'transfer_to_centrifuge_tube' and op.get('to'):
+            vessel_locations[op['to']] = 'CF1'
     return out, repairs
 
 
 def _compress_micro_plan_for_gt_style(micro_plan: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
     compressed: List[Dict[str, Any]] = []
+    last_temp_by_target: Dict[Tuple[Any, Any], Any] = {}
     for op in micro_plan:
         verb = op.get('verb')
-        # Keep richer workup primitives in steps[].ops, but omit them from top-level micro_plan to match GT style.
         if verb in {'decant_supernatant', 'resuspend'}:
             continue
+        if verb == 'set' and op.get('param') == 'temperature_C':
+            target = (op.get('device'), op.get('vessel'))
+            value = op.get('value')
+            if last_temp_by_target.get(target) == value:
+                while compressed and compressed[-1].get('source_step_index') == op.get('source_step_index') and compressed[-1].get('verb') in {'pick_up', 'place'}:
+                    compressed.pop()
+                continue
+            last_temp_by_target[target] = value
         compressed.append(op)
     return compressed
 
