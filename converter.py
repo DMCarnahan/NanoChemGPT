@@ -1740,12 +1740,36 @@ def apply_postprocessing(doc: Dict[str, Any]) -> Dict[str, Any]:
     return result
 
 
+def _enrich_step_scalar_fields(steps: List[Dict[str, Any]]) -> None:
+    """Backfill scalar fields like temperature_C and target_ph onto emitted step records.
+
+    Some tests inspect doc["steps"] directly rather than micro_plan, so these values
+    need to exist on the step records themselves even if they were only inferred later
+    for primitive execution ops.
+    """
+    ph_rx = re.compile(r"\bpH\s*(?:to|=|of|reaches?|reach)?\s*(\d+(?:\.\d+)?)", re.I)
+    for step in steps:
+        raw = step.get("raw", "") or ""
+        if step.get("temperature_C") in (None, ""):
+            temps = _temperature_candidates_c(raw)
+            if temps:
+                step["temperature_C"] = temps[0]
+        if step.get("target_ph") in (None, ""):
+            m = ph_rx.search(raw)
+            if m:
+                try:
+                    step["target_ph"] = float(m.group(1))
+                except Exception:
+                    pass
+
+
 def convert_text_to_robot_ops(text: str) -> Dict[str, Any]:
     hardware = parse_hardware(text)
     vessels = VesselRegistry(hardware)
     primary_vessel = vessels.ensure_glassware("Beaker")
     semantic_steps, _context = semantic_parse(text, vessels)
     records = emit_steps(semantic_steps, vessels)
+    _enrich_step_scalar_fields(records)
 
     result: Dict[str, Any] = {
         "_executor": {
