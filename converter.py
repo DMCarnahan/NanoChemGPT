@@ -516,6 +516,49 @@ def _is_non_procedure_step_text(text: str) -> bool:
     return bool(NON_PROCEDURE_STEP_RX.match(s))
 
 
+DISPLAY_NAME_OVERRIDES: Dict[str, str] = {
+    "pt(acac)2": "Platinum(II) acetylacetonate (Pt(acac)2)",
+    "ru(acac)3": "Ruthenium(III) acetylacetonate (Ru(acac)3)",
+    "ctab": "Hexadecyltrimethylammonium bromide (CTAB)",
+    "nabh4": "Sodium borohydride (NaBH4)",
+    "chloroform": "Chloroform",
+    "water": "Water",
+    "ethanol": "Ethanol",
+}
+
+
+def _display_name_for(name: Optional[str]) -> Optional[str]:
+    if name is None:
+        return None
+    cleaned = strip_tags(name).strip()
+    key = cleaned.lower()
+    return DISPLAY_NAME_OVERRIDES.get(key, cleaned)
+
+
+def _solution_struct(name: str, *, original: Optional[str] = None, concentration: Optional[float] = None,
+                     conc_unit: Optional[str] = None, solvent: Optional[str] = None,
+                     is_solution: bool = True) -> Dict[str, Any]:
+    out: Dict[str, Any] = {
+        "name": name,
+        "display_name": _display_name_for(name),
+        "original": original or name,
+    }
+    if concentration is not None:
+        out["concentration"] = concentration
+    if conc_unit is not None:
+        out["conc_unit"] = conc_unit
+    if solvent is not None:
+        out["solvent"] = solvent
+    if is_solution:
+        out["is_solution"] = True
+    return out
+
+
+def _is_non_procedure_step_text(text: str) -> bool:
+    s = strip_tags(_clean_unicode(text or ""))
+    return bool(NON_PROCEDURE_STEP_RX.match(s))
+
+
 def _slug_token(s: str) -> str:
     slug = re.sub(r"[^a-zA-Z0-9]+", "_", s.strip().lower())
     slug = re.sub(r"_+", "_", slug).strip("_")
@@ -887,6 +930,7 @@ def _emit_prepare_solution(step: Dict[str, Any], vessel: str) -> Tuple[Dict[str,
     ops: List[Dict[str, Any]] = []
     reagents: List[str] = []
     detailed_components: List[Dict[str, Any]] = []
+    structured: List[Dict[str, Any]] = []
 
     for comp in components:
         ops.append({"op": "pour", "reagent": comp["name"], "vessel": vessel})
@@ -894,17 +938,26 @@ def _emit_prepare_solution(step: Dict[str, Any], vessel: str) -> Tuple[Dict[str,
         detailed_components.append(
             {
                 "name": comp["name"],
-                "display_name": comp["name"],
+                "display_name": _display_name_for(comp["name"]),
                 "concentration": comp["concentration"],
                 "conc_unit": comp["conc_unit"],
                 "solvent": solvent,
             }
         )
+        structured.append(_solution_struct(
+            comp["name"],
+            original=f"{comp['concentration']} {comp['conc_unit']} of {comp['name']}",
+            concentration=comp["concentration"],
+            conc_unit=comp["conc_unit"],
+            solvent=solvent,
+            is_solution=False,
+        ))
     ops.append({"op": "pour", "solvent": solvent, "vessel": vessel})
     reagents.append(solvent)
+    structured.append({"name": solvent, "display_name": _display_name_for(solvent), "original": solvent})
     detail = {
         "description": step.get("description", f"prepared solution in {solvent}"),
-        "components": detailed_components + [{"name": solvent, "display_name": solvent, "role": "solvent"}],
+        "components": detailed_components + [{"name": solvent, "display_name": _display_name_for(solvent), "role": "solvent"}],
     }
     record = {
         "action": "prepare_solution",
@@ -912,6 +965,7 @@ def _emit_prepare_solution(step: Dict[str, Any], vessel: str) -> Tuple[Dict[str,
         "vessel": vessel,
         "ops": ops,
         "reagents": reagents,
+        "reagents_structured": structured,
     }
     return record, detail
 
@@ -928,8 +982,19 @@ def _emit_add_prepared_solution(step: Dict[str, Any], vessel: str) -> Dict[str, 
         "raw": step["raw"],
         "vessel": vessel,
         "rpm": DEFAULTS["stir_rpm"],
+        "with_stirring": True,
         "ops": ops,
         "reagents": [step["reagent"], step["solvent"]],
+        "reagents_structured": [
+            _solution_struct(
+                step["reagent"],
+                original=f"{step['concentration']} {step['conc_unit']} solution of {step['reagent']} in {step['solvent']}",
+                concentration=step["concentration"],
+                conc_unit=step["conc_unit"],
+                solvent=step["solvent"],
+                is_solution=True,
+            )
+        ],
     }
 
 
@@ -954,19 +1019,35 @@ def _emit_add_solvent(step: Dict[str, Any], vessel: str) -> Dict[str, Any]:
         "volume_units": step["volume_units"],
         "ops": ops,
         "reagents": [step["solvent"]],
+        "reagents_structured": [{
+            "name": step["solvent"],
+            "display_name": _display_name_for(step["solvent"]),
+            "original": f"{step['volume']} {step['volume_units']} of {step['solvent']}",
+            "amount": step["volume"],
+            "amount_unit": step["volume_units"],
+        }],
     }
 
 
 def _emit_add_reagent_solution(step: Dict[str, Any], vessel: str) -> Dict[str, Any]:
     token = f"{_slug_token(step['reagent'])}_{_slug_token(step['solvent'])}_solution"
     ops = [{"op": "pour", "reagent": token, "vessel": vessel}]
+    solvent_name = "water" if step["solvent"].lower() == "aqueous" else step["solvent"]
     return {
         "action": "add",
         "raw": step["raw"],
         "vessel": vessel,
-        "with_stirring": step.get("with_stirring", True),
+        "with_stirring": bool(step.get("with_stirring", True) or re.search(r"reaction mixture|under stirring|while stirring", step.get("raw", ""), re.I)),
         "ops": ops,
         "reagents": [f"{step['reagent']} aqueous solution" if step["solvent"].lower() == "aqueous" else f"{step['reagent']} {step['solvent']} solution"],
+        "reagents_structured": [
+            _solution_struct(
+                step["reagent"],
+                original=f"aqueous solution of {step['reagent']}" if step["solvent"].lower() == "aqueous" else f"{step['solvent']} solution of {step['reagent']}",
+                solvent=solvent_name,
+                is_solution=True,
+            )
+        ],
     }
 
 
@@ -1134,7 +1215,7 @@ def _emit_postprocess(step: Dict[str, Any], vessel: str) -> Dict[str, Any]:
         "reagents_structured": [
             {
                 "name": step["wash_solvent"],
-                "display_name": step["wash_solvent"].title() if step["wash_solvent"].islower() else step["wash_solvent"],
+                "display_name": _display_name_for(step["wash_solvent"]),
                 "original": f"{step['wash_volume']} {step.get('wash_volume_units') or 'mL'} of {step['wash_solvent']}",
                 "amount": step["wash_volume"],
                 "amount_unit": step.get("wash_volume_units") or "mL",
@@ -1162,6 +1243,7 @@ def _emit_redisperse(step: Dict[str, Any], vessel: str) -> Dict[str, Any]:
             },
         ],
         "reagents": [solvent],
+        "reagents_structured": [{"name": solvent, "display_name": _display_name_for(solvent), "original": solvent}],
     }
 
 
@@ -1660,6 +1742,17 @@ def _insert_required_placements(micro_plan: List[Dict[str, Any]]) -> Tuple[List[
     return out, repairs
 
 
+def _compress_micro_plan_for_gt_style(micro_plan: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    compressed: List[Dict[str, Any]] = []
+    for op in micro_plan:
+        verb = op.get('verb')
+        # Keep richer workup primitives in steps[].ops, but omit them from top-level micro_plan to match GT style.
+        if verb in {'decant_supernatant', 'resuspend'}:
+            continue
+        compressed.append(op)
+    return compressed
+
+
 def apply_postprocessing(doc: Dict[str, Any]) -> Dict[str, Any]:
     result = copy.deepcopy(doc)
     result.setdefault('_executor', {})
@@ -1738,6 +1831,7 @@ def apply_postprocessing(doc: Dict[str, Any]) -> Dict[str, Any]:
         if 'device' in op:
             op['device'] = _canonicalize_device_name(op.get('device'))
 
+    micro_plan = _compress_micro_plan_for_gt_style(micro_plan)
     micro_plan = _dedupe_micro_ops(micro_plan)
     _assign_unique_action_step_indices(micro_plan)
     result['micro_plan'] = micro_plan
