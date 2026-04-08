@@ -35,6 +35,11 @@ NON_PROC_HEAD_RX = re.compile(
     re.I,
 )
 
+NON_PROCEDURE_STEP_RX = re.compile(
+    r"^\s*(?:hardware(?:\s*&\s*glassware)?|materials?|reagents?|equipment|apparatus|supplies|chemicals?|glassware)\s*:\s*",
+    re.I,
+)
+
 _UNIT_CANON = {
     "l": "L",
     "L": "L",
@@ -457,11 +462,12 @@ def extract_steps(markdown_text: str) -> List[str]:
         steps.append(" ".join(buf).strip())
 
     if steps:
-        return [strip_tags(s) for s in steps if s.strip()]
+        cleaned_steps = [strip_tags(s) for s in steps if s.strip()]
+        return [s for s in cleaned_steps if not _is_non_procedure_step_text(s)]
 
     if markdown_text.strip():
         cleaned = strip_tags(markdown_text.strip())
-        if cleaned:
+        if cleaned and not _is_non_procedure_step_text(cleaned):
             return [cleaned]
 
     return []
@@ -495,6 +501,19 @@ def _clean_solvent_tail(solvent: str) -> str:
     solvent = strip_tags((solvent or "").strip().rstrip(",."))
     solvent = solvent.split(" in ")[0].strip()
     return solvent
+
+
+def _normalize_solvent_name(solvent: Optional[str]) -> Optional[str]:
+    if solvent is None:
+        return None
+    s = _clean_solvent_tail(solvent)
+    s = re.sub(r"\b(?:for|to)\b.+$", "", s, flags=re.I).strip().rstrip(",.")
+    return s or None
+
+
+def _is_non_procedure_step_text(text: str) -> bool:
+    s = strip_tags(_clean_unicode(text or ""))
+    return bool(NON_PROCEDURE_STEP_RX.match(s))
 
 
 def _slug_token(s: str) -> str:
@@ -679,7 +698,7 @@ def detect_redisperse(line: str) -> Optional[Dict[str, Any]]:
     if not re.search(r"\b(disperse|redisperse)\b", s, re.I):
         return None
     m = re.search(r"\bin\s+(?P<solvent>[^,.;]+)", s, re.I)
-    solvent = _clean_solvent_tail(m.group("solvent")) if m else None
+    solvent = _normalize_solvent_name(m.group("solvent")) if m else None
     return {"action": "redisperse", "solvent": solvent}
 
 
@@ -845,10 +864,13 @@ def semantic_parse(text: str, vessels: VesselRegistry) -> Tuple[List[Dict[str, A
     context: Dict[str, Any] = {"prepared_tokens": {}}
 
     for step in steps:
+        if _is_non_procedure_step_text(step):
+            continue
         parsed = semantic_parse_step(step)
         if parsed.get("action") == "composite":
             for part in parsed["parts"]:
-                records.append(part)
+                if not _is_non_procedure_step_text(part.get("raw", "")):
+                    records.append(part)
             continue
         records.append(parsed)
 
@@ -1124,7 +1146,7 @@ def _emit_postprocess(step: Dict[str, Any], vessel: str) -> Dict[str, Any]:
 
 def _emit_redisperse(step: Dict[str, Any], vessel: str) -> Dict[str, Any]:
     redisperse_vessel = f"{vessel}_tube"
-    solvent = step.get("solvent") or "solvent"
+    solvent = _normalize_solvent_name(step.get("solvent")) or "solvent"
     return {
         "action": "redisperse",
         "raw": step["raw"],
@@ -1513,7 +1535,7 @@ def _infer_micro_from_raw(steps: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
                 inferred.append({'verb': 'wait', 'minutes': minutes, 'source_step_index': source_step_index})
 
         # Stir-only instructions with duration
-        if re.search(r"\bstir\b", s, re.I) and not re.search(r"\b(heat|oven|dry)\b", s, re.I):
+        if action not in {'stir', 'add_solvent'} and re.search(r"\bstir\b", s, re.I) and not re.search(r"\b(heat|oven|dry)\b", s, re.I):
             minutes = find_minutes(s)
             temp = find_temp_c(s)
             if temp is not None:
@@ -1583,6 +1605,34 @@ def _infer_micro_from_raw(steps: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
             if minutes and not any(op.get('source_step_index') == source_step_index and op.get('verb') == 'wait' for op in inferred):
                 inferred.append({'verb': 'wait', 'minutes': minutes, 'source_step_index': source_step_index})
     return inferred
+
+
+
+def _dedupe_micro_ops(micro_plan: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    out: List[Dict[str, Any]] = []
+    seen = set()
+    for op in micro_plan:
+        key = (
+            op.get('source_step_index'),
+            op.get('verb'),
+            op.get('device'),
+            op.get('param'),
+            op.get('value'),
+            op.get('minutes'),
+            op.get('vessel'),
+            op.get('tube'),
+            op.get('reagent'),
+            op.get('from'),
+            op.get('to'),
+            op.get('volume'),
+            op.get('volume_units'),
+            op.get('wash_cycle'),
+        )
+        if key in seen:
+            continue
+        seen.add(key)
+        out.append(op)
+    return out
 
 
 def _insert_required_placements(micro_plan: List[Dict[str, Any]]) -> Tuple[List[Dict[str, Any]], List[str]]:
@@ -1688,6 +1738,7 @@ def apply_postprocessing(doc: Dict[str, Any]) -> Dict[str, Any]:
         if 'device' in op:
             op['device'] = _canonicalize_device_name(op.get('device'))
 
+    micro_plan = _dedupe_micro_ops(micro_plan)
     _assign_unique_action_step_indices(micro_plan)
     result['micro_plan'] = micro_plan
 
@@ -1735,7 +1786,15 @@ def apply_postprocessing(doc: Dict[str, Any]) -> Dict[str, Any]:
 
     _assign_unique_action_step_indices(micro_plan_min)
     result['micro_plan_min'] = micro_plan_min
-    result['timing_delays'] = timing_delays
+    deduped_timing: List[Dict[str, Any]] = []
+    seen_timing = set()
+    for delay in timing_delays:
+        key = (delay.get('verb'), delay.get('minutes'), delay.get('step_index'))
+        if key in seen_timing:
+            continue
+        seen_timing.add(key)
+        deduped_timing.append(delay)
+    result['timing_delays'] = deduped_timing
     result['_executor']['repairs'].extend(repairs)
     return result
 
