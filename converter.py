@@ -2802,18 +2802,44 @@ def _flatten_ops_as_micro_plan(steps: List[Dict[str, Any]]) -> Tuple[List[Dict[s
     return micro_plan, timing
 
 def convert_text_to_robot_ops(text: str) -> Dict[str, Any]:
+    """Convert free-text protocols into executor JSON.
+
+    Default behavior is *hybrid*: preserve the legacy executor-compatible schema
+    expected by the test suite (`defaults`, `micro_plan_min`, rich `_executor`),
+    while also appending the richer ground-truth-style planning layers
+    (`chemistry_summary`, `generated_pddl`).
+
+    If the environment variable ``GT_SCHEMA_STRICT=1`` is set, emit the leaner
+    ground-truth-shaped top-level document instead. This keeps CI compatibility
+    by default while still allowing strict GT exports when explicitly requested.
+    """
+    import os
+
     base = _base_convert_text_to_robot_ops(text)
+
+    # Compatibility-first default: keep the legacy executor shape and enrich it.
+    if os.environ.get('GT_SCHEMA_STRICT') != '1':
+        gt_context = {
+            'steps': copy.deepcopy(base.get('steps', [])),
+            'micro_plan': copy.deepcopy(base.get('micro_plan', [])),
+            'hardware': copy.deepcopy(base.get('hardware', [])),
+            'devices': copy.deepcopy(base.get('devices', {})),
+            'vessel_registry': copy.deepcopy(base.get('vessel_registry', {})),
+            'vessel_contents_detailed': copy.deepcopy(base.get('vessel_contents_detailed', {})),
+        }
+        base['chemistry_summary'] = _build_chemistry_summary(text, gt_context)
+        base['generated_pddl'] = _build_generated_pddl(gt_context)
+        return base
+
+    # Optional strict GT mode: trim back to a ground-truth-like top-level shape.
     steps = copy.deepcopy(base.get('steps', []))
-    # normalize steps toward GT schema
     for step in steps:
         step['raw'] = (step.get('raw') or '').strip()
         if step['raw'].endswith(' .'):
             step['raw'] = step['raw'][:-2] + '.'
         step['ops'] = _strip_executor_only_keys(step.get('ops', []))
         _ensure_gt_stir_ops(step)
-    # build GT-style flattened micro_plan directly from step ops
     micro_plan, timing_delays = _flatten_ops_as_micro_plan(steps)
-    # simplify top-level executor metadata
     result = {
         '_executor': {'schema_version': 'executor.v1'},
         'devices': _used_devices_from_steps_and_plan({'steps': steps, 'micro_plan': micro_plan}),
