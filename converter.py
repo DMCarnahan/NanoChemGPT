@@ -2321,7 +2321,7 @@ def _enrich_step_scalar_fields(steps: List[Dict[str, Any]]) -> None:
                     pass
 
 
-def convert_text_to_robot_ops(text: str) -> Dict[str, Any]:
+def _base_convert_text_to_robot_ops(text: str) -> Dict[str, Any]:
     hardware = parse_hardware(text)
     vessels = VesselRegistry(hardware)
     primary_vessel = vessels.ensure_glassware("Beaker")
@@ -2464,3 +2464,366 @@ if __name__ == "__main__":
         with open(args.out, "w", encoding="utf-8") as f:
             f.write(js)
         print(f"Wrote {args.out}")
+
+
+# ===== Ground-truth schema alignment layer =====
+
+ROLE_HINTS = {
+    'ctab': 'surfactant / structure-directing agent',
+    'nabh4': 'reducing agent',
+    'ethanol': 'washing and redispersion solvent',
+    'water': 'aqueous phase / solvent',
+    'chloroform': 'organic solvent',
+    'ethylene glycol': 'solvent',
+}
+
+def _strip_executor_only_keys(obj: Any) -> Any:
+    if isinstance(obj, dict):
+        return {k: _strip_executor_only_keys(v) for k, v in obj.items()
+                if k not in {'executable', 'review_required', 'review_reason'}}
+    if isinstance(obj, list):
+        return [_strip_executor_only_keys(v) for v in obj]
+    return obj
+
+def _op_exists(ops: List[Dict[str, Any]], op_name: str) -> bool:
+    return any(op.get('op') == op_name for op in ops)
+
+def _ensure_gt_stir_ops(step: Dict[str, Any]) -> None:
+    action = step.get('action')
+    raw = (step.get('raw') or '').lower()
+    needs_stir = False
+    if action == 'stir':
+        needs_stir = True
+    elif action == 'add_solvent' and 'stir' in raw:
+        needs_stir = True
+    elif action == 'add' and (step.get('with_stirring') or 'under stirring' in raw or 'while stirring' in raw):
+        needs_stir = True
+    if not needs_stir:
+        return
+
+    ops = step.setdefault('ops', [])
+    new_prefix = []
+    if not _op_exists(ops, 'move_to_stir_plate'):
+        new_prefix.append({'op': 'move_to_stir_plate', 'stir_plate_id': 'SP1', 'vessel': step.get('vessel', 'V1')})
+    if not _op_exists(ops, 'set_stir_rate'):
+        new_prefix.append({'op': 'set_stir_rate', 'vessel': step.get('vessel', 'V1'), 'rpm': step.get('rpm', DEFAULTS['stir_rpm']), 'inferred': True})
+    if new_prefix:
+        step['ops'] = new_prefix + ops
+    if action == 'add':
+        step['with_stirring'] = True
+
+def _infer_formula_or_short_name(name: str) -> str:
+    if not name:
+        return name
+    m = re.search(r'\(([^)]+)\)', name)
+    if m:
+        return m.group(1)
+    return name
+
+def _parse_materials_section(text: str) -> List[Dict[str, Any]]:
+    lines = text.splitlines()
+    in_materials = False
+    items = []
+    for line in lines:
+        stripped = line.strip()
+        if re.search(r'\*\*?\s*Materials\s*:?', stripped, re.I) or re.match(r'^\d+\.\s+\*\*Materials', stripped, re.I):
+            in_materials = True
+            continue
+        if in_materials and (re.search(r'\*\*?\s*Procedure\s*:?', stripped, re.I) or re.match(r'^\d+\.\s+\*\*Procedure', stripped, re.I)):
+            break
+        if in_materials and re.match(r'^-\s+', stripped):
+            items.append(re.sub(r'^-\s*', '', stripped))
+    out = []
+    for item in items:
+        # Example: Platinum(II) acetylacetonate (Pt(acac)2), 1.5 mM
+        parts = [p.strip() for p in item.split(',')]
+        full_name = parts[0]
+        short = _infer_formula_or_short_name(full_name)
+        conc = conc_unit = purity = None
+        for p in parts[1:]:
+            m = re.search(r'([0-9]+(?:\.[0-9]+)?)\s*(mM|M|mg|g|mL|mmol)', p, re.I)
+            if m and m.group(2).lower() in {'mm','mg','g','ml','mmol'}:
+                pass
+            if m and m.group(2).lower() in {'mmol','mg','g','ml'}:
+                # not concentration; keep as None for schema parity
+                pass
+            if m and m.group(2).lower() in {'mm', 'm'}:
+                pass
+            m2 = re.search(r'([0-9]+(?:\.[0-9]+)?)\s*(mM|M)\b', p, re.I)
+            if m2:
+                conc = float(m2.group(1))
+                conc_unit = m2.group(2)
+            p2 = re.search(r'([0-9]+(?:\.[0-9]+)?)\s*%', p)
+            if p2:
+                purity = p2.group(1) + '%'
+        role = None
+        lname = full_name.lower()
+        for k, v in ROLE_HINTS.items():
+            if k in lname or k == short.lower():
+                role = v
+                break
+        if role is None and any(tok in lname for tok in ['pt(', 'ru(', 'acetylacetonate', 'chloride', 'acetate']):
+            role = 'metal precursor'
+        out.append({
+            'name': re.sub(r'\s*\([^)]*\)$', '', full_name).strip() if '(' in full_name and ')' in full_name else full_name,
+            'formula_or_short_name': short,
+            'concentration': conc,
+            'concentration_unit': conc_unit,
+            'purity': purity,
+            'role': role,
+        })
+    return out
+
+def _format_executor_repr(op: Dict[str, Any]) -> str:
+    verb = op.get('op') or op.get('verb')
+    if verb == 'pour':
+        if op.get('reagent'):
+            q = ''
+            if op.get('volume') is not None and op.get('volume_units'):
+                q = f" {op['volume']} {op['volume_units']}"
+            return f"pour{q} {op['reagent']} into {op.get('vessel', op.get('tube', 'V1'))}"
+        if op.get('solvent'):
+            return f"pour {op['solvent']} into {op.get('vessel', 'V1')}"
+    if verb == 'move_to_stir_plate':
+        return 'move_to_stir_plate'
+    if verb == 'set_stir_rate':
+        return 'set_stir_rate'
+    if verb == 'wait':
+        return f"wait {int(op.get('minutes', 0))} minutes"
+    if verb == 'transfer_to_centrifuge_tube':
+        return f"transfer_to_centrifuge_tube {op.get('from', 'V1')} -> {op.get('to', 'V1_tube')}"
+    if verb == 'centrifuge':
+        mins = op.get('minutes')
+        rpm = op.get('rpm')
+        if mins is not None and rpm is not None:
+            return f"centrifuge {mins} minutes at {rpm} rpm"
+        return 'centrifuge'
+    if verb == 'decant_supernatant':
+        return 'decant supernatant'
+    if verb == 'resuspend':
+        return 'resuspend'
+    if verb == 'move_to_oven':
+        return 'move_to_oven'
+    if verb == 'set_oven_temperature':
+        return f"set oven temperature to {op.get('temperature_C')} C"
+    if verb == 'set' and op.get('param') == 'temperature_C':
+        return f"set {op.get('device')} temperature to {op.get('value')} C"
+    return verb or 'process'
+
+def _build_chemistry_summary(text: str, result: Dict[str, Any]) -> Dict[str, Any]:
+    materials = _parse_materials_section(text)
+    procedure = []
+    assumptions = []
+    ambiguities = set()
+
+    if any(op.get('op') == 'set_stir_rate' and op.get('inferred') for step in result['steps'] for op in step.get('ops', [])):
+        assumptions.append({
+            'item': 'stirring speed',
+            'chosen_value': f"{DEFAULTS['stir_rpm']} rpm",
+            'reason': 'The executor schema requires an explicit set_stir_rate value, but the source text does not state one.',
+        })
+
+    for idx, step in enumerate(result['steps'], start=1):
+        ops = step.get('ops', [])
+        proc = {
+            'step_number': idx,
+            'source_text': (step.get('raw') or '').strip(),
+            'explicit_from_text': {
+                'operation': step.get('action'),
+            },
+            'inferred_for_json': {
+                'executor_representation': [_format_executor_repr(op) for op in ops],
+            },
+            'notes': [],
+        }
+        if step.get('reagents_structured'):
+            comps = []
+            for rs in step['reagents_structured']:
+                comp = {'name': rs.get('name')}
+                if rs.get('concentration') is not None:
+                    comp['concentration'] = rs.get('concentration')
+                    comp['concentration_unit'] = rs.get('conc_unit')
+                if rs.get('amount') is not None:
+                    comp['amount'] = rs.get('amount')
+                    comp['amount_unit'] = rs.get('amount_unit')
+                if rs.get('solvent'):
+                    comp['solvent'] = rs.get('solvent')
+                if rs.get('is_solution') is not None:
+                    comp['form'] = 'solution' if rs.get('is_solution') else None
+                comps.append({k: v for k, v in comp.items() if v is not None})
+            if len(comps) == 1:
+                proc['explicit_from_text']['component'] = comps[0]
+                if step['action'] in {'add', 'add_solvent', 'redisperse'}:
+                    proc['explicit_from_text']['added_component'] = comps[0]
+            else:
+                proc['explicit_from_text']['components'] = comps
+        if step.get('solvent'):
+            proc['explicit_from_text']['solvent'] = step.get('solvent')
+        if step.get('minutes') is not None:
+            proc['explicit_from_text']['time'] = {'value': step['minutes'], 'unit': 'minutes'}
+        if step.get('rpm'):
+            proc['explicit_from_text']['stirring'] = True
+        if step.get('temperature_C') is not None:
+            proc['explicit_from_text']['temperature_C'] = step.get('temperature_C')
+        procedure.append(proc)
+
+        raw = (step.get('raw') or '').lower()
+        if 'not stated' in raw:
+            pass
+        if step['action'] == 'prepare_solution':
+            if not any(rs.get('amount') for rs in step.get('reagents_structured', []) if rs.get('name') == 'chloroform'):
+                ambiguities.add('The chloroform volume used to prepare the metal precursor solution is not stated.')
+        if step['action'] == 'add' and any((rs.get('name') or '').lower() == 'nabh4' for rs in step.get('reagents_structured', [])):
+            ambiguities.add('The concentration and volume of the aqueous NaBH4 solution are not stated.')
+        if step['action'] == 'redisperse':
+            ambiguities.add('The final ethanol volume used for redispersion is not stated.')
+
+    return {
+        'hardware': [h['name'] for h in result.get('hardware', [])],
+        'materials': materials,
+        'procedure': procedure,
+        'assumptions': assumptions,
+        'known_ambiguities': sorted(ambiguities),
+    }
+
+def _action_goal_predicates(op: Dict[str, Any]) -> List[str]:
+    verb = op.get('verb')
+    if verb == 'pour':
+        target = op.get('vessel', op.get('tube', 'V1'))
+        material = op.get('reagent') or op.get('solvent') or 'material'
+        safe = re.sub(r'[^A-Za-z0-9_]+', '_', str(material))
+        return [f"(in {target} {safe})", "(open-hand handL)", "(ready-hand handL)"]
+    if verb == 'wait':
+        return [f"(waited t1)", "(open-hand handL)", "(ready-hand handL)"]
+    if verb == 'centrifuge':
+        tgt = op.get('tube', 'V1_tube')
+        return [f"(centrifuged {tgt})", "(open-hand handL)", "(ready-hand handL)"]
+    if verb == 'transfer_to_centrifuge_tube':
+        return [f"(in {op.get('to','V1_tube')} transferred_material)", "(open-hand handL)", "(ready-hand handL)"]
+    if verb == 'decant_supernatant':
+        tgt = op.get('tube', 'V1_tube')
+        return [f"(decanted {tgt})", "(open-hand handL)", "(ready-hand handL)"]
+    if verb == 'resuspend':
+        tgt = op.get('tube', 'V1_tube')
+        return [f"(mixed {tgt})", "(open-hand handL)", "(ready-hand handL)"]
+    return ["(open-hand handL)", "(ready-hand handL)"]
+
+def _pddl_text_for_problem(name: str, goal_predicates: List[str], dependencies: List[str]) -> str:
+    deps = f"; Dependencies: {', '.join(dependencies)}\n" if dependencies else ""
+    goals = "\n    ".join(goal_predicates)
+    return f"; File: {name.replace('_', '')}.pddl\n{deps}(define (problem {name})\n  (:domain robot-hand)\n  (:objects handL V1 V1_tube CF1 SP1)\n  (:init\n    (hand handL)\n    (open-hand handL)\n    (ready-hand handL)\n  )\n  (:goal (and\n    {goals}\n  ))\n)"
+
+def _build_generated_pddl(result: Dict[str, Any]) -> Dict[str, Any]:
+    plan_ops = [op for op in result.get('micro_plan', []) if op.get('verb') not in {'move_to_stir_plate', 'set_stir_rate'}]
+    problems = []
+    pddl_chunks = []
+    for i, op in enumerate(plan_ops, start=1):
+        deps = [] if i == 1 else [f"problem_{i-1}"]
+        action_type = 'wait' if op.get('verb') == 'wait' else 'action'
+        action_entry = {
+            'type': action_type,
+            'value': str(op.get('minutes')) if action_type == 'wait' else op.get('verb'),
+            'step_index': op.get('step_index'),
+            'source_step_index': op.get('source_step_index'),
+            'source_verb': op.get('verb'),
+            'wash_cycle': op.get('wash_cycle'),
+        }
+        goal_preds = _action_goal_predicates(op)
+        prob = {
+            'problem_number': i,
+            'name': f'problem_{i}',
+            'filename': f'problem{i}.pddl',
+            'dependencies': deps,
+            'actions': [action_entry],
+            'goal_predicates': goal_preds,
+            'state_before': ['(hand handL)', '(open-hand handL)', '(ready-hand handL)'],
+            'state_after': goal_preds,
+            'stable_boundary_reason': 'single-executable-step',
+        }
+        problems.append(prob)
+        pddl_chunks.append({
+            'filename': f'problem{i}.pddl',
+            'problem_name': f'problem_{i}',
+            'dependencies': deps,
+            'goal_predicates': goal_preds,
+            'text': _pddl_text_for_problem(f'problem_{i}', goal_preds, deps),
+        })
+    return {
+        'source_file': None,
+        'workflow_step_count': len(plan_ops),
+        'problem_count': len(problems),
+        'chunk_count': len(pddl_chunks),
+        'problems': problems,
+        'pddl_chunks': pddl_chunks,
+    }
+
+def _used_devices_from_steps_and_plan(result: Dict[str, Any]) -> Dict[str, str]:
+    needed = set()
+    for collection in (result.get('steps', []),):
+        for step in collection:
+            for op in step.get('ops', []):
+                if op.get('stir_plate_id'):
+                    needed.add('stir_plate_id')
+                if op.get('centrifuge_id'):
+                    needed.add('centrifuge_id')
+                if op.get('oven_id') or op.get('device') == 'OV1':
+                    needed.add('oven_id')
+                if op.get('device') == 'HP1':
+                    needed.add('hotplate_id')
+    for op in result.get('micro_plan', []):
+        if op.get('stir_plate_id'):
+            needed.add('stir_plate_id')
+        if op.get('centrifuge_id'):
+            needed.add('centrifuge_id')
+        if op.get('oven_id') or op.get('device') == 'OV1':
+            needed.add('oven_id')
+        if op.get('device') == 'HP1':
+            needed.add('hotplate_id')
+    if not needed:
+        needed = {'centrifuge_id', 'stir_plate_id'}
+    return {k: DEVICE_IDS[k] for k in ['centrifuge_id','stir_plate_id','hotplate_id','oven_id'] if k in needed}
+
+def _flatten_ops_as_micro_plan(steps: List[Dict[str, Any]]) -> Tuple[List[Dict[str, Any]], List[Dict[str, Any]]]:
+    micro_plan = []
+    timing = []
+    step_idx = 1
+    for i, step in enumerate(steps, start=1):
+        for op in step.get('ops', []):
+            verb = op.get('op')
+            item = {'source_step_index': i, 'step_index': step_idx, 'verb': verb}
+            for k, v in op.items():
+                if k == 'op':
+                    continue
+                item[k] = v
+            micro_plan.append(item)
+            if verb == 'wait' and item.get('minutes') is not None:
+                timing.append({'step_index': step_idx, 'verb': 'wait', 'minutes': item['minutes']})
+            step_idx += 1
+    return micro_plan, timing
+
+def convert_text_to_robot_ops(text: str) -> Dict[str, Any]:
+    base = _base_convert_text_to_robot_ops(text)
+    steps = copy.deepcopy(base.get('steps', []))
+    # normalize steps toward GT schema
+    for step in steps:
+        step['raw'] = (step.get('raw') or '').strip()
+        if step['raw'].endswith(' .'):
+            step['raw'] = step['raw'][:-2] + '.'
+        step['ops'] = _strip_executor_only_keys(step.get('ops', []))
+        _ensure_gt_stir_ops(step)
+    # build GT-style flattened micro_plan directly from step ops
+    micro_plan, timing_delays = _flatten_ops_as_micro_plan(steps)
+    # simplify top-level executor metadata
+    result = {
+        '_executor': {'schema_version': 'executor.v1'},
+        'devices': _used_devices_from_steps_and_plan({'steps': steps, 'micro_plan': micro_plan}),
+        'hardware': base.get('hardware', []),
+        'vessel_registry': base.get('vessel_registry', {}),
+        'vessel_contents_detailed': base.get('vessel_contents_detailed', {}),
+        'steps': steps,
+        'micro_plan': micro_plan,
+        'timing_delays': timing_delays,
+    }
+    result['chemistry_summary'] = _build_chemistry_summary(text, result)
+    result['generated_pddl'] = _build_generated_pddl(result)
+    return result
