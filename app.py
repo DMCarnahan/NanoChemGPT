@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 """Main Flask application for NanoChemGPT
-Handles API endpoints, configuration, and integration with search, database, and LLM services.
+Handles API endpoints, configuration, and integration with search database, and LLM services.
 """
 from flask import Flask, request, jsonify, abort, render_template, send_file, g
 import os
