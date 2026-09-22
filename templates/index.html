@@ -281,7 +281,32 @@
   <script>
     document.getElementById('year').textContent = new Date().getFullYear();
     const hs = document.getElementById('healthStatus');
-    if (hs) setTimeout(()=>{ hs.querySelector('.status-dot').style.background = 'var(--ok)'; hs.querySelector('.status-txt').textContent = 'healthy'; }, 600);
+    if (hs) {
+      (async () => {
+        const dot = hs.querySelector('.status-dot');
+        const label = hs.querySelector('.status-txt');
+        try {
+          const path = window.location.pathname || '';
+          const base = (path === '/app' || path.startsWith('/app/')) ? '/app' : '';
+          const response = await fetch(`${base}/healthz`, {
+            cache: 'no-store',
+            headers: { Accept: 'application/json' }
+          });
+          const health = await response.json();
+          if (!response.ok || health.ok !== true) throw new Error('health check failed');
+          const ready = health.ready === true;
+          dot.style.background = ready ? 'var(--ok)' : '#d97706';
+          label.textContent = ready ? 'healthy' : 'degraded';
+          hs.title = ready
+            ? 'OpenAI and retriever are ready'
+            : 'One or more answer dependencies are unavailable';
+        } catch (error) {
+          dot.style.background = 'var(--danger, #dc2626)';
+          label.textContent = 'unreachable';
+          hs.title = 'Health check could not be reached';
+        }
+      })();
+    }
   </script>
   <script src="{{ url_for('static', filename='app.js') }}" defer></script>
   <script src="{{ url_for('static', filename='refs-toggle.js') }}"></script>
