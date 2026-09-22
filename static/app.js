@@ -136,7 +136,8 @@ document.addEventListener('DOMContentLoaded', () => {
       const payload = {
         question,
         mode,
-        attachments: pendingAttachmentIds
+        attachments: pendingAttachmentIds,
+        allow_fetch: false
       };
       payload.format = 'protocol-grounded';
 
