@@ -82,6 +82,42 @@ def reload_caches() -> bool:
 # ------------------------------ Utils ----------------------------------------
 
 
+def _load_rows_sidecar(idx: Path) -> List[dict]:
+    """Load row text and metadata stored alongside an NPZ/PKL index."""
+    rows_path = idx / "rows.jsonl"
+    if not rows_path.is_file():
+        return []
+
+    rows: List[dict] = []
+    with rows_path.open("r", encoding="utf-8", errors="replace") as handle:
+        for line_number, line in enumerate(handle, 1):
+            if not line.strip():
+                continue
+            try:
+                row = json.loads(line)
+            except json.JSONDecodeError as exc:
+                logger.warning(
+                    "Skipping malformed %s line %d: %s",
+                    rows_path,
+                    line_number,
+                    exc,
+                )
+                continue
+            if isinstance(row, dict):
+                rows.append(row)
+    return rows
+
+
+def _attach_rows_sidecar(bundle: dict, idx: Path) -> dict:
+    """Add rows.jsonl when the serialized matrix omits texts and metadata."""
+    if bundle.get("rows"):
+        return bundle
+    rows = _load_rows_sidecar(idx)
+    if rows:
+        bundle["rows"] = rows
+    return bundle
+
+
 def _ensure_texts_metas(bundle: dict) -> dict:
     X = bundle.get("matrix")
     n = int(getattr(X, "shape", (0, 0))[0]) if X is not None else 0
@@ -229,7 +265,7 @@ def _load_tfidf_for(idx: Path, force: bool = False) -> Dict[str, Any]:
             except Exception as _e:
                 print(f"[retriever] shape check warn: {_e}")
 
-            _BUNDLES[idx] = _ensure_texts_metas(bundle)
+            _BUNDLES[idx] = _ensure_texts_metas(_attach_rows_sidecar(bundle, idx))
             return _BUNDLES[idx]
 
     # --- PKL path (unless disabled) ---
@@ -278,7 +314,7 @@ def _load_tfidf_for(idx: Path, force: bool = False) -> Dict[str, Any]:
                         )
                 except Exception as _e:
                     print(f"[retriever] shape check warn: {_e}")
-                _BUNDLES[idx] = _ensure_texts_metas(bundle)
+                _BUNDLES[idx] = _ensure_texts_metas(_attach_rows_sidecar(bundle, idx))
                 return _BUNDLES[idx]
             # else fall through
 
@@ -300,7 +336,7 @@ def _load_tfidf_for(idx: Path, force: bool = False) -> Dict[str, Any]:
                         )
                 except Exception as _e:
                     print(f"[retriever] shape check warn: {_e}")
-                _BUNDLES[idx] = _ensure_texts_metas(bundle)
+                _BUNDLES[idx] = _ensure_texts_metas(_attach_rows_sidecar(bundle, idx))
                 return _BUNDLES[idx]
 
     # --- NPZ second chance (if not preferred initially) ---
@@ -332,7 +368,7 @@ def _load_tfidf_for(idx: Path, force: bool = False) -> Dict[str, Any]:
             raise RuntimeError(f"Found {npz} but no vectorizer.joblib or vocab.json")
 
         bundle = {"kind": "matrix", "matrix": X, "vectorizer": vectorizer}
-        _BUNDLES[idx] = _ensure_texts_metas(bundle)
+        _BUNDLES[idx] = _ensure_texts_metas(_attach_rows_sidecar(bundle, idx))
         return _BUNDLES[idx]
 
     raise RuntimeError(
