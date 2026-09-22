@@ -1,48 +1,5 @@
 from __future__ import annotations
 
-"""Main Flask application for NanoChemGPT
-Handles API endpoints, configuration, and integration with search database, and LLM services.
-"""
-from flask import Flask, request, jsonify, abort, render_template, send_file, g
-import os
-from pathlib import Path
-
-app = Flask(__name__)
-
-
-# Composite health endpoint ----------------------------------------------------
-@app.get("/healthz")
-def healthz():
-    from app_utils.constants import (
-        ATTACH_DIR,
-        UPLOADS_DIR,
-        HARVEST_OUT_DIR,
-        INDEX_DIR,
-        ENABLE_AUTO_HARVEST,
-    )
-
-    bundle = Path(HARVEST_OUT_DIR) / "bundle.jsonl"
-    tfidf_ok = any((Path(INDEX_DIR) / n).exists() for n in ("tfidf.pkl", "tfidf.npz"))
-    faiss_idx = Path(INDEX_DIR) / "index.faiss"
-    faiss_ok = faiss_idx.exists() and faiss_idx.stat().st_size > 0
-    openai_key = bool(os.getenv("OPENAI_API_KEY"))
-    return {
-        "ok": True,
-        "paths": {
-            "attach": str(ATTACH_DIR),
-            "uploads": str(UPLOADS_DIR),
-            "harvest": str(HARVEST_OUT_DIR),
-            "index": str(INDEX_DIR),
-        },
-        "bundle_present": bundle.exists() and bundle.stat().st_size > 0,
-        "tfidf_index": tfidf_ok,
-        "faiss_index": faiss_ok,
-        "auto_harvest": ENABLE_AUTO_HARVEST,
-        "openai_configured": openai_key,
-        "version": os.getenv("GIT_SHA", "unknown"),
-    }
-
-
 """
 app.py
 -----
@@ -296,6 +253,14 @@ except Exception:
             return default if v == "" else float(v)
         except Exception:
             return default
+
+
+def _env_bool(name: str, default: bool = False) -> bool:
+    """Read a boolean environment flag at request time."""
+    raw = os.getenv(name)
+    if raw is None or not raw.strip():
+        return default
+    return raw.strip().lower() in {"1", "true", "yes", "y", "on"}
 
 
 def _best_chunks_from_text(
@@ -1161,7 +1126,7 @@ def ask():
       • Builds a numbered REFERENCES list (web + KB), asks the LLM to cite with [n].
       • Extracts **used** citation indexes and returns only those in an ACS-style block.
       • Computes usage markers via _extract_used_markers.
-      • Judges sufficiency and, if thin, optionally harvests more data, reindexes, reloads retriever, and retries once.
+      • Judges sufficiency and, if thin, optionally queues background mining without delaying the answer.
     """
 
     # ---------- request payload ----------
@@ -1171,6 +1136,7 @@ def ask():
     if not question:
         return jsonify({"ok": False, "error": "Missing 'question'"}), 400
     enqueued = False
+    mining_job_id = None
     MIN_HITS = _env_int("JUDGE_MIN_HITS", 1)
     MIN_SCORE = _env_float("JUDGE_MIN_SCORE", 0.15)
     MIN_CHARS = _env_int("JUDGE_MIN_CHARS", 64)
@@ -1230,7 +1196,7 @@ def ask():
         mode = "reasoning" if intent in {"reasoning", "analysis"} else "protocol"
 
     want_inline = _pick_bool("want_inline", True)
-    allow_fetch = _pick_bool("allow_fetch", True)
+    allow_fetch = _pick_bool("allow_fetch", False)
     kb_k = _pick_int("kb_k", 5)
     web_k = _pick_int("web_k", 10)
 
@@ -1845,46 +1811,9 @@ def ask():
     except Exception as e:
         app.logger.warning(f"[/ask] retriever_search error: {e}")
         hits = []
-    # If evidence thin, optionally auto-harvest -> reindex -> reload -> retry once
+    # Keep request handling bounded: mining/index rebuilds must run out of band.
+    # The existing references list still accepts harvested refs from other paths.
     harvest_refs = []
-    # Auto-harvest can be expensive and relies on optional dependencies. Gate it behind an env var.
-    job_id_for_harvest = None
-    if allow_fetch and _needs_more(hits):
-        try:
-            # Create a job id so callers can poll progress
-            job_id_for_harvest = os.urandom(8).hex()
-            try:
-                _set_job(
-                    job_id_for_harvest,
-                    status="queued",
-                    progress=0,
-                    stage="queued_harvest",
-                    queries=[],
-                )
-            except Exception:
-                pass
-            harvest_refs = (
-                _harvest_reindex(_expand_queries(question), jid=job_id_for_harvest)
-                or []
-            )  # <— collect refs
-            hits = (
-                retriever_search(
-                    question,
-                    k=web_k,
-                    level=retriever_level,
-                    k_doc=k_doc,
-                    k_passage=k_passage,
-                    w_doc=w_doc,
-                    w_passage=w_passage,
-                )
-                or []
-            )
-        except Exception as e:
-            app.logger.warning(f"[/ask] auto-harvest failed: {e}")
-            if job_id_for_harvest:
-                _set_job(job_id_for_harvest, status="error", error=str(e))
-        else:
-            app.logger.info("[/ask] auto-harvest unnecessary or succeeded.")
 
     # A) Build web_refs from hit.meta with aggressive normalization (extract DOI from url/text if needed)
     def _hit_meta(h):
@@ -2092,8 +2021,6 @@ def ask():
             {"source": "attachment", "note": "verbatim"}
         ]  # or your normal refs shape
         resp = {"ok": True, "answer": answer, "rationale": rationale, "refs": refs}
-        if job_id_for_harvest:
-            resp["job_id"] = job_id_for_harvest
         return jsonify(resp)
 
     # ----------------- Compose CONTEXT -----------------
@@ -2269,15 +2196,28 @@ def ask():
                 "```reason\nOffline stub for testing.\n```"
             )
     else:
-        raw = (
-            client.chat.completions.create(
-                model="gpt-4o",
-                messages=[{"role": "user", "content": prompt}],
-                temperature=0.2,
+        try:
+            raw = (
+                client.chat.completions.create(
+                    model="gpt-4o",
+                    messages=[{"role": "user", "content": prompt}],
+                    temperature=0.2,
+                )
+                .choices[0]
+                .message.content
             )
-            .choices[0]
-            .message.content
-        )
+        except Exception as exc:
+            app.logger.exception("[/ask] OpenAI request failed")
+            return (
+                jsonify(
+                    {
+                        "ok": False,
+                        "error": "Language model request failed",
+                        "error_type": type(exc).__name__,
+                    }
+                ),
+                502,
+            )
 
     # Split answer/rationale and strip any in-answer references block
     if mode == "reasoning":
@@ -2625,12 +2565,40 @@ def ask():
 
     web_thin = _needs_more(hits)
 
-    # final sufficiency: any strong signal should allow skipping harvest/enqueue
+    # Background mining is opt-in and never runs in the request process.
     sufficient = judged_ok or kb_ok
-    if not sufficient or web_thin:
+    should_mine = not sufficient or web_thin
+    if (
+        should_mine
+        and allow_fetch
+        and _env_bool("ENABLE_AUTO_HARVEST", False)
+    ):
         try:
-            enqueue_text_mining_job(question)
-            enqueued = True
+            candidate_job_id = enqueue_text_mining_job(
+                question,
+                intent=intent,
+                reason="insufficient_evidence",
+                features={
+                    "web_thin": web_thin,
+                    "judged_ok": judged_ok,
+                    "kb_ok": kb_ok,
+                },
+            )
+            failed_prefixes = (
+                "job_disabled_",
+                "job_unknown_mode_",
+                "job_log_error_",
+                "job_redis_error_",
+            )
+            if candidate_job_id and not str(candidate_job_id).startswith(
+                failed_prefixes
+            ):
+                mining_job_id = str(candidate_job_id)
+                enqueued = True
+            else:
+                app.logger.info(
+                    "[/ask] background mining unavailable: %s", candidate_job_id
+                )
         except Exception as e:
             app.logger.warning(f"[/ask] enqueue_text_mining_job failed: {e}")
 
@@ -2673,6 +2641,8 @@ def ask():
         "question": question,
         "intent": intent,
         "mode": mode,
+        "mining_enqueued": enqueued,
+        "mining_job_id": mining_job_id,
         "answer": answer,
         "rationale": rationale,
         "markers": markers,
@@ -3002,7 +2972,61 @@ def upload_builtin():
 
 @app.get("/healthz")
 def healthz():
-    return jsonify(ok=True)
+    """Report liveness and the dependencies required to answer questions."""
+    indexes = {}
+    retriever_ready = False
+    retriever_error = None
+    try:
+        from retriever import retriever as retriever_runtime
+
+        for label, index_path in retriever_runtime._labels_and_paths():
+            index_path = Path(index_path)
+            matrix_present = any(
+                (index_path / name).is_file()
+                and (index_path / name).stat().st_size > 0
+                for name in ("tfidf.npz", "tfidf.pkl")
+            )
+            vectorizer_present = any(
+                (index_path / name).is_file()
+                and (index_path / name).stat().st_size > 0
+                for name in ("vectorizer.joblib", "tfidf.pkl")
+            )
+            rows_path = index_path / "rows.jsonl"
+            rows_present = rows_path.is_file() and rows_path.stat().st_size > 0
+            indexes[label] = {
+                "path": str(index_path),
+                "matrix_present": matrix_present,
+                "vectorizer_present": vectorizer_present,
+                "rows_present": rows_present,
+                "ready": matrix_present and vectorizer_present and rows_present,
+            }
+        retriever_ready = bool(indexes) and all(
+            item["ready"] for item in indexes.values()
+        )
+    except Exception as exc:
+        retriever_error = type(exc).__name__
+        app.logger.warning("[/healthz] retriever check failed: %s", exc)
+
+    openai_configured = bool(os.getenv("OPENAI_API_KEY"))
+    ready = openai_configured and retriever_ready
+    try:
+        bundle = Path(CONST_HARVEST_OUT_DIR) / "bundle.jsonl"
+        bundle_present = bundle.is_file() and bundle.stat().st_size > 0
+    except Exception:
+        bundle_present = False
+
+    return jsonify(
+        ok=True,
+        ready=ready,
+        openai_configured=openai_configured,
+        retriever_ready=retriever_ready,
+        retriever_error=retriever_error,
+        indexes=indexes,
+        auto_harvest=_env_bool("ENABLE_AUTO_HARVEST", False),
+        miner_mode=os.getenv("MINER_MODE", "disabled"),
+        bundle_present=bundle_present,
+        version=os.getenv("GIT_SHA", "unknown"),
+    )
 
 
 if __name__ == "__main__":
