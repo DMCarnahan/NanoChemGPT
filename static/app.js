@@ -120,15 +120,12 @@ document.addEventListener('DOMContentLoaded', () => {
   askBtn.disabled = true;
   askMsg.classList.remove('hidden');
   
-  // Debug logging for attachments
-  console.log('[ask] attachments ->', pendingAttachmentIds);
-  
   // Show attachment status to user
   if (askMsg) { 
     askMsg.textContent = `Using attachments: ${pendingAttachmentIds.join(', ') || '(none)'} - Asking…`; 
   }
   
-  spinner.style.display = 'block';
+  spinnerOverlay.style.display = 'flex';
 
   try {
       const headers = { 'Content-Type': 'application/json' };
@@ -144,35 +141,37 @@ document.addEventListener('DOMContentLoaded', () => {
       const res = await fetch(`${(window.BASE_PATH||'')}/ask`, {
         method: 'POST',
         headers,
-        body: JSON.stringify(Object.assign({}, payload, { attachments: pendingAttachmentIds }))
+        body: JSON.stringify(payload)
       });
 
       const raw = await res.text();
       let data;
       try { data = JSON.parse(raw); } catch { data = { answer: raw }; }
 
-      answerPre.textContent = data.answer ?? '(no answer)';
-      rationalePre.textContent = data.rationale ?? '';
-      renderRefsFromData(data);
       if (!res.ok) {
-        askMsg.textContent = `Error ${res.status}: ${data.error || raw}`;
+        const detail = [data.error_code, data.request_id && `request ${data.request_id}`]
+          .filter(Boolean)
+          .join('; ');
+        askMsg.textContent = `Error ${res.status}: ${data.error || raw}${detail ? ` (${detail})` : ''}`;
       } else if (data.answer && data.answer.toLowerCase().includes('error')) {
         askMsg.textContent = `Backend error: ${data.answer}`;
       } else {
+        answerPre.textContent = data.answer ?? '(no answer)';
+        rationalePre.textContent = data.rationale ?? '';
+        renderRefsFromData(data);
         askMsg.textContent = 'Done.';
+        // Keep attachments on failed requests so a retry uses the same evidence.
+        pendingAttachmentIds = [];
+        if (attachList) attachList.innerHTML = '';
+        if (attachInput) attachInput.value = '';
       }
-      
-      // Clear attachments after successful ask
-      pendingAttachmentIds = [];
-      if (attachList) attachList.innerHTML = '';
-      if (attachInput) attachInput.value = '';
       
     } catch (err) {
       console.error(err);
-      askMsg.textContent = `Error: ${err.message || err}`;
+      askMsg.textContent = `Network error: ${err.message || err}. Check the deployment and retry.`;
     } finally {
       askBtn.disabled = false;
-      spinner.style.display = 'none';
+      spinnerOverlay.style.display = 'none';
     }
   });
 
@@ -192,7 +191,7 @@ document.addEventListener('DOMContentLoaded', () => {
   try {
       const headers = { 'Content-Type': 'application/json' };
 
-      const res = await fetch('/parse', {
+      const res = await fetch(`${window.BASE_PATH || ''}/parse`, {
         method: 'POST',
         headers,
         body: JSON.stringify({ text })
@@ -483,7 +482,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // History button
   historyBtn?.addEventListener('click', async () => {
   try {
-      const res = await fetch('/api/history');
+      const res = await fetch(`${window.BASE_PATH || ''}/api/history`);
       if (!res.ok) {
         historyList.innerHTML = `<li>Error loading history: ${res.status}</li>`;
         return;
@@ -501,7 +500,7 @@ document.addEventListener('DOMContentLoaded', () => {
           const id = a.getAttribute('data-id');
           if (!id) return;
           try {
-            const res = await fetch(`/api/history/${id}`);
+            const res = await fetch(`${window.BASE_PATH || ''}/api/history/${id}`);
             if (!res.ok) {
               answerPre.textContent = `Error loading answer: ${res.status}`;
               rationalePre.textContent = '';
@@ -588,7 +587,7 @@ document.addEventListener('DOMContentLoaded', () => {
       // No CSRF token needed
       const headers = {};
 
-      const res = await fetch('/upload_builtin', {
+      const res = await fetch(`${window.BASE_PATH || ''}/upload_builtin`, {
         method: 'POST',
         headers,
         body: fd

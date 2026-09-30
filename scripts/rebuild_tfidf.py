@@ -1,16 +1,20 @@
 from __future__ import annotations
 
 import os
-import sys
 import subprocess
+import sys
 from pathlib import Path
-
 
 TFIDF_FILES = [
     "tfidf.pkl",
     "tfidf.npz",
     "vectorizer.joblib",
     "rows.jsonl",
+    "index_meta.json",
+    "tfidf.tmp.npz",
+    "vectorizer.tmp.joblib",
+    "rows.tmp.jsonl",
+    "index_meta.tmp.json",
 ]
 
 
@@ -51,14 +55,24 @@ def main() -> int:
         return 0
 
     # Inputs
-    harvest_dir = Path(os.getenv("HARVEST_OUT_DIR", "/data/harvester/out_auto")).resolve()
-    bundle_methods = Path(os.getenv("BUNDLE_PATH", harvest_dir / "bundle_with_methods.jsonl")).resolve()
+    harvest_dir = Path(
+        os.getenv("HARVEST_OUT_DIR", "/data/harvester/out_auto")
+    ).resolve()
+    bundle_methods = Path(
+        os.getenv("BUNDLE_PATH", harvest_dir / "bundle_with_methods.jsonl")
+    ).resolve()
     bundle_plain = Path(harvest_dir / "bundle.jsonl").resolve()
 
     # Index dirs
-    idx_single = Path(os.getenv("RETRIEVER_INDEX_DIR", os.getenv("INDEX_DIR", "/data/vector_store"))).resolve()
-    idx_doc = Path(os.getenv("RETRIEVER_INDEX_DIR_DOC", "/data/vector_store_doc")).resolve()
-    idx_pas = Path(os.getenv("RETRIEVER_INDEX_DIR_PASSAGE", "/data/vector_store_passage")).resolve()
+    idx_single = Path(
+        os.getenv("RETRIEVER_INDEX_DIR", os.getenv("INDEX_DIR", "/data/vector_store"))
+    ).resolve()
+    idx_doc = Path(
+        os.getenv("RETRIEVER_INDEX_DIR_DOC", "/data/vector_store_doc")
+    ).resolve()
+    idx_pas = Path(
+        os.getenv("RETRIEVER_INDEX_DIR_PASSAGE", "/data/vector_store_passage")
+    ).resolve()
 
     # Optional purge
     if _truthy(os.getenv("PURGE_TFIDF")):
@@ -73,7 +87,9 @@ def main() -> int:
         rc_total |= rc
         # Also single-index if set
         if str(idx_single) != str(idx_pas):
-            rc = build_index(bundle_methods, idx_single, text_key="methods", min_chars=20)
+            rc = build_index(
+                bundle_methods, idx_single, text_key="methods", min_chars=20
+            )
             rc_total |= rc
     elif bundle_plain.exists() and bundle_plain.stat().st_size > 0:
         # Fallback to sections/abstract
@@ -82,9 +98,13 @@ def main() -> int:
             rc = build_index(bundle_plain, idx_pas, text_key="abstract", min_chars=10)
         rc_total |= rc
         if str(idx_single) != str(idx_pas):
-            rc = build_index(bundle_plain, idx_single, text_key="sections", min_chars=20)
+            rc = build_index(
+                bundle_plain, idx_single, text_key="sections", min_chars=20
+            )
             if rc != 0:
-                rc = build_index(bundle_plain, idx_single, text_key="abstract", min_chars=10)
+                rc = build_index(
+                    bundle_plain, idx_single, text_key="abstract", min_chars=10
+                )
             rc_total |= rc
     else:
         # Nothing to build

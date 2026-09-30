@@ -6,15 +6,18 @@ path constants from `app_utils.constants` so callers (like `app.py`) do not
 need to reference legacy module-level names directly.
 """
 
+import logging
 import os
 from typing import List
-import logging
 
 from werkzeug.datastructures import FileStorage
 
 from app_utils.constants import ATTACH_DIR, BUILTIN_DIR
+from app_utils.request_validation import ATTACHMENT_ID_RE
 
 logger = logging.getLogger(__name__)
+
+ATTACHMENT_EXTENSIONS = {".csv", ".json", ".md", ".pdf", ".txt"}
 
 
 def save_attachment(file: FileStorage, max_pages: int | None = None) -> dict:
@@ -23,9 +26,14 @@ def save_attachment(file: FileStorage, max_pages: int | None = None) -> dict:
     Returns a dict with keys: id, filename, kind, n_pages (if pdf), n_chars (if pdf)
     """
     import uuid
+
     from werkzeug.utils import secure_filename
 
     fname = secure_filename(file.filename or "file")
+    suffix = os.path.splitext(fname)[1].lower()
+    if suffix not in ATTACHMENT_EXTENSIONS:
+        allowed = ", ".join(sorted(ATTACHMENT_EXTENSIONS))
+        raise ValueError(f"Unsupported attachment type. Allowed: {allowed}")
     aid = uuid.uuid4().hex[:12]
     dest = ATTACH_DIR / f"{aid}__{fname}"
     dest.parent.mkdir(parents=True, exist_ok=True)
@@ -82,6 +90,9 @@ def save_builtin_files(files: List[FileStorage]) -> List[str]:
 
 def read_attachment_text(aid: str, max_pages: int | None = None) -> str:
     """Return extracted text for an attachment id (best-effort)."""
+    if not ATTACHMENT_ID_RE.fullmatch(str(aid or "")):
+        logger.warning("[attachments] rejected invalid attachment id")
+        return ""
     txt_path = ATTACH_DIR / f"{aid}.txt"
     if txt_path.exists():
         try:

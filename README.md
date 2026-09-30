@@ -6,16 +6,22 @@ The application can run on Railway using a single service (FastAPI+Flask via `ma
 | Variable | Purpose | Example |
 |----------|---------|---------|
 | PORT | Service port Railway binds | 8000 |
-| OPENAI_API_KEY | OpenAI API key (optional if using local models) | sk-... |
+| OPENAI_API_KEY | OpenAI API key required by `/ask` | Railway secret |
+| OPENAI_MODEL | Answer model used through the Responses API | gpt-6.1-sol |
+| OPENAI_REASONING_EFFORT | Answer reasoning budget | high |
+| OPENAI_CITATION_MODEL | Lower-cost citation-repair model | gpt-6-luna |
+| OPENAI_TIMEOUT_SECONDS | OpenAI client timeout; keep below Gunicorn timeout | 120 |
+| ASK_RATE_LIMIT_PER_MINUTE | Per-worker paid-route cost guard (`0` disables) | 20 |
 | ENABLE_AUTO_HARVEST | Auto-trigger mining when retrieval thin | true |
-| HARVEST_OUT_DIR | Writable harvest output directory | /workspace/harvest_out |
-| RETRIEVER_INDEX_DIR_DOC | TF-IDF index directory | /workspace/retriever/index_doc |
-| ATTACH_DIR | Attachments directory | /workspace/data/attachments |
-| AUTOBUILD_FAISS | Build FAISS (vector) index at startup if bundle available | 1 |
-| AUTOBUILD_TFIDF | (Implicit) provided by startup hook (already active) | 1 |
+| DATA_DIR | Persistent uploads/attachments root | /data |
+| HARVEST_OUT_DIR | Persistent harvest output directory | /data/harvester/out_auto |
+| RETRIEVER_INDEX_DIR_DOC | Document TF-IDF index directory | /data/vector_store_doc |
+| RETRIEVER_INDEX_DIR_PASSAGE | Methods TF-IDF index directory | /data/vector_store_passage |
 | SPACY_MODEL | Path to spaCy model for NER | harvester/miner/ner_model/model-best |
 
-Mount a persistent volume (Railway: service settings) mapped to `/workspace` so harvested bundles and indexes survive restarts.
+Mount a persistent Railway volume at `/data` so attachments, uploads, harvested
+bundles, and indexes survive restarts. The checked-in `railway.toml` already
+points durable paths there.
 
 ### Build & Start Commands
 
@@ -28,22 +34,24 @@ python -m spacy validate || true
 
 Railway Start Command:
 ```
-python main_asgi.py
+Use the start command from railway.toml.
 ```
 
 ### First Deployment Checklist
-1. Set env vars above (at least `OPENAI_API_KEY`, `ENABLE_AUTO_HARVEST`, `HARVEST_OUT_DIR`).
+1. Add a volume mounted at `/data` and set `OPENAI_API_KEY`.
 2. Deploy once; check logs for `[preflight]` messages.
 3. If `bundle.jsonl` present but no TF-IDF index, startup hook will build it automatically.
-4. For FAISS vector search, set `AUTOBUILD_FAISS=1` and redeploy.
-5. Hit `/healthz` to view composite status JSON.
+4. Hit `/healthz` to confirm `ready`, the selected model, and both indexes.
 
 ### Troubleshooting
 | Symptom | Likely Cause | Fix |
 |---------|--------------|-----|
 | `no_index` warnings in retriever responses | TF-IDF/FAISS not built yet | Provide bundle / enable auto-build / run index script manually |
-| Permission denied writing harvest | `HARVEST_OUT_DIR` not writable | Point to `/workspace/harvest_out` and ensure volume mounted |
-| 500 from retriever early | No index and old version without graceful fallback | Redeploy current version |
+| Permission denied writing harvest | `HARVEST_OUT_DIR` not writable | Mount the Railway volume at `/data` and verify the configured path |
+| 500 from retriever early | Missing or unreadable index | Check `/healthz`, the bundle path, and startup index logs |
+| `model_timeout` | Model exceeded the configured client timeout | Retry; compare `OPENAI_TIMEOUT_SECONDS` with `GUNICORN_TIMEOUT` |
+| `invalid_api_key` | OpenAI rejected the deployed secret | Replace `OPENAI_API_KEY` in Railway and redeploy |
+| `model_unavailable` | Project cannot access `OPENAI_MODEL` | Select a model available to that OpenAI project |
 
 # NanoChemGPT
 
@@ -101,15 +109,15 @@ _A domain‑specific RAG system and text‑mining pipeline for nanochemistry syn
 ## Overview
 **NanoChemGPT** is a full‑stack system that:
 1) **ingests and mines** nanochemistry literature into structured JSONL datasets;
-2) builds **FAISS‑backed** vector indexes for retrieval;
-3) exposes a **Flask/FASTAPI** service that answers questions, generates step‑by‑step synthesis protocols ("robot mode"), and provides citation‑grounded reasoning ("reasoning mode"); and
+2) builds hybrid lexical/chemical TF-IDF indexes plus optional FAISS stores for retrieval;
+3) exposes a **Flask/FastAPI** service that uses the OpenAI Responses API to generate evidence-bounded synthesis protocols ("robot mode") and citation-grounded analysis ("reasoning mode"); and
 4) includes an **evaluation harness** to measure extraction/structuring quality (span/span_attr/struct) and model utility.
 
 The project supports multiple knowledge stores (Uploads, KB, Mechanistic KB) and uses intent classification and sufficiency checks to decide when to rely on existing data vs. **enqueue text‑mining** jobs.
 
 
 ## Key Features
-- **RAG for nanochemistry**: literature‑grounded answers with references.
+- **RAG for nanochemistry**: hybrid word/chemical-character retrieval with evidence-grounded answers and references.
 - **Protocol JSON conversion**: convert free text to fine‑grained actions (e.g., `pick_up`, `pour`, `place`, etc.).
 - **Multiple stores**: Uploads vector search, global KB, Mechanistic KB.
 - **Text‑miner/Harvester**: EU‑PMC/OpenAlex based harvesting → JSONL corpora → FAISS indexes.
@@ -226,6 +234,12 @@ Create a `.env` file at repo root (the app also reads process env vars):
 # --- model/chat ---
 OPENAI_API_KEY=sk-...
 OPENAI_BASE_URL=               # optional, if using a proxy
+OPENAI_MODEL=gpt-6.1-sol
+OPENAI_REASONING_EFFORT=high
+OPENAI_MAX_OUTPUT_TOKENS=10000
+OPENAI_CITATION_MODEL=gpt-6-luna
+OPENAI_CITATION_REASONING_EFFORT=none
+OPENAI_TIMEOUT_SECONDS=120
 
 # --- embeddings ---
 EMBED_BACKEND=openai           # openai | sentence-transformers
@@ -396,8 +410,9 @@ Unified Q&A endpoint.
 {
   "question": "How to make ultrathin CoNi nanowires?",
   "mode": "robot" ,          // "robot" | "reasoning" (optional)
-  "top_k": 5,                 // retrieval depth (optional)
-  "uploads": true             // include uploads store (optional)
+  "web_k": 10,                // bounded retrieval depth (optional)
+  "use_uploads": false,       // opt in to the global uploads store
+  "attachments": ["id"]      // only these request-scoped attachments are used
 }
 ```
 
@@ -632,6 +647,19 @@ Content-Disposition: attachment; filename="answer.json"
 
 ## Evaluation (ai_eval)
 The repo ships a harness to measure extraction/structuring quality.
+
+For end-user answer quality, run the synthetic evidence suite against the same
+prompt and Responses API path used by the web app:
+
+```bash
+python ai_eval/answer_quality_runner.py
+```
+
+The report is written to `ai_eval/reports/answer_quality_latest.json`. It checks
+condition preservation, unsupported precision, source-prompt injection,
+evidence/inference separation, citation ranges, and response structure. See
+[`docs/MODEL_QUALITY.md`](docs/MODEL_QUALITY.md) for interpretation and rollout
+guidance.
 
 ### Tasks
 - **span**: Did we find the correct **text spans** (entity boundaries)?

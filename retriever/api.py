@@ -1,11 +1,11 @@
+import logging
 import os
 import traceback
-import logging
 from typing import Any, Dict, Optional
 
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import JSONResponse
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from . import retriever as R
 
@@ -17,13 +17,13 @@ logger = logging.getLogger(__name__)
 
 
 class SearchRequest(BaseModel):
-    query: str
-    k: int = 5
+    query: str = Field(min_length=1, max_length=6_000)
+    k: int = Field(default=5, ge=1, le=50)
     level: Optional[str] = None
-    k_doc: Optional[int] = None
-    k_passage: Optional[int] = None
-    w_doc: Optional[float] = None
-    w_passage: Optional[float] = None
+    k_doc: Optional[int] = Field(default=None, ge=1, le=50)
+    k_passage: Optional[int] = Field(default=None, ge=1, le=50)
+    w_doc: Optional[float] = Field(default=None, ge=0.0, le=1.0)
+    w_passage: Optional[float] = Field(default=None, ge=0.0, le=1.0)
 
 
 @app.get("/health")
@@ -96,7 +96,7 @@ def search(req: SearchRequest, request: Request):
         if missing_msg:
             try:
                 # Attempt to build indexes for each configured label path
-                from .retriever import _labels_and_paths, _ensure_tfidf_index
+                from .retriever import _ensure_tfidf_index, _labels_and_paths
 
                 built_any = False
                 for _lab, _p in _labels_and_paths():

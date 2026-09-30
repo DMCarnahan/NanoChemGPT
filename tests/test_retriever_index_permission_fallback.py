@@ -39,7 +39,7 @@ def test_index_permission_fallback(monkeypatch, tmp_path):
     monkeypatch.setattr(R, "_resolve_bundle_path", lambda: bundle)
 
     # Patch build_tfidf_for_jsonl import path by creating a stub module function
-    def fake_build(bundle_path, out_dir):
+    def fake_build(bundle_path, out_dir, **_kwargs):
         (Path(out_dir) / "tfidf.pkl").write_text("ok")
 
     monkeypatch.setitem(
@@ -48,9 +48,10 @@ def test_index_permission_fallback(monkeypatch, tmp_path):
         type("X", (), {"build_tfidf_for_jsonl": fake_build}),
     )
 
-    _ensure_tfidf_index(fake)
+    resolved = _ensure_tfidf_index(fake)
     # After fallback, a tfidf.pkl should exist either in a fallback dir under /tmp/nanochem_indexes
     fallback_root = Path("/tmp/nanochem_indexes")
     assert fallback_root.exists()
     found = list(fallback_root.rglob("tfidf.pkl"))
     assert found, "Expected tfidf.pkl in fallback root"
+    assert resolved.parent == fallback_root

@@ -1,12 +1,13 @@
-﻿from __future__ import annotations
+from __future__ import annotations
 
-import os, json
+import json
+import logging
+import os
 from pathlib import Path
 from typing import Any, Dict, List, Tuple
 
 import joblib
 import numpy as np
-import logging
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -24,7 +25,7 @@ def _env_paths() -> Dict[str, Path]:
             lab = (
                 "doc"
                 if ("doc" in p)
-                else ("passage" if "passage" in p else f"idx{i+1}")
+                else ("passage" if "passage" in p else f"idx{i + 1}")
             )
             out[lab] = Path(p).resolve()
         return out
@@ -71,6 +72,7 @@ def _labels_and_paths() -> List[Tuple[str, Path]]:
 
 _BUNDLES: Dict[Path, Dict[str, Any]] = {}
 _VECS: Dict[Path, Tuple[Any, Any]] = {}
+_INDEX_PATH_OVERRIDES: Dict[Path, Path] = {}
 
 
 def reload_caches() -> bool:
@@ -444,11 +446,28 @@ def _safe_float(v, default):
         return float(default)
 
 
+def _hit_identity(hit: Dict[str, Any]) -> tuple[str, str]:
+    """Return a stable per-level identity for duplicate suppression."""
+
+    meta = hit.get("meta") if isinstance(hit.get("meta"), dict) else {}
+    for field in ("doi", "paper_id", "url", "id"):
+        value = str(meta.get(field) or "").strip().lower()
+        if value:
+            return str(hit.get("level") or ""), f"{field}:{value}"
+    title = " ".join(str(meta.get("title") or "").lower().split())
+    if title:
+        return str(hit.get("level") or ""), f"title:{title}"
+    text = " ".join(str(hit.get("text") or "").lower().split())
+    return str(hit.get("level") or ""), f"text:{text[:240]}"
+
+
 # ------------------------------ Public API -----------------------------------
 try:
     from app_utils.constants import (
-        HARVEST_OUT_DIR as _CONST_HARVEST_OUT_DIR,
         BUNDLE_AUTO as _CONST_BUNDLE_AUTO,
+    )
+    from app_utils.constants import (
+        HARVEST_OUT_DIR as _CONST_HARVEST_OUT_DIR,
     )
 except Exception:
     _CONST_HARVEST_OUT_DIR = Path("harvester/out_auto")
@@ -496,17 +515,20 @@ _MISSING_BUNDLE_WARNED: bool = False
 _AUTO_BUILD_ATTEMPTED: set[Path] = set()
 
 
-def _ensure_tfidf_index(idx_path: Path):
+def _ensure_tfidf_index(idx_path: Path) -> Path:
     """Ensure a TF-IDF index exists, attempting a lazy auto-build.
 
     Suppresses repeated missing-bundle warnings and avoids repeated build attempts
     for the same index directory within a single process.
     """
     global _MISSING_BUNDLE_WARNED
+    original_path = idx_path
+    if original_path in _INDEX_PATH_OVERRIDES:
+        return _INDEX_PATH_OVERRIDES[original_path]
     if (idx_path / "tfidf.pkl").exists() or (idx_path / "tfidf.npz").exists():
-        return
+        return idx_path
     if idx_path in _AUTO_BUILD_ATTEMPTED:
-        return
+        return idx_path
     bundle = _resolve_bundle_path()
     harvest_bundle_hint = (_CONST_HARVEST_OUT_DIR / "bundle.jsonl").resolve()
     if not bundle.exists():
@@ -517,13 +539,13 @@ def _ensure_tfidf_index(idx_path: Path):
                 harvest_bundle_hint,
             )
             _MISSING_BUNDLE_WARNED = True
-        return
+        return idx_path
     try:
         from retriever.index_jsonl import build_tfidf_for_jsonl
     except Exception:
         if not _MISSING_BUNDLE_WARNED:
             logger.warning("[retriever] build_tfidf_for_jsonl unavailable")
-        return
+        return idx_path
     try:
         try:
             idx_path.mkdir(parents=True, exist_ok=True)
@@ -547,15 +569,20 @@ def _ensure_tfidf_index(idx_path: Path):
                     fallback,
                     pe2,
                 )
-                return
+                return original_path
         logger.info(
             "[retriever] auto-building tfidf index -> %s (bundle=%s)", idx_path, bundle
         )
-        build_tfidf_for_jsonl(str(bundle), str(idx_path))
+        text_key = "methods" if "passage" in idx_path.name.lower() else "abstract"
+        build_tfidf_for_jsonl(str(bundle), str(idx_path), text_key=text_key)
+        if idx_path != original_path:
+            _INDEX_PATH_OVERRIDES[original_path] = idx_path
     except Exception as e:
         logger.warning("[retriever] auto-build failed: %s", e)
     finally:
+        _AUTO_BUILD_ATTEMPTED.add(original_path)
         _AUTO_BUILD_ATTEMPTED.add(idx_path)
+    return idx_path
 
 
 def search(query: str, k: int = 5, **kwargs) -> Dict[str, Any]:
@@ -570,7 +597,12 @@ def search(query: str, k: int = 5, **kwargs) -> Dict[str, Any]:
     if want_both:
         targets: List[Tuple[str, Path]] = label_paths
     else:
-        targets = [next(((l, p) for l, p in label_paths if l == level), label_paths[0])]
+        targets = [
+            next(
+                ((label, path) for label, path in label_paths if label == level),
+                label_paths[0],
+            )
+        ]
 
     k_doc = int(kwargs.get("k_doc", k))
     k_pas = int(kwargs.get("k_passage", k))
@@ -579,7 +611,7 @@ def search(query: str, k: int = 5, **kwargs) -> Dict[str, Any]:
     w_pas = _safe_float(kwargs.get("w_passage", os.getenv("WEIGHT_PASSAGE", 0.4)), 0.4)
 
     for lab, idx_path in targets:
-        _ensure_tfidf_index(idx_path)
+        idx_path = _ensure_tfidf_index(idx_path)
         tf = _load_tfidf_for(idx_path)
         vec, nn = _get_vec_nn(idx_path)
         qv = _build_query_vec(vec, query)
@@ -591,20 +623,20 @@ def search(query: str, k: int = 5, **kwargs) -> Dict[str, Any]:
         texts = tf.get("texts") or []
         metas = tf.get("metas") or [{}] * len(texts)
 
-        s = scores[top].astype("float32")
-        if s.size > 0:
-            s_min, s_max = float(np.min(s)), float(np.max(s))
-            s = (s - s_min) / (s_max - s_min) if s_max > s_min else np.full_like(s, 0.5)
-
         weight = w_doc if lab == "doc" else (w_pas if lab == "passage" else 0.5)
-        for i, sc in zip(top, s):
+        for rank, i in enumerate(top, start=1):
             i = int(i)
             meta = metas[i] if i < len(metas) else {}
             txt = (texts[i] if i < len(texts) else "") or ""
+            raw_score = max(0.0, float(scores[i]))
             merged.append(
                 {
                     "i": i,
-                    "score": float(sc * weight),
+                    # Keep absolute cosine strength. Per-index min-max scaling
+                    # made the best result look strong even for unrelated queries.
+                    "score": float(raw_score * weight),
+                    "raw_score": raw_score,
+                    "rank": rank,
                     "text": txt[:1200],
                     "meta": meta,
                     "level": lab,
@@ -616,7 +648,17 @@ def search(query: str, k: int = 5, **kwargs) -> Dict[str, Any]:
         return {"query": query, "k": k, "hits": []}
 
     merged.sort(key=lambda h: h["score"], reverse=True)
-    merged = merged[: max(1, int(k))]
+    unique: List[Dict[str, Any]] = []
+    seen: set[tuple[str, str]] = set()
+    for hit in merged:
+        identity = _hit_identity(hit)
+        if identity in seen:
+            continue
+        seen.add(identity)
+        unique.append(hit)
+        if len(unique) >= max(1, int(k)):
+            break
+    merged = unique
     return {
         "query": query,
         "k": k,

@@ -24,6 +24,7 @@ import glob
 import json
 import logging
 import threading
+import uuid
 from datetime import datetime
 from pathlib import Path
 from functools import lru_cache
@@ -40,7 +41,6 @@ except Exception:
 import httpx
 from flask import Flask, request, jsonify, abort, render_template, send_file, g
 from jinja2 import TemplateNotFound
-from openai import OpenAI
 from werkzeug.utils import secure_filename
 
 # Local modules
@@ -68,6 +68,23 @@ from app_utils.constants import (
     BUNDLE_AUTO,
 )
 from app_utils.uploads import read_attachment_text
+from app_utils.llm import (
+    create_openai_client,
+    generate_text,
+    load_model_settings,
+    public_model_error,
+)
+from app_utils.prompts import build_answer_prompt, build_citation_repair_prompt
+from app_utils.rate_limit import SlidingWindowRateLimiter
+from app_utils.request_validation import (
+    ATTACHMENT_ID_RE,
+    RequestValidationError,
+    bounded_float,
+    bounded_int,
+    normalize_attachment_ids,
+    normalize_mode,
+    truncate_context,
+)
 
 # Prefer simple, explicit module-level path constants so static analysis
 # tools can reason about them. Resolution order:
@@ -324,22 +341,60 @@ def _best_chunks_from_text(
 # Keep template/static folder paths explicit for packaging and mounting under ASGI.
 app = Flask(__name__, static_folder="static", template_folder="templates")
 app.logger.setLevel(logging.INFO)
+app.config["MAX_CONTENT_LENGTH"] = bounded_int(
+    os.getenv("MAX_UPLOAD_MB", 50), 50, minimum=1, maximum=250
+) * 1024 * 1024
+_ask_rate_limiter = SlidingWindowRateLimiter()
 
 
 @app.before_request
 def _inject_base_path():
     # request.script_root will be "/app" when mounted at /app, else ""
     g.base_path = request.script_root or ""
+    supplied_request_id = (request.headers.get("X-Request-ID") or "").strip()
+    if not re.fullmatch(r"[A-Za-z0-9._-]{1,64}", supplied_request_id):
+        supplied_request_id = uuid.uuid4().hex
+    g.request_id = supplied_request_id
+    if request.endpoint == "ask" and not app.config.get("TESTING"):
+        limit = bounded_int(
+            os.getenv("ASK_RATE_LIMIT_PER_MINUTE", 20),
+            20,
+            minimum=0,
+            maximum=1_000,
+        )
+        client_key = request.remote_addr or "unknown"
+        decision = _ask_rate_limiter.check(client_key, limit=limit)
+        if not decision.allowed:
+            response = jsonify(
+                {
+                    "ok": False,
+                    "error": "Too many questions; try again shortly.",
+                    "error_code": "rate_limit_exceeded",
+                    "retryable": True,
+                    "request_id": g.request_id,
+                }
+            )
+            response.status_code = 429
+            response.headers["Retry-After"] = str(decision.retry_after)
+            return response
+
+
+@app.after_request
+def _response_headers(response):
+    response.headers["X-Request-ID"] = getattr(g, "request_id", uuid.uuid4().hex)
+    response.headers.setdefault("X-Content-Type-Options", "nosniff")
+    response.headers.setdefault("X-Frame-Options", "DENY")
+    response.headers.setdefault("Referrer-Policy", "same-origin")
+    if request.endpoint in {"ask", "api_history", "api_history_one", "attachment_text"}:
+        response.headers.setdefault("Cache-Control", "no-store")
+    return response
 
 
 # DuckDB integration removed: previously optional structured table lookup is no longer initialized.
 
 # ──────────────── OpenAI client ──────────────── #
 _no_proxy = httpx.Client(trust_env=False, timeout=120.0)
-OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "")
-client = (
-    OpenAI(api_key=OPENAI_API_KEY, http_client=_no_proxy) if OPENAI_API_KEY else None
-)
+client = create_openai_client()
 
 RETRIEVER_URL = os.getenv(
     "RETRIEVER_URL", f"http://localhost:{os.getenv('PORT','8000')}/retriever"
@@ -459,7 +514,7 @@ def _maybe_autobuild_tfidf():
         idx_dir.mkdir(parents=True, exist_ok=True)
         app.logger.info("[preflight] auto-building TF-IDF index -> %s", idx_dir)
         try:
-            build_tfidf_for_jsonl(str(bundle), str(idx_dir))
+            build_tfidf_for_jsonl(str(bundle), str(idx_dir), text_key="abstract")
         except Exception as e:
             app.logger.warning("[preflight] tfidf autobuild failed: %s", e)
     except Exception as e:
@@ -842,6 +897,8 @@ def _extract_used_markers(*texts: str) -> dict:
 # Attachment text retrieval ----------------------------------------------------
 @app.get("/attachment_text/<aid>")
 def attachment_text(aid: str):
+    if not ATTACHMENT_ID_RE.fullmatch(aid):
+        return jsonify({"ok": False, "error": "Invalid attachment ID"}), 400
     txt = read_attachment_text(aid)
     meta = {"id": aid, "n_chars": len(txt)}
     snippet = txt[:1200]
@@ -895,6 +952,64 @@ def build_references_payload(
 @lru_cache(maxsize=128)
 def cached_vs_search(q):
     return vs.search(q, k=8) or ""
+
+
+@lru_cache(maxsize=8)
+def _cached_uploads_search(
+    folder: str, folder_mtime_ns: int, device: str, backend: str
+):
+    del folder_mtime_ns  # cache-key only
+    return UploadsVectorSearch.from_folder(
+        Path(folder),
+        device=device,
+        backend=backend,
+        max_docs=1_000,
+    )
+
+
+def _get_uploads_search(folder: Path, *, device: str):
+    """Reuse the costly upload index until the upload directory changes."""
+
+    backend = (os.getenv("UPLOADS_VECTOR_BACKEND") or "auto").strip().lower()
+    if app.config.get("TESTING"):
+        return UploadsVectorSearch.from_folder(
+            folder, device=device, backend=backend, max_docs=1_000
+        )
+    try:
+        mtime_ns = folder.stat().st_mtime_ns
+    except OSError:
+        mtime_ns = 0
+    return _cached_uploads_search(str(folder.resolve()), mtime_ns, device, backend)
+
+
+def _uploads_context(question: str) -> str:
+    uploads_dir = CONST_UPLOADS_DIR
+    uploads_dir.mkdir(exist_ok=True)
+    try:
+        import torch
+
+        device = "cuda" if torch.cuda.is_available() else "cpu"
+    except Exception:
+        device = "cpu"
+
+    search_engine = _get_uploads_search(uploads_dir, device=device)
+    lines = []
+    for i, hit in enumerate(search_engine.search(question, k=8), start=1):
+        text = _s(hit.get("text") or "")
+        title = _s(hit.get("title") or "")
+        section = _s(hit.get("section") or "")
+        page = hit.get("page")
+        path = _s(hit.get("path") or "")
+        heading = f"[U{i}] {title}" if title else f"[U{i}]"
+        if section:
+            heading += f" — {section}"
+        if page is not None:
+            heading += f" (p.{page})"
+        if path:
+            heading += f" — {path}"
+        if text:
+            lines.append(heading + "\n" + text.strip()[:1_200])
+    return "\n\n".join(lines)
 
 
 @lru_cache(maxsize=128)
@@ -956,10 +1071,10 @@ from app_utils.utils import (
     clean_verbatim_block as _clean_verbatim_block,
 )
 from app_utils.uploads import (
+    ATTACHMENT_EXTENSIONS,
     save_attachment,
     save_builtin_files,
     read_attachment_text,
-    latest_attachment_id,
 )
 
 
@@ -970,6 +1085,18 @@ def upload():
         abort(400, "No file uploaded.")
     fname = secure_filename(f.filename or "")
     lower = fname.lower()
+    allowed_upload_extensions = ATTACHMENT_EXTENSIONS | {".parquet", ".tsv", ".xlsx"}
+    if not fname or Path(fname).suffix.lower() not in allowed_upload_extensions:
+        return (
+            jsonify(
+                {
+                    "ok": False,
+                    "error": "Unsupported upload type.",
+                    "error_code": "unsupported_file_type",
+                }
+            ),
+            400,
+        )
 
     dest = (
         CONST_LOOKUP_UPLOAD_DIR / fname
@@ -1131,10 +1258,31 @@ def ask():
 
     # ---------- request payload ----------
     answer = ""
-    payload = request.get_json(silent=True) or {}
-    question = (payload.get("question") or payload.get("q") or "").strip()
+    payload = request.get_json(silent=True) if request.is_json else None
+    if not isinstance(payload, dict):
+        payload = request.form.to_dict(flat=True)
+    raw_question = payload.get("question") or payload.get("q") or ""
+    question = str(raw_question).strip()
     if not question:
         return jsonify({"ok": False, "error": "Missing 'question'"}), 400
+    max_question_chars = bounded_int(
+        os.getenv("MAX_QUESTION_CHARS", 6_000),
+        6_000,
+        minimum=256,
+        maximum=20_000,
+    )
+    if len(question) > max_question_chars:
+        return (
+            jsonify(
+                {
+                    "ok": False,
+                    "error": f"Question exceeds {max_question_chars} characters.",
+                    "error_code": "question_too_long",
+                    "request_id": g.request_id,
+                }
+            ),
+            400,
+        )
     enqueued = False
     mining_job_id = None
     MIN_HITS = _env_int("JUDGE_MIN_HITS", 1)
@@ -1191,14 +1339,20 @@ def ask():
 
     # final intent/mode + knobs
     intent = payload.get("intent") or ci.get("intent") or "protocol"
-    mode = payload.get("mode") or ci.get("mode")
-    if not mode:
-        mode = "reasoning" if intent in {"reasoning", "analysis"} else "protocol"
+    requested_mode = payload.get("mode") or ci.get("mode")
+    if not requested_mode:
+        requested_mode = (
+            "reasoning" if intent in {"reasoning", "analysis"} else "protocol"
+        )
+    try:
+        mode = normalize_mode(requested_mode)
+    except RequestValidationError as exc:
+        return jsonify({"ok": False, "error": str(exc)}), 400
 
-    want_inline = _pick_bool("want_inline", True)
     allow_fetch = _pick_bool("allow_fetch", False)
-    kb_k = _pick_int("kb_k", 5)
-    web_k = _pick_int("web_k", 10)
+    use_uploads = _pick_bool("use_uploads", False)
+    kb_k = bounded_int(_pick_int("kb_k", 5), 5, minimum=0, maximum=10)
+    web_k = bounded_int(_pick_int("web_k", 10), 10, minimum=1, maximum=20)
 
     # Choose retriever level and knobs
     retriever_level = (
@@ -1211,65 +1365,46 @@ def ask():
             else "doc"
         )
     )
+    retriever_level = str(retriever_level).strip().lower()
+    if retriever_level not in {"auto", "both", "doc", "passage"}:
+        retriever_level = "both" if mode == "protocol" else "doc"
     k_doc_default = min(web_k, 6)
     k_pass_default = max(web_k, 10)
-    k_doc = int(payload.get("k_doc", k_doc_default))
-    k_passage = int(payload.get("k_passage", k_pass_default))
-    w_doc = float(payload.get("w_doc", os.getenv("WEIGHT_DOC", 0.6)))
-    w_passage = float(payload.get("w_passage", os.getenv("WEIGHT_PASSAGE", 0.4)))
+    k_doc = bounded_int(
+        payload.get("k_doc", k_doc_default), k_doc_default, minimum=1, maximum=10
+    )
+    k_passage = bounded_int(
+        payload.get("k_passage", k_pass_default),
+        k_pass_default,
+        minimum=1,
+        maximum=20,
+    )
+    w_doc = bounded_float(
+        payload.get("w_doc", os.getenv("WEIGHT_DOC", 0.6)),
+        0.6,
+        minimum=0.0,
+        maximum=1.0,
+    )
+    w_passage = bounded_float(
+        payload.get("w_passage", os.getenv("WEIGHT_PASSAGE", 0.4)),
+        0.4,
+        minimum=0.0,
+        maximum=1.0,
+    )
+    weight_total = w_doc + w_passage
+    if weight_total <= 0:
+        w_doc, w_passage = 0.6, 0.4
+    else:
+        w_doc, w_passage = w_doc / weight_total, w_passage / weight_total
 
-    # ----------------- uploads → semantic context -----------------
+    # Global uploaded sources are opt-in per request. Explicit attachments are
+    # handled separately below and never leak into unrelated questions.
     uploads_ctx = ""
-    try:
-        uploads_dir = CONST_UPLOADS_DIR
-        uploads_dir.mkdir(exist_ok=True)
+    if use_uploads:
         try:
-            import torch
-
-            vector_device = "cuda" if torch.cuda.is_available() else "cpu"
-        except Exception:
-            vector_device = "cpu"
-
-        try:
-            uvs = UploadsVectorSearch.from_folder(
-                uploads_dir, device=vector_device, max_docs=1000
-            )
-        except TypeError:
-            # Fallback: attempt without max_docs if the signature differs.
-            try:
-                uvs = UploadsVectorSearch.from_folder(uploads_dir, device=vector_device)
-            except Exception as e2:
-                app.logger.warning(f"[/ask] Uploads VS error: {e2}")
-                uvs = None
-        except Exception as e:
-            app.logger.warning(f"[/ask] Uploads VS error: {e}")
-            uvs = None
-
-        if uvs is not None:
-            hits = uvs.search(question, k=8)
-            lines = []
-            for i, h in enumerate(hits, start=1):
-                txt = _s(h.get("text") or "")
-                title = _s(h.get("title") or "")
-                sect = _s(h.get("section") or "")
-                page = h.get("page")
-                path = _s(h.get("path") or "")
-                head = f"[U{i}] {title}" if title else f"[U{i}]"
-                if sect:
-                    head += f" — {sect}"
-                if page is not None:
-                    head += f" (p.{page})"
-                if path:
-                    head += f" — {path}"
-                if txt:
-                    lines.append(head + "\n" + txt.strip()[:1200])
-            uploads_ctx = "\n\n".join(lines)
-    except Exception as e:
-        app.logger.warning(f"[/ask] uploads_ctx warn: {e}")
-
-    # DuckDB table lookup removed
-    table_ctx = ""
-    table_refs = []
+            uploads_ctx = _uploads_context(question)
+        except Exception as exc:
+            app.logger.warning("[/ask] uploads context failed: %s", exc)
 
     def _split_reasoning(raw: str) -> tuple[str, str]:
         if not raw:
@@ -1404,361 +1539,8 @@ def ask():
         total_ctx = sum(len(_s(h.get("text", ""))) for h in hits)
         return total_ctx < 800
 
-    def _expand_queries(q: str) -> list[str]:
-        seeds = [
-            "hydrothermal",
-            "solvothermal",
-            "sol-gel",
-            "calcination",
-            "anneal",
-            "spin-coating",
-            "precursor",
-            "coprecipitation",
-            "microwave",
-            "template",
-            "electrospinning",
-            "nanoparticle",
-            "thin film",
-            "oxide",
-        ]
-        base = q.strip()
-        out = [base] + [f"{base} {w}" for w in seeds]
-        seen, uniq = set(), []
-        for s in out:
-            if s not in seen:
-                seen.add(s)
-                uniq.append(s)
-        return uniq[:6]
-
-    def _harvest_reindex(
-        queries: list[str], use_grobid: bool | None = None, jid: str | None = None
-    ) -> list[dict]:
-        """
-        Harvest new papers for the given queries and rebuild the retriever index.
-        Returns a list of reference dicts extracted from the chosen bundle so the agent
-        can cite them immediately (even before/independent of retriever hits).
-        """
-        import tempfile, os, sys, subprocess, json
-
-        ROOT = Path(__file__).resolve().parent
-        try:
-            from app_utils.constants import HARVEST_OUT_DIR as _HARVEST_OUT_DIR_CONST
-
-            out_dir = Path(_HARVEST_OUT_DIR_CONST)
-        except Exception:
-            out_dir = ROOT / "harvester" / "out_auto"
-        out_dir.mkdir(parents=True, exist_ok=True)
-
-        # ------------- config -------------
-        raw = os.getenv("HARVEST_MAX_RESULTS", "6")
-        try:
-            max_results = int(raw)
-        except ValueError:
-            max_results = 6
-        cfg = (
-            "out_dir: {od}\n"
-            "queries:\n{qs}\n"
-            "since_year: 2016\n"
-            f"max_results_per_source: {max_results}\n"
-            "grobid_url: http://127.0.0.1:8070\n"
-            'unpaywall_email: ""\n'
-        ).format(
-            od=str(out_dir).replace("\\", "/"),
-            qs="\n".join(f"- {json.dumps(q)}" for q in queries),
-        )
-
-        env = os.environ.copy()
-        # Ensure subprocesses print using UTF-8 (avoid cp1252 UnicodeEncodeError on Windows)
-        env.setdefault("PYTHONIOENCODING", "utf-8")
-        if use_grobid is None:
-            use_grobid = env.get("USE_GROBID", "0").lower() in {"1", "true", "yes"}
-        env["USE_GROBID"] = "1" if use_grobid else "0"
-        for var in (
-            "OMP_NUM_THREADS",
-            "OPENBLAS_NUM_THREADS",
-            "MKL_NUM_THREADS",
-            "NUMEXPR_NUM_THREADS",
-        ):
-            env.setdefault(var, "1")
-
-        def _stream(cmd: list[str]) -> int:
-            app.logger.info(f"[harvest_reindex] running: {' '.join(cmd)}")
-            p = subprocess.Popen(
-                cmd,
-                stdout=subprocess.PIPE,
-                stderr=subprocess.STDOUT,
-                text=True,
-                env=env,
-                cwd=str(ROOT),
-            )
-            assert p.stdout is not None
-            # Stream lines and update job progress message if a job id is present
-            for line in p.stdout:
-                sys.stdout.write(line)
-                if jid:
-                    try:
-                        _set_job(
-                            jid,
-                            status="processing",
-                            stage="harvest",
-                            last_line=line.strip(),
-                        )
-                    except Exception:
-                        pass
-            rc = p.wait()
-            if rc == 0:
-                app.logger.info(f"[harvest_reindex] {' '.join(cmd)} OK")
-            else:
-                app.logger.warning(f"[harvest_reindex] {' '.join(cmd)} EXIT {rc}")
-            return rc
-
-        def _file_has_lines(path: Path, min_lines: int = 1) -> bool:
-            try:
-                with path.open("r", encoding="utf-8") as f:
-                    for i, _ in enumerate(f, 1):
-                        if i >= min_lines:
-                            return True
-                return False
-            except FileNotFoundError:
-                return False
-
-        # --------- 1) harvest ---------
-        with tempfile.NamedTemporaryFile("w", suffix=".yaml", delete=False) as tf:
-            tf.write(cfg)
-            cfg_path = tf.name
-
-        if jid:
-            try:
-                _set_job(
-                    jid,
-                    status="processing",
-                    progress=5,
-                    stage="starting_harvest",
-                    queries=queries,
-                )
-            except Exception:
-                pass
-
-        rc = _stream(
-            ["python", str(ROOT / "harvester/harvester.py"), "--config", cfg_path]
-        )
-        bundle_raw = out_dir / "bundle.jsonl"
-        partial_ok = _file_has_lines(bundle_raw, 1)
-
-        if rc != 0 and not partial_ok:
-            app.logger.warning(
-                "[harvest_reindex] harvest failed and no bundle produced; skipping index."
-            )
-            if jid:
-                _set_job(jid, status="error", progress=0, stage="harvest_failed")
-            return []
-
-        if rc != 0 and partial_ok:
-            app.logger.info(
-                "[harvest_reindex] harvest non-zero, but bundle exists — continuing with index."
-            )
-            if jid:
-                _set_job(jid, status="processing", progress=20, stage="harvest_partial")
-
-        # --------- 2) add fallback (methods) ---------
-        merged_bundle = out_dir / "bundle_with_methods.jsonl"
-        _stream(
-            [
-                "python",
-                str(ROOT / "scripts/bundle_add_fallback.py"),
-                str(bundle_raw),
-                str(merged_bundle),
-            ]
-        )
-        if jid:
-            _set_job(jid, status="processing", progress=45, stage="adding_methods")
-
-        # --------- 3) choose bundle + text_key ---------
-        # (Assumes BUNDLE_AUTO/MERGED/PLAIN/INDEX_DIR defined at module top)
-        bundle_for_index = None
-        text_key = "methods"
-        try:
-            if hasattr(CONST_BUNDLE_AUTO, "exists") and CONST_BUNDLE_AUTO.exists():
-                bundle_for_index = CONST_BUNDLE_AUTO
-        except Exception:
-            # ignore non-path-like bundle flags
-            pass
-
-        # If canonical bundle wasn't set, try repository-local defaults
-        if bundle_for_index is None:
-            if (ROOT / "out" / "bundle_with_methods.jsonl").exists():
-                bundle_for_index = ROOT / "out" / "bundle_with_methods.jsonl"
-            else:
-                # fall back to the ones wrote in out_auto
-                if merged_bundle.exists():
-                    bundle_for_index = merged_bundle
-                elif bundle_raw.exists():
-                    bundle_for_index = bundle_raw
-
-        if bundle_for_index is None:
-            app.logger.warning("[harvest_reindex] No bundle found to index.")
-            return []
-
-        # --------- 4) index ---------
-        doc_dir = os.getenv("RETRIEVER_INDEX_DIR_DOC")
-        pas_dir = os.getenv("RETRIEVER_INDEX_DIR_PASSAGE")
-
-        if doc_dir or pas_dir:
-            # doc-level index
-            if doc_dir:
-                _stream(
-                    [
-                        "python",
-                        str(ROOT / "retriever/index_jsonl.py"),
-                        "--bundle",
-                        str(bundle_for_index),
-                        "--index_dir",
-                        str(doc_dir),
-                        "--text-key",
-                        "abstract",
-                    ]
-                )
-            # passage-level index (methods)
-            if pas_dir:
-                _stream(
-                    [
-                        "python",
-                        str(ROOT / "retriever/index_jsonl.py"),
-                        "--bundle",
-                        str(bundle_for_index),
-                        "--index_dir",
-                        str(pas_dir),
-                        "--text-key",
-                        "methods",
-                    ]
-                )
-            app.logger.info(
-                f"[harvest_reindex] indexed dual: doc={doc_dir} passage={pas_dir}"
-            )
-            if jid:
-                _set_job(jid, status="processing", progress=80, stage="indexing")
-        else:
-            # single-index fallback
-            _stream(
-                [
-                    "python",
-                    str(ROOT / "retriever/index_jsonl.py"),
-                    "--bundle",
-                    str(bundle_for_index),
-                    "--index_dir",
-                    str(CONST_INDEX_DIR),
-                    "--text-key",
-                    "methods",
-                ]
-            )
-            app.logger.info(f"[harvest_reindex] indexed single → {CONST_INDEX_DIR}")
-            if jid:
-                _set_job(jid, status="processing", progress=80, stage="indexing")
-
-        # --------- 5) ping retriever ---------
-        try:
-            with httpx.Client(timeout=20) as s:
-                s.post(f"{RETRIEVER_URL.rstrip('/')}/reload")
-            if jid:
-                _set_job(
-                    jid, status="processing", progress=90, stage="reload_retriever"
-                )
-        except Exception:
-            if jid:
-                _set_job(jid, status="warning", progress=85, stage="reload_failed")
-            pass
-
-        # --------- 6) BUILD REFERENCE TABLE from the chosen bundle ---------
-        def _mk_ref(rec: dict) -> dict:
-            def _author_names(auths):
-                out = []
-                if isinstance(auths, list):
-                    for a in auths:
-                        if isinstance(a, str):
-                            out.append(a)
-                        elif isinstance(a, dict):
-                            n = (
-                                a.get("name")
-                                or " ".join(
-                                    x for x in [a.get("first"), a.get("last")] if x
-                                )
-                                or " ".join(
-                                    x for x in [a.get("given"), a.get("family")] if x
-                                )
-                            )
-                            if n:
-                                out.append(n)
-                return out
-
-            title = (rec.get("title") or rec.get("name") or "").strip()
-            paper_id = str(rec.get("paper_id") or "")
-            doi = (
-                rec.get("doi") or (paper_id if paper_id.startswith("10.") else "") or ""
-            ).strip()
-            url = (
-                rec.get("url")
-                or rec.get("oa_url")
-                or rec.get("pdf_url")
-                or (f"https://doi.org/{doi}" if doi else "")
-                or ""
-            ).strip()
-            # year: try explicit, else parse YYYY out of date-like fields
-            year = rec.get("year") or rec.get("publication_year")
-            if not year:
-                for k in ("date", "published", "pub_date"):
-                    v = rec.get(k)
-                    if isinstance(v, str) and len(v) >= 4 and v[:4].isdigit():
-                        year = v[:4]
-                        break
-            year = str(year or "")
-            authors = (
-                rec.get("authors")
-                or rec.get("authorships")
-                or rec.get("metadata", {}).get("authors")
-                or []
-            )
-            authors = (
-                _author_names(authors) or authors
-            )  # normalize to list of strings if possible
-
-            return {
-                "title": title,
-                "year": year,
-                "url": url,
-                "doi": doi,
-                "authors": authors,
-                "biblio": {},
-            }
-
-        harvest_refs: list[dict] = []
-        try:
-            with bundle_for_index.open("r", encoding="utf-8") as f:
-                for i, line in enumerate(f):
-                    if i >= 40:  # cap to keep prompt small
-                        break
-                    line = line.strip()
-                    if not line:
-                        continue
-                    try:
-                        rec = json.loads(line)
-                    except Exception:
-                        continue
-                    ref = _mk_ref(rec)
-                    if ref.get("title"):
-                        harvest_refs.append(ref)
-        except Exception as e:
-            app.logger.warning(f"[/harvest_reindex] refs build warn: {e}")
-
-        if jid:
-            _set_job(
-                jid,
-                status="done",
-                progress=100,
-                stage="complete",
-                refs=len(harvest_refs),
-            )
-        return harvest_refs
-
+    # Mining and index rebuilds intentionally run in the background worker.
+    # Keeping subprocess orchestration out of this request path bounds latency.
     # ----------------- KB search + fetch -----------------
     kb_ctx = ""
     kb_refs_raw = []
@@ -1775,7 +1557,10 @@ def ask():
         kb_hits = []
 
     def _mk_kb_ref_from_hit(h) -> dict:
-        meta = getattr(h, "meta", {}) if not isinstance(h, dict) else h
+        if isinstance(h, dict):
+            meta = h.get("meta") if isinstance(h.get("meta"), dict) else h
+        else:
+            meta = getattr(h, "meta", {})
         j = meta.get("json") if isinstance(meta, dict) else None
         title = ""
         if isinstance(j, dict):
@@ -1789,10 +1574,12 @@ def ask():
             "biblio": {},
         }
 
+    def _kb_hit_text(h) -> str:
+        if isinstance(h, dict):
+            return _s(h.get("text") or (h.get("meta") or {}).get("text"))
+        return _s(getattr(h, "text", ""))
+
     kb_refs_raw = [_mk_kb_ref_from_hit(h) for h in kb_hits]
-    if kb_refs_raw:
-        kb_lines = [f"[KB{i}] {r['title']}" for i, r in enumerate(kb_refs_raw, 1)]
-        kb_ctx = "\n".join(kb_lines)
 
     # ----------------- Web/hybrid retriever (initial) -----------------
     try:
@@ -1850,12 +1637,12 @@ def ask():
             question,
             raw_refs,
             domain_terms=DEFAULT_NANOCHEM_TERMS,
-            top_k=max(40, len(raw_refs)),
+            top_k=40,
         )
         if not refs_all:
-            refs_all = list(raw_refs)
+            refs_all = list(raw_refs)[:40]
     except Exception:
-        refs_all = list(raw_refs)
+        refs_all = list(raw_refs)[:40]
 
     # Numbered REFERENCES string shown to the LLM
     refs_prompt = (
@@ -1887,20 +1674,40 @@ def ask():
         if key:
             ref_index[key] = i
 
+    kb_ctx_lines = []
+    for hit, ref in zip(kb_hits, kb_refs_raw):
+        source_index = ref_index.get(_normkey_ref(ref))
+        source_text = _kb_hit_text(hit)
+        if source_index and source_text:
+            kb_ctx_lines.append(
+                f"[{source_index}] {ref.get('title') or '(KB item)'}\n"
+                f"{source_text[:1600]}"
+            )
+    kb_ctx = "\n\n".join(kb_ctx_lines)
+
     web_ctx_lines = []
     unmatched_debug = []
-    for h in hits[:5]:
+    max_evidence_hits = bounded_int(
+        os.getenv("MAX_EVIDENCE_HITS", 8), 8, minimum=1, maximum=12
+    )
+    fuzzy_threshold = bounded_float(
+        os.getenv("FUZZY_TITLE_THRESHOLD", 0.84),
+        0.84,
+        minimum=0.5,
+        maximum=1.0,
+    )
+    for h in hits[:max_evidence_hits]:
         idx = _best_ref_idx_for_hit(
             h,
             ref_index,
             ref_titles,
-            fuzzy_thr=float(os.getenv("FUZZY_TITLE_THRESHOLD", "0.84")),
+            fuzzy_thr=fuzzy_threshold,
         )
         head = f"[{idx}]" if idx else "[?]"
         title = _s((h.get("meta") or {}).get("title") or "(no title)")
         snip = _s(h.get("text") or "")
         if snip:
-            web_ctx_lines.append(f"{head} {title}\n{snip[:1000]}")
+            web_ctx_lines.append(f"{head} {title}\n{snip[:1600]}")
         if not idx:
             try:
                 unmatched_debug.append(
@@ -1927,41 +1734,30 @@ def ask():
 
     # ----------------- attachments → per-question context -----------------
     attachments_ctx = ""
+    raw_attachment_ids = payload.get("attachments")
+    if raw_attachment_ids is None:
+        raw_attachment_ids = payload.get("attachment_ids")
+    if raw_attachment_ids is None and not request.is_json:
+        raw_attachment_ids = request.form.getlist("attachments") or request.form.get(
+            "attachment_ids"
+        )
     try:
-        # 1) ids from JSON or form
-        atch_ids = []
-        payload_json = request.get_json(silent=True) if request.is_json else None
-        if isinstance(payload_json, dict):
-            atch_ids = payload_json.get("attachments") or []
-        if not atch_ids:
-            atch_ids = request.form.getlist("attachments") or (
-                (request.form.get("attachments") or "").split(",")
-                if request.form.get("attachments")
-                else []
-            )
-        atch_ids = [(a or "").strip() for a in atch_ids if (a or "").strip()]
+        atch_ids = normalize_attachment_ids(raw_attachment_ids, maximum=5)
+    except RequestValidationError as exc:
+        return jsonify({"ok": False, "error": str(exc)}), 400
 
-        # 2) fallback: use the most recent attachment if none were passed
-        if not atch_ids:
-            latest_id = latest_attachment_id()
-            if latest_id:
-                atch_ids = [latest_id]
-
-        # 3) build chunks
+    try:
+        # Attachments are used only when this request names them explicitly.
         if atch_ids:
             lines = []
-            qtext = (
-                (payload_json or {}).get("question")
-                or request.values.get("question")
-                or ""
+            max_pages = bounded_int(
+                os.getenv("ATTACH_MAX_PAGES", 40), 40, minimum=1, maximum=100
             )
             for j, aid in enumerate(atch_ids, start=1):
-                txt = read_attachment_text(
-                    aid, max_pages=int(os.environ.get("ATTACH_MAX_PAGES", "40") or "40")
-                )
+                txt = read_attachment_text(aid, max_pages=max_pages)
                 if txt:
                     for k, ch in enumerate(
-                        _best_chunks_from_text(txt, qtext, top_k=3), start=1
+                        _best_chunks_from_text(txt, question, top_k=3), start=1
                     ):
                         head = f"[A{j}.{k}] attachment:{aid}"
                         lines.append(head + "\n" + ch.strip()[:1200])
@@ -2040,6 +1836,15 @@ def ask():
         ctx_parts.append("<<<CTX_WEB>>>\n" + web_ctx)
 
     context_joined = "\n\n---\n\n".join([p for p in ctx_parts if p]).strip()
+    context_joined = truncate_context(
+        context_joined,
+        maximum_chars=bounded_int(
+            os.getenv("MAX_CONTEXT_CHARS", 30_000),
+            30_000,
+            minimum=4_000,
+            maximum=100_000,
+        ),
+    )
 
     # detect user intent; you can also set this via a payload flag from the UI
     def _wants_structured(q: str) -> bool:
@@ -2088,98 +1893,36 @@ def ask():
         )
 
     # ----------------- Prompting -----------------
-    # Adjust scale requirements based on attachment presence
-    if attachments_ctx:
-        # If attachments are present, preserve their scale
-        robot_rules = (
-            " - Return a discrete lab protocol preserving the scale and quantities from the attached documents.\n"
-            " - If the attachment contains specific quantities, maintain those exact amounts.\n"
-            " - Include specific masses (mg, g) or mmol for reagents; volumes (mL, L) for liquids as shown in attachments.\n"
-            " - Specify temperatures (°C), ramp rates (°C/min), and hold times (min/h) matching the attachment when provided.\n"
-            " - Include workup and purification (quench, washing/centrifugation, drying) with volumes from the attachment.\n"
-            ' - No placeholders (avoid "e.g."/"or"). Be decisive.\n'
-            " - Avoid using Schlenk line, air-free techniques. Do not suggest inert gas.\n"
-            " - Do not output a REFERENCES block in the answer."
-        )
-    else:
-        robot_rules = (
-            " - Return a discrete lab protocol with exact quantities on a small scale (e.g., ~0.5–1 mmol of the metal precursor).\n"
-            " - Include specific masses (mg) or mmol for reagents; volumes (mL) for liquids.\n"
-            " - Specify temperatures (°C), ramp rates (°C/min), and hold times (min/h).\n"
-            " - Include workup and purification (quench, washing/centrifugation, drying) with volumes.\n"
-            ' - No placeholders (avoid "e.g."/"or"). Be decisive.\n'
-            " - Avoid using Schlenk line, air-free techniques. Do not suggest inert gas.\n"
-            " - Do not output a REFERENCES block in the answer."
-        )
-    reasoning_rules = (
-        " - Provide a mechanistic explanation and design considerations for the target.\n"
-        " - Focus on: nucleation vs growth; ligand/solvent coordination; "
-        " - IMPORTANT: specify why certain precursors over others; and IMPORTANT: why certain reagents over others.\n"
-        " - Do NOT say generic statements, or say you only chose things because they were in context or references. Specify your reasoning.\n"
-        " - Do NOT return a step-by-step protocol. Be concise but specific."
-    )
-    inline_rule = (
-        " - When you pull a fact from any numbered REFERENCE, put its number in square brackets right after the sentence "
-        " - (e.g. “hydrothermal at 200 °C [3]”)."
-    )
-    acs_rule = (
-        " - Use inline numeric citations ([n]) for any facts taken from REFERENCES.\n"
-        " - Do NOT output a REFERENCES block; it will be assembled server-side."
-    )
-
     def strip_references_block(text: str) -> str:
         return RE_REF_BLOCK.sub("", text).strip()
 
-    if mode == "reasoning":
-        prompt = (
-            "You are NanoChemGPT. Use the CONTEXT and numbered REFERENCES.\n"
-            "Rules:\n"
-            " - Prefer CONTEXT and REFERENCES over general knowledge when relevant.\n"
-            " - For each bullet, quote or paraphrase a specific finding from CONTEXT or REFERENCES, and cite the source. Do not generalize or invent citations.\n"
-            " - Be very specific to the question.\n"
-            f"{inline_rule}\n"
-            " - If CONTEXT is insufficient, say so explicitly before generalizing.\n"
-            " - Every claim that uses info from CONTEXT/REFERENCES must end with [n]. If no [n] applies, omit the claim.\n"
-            f"{reasoning_rules}\n"
-            f"{acs_rule}\n"
-            "Return exactly ONE block:\n"
-            "## Mechanistic reasoning\n"
-            "- bullet points with inline [n] where appropriate.\n\n"
-            f"CONTEXT:\n{context_joined}\n\n"
-            f"REFERENCES:\n{refs_prompt}\n\n"
-            f"User question: {question}"
-        )
-    else:
-        prompt = (
-            "You are NanoChemGPT. Use the CONTEXT and the numbered REFERENCES to propose a synthesis.\n"
-            "Rules:\n"
-            " - Prefer CONTEXT and REFERENCES over general knowledge when relevant.\n"
-            " - For each step, quote or paraphrase a specific finding from CONTEXT or REFERENCES, and cite the source. Do not generalize or invent citations.\n"
-            f"{inline_rule}\n"
-            " - If CONTEXT is insufficient, say so explicitly before generalizing.\n"
-            " - Every claim that uses info from CONTEXT/REFERENCES must end with [n]. If no [n] applies, omit the claim.\n"
-            f"{robot_rules}\n"
-            f"{acs_rule}\n"
-            "Return two blocks exactly in this order:\n"
-            "## Synthesis Protocol:\n"
-            "1. **Hardware & Glassware**:\n[]\n"
-            "2. **Materials**:\n[]\n"
-            "3. **Procedure**\n[]\n\n"
-            "```reason\n"
-            "Every claim that uses info from CONTEXT/REFERENCES must end with [n]. If no [n] applies, omit the claim.\n"
-            "Keep rationales terse, but specific to the question, citing references and explaining logic.\n"
-            "Add NO other blocks of text.\n"
-            "```\n\n"
-            f"CONTEXT:\n{context_joined}\n\n"
-            f"REFERENCES:\n{refs_prompt}\n\n"
-            f"User question: {question}"
-        )
+    prompt_bundle = build_answer_prompt(
+        question=question,
+        mode=mode,
+        context=context_joined,
+        references=refs_prompt,
+    )
+    model_settings = load_model_settings()
+    model_used = model_settings.answer_model
+    model_response_id = None
+    model_usage = {}
 
     if client is None:
-        return jsonify({"ok": False, "error": "OpenAI client not configured"}), 500
+        return (
+            jsonify(
+                {
+                    "ok": False,
+                    "error": "OpenAI is not configured for this deployment.",
+                    "error_code": "openai_not_configured",
+                    "retryable": False,
+                    "request_id": g.request_id,
+                }
+            ),
+            503,
+        )
 
     # Offline/testing stub: avoid network/SDK differences during tests
-    if app.config.get("TESTING") or os.getenv("OFFLINE_TESTS"):
+    if app.config.get("TESTING") or _env_bool("OFFLINE_TESTS", False):
         try:
             _m = re.search(r"3\. \*\*Procedure\*\*\n\[(.*?)\]\n", context_joined, re.S)
             proc_block = _m.group(1).strip() if _m else "Heat at 60 C for 30 min."
@@ -2197,23 +1940,35 @@ def ask():
             )
     else:
         try:
-            raw = (
-                client.chat.completions.create(
-                    model="gpt-4o",
-                    messages=[{"role": "user", "content": prompt}],
-                    temperature=0.2,
-                )
-                .choices[0]
-                .message.content
+            generated = generate_text(
+                client,
+                model=model_settings.answer_model,
+                instructions=prompt_bundle.instructions,
+                input_text=prompt_bundle.input_text,
+                reasoning_effort=model_settings.reasoning_effort,
+                max_output_tokens=model_settings.max_output_tokens,
             )
+            raw = generated.text
+            model_used = generated.model
+            model_response_id = generated.response_id
+            model_usage = generated.usage
         except Exception as exc:
-            app.logger.exception("[/ask] OpenAI request failed")
+            public_error = public_model_error(exc)
+            app.logger.exception(
+                "[/ask] OpenAI request failed request_id=%s error_code=%s",
+                g.request_id,
+                public_error.code,
+            )
             return (
                 jsonify(
                     {
                         "ok": False,
-                        "error": "Language model request failed",
+                        "error": public_error.message,
+                        "error_code": public_error.code,
                         "error_type": type(exc).__name__,
+                        "retryable": public_error.retryable,
+                        "request_id": g.request_id,
+                        "upstream_request_id": public_error.request_id,
                     }
                 ),
                 502,
@@ -2423,32 +2178,43 @@ def ask():
     used_idxs = _extract_used_ref_indexes_safe(answer, rationale)
     used_idxs = [i for i in used_idxs if 1 <= i <= len(refs_all)]
 
-    # If no citations but answer exists, ask model to add [n] and retry once
-    if not used_idxs and answer:
-        fix_prompt = (
-            "Add numeric citations [n] to the answer using the numbered REFERENCES. "
-            "Do not change wording; only append [n] to sentences that clearly use info from CONTEXT/REFERENCES. "
-            "If you cannot justify a sentence by CONTEXT/REFERENCES, leave it without [n].\n\n"
-            f"CONTEXT:\n{context_joined}\n\n"
-            f"REFERENCES:\n{refs_prompt}\n\n"
-            f"ANSWER:\n{answer}"
+    # If grounded evidence exists but no numeric source was cited, run one
+    # narrow verification pass. Never spend a second request when there are no
+    # numbered sources to add.
+    if (
+        not used_idxs
+        and answer
+        and refs_all
+        and context_joined
+        and not app.config.get("TESTING")
+        and not _env_bool("OFFLINE_TESTS", False)
+    ):
+        citation_bundle = build_citation_repair_prompt(
+            answer=answer,
+            context=context_joined,
+            references=refs_prompt,
         )
         try:
-            fixed = (
-                client.chat.completions.create(
-                    model="gpt-4o-mini",
-                    messages=[{"role": "user", "content": fix_prompt}],
-                    temperature=0.0,
-                )
-                .choices[0]
-                .message.content
+            citation_result = generate_text(
+                client,
+                model=model_settings.citation_model,
+                instructions=citation_bundle.instructions,
+                input_text=citation_bundle.input_text,
+                reasoning_effort=model_settings.citation_reasoning_effort,
+                max_output_tokens=model_settings.citation_max_output_tokens,
             )
+            fixed = citation_result.text
             if isinstance(fixed, str) and fixed.strip():
                 answer = fixed
                 used_idxs = _extract_used_ref_indexes_safe(answer, "")
                 used_idxs = [i for i in used_idxs if 1 <= i <= len(refs_all)]
-        except Exception as _e:
-            pass
+                model_usage["citation_repair"] = citation_result.usage
+        except Exception as exc:
+            app.logger.warning(
+                "[/ask] citation repair skipped request_id=%s error=%s",
+                g.request_id,
+                type(exc).__name__,
+            )
 
     # Split to used refs and create a renumbering map
     try:
@@ -2616,6 +2382,10 @@ def ask():
                 "question": question,
                 "intent": intent,
                 "mode": mode,
+                "request_id": g.request_id,
+                "model": model_used,
+                "model_response_id": model_response_id,
+                "model_usage": model_usage,
                 "created_at": datetime.utcnow(),
                 "answer": answer,
                 "rationale": rationale,
@@ -2630,6 +2400,7 @@ def ask():
                 "web_refs_count": len(web_refs),
                 # table_refs removed
                 "context_present": bool(context_joined),
+                "context_chars": len(context_joined),
                 "mining_enqueued": enqueued,
             }
         )
@@ -2641,6 +2412,8 @@ def ask():
         "question": question,
         "intent": intent,
         "mode": mode,
+        "request_id": g.request_id,
+        "model": model_used,
         "mining_enqueued": enqueued,
         "mining_job_id": mining_job_id,
         "answer": answer,
@@ -2656,7 +2429,15 @@ def ask():
         "refs_used": refs_used_s,
         "candidates": candidates_s,
         "index_map": index_map_s,
+        "grounding": {
+            "context_chars": len(context_joined),
+            "retrieved_hits": len(hits),
+            "cited_sources": len(refs_used),
+            "sufficient": bool(sufficient),
+        },
     }
+    if _env_bool("EXPOSE_MODEL_USAGE", False):
+        response_payload["model_usage"] = model_usage
     # Attach robot operations if produced
     try:
         if "robot_operations" in locals() and robot_operations:
@@ -2935,6 +2716,22 @@ def attach():
             files = [f]
     if not files:
         abort(400, "No files uploaded.")
+    if len(files) > 5:
+        return jsonify({"ok": False, "error": "At most 5 attachments are allowed."}), 400
+    for f in files:
+        filename = secure_filename(f.filename or "")
+        if not filename or Path(filename).suffix.lower() not in ATTACHMENT_EXTENSIONS:
+            allowed = ", ".join(sorted(ATTACHMENT_EXTENSIONS))
+            return (
+                jsonify(
+                    {
+                        "ok": False,
+                        "error": f"Unsupported attachment type. Allowed: {allowed}",
+                        "error_code": "unsupported_file_type",
+                    }
+                ),
+                400,
+            )
     items = []
     for f in files:
         try:
@@ -2942,6 +2739,8 @@ def attach():
             items.append(meta)
         except Exception as e:
             app.logger.warning(f"[/attach] save_attachment failed: {e}")
+    if not items:
+        return jsonify({"ok": False, "error": "No attachments could be saved."}), 500
     return jsonify({"ok": True, "items": items})
 
 
@@ -2954,7 +2753,8 @@ def handle_err(e):
 
 @app.errorhandler(413)
 def too_large(e):
-    return jsonify(error="File bigger than 100 MB — compress or split it."), 413
+    max_mb = app.config["MAX_CONTENT_LENGTH"] // (1024 * 1024)
+    return jsonify(error=f"File exceeds the {max_mb} MB limit — compress or split it."), 413
 
 
 @app.post("/upload_builtin")
@@ -3008,6 +2808,7 @@ def healthz():
         app.logger.warning("[/healthz] retriever check failed: %s", exc)
 
     openai_configured = bool(os.getenv("OPENAI_API_KEY"))
+    model_settings = load_model_settings()
     ready = openai_configured and retriever_ready
     try:
         bundle = Path(CONST_HARVEST_OUT_DIR) / "bundle.jsonl"
@@ -3019,13 +2820,20 @@ def healthz():
         ok=True,
         ready=ready,
         openai_configured=openai_configured,
+        model=model_settings.answer_model,
+        reasoning_effort=model_settings.reasoning_effort,
         retriever_ready=retriever_ready,
         retriever_error=retriever_error,
         indexes=indexes,
         auto_harvest=_env_bool("ENABLE_AUTO_HARVEST", False),
         miner_mode=os.getenv("MINER_MODE", "disabled"),
         bundle_present=bundle_present,
-        version=os.getenv("GIT_SHA", "unknown"),
+        version=(
+            os.getenv("GIT_SHA")
+            or os.getenv("RAILWAY_GIT_COMMIT_SHA")
+            or os.getenv("SOURCE_VERSION")
+            or "unknown"
+        ),
     )
 
 

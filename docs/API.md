@@ -33,6 +33,9 @@ All endpoints return errors in the following format:
 Common HTTP status codes:
 - `200`: Success
 - `400`: Bad Request (invalid parameters)
+- `429`: Per-worker question rate limit reached
+- `502`: Upstream model request failed (inspect `error_code` and `request_id`)
+- `503`: OpenAI is not configured
 - `404`: Not Found
 - `500`: Internal Server Error
 
@@ -70,7 +73,8 @@ Main endpoint for question answering with retrieval-augmented generation.
   "k_passage": 10,
   "retrieval": "both",
   "allow_fetch": true,
-  "want_inline": true,
+  "use_uploads": false,
+  "attachments": ["attachment_id"],
   "kb_k": 5,
   "web_k": 10,
   "w_doc": 0.6,
@@ -88,10 +92,11 @@ Main endpoint for question answering with retrieval-augmented generation.
 | `k_doc` | integer | No | 5 | Number of documents to retrieve |
 | `k_passage` | integer | No | 10 | Number of passages to retrieve |
 | `retrieval` | string | No | `"both"` | Retrieval level: `"doc"`, `"passage"`, or `"both"` |
-| `allow_fetch` | boolean | No | `true` | Allow background literature fetching |
-| `want_inline` | boolean | No | `true` | Include inline citations |
+| `allow_fetch` | boolean | No | `false` | Allow background literature fetching |
+| `use_uploads` | boolean | No | `false` | Opt in to the shared/global upload store for this request |
+| `attachments` | string[] | No | `[]` | Explicit request-scoped attachment IDs (maximum 5) |
 | `kb_k` | integer | No | 5 | Knowledge base retrieval count |
-| `web_k` | integer | No | 10 | Web search retrieval count |
+| `web_k` | integer | No | 10 | Literature retrieval count (bounded to 1–20) |
 | `w_doc` | float | No | 0.6 | Document weight in combined retrieval |
 | `w_passage` | float | No | 0.4 | Passage weight in combined retrieval |
 
@@ -152,21 +157,21 @@ The API surfaces executor metadata at the top-level for convenience when `robot_
 
 Clients can rely on `executor_valid == true` indicating the plan should be consumable by the executor without further transformation.
 
-#### POST `/ask` (with file upload)
+#### POST `/ask` (with an attachment)
 
-Submit questions with file attachments for context.
+Upload the file to `/attach`, then pass the returned ID in `attachments` on
+`/ask`. The server never falls back to another user's or an older attachment.
 
-**Request** (multipart/form-data):
-- `question`: The question text
-- `file`: PDF or text file attachment
-- Additional parameters as form fields
+**Request** (JSON):
 
 **Example using curl**:
 ```bash
-curl -X POST "http://localhost:5000/ask" \
-  -F "question=Analyze this synthesis protocol and suggest optimizations" \
-  -F "file=@synthesis_protocol.pdf" \
-  -F "mode=reasoning"
+ATTACHMENT_ID=$(curl -sS -X POST "http://localhost:5000/attach" \
+  -F "file=@synthesis_protocol.pdf" | python -c 'import json,sys; print(json.load(sys.stdin)["id"])')
+
+curl -sS -X POST "http://localhost:5000/ask" \
+  -H "Content-Type: application/json" \
+  -d "{\"question\":\"Analyze this synthesis protocol\",\"mode\":\"reasoning\",\"attachments\":[\"$ATTACHMENT_ID\"]}"
 ```
 
 ---
