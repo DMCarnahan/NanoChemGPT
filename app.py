@@ -75,6 +75,11 @@ from app_utils.llm import (
     public_model_error,
 )
 from app_utils.prompts import build_answer_prompt, build_citation_repair_prompt
+from app_utils.citations import (
+    citation_repair_target,
+    grounded_reference_indexes,
+    needs_citation_repair,
+)
 from app_utils.rate_limit import SlidingWindowRateLimiter
 from app_utils.request_validation import (
     ATTACHMENT_ID_RE,
@@ -929,6 +934,11 @@ def build_references_payload(
     except Exception:
         refs_all = list(refs_input or [])
 
+    refs_all = [
+        {**reference, "index": index}
+        for index, reference in enumerate(refs_all, 1)
+    ]
+
     try:
         used = extract_used_ref_indexes(answer_text or "")
     except Exception:
@@ -1644,6 +1654,13 @@ def ask():
     except Exception:
         refs_all = list(raw_refs)[:40]
 
+    # Citation markers in the prompt and evidence are positional. Reindex after
+    # deduplication/reranking so [n], refs_all[n-1], and split_used_refs agree.
+    refs_all = [
+        {**reference, "index": index}
+        for index, reference in enumerate(refs_all, 1)
+    ]
+
     # Numbered REFERENCES string shown to the LLM
     refs_prompt = (
         "\n".join(
@@ -2178,11 +2195,16 @@ def ask():
     used_idxs = _extract_used_ref_indexes_safe(answer, rationale)
     used_idxs = [i for i in used_idxs if 1 <= i <= len(refs_all)]
 
-    # If grounded evidence exists but no numeric source was cited, run one
-    # narrow verification pass. Never spend a second request when there are no
-    # numbered sources to add.
+    grounded_ref_indexes = grounded_reference_indexes(
+        context_joined, maximum=len(refs_all)
+    )
+    target_source_count = citation_repair_target(grounded_ref_indexes)
+
+    # Run one narrow verification pass when the draft cites fewer distinct
+    # sources than the grounded evidence can support (up to two). Never spend a
+    # second request when there are no numbered evidence sources to add.
     if (
-        not used_idxs
+        needs_citation_repair(used_idxs, grounded_ref_indexes)
         and answer
         and refs_all
         and context_joined
@@ -2193,6 +2215,7 @@ def ask():
             answer=answer,
             context=context_joined,
             references=refs_prompt,
+            target_source_count=target_source_count,
         )
         try:
             citation_result = generate_text(
@@ -2206,7 +2229,7 @@ def ask():
             fixed = citation_result.text
             if isinstance(fixed, str) and fixed.strip():
                 answer = fixed
-                used_idxs = _extract_used_ref_indexes_safe(answer, "")
+                used_idxs = _extract_used_ref_indexes_safe(answer, rationale)
                 used_idxs = [i for i in used_idxs if 1 <= i <= len(refs_all)]
                 model_usage["citation_repair"] = citation_result.usage
         except Exception as exc:

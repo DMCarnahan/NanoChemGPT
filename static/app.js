@@ -108,6 +108,24 @@ document.addEventListener('DOMContentLoaded', () => {
   // Small helper to sandbox optional UI so it can't crash the flow
   function safe(fn){ try { fn(); } catch(e){ console.warn('Optional UI failed:', e); } }
 
+  function renderModelText(element, value) {
+    if (!element) return;
+    const markdown = String(value == null ? '' : value);
+    element.dataset.rawMarkdown = markdown;
+    const renderer = window.NanoChemMarkdown?.renderMarkdown;
+    if (typeof renderer === 'function') {
+      element.innerHTML = renderer(markdown);
+    } else {
+      // Safe fallback if the renderer fails to load.
+      element.textContent = markdown;
+    }
+  }
+
+  function rawModelText(element) {
+    if (!element) return '';
+    return element.dataset.rawMarkdown ?? element.textContent ?? '';
+  }
+
   // Ask button
   /**
    * Handles the Ask button click: sends question to backend and updates UI.
@@ -156,8 +174,8 @@ document.addEventListener('DOMContentLoaded', () => {
       } else if (data.answer && data.answer.toLowerCase().includes('error')) {
         askMsg.textContent = `Backend error: ${data.answer}`;
       } else {
-        answerPre.textContent = data.answer ?? '(no answer)';
-        rationalePre.textContent = data.rationale ?? '';
+        renderModelText(answerPre, data.answer ?? '(no answer)');
+        renderModelText(rationalePre, data.rationale ?? '');
         renderRefsFromData(data);
         askMsg.textContent = 'Done.';
         // Keep attachments on failed requests so a retry uses the same evidence.
@@ -181,7 +199,7 @@ document.addEventListener('DOMContentLoaded', () => {
    */
   // Parse button (Convert to JSON + Download)
   parseBtn?.addEventListener('click', async () => {
-    const text = answerPre?.textContent || '';
+    const text = rawModelText(answerPre);
     if (!text) return;
 
     parseBtn.disabled = true;
@@ -233,106 +251,99 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  /**
-   * Renders references from data object into the UI.
-   * @param {object} data
-   */
-  
-  /**
-   * Renders references from data object into the UI.
-   * Accepts multiple shapes, prefers ACS block, falls back to structured list.
-   * @param {object} data
-   */
+  /** Render the used reference block and an optional candidate/debug list. */
   function renderRefsFromData(data) {
     const refsSection = document.getElementById('refsSection');
-    const refsList    = document.getElementById('refsList');      // candidates list (debug)
+    const refsBlock = document.getElementById('refsBlock');
+    const refsList = document.getElementById('refsList');
+    const candPanel = document.getElementById('candPanel');
     if (!refsSection) return;
 
-    // Accept multiple shapes
-    const block  = (data?.reference_block || data?.references_block || '').trim();
-    const arrRaw = (data?.references || data?.refs || data?.citations || data?.used_refs) || null;
-    const used   = Array.isArray(data?.used_ref_indexes)
-      ? data.used_ref_indexes.map(Number).filter(Number.isFinite)
-      : [];
-
-    // Debug: what did backend return?
-    try {
-      console.debug('[refs] blockLen=', block.length,
-                    'used=', used,
-                    'candidates=', Array.isArray(arrRaw) ? arrRaw.length : 0);
-    } catch {}
+    const block = String(data?.reference_block || data?.references_block || '').trim();
+    const candidates = [data?.refs_all, data?.refs, data?.references, data?.citations]
+      .find((value) => Array.isArray(value) && value.length) || [];
+    const usedRefs = Array.isArray(data?.refs_used) ? data.refs_used : [];
 
     // Reset UI
     if (refsList) refsList.innerHTML = '';
-    refsSection.querySelector('.refs-pre')?.remove();
+    if (refsBlock) {
+      refsBlock.textContent = '';
+      refsBlock.classList.add('hidden');
+    }
+    if (candPanel) {
+      candPanel.classList.add('hidden');
+      candPanel.open = false;
+    }
     refsSection.classList.add('hidden');
 
-    // 1) Prefer the used-only ACS block from backend
-    if (block) {
-      const pre = document.createElement('pre');
-      pre.className = 'refs-pre';
-      pre.textContent = block;
-      refsSection.appendChild(pre);
-      refsSection.classList.remove('hidden');
-      try { window.initRefsToggle?.({ btnSelector: '#refsToggleBtn', panelSelector: '#refsSection' }); } catch {}
-      return; // short-circuit so we do NOT render candidates
+    let rendered = false;
+    if (block && refsBlock) {
+      refsBlock.textContent = block;
+      refsBlock.classList.remove('hidden');
+      rendered = true;
     }
 
-    // 2) Fallback: structured candidates (optionally filter to "used" if indexes present)
-    if (Array.isArray(arrRaw) && arrRaw.length && refsList) {
-      const items = used.length
-        ? arrRaw.map((r, i) => ({ r, i: i + 1 }))
-              .filter(x => used.includes(x.i))
-              .map(x => x.r)
-        : arrRaw.slice(0, 6); // cap to top-6 to keep UI tidy when no block
+    // When the formatted block is unavailable, prioritize the cited subset.
+    // Otherwise keep a bounded candidate list available behind the debug panel.
+    const items = (block ? candidates : (usedRefs.length ? usedRefs : candidates)).slice(0, 10);
+    if (items.length && refsList) {
+      items.forEach((reference, idx) => {
+        const li = document.createElement('li');
 
-      if (items.length) {
-        items.forEach((r, idx) => {
-          const li = document.createElement('li');
-
-          if (typeof r === 'string') {
-            li.textContent = r;
-            refsList.appendChild(li);
-            return;
-          }
-
-          const title   = r.title || r.citation || r.name || r.label || `Reference ${idx+1}`;
-          const authors = Array.isArray(r.authors) ? r.authors.join(', ') : (r.authors || '');
-          const journal = (r.biblio?.journal) || r.journal || r.source || '';
-          const year    = r.year || r.biblio?.year || '';
-          const doi     = r.doi ? String(r.doi).replace(/^https?:\/\/doi\.org\//, '') : '';
-          const url     = r.url || (doi ? `https://doi.org/${doi}` : '');
-
-          const strong = document.createElement('strong');
-          strong.textContent = title;
-          li.appendChild(strong);
-
-          const metaBits = [authors, journal, year].filter(Boolean);
-          if (metaBits.length) {
-            const small = document.createElement('small');
-            small.textContent = ' — ' + metaBits.join(', ');
-            li.appendChild(small);
-          }
-
-          if (url) {
-            li.appendChild(document.createTextNode(' '));
-            const a = document.createElement('a');
-            a.href = url; a.target = '_blank'; a.rel = 'noopener';
-            a.textContent = '(link)';
-            li.appendChild(a);
-          }
-
+        if (typeof reference === 'string') {
+          li.textContent = reference;
           refsList.appendChild(li);
-        });
+          return;
+        }
 
-        refsSection.classList.remove('hidden');
-        try { window.initRefsToggle?.({ btnSelector: '#refsToggleBtn', panelSelector: '#refsSection' }); } catch {}
-        return;
-      }
+        const r = reference && typeof reference === 'object' ? reference : {};
+        const itemIndex = Number(r.index);
+        if (Number.isFinite(itemIndex) && itemIndex > 0) li.value = itemIndex;
+
+        const title = r.title || r.citation || r.name || r.label || `Reference ${idx + 1}`;
+        const authors = Array.isArray(r.authors) ? r.authors.join(', ') : (r.authors || '');
+        const journal = r.biblio?.journal || r.journal || r.venue || r.source || '';
+        const year = r.year || r.biblio?.year || '';
+        const doi = r.doi ? String(r.doi).replace(/^https?:\/\/doi\.org\//, '') : '';
+        const url = r.url || (doi ? `https://doi.org/${doi}` : '');
+
+        const strong = document.createElement('strong');
+        strong.textContent = title;
+        li.appendChild(strong);
+
+        const metaBits = [authors, journal, year].filter(Boolean);
+        if (metaBits.length) {
+          const small = document.createElement('small');
+          small.textContent = ' — ' + metaBits.join(', ');
+          li.appendChild(small);
+        }
+
+        if (url) {
+          li.appendChild(document.createTextNode(' '));
+          const link = document.createElement('a');
+          link.href = url;
+          link.target = '_blank';
+          link.rel = 'noopener noreferrer';
+          link.textContent = doi ? '(DOI)' : '(source)';
+          li.appendChild(link);
+        }
+
+        refsList.appendChild(li);
+      });
+
+      candPanel?.classList.remove('hidden');
+      rendered = true;
     }
 
-    // 3) Nothing to show
-    refsSection.classList.add('hidden');
+    if (rendered) {
+      refsSection.classList.remove('hidden');
+      if (candPanel && !block) candPanel.open = true;
+      try {
+        window.initRefsToggle?.({ btnSelector: '#refsToggleBtn', panelSelector: '#refsSection' });
+      } catch {}
+    } else {
+      refsSection.classList.add('hidden');
+    }
   }
 
   // Upload button
@@ -502,17 +513,17 @@ document.addEventListener('DOMContentLoaded', () => {
           try {
             const res = await fetch(`${window.BASE_PATH || ''}/api/history/${id}`);
             if (!res.ok) {
-              answerPre.textContent = `Error loading answer: ${res.status}`;
-              rationalePre.textContent = '';
+              renderModelText(answerPre, `Error loading answer: ${res.status}`);
+              renderModelText(rationalePre, '');
               return;
             }
             const data = await res.json();
-            answerPre.textContent = data.answer ?? '(no answer)';
-            rationalePre.textContent = data.rationale ?? '';
+            renderModelText(answerPre, data.answer ?? '(no answer)');
+            renderModelText(rationalePre, data.rationale ?? '');
             renderRefsFromData(data);
           } catch (err) {
-            answerPre.textContent = `Error: ${err.message || err}`;
-            rationalePre.textContent = '';
+            renderModelText(answerPre, `Error: ${err.message || err}`);
+            renderModelText(rationalePre, '');
             console.error(err);
           }
         });
@@ -529,7 +540,7 @@ document.addEventListener('DOMContentLoaded', () => {
    */
   // Save as TXT button (Export answer)
   saveTxtBtn?.addEventListener('click', () => {
-    const text = answerPre?.textContent || '';
+    const text = rawModelText(answerPre);
     if (!text) return;
 
     const blob = new Blob([text], { type: 'text/plain' });
@@ -600,231 +611,51 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
+  async function uploadAttachmentsForQuestion(files) {
+    if (!files || !files.length) return [];
+    const form = new FormData();
+    for (const file of files) form.append('files', file);
+
+    const response = await fetch(`${window.BASE_PATH || ''}/attach`, {
+      method: 'POST',
+      body: form
+    });
+    const raw = await response.text();
+    let data;
+    try {
+      data = JSON.parse(raw);
+    } catch {
+      throw new Error(raw || 'Attachment endpoint returned invalid JSON');
+    }
+    if (!response.ok || !data.ok) {
+      throw new Error(data.error || `HTTP ${response.status}`);
+    }
+    return (data.items || []).map((item) => item.id);
+  }
+
+  attachInput?.addEventListener('change', async () => {
+    const files = Array.from(attachInput.files || []);
+    if (!files.length) return;
+    try {
+      const ids = await uploadAttachmentsForQuestion(files);
+      pendingAttachmentIds = ids;
+      if (attachList) {
+        attachList.innerHTML = '';
+        files.forEach((file, index) => {
+          const li = document.createElement('li');
+          li.textContent = `${file.name} (${ids[index] || ''})`;
+          attachList.appendChild(li);
+        });
+      }
+      if (attachMsg) attachMsg.textContent = `${ids.length} attachment(s) ready.`;
+    } catch (error) {
+      console.error(error);
+      if (attachMsg) {
+        attachMsg.textContent = `Attach failed: ${error.message || error}`;
+      }
+    }
+  });
+
   // Auto-load history on page load
   if (historyBtn) historyBtn.click();
-});
-
-function renderRefsFromData(data) {
-  try {
-    if (!data || typeof data !== 'object') {
-      console.warn('renderRefsFromData: expected object, got', data);
-      return;
-    }
-    const refsSection = document.getElementById('refsSection');
-    const refsList    = document.getElementById('refsList');
-    if (!refsSection) return;
-
-    const block  = (data.reference_block || data.references_block || '').trim?.() || '';
-    const arrRaw = (data.references || data.refs || data.citations || data.used_refs) || null;
-    const used   = Array.isArray(data.used_ref_indexes) ? data.used_ref_indexes.map(Number).filter(Number.isFinite) : [];
-
-    try {
-      console.debug('[refs] blockLen=', block.length, 'used=', used, 'candidates=', Array.isArray(arrRaw) ? arrRaw.length : 0);
-    } catch {}
-
-    // Reset UI
-    if (refsList) refsList.innerHTML = '';
-    const oldPre = refsSection.querySelector('.refs-pre');
-    if (oldPre) oldPre.remove();
-    refsSection.classList.add('hidden');
-
-    // 1) Prefer used-only ACS block
-    if (block) {
-      const pre = document.createElement('pre');
-      pre.className = 'refs-pre';
-      pre.textContent = block;
-      refsSection.appendChild(pre);
-      refsSection.classList.remove('hidden');
-      try { window.initRefsToggle?.({ btnSelector: '#refsToggleBtn', panelSelector: '#refsSection' }); } catch {}
-      return;
-    }
-
-    // 2) Fallback: structured candidates (optionally filtered by used)
-    if (Array.isArray(arrRaw) && arrRaw.length && refsList) {
-      const items = used.length
-        ? arrRaw.map((r, i) => ({ r, i: i + 1 })).filter(x => used.includes(x.i)).map(x => x.r)
-        : arrRaw.slice(0, 6); // cap to keep tidy when no block
-
-      if (items.length) {
-        items.forEach((r, idx) => {
-          const li = document.createElement('li');
-
-          if (typeof r === 'string') {
-            li.textContent = r;
-            refsList.appendChild(li);
-            return;
-          }
-
-          const title   = r.title || r.citation || r.name || r.label || `Reference ${idx+1}`;
-          const authors = Array.isArray(r.authors) ? r.authors.join(', ') : (r.authors || '');
-          const journal = (r.biblio && r.biblio.journal) || r.journal || r.source || '';
-          const year    = r.year || (r.biblio && r.biblio.year) || '';
-          const doi     = r.doi ? String(r.doi).replace(/^https?:\/\/doi\.org\//, '') : '';
-          const url     = r.url || (doi ? `https://doi.org/${doi}` : '');
-
-          const strong = document.createElement('strong');
-          strong.textContent = title;
-          li.appendChild(strong);
-
-          const metaBits = [authors, journal, year].filter(Boolean);
-          if (metaBits.length) {
-            const small = document.createElement('small');
-            small.textContent = ' — ' + metaBits.join(', ');
-            li.appendChild(small);
-          }
-
-          if (url) {
-            li.appendChild(document.createTextNode(' '));
-            const a = document.createElement('a');
-            a.href = url; a.target = '_blank'; a.rel = 'noopener';
-            a.textContent = '(link)';
-            li.appendChild(a);
-          }
-
-          refsList.appendChild(li);
-        });
-
-        refsSection.classList.remove('hidden');
-        try { window.initRefsToggle?.({ btnSelector: '#refsToggleBtn', panelSelector: '#refsSection' }); } catch {}
-        return;
-      }
-    }
-
-    // 3) Nothing to show
-    refsSection.classList.add('hidden');
-  } catch (e) {
-    try { console.error('renderRefsFromData error:', e); } catch {}
-  }
-}
-
-function renderRefsFromData(data) {
-  try {
-    if (!data || typeof data !== 'object') {
-      console.warn('renderRefsFromData: expected object, got', data);
-      return;
-    }
-    const refsSection = document.getElementById('refsSection');
-    const refsList    = document.getElementById('refsList');
-    if (!refsSection) return;
-
-    const block  = (data.reference_block || data.references_block || '').trim?.() || '';
-    const arrRaw = (data.references || data.refs || data.citations || data.used_refs) || null;
-    const used   = Array.isArray(data.used_ref_indexes) ? data.used_ref_indexes.map(Number).filter(Number.isFinite) : [];
-
-    try {
-      console.debug('[refs] blockLen=', block.length, 'used=', used, 'candidates=', Array.isArray(arrRaw) ? arrRaw.length : 0);
-    } catch {}
-
-    // Reset UI
-    if (refsList) refsList.innerHTML = '';
-    const oldPre = refsSection.querySelector('.refs-pre');
-    if (oldPre) oldPre.remove();
-    refsSection.classList.add('hidden');
-
-    // 1) Prefer used-only ACS block
-    if (block) {
-      const pre = document.createElement('pre');
-      pre.className = 'refs-pre';
-      pre.textContent = block;
-      refsSection.appendChild(pre);
-      refsSection.classList.remove('hidden');
-      try { window.initRefsToggle?.({ btnSelector: '#refsToggleBtn', panelSelector: '#refsSection' }); } catch {}
-      return;
-    }
-
-    // 2) Fallback: structured candidates (optionally filtered by used)
-    if (Array.isArray(arrRaw) && arrRaw.length && refsList) {
-      const items = used.length
-        ? arrRaw.map((r, i) => ({ r, i: i + 1 })).filter(x => used.includes(x.i)).map(x => x.r)
-        : arrRaw.slice(0, 6); // cap to keep tidy when no block
-
-      if (items.length) {
-        items.forEach((r, idx) => {
-          const li = document.createElement('li');
-
-          if (typeof r === 'string') {
-            li.textContent = r;
-            refsList.appendChild(li);
-            return;
-          }
-
-          const title   = r.title || r.citation || r.name || r.label || `Reference ${idx+1}`;
-          const authors = Array.isArray(r.authors) ? r.authors.join(', ') : (r.authors || '');
-          const journal = (r.biblio && r.biblio.journal) || r.journal || r.source || '';
-          const year    = r.year || (r.biblio && r.biblio.year) || '';
-          const doi     = r.doi ? String(r.doi).replace(/^https?:\/\/doi\.org\//, '') : '';
-          const url     = r.url || (doi ? `https://doi.org/${doi}` : '');
-
-          const strong = document.createElement('strong');
-          strong.textContent = title;
-          li.appendChild(strong);
-
-          const metaBits = [authors, journal, year].filter(Boolean);
-          if (metaBits.length) {
-            const small = document.createElement('small');
-            small.textContent = ' — ' + metaBits.join(', ');
-            li.appendChild(small);
-          }
-
-          if (url) {
-            li.appendChild(document.createTextNode(' '));
-            const a = document.createElement('a');
-            a.href = url; a.target = '_blank'; a.rel = 'noopener';
-            a.textContent = '(link)';
-            li.appendChild(a);
-          }
-
-          refsList.appendChild(li);
-        });
-
-        refsSection.classList.remove('hidden');
-        try { window.initRefsToggle?.({ btnSelector: '#refsToggleBtn', panelSelector: '#refsSection' }); } catch {}
-        return;
-      }
-    }
-
-    // 3) Nothing to show
-    refsSection.classList.add('hidden');
-  } catch (e) {
-    try { console.error('renderRefsFromData error:', e); } catch {}
-  }
-}
-
-async function uploadAttachmentsForQuestion(files) {
-  if (!files || !files.length) return [];
-  const fd = new FormData();
-  for (const f of files) fd.append('files', f);
-  
-  const headers = {};
-  
-  const res = await fetch(`${window.BASE_PATH||''}/attach`, { 
-    method: 'POST', 
-    headers,
-    body: fd 
-  });
-  const text = await res.text();
-  let j;
-  try { j = JSON.parse(text); } catch { throw new Error(text || 'bad JSON'); }
-  if (!res.ok || !j.ok) throw new Error(j.error || `HTTP ${res.status}`);
-  return (j.items || []).map(x => x.id);
-}
-
-attachInput?.addEventListener('change', async () => {
-  const files = Array.from(attachInput.files || []);
-  if (!files.length) return;
-  try {
-    const ids = await uploadAttachmentsForQuestion(files);
-    pendingAttachmentIds = ids;
-    if (attachList) {
-      attachList.innerHTML = '';
-      files.forEach((f, i) => {
-        const li = document.createElement('li');
-        li.textContent = `${f.name} (${ids[i]||''})`;
-        attachList.appendChild(li);
-      });
-    }
-  } catch (e) {
-    console.error(e);
-    alert('Attach failed: ' + (e.message || e));
-  }
 });

@@ -6,10 +6,26 @@ import requests
 
 UNPAYWALL = "https://api.unpaywall.org/v2/"
 OPENALEX = "https://api.openalex.org/works/"
-EPMC = "https://www.ebi.ac.uk/europepmc/webservices/rest/search"
+_DEFAULT_EPMC_BASE = "https://www.ebi.ac.uk/europepmc/webservices/rest"
+EPMC_BASE = (os.getenv("EPMC_BASE") or _DEFAULT_EPMC_BASE).strip().rstrip("/")
+EPMC = f"{EPMC_BASE}/search"
 
 UA = "NanoChemGPT-Harvester/1.0 (+https://nanochemgpt-production.up.railway.app/)"
-TIMEOUT = float(os.getenv("OA_TIMEOUT", "12"))
+
+
+def _optional_env(name: str) -> str:
+    return (os.getenv(name) or "").strip()
+
+
+def _env_float(name: str, default: float) -> float:
+    raw = _optional_env(name)
+    try:
+        return float(raw) if raw else default
+    except (TypeError, ValueError):
+        return default
+
+
+TIMEOUT = _env_float("OA_TIMEOUT", 12.0)
 
 
 def _get(session, url, **kw):
@@ -21,7 +37,8 @@ def _get(session, url, **kw):
 
 
 def unpaywall_get(doi: str, email: str, session=None) -> dict:
-    if not doi:
+    email = (email or "").strip()
+    if not doi or not email:
         return {}
     session = session or requests.Session()
     url = UNPAYWALL + urllib.parse.quote(doi)
@@ -34,7 +51,14 @@ def openalex_get_by_doi(doi: str, session=None) -> dict:
         return {}
     session = session or requests.Session()
     url = OPENALEX + f"doi:{urllib.parse.quote(doi.lower())}"
-    r = _get(session, url, params={"mailto": os.getenv("OPENALEX_MAILTO", "")})
+    params = {}
+    api_key = _optional_env("OPENALEX_API_KEY")
+    mailto = _optional_env("OPENALEX_MAILTO")
+    if api_key:
+        params["api_key"] = api_key
+    if mailto:
+        params["mailto"] = mailto
+    r = _get(session, url, params=params)
     return r.json()
 
 
@@ -80,7 +104,7 @@ def resolve_oa(doi: str, session=None) -> dict:
       }
     """
     session = session or requests.Session()
-    email = os.getenv("UNPAYWALL_EMAIL", "")
+    email = _optional_env("UNPAYWALL_EMAIL")
     out = {
         "is_oa": False,
         "source": None,
