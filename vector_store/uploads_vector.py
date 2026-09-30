@@ -350,6 +350,12 @@ class UploadsVectorSearch:
             except Exception:
                 continue
 
+        # Avoid loading a sentence-transformer when there is nothing to index.
+        if not docs:
+            empty_backend = _MiniTfidf()
+            empty_backend.fit([])
+            return cls([], empty_backend)
+
         # choose backend safely
         use_st = _st_available() and (
             backend == "st" or (backend == "auto" and len(docs) <= max_docs // 2)

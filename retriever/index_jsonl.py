@@ -2,13 +2,17 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import re
 from pathlib import Path
 from typing import Dict, Iterable, List, Tuple
 
+import joblib
 from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.pipeline import FeatureUnion
 
 MIN_CHARS_DEFAULT = 40
+INDEX_SCHEMA_VERSION = 2
 
 _DOI_RX = re.compile(r"(10\.\d{4,9}/[-._;()/:A-Z0-9]+)", re.I)
 
@@ -174,6 +178,120 @@ def load_texts(
     return ids, texts, metas
 
 
+def build_vectorizer() -> FeatureUnion:
+    """Build a lexical index that handles both prose and chemical notation."""
+
+    return FeatureUnion(
+        [
+            (
+                "word",
+                TfidfVectorizer(
+                    lowercase=True,
+                    strip_accents="unicode",
+                    token_pattern=r"(?u)\b[\w-]{2,}\b",
+                    ngram_range=(1, 2),
+                    min_df=1,
+                    max_df=1.0,
+                    max_features=160_000,
+                    sublinear_tf=True,
+                ),
+            ),
+            (
+                "chem_char",
+                TfidfVectorizer(
+                    analyzer="char_wb",
+                    lowercase=True,
+                    strip_accents="unicode",
+                    ngram_range=(3, 5),
+                    min_df=1,
+                    max_features=90_000,
+                    sublinear_tf=True,
+                ),
+            ),
+        ]
+    )
+
+
+def build_tfidf_for_jsonl(
+    bundle: str | Path,
+    index_dir: str | Path,
+    *,
+    text_key: str = "methods",
+    min_chars: int = MIN_CHARS_DEFAULT,
+    max_docs: int | None = None,
+) -> dict:
+    """Build an index for CLI, startup preflight, and background rebuilds."""
+
+    bundle_path = Path(bundle).resolve()
+    out = Path(index_dir).resolve()
+    out.mkdir(parents=True, exist_ok=True)
+
+    ids, texts, metas = load_texts(bundle_path, text_key, min_chars)
+    if max_docs:
+        ids, texts, metas = (
+            ids[:max_docs],
+            texts[:max_docs],
+            metas[:max_docs],
+        )
+
+    if not texts:
+        raise ValueError(
+            f"No documents to index from {bundle_path} (source='{text_key}')."
+        )
+
+    vectorizer = build_vectorizer()
+    X = vectorizer.fit_transform(texts)
+    if X.shape[1] == 0:
+        raise ValueError("No index features; inputs are likely too short or empty.")
+
+    from scipy.sparse import save_npz
+
+    npz_final = out / "tfidf.npz"
+    tmp_npz = out / "tfidf.tmp.npz"
+
+    save_npz(tmp_npz, X)
+    os.replace(tmp_npz, npz_final)
+
+    vectorizer_final = out / "vectorizer.joblib"
+    vectorizer_tmp = out / "vectorizer.tmp.joblib"
+    joblib.dump(vectorizer, vectorizer_tmp)
+    os.replace(vectorizer_tmp, vectorizer_final)
+    if os.getenv("WRITE_LEGACY_TFIDF_PKL", "0").lower() in {"1", "true", "yes"}:
+        joblib.dump(
+            {
+                "matrix": X,
+                "vectorizer": vectorizer,
+                "texts": texts,
+                "metas": metas,
+            },
+            out / "tfidf.pkl",
+        )
+    rows_final = out / "rows.jsonl"
+    rows_tmp = out / "rows.tmp.jsonl"
+    with rows_tmp.open("w", encoding="utf-8") as f:
+        for t, m in zip(texts, metas):
+            row = {"text": t}
+            row.update(m)
+            f.write(json.dumps(row, ensure_ascii=False) + "\n")
+    os.replace(rows_tmp, rows_final)
+
+    metadata = {
+        "schema_version": INDEX_SCHEMA_VERSION,
+        "documents": len(ids),
+        "features": int(X.shape[1]),
+        "text_key": text_key,
+        "vectorizer": "word_and_chemical_character_tfidf",
+    }
+    metadata_final = out / "index_meta.json"
+    metadata_tmp = out / "index_meta.tmp.json"
+    metadata_tmp.write_text(
+        json.dumps(metadata, indent=2) + "\n",
+        encoding="utf-8",
+    )
+    os.replace(metadata_tmp, metadata_final)
+    return metadata
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--bundle", required=True, type=Path)
@@ -183,8 +301,8 @@ def main():
         "--embed-backend",
         choices=["openai", "sentence-transformers", "none"],
         default="none",
-    )  # compat
-    ap.add_argument("--embed-model", default=None)  # compat
+    )  # compatibility; this builder is deliberately local and deterministic
+    ap.add_argument("--embed-model", default=None)  # compatibility
     ap.add_argument(
         "--text-key",
         default="methods",
@@ -193,61 +311,19 @@ def main():
     ap.add_argument("--min-chars", type=int, default=MIN_CHARS_DEFAULT)
     args = ap.parse_args()
 
-    out = args.index_dir.resolve()
-    out.mkdir(parents=True, exist_ok=True)
-
-    ids, texts, metas = load_texts(args.bundle, args.text_key, args.min_chars)
-    if args.max_docs:
-        ids, texts, metas = (
-            ids[: args.max_docs],
-            texts[: args.max_docs],
-            metas[: args.max_docs],
-        )
-
-    if not texts:
-        raise SystemExit(
-            f"[index_jsonl] No documents to index from {args.bundle} (source='{args.text_key}')."
-        )
-
-    vectorizer = TfidfVectorizer(
-        lowercase=True,
-        strip_accents="unicode",
-        token_pattern=r"(?u)\b[\w-]{2,}\b",
-        ngram_range=(1, 2),
-        min_df=1,
-        max_df=0.99,
-        max_features=250_000,
+    metadata = build_tfidf_for_jsonl(
+        args.bundle,
+        args.index_dir,
+        text_key=args.text_key,
+        min_chars=args.min_chars,
+        max_docs=args.max_docs,
     )
-    X = vectorizer.fit_transform(texts)
-    if X.shape[1] == 0:
-        raise SystemExit("[index_jsonl] 0 features — inputs likely too short/empty.")
 
-    import os
-
-    import joblib
-    from scipy.sparse import save_npz
-
-    npz_final = out / "tfidf.npz"
-    tmp_npz = out / "tfidf.npz.tmp"
-
-    try:
-        save_npz(tmp_npz, X)
-        os.replace(tmp_npz, npz_final)
-    except FileNotFoundError:
-        save_npz(npz_final, X)
-
-    joblib.dump(vectorizer, out / "vectorizer.joblib")
-    joblib.dump(
-        {"matrix": X, "vectorizer": vectorizer, "texts": texts, "metas": metas},
-        out / "tfidf.pkl",
+    print(
+        "[index_jsonl] OK. "
+        f"docs={metadata['documents']} terms={metadata['features']} "
+        f"→ {args.index_dir.resolve()}"
     )
-    with (out / "rows.jsonl").open("w", encoding="utf-8") as f:
-        for t, m in zip(texts, metas):
-            row = {"text": t}
-            row.update(m)
-            f.write(json.dumps(row, ensure_ascii=False) + "\n")
-
-    print(f"[index_jsonl] OK. docs={len(ids)} terms={X.shape[1]} → {out}")
 
 
 if __name__ == "__main__":

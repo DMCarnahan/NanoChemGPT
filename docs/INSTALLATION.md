@@ -112,6 +112,8 @@ nano .env  # or use your preferred editor
 ```bash
 # OpenAI Configuration
 OPENAI_API_KEY=your_openai_api_key_here
+OPENAI_MODEL=gpt-6.1-sol
+OPENAI_REASONING_EFFORT=high
 OPENAI_EMB=text-embedding-3-small
 
 # Embedding Backend
@@ -523,7 +525,11 @@ PORT=8000
 # === OpenAI Configuration ===
 OPENAI_API_KEY=your_openai_api_key_here
 OPENAI_EMB=text-embedding-3-small
-OPENAI_MODEL=gpt-4
+OPENAI_MODEL=gpt-6.1-sol
+OPENAI_REASONING_EFFORT=high
+OPENAI_CITATION_MODEL=gpt-6-luna
+OPENAI_CITATION_REASONING_EFFORT=none
+OPENAI_TIMEOUT_SECONDS=120
 
 # === Embedding Configuration ===
 EMBED_BACKEND=st  # Options: 'st' (sentence-transformers), 'openai'
@@ -535,7 +541,7 @@ REDIS_URL=redis://localhost:6379/0
 
 # === File Storage ===
 UPLOADS_DIR=data/uploads
-MAX_FILE_SIZE=100MB
+MAX_UPLOAD_MB=50
 ALLOWED_EXTENSIONS=pdf,txt,docx,doc
 
 # === Vector Store Configuration ===

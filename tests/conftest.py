@@ -55,19 +55,15 @@ def fake_openai_client(monkeypatch, request):
 
     class FakeResp:
         def __init__(self, content):
-            class Msg:
-                def __init__(self, c):
-                    self.content = c
-
-            self.choices = [type("C", (), {"message": Msg(content)})()]
+            self.output_text = content
+            self.id = "resp_test"
+            self.model = "test-model"
+            self.usage = {}
 
     class FakeClient:
-        def __init__(self):
-            pass
-
-        class chat:
+        class responses:
             @staticmethod
-            def completions_create(**kwargs):
+            def create(**kwargs):
                 # Return a simple answer that doesn't require context
                 return FakeResp("This is a fake answer.\n\n## References\n")
 

@@ -2,20 +2,19 @@
 builder = "NIXPACKS"
 
 [env]
-# --- Embedding configs ---
+# Embedding config for FAISS/upload stores. The literature retriever below uses
+# deterministic word + chemical-character TF-IDF indexes.
 EMBED_BACKEND            = "st"
-
-# doc-level (papers) → SPECTER
-EMBED_MODEL_DOC          = "allenai/specter"
+EMBED_MODEL              = "sentence-transformers/all-MiniLM-L6-v2"
+DATA_DIR                 = "/data"
+HARVEST_OUT_DIR          = "/data/harvester/out_auto"
 INDEX_DIR_DOC            = "/data/vector_store_doc"
-
-# passage-level (methods paragraphs) → MPNet QA
-EMBED_MODEL_PASSAGE      = "multi-qa-mpnet-base-dot-v1"
 INDEX_DIR_PASSAGE        = "/data/vector_store_passage"
 
 # existing paths
 INDEX_DIR                = "/data/vector_store"                      # kept for backward-compat; points to DOC
 BUNDLE_PATH              = "/data/harvester/out_auto/bundle.jsonl"
+BUNDLE_AUTO              = "/data/harvester/out_auto/bundle.jsonl"
 
 # retriever envs (your app can read these to choose an index)
 RETRIEVER_INDEX_DIR_DOC      = "/data/vector_store_doc"
@@ -25,14 +24,12 @@ RETRIEVER_INDEX_DIRS         = "/data/vector_store_doc:/data/vector_store_passag
 
 LOOKUP_BACKEND = "none"
 PYTHONPATH     = "/app"
+PYTHONUNBUFFERED = "1"
 
 [phases.install]
 cmds = [
   "pip install -U pip wheel",
-  "pip install -r requirements.txt",
-  "pip install 'spacy<4'",
-  "pip install -U spacy-lookups-data",
-  "python -m spacy download en_core_web_sm"
+  "pip install -r requirements.txt"
 ]
 
 [phases.start]
@@ -57,7 +54,7 @@ cmd = """bash -lc '
   # Optional TF-IDF purge/rebuild for sklearn version alignment
   if [ "${REBUILD_TFIDF:-0}" = "1" ]; then
     echo "[start] REBUILD_TFIDF=1 (PURGE_TFIDF=${PURGE_TFIDF:-0})"
-    python scripts/rebuild_tfidf.py || true
+    python scripts/rebuild_tfidf.py
   fi
 
   if [ ! -s "$BUNDLE_PATH" ] && [ -f "/app/data/harvester/out_auto/seed_bundle.jsonl" ]; then
@@ -69,17 +66,23 @@ cmd = """bash -lc '
     echo "[start] Skipping normal index build (REBUILD_TFIDF active)"
   else
     if [ -s "$BUNDLE_PATH" ]; then
-      echo "[start] Building DOC index (SPECTER)..."
-      EMBED_BACKEND=st EMBED_MODEL="${EMBED_MODEL_DOC:-allenai/specter}" \
-        python retriever/index_jsonl.py --bundle "$BUNDLE_PATH" --index_dir "$INDEX_DIR_DOC" || true
-      echo "[start] Building PASSAGE index (MPNet)..."
-      EMBED_BACKEND=st EMBED_MODEL="${EMBED_MODEL_PASSAGE:-multi-qa-mpnet-base-dot-v1}" \
-        python retriever/index_jsonl.py --bundle "$BUNDLE_PATH" --index_dir "$INDEX_DIR_PASSAGE" || true
+      if [ ! -s "$INDEX_DIR_DOC/tfidf.npz" ] || [ ! -s "$INDEX_DIR_DOC/rows.jsonl" ]; then
+        echo "[start] Building document index from abstracts..."
+        python retriever/index_jsonl.py --bundle "$BUNDLE_PATH" --index_dir "$INDEX_DIR_DOC" --text-key abstract
+      else
+        echo "[start] Document index already present; skipping rebuild"
+      fi
+      if [ ! -s "$INDEX_DIR_PASSAGE/tfidf.npz" ] || [ ! -s "$INDEX_DIR_PASSAGE/rows.jsonl" ]; then
+        echo "[start] Building passage index from methods..."
+        python retriever/index_jsonl.py --bundle "$BUNDLE_PATH" --index_dir "$INDEX_DIR_PASSAGE" --text-key methods
+      else
+        echo "[start] Passage index already present; skipping rebuild"
+      fi
     else
       echo "[start] No bundle at $BUNDLE_PATH; skipping index"
     fi
   fi
 
-  exec gunicorn -k uvicorn.workers.UvicornWorker -w 2 --threads 2 --timeout 90 \
+  exec gunicorn -k uvicorn.workers.UvicornWorker -w "${WEB_CONCURRENCY:-2}" --timeout "${GUNICORN_TIMEOUT:-180}" \
     --worker-tmp-dir /dev/shm -b 0.0.0.0:${PORT} main_asgi:app
 '"""

@@ -95,16 +95,13 @@ def test_openai_failure_returns_structured_502(ask_module, monkeypatch):
         ],
     )
 
-    class FailingCompletions:
+    class FailingResponses:
         @staticmethod
         def create(**_kwargs):
             raise TimeoutError("upstream timed out")
 
-    class FailingChat:
-        completions = FailingCompletions()
-
     class FailingClient:
-        chat = FailingChat()
+        responses = FailingResponses()
 
     monkeypatch.setattr(ask_module, "client", FailingClient())
 
@@ -117,11 +114,42 @@ def test_openai_failure_returns_structured_502(ask_module, monkeypatch):
     )
 
     assert response.status_code == 502
-    assert response.get_json() == {
-        "ok": False,
-        "error": "Language model request failed",
-        "error_type": "TimeoutError",
-    }
+    data = response.get_json()
+    assert data["ok"] is False
+    assert data["error"] == "The language model took too long to respond; try again."
+    assert data["error_code"] == "model_timeout"
+    assert data["error_type"] == "TimeoutError"
+    assert data["retryable"] is True
+    assert data["upstream_request_id"] is None
+    assert isinstance(data["request_id"], str)
+    assert data["request_id"]
+
+
+def test_ask_never_uses_an_implicit_latest_attachment(ask_module, monkeypatch):
+    def unexpected_read(*_args, **_kwargs):
+        raise AssertionError("an attachment was read without an explicit ID")
+
+    monkeypatch.setattr(ask_module, "read_attachment_text", unexpected_read)
+
+    response = ask_module.app.test_client().post(
+        "/ask", json={"question": "Explain nanocrystal nucleation."}
+    )
+
+    assert response.status_code == 200
+    assert response.get_json()["ok"] is True
+
+
+def test_ask_rejects_unsafe_attachment_id(ask_module):
+    response = ask_module.app.test_client().post(
+        "/ask",
+        json={
+            "question": "Read the attachment.",
+            "attachments": ["../../another-users-file"],
+        },
+    )
+
+    assert response.status_code == 400
+    assert response.get_json()["error"] == "Invalid attachment ID"
 
 
 def test_healthz_reports_answer_readiness(ask_module, monkeypatch, tmp_path):
@@ -151,4 +179,6 @@ def test_healthz_reports_answer_readiness(ask_module, monkeypatch, tmp_path):
     assert data["ready"] is True
     assert data["openai_configured"] is True
     assert data["retriever_ready"] is True
+    assert data["model"] == "gpt-6.1-sol"
+    assert data["reasoning_effort"] == "high"
     assert data["indexes"]["doc"]["rows_present"] is True

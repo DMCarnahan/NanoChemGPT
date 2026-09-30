@@ -1,5 +1,5 @@
-import os
-from pathlib import Path
+import io
+
 from app import app as flask_app
 from app_utils.constants import ATTACH_DIR
 
@@ -36,3 +36,18 @@ def test_attachment_text_pdf_fail_cache(tmp_path, monkeypatch):
     txt = read_attachment_text(aid)
     # Cached fail should return empty string
     assert txt == ""
+
+
+def test_attachment_rejects_unsafe_id_and_unsupported_type():
+    client = flask_app.test_client()
+
+    invalid_id = client.get("/attachment_text/bad$id")
+    assert invalid_id.status_code == 400
+
+    upload = client.post(
+        "/attach",
+        data={"files": (io.BytesIO(b"not executable"), "payload.exe")},
+        content_type="multipart/form-data",
+    )
+    assert upload.status_code == 400
+    assert upload.get_json()["error_code"] == "unsupported_file_type"
