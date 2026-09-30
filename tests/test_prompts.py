@@ -18,6 +18,7 @@ def test_answer_prompt_keeps_untrusted_evidence_out_of_instructions():
     )
     assert "proposed starting point" in prompt.instructions
     assert "Do not force an air-free or air-exposed procedure" in prompt.instructions
+    assert "cite at least two distinct sources" in prompt.instructions
     assert "## Synthesis Protocol:" in prompt.instructions
 
 
@@ -37,9 +38,14 @@ def test_reasoning_prompt_requires_evidence_inference_separation():
 
 def test_citation_repair_cannot_rewrite_or_invent_sources():
     prompt = build_citation_repair_prompt(
-        answer="Draft answer.", context="Evidence.", references="[1] Paper"
+        answer="Draft answer.",
+        context="Evidence.",
+        references="[1] Paper",
+        target_source_count=2,
     )
 
     assert "Preserve the draft wording and formatting" in prompt.instructions
     assert "only when source n directly supports" in prompt.instructions
+    assert "at least 2 distinct numbered sources" in prompt.instructions
+    assert "rather than padding with irrelevant sources" in prompt.instructions
     assert "BEGIN DRAFT\nDraft answer.\nEND DRAFT" in prompt.input_text

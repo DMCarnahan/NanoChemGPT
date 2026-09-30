@@ -241,6 +241,13 @@ OPENAI_CITATION_MODEL=gpt-6-luna
 OPENAI_CITATION_REASONING_EFFORT=none
 OPENAI_TIMEOUT_SECONDS=120
 
+# --- optional literature services (blank-safe) ---
+OPENALEX_API_KEY=             # optional; raises the OpenAlex request budget
+OPENALEX_MAILTO=              # optional contact address
+UNPAYWALL_EMAIL=              # enables Unpaywall DOI lookups (email, not a key)
+EPMC_BASE=                    # optional Europe PMC endpoint override
+OA_TIMEOUT=12
+
 # --- embeddings ---
 EMBED_BACKEND=openai           # openai | sentence-transformers
 EMBED_MODEL=text-embedding-3-small   # or sentence-transformers/all-MiniLM-L6-v2
@@ -262,7 +269,12 @@ FLASK_ENV=development
 ADMIN_TOKEN=change-me          # required for /admin/* endpoints
 ```
 
-The app will fall back to sensible defaults if some variables are missing, but the above is recommended.
+The app will fall back to sensible defaults if some variables are missing. All
+literature-service variables above may be absent or blank; NanoChemGPT then
+skips that credential or uses the public fallback instead of failing a request.
+Publisher-specific keys such as Elsevier or Springer Nature are not consumed by
+the current harvester and should not be added until a corresponding provider is
+implemented.
 
 ## Publishing & Docker
 

@@ -47,7 +47,17 @@ import logging
 logger = logging.getLogger(__name__)
 
 UA = "NanoChemGPT-Harvester/1.0 (+https://nanochemgpt-production.up.railway.app/)"
-TIMEOUT = float(os.getenv("OA_TIMEOUT", "12"))
+
+
+def _env_float(name: str, default: float) -> float:
+    raw = (os.getenv(name) or "").strip()
+    try:
+        return float(raw) if raw else default
+    except (TypeError, ValueError):
+        return default
+
+
+TIMEOUT = _env_float("OA_TIMEOUT", 12.0)
 # ---------------------- Normalization helpers ----------------------
 _DOI_RX = re.compile(r"(10\.\d{4,9}/[-._;()/:A-Z0-9]+)", re.I)
 

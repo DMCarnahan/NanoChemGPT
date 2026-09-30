@@ -1,8 +1,11 @@
+import os
 from typing import Any, Dict, List
 
 import httpx
 
-EPMC_SEARCH = "https://www.ebi.ac.uk/europepmc/webservices/rest/search"
+_DEFAULT_EPMC_BASE = "https://www.ebi.ac.uk/europepmc/webservices/rest"
+EPMC_BASE = (os.getenv("EPMC_BASE") or _DEFAULT_EPMC_BASE).strip().rstrip("/")
+EPMC_SEARCH = f"{EPMC_BASE}/search"
 
 
 def _to_int(x, default=None):
@@ -115,7 +118,7 @@ def fetch_fulltext_jats(pmcid: str, timeout: float = 60.0) -> str | None:
         return None
 
     # 1) Europe PMC: /webservices/rest/{PMCID}/fullTextXML
-    url_epmc = f"https://www.ebi.ac.uk/europepmc/webservices/rest/{pmcid}/fullTextXML"
+    url_epmc = f"{EPMC_BASE}/{pmcid}/fullTextXML"
     try:
         r = httpx.get(
             url_epmc,
