@@ -63,6 +63,23 @@ Check system health and availability.
 
 Main endpoint for question answering with retrieval-augmented generation.
 
+Protocol answers use material bullets and discrete numbered actions. Screening
+tables are normalized into labeled bullets before display and JSON conversion;
+normalization preserves values and does not select an experimental condition.
+Literature and KB hits are filtered against the current question's material
+before they enter the model evidence or candidate reference list. For an
+elliptical question about an attachment, a named target in that attachment can
+scope the search. If no relevant literature evidence survives, the response
+reports that gap instead of padding references.
+
+`[A1.1]` identifies the first attached document and is separate from numbered
+literature citations such as `[1]`. An attachment marker supports only what its
+document states; it does not validate a proposed optimization. Citation repair
+checks both the protocol and its rationale and accepts citation changes only.
+The `grounding` object includes `material_scope`, `rejected_hits`, and
+`literature_evidence_sources` (the number of numbered sources with evidence in
+the model context).
+
 **Request Body** (JSON):
 ```json
 {

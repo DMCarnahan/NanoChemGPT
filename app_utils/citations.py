@@ -10,6 +10,17 @@ from ref_utils import (
 )
 
 _EVIDENCE_SOURCE_HEADER = re.compile(r"(?m)^\[(\d+)\]\s+\S")
+_CITATION_MARKER = re.compile(r"\[(?:\d+(?:\s*[-–,]\s*\d+)*|[AU]\d+(?:\.\d+)*)\]")
+
+
+def preserves_non_citation_text(draft: str, repaired: str) -> bool:
+    """A citation-only pass must not rewrite chemistry or execution conditions."""
+
+    def wording(text):
+        text = re.sub(r"\s+", " ", _CITATION_MARKER.sub("", text or "")).strip()
+        return re.sub(r"\s+([.,;:!?])", r"\1", text)
+
+    return wording(draft) == wording(repaired)
 
 
 def _positive_indexes(values) -> set[int]:

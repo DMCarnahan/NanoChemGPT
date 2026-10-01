@@ -1,0 +1,15 @@
+# Synthetic converter regression data
+# Placeholder stocks; not a validated laboratory procedure.
+
+Procedure:
+1. Add 10 mL water to the flask, followed by 2 mL stock A, then 3 mL stock B and add 1 mL stock C. Preserve this addition order for every batch.
+
+2. Stir for 5 minutes. The example does not state stirring speed. Proposed starting point: maintain 23-26 °C and use a reproducible stirring setting. Record the temperature and stirring speed.
+
+3. At the end of the mixing period, dissolve 100 mg NaCl in 4 mL water at approximately 5 °C. Add the dissolved solution to the reaction flask within three minutes of water contacting NaCl.
+
+4. Allow reaction to proceed for 5-10 minutes. For this example, use 8 minutes as the proposed fixed endpoint.
+
+5. Distribute the product among three 15 mL centrifuge tubes, balance them, and centrifuge at 2000 rpm for 2 minutes. Decant the supernatant.
+
+6. Perform two additional water washes, then redisperse the product in water. Proposed starting point: use 3 mL water per tube per wash, gently redisperse, and repeat 2000 rpm for 2 minutes.
