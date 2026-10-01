@@ -162,13 +162,15 @@
         <p class="small muted mt-2">Tip: Describe reagents, solvents, temps, and any constraints.</p>
   <label class="visually-hidden" for="question">Enter a question</label>
         <textarea id="question" class="textarea" rows="8" autocomplete="off" placeholder="Ask a synthesis question…" aria-describedby="askHelp"></textarea>
-        <label for="attachInput" class="small mt-2" id="attachLabel">Attach files</label>
+        <label for="attachInput" class="small mt-2" id="attachLabel">Attach files to questions</label>
         <input id="attachInput"
               type="file"
               multiple
-              accept=".pdf,.txt,.json"
+              accept=".pdf,.txt,.md,.json,.csv"
               aria-describedby="attachHelp attachMsg"
-              data-max-files="3">
+              data-max-files="5">
+        <p id="attachHelp" class="small muted mt-1">Selected files stay attached to follow-up questions until removed. Choose up to 5 files.</p>
+        <button id="clearAttachmentsBtn" class="btn tertiary mt-1" type="button" disabled>Remove attached files</button>
         <ul id="attachList"
             class="mt-1"
             aria-live="polite"
@@ -178,6 +180,7 @@
             role="status"
             aria-live="polite"
             aria-atomic="true"></div>
+        <label class="small mt-2" for="useUploads"><input id="useUploads" type="checkbox"> Use stored uploaded sources for this question</label>
         <div class="toolbar mt-3" role="group" aria-label="Ask toolbar">
           <button id="askBtn" class="btn" type="button" aria-controls="answerPre rationalePre refsSection askMsg">Ask</button>
           <button id="parseBtn" class="btn secondary" type="button">Convert → JSON</button>
@@ -220,13 +223,13 @@
         <h2 id="sec-quick" class="card-title">Data & tools</h2>
 
         <details class="clean" open>
-          <summary class="subhead">Upload source (PDF / JSON / TXT)</summary>
+          <summary class="subhead">Store source (PDF / JSON / TXT)</summary>
           <div class="stack mt-2" role="group" aria-label="Upload source">
             <div class="cluster">
               <input id="fileInput" type="file" accept=".pdf,.json,.txt,.md,.csv,.parquet" aria-describedby="fileHint">
               <button id="uploadBtn" class="btn secondary" type="button" aria-controls="result progressInner">Upload</button>
             </div>
-            <div id="fileHint" class="small muted" role="note">Supported: .pdf, .json, .txt, .md, .csv</div>
+            <div id="fileHint" class="small muted" role="note">Supported: .pdf, .json, .txt, .md, .csv. Select “Use stored uploaded sources” to use these files, or attach a specific protocol above.</div>
             <div class="progress" role="progressbar" aria-label="Upload progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
               <div id="progressInner"></div>
             </div>

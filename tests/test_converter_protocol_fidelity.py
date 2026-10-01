@@ -24,6 +24,52 @@ def test_brackets_and_citations_are_not_procedure_steps():
     assert all(s not in {"[", "]"} and "[A1." not in s for s in steps)
 
 
+def test_numbered_annotation_heading_does_not_hide_later_operations():
+    text = (
+        "Procedure:\n"
+        "1. Define the target using individual particles:\n"
+        "   Aspect ratio 6.\n"
+        "2. Add 10 mL water to the flask.\n"
+        "3. Stir at 500 rpm for 5 minutes."
+    )
+    steps = extract_steps(text)
+    assert steps[1:] == [
+        "Add 10 mL water to the flask.",
+        "Stir at 500 rpm for 5 minutes.",
+    ]
+    doc = convert_text_to_robot_ops(text)
+    assert [s["action"] for s in doc["steps"]] == ["process", "add_solvent", "stir"]
+    assert [op["verb"] for op in doc["micro_plan"]] == [
+        "pour",
+        "move_to_stir_plate",
+        "set_stir_rate",
+        "wait",
+    ]
+    assert doc["_executor"]["valid"] is True
+
+
+def test_numbered_heading_keeps_its_indented_substeps():
+    text = (
+        "Procedure:\n"
+        "1. Prepare the mixture:\n"
+        "   1. Add 10 mL water to the flask.\n"
+        "   2. Stir at 500 rpm for 5 minutes.\n"
+        "2. Transfer the mixture to a clean beaker."
+    )
+    steps = extract_steps(text)
+    assert steps[0].startswith("Prepare the mixture: Add")
+    assert steps[1].startswith("Prepare the mixture: Stir")
+    assert steps[2] == "Transfer the mixture to a clean beaker."
+
+
+def test_unnumbered_section_heading_can_cover_numbered_steps():
+    text = "Procedure:\nPreparation:\n1. Add 10 mL water.\n2. Stir for 5 minutes."
+    assert extract_steps(text) == [
+        "Preparation: Add 10 mL water.",
+        "Preparation: Stir for 5 minutes.",
+    ]
+
+
 @pytest.mark.parametrize("strict", [False, True])
 def test_exports_never_include_pddl(monkeypatch, strict):
     monkeypatch.setenv("GT_SCHEMA_STRICT", "1" if strict else "0")
