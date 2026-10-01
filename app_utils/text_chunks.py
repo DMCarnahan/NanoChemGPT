@@ -3,13 +3,19 @@
 from __future__ import annotations
 
 import re
+from textwrap import wrap
 from typing import List
 
 from .pdf_utils import normalize_pdf_text
 
 
 def best_chunks_from_text(
-    text: str, query: str, max_chunk_chars: int = 1200, top_k: int = 3
+    text: str,
+    query: str,
+    max_chunk_chars: int = 1200,
+    top_k: int = 3,
+    *,
+    preserve_order: bool = False,
 ) -> List[str]:
     if not text:
         return []
@@ -42,6 +48,12 @@ def best_chunks_from_text(
                 buf = []
                 size = 0
             continue
+        if len(p) > max_chunk_chars:
+            if buf:
+                chunks.append("\n".join(buf))
+                buf, size = [], 0
+            chunks.extend(wrap(p, width=max_chunk_chars, break_on_hyphens=False))
+            continue
         if size + len(p) + 1 > max_chunk_chars and buf:
             chunks.append("\n".join(buf))
             buf = []
@@ -58,8 +70,11 @@ def best_chunks_from_text(
         nums = len(re.findall(r"\b\d+(?:\.\d+)?\s*(?:m|mL|min|°C|h|pH)\b", s))
         return base + bonus + nums
 
-    ranked = sorted(chunks, key=score, reverse=True)
-    return ranked[:top_k]
+    ranked = sorted(range(len(chunks)), key=lambda i: score(chunks[i]), reverse=True)
+    selected = ranked[:top_k]
+    if preserve_order:
+        selected.sort()
+    return [chunks[i] for i in selected]
 
 
 def pick_method_paragraph(text: str) -> str:

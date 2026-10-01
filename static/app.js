@@ -61,7 +61,28 @@ document.addEventListener('DOMContentLoaded', () => {
   const askBtn = $('askBtn');
   const attachInput = $('attachInput');
   const attachList = $('attachList');
+  const attachMsg = $('attachMsg');
+  const clearAttachmentsBtn = $('clearAttachmentsBtn');
+  const useUploads = $('useUploads');
   let pendingAttachmentIds = [];
+  let asking = false;
+  let attaching = false;
+
+  function updateAttachmentControls() {
+    if (askBtn) askBtn.disabled = asking || attaching;
+    if (attachInput) attachInput.disabled = asking || attaching;
+    if (clearAttachmentsBtn) {
+      clearAttachmentsBtn.disabled = asking || attaching || !pendingAttachmentIds.length;
+    }
+  }
+
+  clearAttachmentsBtn?.addEventListener('click', () => {
+    pendingAttachmentIds = [];
+    if (attachList) attachList.innerHTML = '';
+    if (attachInput) attachInput.value = '';
+    if (attachMsg) attachMsg.textContent = 'No files attached.';
+    updateAttachmentControls();
+  });
   const parseBtn = $('parseBtn');
   const uploadBtn = $('uploadBtn');
   const fileInput = $('fileInput');
@@ -135,12 +156,16 @@ document.addEventListener('DOMContentLoaded', () => {
     const question = qInput?.value.trim();
     if (!question) return;
 
-  askBtn.disabled = true;
+  if (asking || attaching) return;
+  asking = true;
+  updateAttachmentControls();
   askMsg.classList.remove('hidden');
   
   // Show attachment status to user
   if (askMsg) { 
-    askMsg.textContent = `Using attachments: ${pendingAttachmentIds.join(', ') || '(none)'} - Asking…`; 
+    askMsg.textContent = pendingAttachmentIds.length
+      ? `Asking with ${pendingAttachmentIds.length} attached file(s)…`
+      : 'Asking…';
   }
   
   spinnerOverlay.style.display = 'flex';
@@ -151,7 +176,8 @@ document.addEventListener('DOMContentLoaded', () => {
       const payload = {
         question,
         mode,
-        attachments: pendingAttachmentIds,
+        attachments: [...pendingAttachmentIds],
+        use_uploads: Boolean(useUploads?.checked),
         allow_fetch: false
       };
       payload.format = 'protocol-grounded';
@@ -166,29 +192,25 @@ document.addEventListener('DOMContentLoaded', () => {
       let data;
       try { data = JSON.parse(raw); } catch { data = { answer: raw }; }
 
-      if (!res.ok) {
+      if (!res.ok || data.ok === false) {
         const detail = [data.error_code, data.request_id && `request ${data.request_id}`]
           .filter(Boolean)
           .join('; ');
         askMsg.textContent = `Error ${res.status}: ${data.error || raw}${detail ? ` (${detail})` : ''}`;
-      } else if (data.answer && data.answer.toLowerCase().includes('error')) {
-        askMsg.textContent = `Backend error: ${data.answer}`;
       } else {
         renderModelText(answerPre, data.answer ?? '(no answer)');
         renderModelText(rationalePre, data.rationale ?? '');
         renderRefsFromData(data);
         askMsg.textContent = 'Done.';
-        // Keep attachments on failed requests so a retry uses the same evidence.
-        pendingAttachmentIds = [];
-        if (attachList) attachList.innerHTML = '';
-        if (attachInput) attachInput.value = '';
+        // Selected files remain explicit inputs to follow-up questions until cleared.
       }
       
     } catch (err) {
       console.error(err);
       askMsg.textContent = `Network error: ${err.message || err}. Check the deployment and retry.`;
     } finally {
-      askBtn.disabled = false;
+      asking = false;
+      updateAttachmentControls();
       spinnerOverlay.style.display = 'none';
     }
   });
@@ -635,24 +657,41 @@ document.addEventListener('DOMContentLoaded', () => {
 
   attachInput?.addEventListener('change', async () => {
     const files = Array.from(attachInput.files || []);
-    if (!files.length) return;
+    if (!files.length || asking || attaching) return;
+    if (files.length > 5) {
+      if (attachMsg) attachMsg.textContent = 'Choose at most 5 files.';
+      attachInput.value = '';
+      return;
+    }
+    attaching = true;
+    updateAttachmentControls();
+    if (attachMsg) attachMsg.textContent = 'Attaching files…';
     try {
       const ids = await uploadAttachmentsForQuestion(files);
+      if (ids.length !== files.length) {
+        throw new Error('Some files could not be attached. Please try again.');
+      }
       pendingAttachmentIds = ids;
       if (attachList) {
         attachList.innerHTML = '';
-        files.forEach((file, index) => {
+        files.forEach((file) => {
           const li = document.createElement('li');
-          li.textContent = `${file.name} (${ids[index] || ''})`;
+          li.textContent = file.name;
           attachList.appendChild(li);
         });
       }
-      if (attachMsg) attachMsg.textContent = `${ids.length} attachment(s) ready.`;
+      if (attachMsg) {
+        attachMsg.textContent = `${ids.length} file(s) attached to questions until removed.`;
+      }
     } catch (error) {
       console.error(error);
       if (attachMsg) {
         attachMsg.textContent = `Attach failed: ${error.message || error}`;
       }
+      attachInput.value = '';
+    } finally {
+      attaching = false;
+      updateAttachmentControls();
     }
   });
 

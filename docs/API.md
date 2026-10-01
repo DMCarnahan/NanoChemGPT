@@ -162,6 +162,10 @@ The API surfaces executor metadata at the top-level for convenience when `robot_
 Upload the file to `/attach`, then pass the returned ID in `attachments` on
 `/ask`. The server never falls back to another user's or an older attachment.
 
+The page keeps selected attachments for follow-up questions until **Remove attached files** is clicked. Each request still explicitly supplies the selected IDs. Files uploaded through **Store source** are used only when **Use stored uploaded sources for this question** is selected.
+
+Complete short protocols are included in the model context, preserving their operation order and final workup. Larger files share the `MAX_CONTEXT_CHARS` budget; selected excerpts retain source order and carry an omission notice. Responses include `attachments_used` with each attachment's `id`, `source_chars`, `context_chars`, and `excerpted` status. A requested attachment that is missing, empty, or unreadable stops `/ask` with HTTP 422 and `error_code: "attachment_unreadable"`, rather than silently proceeding without it.
+
 **Request** (JSON):
 
 **Example using curl**:

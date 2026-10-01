@@ -46,3 +46,15 @@ def test_page_loads_renderer_before_app_and_uses_wrapped_reference_block():
     assert 'id="refsBlock"' in template
     assert "#refsBlock,.refs-pre,.refsBlock" in template
     assert "white-space:pre-wrap" in template
+
+
+def test_attachments_survive_followups_and_require_explicit_removal():
+    if not shutil.which("node"):
+        pytest.skip("Node.js is not available")
+    result = subprocess.run(
+        ["node", "tests/frontend_attachment_flow.cjs"],
+        cwd=ROOT,
+        capture_output=True,
+        text=True,
+    )
+    assert result.returncode == 0, result.stdout + result.stderr

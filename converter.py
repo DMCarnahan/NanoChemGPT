@@ -460,6 +460,7 @@ def extract_steps(markdown_text: str) -> List[str]:
     saw_proc_header = False
     steps: List[str] = []
     current_section: Optional[str] = None
+    numbered_section_indent: Optional[int] = None
     last_step_idx: Optional[int] = None
 
     for raw_line in lines:
@@ -479,6 +480,7 @@ def extract_steps(markdown_text: str) -> List[str]:
             in_proc = True
             saw_proc_header = True
             current_section = None
+            numbered_section_indent = None
             last_step_idx = None
             continue
 
@@ -489,6 +491,15 @@ def extract_steps(markdown_text: str) -> List[str]:
             continue
 
         if re.match(r"^\s*\d+\.\s*", stripped):
+            indent = len(raw_line) - len(raw_line.lstrip())
+            # A numbered heading applies to its body, not to the next sibling.
+            # Indented numbered substeps still belong to the current heading.
+            if (
+                numbered_section_indent is not None
+                and indent <= numbered_section_indent
+            ):
+                current_section = None
+                numbered_section_indent = None
             content = _strip_markdown_prefix(stripped)
             if _is_section_heading_line(content):
                 heading = content.rstrip(":").strip()
@@ -496,6 +507,7 @@ def extract_steps(markdown_text: str) -> List[str]:
                     r"\bprocedure\b", heading, re.I
                 ) and not _is_non_procedure_step_text(heading + ":"):
                     current_section = heading
+                    numbered_section_indent = indent
                 last_step_idx = None
                 continue
             candidate = _clean_step_text(content)
@@ -523,6 +535,7 @@ def extract_steps(markdown_text: str) -> List[str]:
             heading = plain.rstrip(":").strip()
             if not _is_non_procedure_step_text(heading + ":"):
                 current_section = heading
+                numbered_section_indent = None
             last_step_idx = None
             continue
 

@@ -75,6 +75,7 @@ from app_utils.llm import (
     public_model_error,
 )
 from app_utils.prompts import build_answer_prompt, build_citation_repair_prompt
+from app_utils.attachment_context import build_attachment_context
 from app_utils.citations import (
     citation_repair_target,
     grounded_reference_indexes,
@@ -1763,35 +1764,57 @@ def ask():
     except RequestValidationError as exc:
         return jsonify({"ok": False, "error": str(exc)}), 400
 
-    try:
-        # Attachments are used only when this request names them explicitly.
-        if atch_ids:
-            lines = []
-            max_pages = bounded_int(
-                os.getenv("ATTACH_MAX_PAGES", 40), 40, minimum=1, maximum=100
-            )
-            for j, aid in enumerate(atch_ids, start=1):
-                txt = read_attachment_text(aid, max_pages=max_pages)
-                if txt:
-                    for k, ch in enumerate(
-                        _best_chunks_from_text(txt, question, top_k=3), start=1
-                    ):
-                        head = f"[A{j}.{k}] attachment:{aid}"
-                        lines.append(head + "\n" + ch.strip()[:1200])
-            attachments_ctx = "\n\n".join(lines)
-            app.logger.info(
-                f"[ask] attachments used: {atch_ids} | ctx_chars={len(attachments_ctx)}"
-            )
-    except Exception as e:
+    max_context_chars = bounded_int(
+        os.getenv("MAX_CONTEXT_CHARS", 30_000),
+        30_000,
+        minimum=4_000,
+        maximum=100_000,
+    )
+    attachment_evidence = []
+    unreadable_attachments = []
+    max_pages = bounded_int(
+        os.getenv("ATTACH_MAX_PAGES", 40), 40, minimum=1, maximum=100
+    )
+    # Read only the IDs explicitly supplied by this request. Missing files must
+    # not turn into a successful answer that silently ignores the user's source.
+    for aid in atch_ids:
         try:
-            app.logger.warning(f"[/ask] attachments_ctx warn: {e}")
+            txt = read_attachment_text(aid, max_pages=max_pages)
         except Exception:
-            pass
+            app.logger.exception("[/ask] attachment read failed id=%s", aid)
+            txt = ""
+        if not isinstance(txt, str) or not txt.strip():
+            unreadable_attachments.append(aid)
+        else:
+            attachment_evidence.append((aid, txt))
+    if unreadable_attachments:
+        return (
+            jsonify(
+                {
+                    "ok": False,
+                    "error": "An attached file is missing or contains no readable text. "
+                    "Reattach it as a text-readable PDF, TXT, or Markdown file.",
+                    "error_code": "attachment_unreadable",
+                    "attachment_ids": unreadable_attachments,
+                    "request_id": g.request_id,
+                }
+            ),
+            422,
+        )
+    attachments_ctx, attachments_used = build_attachment_context(
+        attachment_evidence,
+        question,
+        maximum_chars=max_context_chars - len("<<<CTX_ATTACH>>>\n"),
+    )
+    if atch_ids:
+        app.logger.info(
+            "[ask] attachments used: %s | ctx_chars=%s", atch_ids, len(attachments_ctx)
+        )
     verbatim_mode = bool(attachments_ctx) and _wants_verbatim(question)
 
     raw_verbatim_text = ""
     if verbatim_mode:
-        # attachments_ctx was built from best chunks; concatenate them and clean
+        # Clean the supplied attachment text without inventing missing conditions.
         raw_verbatim_text = _clean_verbatim_block(attachments_ctx)
         try:
             from app_utils.pdf_utils import normalize_pdf_text as _nv
@@ -1833,7 +1856,15 @@ def ask():
         refs = [
             {"source": "attachment", "note": "verbatim"}
         ]  # or your normal refs shape
-        resp = {"ok": True, "answer": answer, "rationale": rationale, "refs": refs}
+        if any(item["excerpted"] for item in attachments_used):
+            rationale += " Some attachment text was omitted at the context limit."
+        resp = {
+            "ok": True,
+            "answer": answer,
+            "rationale": rationale,
+            "refs": refs,
+            "attachments_used": attachments_used,
+        }
         return jsonify(resp)
 
     # ----------------- Compose CONTEXT -----------------
@@ -1852,16 +1883,23 @@ def ask():
     if web_ctx:
         ctx_parts.append("<<<CTX_WEB>>>\n" + web_ctx)
 
-    context_joined = "\n\n---\n\n".join([p for p in ctx_parts if p]).strip()
-    context_joined = truncate_context(
-        context_joined,
-        maximum_chars=bounded_int(
-            os.getenv("MAX_CONTEXT_CHARS", 30_000),
-            30_000,
-            minimum=4_000,
-            maximum=100_000,
-        ),
-    )
+    separator = "\n\n---\n\n"
+    if attachments_ctx:
+        # Preserve the attachment allocation even when supplementary retrieval
+        # exceeds the limit; truncating the joined context would cut its tail.
+        context_joined = ctx_parts[0]
+        supplemental = truncate_context(
+            separator.join(ctx_parts[1:]),
+            maximum_chars=max(
+                0, max_context_chars - len(context_joined) - len(separator)
+            ),
+        )
+        if supplemental:
+            context_joined += separator + supplemental
+    else:
+        context_joined = truncate_context(
+            separator.join(ctx_parts), maximum_chars=max_context_chars
+        )
 
     # detect user intent; you can also set this via a payload flag from the UI
     def _wants_structured(q: str) -> bool:
@@ -1906,6 +1944,7 @@ def ask():
                 "refs": refs,
                 "method_paragraph_used": bool(method_paragraph),
                 "extracted_facts": facts,
+                "attachments_used": attachments_used,
             }
         )
 
@@ -2437,6 +2476,7 @@ def ask():
         "mode": mode,
         "request_id": g.request_id,
         "model": model_used,
+        "attachments_used": attachments_used,
         "mining_enqueued": enqueued,
         "mining_job_id": mining_job_id,
         "answer": answer,
