@@ -5,10 +5,16 @@ const vm = require('node:vm');
 function element() {
   const listeners = {};
   const style = {};
+  const classes = new Set();
   const el = {
     listeners, children: [], dataset: {}, files: [], value: '', textContent: '',
     disabled: false, checked: false,
-    classList: {add() {}, remove() {}},
+    classList: {
+      add(name) {classes.add(name);},
+      remove(name) {classes.delete(name);},
+      contains(name) {return classes.has(name);},
+      toggle(name, force) {if (force) classes.add(name); else classes.delete(name);},
+    },
     addEventListener(name, callback) {listeners[name] = callback;},
     appendChild(child) {this.children.push(child);},
     async dispatch(name) {await listeners[name]?.({preventDefault() {}});},
@@ -26,6 +32,7 @@ async function main() {
   const nodes = Object.fromEntries([
     'askBtn', 'attachInput', 'attachList', 'attachMsg', 'clearAttachmentsBtn',
     'useUploads', 'question', 'askMsg', 'answerPre', 'rationalePre',
+    'refsSection', 'refsBlock', 'refsList', 'candPanel', 'sourceNotes',
   ].map(id => [id, element()]));
   let ready;
   let finishUpload;
@@ -55,7 +62,11 @@ async function main() {
         ok: !failAsk, status: failAsk ? 422 : 200,
         text: async () => JSON.stringify(failAsk
           ? {ok: false, error: 'Attachment unreadable', error_code: 'attachment_unreadable'}
-          : {ok: true, answer: 'Protocol with an error estimate.', rationale: ''}),
+          : {
+            ok: true, answer: 'Protocol with an error estimate.', rationale: '',
+            attachments_used: questions.at(-1).attachments.map(id => ({id})),
+            grounding: {literature_evidence_sources: 0},
+          }),
       };
     },
   };
@@ -77,6 +88,10 @@ async function main() {
   assert.equal(questions[0].use_uploads, false);
   assert.equal(nodes.askMsg.textContent, 'Done.');
   assert.equal(nodes.attachList.children.length, 1, 'Keep selected files after success');
+  assert.match(nodes.sourceNotes.textContent, /\[A1\.1\] identifies attached file 1/);
+  assert.match(nodes.sourceNotes.textContent, /No relevant literature evidence/);
+  assert.equal(nodes.refsSection.classList.contains('hidden'), false);
+  assert.equal(nodes.candPanel.open, false, 'Candidates stay collapsed');
 
   nodes.question.value = 'What if the hold is shorter?';
   nodes.useUploads.checked = true;
@@ -99,6 +114,7 @@ async function main() {
   await nodes.askBtn.dispatch('click');
   assert.deepEqual(questions[4].attachments, []);
   assert.equal(questions[4].use_uploads, false);
+  assert.doesNotMatch(nodes.sourceNotes.textContent, /\[A1\.1\]/);
 }
 
 main().catch(error => {

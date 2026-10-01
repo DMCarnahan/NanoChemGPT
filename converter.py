@@ -324,6 +324,8 @@ def parse_hardware(markdown_text: str) -> List[Dict[str, Any]]:
                 break
             if line.strip().startswith("- "):
                 entry = strip_tags(line.strip()[2:])
+                if re.match(r"^(?:plan|scale basis)\s*:", entry, re.I):
+                    continue
                 m = re.match(r"(Beakers?|Flasks?)\s*\((.+?)\)", entry, re.I)
                 if m:
                     base = "beaker" if "beaker" in m.group(1).lower() else "flask"
@@ -829,6 +831,19 @@ def _extract_wash_sequence(text: str) -> List[Dict[str, Any]]:
             }
         )
     if not seq:
+        measured = re.search(
+            r"\b(?:use|with)\s+(\d+(?:\.\d+)?)\s*(mL|L|µL|uL)\s+(?:of\s+)?"
+            r"([A-Za-z][A-Za-z -]*?)(?=\s+per\s+(?:tube|wash)\b|[,.;]|$)",
+            s,
+            re.I,
+        )
+        if measured:
+            seq.append({
+                "solvent": _normalize_solvent_name(measured.group(3)),
+                "volume": float(measured.group(1)),
+                "volume_units": _canon_unit(measured.group(2)),
+            })
+    if not seq:
         # Preserve solvent-only washes even when their volumes need review.
         m = re.search(
             r"(?:\d+|one|two|three|four|five)\s+(?:additional\s+)?([A-Za-z][A-Za-z -]*?)\s+washes\b",
@@ -1120,6 +1135,10 @@ def _split_operation_clauses(text: str) -> List[str]:
     # 'Add 5 mL ethanol and 10 mL water' is two additions, not one reagent name.
     if re.search(r"\badd\b", s, re.I):
         s = re.sub(
+            r",?\s*(?:followed\s+by|then)\s+(?=\d+(?:\.\d+)?\s*(?:mL|L|µL|mg|g)\b)",
+            "; Add ", s, flags=re.I,
+        )
+        s = re.sub(
             r"\band\s+(?=\d+(?:\.\d+)?\s*(?:mL|L|µL)\b)", "and add ", s, flags=re.I
         )
     actions = r"add|transfer|stir|heat|cool|dissolve|redisperse|resuspend|dry|wait"
@@ -1210,27 +1229,31 @@ def _detect_measured_addition(text: str) -> Optional[Dict[str, Any]]:
 def _detect_reaction_wait(text: str) -> Optional[Dict[str, Any]]:
     s = strip_tags(text)
     if not re.match(
-        r"^(?:wait\b|allow\s+(?:the\s+)?(?:reaction|reduction)\s+to\s+proceed\b)",
+        r"^(?:wait\b|allow\s+(?:the\s+)?(?:reaction|reduction)\b)",
         s,
         re.I,
     ):
         return None
     # A selected duration overrides a cited range; do not sum both descriptions.
-    chosen = re.search(
-        r"(?:for\s+consistency[^.]*?use|for)\s+(\d+(?:\.\d+)?)\s+minutes?\b", s, re.I
+    chosen = re.search(r"\buse\s+(\d+(?:\.\d+)?)\s+minutes?\b", s, re.I)
+    duration_range = re.search(
+        r"(\d+(?:\.\d+)?)\s*[-–]\s*(\d+(?:\.\d+)?)\s*minutes?\b", s, re.I
     )
     minutes = (
         float(chosen.group(1))
         if chosen
-        else (find_minutes(s) if s.lower().startswith("wait") else None)
+        else (find_minutes(s) if not duration_range else None)
     )
-    return {"action": "wait", "raw": text, "minutes": minutes}
+    result = {"action": "wait", "raw": text, "minutes": minutes}
+    if duration_range and not chosen:
+        result["minutes_range"] = [float(duration_range.group(1)), float(duration_range.group(2))]
+    return result
 
 
 def _detect_prepared_transfer(text: str) -> Optional[Dict[str, Any]]:
     s = strip_tags(text)
     if not re.search(
-        r"\btransfer\s+(?:the\s+)?(?:dissolved|prepared)\s+solution\s+to\s+(?:the\s+)?(?:stirred\s+)?reaction\b",
+        r"\b(?:transfer|add)\s+(?:the\s+)?(?:dissolved|prepared)\s+solution\s+(?:to|into)\s+(?:the\s+)?(?:stirred\s+)?reaction\b",
         s,
         re.I,
     ):
@@ -1280,6 +1303,11 @@ def semantic_parse_step(step: str) -> Dict[str, Any]:
             "parts": [semantic_parse_step(c) for c in clauses],
             "raw": step,
         }
+
+    if re.search(r"\b(?:maintain|heat|cool|hold)\b", plain, re.I) and re.search(
+        r"\d+(?:\.\d+)?\s*[-–]\s*\d+(?:\.\d+)?\s*°?\s*C\b", plain, re.I
+    ):
+        return _process_note(step, "temperature_range_requires_selection")
 
     if re.match(
         r"^prepare\s+(?:one\s+reaction\s+mixture|the\s+reductant\s+immediately)\b",
@@ -1364,8 +1392,32 @@ def _normalize_semantic_steps(records: List[Dict[str, Any]]) -> List[Dict[str, A
     normalized: List[Dict[str, Any]] = []
     last_explicit_centrifuge: Optional[Tuple[float, int]] = None
 
-    for step in records:
+    for index, step in enumerate(records):
         current = copy.deepcopy(step)
+
+        # A dissolved solution subsequently added to the reaction is prepared
+        # separately. Do not inject a default two-minute stir into its deadline.
+        following = next(
+            (record for record in records[index + 1:]
+             if record.get("instruction_type") != "annotation"),
+            {},
+        )
+        if current.get("action") == "dissolve" and not current.get("solvents") and following.get("action") == "transfer_prepared_solution":
+            solvent = current["solvent"]
+            temperature = find_temp_c(solvent)
+            solvent = re.sub(
+                r"\s+at\s+(?:approximately\s+)?-?\d+(?:\.\d+)?\s*°?\s*C\b.*$",
+                "", solvent, flags=re.I,
+            )
+            current.update(
+                action="prepare_solution_from_amounts",
+                solutes=[parse_reagent_phrase_to_struct(
+                    f"{current['amount']} {current['unit']} {current['solute']}"
+                )],
+                solvent=solvent,
+                solvent_temperature_C=temperature,
+                hardware_hint="Separate preparation vessel",
+            )
 
         if current.get("action") == "heat_hold":
             mins = current.get("minutes")
@@ -1393,6 +1445,9 @@ def _normalize_semantic_steps(records: List[Dict[str, Any]]) -> List[Dict[str, A
             prev = normalized[-1] if normalized else None
             if prev and prev.get("action") == "postprocess" and not prev.get("wash_sequence") and current.get("wash_sequence"):
                 current["skip_initial_transfer"] = True
+                if current.get("tube_capacity_mL") is None:
+                    current["tube_count"] = prev.get("tube_count", 1)
+                    current["tube_capacity_mL"] = prev.get("tube_capacity_mL")
 
         normalized.append(current)
 
@@ -2087,6 +2142,7 @@ def emit_steps(
                 "vessel": primary,
                 "reagents": [],
                 "minutes": step.get("minutes"),
+                **({"minutes_range": step["minutes_range"]} if step.get("minutes_range") else {}),
                 "ops": (
                     [{"op": "wait", "minutes": step["minutes"]}]
                     if step.get("minutes")
@@ -3492,7 +3548,13 @@ def _parse_materials_section(text: str) -> List[Dict[str, Any]]:
         ):
             add(mixture.group(1), item, solvent=mixture.group(2))
             add(mixture.group(2), item)
-        if stocks or ":" in item:
+        if stocks or ":" in item or re.match(r"^(?:prepare|confirm|record)\b", item, re.I):
+            continue
+        if re.match(rf"^{_AMOUNT_UNIT}\s+", item, re.I):
+            for phrase in split_reagent_phrases(item):
+                component = parse_reagent_phrase_to_struct(phrase)
+                name = re.split(r"\s+(?:for|at)\s+", component["name"], maxsplit=1, flags=re.I)[0]
+                add(name, item, amount=component.get("amount"), amount_unit=component.get("amount_unit"))
             continue
         # Ordinary reagent bullets retain their names, concentrations and purity.
         name = re.split(r",(?![^()]*\))", item, maxsplit=1)[0]

@@ -1,3 +1,6 @@
+from types import SimpleNamespace
+
+
 def test_nanorod_query_relevance_and_references(monkeypatch):
     import app
 
@@ -31,26 +34,21 @@ def test_nanorod_query_relevance_and_references(monkeypatch):
     # _harvest_reindex is defined inside the ask handler; insert our fake at module level
     monkeypatch.setattr(app, "_harvest_reindex", fake_harvest, raising=False)
 
-    # 3) Fake OpenAI client that returns content citing [1]
-    class FakeResp:
-        def __init__(self, content):
-            class Msg:
-                def __init__(self, c):
-                    self.content = c
-
-            # provide both .choices and .choices[0].message.content style used elsewhere
-            self.choices = [type("C", (), {"message": Msg(content)})()]
-
+    # Exercise the live request path through a deterministic Responses API stub.
     class FakeClient:
-        class chat:
-            class completions:
-                @staticmethod
-                def create(**kwargs):
-                    return FakeResp(
-                        "You can synthesize SnO nanorods via hydrothermal methods [1].\n\n## References\n[1] Synthesis of SnO nanorods with controlled aspect ratio (2018)"
-                    )
+        class responses:
+            @staticmethod
+            def create(**kwargs):
+                return SimpleNamespace(
+                    output_text="You can synthesize SnO nanorods via hydrothermal methods [1].",
+                    id="resp_relevance",
+                    model="test-model",
+                    usage={},
+                )
 
     monkeypatch.setattr(app, "client", FakeClient())
+    monkeypatch.setitem(app.app.config, "TESTING", False)
+    monkeypatch.delenv("OFFLINE_TESTS", raising=False)
 
     # 4) Disable auto-harvest so the test doesn't spawn subprocesses in CI/test env
     monkeypatch.setenv("ENABLE_AUTO_HARVEST", "0")
@@ -70,6 +68,6 @@ def test_nanorod_query_relevance_and_references(monkeypatch):
     # The server should return a 'refs' block assembled from retriever + harvest
     refs = data.get("refs") or []
     titles = [r.get("title", "").lower() for r in refs]
-    assert any(
-        "nanorod" in t or "sno" in t or "sn" in t for t in titles
-    ), f"Unexpected refs: {titles}"
+    assert any("nanorod" in t or "sno" in t or "sn" in t for t in titles), (
+        f"Unexpected refs: {titles}"
+    )

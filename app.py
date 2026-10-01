@@ -76,10 +76,17 @@ from app_utils.llm import (
 )
 from app_utils.prompts import build_answer_prompt, build_citation_repair_prompt
 from app_utils.attachment_context import build_attachment_context
+from app_utils.evidence_relevance import (
+    filter_relevant_hits,
+    material_scope,
+    retrieval_question,
+)
+from app_utils.protocol_format import protocol_tables_to_lists
 from app_utils.citations import (
     citation_repair_target,
     grounded_reference_indexes,
     needs_citation_repair,
+    preserves_non_citation_text,
 )
 from app_utils.rate_limit import SlidingWindowRateLimiter
 from app_utils.request_validation import (
@@ -1408,8 +1415,73 @@ def ask():
     else:
         w_doc, w_passage = w_doc / weight_total, w_passage / weight_total
 
+    # ----------------- attachments → per-question context -----------------
+    attachments_ctx = ""
+    raw_attachment_ids = payload.get("attachments")
+    if raw_attachment_ids is None:
+        raw_attachment_ids = payload.get("attachment_ids")
+    if raw_attachment_ids is None and not request.is_json:
+        raw_attachment_ids = request.form.getlist("attachments") or request.form.get(
+            "attachment_ids"
+        )
+    try:
+        atch_ids = normalize_attachment_ids(raw_attachment_ids, maximum=5)
+    except RequestValidationError as exc:
+        return jsonify({"ok": False, "error": str(exc)}), 400
+
+    max_context_chars = bounded_int(
+        os.getenv("MAX_CONTEXT_CHARS", 30_000),
+        30_000,
+        minimum=4_000,
+        maximum=100_000,
+    )
+    attachment_evidence = []
+    unreadable_attachments = []
+    max_pages = bounded_int(
+        os.getenv("ATTACH_MAX_PAGES", 40), 40, minimum=1, maximum=100
+    )
+    # Read only the IDs explicitly supplied by this request. Missing files must
+    # not turn into a successful answer that silently ignores the user's source.
+    for aid in atch_ids:
+        try:
+            txt = read_attachment_text(aid, max_pages=max_pages)
+        except Exception:
+            app.logger.exception("[/ask] attachment read failed id=%s", aid)
+            txt = ""
+        if not isinstance(txt, str) or not txt.strip():
+            unreadable_attachments.append(aid)
+        else:
+            attachment_evidence.append((aid, txt))
+    if unreadable_attachments:
+        return (
+            jsonify(
+                {
+                    "ok": False,
+                    "error": "An attached file is missing or contains no readable text. "
+                    "Reattach it as a text-readable PDF, TXT, or Markdown file.",
+                    "error_code": "attachment_unreadable",
+                    "attachment_ids": unreadable_attachments,
+                    "request_id": g.request_id,
+                }
+            ),
+            422,
+        )
+    attachments_ctx, attachments_used = build_attachment_context(
+        attachment_evidence,
+        question,
+        maximum_chars=max_context_chars - len("<<<CTX_ATTACH>>>\n"),
+    )
+    if atch_ids:
+        app.logger.info(
+            "[ask] attachments used: %s | ctx_chars=%s", atch_ids, len(attachments_ctx)
+        )
+    scope = material_scope(
+        question, "\n".join(text for _aid, text in attachment_evidence)
+    )
+    evidence_question = retrieval_question(question, scope)
+
     # Global uploaded sources are opt-in per request. Explicit attachments are
-    # handled separately below and never leak into unrelated questions.
+    # read above and never leak into unrelated questions.
     uploads_ctx = ""
     if use_uploads:
         try:
@@ -1560,12 +1632,14 @@ def ask():
     try:
         if _h_kb_search:
             # helpers.kb_search returns List[Hit] (text, score, meta)
-            kb_hits = _h_kb_search(question, top_k=kb_k) or []
+            kb_hits = _h_kb_search(evidence_question, top_k=kb_k) or []
         else:
             kb_hits = []
     except Exception as e:
         app.logger.warning(f"[/ask] KB search failed: {e}")
         kb_hits = []
+
+    kb_hits = filter_relevant_hits(kb_hits, evidence_question, scope)
 
     def _mk_kb_ref_from_hit(h) -> dict:
         if isinstance(h, dict):
@@ -1596,7 +1670,7 @@ def ask():
     try:
         hits = (
             retriever_search(
-                question,
+                evidence_question,
                 k=web_k,
                 level=retriever_level,
                 k_doc=k_doc,
@@ -1609,6 +1683,9 @@ def ask():
     except Exception as e:
         app.logger.warning(f"[/ask] retriever_search error: {e}")
         hits = []
+    retrieved_hit_count = len(hits)
+    hits = filter_relevant_hits(hits, evidence_question, scope)
+    rejected_hit_count = retrieved_hit_count - len(hits)
     # Keep request handling bounded: mining/index rebuilds must run out of band.
     # The existing references list still accepts harvested refs from other paths.
     harvest_refs = []
@@ -1645,7 +1722,7 @@ def ask():
     # Deduplicate + rerank with ref_utils
     try:
         refs_all = dedupe_and_rerank(
-            question,
+            evidence_question,
             raw_refs,
             domain_terms=DEFAULT_NANOCHEM_TERMS,
             top_k=40,
@@ -1746,70 +1823,6 @@ def ask():
         )
     web_ctx = "\n\n".join(web_ctx_lines)
 
-    # The attachments handling block was consolidated below to prefer the
-    # ATTACH_DIR-based implementation. The older _consts-based block was
-    # removed to avoid duplicated logic and indentation/syntax issues.
-
-    # ----------------- attachments → per-question context -----------------
-    attachments_ctx = ""
-    raw_attachment_ids = payload.get("attachments")
-    if raw_attachment_ids is None:
-        raw_attachment_ids = payload.get("attachment_ids")
-    if raw_attachment_ids is None and not request.is_json:
-        raw_attachment_ids = request.form.getlist("attachments") or request.form.get(
-            "attachment_ids"
-        )
-    try:
-        atch_ids = normalize_attachment_ids(raw_attachment_ids, maximum=5)
-    except RequestValidationError as exc:
-        return jsonify({"ok": False, "error": str(exc)}), 400
-
-    max_context_chars = bounded_int(
-        os.getenv("MAX_CONTEXT_CHARS", 30_000),
-        30_000,
-        minimum=4_000,
-        maximum=100_000,
-    )
-    attachment_evidence = []
-    unreadable_attachments = []
-    max_pages = bounded_int(
-        os.getenv("ATTACH_MAX_PAGES", 40), 40, minimum=1, maximum=100
-    )
-    # Read only the IDs explicitly supplied by this request. Missing files must
-    # not turn into a successful answer that silently ignores the user's source.
-    for aid in atch_ids:
-        try:
-            txt = read_attachment_text(aid, max_pages=max_pages)
-        except Exception:
-            app.logger.exception("[/ask] attachment read failed id=%s", aid)
-            txt = ""
-        if not isinstance(txt, str) or not txt.strip():
-            unreadable_attachments.append(aid)
-        else:
-            attachment_evidence.append((aid, txt))
-    if unreadable_attachments:
-        return (
-            jsonify(
-                {
-                    "ok": False,
-                    "error": "An attached file is missing or contains no readable text. "
-                    "Reattach it as a text-readable PDF, TXT, or Markdown file.",
-                    "error_code": "attachment_unreadable",
-                    "attachment_ids": unreadable_attachments,
-                    "request_id": g.request_id,
-                }
-            ),
-            422,
-        )
-    attachments_ctx, attachments_used = build_attachment_context(
-        attachment_evidence,
-        question,
-        maximum_chars=max_context_chars - len("<<<CTX_ATTACH>>>\n"),
-    )
-    if atch_ids:
-        app.logger.info(
-            "[ask] attachments used: %s | ctx_chars=%s", atch_ids, len(attachments_ctx)
-        )
     verbatim_mode = bool(attachments_ctx) and _wants_verbatim(question)
 
     raw_verbatim_text = ""
@@ -2038,6 +2051,10 @@ def ask():
         a, r = _split_reasoning(strip_references_block(_s(raw)))
         answer, rationale = _s(a), _s(r)
 
+    if mode != "reasoning":
+        answer = protocol_tables_to_lists(answer)
+        rationale = protocol_tables_to_lists(rationale)
+
     # Optional robot operations conversion (Option A)
     want_robot_ops = False
     try:
@@ -2250,8 +2267,12 @@ def ask():
         and not app.config.get("TESTING")
         and not _env_bool("OFFLINE_TESTS", False)
     ):
+        draft = (
+            answer + "\n\n```reason\n" + rationale + "\n```"
+            if rationale else answer
+        )
         citation_bundle = build_citation_repair_prompt(
-            answer=answer,
+            answer=draft,
             context=context_joined,
             references=refs_prompt,
             target_source_count=target_source_count,
@@ -2267,7 +2288,11 @@ def ask():
             )
             fixed = citation_result.text
             if isinstance(fixed, str) and fixed.strip():
-                answer = fixed
+                if preserves_non_citation_text(draft, fixed):
+                    if mode == "reasoning":
+                        answer = fixed.strip()
+                    else:
+                        answer, rationale = _split_reasoning(fixed)
                 used_idxs = _extract_used_ref_indexes_safe(answer, rationale)
                 used_idxs = [i for i in used_idxs if 1 <= i <= len(refs_all)]
                 model_usage["citation_repair"] = citation_result.usage
@@ -2495,6 +2520,9 @@ def ask():
         "grounding": {
             "context_chars": len(context_joined),
             "retrieved_hits": len(hits),
+            "rejected_hits": rejected_hit_count,
+            "literature_evidence_sources": len(grounded_ref_indexes),
+            "material_scope": scope,
             "cited_sources": len(refs_used),
             "sufficient": bool(sufficient),
         },

@@ -279,6 +279,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const refsBlock = document.getElementById('refsBlock');
     const refsList = document.getElementById('refsList');
     const candPanel = document.getElementById('candPanel');
+    const sourceNotes = document.getElementById('sourceNotes');
     if (!refsSection) return;
 
     const block = String(data?.reference_block || data?.references_block || '').trim();
@@ -299,6 +300,17 @@ document.addEventListener('DOMContentLoaded', () => {
     refsSection.classList.add('hidden');
 
     let rendered = false;
+    if (sourceNotes) {
+      const attachments = Array.isArray(data?.attachments_used) ? data.attachments_used : [];
+      const notes = attachments.map((_, index) =>
+        `[A${index + 1}.1] identifies attached file ${index + 1}.`);
+      if (data?.grounding?.literature_evidence_sources === 0) {
+        notes.push('No relevant literature evidence was found for this question.');
+      }
+      sourceNotes.textContent = notes.join(' ');
+      sourceNotes.classList.toggle('hidden', !notes.length);
+      rendered = Boolean(notes.length);
+    }
     if (block && refsBlock) {
       refsBlock.textContent = block;
       refsBlock.classList.remove('hidden');
@@ -359,7 +371,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (rendered) {
       refsSection.classList.remove('hidden');
-      if (candPanel && !block) candPanel.open = true;
       try {
         window.initRefsToggle?.({ btnSelector: '#refsToggleBtn', panelSelector: '#refsSection' });
       } catch {}

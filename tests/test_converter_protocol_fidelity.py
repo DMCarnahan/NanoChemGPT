@@ -195,6 +195,72 @@ def test_fully_specified_simple_protocol_is_valid():
     assert doc["_executor"]["validation_errors"] == []
 
 
+def test_compound_additions_keep_separate_preparation_and_waits():
+    source = (
+        Path(__file__).parent / "fixtures" / "synthetic_protocol_variants.txt"
+    ).read_text()
+    doc = convert_text_to_robot_ops(source)
+    plan = doc["micro_plan"]
+    assert [(op["reagent"], op["volume"]) for op in plan[:4]] == [
+        ("water", 10),
+        ("stock A", 2),
+        ("stock B", 3),
+        ("stock C", 1),
+    ]
+    assert [op["minutes"] for op in plan if op["verb"] == "wait"] == [5, 8]
+    solute = next(op for op in plan if op.get("reagent") == "NaCl")
+    assert solute["vessel"] == "V2" and solute["amount"] == 100
+    water = next(op for op in plan if op.get("reagent_temperature_C") == 5)
+    assert water["vessel"] == "V2" and water["volume"] == 4
+    transfer = next(op for op in plan if op.get("from") == "V2")
+    assert transfer["to"] == "V1" and transfer["volume"] == 4
+    assert transfer["max_delay_minutes"] == 3
+    assert not any(op["verb"] == "stir" and op.get("minutes") == 2 for op in plan)
+    assert not any(
+        op["verb"] == "set" and op.get("param") == "temperature_C" for op in plan
+    )
+    assert any(
+        "temperature_range_requires_selection" in error
+        for error in doc["_executor"]["validation_errors"]
+    )
+
+
+def test_later_washes_keep_tube_count_and_explicit_volumes():
+    source = (
+        Path(__file__).parent / "fixtures" / "synthetic_protocol_variants.txt"
+    ).read_text()
+    doc = convert_text_to_robot_ops(source)
+    tubes = {f"V1_tube_{index}" for index in range(1, 4)}
+    spins = [op for op in doc["micro_plan"] if op["verb"] == "centrifuge"]
+    assert len(spins) == 3
+    assert all(set(op["tubes"]) == tubes for op in spins)
+    for cycle in range(1, 3):
+        washes = [
+            op
+            for op in doc["micro_plan"]
+            if op["verb"] == "pour" and op.get("wash_cycle") == cycle
+        ]
+        assert {op["vessel"] for op in washes} == tubes
+        assert all(op["reagent"] == "water" and op["volume"] == 3 for op in washes)
+    assert doc["_executor"]["valid"] is False
+
+
+def test_unselected_wait_range_requires_review_without_choosing_endpoint():
+    doc = convert_text_to_robot_ops("Procedure:\n1. Allow reduction for 20–30 minutes.")
+    assert not doc["micro_plan"]
+    assert doc["steps"][0]["minutes_range"] == [20, 30]
+    assert any(
+        "missing_duration" in error for error in doc["_executor"]["validation_errors"]
+    )
+
+
+def test_ordinary_dissolution_does_not_move_an_existing_reaction():
+    doc = convert_text_to_robot_ops(
+        "Procedure:\n1. Dissolve 1 g NaCl in 10 mL water.\n2. Stir at 500 rpm for 5 minutes."
+    )
+    assert all(op.get("vessel", "V1") == "V1" for op in doc["micro_plan"])
+
+
 def test_validator_detects_out_of_order_and_missing_setpoint():
     doc = {
         "devices": {"hotplate_id": "HP1"},
