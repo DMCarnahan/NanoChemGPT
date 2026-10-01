@@ -457,8 +457,12 @@ After conversion, a late normalization pass enforces invariants to make outputs 
 Following normalization, an executor validation/repair pass attaches `robot_operations._executor`:
 
 - `schema_version`: version string for the executor op schema.
-- `valid`: true if the plan is executor-readable after repairs.
+- `valid`: true only when validation finds no unresolved quantities, unsupported operations, or review requirements.
 - `repairs`: list of applied fixes (e.g., inserted `place` before `set temperature_C`).
+- `validation_errors`: details of unresolved operations and invalid values.
+- `review_required`: true when the plan needs parameters or executor support confirmed before execution.
+
+The `executor.v1` JSON preserves compound instructions in source order, including stirring controls, separate solution preparation, centrifugation, decanting, and wash cycles. Reagent temperatures remain attached to the reagent rather than becoming reaction temperature setpoints. Missing wash volumes remain unspecified and require review. PDDL is not generated or included in exports.
 
 When `/ask` returns `robot_operations`, the API also lifts these fields to top-level keys: `executor_valid`, `executor_repairs`, `executor_schema_version` for convenience.
 

@@ -1,0 +1,2535 @@
+{
+  "_executor": {
+    "schema_version": "executor.v1",
+    "converter": "converter_v2",
+    "postprocessing_applied": true,
+    "repairs": [],
+    "validation_errors": [
+      "Action 9 requires review: unsupported_dispersion_primitive",
+      "Action 10 requires review: transfer_deadline_requires_executor_support",
+      "Action 12 requires review: balanced_split_requires_confirmation",
+      "Action 13 requires review: balanced_split_requires_confirmation",
+      "Action 14 requires review: balanced_split_requires_confirmation",
+      "Action 15 requires review: balanced_split_requires_confirmation",
+      "Action 16 requires review: multi_tube_loading_requires_executor_support",
+      "Action 17 requires review: unsupported_phase_separation_primitive",
+      "Action 18 requires review: unsupported_phase_separation_primitive",
+      "Action 19 requires review: unsupported_phase_separation_primitive",
+      "Action 20 requires review: unsupported_phase_separation_primitive",
+      "Action 21 is missing a transfer volume or reagent amount",
+      "Action 22 is missing a transfer volume or reagent amount",
+      "Action 23 is missing a transfer volume or reagent amount",
+      "Action 24 is missing a transfer volume or reagent amount",
+      "Action 25 requires review: unsupported_dispersion_primitive",
+      "Action 26 requires review: unsupported_dispersion_primitive",
+      "Action 27 requires review: unsupported_dispersion_primitive",
+      "Action 28 requires review: unsupported_dispersion_primitive",
+      "Action 29 requires review: multi_tube_loading_requires_executor_support",
+      "Action 30 requires review: unsupported_phase_separation_primitive",
+      "Action 31 requires review: unsupported_phase_separation_primitive",
+      "Action 32 requires review: unsupported_phase_separation_primitive",
+      "Action 33 requires review: unsupported_phase_separation_primitive",
+      "Action 34 is missing a transfer volume or reagent amount",
+      "Action 35 is missing a transfer volume or reagent amount",
+      "Action 36 is missing a transfer volume or reagent amount",
+      "Action 37 is missing a transfer volume or reagent amount",
+      "Action 38 requires review: unsupported_dispersion_primitive",
+      "Action 39 requires review: unsupported_dispersion_primitive",
+      "Action 40 requires review: unsupported_dispersion_primitive",
+      "Action 41 requires review: unsupported_dispersion_primitive",
+      "Action 42 requires review: multi_tube_loading_requires_executor_support",
+      "Action 43 requires review: unsupported_phase_separation_primitive",
+      "Action 44 requires review: unsupported_phase_separation_primitive",
+      "Action 45 requires review: unsupported_phase_separation_primitive",
+      "Action 46 requires review: unsupported_phase_separation_primitive",
+      "Action 47 is missing a transfer volume or reagent amount",
+      "Action 48 is missing a transfer volume or reagent amount",
+      "Action 49 is missing a transfer volume or reagent amount",
+      "Action 50 is missing a transfer volume or reagent amount",
+      "Action 51 requires review: unsupported_dispersion_primitive",
+      "Action 52 requires review: unsupported_dispersion_primitive",
+      "Action 53 requires review: unsupported_dispersion_primitive",
+      "Action 54 requires review: unsupported_dispersion_primitive",
+      "Action 55 requires review: multi_tube_loading_requires_executor_support",
+      "Action 56 requires review: unsupported_phase_separation_primitive",
+      "Action 57 requires review: unsupported_phase_separation_primitive",
+      "Action 58 requires review: unsupported_phase_separation_primitive",
+      "Action 59 requires review: unsupported_phase_separation_primitive",
+      "Action 60 is missing a transfer volume or reagent amount",
+      "Action 61 is missing a transfer volume or reagent amount",
+      "Action 62 is missing a transfer volume or reagent amount",
+      "Action 63 is missing a transfer volume or reagent amount",
+      "Action 64 requires review: unsupported_dispersion_primitive",
+      "Action 65 requires review: unsupported_dispersion_primitive",
+      "Action 66 requires review: unsupported_dispersion_primitive",
+      "Action 67 requires review: unsupported_dispersion_primitive",
+      "Source step 2 requires review: unparsed_instruction",
+      "Source step 3 requires review: unparsed_instruction",
+      "Source step 6 requires review: unparsed_instruction",
+      "Source step 7 requires review: reaction_conditions_require_selection",
+      "Source step 10 requires review: stock_condition_requires_selection",
+      "Source step 19 requires review: unparsed_instruction",
+      "Source step 22 requires review: batch_repeat_requires_condition_selection"
+    ],
+    "valid": false,
+    "review_required": true
+  },
+  "devices": {
+    "stir_plate_id": "SP1",
+    "hotplate_id": "HP1",
+    "centrifuge_id": "CF1",
+    "oven_id": "OV1",
+    "vacuum_pump_id": "VP1",
+    "sonicator_id": "US1",
+    "ph_meter_id": "PH1",
+    "autotitrator_id": "AT1"
+  },
+  "defaults": {
+    "stir_rpm": 700,
+    "centrifuge_rpm": 4000,
+    "centrifuge_minutes": 10,
+    "transfer_rate_slow": "slow",
+    "room_temp_C": 25.0
+  },
+  "hardware": [
+    {
+      "name": "Flask 500 mL",
+      "type": "flask",
+      "capacity": "500 mL",
+      "id": "H1"
+    },
+    {
+      "name": "Glass vessels for the CTAB/chloroform stocks; a vented glass vessel for preparing fresh NaBH4 solution.",
+      "type": "hardware",
+      "capacity": null,
+      "id": "H2"
+    },
+    {
+      "name": "Four 50 mL centrifuge tubes compatible with the chloroform-containing mixture, and a compatible rotor rated for 9000 rpm.",
+      "type": "hardware",
+      "capacity": "50 mL",
+      "id": "H3"
+    },
+    {
+      "name": "TEM access for length/diameter measurements; STEM-EDS or equivalent elemental analysis to check Pt/Ni incorporation.",
+      "type": "hardware",
+      "capacity": null,
+      "id": "H4"
+    }
+  ],
+  "vessel_registry": {
+    "V1": "Flask 500 mL",
+    "V2": "Separate preparation vessel",
+    "V1_tube_1": "Centrifuge Tube 50 mL",
+    "V1_tube_2": "Centrifuge Tube 50 mL",
+    "V1_tube_3": "Centrifuge Tube 50 mL",
+    "V1_tube_4": "Centrifuge Tube 50 mL"
+  },
+  "vessel_contents_detailed": {
+    "V2": {
+      "description": "prepared mixture in DI water",
+      "prepared_in_source_step": 15,
+      "components": [
+        {
+          "name": "NaBH4",
+          "display_name": "Sodium borohydride (NaBH4)"
+        },
+        {
+          "name": "DI water",
+          "display_name": "DI water",
+          "role": "solvent"
+        }
+      ]
+    }
+  },
+  "steps": [
+    {
+      "action": "process",
+      "raw": "Define the target before modifying the synthesis. Use aspect ratio \\(AR=L/d\\), measured for individual objects. Proposed starting point: target a median AR near 6, while separately reporting the distribution and the fraction of particles that are wire-like. The attachment provides no baseline dimensions or validated AR-control relationship.",
+      "vessel": "V1",
+      "reagents": [],
+      "ops": [],
+      "source_protocol_step": 1,
+      "source_text": "Define the target before modifying the synthesis. Use aspect ratio \\(AR=L/d\\), measured for individual objects. Proposed starting point: target a median AR near 6, while separately reporting the distribution and the fraction of particles that are wire-like. The attachment provides no baseline dimensions or validated AR-control relationship.",
+      "instruction_type": "annotation",
+      "reagents_structured": []
+    },
+    {
+      "action": "process",
+      "raw": "Prepare the three CTAB stocks",
+      "vessel": "V1",
+      "reagents": [],
+      "ops": [],
+      "source_protocol_step": 2,
+      "source_text": "Prepare the three CTAB stocks. Prepare the original 40 mM stock in glass as specified, and prepare the proposed 20 and 60 mM stocks in glass. Confirm that each stock is homogeneous at the working temperature. If a proposed concentration does not dissolve reproducibly, do not treat its nominal concentration as an available surfactant concentration; narrow the screen instead.",
+      "review_required": true,
+      "review_reason": "unparsed_instruction",
+      "reagents_structured": []
+    },
+    {
+      "action": "process",
+      "raw": "Prepare the original 40 mM stock in glass as specified, and prepare the proposed 20 and 60 mM stocks in glass",
+      "vessel": "V1",
+      "reagents": [],
+      "ops": [],
+      "source_protocol_step": 2,
+      "source_text": "Prepare the three CTAB stocks. Prepare the original 40 mM stock in glass as specified, and prepare the proposed 20 and 60 mM stocks in glass. Confirm that each stock is homogeneous at the working temperature. If a proposed concentration does not dissolve reproducibly, do not treat its nominal concentration as an available surfactant concentration; narrow the screen instead.",
+      "review_required": true,
+      "review_reason": "unparsed_instruction",
+      "reagents_structured": []
+    },
+    {
+      "action": "process",
+      "raw": "Confirm that each stock is homogeneous at the working temperature",
+      "vessel": "V1",
+      "reagents": [],
+      "ops": [],
+      "source_protocol_step": 2,
+      "source_text": "Prepare the three CTAB stocks. Prepare the original 40 mM stock in glass as specified, and prepare the proposed 20 and 60 mM stocks in glass. Confirm that each stock is homogeneous at the working temperature. If a proposed concentration does not dissolve reproducibly, do not treat its nominal concentration as an available surfactant concentration; narrow the screen instead.",
+      "instruction_type": "annotation",
+      "reagents_structured": []
+    },
+    {
+      "action": "process",
+      "raw": "If a proposed concentration does not dissolve reproducibly, do not treat its nominal concentration as an available surfactant concentration",
+      "vessel": "V1",
+      "reagents": [],
+      "ops": [],
+      "source_protocol_step": 2,
+      "source_text": "Prepare the three CTAB stocks. Prepare the original 40 mM stock in glass as specified, and prepare the proposed 20 and 60 mM stocks in glass. Confirm that each stock is homogeneous at the working temperature. If a proposed concentration does not dissolve reproducibly, do not treat its nominal concentration as an available surfactant concentration; narrow the screen instead.",
+      "instruction_type": "annotation",
+      "reagents_structured": []
+    },
+    {
+      "action": "process",
+      "raw": "narrow the screen instead",
+      "vessel": "V1",
+      "reagents": [],
+      "ops": [],
+      "source_protocol_step": 2,
+      "source_text": "Prepare the three CTAB stocks. Prepare the original 40 mM stock in glass as specified, and prepare the proposed 20 and 60 mM stocks in glass. Confirm that each stock is homogeneous at the working temperature. If a proposed concentration does not dissolve reproducibly, do not treat its nominal concentration as an available surfactant concentration; narrow the screen instead.",
+      "review_required": true,
+      "review_reason": "unparsed_instruction",
+      "reagents_structured": []
+    },
+    {
+      "action": "process",
+      "raw": "Hold the other variables constant. Use the same flask geometry, stirring setting, precursor ratio, reagent addition method, and temperature across all batches. The attachment does not specify reaction temperature or atmosphere. Proposed starting point: conduct the screen at 20-25 °C in a vented, ambient-air apparatus in the hood, recording the actual temperature. Do not seal the reaction or introduce an inert purge solely as an assumed requirement.",
+      "vessel": "V1",
+      "reagents": [],
+      "ops": [],
+      "source_protocol_step": 3,
+      "source_text": "Hold the other variables constant. Use the same flask geometry, stirring setting, precursor ratio, reagent addition method, and temperature across all batches. The attachment does not specify reaction temperature or atmosphere. Proposed starting point: conduct the screen at 20-25 °C in a vented, ambient-air apparatus in the hood, recording the actual temperature. Do not seal the reaction or introduce an inert purge solely as an assumed requirement.",
+      "review_required": true,
+      "review_reason": "reaction_conditions_require_selection",
+      "reagents_structured": [],
+      "temperature_C": 20.0
+    },
+    {
+      "action": "process",
+      "raw": "Prepare one reaction mixture",
+      "vessel": "V1",
+      "reagents": [],
+      "ops": [],
+      "source_protocol_step": 4,
+      "source_text": "Prepare one reaction mixture. Add 120 mL DI water to the flask containing the stir bar. Add 15 mL of the selected CTAB/chloroform stock. Then add the combined 15 mL of metal precursor stocks, preserving the attachment’s addition order.",
+      "instruction_type": "annotation",
+      "reagents_structured": []
+    },
+    {
+      "action": "add_solvent",
+      "raw": "Add 120 mL DI water to the flask containing the stir bar",
+      "vessel": "V1",
+      "solvent": "DI water",
+      "volume": 120.0,
+      "volume_units": "mL",
+      "ops": [
+        {
+          "op": "pour",
+          "reagent": "DI water",
+          "vessel": "V1",
+          "volume": 120.0,
+          "volume_units": "mL"
+        }
+      ],
+      "reagents": [
+        "DI water"
+      ],
+      "reagents_structured": [
+        {
+          "name": "DI water",
+          "display_name": "DI water",
+          "original": "120.0 mL of DI water",
+          "amount": 120.0,
+          "amount_unit": "mL"
+        }
+      ],
+      "source_protocol_step": 4,
+      "source_text": "Prepare one reaction mixture. Add 120 mL DI water to the flask containing the stir bar. Add 15 mL of the selected CTAB/chloroform stock. Then add the combined 15 mL of metal precursor stocks, preserving the attachment’s addition order.",
+      "review_required": false,
+      "with_stirring": false
+    },
+    {
+      "action": "add_solvent",
+      "raw": "Add 15 mL of the selected CTAB/chloroform stock",
+      "vessel": "V1",
+      "solvent": "CTAB/chloroform stock",
+      "volume": 15.0,
+      "volume_units": "mL",
+      "ops": [
+        {
+          "op": "pour",
+          "reagent": "CTAB/chloroform stock",
+          "vessel": "V1",
+          "volume": 15.0,
+          "volume_units": "mL"
+        }
+      ],
+      "reagents": [
+        "CTAB/chloroform stock"
+      ],
+      "reagents_structured": [
+        {
+          "name": "CTAB/chloroform stock",
+          "display_name": "CTAB/chloroform stock",
+          "original": "15.0 mL of CTAB/chloroform stock",
+          "amount": 15.0,
+          "amount_unit": "mL"
+        }
+      ],
+      "source_protocol_step": 4,
+      "source_text": "Prepare one reaction mixture. Add 120 mL DI water to the flask containing the stir bar. Add 15 mL of the selected CTAB/chloroform stock. Then add the combined 15 mL of metal precursor stocks, preserving the attachment’s addition order.",
+      "review_required": true,
+      "with_stirring": false,
+      "review_reason": "stock_condition_requires_selection"
+    },
+    {
+      "action": "add_solvent",
+      "raw": "Then add the combined 15 mL of metal precursor stocks, preserving the attachment’s addition order",
+      "vessel": "V1",
+      "solvent": "metal precursor stocks",
+      "volume": 15.0,
+      "volume_units": "mL",
+      "ops": [
+        {
+          "op": "pour",
+          "reagent": "metal precursor stocks",
+          "vessel": "V1",
+          "volume": 15.0,
+          "volume_units": "mL"
+        }
+      ],
+      "reagents": [
+        "metal precursor stocks"
+      ],
+      "reagents_structured": [
+        {
+          "name": "metal precursor stocks",
+          "display_name": "metal precursor stocks",
+          "original": "15.0 mL of metal precursor stocks",
+          "amount": 15.0,
+          "amount_unit": "mL"
+        }
+      ],
+      "source_protocol_step": 4,
+      "source_text": "Prepare one reaction mixture. Add 120 mL DI water to the flask containing the stir bar. Add 15 mL of the selected CTAB/chloroform stock. Then add the combined 15 mL of metal precursor stocks, preserving the attachment’s addition order.",
+      "review_required": false,
+      "with_stirring": false
+    },
+    {
+      "action": "stir",
+      "raw": "Stir for 30 minutes before reduction",
+      "vessel": "V1",
+      "rpm": 700,
+      "minutes": 30.0,
+      "ops": [
+        {
+          "op": "move_to_stir_plate",
+          "stir_plate_id": "SP1",
+          "vessel": "V1"
+        },
+        {
+          "op": "set_stir_rate",
+          "vessel": "V1",
+          "rpm": 700,
+          "inferred": true
+        },
+        {
+          "op": "wait",
+          "minutes": 30.0
+        }
+      ],
+      "reagents": [],
+      "reagents_structured": [],
+      "source_protocol_step": 5,
+      "source_text": "Stir for 30 minutes before reduction. Retain this preassembly period for all three batches so that CTAB concentration is the only intended synthesis variable."
+    },
+    {
+      "action": "process",
+      "raw": "Retain this preassembly period for all three batches so that CTAB concentration is the only intended synthesis variable",
+      "vessel": "V1",
+      "reagents": [],
+      "ops": [],
+      "source_protocol_step": 5,
+      "source_text": "Stir for 30 minutes before reduction. Retain this preassembly period for all three batches so that CTAB concentration is the only intended synthesis variable.",
+      "instruction_type": "annotation",
+      "reagents_structured": []
+    },
+    {
+      "action": "process",
+      "raw": "Prepare the reductant immediately before use",
+      "vessel": "V1",
+      "reagents": [],
+      "ops": [],
+      "source_protocol_step": 6,
+      "source_text": "Prepare the reductant immediately before use. After the 30-minute stirring period, add 15 mL approximately 4 °C DI water to 600 mg NaBH4 and dissolve rapidly. Transfer the dissolved solution to the stirred reaction within two minutes of adding the water. Safety modification: use a vented preparation vessel and mix without tightly capping it; aqueous NaBH4 can generate hydrogen.",
+      "instruction_type": "annotation",
+      "reagents_structured": []
+    },
+    {
+      "action": "prepare_solution",
+      "raw": "After the 30-minute stirring period, add 15 mL approximately 4 °C DI water to 600 mg NaBH4",
+      "vessel": "V2",
+      "solvent": "DI water",
+      "volume": 15.0,
+      "volume_units": "mL",
+      "reagents": [
+        "NaBH4",
+        "DI water"
+      ],
+      "reagents_structured": [
+        {
+          "name": "NaBH4",
+          "display_name": "Sodium borohydride (NaBH4)",
+          "original": "600 mg NaBH4",
+          "amount": 600.0,
+          "amount_unit": "mg"
+        },
+        {
+          "name": "DI water",
+          "display_name": "DI water",
+          "original": "15.0 mL of DI water",
+          "amount": 15.0,
+          "amount_unit": "mL"
+        }
+      ],
+      "ops": [
+        {
+          "op": "pour",
+          "reagent": "NaBH4",
+          "vessel": "V2",
+          "amount": 600.0,
+          "amount_unit": "mg"
+        },
+        {
+          "op": "pour",
+          "reagent": "DI water",
+          "vessel": "V2",
+          "volume": 15.0,
+          "volume_units": "mL",
+          "reagent_temperature_C": 4.0
+        }
+      ],
+      "source_protocol_step": 6,
+      "source_text": "Prepare the reductant immediately before use. After the 30-minute stirring period, add 15 mL approximately 4 °C DI water to 600 mg NaBH4 and dissolve rapidly. Transfer the dissolved solution to the stirred reaction within two minutes of adding the water. Safety modification: use a vented preparation vessel and mix without tightly capping it; aqueous NaBH4 can generate hydrogen.",
+      "temperature_C": 4.0
+    },
+    {
+      "action": "dissolve",
+      "raw": "dissolve rapidly",
+      "vessel": "V2",
+      "reagents": [],
+      "ops": [
+        {
+          "op": "resuspend",
+          "tube": "V2",
+          "executable": false,
+          "review_required": true,
+          "review_reason": "unsupported_dispersion_primitive"
+        }
+      ],
+      "source_protocol_step": 6,
+      "source_text": "Prepare the reductant immediately before use. After the 30-minute stirring period, add 15 mL approximately 4 °C DI water to 600 mg NaBH4 and dissolve rapidly. Transfer the dissolved solution to the stirred reaction within two minutes of adding the water. Safety modification: use a vented preparation vessel and mix without tightly capping it; aqueous NaBH4 can generate hydrogen.",
+      "reagents_structured": []
+    },
+    {
+      "action": "transfer",
+      "raw": "Transfer the dissolved solution to the stirred reaction within two minutes of adding the water",
+      "vessel": "V1",
+      "ops": [
+        {
+          "op": "pour",
+          "vessel": "V1",
+          "to": "V1",
+          "from": "V2",
+          "volume": 15.0,
+          "volume_units": "mL",
+          "max_delay_minutes": 2.0,
+          "timing_reference": "solvent_addition_to_prepared_solution",
+          "executable": false,
+          "review_required": true,
+          "review_reason": "transfer_deadline_requires_executor_support"
+        }
+      ],
+      "reagents": [],
+      "source_protocol_step": 6,
+      "source_text": "Prepare the reductant immediately before use. After the 30-minute stirring period, add 15 mL approximately 4 °C DI water to 600 mg NaBH4 and dissolve rapidly. Transfer the dissolved solution to the stirred reaction within two minutes of adding the water. Safety modification: use a vented preparation vessel and mix without tightly capping it; aqueous NaBH4 can generate hydrogen.",
+      "reagents_structured": []
+    },
+    {
+      "action": "process",
+      "raw": "Safety modification: use a vented preparation vessel and mix without tightly capping it",
+      "vessel": "V1",
+      "reagents": [],
+      "ops": [],
+      "source_protocol_step": 6,
+      "source_text": "Prepare the reductant immediately before use. After the 30-minute stirring period, add 15 mL approximately 4 °C DI water to 600 mg NaBH4 and dissolve rapidly. Transfer the dissolved solution to the stirred reaction within two minutes of adding the water. Safety modification: use a vented preparation vessel and mix without tightly capping it; aqueous NaBH4 can generate hydrogen.",
+      "instruction_type": "annotation",
+      "reagents_structured": []
+    },
+    {
+      "action": "process",
+      "raw": "aqueous NaBH4 can generate hydrogen",
+      "vessel": "V1",
+      "reagents": [],
+      "ops": [],
+      "source_protocol_step": 6,
+      "source_text": "Prepare the reductant immediately before use. After the 30-minute stirring period, add 15 mL approximately 4 °C DI water to 600 mg NaBH4 and dissolve rapidly. Transfer the dissolved solution to the stirred reaction within two minutes of adding the water. Safety modification: use a vented preparation vessel and mix without tightly capping it; aqueous NaBH4 can generate hydrogen.",
+      "review_required": true,
+      "review_reason": "unparsed_instruction",
+      "reagents_structured": []
+    },
+    {
+      "action": "wait",
+      "raw": "Allow reduction to proceed. Keep the apparatus vented in the fume hood, away from ignition sources. The attachment specifies 20-30 minutes of hydrogen evolution. For consistency, use 30 minutes, within that reported interval, for every screening batch. Do not shorten the reaction as an assumed method of shortening the wires; no growth-time relationship is supplied.",
+      "vessel": "V1",
+      "reagents": [],
+      "minutes": 30.0,
+      "ops": [
+        {
+          "op": "wait",
+          "minutes": 30.0
+        }
+      ],
+      "source_protocol_step": 7,
+      "source_text": "Allow reduction to proceed. Keep the apparatus vented in the fume hood, away from ignition sources. The attachment specifies 20-30 minutes of hydrogen evolution. For consistency, use 30 minutes, within that reported interval, for every screening batch. Do not shorten the reaction as an assumed method of shortening the wires; no growth-time relationship is supplied.",
+      "reagents_structured": []
+    },
+    {
+      "action": "postprocess",
+      "raw": "Collect and wash. Divide the mixture among four balanced 50 mL centrifuge tubes. Centrifuge at 9000 rpm for 5 minutes and decant. Perform three additional ethanol washes, then redisperse the collected material in ethanol. Record the rotor used because rpm alone does not define centrifugal force. Use a consistent, recorded ethanol wash volume; the attachment does not provide one.",
+      "vessel": "V1",
+      "ops": [
+        {
+          "op": "transfer_to_centrifuge_tube",
+          "from": "V1",
+          "to": "V1_tube_1",
+          "fraction": 0.25,
+          "executable": false,
+          "review_required": true,
+          "review_reason": "balanced_split_requires_confirmation"
+        },
+        {
+          "op": "transfer_to_centrifuge_tube",
+          "from": "V1",
+          "to": "V1_tube_2",
+          "fraction": 0.25,
+          "executable": false,
+          "review_required": true,
+          "review_reason": "balanced_split_requires_confirmation"
+        },
+        {
+          "op": "transfer_to_centrifuge_tube",
+          "from": "V1",
+          "to": "V1_tube_3",
+          "fraction": 0.25,
+          "executable": false,
+          "review_required": true,
+          "review_reason": "balanced_split_requires_confirmation"
+        },
+        {
+          "op": "transfer_to_centrifuge_tube",
+          "from": "V1",
+          "to": "V1_tube_4",
+          "fraction": 0.25,
+          "executable": false,
+          "review_required": true,
+          "review_reason": "balanced_split_requires_confirmation"
+        },
+        {
+          "op": "centrifuge",
+          "centrifuge_id": "CF1",
+          "tube": "V1_tube_1",
+          "minutes": 5.0,
+          "rpm": 9000,
+          "inferred": false,
+          "tubes": [
+            "V1_tube_1",
+            "V1_tube_2",
+            "V1_tube_3",
+            "V1_tube_4"
+          ],
+          "executable": false,
+          "review_required": true,
+          "review_reason": "multi_tube_loading_requires_executor_support"
+        },
+        {
+          "op": "decant_supernatant",
+          "tube": "V1_tube_1",
+          "executable": false,
+          "review_required": true,
+          "review_reason": "unsupported_phase_separation_primitive"
+        },
+        {
+          "op": "decant_supernatant",
+          "tube": "V1_tube_2",
+          "executable": false,
+          "review_required": true,
+          "review_reason": "unsupported_phase_separation_primitive"
+        },
+        {
+          "op": "decant_supernatant",
+          "tube": "V1_tube_3",
+          "executable": false,
+          "review_required": true,
+          "review_reason": "unsupported_phase_separation_primitive"
+        },
+        {
+          "op": "decant_supernatant",
+          "tube": "V1_tube_4",
+          "executable": false,
+          "review_required": true,
+          "review_reason": "unsupported_phase_separation_primitive"
+        },
+        {
+          "op": "pour",
+          "reagent": "ethanol",
+          "vessel": "V1_tube_1",
+          "volume": null,
+          "volume_units": "mL",
+          "wash_cycle": 1
+        },
+        {
+          "op": "pour",
+          "reagent": "ethanol",
+          "vessel": "V1_tube_2",
+          "volume": null,
+          "volume_units": "mL",
+          "wash_cycle": 1
+        },
+        {
+          "op": "pour",
+          "reagent": "ethanol",
+          "vessel": "V1_tube_3",
+          "volume": null,
+          "volume_units": "mL",
+          "wash_cycle": 1
+        },
+        {
+          "op": "pour",
+          "reagent": "ethanol",
+          "vessel": "V1_tube_4",
+          "volume": null,
+          "volume_units": "mL",
+          "wash_cycle": 1
+        },
+        {
+          "op": "resuspend",
+          "tube": "V1_tube_1",
+          "wash_cycle": 1,
+          "executable": false,
+          "review_required": true,
+          "review_reason": "unsupported_dispersion_primitive"
+        },
+        {
+          "op": "resuspend",
+          "tube": "V1_tube_2",
+          "wash_cycle": 1,
+          "executable": false,
+          "review_required": true,
+          "review_reason": "unsupported_dispersion_primitive"
+        },
+        {
+          "op": "resuspend",
+          "tube": "V1_tube_3",
+          "wash_cycle": 1,
+          "executable": false,
+          "review_required": true,
+          "review_reason": "unsupported_dispersion_primitive"
+        },
+        {
+          "op": "resuspend",
+          "tube": "V1_tube_4",
+          "wash_cycle": 1,
+          "executable": false,
+          "review_required": true,
+          "review_reason": "unsupported_dispersion_primitive"
+        },
+        {
+          "op": "centrifuge",
+          "centrifuge_id": "CF1",
+          "tube": "V1_tube_1",
+          "minutes": 5.0,
+          "rpm": 9000,
+          "wash_cycle": 1,
+          "tubes": [
+            "V1_tube_1",
+            "V1_tube_2",
+            "V1_tube_3",
+            "V1_tube_4"
+          ],
+          "executable": false,
+          "review_required": true,
+          "review_reason": "multi_tube_loading_requires_executor_support"
+        },
+        {
+          "op": "decant_supernatant",
+          "tube": "V1_tube_1",
+          "wash_cycle": 1,
+          "executable": false,
+          "review_required": true,
+          "review_reason": "unsupported_phase_separation_primitive"
+        },
+        {
+          "op": "decant_supernatant",
+          "tube": "V1_tube_2",
+          "wash_cycle": 1,
+          "executable": false,
+          "review_required": true,
+          "review_reason": "unsupported_phase_separation_primitive"
+        },
+        {
+          "op": "decant_supernatant",
+          "tube": "V1_tube_3",
+          "wash_cycle": 1,
+          "executable": false,
+          "review_required": true,
+          "review_reason": "unsupported_phase_separation_primitive"
+        },
+        {
+          "op": "decant_supernatant",
+          "tube": "V1_tube_4",
+          "wash_cycle": 1,
+          "executable": false,
+          "review_required": true,
+          "review_reason": "unsupported_phase_separation_primitive"
+        },
+        {
+          "op": "pour",
+          "reagent": "ethanol",
+          "vessel": "V1_tube_1",
+          "volume": null,
+          "volume_units": "mL",
+          "wash_cycle": 2
+        },
+        {
+          "op": "pour",
+          "reagent": "ethanol",
+          "vessel": "V1_tube_2",
+          "volume": null,
+          "volume_units": "mL",
+          "wash_cycle": 2
+        },
+        {
+          "op": "pour",
+          "reagent": "ethanol",
+          "vessel": "V1_tube_3",
+          "volume": null,
+          "volume_units": "mL",
+          "wash_cycle": 2
+        },
+        {
+          "op": "pour",
+          "reagent": "ethanol",
+          "vessel": "V1_tube_4",
+          "volume": null,
+          "volume_units": "mL",
+          "wash_cycle": 2
+        },
+        {
+          "op": "resuspend",
+          "tube": "V1_tube_1",
+          "wash_cycle": 2,
+          "executable": false,
+          "review_required": true,
+          "review_reason": "unsupported_dispersion_primitive"
+        },
+        {
+          "op": "resuspend",
+          "tube": "V1_tube_2",
+          "wash_cycle": 2,
+          "executable": false,
+          "review_required": true,
+          "review_reason": "unsupported_dispersion_primitive"
+        },
+        {
+          "op": "resuspend",
+          "tube": "V1_tube_3",
+          "wash_cycle": 2,
+          "executable": false,
+          "review_required": true,
+          "review_reason": "unsupported_dispersion_primitive"
+        },
+        {
+          "op": "resuspend",
+          "tube": "V1_tube_4",
+          "wash_cycle": 2,
+          "executable": false,
+          "review_required": true,
+          "review_reason": "unsupported_dispersion_primitive"
+        },
+        {
+          "op": "centrifuge",
+          "centrifuge_id": "CF1",
+          "tube": "V1_tube_1",
+          "minutes": 5.0,
+          "rpm": 9000,
+          "wash_cycle": 2,
+          "tubes": [
+            "V1_tube_1",
+            "V1_tube_2",
+            "V1_tube_3",
+            "V1_tube_4"
+          ],
+          "executable": false,
+          "review_required": true,
+          "review_reason": "multi_tube_loading_requires_executor_support"
+        },
+        {
+          "op": "decant_supernatant",
+          "tube": "V1_tube_1",
+          "wash_cycle": 2,
+          "executable": false,
+          "review_required": true,
+          "review_reason": "unsupported_phase_separation_primitive"
+        },
+        {
+          "op": "decant_supernatant",
+          "tube": "V1_tube_2",
+          "wash_cycle": 2,
+          "executable": false,
+          "review_required": true,
+          "review_reason": "unsupported_phase_separation_primitive"
+        },
+        {
+          "op": "decant_supernatant",
+          "tube": "V1_tube_3",
+          "wash_cycle": 2,
+          "executable": false,
+          "review_required": true,
+          "review_reason": "unsupported_phase_separation_primitive"
+        },
+        {
+          "op": "decant_supernatant",
+          "tube": "V1_tube_4",
+          "wash_cycle": 2,
+          "executable": false,
+          "review_required": true,
+          "review_reason": "unsupported_phase_separation_primitive"
+        },
+        {
+          "op": "pour",
+          "reagent": "ethanol",
+          "vessel": "V1_tube_1",
+          "volume": null,
+          "volume_units": "mL",
+          "wash_cycle": 3
+        },
+        {
+          "op": "pour",
+          "reagent": "ethanol",
+          "vessel": "V1_tube_2",
+          "volume": null,
+          "volume_units": "mL",
+          "wash_cycle": 3
+        },
+        {
+          "op": "pour",
+          "reagent": "ethanol",
+          "vessel": "V1_tube_3",
+          "volume": null,
+          "volume_units": "mL",
+          "wash_cycle": 3
+        },
+        {
+          "op": "pour",
+          "reagent": "ethanol",
+          "vessel": "V1_tube_4",
+          "volume": null,
+          "volume_units": "mL",
+          "wash_cycle": 3
+        },
+        {
+          "op": "resuspend",
+          "tube": "V1_tube_1",
+          "wash_cycle": 3,
+          "executable": false,
+          "review_required": true,
+          "review_reason": "unsupported_dispersion_primitive"
+        },
+        {
+          "op": "resuspend",
+          "tube": "V1_tube_2",
+          "wash_cycle": 3,
+          "executable": false,
+          "review_required": true,
+          "review_reason": "unsupported_dispersion_primitive"
+        },
+        {
+          "op": "resuspend",
+          "tube": "V1_tube_3",
+          "wash_cycle": 3,
+          "executable": false,
+          "review_required": true,
+          "review_reason": "unsupported_dispersion_primitive"
+        },
+        {
+          "op": "resuspend",
+          "tube": "V1_tube_4",
+          "wash_cycle": 3,
+          "executable": false,
+          "review_required": true,
+          "review_reason": "unsupported_dispersion_primitive"
+        },
+        {
+          "op": "centrifuge",
+          "centrifuge_id": "CF1",
+          "tube": "V1_tube_1",
+          "minutes": 5.0,
+          "rpm": 9000,
+          "wash_cycle": 3,
+          "tubes": [
+            "V1_tube_1",
+            "V1_tube_2",
+            "V1_tube_3",
+            "V1_tube_4"
+          ],
+          "executable": false,
+          "review_required": true,
+          "review_reason": "multi_tube_loading_requires_executor_support"
+        },
+        {
+          "op": "decant_supernatant",
+          "tube": "V1_tube_1",
+          "wash_cycle": 3,
+          "executable": false,
+          "review_required": true,
+          "review_reason": "unsupported_phase_separation_primitive"
+        },
+        {
+          "op": "decant_supernatant",
+          "tube": "V1_tube_2",
+          "wash_cycle": 3,
+          "executable": false,
+          "review_required": true,
+          "review_reason": "unsupported_phase_separation_primitive"
+        },
+        {
+          "op": "decant_supernatant",
+          "tube": "V1_tube_3",
+          "wash_cycle": 3,
+          "executable": false,
+          "review_required": true,
+          "review_reason": "unsupported_phase_separation_primitive"
+        },
+        {
+          "op": "decant_supernatant",
+          "tube": "V1_tube_4",
+          "wash_cycle": 3,
+          "executable": false,
+          "review_required": true,
+          "review_reason": "unsupported_phase_separation_primitive"
+        },
+        {
+          "op": "pour",
+          "reagent": "ethanol",
+          "vessel": "V1_tube_1",
+          "volume": null,
+          "volume_units": "mL",
+          "purpose": "final_redispersion"
+        },
+        {
+          "op": "pour",
+          "reagent": "ethanol",
+          "vessel": "V1_tube_2",
+          "volume": null,
+          "volume_units": "mL",
+          "purpose": "final_redispersion"
+        },
+        {
+          "op": "pour",
+          "reagent": "ethanol",
+          "vessel": "V1_tube_3",
+          "volume": null,
+          "volume_units": "mL",
+          "purpose": "final_redispersion"
+        },
+        {
+          "op": "pour",
+          "reagent": "ethanol",
+          "vessel": "V1_tube_4",
+          "volume": null,
+          "volume_units": "mL",
+          "purpose": "final_redispersion"
+        },
+        {
+          "op": "resuspend",
+          "tube": "V1_tube_1",
+          "purpose": "final_redispersion",
+          "executable": false,
+          "review_required": true,
+          "review_reason": "unsupported_dispersion_primitive"
+        },
+        {
+          "op": "resuspend",
+          "tube": "V1_tube_2",
+          "purpose": "final_redispersion",
+          "executable": false,
+          "review_required": true,
+          "review_reason": "unsupported_dispersion_primitive"
+        },
+        {
+          "op": "resuspend",
+          "tube": "V1_tube_3",
+          "purpose": "final_redispersion",
+          "executable": false,
+          "review_required": true,
+          "review_reason": "unsupported_dispersion_primitive"
+        },
+        {
+          "op": "resuspend",
+          "tube": "V1_tube_4",
+          "purpose": "final_redispersion",
+          "executable": false,
+          "review_required": true,
+          "review_reason": "unsupported_dispersion_primitive"
+        }
+      ],
+      "reagents": [
+        "ethanol"
+      ],
+      "reagents_structured": [
+        {
+          "name": "ethanol",
+          "display_name": "Ethanol",
+          "original": "None mL of ethanol",
+          "repetitions": 3,
+          "amount_unit": "mL"
+        }
+      ],
+      "tube_count": 4,
+      "tube_capacity_mL": 50.0,
+      "source_protocol_step": 8,
+      "source_text": "Collect and wash. Divide the mixture among four balanced 50 mL centrifuge tubes. Centrifuge at 9000 rpm for 5 minutes and decant. Perform three additional ethanol washes, then redisperse the collected material in ethanol. Record the rotor used because rpm alone does not define centrifugal force. Use a consistent, recorded ethanol wash volume; the attachment does not provide one."
+    },
+    {
+      "action": "process",
+      "raw": "Repeat Steps 4-8 for the other CTAB concentrations. Do not change metal feed, chloroform volume, NaBH4 loading, or reaction duration during this first screen.",
+      "vessel": "V1",
+      "reagents": [],
+      "ops": [],
+      "source_protocol_step": 9,
+      "source_text": "Repeat Steps 4-8 for the other CTAB concentrations. Do not change metal feed, chloroform volume, NaBH4 loading, or reaction duration during this first screen.",
+      "review_required": true,
+      "review_reason": "batch_repeat_requires_condition_selection",
+      "reagents_structured": []
+    },
+    {
+      "action": "process",
+      "raw": "Measure morphology before selecting a condition. Proposed starting point: measure at least 100 individually resolved objects per batch across multiple TEM fields. Measure each object’s length and diameter, calculate its individual AR, and report the median, distribution, and wire-like fraction. Do not count bundles as single thick wires. Check Pt/Ni incorporation separately; morphology alone cannot establish a PtNi alloy.",
+      "vessel": "V1",
+      "reagents": [],
+      "ops": [],
+      "source_protocol_step": 10,
+      "source_text": "Measure morphology before selecting a condition. Proposed starting point: measure at least 100 individually resolved objects per batch across multiple TEM fields. Measure each object’s length and diameter, calculate its individual AR, and report the median, distribution, and wire-like fraction. Do not count bundles as single thick wires. Check Pt/Ni incorporation separately; morphology alone cannot establish a PtNi alloy.",
+      "instruction_type": "annotation",
+      "reagents_structured": []
+    },
+    {
+      "action": "process",
+      "raw": "Refine around the measured result. If two CTAB concentrations give median aspect ratios on opposite sides of 6, test intermediate concentrations while keeping the other conditions fixed. If no trend or no wire-like product appears, do not extrapolate blindly. Proposed second-stage screen: vary the preassembly period to 10, 30, and 60 minutes at the best-performing CTAB concentration; only 30 minutes is attachment-backed. Repeat any apparent AR ≈ 6 condition in independent batches before treating it as reproducible.",
+      "vessel": "V1",
+      "reagents": [],
+      "ops": [],
+      "source_protocol_step": 11,
+      "source_text": "Refine around the measured result. If two CTAB concentrations give median aspect ratios on opposite sides of 6, test intermediate concentrations while keeping the other conditions fixed. If no trend or no wire-like product appears, do not extrapolate blindly. Proposed second-stage screen: vary the preassembly period to 10, 30, and 60 minutes at the best-performing CTAB concentration; only 30 minutes is attachment-backed. Repeat any apparent AR ≈ 6 condition in independent batches before treating it as reproducible.",
+      "instruction_type": "annotation",
+      "reagents_structured": []
+    }
+  ],
+  "micro_plan": [
+    {
+      "reagent": "DI water",
+      "vessel": "V1",
+      "volume": 120.0,
+      "volume_units": "mL",
+      "verb": "pour",
+      "source_step_index": 9,
+      "step_index": 1
+    },
+    {
+      "reagent": "CTAB/chloroform stock",
+      "vessel": "V1",
+      "volume": 15.0,
+      "volume_units": "mL",
+      "verb": "pour",
+      "source_step_index": 10,
+      "step_index": 2
+    },
+    {
+      "reagent": "metal precursor stocks",
+      "vessel": "V1",
+      "volume": 15.0,
+      "volume_units": "mL",
+      "verb": "pour",
+      "source_step_index": 11,
+      "step_index": 3
+    },
+    {
+      "stir_plate_id": "SP1",
+      "vessel": "V1",
+      "verb": "move_to_stir_plate",
+      "source_step_index": 12,
+      "step_index": 4
+    },
+    {
+      "vessel": "V1",
+      "rpm": 700,
+      "inferred": true,
+      "verb": "set_stir_rate",
+      "source_step_index": 12,
+      "step_index": 5
+    },
+    {
+      "minutes": 30.0,
+      "verb": "wait",
+      "source_step_index": 12,
+      "step_index": 6
+    },
+    {
+      "reagent": "NaBH4",
+      "vessel": "V2",
+      "amount": 600.0,
+      "amount_unit": "mg",
+      "verb": "pour",
+      "source_step_index": 15,
+      "step_index": 7
+    },
+    {
+      "reagent": "DI water",
+      "vessel": "V2",
+      "volume": 15.0,
+      "volume_units": "mL",
+      "reagent_temperature_C": 4.0,
+      "verb": "pour",
+      "source_step_index": 15,
+      "step_index": 8
+    },
+    {
+      "tube": "V2",
+      "executable": false,
+      "review_required": true,
+      "review_reason": "unsupported_dispersion_primitive",
+      "verb": "resuspend",
+      "source_step_index": 16,
+      "step_index": 9
+    },
+    {
+      "vessel": "V1",
+      "to": "V1",
+      "from": "V2",
+      "volume": 15.0,
+      "volume_units": "mL",
+      "max_delay_minutes": 2.0,
+      "timing_reference": "solvent_addition_to_prepared_solution",
+      "executable": false,
+      "review_required": true,
+      "review_reason": "transfer_deadline_requires_executor_support",
+      "verb": "pour",
+      "source_step_index": 17,
+      "step_index": 10
+    },
+    {
+      "minutes": 30.0,
+      "verb": "wait",
+      "source_step_index": 20,
+      "step_index": 11
+    },
+    {
+      "from": "V1",
+      "to": "V1_tube_1",
+      "fraction": 0.25,
+      "executable": false,
+      "review_required": true,
+      "review_reason": "balanced_split_requires_confirmation",
+      "verb": "transfer_to_centrifuge_tube",
+      "source_step_index": 21,
+      "step_index": 12
+    },
+    {
+      "from": "V1",
+      "to": "V1_tube_2",
+      "fraction": 0.25,
+      "executable": false,
+      "review_required": true,
+      "review_reason": "balanced_split_requires_confirmation",
+      "verb": "transfer_to_centrifuge_tube",
+      "source_step_index": 21,
+      "step_index": 13
+    },
+    {
+      "from": "V1",
+      "to": "V1_tube_3",
+      "fraction": 0.25,
+      "executable": false,
+      "review_required": true,
+      "review_reason": "balanced_split_requires_confirmation",
+      "verb": "transfer_to_centrifuge_tube",
+      "source_step_index": 21,
+      "step_index": 14
+    },
+    {
+      "from": "V1",
+      "to": "V1_tube_4",
+      "fraction": 0.25,
+      "executable": false,
+      "review_required": true,
+      "review_reason": "balanced_split_requires_confirmation",
+      "verb": "transfer_to_centrifuge_tube",
+      "source_step_index": 21,
+      "step_index": 15
+    },
+    {
+      "centrifuge_id": "CF1",
+      "tube": "V1_tube_1",
+      "minutes": 5.0,
+      "rpm": 9000,
+      "inferred": false,
+      "tubes": [
+        "V1_tube_1",
+        "V1_tube_2",
+        "V1_tube_3",
+        "V1_tube_4"
+      ],
+      "executable": false,
+      "review_required": true,
+      "review_reason": "multi_tube_loading_requires_executor_support",
+      "verb": "centrifuge",
+      "source_step_index": 21,
+      "step_index": 16
+    },
+    {
+      "tube": "V1_tube_1",
+      "executable": false,
+      "review_required": true,
+      "review_reason": "unsupported_phase_separation_primitive",
+      "verb": "decant_supernatant",
+      "source_step_index": 21,
+      "step_index": 17
+    },
+    {
+      "tube": "V1_tube_2",
+      "executable": false,
+      "review_required": true,
+      "review_reason": "unsupported_phase_separation_primitive",
+      "verb": "decant_supernatant",
+      "source_step_index": 21,
+      "step_index": 18
+    },
+    {
+      "tube": "V1_tube_3",
+      "executable": false,
+      "review_required": true,
+      "review_reason": "unsupported_phase_separation_primitive",
+      "verb": "decant_supernatant",
+      "source_step_index": 21,
+      "step_index": 19
+    },
+    {
+      "tube": "V1_tube_4",
+      "executable": false,
+      "review_required": true,
+      "review_reason": "unsupported_phase_separation_primitive",
+      "verb": "decant_supernatant",
+      "source_step_index": 21,
+      "step_index": 20
+    },
+    {
+      "reagent": "ethanol",
+      "vessel": "V1_tube_1",
+      "volume": null,
+      "volume_units": "mL",
+      "wash_cycle": 1,
+      "verb": "pour",
+      "source_step_index": 21,
+      "step_index": 21
+    },
+    {
+      "reagent": "ethanol",
+      "vessel": "V1_tube_2",
+      "volume": null,
+      "volume_units": "mL",
+      "wash_cycle": 1,
+      "verb": "pour",
+      "source_step_index": 21,
+      "step_index": 22
+    },
+    {
+      "reagent": "ethanol",
+      "vessel": "V1_tube_3",
+      "volume": null,
+      "volume_units": "mL",
+      "wash_cycle": 1,
+      "verb": "pour",
+      "source_step_index": 21,
+      "step_index": 23
+    },
+    {
+      "reagent": "ethanol",
+      "vessel": "V1_tube_4",
+      "volume": null,
+      "volume_units": "mL",
+      "wash_cycle": 1,
+      "verb": "pour",
+      "source_step_index": 21,
+      "step_index": 24
+    },
+    {
+      "tube": "V1_tube_1",
+      "wash_cycle": 1,
+      "executable": false,
+      "review_required": true,
+      "review_reason": "unsupported_dispersion_primitive",
+      "verb": "resuspend",
+      "source_step_index": 21,
+      "step_index": 25
+    },
+    {
+      "tube": "V1_tube_2",
+      "wash_cycle": 1,
+      "executable": false,
+      "review_required": true,
+      "review_reason": "unsupported_dispersion_primitive",
+      "verb": "resuspend",
+      "source_step_index": 21,
+      "step_index": 26
+    },
+    {
+      "tube": "V1_tube_3",
+      "wash_cycle": 1,
+      "executable": false,
+      "review_required": true,
+      "review_reason": "unsupported_dispersion_primitive",
+      "verb": "resuspend",
+      "source_step_index": 21,
+      "step_index": 27
+    },
+    {
+      "tube": "V1_tube_4",
+      "wash_cycle": 1,
+      "executable": false,
+      "review_required": true,
+      "review_reason": "unsupported_dispersion_primitive",
+      "verb": "resuspend",
+      "source_step_index": 21,
+      "step_index": 28
+    },
+    {
+      "centrifuge_id": "CF1",
+      "tube": "V1_tube_1",
+      "minutes": 5.0,
+      "rpm": 9000,
+      "wash_cycle": 1,
+      "tubes": [
+        "V1_tube_1",
+        "V1_tube_2",
+        "V1_tube_3",
+        "V1_tube_4"
+      ],
+      "executable": false,
+      "review_required": true,
+      "review_reason": "multi_tube_loading_requires_executor_support",
+      "verb": "centrifuge",
+      "source_step_index": 21,
+      "step_index": 29
+    },
+    {
+      "tube": "V1_tube_1",
+      "wash_cycle": 1,
+      "executable": false,
+      "review_required": true,
+      "review_reason": "unsupported_phase_separation_primitive",
+      "verb": "decant_supernatant",
+      "source_step_index": 21,
+      "step_index": 30
+    },
+    {
+      "tube": "V1_tube_2",
+      "wash_cycle": 1,
+      "executable": false,
+      "review_required": true,
+      "review_reason": "unsupported_phase_separation_primitive",
+      "verb": "decant_supernatant",
+      "source_step_index": 21,
+      "step_index": 31
+    },
+    {
+      "tube": "V1_tube_3",
+      "wash_cycle": 1,
+      "executable": false,
+      "review_required": true,
+      "review_reason": "unsupported_phase_separation_primitive",
+      "verb": "decant_supernatant",
+      "source_step_index": 21,
+      "step_index": 32
+    },
+    {
+      "tube": "V1_tube_4",
+      "wash_cycle": 1,
+      "executable": false,
+      "review_required": true,
+      "review_reason": "unsupported_phase_separation_primitive",
+      "verb": "decant_supernatant",
+      "source_step_index": 21,
+      "step_index": 33
+    },
+    {
+      "reagent": "ethanol",
+      "vessel": "V1_tube_1",
+      "volume": null,
+      "volume_units": "mL",
+      "wash_cycle": 2,
+      "verb": "pour",
+      "source_step_index": 21,
+      "step_index": 34
+    },
+    {
+      "reagent": "ethanol",
+      "vessel": "V1_tube_2",
+      "volume": null,
+      "volume_units": "mL",
+      "wash_cycle": 2,
+      "verb": "pour",
+      "source_step_index": 21,
+      "step_index": 35
+    },
+    {
+      "reagent": "ethanol",
+      "vessel": "V1_tube_3",
+      "volume": null,
+      "volume_units": "mL",
+      "wash_cycle": 2,
+      "verb": "pour",
+      "source_step_index": 21,
+      "step_index": 36
+    },
+    {
+      "reagent": "ethanol",
+      "vessel": "V1_tube_4",
+      "volume": null,
+      "volume_units": "mL",
+      "wash_cycle": 2,
+      "verb": "pour",
+      "source_step_index": 21,
+      "step_index": 37
+    },
+    {
+      "tube": "V1_tube_1",
+      "wash_cycle": 2,
+      "executable": false,
+      "review_required": true,
+      "review_reason": "unsupported_dispersion_primitive",
+      "verb": "resuspend",
+      "source_step_index": 21,
+      "step_index": 38
+    },
+    {
+      "tube": "V1_tube_2",
+      "wash_cycle": 2,
+      "executable": false,
+      "review_required": true,
+      "review_reason": "unsupported_dispersion_primitive",
+      "verb": "resuspend",
+      "source_step_index": 21,
+      "step_index": 39
+    },
+    {
+      "tube": "V1_tube_3",
+      "wash_cycle": 2,
+      "executable": false,
+      "review_required": true,
+      "review_reason": "unsupported_dispersion_primitive",
+      "verb": "resuspend",
+      "source_step_index": 21,
+      "step_index": 40
+    },
+    {
+      "tube": "V1_tube_4",
+      "wash_cycle": 2,
+      "executable": false,
+      "review_required": true,
+      "review_reason": "unsupported_dispersion_primitive",
+      "verb": "resuspend",
+      "source_step_index": 21,
+      "step_index": 41
+    },
+    {
+      "centrifuge_id": "CF1",
+      "tube": "V1_tube_1",
+      "minutes": 5.0,
+      "rpm": 9000,
+      "wash_cycle": 2,
+      "tubes": [
+        "V1_tube_1",
+        "V1_tube_2",
+        "V1_tube_3",
+        "V1_tube_4"
+      ],
+      "executable": false,
+      "review_required": true,
+      "review_reason": "multi_tube_loading_requires_executor_support",
+      "verb": "centrifuge",
+      "source_step_index": 21,
+      "step_index": 42
+    },
+    {
+      "tube": "V1_tube_1",
+      "wash_cycle": 2,
+      "executable": false,
+      "review_required": true,
+      "review_reason": "unsupported_phase_separation_primitive",
+      "verb": "decant_supernatant",
+      "source_step_index": 21,
+      "step_index": 43
+    },
+    {
+      "tube": "V1_tube_2",
+      "wash_cycle": 2,
+      "executable": false,
+      "review_required": true,
+      "review_reason": "unsupported_phase_separation_primitive",
+      "verb": "decant_supernatant",
+      "source_step_index": 21,
+      "step_index": 44
+    },
+    {
+      "tube": "V1_tube_3",
+      "wash_cycle": 2,
+      "executable": false,
+      "review_required": true,
+      "review_reason": "unsupported_phase_separation_primitive",
+      "verb": "decant_supernatant",
+      "source_step_index": 21,
+      "step_index": 45
+    },
+    {
+      "tube": "V1_tube_4",
+      "wash_cycle": 2,
+      "executable": false,
+      "review_required": true,
+      "review_reason": "unsupported_phase_separation_primitive",
+      "verb": "decant_supernatant",
+      "source_step_index": 21,
+      "step_index": 46
+    },
+    {
+      "reagent": "ethanol",
+      "vessel": "V1_tube_1",
+      "volume": null,
+      "volume_units": "mL",
+      "wash_cycle": 3,
+      "verb": "pour",
+      "source_step_index": 21,
+      "step_index": 47
+    },
+    {
+      "reagent": "ethanol",
+      "vessel": "V1_tube_2",
+      "volume": null,
+      "volume_units": "mL",
+      "wash_cycle": 3,
+      "verb": "pour",
+      "source_step_index": 21,
+      "step_index": 48
+    },
+    {
+      "reagent": "ethanol",
+      "vessel": "V1_tube_3",
+      "volume": null,
+      "volume_units": "mL",
+      "wash_cycle": 3,
+      "verb": "pour",
+      "source_step_index": 21,
+      "step_index": 49
+    },
+    {
+      "reagent": "ethanol",
+      "vessel": "V1_tube_4",
+      "volume": null,
+      "volume_units": "mL",
+      "wash_cycle": 3,
+      "verb": "pour",
+      "source_step_index": 21,
+      "step_index": 50
+    },
+    {
+      "tube": "V1_tube_1",
+      "wash_cycle": 3,
+      "executable": false,
+      "review_required": true,
+      "review_reason": "unsupported_dispersion_primitive",
+      "verb": "resuspend",
+      "source_step_index": 21,
+      "step_index": 51
+    },
+    {
+      "tube": "V1_tube_2",
+      "wash_cycle": 3,
+      "executable": false,
+      "review_required": true,
+      "review_reason": "unsupported_dispersion_primitive",
+      "verb": "resuspend",
+      "source_step_index": 21,
+      "step_index": 52
+    },
+    {
+      "tube": "V1_tube_3",
+      "wash_cycle": 3,
+      "executable": false,
+      "review_required": true,
+      "review_reason": "unsupported_dispersion_primitive",
+      "verb": "resuspend",
+      "source_step_index": 21,
+      "step_index": 53
+    },
+    {
+      "tube": "V1_tube_4",
+      "wash_cycle": 3,
+      "executable": false,
+      "review_required": true,
+      "review_reason": "unsupported_dispersion_primitive",
+      "verb": "resuspend",
+      "source_step_index": 21,
+      "step_index": 54
+    },
+    {
+      "centrifuge_id": "CF1",
+      "tube": "V1_tube_1",
+      "minutes": 5.0,
+      "rpm": 9000,
+      "wash_cycle": 3,
+      "tubes": [
+        "V1_tube_1",
+        "V1_tube_2",
+        "V1_tube_3",
+        "V1_tube_4"
+      ],
+      "executable": false,
+      "review_required": true,
+      "review_reason": "multi_tube_loading_requires_executor_support",
+      "verb": "centrifuge",
+      "source_step_index": 21,
+      "step_index": 55
+    },
+    {
+      "tube": "V1_tube_1",
+      "wash_cycle": 3,
+      "executable": false,
+      "review_required": true,
+      "review_reason": "unsupported_phase_separation_primitive",
+      "verb": "decant_supernatant",
+      "source_step_index": 21,
+      "step_index": 56
+    },
+    {
+      "tube": "V1_tube_2",
+      "wash_cycle": 3,
+      "executable": false,
+      "review_required": true,
+      "review_reason": "unsupported_phase_separation_primitive",
+      "verb": "decant_supernatant",
+      "source_step_index": 21,
+      "step_index": 57
+    },
+    {
+      "tube": "V1_tube_3",
+      "wash_cycle": 3,
+      "executable": false,
+      "review_required": true,
+      "review_reason": "unsupported_phase_separation_primitive",
+      "verb": "decant_supernatant",
+      "source_step_index": 21,
+      "step_index": 58
+    },
+    {
+      "tube": "V1_tube_4",
+      "wash_cycle": 3,
+      "executable": false,
+      "review_required": true,
+      "review_reason": "unsupported_phase_separation_primitive",
+      "verb": "decant_supernatant",
+      "source_step_index": 21,
+      "step_index": 59
+    },
+    {
+      "reagent": "ethanol",
+      "vessel": "V1_tube_1",
+      "volume": null,
+      "volume_units": "mL",
+      "purpose": "final_redispersion",
+      "verb": "pour",
+      "source_step_index": 21,
+      "step_index": 60
+    },
+    {
+      "reagent": "ethanol",
+      "vessel": "V1_tube_2",
+      "volume": null,
+      "volume_units": "mL",
+      "purpose": "final_redispersion",
+      "verb": "pour",
+      "source_step_index": 21,
+      "step_index": 61
+    },
+    {
+      "reagent": "ethanol",
+      "vessel": "V1_tube_3",
+      "volume": null,
+      "volume_units": "mL",
+      "purpose": "final_redispersion",
+      "verb": "pour",
+      "source_step_index": 21,
+      "step_index": 62
+    },
+    {
+      "reagent": "ethanol",
+      "vessel": "V1_tube_4",
+      "volume": null,
+      "volume_units": "mL",
+      "purpose": "final_redispersion",
+      "verb": "pour",
+      "source_step_index": 21,
+      "step_index": 63
+    },
+    {
+      "tube": "V1_tube_1",
+      "purpose": "final_redispersion",
+      "executable": false,
+      "review_required": true,
+      "review_reason": "unsupported_dispersion_primitive",
+      "verb": "resuspend",
+      "source_step_index": 21,
+      "step_index": 64
+    },
+    {
+      "tube": "V1_tube_2",
+      "purpose": "final_redispersion",
+      "executable": false,
+      "review_required": true,
+      "review_reason": "unsupported_dispersion_primitive",
+      "verb": "resuspend",
+      "source_step_index": 21,
+      "step_index": 65
+    },
+    {
+      "tube": "V1_tube_3",
+      "purpose": "final_redispersion",
+      "executable": false,
+      "review_required": true,
+      "review_reason": "unsupported_dispersion_primitive",
+      "verb": "resuspend",
+      "source_step_index": 21,
+      "step_index": 66
+    },
+    {
+      "tube": "V1_tube_4",
+      "purpose": "final_redispersion",
+      "executable": false,
+      "review_required": true,
+      "review_reason": "unsupported_dispersion_primitive",
+      "verb": "resuspend",
+      "source_step_index": 21,
+      "step_index": 67
+    }
+  ],
+  "micro_plan_min": [
+    {
+      "reagent": "DI water",
+      "vessel": "V1",
+      "volume": 120.0,
+      "volume_units": "mL",
+      "verb": "pour",
+      "source_step_index": 9,
+      "step_index": 1
+    },
+    {
+      "reagent": "CTAB/chloroform stock",
+      "vessel": "V1",
+      "volume": 15.0,
+      "volume_units": "mL",
+      "verb": "pour",
+      "source_step_index": 10,
+      "step_index": 2
+    },
+    {
+      "reagent": "metal precursor stocks",
+      "vessel": "V1",
+      "volume": 15.0,
+      "volume_units": "mL",
+      "verb": "pour",
+      "source_step_index": 11,
+      "step_index": 3
+    },
+    {
+      "reagent": "NaBH4",
+      "vessel": "V2",
+      "amount": 600.0,
+      "amount_unit": "mg",
+      "verb": "pour",
+      "source_step_index": 15,
+      "step_index": 4
+    },
+    {
+      "reagent": "DI water",
+      "vessel": "V2",
+      "volume": 15.0,
+      "volume_units": "mL",
+      "reagent_temperature_C": 4.0,
+      "verb": "pour",
+      "source_step_index": 15,
+      "step_index": 5
+    },
+    {
+      "vessel": "V1",
+      "to": "V1",
+      "from": "V2",
+      "volume": 15.0,
+      "volume_units": "mL",
+      "max_delay_minutes": 2.0,
+      "timing_reference": "solvent_addition_to_prepared_solution",
+      "executable": false,
+      "review_required": true,
+      "review_reason": "transfer_deadline_requires_executor_support",
+      "verb": "pour",
+      "source_step_index": 17,
+      "step_index": 6
+    },
+    {
+      "reagent": "ethanol",
+      "vessel": "V1_tube_1",
+      "volume": null,
+      "volume_units": "mL",
+      "wash_cycle": 1,
+      "verb": "pour",
+      "source_step_index": 21,
+      "step_index": 7
+    },
+    {
+      "reagent": "ethanol",
+      "vessel": "V1_tube_2",
+      "volume": null,
+      "volume_units": "mL",
+      "wash_cycle": 1,
+      "verb": "pour",
+      "source_step_index": 21,
+      "step_index": 8
+    },
+    {
+      "reagent": "ethanol",
+      "vessel": "V1_tube_3",
+      "volume": null,
+      "volume_units": "mL",
+      "wash_cycle": 1,
+      "verb": "pour",
+      "source_step_index": 21,
+      "step_index": 9
+    },
+    {
+      "reagent": "ethanol",
+      "vessel": "V1_tube_4",
+      "volume": null,
+      "volume_units": "mL",
+      "wash_cycle": 1,
+      "verb": "pour",
+      "source_step_index": 21,
+      "step_index": 10
+    },
+    {
+      "reagent": "ethanol",
+      "vessel": "V1_tube_1",
+      "volume": null,
+      "volume_units": "mL",
+      "wash_cycle": 2,
+      "verb": "pour",
+      "source_step_index": 21,
+      "step_index": 11
+    },
+    {
+      "reagent": "ethanol",
+      "vessel": "V1_tube_2",
+      "volume": null,
+      "volume_units": "mL",
+      "wash_cycle": 2,
+      "verb": "pour",
+      "source_step_index": 21,
+      "step_index": 12
+    },
+    {
+      "reagent": "ethanol",
+      "vessel": "V1_tube_3",
+      "volume": null,
+      "volume_units": "mL",
+      "wash_cycle": 2,
+      "verb": "pour",
+      "source_step_index": 21,
+      "step_index": 13
+    },
+    {
+      "reagent": "ethanol",
+      "vessel": "V1_tube_4",
+      "volume": null,
+      "volume_units": "mL",
+      "wash_cycle": 2,
+      "verb": "pour",
+      "source_step_index": 21,
+      "step_index": 14
+    },
+    {
+      "reagent": "ethanol",
+      "vessel": "V1_tube_1",
+      "volume": null,
+      "volume_units": "mL",
+      "wash_cycle": 3,
+      "verb": "pour",
+      "source_step_index": 21,
+      "step_index": 15
+    },
+    {
+      "reagent": "ethanol",
+      "vessel": "V1_tube_2",
+      "volume": null,
+      "volume_units": "mL",
+      "wash_cycle": 3,
+      "verb": "pour",
+      "source_step_index": 21,
+      "step_index": 16
+    },
+    {
+      "reagent": "ethanol",
+      "vessel": "V1_tube_3",
+      "volume": null,
+      "volume_units": "mL",
+      "wash_cycle": 3,
+      "verb": "pour",
+      "source_step_index": 21,
+      "step_index": 17
+    },
+    {
+      "reagent": "ethanol",
+      "vessel": "V1_tube_4",
+      "volume": null,
+      "volume_units": "mL",
+      "wash_cycle": 3,
+      "verb": "pour",
+      "source_step_index": 21,
+      "step_index": 18
+    },
+    {
+      "reagent": "ethanol",
+      "vessel": "V1_tube_1",
+      "volume": null,
+      "volume_units": "mL",
+      "purpose": "final_redispersion",
+      "verb": "pour",
+      "source_step_index": 21,
+      "step_index": 19
+    },
+    {
+      "reagent": "ethanol",
+      "vessel": "V1_tube_2",
+      "volume": null,
+      "volume_units": "mL",
+      "purpose": "final_redispersion",
+      "verb": "pour",
+      "source_step_index": 21,
+      "step_index": 20
+    },
+    {
+      "reagent": "ethanol",
+      "vessel": "V1_tube_3",
+      "volume": null,
+      "volume_units": "mL",
+      "purpose": "final_redispersion",
+      "verb": "pour",
+      "source_step_index": 21,
+      "step_index": 21
+    },
+    {
+      "reagent": "ethanol",
+      "vessel": "V1_tube_4",
+      "volume": null,
+      "volume_units": "mL",
+      "purpose": "final_redispersion",
+      "verb": "pour",
+      "source_step_index": 21,
+      "step_index": 22
+    }
+  ],
+  "timing_delays": [
+    {
+      "step_index": 6,
+      "verb": "wait",
+      "minutes": 30.0
+    },
+    {
+      "step_index": 11,
+      "verb": "wait",
+      "minutes": 30.0
+    }
+  ],
+  "chemistry_summary": {
+    "hardware": [
+      "Flask 500 mL",
+      "Glass vessels for the CTAB/chloroform stocks; a vented glass vessel for preparing fresh NaBH4 solution.",
+      "Four 50 mL centrifuge tubes compatible with the chloroform-containing mixture, and a compatible rotor rated for 9000 rpm.",
+      "TEM access for length/diameter measurements; STEM-EDS or equivalent elemental analysis to check Pt/Ni incorporation."
+    ],
+    "materials": [
+      {
+        "name": "CTAB",
+        "formula_or_short_name": "CTAB",
+        "concentration": null,
+        "concentration_unit": null,
+        "purity": null,
+        "role": "surfactant / structure-directing agent",
+        "source_text": "Scale basis: retain the attached batch scale: 120 mL DI water, 15 mL CTAB/chloroform stock, 15 mL combined aqueous metal stocks, and subsequently 15 mL aqueous reductant-165 mL nominal final volume.",
+        "solvent": "chloroform"
+      },
+      {
+        "name": "chloroform",
+        "formula_or_short_name": "chloroform",
+        "concentration": null,
+        "concentration_unit": null,
+        "purity": null,
+        "role": "organic solvent",
+        "source_text": "Scale basis: retain the attached batch scale: 120 mL DI water, 15 mL CTAB/chloroform stock, 15 mL combined aqueous metal stocks, and subsequently 15 mL aqueous reductant-165 mL nominal final volume."
+      },
+      {
+        "name": "NiCl2",
+        "formula_or_short_name": "NiCl2",
+        "concentration": 20.0,
+        "concentration_unit": "mM",
+        "purity": null,
+        "role": null,
+        "source_text": "Metal stocks: 20 mM NiCl2 in DI water and 20 mM H2PtCl6 in DI water. Keep the same precursor ratio in every screening batch. The attachment’s example uses 13.5 mL H2PtCl6 stock and 1.5 mL NiCl2 stock. Calculated feed: 0.270 mmol Pt and 0.030 mmol Ni, or nominal Pt:Ni = 9:1; this does not establish the product composition."
+      },
+      {
+        "name": "H2PtCl6",
+        "formula_or_short_name": "H2PtCl6",
+        "concentration": 20.0,
+        "concentration_unit": "mM",
+        "purity": null,
+        "role": null,
+        "source_text": "Metal stocks: 20 mM NiCl2 in DI water and 20 mM H2PtCl6 in DI water. Keep the same precursor ratio in every screening batch. The attachment’s example uses 13.5 mL H2PtCl6 stock and 1.5 mL NiCl2 stock. Calculated feed: 0.270 mmol Pt and 0.030 mmol Ni, or nominal Pt:Ni = 9:1; this does not establish the product composition."
+      },
+      {
+        "name": "NaBH4",
+        "formula_or_short_name": "NaBH4",
+        "concentration": null,
+        "concentration_unit": null,
+        "purity": null,
+        "role": "reducing agent",
+        "source_text": "Reductant, per batch: 600 mg NaBH4 and 15 mL DI water cooled to approximately 4 °C.",
+        "amount": 600.0,
+        "amount_unit": "mg"
+      },
+      {
+        "name": "Ethanol",
+        "formula_or_short_name": "Ethanol",
+        "concentration": null,
+        "concentration_unit": null,
+        "purity": null,
+        "role": "washing and redispersion solvent",
+        "source_text": "Ethanol for three additional washes and final redispersion; wash volumes are not specified in the attachment."
+      },
+      {
+        "name": "DI water",
+        "formula_or_short_name": "DI water",
+        "concentration": null,
+        "concentration_unit": null,
+        "purity": null,
+        "role": "aqueous phase / solvent"
+      },
+      {
+        "name": "CTAB/chloroform stock",
+        "formula_or_short_name": "CTAB/chloroform stock",
+        "concentration": null,
+        "concentration_unit": null,
+        "purity": null,
+        "role": "surfactant / structure-directing agent"
+      },
+      {
+        "name": "metal precursor stocks",
+        "formula_or_short_name": "metal precursor stocks",
+        "concentration": null,
+        "concentration_unit": null,
+        "purity": null,
+        "role": null
+      }
+    ],
+    "procedure": [
+      {
+        "step_number": 1,
+        "source_text": "Define the target before modifying the synthesis. Use aspect ratio \\(AR=L/d\\), measured for individual objects. Proposed starting point: target a median AR near 6, while separately reporting the distribution and the fraction of particles that are wire-like. The attachment provides no baseline dimensions or validated AR-control relationship.",
+        "explicit_from_text": {
+          "operation": "process"
+        },
+        "inferred_for_json": {
+          "executor_representation": []
+        },
+        "notes": [],
+        "source_protocol_step": 1
+      },
+      {
+        "step_number": 2,
+        "source_text": "Prepare the three CTAB stocks",
+        "explicit_from_text": {
+          "operation": "process"
+        },
+        "inferred_for_json": {
+          "executor_representation": []
+        },
+        "notes": [
+          "unparsed_instruction"
+        ],
+        "source_protocol_step": 2
+      },
+      {
+        "step_number": 3,
+        "source_text": "Prepare the original 40 mM stock in glass as specified, and prepare the proposed 20 and 60 mM stocks in glass",
+        "explicit_from_text": {
+          "operation": "process"
+        },
+        "inferred_for_json": {
+          "executor_representation": []
+        },
+        "notes": [
+          "unparsed_instruction"
+        ],
+        "source_protocol_step": 2
+      },
+      {
+        "step_number": 4,
+        "source_text": "Confirm that each stock is homogeneous at the working temperature",
+        "explicit_from_text": {
+          "operation": "process"
+        },
+        "inferred_for_json": {
+          "executor_representation": []
+        },
+        "notes": [],
+        "source_protocol_step": 2
+      },
+      {
+        "step_number": 5,
+        "source_text": "If a proposed concentration does not dissolve reproducibly, do not treat its nominal concentration as an available surfactant concentration",
+        "explicit_from_text": {
+          "operation": "process"
+        },
+        "inferred_for_json": {
+          "executor_representation": []
+        },
+        "notes": [],
+        "source_protocol_step": 2
+      },
+      {
+        "step_number": 6,
+        "source_text": "narrow the screen instead",
+        "explicit_from_text": {
+          "operation": "process"
+        },
+        "inferred_for_json": {
+          "executor_representation": []
+        },
+        "notes": [
+          "unparsed_instruction"
+        ],
+        "source_protocol_step": 2
+      },
+      {
+        "step_number": 7,
+        "source_text": "Hold the other variables constant. Use the same flask geometry, stirring setting, precursor ratio, reagent addition method, and temperature across all batches. The attachment does not specify reaction temperature or atmosphere. Proposed starting point: conduct the screen at 20-25 °C in a vented, ambient-air apparatus in the hood, recording the actual temperature. Do not seal the reaction or introduce an inert purge solely as an assumed requirement.",
+        "explicit_from_text": {
+          "operation": "process",
+          "temperature_C": 20.0
+        },
+        "inferred_for_json": {
+          "executor_representation": []
+        },
+        "notes": [
+          "reaction_conditions_require_selection"
+        ],
+        "source_protocol_step": 3
+      },
+      {
+        "step_number": 8,
+        "source_text": "Prepare one reaction mixture",
+        "explicit_from_text": {
+          "operation": "process"
+        },
+        "inferred_for_json": {
+          "executor_representation": []
+        },
+        "notes": [],
+        "source_protocol_step": 4
+      },
+      {
+        "step_number": 9,
+        "source_text": "Add 120 mL DI water to the flask containing the stir bar",
+        "explicit_from_text": {
+          "operation": "add_solvent",
+          "component": {
+            "name": "DI water",
+            "amount": 120.0,
+            "amount_unit": "mL"
+          },
+          "added_component": {
+            "name": "DI water",
+            "amount": 120.0,
+            "amount_unit": "mL"
+          },
+          "solvent": "DI water"
+        },
+        "inferred_for_json": {
+          "executor_representation": [
+            "pour 120.0 mL DI water into V1"
+          ]
+        },
+        "notes": [],
+        "source_protocol_step": 4
+      },
+      {
+        "step_number": 10,
+        "source_text": "Add 15 mL of the selected CTAB/chloroform stock",
+        "explicit_from_text": {
+          "operation": "add_solvent",
+          "component": {
+            "name": "CTAB/chloroform stock",
+            "amount": 15.0,
+            "amount_unit": "mL"
+          },
+          "added_component": {
+            "name": "CTAB/chloroform stock",
+            "amount": 15.0,
+            "amount_unit": "mL"
+          },
+          "solvent": "CTAB/chloroform stock"
+        },
+        "inferred_for_json": {
+          "executor_representation": [
+            "pour 15.0 mL CTAB/chloroform stock into V1"
+          ]
+        },
+        "notes": [
+          "stock_condition_requires_selection"
+        ],
+        "source_protocol_step": 4
+      },
+      {
+        "step_number": 11,
+        "source_text": "Then add the combined 15 mL of metal precursor stocks, preserving the attachment’s addition order",
+        "explicit_from_text": {
+          "operation": "add_solvent",
+          "component": {
+            "name": "metal precursor stocks",
+            "amount": 15.0,
+            "amount_unit": "mL"
+          },
+          "added_component": {
+            "name": "metal precursor stocks",
+            "amount": 15.0,
+            "amount_unit": "mL"
+          },
+          "solvent": "metal precursor stocks"
+        },
+        "inferred_for_json": {
+          "executor_representation": [
+            "pour 15.0 mL metal precursor stocks into V1"
+          ]
+        },
+        "notes": [],
+        "source_protocol_step": 4
+      },
+      {
+        "step_number": 12,
+        "source_text": "Stir for 30 minutes before reduction",
+        "explicit_from_text": {
+          "operation": "stir",
+          "time": {
+            "value": 30.0,
+            "unit": "minutes"
+          },
+          "stirring": true
+        },
+        "inferred_for_json": {
+          "executor_representation": [
+            "move_to_stir_plate",
+            "set_stir_rate",
+            "wait 30 minutes"
+          ]
+        },
+        "notes": [],
+        "source_protocol_step": 5
+      },
+      {
+        "step_number": 13,
+        "source_text": "Retain this preassembly period for all three batches so that CTAB concentration is the only intended synthesis variable",
+        "explicit_from_text": {
+          "operation": "process"
+        },
+        "inferred_for_json": {
+          "executor_representation": []
+        },
+        "notes": [],
+        "source_protocol_step": 5
+      },
+      {
+        "step_number": 14,
+        "source_text": "Prepare the reductant immediately before use",
+        "explicit_from_text": {
+          "operation": "process"
+        },
+        "inferred_for_json": {
+          "executor_representation": []
+        },
+        "notes": [],
+        "source_protocol_step": 6
+      },
+      {
+        "step_number": 15,
+        "source_text": "After the 30-minute stirring period, add 15 mL approximately 4 °C DI water to 600 mg NaBH4",
+        "explicit_from_text": {
+          "operation": "prepare_solution",
+          "components": [
+            {
+              "name": "NaBH4",
+              "amount": 600.0,
+              "amount_unit": "mg"
+            },
+            {
+              "name": "DI water",
+              "amount": 15.0,
+              "amount_unit": "mL"
+            }
+          ],
+          "solvent": "DI water",
+          "temperature_C": 4.0
+        },
+        "inferred_for_json": {
+          "executor_representation": [
+            "pour NaBH4 into V2",
+            "pour 15.0 mL DI water into V2"
+          ]
+        },
+        "notes": [],
+        "source_protocol_step": 6
+      },
+      {
+        "step_number": 16,
+        "source_text": "dissolve rapidly",
+        "explicit_from_text": {
+          "operation": "dissolve"
+        },
+        "inferred_for_json": {
+          "executor_representation": [
+            "resuspend"
+          ]
+        },
+        "notes": [],
+        "source_protocol_step": 6
+      },
+      {
+        "step_number": 17,
+        "source_text": "Transfer the dissolved solution to the stirred reaction within two minutes of adding the water",
+        "explicit_from_text": {
+          "operation": "transfer"
+        },
+        "inferred_for_json": {
+          "executor_representation": [
+            "pour"
+          ]
+        },
+        "notes": [],
+        "source_protocol_step": 6
+      },
+      {
+        "step_number": 18,
+        "source_text": "Safety modification: use a vented preparation vessel and mix without tightly capping it",
+        "explicit_from_text": {
+          "operation": "process"
+        },
+        "inferred_for_json": {
+          "executor_representation": []
+        },
+        "notes": [],
+        "source_protocol_step": 6
+      },
+      {
+        "step_number": 19,
+        "source_text": "aqueous NaBH4 can generate hydrogen",
+        "explicit_from_text": {
+          "operation": "process"
+        },
+        "inferred_for_json": {
+          "executor_representation": []
+        },
+        "notes": [
+          "unparsed_instruction"
+        ],
+        "source_protocol_step": 6
+      },
+      {
+        "step_number": 20,
+        "source_text": "Allow reduction to proceed. Keep the apparatus vented in the fume hood, away from ignition sources. The attachment specifies 20-30 minutes of hydrogen evolution. For consistency, use 30 minutes, within that reported interval, for every screening batch. Do not shorten the reaction as an assumed method of shortening the wires; no growth-time relationship is supplied.",
+        "explicit_from_text": {
+          "operation": "wait",
+          "time": {
+            "value": 30.0,
+            "unit": "minutes"
+          }
+        },
+        "inferred_for_json": {
+          "executor_representation": [
+            "wait 30 minutes"
+          ]
+        },
+        "notes": [],
+        "source_protocol_step": 7
+      },
+      {
+        "step_number": 21,
+        "source_text": "Collect and wash. Divide the mixture among four balanced 50 mL centrifuge tubes. Centrifuge at 9000 rpm for 5 minutes and decant. Perform three additional ethanol washes, then redisperse the collected material in ethanol. Record the rotor used because rpm alone does not define centrifugal force. Use a consistent, recorded ethanol wash volume; the attachment does not provide one.",
+        "explicit_from_text": {
+          "operation": "postprocess",
+          "component": {
+            "name": "ethanol"
+          }
+        },
+        "inferred_for_json": {
+          "executor_representation": [
+            "transfer_to_centrifuge_tube V1 -> V1_tube_1",
+            "transfer_to_centrifuge_tube V1 -> V1_tube_2",
+            "transfer_to_centrifuge_tube V1 -> V1_tube_3",
+            "transfer_to_centrifuge_tube V1 -> V1_tube_4",
+            "centrifuge 5.0 minutes at 9000 rpm",
+            "decant supernatant",
+            "decant supernatant",
+            "decant supernatant",
+            "decant supernatant",
+            "pour ethanol into V1_tube_1",
+            "pour ethanol into V1_tube_2",
+            "pour ethanol into V1_tube_3",
+            "pour ethanol into V1_tube_4",
+            "resuspend",
+            "resuspend",
+            "resuspend",
+            "resuspend",
+            "centrifuge 5.0 minutes at 9000 rpm",
+            "decant supernatant",
+            "decant supernatant",
+            "decant supernatant",
+            "decant supernatant",
+            "pour ethanol into V1_tube_1",
+            "pour ethanol into V1_tube_2",
+            "pour ethanol into V1_tube_3",
+            "pour ethanol into V1_tube_4",
+            "resuspend",
+            "resuspend",
+            "resuspend",
+            "resuspend",
+            "centrifuge 5.0 minutes at 9000 rpm",
+            "decant supernatant",
+            "decant supernatant",
+            "decant supernatant",
+            "decant supernatant",
+            "pour ethanol into V1_tube_1",
+            "pour ethanol into V1_tube_2",
+            "pour ethanol into V1_tube_3",
+            "pour ethanol into V1_tube_4",
+            "resuspend",
+            "resuspend",
+            "resuspend",
+            "resuspend",
+            "centrifuge 5.0 minutes at 9000 rpm",
+            "decant supernatant",
+            "decant supernatant",
+            "decant supernatant",
+            "decant supernatant",
+            "pour ethanol into V1_tube_1",
+            "pour ethanol into V1_tube_2",
+            "pour ethanol into V1_tube_3",
+            "pour ethanol into V1_tube_4",
+            "resuspend",
+            "resuspend",
+            "resuspend",
+            "resuspend"
+          ]
+        },
+        "notes": [],
+        "source_protocol_step": 8
+      },
+      {
+        "step_number": 22,
+        "source_text": "Repeat Steps 4-8 for the other CTAB concentrations. Do not change metal feed, chloroform volume, NaBH4 loading, or reaction duration during this first screen.",
+        "explicit_from_text": {
+          "operation": "process"
+        },
+        "inferred_for_json": {
+          "executor_representation": []
+        },
+        "notes": [
+          "batch_repeat_requires_condition_selection"
+        ],
+        "source_protocol_step": 9
+      },
+      {
+        "step_number": 23,
+        "source_text": "Measure morphology before selecting a condition. Proposed starting point: measure at least 100 individually resolved objects per batch across multiple TEM fields. Measure each object’s length and diameter, calculate its individual AR, and report the median, distribution, and wire-like fraction. Do not count bundles as single thick wires. Check Pt/Ni incorporation separately; morphology alone cannot establish a PtNi alloy.",
+        "explicit_from_text": {
+          "operation": "process"
+        },
+        "inferred_for_json": {
+          "executor_representation": []
+        },
+        "notes": [],
+        "source_protocol_step": 10
+      },
+      {
+        "step_number": 24,
+        "source_text": "Refine around the measured result. If two CTAB concentrations give median aspect ratios on opposite sides of 6, test intermediate concentrations while keeping the other conditions fixed. If no trend or no wire-like product appears, do not extrapolate blindly. Proposed second-stage screen: vary the preassembly period to 10, 30, and 60 minutes at the best-performing CTAB concentration; only 30 minutes is attachment-backed. Repeat any apparent AR ≈ 6 condition in independent batches before treating it as reproducible.",
+        "explicit_from_text": {
+          "operation": "process"
+        },
+        "inferred_for_json": {
+          "executor_representation": []
+        },
+        "notes": [],
+        "source_protocol_step": 11
+      }
+    ],
+    "assumptions": [
+      {
+        "item": "stirring speed",
+        "chosen_value": "700 rpm",
+        "reason": "The executor schema requires an explicit set_stir_rate value, but the source text does not state one."
+      }
+    ],
+    "known_ambiguities": [
+      "The quantity of ethanol is not stated for source step 21.",
+      "batch repeat requires condition selection",
+      "reaction conditions require selection",
+      "stock condition requires selection",
+      "unparsed instruction"
+    ]
+  }
+}

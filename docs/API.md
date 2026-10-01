@@ -148,14 +148,14 @@ The API surfaces executor metadata at the top-level for convenience when `robot_
 
 ```jsonc
 {
-  "robot_operations": { "_executor": { "schema_version": "v1", "valid": true, "repairs": [] } },
+  "robot_operations": { "_executor": { "schema_version": "executor.v1", "valid": true, "repairs": [], "review_required": false, "validation_errors": [] } },
   "executor_valid": true,
-  "executor_schema_version": "v1",
+  "executor_schema_version": "executor.v1",
   "executor_repairs": []
 }
 ```
 
-Clients can rely on `executor_valid == true` indicating the plan should be consumable by the executor without further transformation.
+`executor_valid` is false when quantities are missing, operations are unsupported, source order is inconsistent, or instructions require review. Inspect `robot_operations._executor.validation_errors` before execution. Validation describes the exported plan; device adapters and hardware setup must support its operations. Review flags are preserved in both default and strict JSON exports. PDDL is no longer generated or included.
 
 #### POST `/ask` (with an attachment)
 

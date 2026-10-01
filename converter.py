@@ -28,7 +28,7 @@ DEVICE_IDS: Dict[str, str] = {
     "autotitrator_id": "AT1",
 }
 
-INLINE_TAG_RX = re.compile(r"\s*\[(?:CTX|DB|PARSED|GEN|\d+)\]\s*", re.I)
+INLINE_TAG_RX = re.compile(r"\s*\[(?:CTX|DB|PARSED|GEN|\d+|A\d+(?:\.\d+)*)\]\s*", re.I)
 FENCE_START_RX = re.compile(r"^\s*```")
 NON_PROC_HEAD_RX = re.compile(
     r"^\s*#{1,6}\s*(references?|sources?|bibliography|rationale|reasoning|notes|discussion|supplementary|appendix|acknowledge?ments?)\b",
@@ -431,7 +431,6 @@ class VesselRegistry:
         return dict(self._vid_to_label)
 
 
-
 def _strip_markdown_prefix(line: str) -> str:
     s = strip_tags(line.strip())
     s = re.sub(r"^\s*[-*•]\s+", "", s)
@@ -451,6 +450,7 @@ def _is_section_heading_line(line: str) -> bool:
 def _clean_step_text(text: str) -> str:
     s = strip_tags(_clean_unicode(text or ""))
     s = re.sub(r"\s+", " ", s).strip(" -•\t")
+    s = s.strip("[] ")
     return s
 
 
@@ -470,6 +470,11 @@ def extract_steps(markdown_text: str) -> List[str]:
 
         plain = strip_tags(stripped)
 
+        if plain in {"[", "]", "[]"}:
+            continue
+        if NON_PROC_HEAD_RX.match(plain):
+            break
+
         if re.search(r"(?:^|\b)procedure\b\s*:?$", plain, re.I):
             in_proc = True
             saw_proc_header = True
@@ -487,13 +492,17 @@ def extract_steps(markdown_text: str) -> List[str]:
             content = _strip_markdown_prefix(stripped)
             if _is_section_heading_line(content):
                 heading = content.rstrip(":").strip()
-                if not re.search(r"\bprocedure\b", heading, re.I) and not _is_non_procedure_step_text(heading + ":"):
+                if not re.search(
+                    r"\bprocedure\b", heading, re.I
+                ) and not _is_non_procedure_step_text(heading + ":"):
                     current_section = heading
                 last_step_idx = None
                 continue
             candidate = _clean_step_text(content)
             if candidate and not _is_non_procedure_step_text(candidate):
-                if current_section and not candidate.lower().startswith(current_section.lower()):
+                if current_section and not candidate.lower().startswith(
+                    current_section.lower()
+                ):
                     candidate = f"{current_section}: {candidate}"
                 steps.append(candidate)
                 last_step_idx = len(steps) - 1
@@ -502,7 +511,9 @@ def extract_steps(markdown_text: str) -> List[str]:
         if re.match(r"^\s*[-*•]\s+", stripped):
             candidate = _clean_step_text(_strip_markdown_prefix(stripped))
             if candidate and not _is_non_procedure_step_text(candidate):
-                if current_section and not candidate.lower().startswith(current_section.lower()):
+                if current_section and not candidate.lower().startswith(
+                    current_section.lower()
+                ):
                     candidate = f"{current_section}: {candidate}"
                 steps.append(candidate)
                 last_step_idx = len(steps) - 1
@@ -523,7 +534,9 @@ def extract_steps(markdown_text: str) -> List[str]:
 
         candidate = _clean_step_text(plain)
         if candidate and not _is_non_procedure_step_text(candidate):
-            if current_section and not candidate.lower().startswith(current_section.lower()):
+            if current_section and not candidate.lower().startswith(
+                current_section.lower()
+            ):
                 candidate = f"{current_section}: {candidate}"
             steps.append(candidate)
             last_step_idx = len(steps) - 1
@@ -570,11 +583,13 @@ _WORD_NUMBERS = {
 
 def _parse_repeat_count(text: str, default: int = 1) -> int:
     s = (text or "").lower()
-    m = re.search(r"(\d+)\s*(?:x|×|times?|washes?)", s)
+    m = re.search(r"(\d+)\s*(?:x|×|times?|(?:additional\s+)?(?:\w+\s+)?washes?)", s)
     if m:
         return int(m.group(1))
     for word, value in _WORD_NUMBERS.items():
-        if re.search(rf"\b{word}\b\s+times?", s) or re.search(rf"\b{word}\b\s+washes?\b", s):
+        if re.search(rf"\b{word}\b\s+times?", s) or re.search(
+            rf"\b{word}\b\s+(?:additional\s+)?(?:\w+\s+)?washes?\b", s
+        ):
             return value
     return default
 
@@ -595,11 +610,6 @@ def _normalize_solvent_name(solvent: Optional[str]) -> Optional[str]:
     s = _clean_solvent_tail(solvent)
     s = re.sub(r"\b(?:for|to)\b.+$", "", s, flags=re.I).strip().rstrip(",.")
     return s or None
-
-
-def _is_non_procedure_step_text(text: str) -> bool:
-    s = strip_tags(_clean_unicode(text or ""))
-    return bool(NON_PROCEDURE_STEP_RX.match(s))
 
 
 DISPLAY_NAME_OVERRIDES: Dict[str, str] = {
@@ -744,7 +754,6 @@ def detect_prepare_and_add_reagent_solution(line: str) -> Optional[Dict[str, Any
     }
 
 
-
 def detect_prepare_solution_from_amounts(line: str) -> Optional[Dict[str, Any]]:
     s = strip_tags(_clean_unicode(line.strip().rstrip(".")))
     if not re.search(r"\bdissolv\w*\b", s, re.I):
@@ -799,11 +808,34 @@ def _extract_wash_sequence(text: str) -> List[Dict[str, Any]]:
         s,
         re.I,
     ):
-        seq.append({
-            "solvent": _clean_solvent_tail(m.group("solvent")),
-            "volume": float(m.group("vol")),
-            "volume_units": m.group("vunit"),
-        })
+        seq.append(
+            {
+                "solvent": _clean_solvent_tail(m.group("solvent")),
+                "volume": float(m.group("vol")),
+                "volume_units": m.group("vunit"),
+            }
+        )
+    if not seq:
+        # Preserve solvent-only washes even when their volumes need review.
+        m = re.search(
+            r"(?:\d+|one|two|three|four|five)\s+(?:additional\s+)?([A-Za-z][A-Za-z -]*?)\s+washes\b",
+            s,
+            re.I,
+        )
+        if m is None:
+            m = re.search(
+                r"\bwash(?:ed)?\s+(?:(?:\d+|one|two|three|four|five)\s+times\s+)?with\s+([^.;,]+)",
+                s,
+                re.I,
+            )
+        if m:
+            seq.append(
+                {
+                    "solvent": _normalize_solvent_name(m.group(1)),
+                    "volume": None,
+                    "volume_units": "mL",
+                }
+            )
     deduped: List[Dict[str, Any]] = []
     seen = set()
     for item in seq:
@@ -816,7 +848,7 @@ def _extract_wash_sequence(text: str) -> List[Dict[str, Any]]:
 
 def detect_stir(line: str) -> Optional[Dict[str, Any]]:
     s = strip_tags(_clean_unicode(line.strip().rstrip(".")))
-    if not re.search(r"\bstir", s, re.I):
+    if not re.search(r"\bstir(?:ring)?\b(?!\s+bar\b)", s, re.I):
         return None
     m_rpm = re.search(r"(\d{2,5})\s*rpm\b", s, re.I)
     rpm = int(m_rpm.group(1)) if m_rpm else DEFAULTS["stir_rpm"]
@@ -825,7 +857,7 @@ def detect_stir(line: str) -> Optional[Dict[str, Any]]:
     return {
         "action": "stir",
         "rpm": rpm,
-        "minutes": minutes if minutes is not None else 60.0,
+        "minutes": minutes,
         "temperature_C": temp if temp is not None else DEFAULTS["room_temp_C"],
     }
 
@@ -880,8 +912,6 @@ def detect_ph_monitoring(line: str) -> Optional[Dict[str, Any]]:
     return {"action": "monitor_ph", "continuous": True, "interval_seconds": 30}
 
 
-
-
 def detect_explicit_postprocess(line: str) -> Optional[Dict[str, Any]]:
     s = strip_tags(_clean_unicode(line.strip().rstrip(".")))
     if not re.search(r"\bcentrifug|\bwash\b|\bsupernatant\b", s, re.I):
@@ -890,8 +920,16 @@ def detect_explicit_postprocess(line: str) -> Optional[Dict[str, Any]]:
     centrifuge_rpm = None
     centrifuge_minutes = None
 
-    m1 = re.search(r"centrifug\w*.*?\bat\s+(?P<rpm>\d+)\s*rpm\s+for\s+(?P<mins>\d+(?:\.\d+)?)\s*(?:minutes?|mins?)", s, re.I)
-    m2 = re.search(r"centrifug\w*.*?\bfor\s+(?P<mins>\d+(?:\.\d+)?)\s*(?:minutes?|mins?)\s+at\s+(?P<rpm>\d+)\s*rpm", s, re.I)
+    m1 = re.search(
+        r"centrifug\w*.*?\bat\s+(?P<rpm>\d+)\s*rpm\s+for\s+(?P<mins>\d+(?:\.\d+)?)\s*(?:minutes?|mins?)",
+        s,
+        re.I,
+    )
+    m2 = re.search(
+        r"centrifug\w*.*?\bfor\s+(?P<mins>\d+(?:\.\d+)?)\s*(?:minutes?|mins?)\s+at\s+(?P<rpm>\d+)\s*rpm",
+        s,
+        re.I,
+    )
     m = m1 or m2
     if m:
         centrifuge_rpm = int(m.group("rpm"))
@@ -901,16 +939,40 @@ def detect_explicit_postprocess(line: str) -> Optional[Dict[str, Any]]:
     if not wash_sequence and centrifuge_rpm is None and centrifuge_minutes is None:
         return None
 
+    tubes = re.search(
+        r"(\d+|one|two|three|four|five)\s+(?:balanced\s+)?(\d+(?:\.\d+)?)\s*mL\s+centrifuge\s+tubes\b",
+        s,
+        re.I,
+    )
+    tube_count = 1
+    if tubes:
+        n = tubes.group(1).lower()
+        tube_count = _WORD_NUMBERS[n] if n in _WORD_NUMBERS else int(n)
+    redispersion = re.search(r"\bredisperse\b[^.;]*?\bin\s+([^.;,]+)", s, re.I)
     return {
         "action": "postprocess",
         "wash_count": _parse_repeat_count(s, default=1) if wash_sequence else 0,
         "wash_sequence": wash_sequence,
         "wash_solvent": wash_sequence[0]["solvent"] if wash_sequence else None,
         "wash_volume": wash_sequence[0]["volume"] if wash_sequence else None,
-        "wash_volume_units": wash_sequence[0]["volume_units"] if wash_sequence else None,
-        "centrifuge_minutes": centrifuge_minutes if centrifuge_minutes is not None else DEFAULTS["centrifuge_minutes"],
-        "centrifuge_rpm": centrifuge_rpm if centrifuge_rpm is not None else DEFAULTS["centrifuge_rpm"],
-        "centrifuge_explicit": centrifuge_rpm is not None and centrifuge_minutes is not None,
+        "wash_volume_units": (
+            wash_sequence[0]["volume_units"] if wash_sequence else None
+        ),
+        "centrifuge_minutes": (
+            centrifuge_minutes
+            if centrifuge_minutes is not None
+            else DEFAULTS["centrifuge_minutes"]
+        ),
+        "centrifuge_rpm": (
+            centrifuge_rpm if centrifuge_rpm is not None else DEFAULTS["centrifuge_rpm"]
+        ),
+        "centrifuge_explicit": centrifuge_rpm is not None
+        and centrifuge_minutes is not None,
+        "tube_count": tube_count,
+        "tube_capacity_mL": float(tubes.group(2)) if tubes else None,
+        "redispersion_solvent": (
+            _normalize_solvent_name(redispersion.group(1)) if redispersion else None
+        ),
     }
 
 def detect_redisperse(line: str) -> Optional[Dict[str, Any]]:
@@ -1039,8 +1101,188 @@ def detect_generic_add(line: str) -> Optional[Dict[str, Any]]:
     }
 
 
+def _split_operation_clauses(text: str) -> List[str]:
+    """Split instructions at action boundaries, preserving decimals and reagent lists."""
+    s = strip_tags(text)
+    # 'Add 5 mL ethanol and 10 mL water' is two additions, not one reagent name.
+    if re.search(r"\badd\b", s, re.I):
+        s = re.sub(
+            r"\band\s+(?=\d+(?:\.\d+)?\s*(?:mL|L|µL)\b)", "and add ", s, flags=re.I
+        )
+    actions = r"add|transfer|stir|heat|cool|dissolve|redisperse|resuspend|dry|wait"
+    return [
+        part.strip().strip(".")
+        for part in re.split(
+            rf"(?<!\d)\.(?:\s+|$)|;\s*|\s+(?:and|then)\s+(?=(?:{actions})\b)",
+            s,
+            flags=re.I,
+        )
+        if part.strip().strip(".")
+    ]
+
+
+def _process_note(text: str, reason: Optional[str] = None) -> Dict[str, Any]:
+    note = {"action": "process", "raw": text, "ops": [], "reagents": []}
+    if reason:
+        note.update(review_required=True, review_reason=reason)
+    else:
+        note["instruction_type"] = "annotation"
+    return note
+
+
+def _detect_measured_addition(text: str) -> Optional[Dict[str, Any]]:
+    s = strip_tags(text)
+    # A solvent added to a weighed solute prepares a separate solution.
+    prep = re.search(
+        r"\badd\s+(?P<volume>\d+(?:\.\d+)?)\s*(?P<vunit>mL|L|µL|uL)\s+(?P<solvent>.+?)"
+        r"\s+to\s+(?P<mass>\d+(?:\.\d+)?)\s*(?P<munit>mg|g|kg|µg|ug)\s+(?P<solute>.+)$",
+        s,
+        re.I,
+    )
+    if prep:
+        solvent = prep.group("solvent")
+        temps = _temperature_candidates_c(solvent)
+        solvent = re.sub(
+            r"(?:approximately\s+)?-?\d+(?:\.\d+)?\s*°?\s*C\b", "", solvent, flags=re.I
+        ).strip()
+        solvent = re.sub(r"^of\s+", "", solvent, flags=re.I)
+        solute = parse_reagent_phrase_to_struct(
+            f"{prep.group('mass')} {prep.group('munit')} {prep.group('solute')}"
+        )
+        return {
+            "action": "prepare_solution_from_amounts",
+            "solutes": [solute],
+            "solvent": solvent,
+            "volume": float(prep.group("volume")),
+            "volume_units": _canon_unit(prep.group("vunit")),
+            "hardware_hint": "Separate preparation vessel",
+            "solvent_temperature_C": temps[0] if temps else None,
+        }
+
+    m = re.search(
+        r"\badd\s+(?:the\s+)?(?:combined\s+)?(?P<amount>\d+(?:\.\d+)?)\s*"
+        r"(?P<unit>mL|L|µL|uL|mg|g|kg|µg|ug|mmol|mol)\s+(?:of\s+)?(?P<reagent>.+?)"
+        r"(?=\s+(?:to|into)\s+|,|\s+(?:while|under)\s+|$)",
+        s,
+        re.I,
+    )
+    if not m:
+        return None
+    unit = _canon_unit(m.group("unit"))
+    reagent = re.sub(
+        r"^(?:the\s+)?(?:selected\s+)?", "", m.group("reagent"), flags=re.I
+    ).strip()
+    with_stirring = bool(re.search(r"\b(?:while|under)\s+stirring\b", s, re.I))
+    if unit in {"mL", "L", "µL"}:
+        return {
+            "action": "add_solvent",
+            "solvent": reagent,
+            "volume": float(m.group("amount")),
+            "volume_units": unit,
+            "with_stirring": with_stirring,
+            "minutes": find_minutes(s) if with_stirring else None,
+            "review_required": bool(re.search(r"\bselected\b", s, re.I)),
+            "review_reason": "stock_condition_requires_selection",
+        }
+    return {
+        "action": "add_measured_reagent",
+        "reagent": reagent,
+        "amount": float(m.group("amount")),
+        "unit": unit,
+        "with_stirring": with_stirring,
+        "minutes": find_minutes(s) if with_stirring else None,
+    }
+
+
+def _detect_reaction_wait(text: str) -> Optional[Dict[str, Any]]:
+    s = strip_tags(text)
+    if not re.match(
+        r"^(?:wait\b|allow\s+(?:the\s+)?(?:reaction|reduction)\s+to\s+proceed\b)",
+        s,
+        re.I,
+    ):
+        return None
+    # A selected duration overrides a cited range; do not sum both descriptions.
+    chosen = re.search(
+        r"(?:for\s+consistency[^.]*?use|for)\s+(\d+(?:\.\d+)?)\s+minutes?\b", s, re.I
+    )
+    minutes = (
+        float(chosen.group(1))
+        if chosen
+        else (find_minutes(s) if s.lower().startswith("wait") else None)
+    )
+    return {"action": "wait", "raw": text, "minutes": minutes}
+
+
+def _detect_prepared_transfer(text: str) -> Optional[Dict[str, Any]]:
+    s = strip_tags(text)
+    if not re.search(
+        r"\btransfer\s+(?:the\s+)?(?:dissolved|prepared)\s+solution\s+to\s+(?:the\s+)?(?:stirred\s+)?reaction\b",
+        s,
+        re.I,
+    ):
+        return None
+    deadline = re.search(
+        r"\bwithin\s+(\d+(?:\.\d+)?|one|two|three|four|five)\s+minutes?\b", s, re.I
+    )
+    delay = None
+    if deadline:
+        value = deadline.group(1).lower()
+        delay = float(_WORD_NUMBERS[value]) if value in _WORD_NUMBERS else float(value)
+    return {"action": "transfer_prepared_solution", "max_delay_minutes": delay}
+
 
 def semantic_parse_step(step: str) -> Dict[str, Any]:
+    plain = strip_tags(step)
+    # Planning and conditional advice must not become physical operations.
+    if re.match(
+        r"^(?:define\s+the\s+target|measure\s+morphology|refine\s+around)", plain, re.I
+    ):
+        return _process_note(step)
+    if re.match(r"^repeat\s+steps?\b", plain, re.I):
+        return _process_note(step, "batch_repeat_requires_condition_selection")
+    if re.match(r"^hold\s+the\s+other\s+variables\b", plain, re.I):
+        return _process_note(step, "reaction_conditions_require_selection")
+
+    wait = _detect_reaction_wait(step)
+    if wait:
+        return wait
+    # Workup carries shared spin parameters and wash counts across its sentences.
+    postprocess = detect_explicit_postprocess(step)
+    if postprocess:
+        postprocess["raw"] = step
+        return postprocess
+
+    if re.match(
+        r"^(?:the\b|for\s+consistency\b|do\s+not\b|if\b|keep\b|retain\b|confirm\b|record\b|safety\s+modification\b|use\b)",
+        plain,
+        re.I,
+    ):
+        return _process_note(step)
+
+    clauses = _split_operation_clauses(step)
+    if len(clauses) > 1:
+        return {
+            "action": "composite",
+            "parts": [semantic_parse_step(c) for c in clauses],
+            "raw": step,
+        }
+
+    if re.match(
+        r"^prepare\s+(?:one\s+reaction\s+mixture|the\s+reductant\s+immediately)\b",
+        plain,
+        re.I,
+    ):
+        return _process_note(step)
+    transfer = _detect_prepared_transfer(step)
+    if transfer:
+        return dict(transfer, raw=step)
+    if re.match(r"^dissolve\s+(?:rapidly|completely)\b", plain, re.I):
+        return {"action": "mix_prepared_solution", "raw": step}
+    addition = _detect_measured_addition(step)
+    if addition:
+        return dict(addition, raw=step)
+
     detectors = [
         detect_prepare_solution_components,
         detect_prepare_solution_from_amounts,
@@ -1069,30 +1311,34 @@ def semantic_parse_step(step: str) -> Dict[str, Any]:
             return parsed
 
     target_vessel = "V1"
-    record: Dict[str, Any] = {"action": "process", "vessel": target_vessel, "reagents": [], "ops": [], "raw": step}
-    substeps = _split_substeps(step)
-    if len(substeps) > 1:
-        fragments: List[Dict[str, Any]] = []
-        for sub in substeps:
-            parsed = semantic_parse_step(sub)
-            if parsed.get("action") != "process":
-                fragments.append(parsed)
-        if fragments:
-            return {"action": "composite", "parts": fragments, "raw": step}
+    record: Dict[str, Any] = {
+        "action": "process",
+        "vessel": target_vessel,
+        "reagents": [],
+        "ops": [],
+        "raw": step,
+    }
+    record.update(review_required=True, review_reason="unparsed_instruction")
     return record
 
-def semantic_parse(text: str, vessels: VesselRegistry) -> Tuple[List[Dict[str, Any]], Dict[str, Any]]:
+def semantic_parse(
+    text: str, vessels: VesselRegistry
+) -> Tuple[List[Dict[str, Any]], Dict[str, Any]]:
     steps = extract_steps(text)
     records: List[Dict[str, Any]] = []
     context: Dict[str, Any] = {"prepared_tokens": {}}
 
-    for step in steps:
+    for source_protocol_step, step in enumerate(steps, start=1):
         if _is_non_procedure_step_text(step):
             continue
         parsed = semantic_parse_step(step)
+        parsed["source_protocol_step"] = source_protocol_step
+        parsed["source_text"] = step
         if parsed.get("action") == "composite":
             for part in parsed["parts"]:
                 if not _is_non_procedure_step_text(part.get("raw", "")):
+                    part["source_protocol_step"] = source_protocol_step
+                    part["source_text"] = step
                     records.append(part)
             continue
         records.append(parsed)
@@ -1144,20 +1390,37 @@ def _ensure_primary_vessel(vessels: VesselRegistry) -> str:
     return vessels.primary_vessel or vessels.ensure_glassware("Beaker")
 
 
-
-def _emit_prepare_solution_from_amounts(step: Dict[str, Any], vessels: VesselRegistry) -> Tuple[Dict[str, Any], Optional[Dict[str, Any]]]:
+def _emit_prepare_solution_from_amounts(
+    step: Dict[str, Any], vessels: VesselRegistry
+) -> Tuple[Dict[str, Any], Optional[Dict[str, Any]]]:
     solvent = step["solvent"]
     volume = step["volume"]
     volume_units = step["volume_units"]
-    vol_ml = volume * (0.001 if volume_units.lower() in ("µl", "ul") else (1.0 if volume_units.lower() == "ml" else 1000.0))
-    vid = vessels.ensure_glassware(step.get("hardware_hint") or "Beaker", prefer_capacity_ml=vol_ml, explicit_hardware_hint=step.get("hardware_hint"))
+    vol_ml = volume * (
+        0.001
+        if volume_units.lower() in ("µl", "ul")
+        else (1.0 if volume_units.lower() == "ml" else 1000.0)
+    )
+    vid = vessels.ensure_glassware(
+        step.get("hardware_hint") or "Beaker",
+        prefer_capacity_ml=vol_ml,
+        explicit_hardware_hint=step.get("hardware_hint"),
+    )
     ops: List[Dict[str, Any]] = []
     reagents: List[str] = []
     structured: List[Dict[str, Any]] = []
     detail_components: List[Dict[str, Any]] = []
 
     for sol in step["solutes"]:
-        ops.append({"op": "pour", "reagent": sol["name"], "vessel": vid})
+        ops.append(
+            {
+                "op": "pour",
+                "reagent": sol["name"],
+                "vessel": vid,
+                "amount": sol.get("amount"),
+                "amount_unit": sol.get("amount_unit"),
+            }
+        )
         reagents.append(sol["name"])
         struct = {
             "name": sol["name"],
@@ -1169,11 +1432,32 @@ def _emit_prepare_solution_from_amounts(step: Dict[str, Any], vessels: VesselReg
         if sol.get("amount_unit") is not None:
             struct["amount_unit"] = sol["amount_unit"]
         structured.append(struct)
-        detail_components.append({"name": sol["name"], "display_name": _display_name_for(sol["name"])})
-    ops.append({"op": "pour", "reagent": solvent, "vessel": vid, "volume": volume, "volume_units": volume_units})
+        detail_components.append(
+            {"name": sol["name"], "display_name": _display_name_for(sol["name"])}
+        )
+    solvent_op = {
+        "op": "pour",
+        "reagent": solvent,
+        "vessel": vid,
+        "volume": volume,
+        "volume_units": volume_units,
+    }
+    if step.get("solvent_temperature_C") is not None:
+        solvent_op["reagent_temperature_C"] = step["solvent_temperature_C"]
+    ops.append(solvent_op)
     reagents.append(solvent)
-    structured.append({"name": solvent, "display_name": _display_name_for(solvent), "original": f"{volume} {volume_units} of {solvent}", "amount": volume, "amount_unit": volume_units})
-    detail_components.append({"name": solvent, "display_name": _display_name_for(solvent), "role": "solvent"})
+    structured.append(
+        {
+            "name": solvent,
+            "display_name": _display_name_for(solvent),
+            "original": f"{volume} {volume_units} of {solvent}",
+            "amount": volume,
+            "amount_unit": volume_units,
+        }
+    )
+    detail_components.append(
+        {"name": solvent, "display_name": _display_name_for(solvent), "role": "solvent"}
+    )
 
     record = {
         "action": "prepare_solution",
@@ -1356,7 +1640,20 @@ def _emit_stir(step: Dict[str, Any], vessel: str) -> Dict[str, Any]:
         "vessel": vessel,
         "rpm": step["rpm"],
         "minutes": step["minutes"],
-        "ops": [{"op": "wait", "minutes": step["minutes"]}],
+        "ops": [
+            {"op": "move_to_stir_plate", "stir_plate_id": "SP1", "vessel": vessel},
+            {
+                "op": "set_stir_rate",
+                "vessel": vessel,
+                "rpm": step["rpm"],
+                "inferred": not bool(re.search(r"\d+\s*rpm", step["raw"], re.I)),
+            },
+            *(
+                [{"op": "wait", "minutes": step["minutes"]}]
+                if step.get("minutes")
+                else []
+            ),
+        ],
         "reagents": [],
         "reagents_structured": [],
     }
@@ -1420,8 +1717,6 @@ def _emit_autotitrator_rate(step: Dict[str, Any], vessel: str) -> Dict[str, Any]
     }
 
 
-
-
 def _emit_monitor_ph(step: Dict[str, Any], vessel: str) -> Dict[str, Any]:
     return {
         "action": "monitor_ph",
@@ -1459,35 +1754,46 @@ def _emit_oven_dry(step: Dict[str, Any], vessel: str) -> Dict[str, Any]:
     }
 
 
-
 def _emit_postprocess(step: Dict[str, Any], vessel: str) -> Dict[str, Any]:
     ops: List[Dict[str, Any]] = []
     if not step.get("skip_initial_transfer"):
-        ops.extend([
-            {"op": "transfer_to_centrifuge_tube", "from": vessel, "to": f"{vessel}_tube"},
-            {
-                "op": "centrifuge",
-                "centrifuge_id": DEVICE_IDS["centrifuge_id"],
-                "tube": f"{vessel}_tube",
-                "minutes": step["centrifuge_minutes"],
-                "rpm": step["centrifuge_rpm"],
-                "inferred": not bool(step.get("centrifuge_explicit")),
-            },
-            {
-                "op": "decant_supernatant",
-                "tube": f"{vessel}_tube",
-                "executable": False,
-                "review_required": True,
-                "review_reason": "unsupported_phase_separation_primitive",
-            },
-        ])
+        ops.extend(
+            [
+                {
+                    "op": "transfer_to_centrifuge_tube",
+                    "from": vessel,
+                    "to": f"{vessel}_tube",
+                },
+                {
+                    "op": "centrifuge",
+                    "centrifuge_id": DEVICE_IDS["centrifuge_id"],
+                    "tube": f"{vessel}_tube",
+                    "minutes": step["centrifuge_minutes"],
+                    "rpm": step["centrifuge_rpm"],
+                    "inferred": not bool(step.get("centrifuge_explicit")),
+                },
+                {
+                    "op": "decant_supernatant",
+                    "tube": f"{vessel}_tube",
+                    "executable": False,
+                    "review_required": True,
+                    "review_reason": "unsupported_phase_separation_primitive",
+                },
+            ]
+        )
     wash_sequence = step.get("wash_sequence") or []
     if not wash_sequence and step.get("wash_solvent"):
-        wash_sequence = [{
-            "solvent": step["wash_solvent"],
-            "volume": step.get("wash_volume"),
-            "volume_units": step.get("wash_volume_units") or "mL",
-        }] if step.get("wash_count", 0) > 0 else []
+        wash_sequence = (
+            [
+                {
+                    "solvent": step["wash_solvent"],
+                    "volume": step.get("wash_volume"),
+                    "volume_units": step.get("wash_volume_units") or "mL",
+                }
+            ]
+            if step.get("wash_count", 0) > 0
+            else []
+        )
 
     for wash_cycle in range(1, step["wash_count"] + 1):
         for wash in wash_sequence:
@@ -1532,6 +1838,59 @@ def _emit_postprocess(step: Dict[str, Any], vessel: str) -> Dict[str, Any]:
                 }
             )
 
+    if step.get("redispersion_solvent"):
+        ops.extend(
+            [
+                {
+                    "op": "pour",
+                    "reagent": step["redispersion_solvent"],
+                    "vessel": f"{vessel}_tube",
+                    "volume": None,
+                    "volume_units": "mL",
+                    "purpose": "final_redispersion",
+                },
+                {
+                    "op": "resuspend",
+                    "tube": f"{vessel}_tube",
+                    "purpose": "final_redispersion",
+                    "executable": False,
+                    "review_required": True,
+                    "review_reason": "unsupported_dispersion_primitive",
+                },
+            ]
+        )
+
+    tube_count = step.get("tube_count", 1)
+    if tube_count > 1:
+        tubes = [f"{vessel}_tube_{n}" for n in range(1, tube_count + 1)]
+        expanded = []
+        for op in ops:
+            if op["op"] == "centrifuge":
+                spin = dict(
+                    op,
+                    tube=tubes[0],
+                    tubes=tubes,
+                    executable=False,
+                    review_required=True,
+                    review_reason="multi_tube_loading_requires_executor_support",
+                )
+                expanded.append(spin)
+                continue
+            for tube in tubes:
+                item = copy.deepcopy(op)
+                for field in ("vessel", "tube", "to"):
+                    if item.get(field) == f"{vessel}_tube":
+                        item[field] = tube
+                if item["op"] == "transfer_to_centrifuge_tube":
+                    item["fraction"] = 1.0 / tube_count
+                    item.update(
+                        executable=False,
+                        review_required=True,
+                        review_reason="balanced_split_requires_confirmation",
+                    )
+                expanded.append(item)
+        ops = expanded
+
     reagents = [wash["solvent"] for wash in wash_sequence]
     reagents_structured = []
     for wash in wash_sequence:
@@ -1554,6 +1913,8 @@ def _emit_postprocess(step: Dict[str, Any], vessel: str) -> Dict[str, Any]:
         "ops": ops,
         "reagents": reagents,
         "reagents_structured": reagents_structured,
+        "tube_count": tube_count,
+        "tube_capacity_mL": step.get("tube_capacity_mL"),
     }
 
 def _emit_redisperse(step: Dict[str, Any], vessel: str) -> Dict[str, Any]:
@@ -1681,9 +2042,12 @@ def _emit_fallback(step: Dict[str, Any], vessel: str) -> Dict[str, Any]:
     return {"action": "process", "raw": step["raw"], "vessel": vessel, "reagents": [], "ops": []}
 
 
-def emit_steps(semantic_steps: List[Dict[str, Any]], vessels: VesselRegistry) -> List[Dict[str, Any]]:
+def emit_steps(
+    semantic_steps: List[Dict[str, Any]], vessels: VesselRegistry
+) -> List[Dict[str, Any]]:
     emitted: List[Dict[str, Any]] = []
     primary = _ensure_primary_vessel(vessels)
+    prepared_solution: Optional[Dict[str, Any]] = None
 
     for idx, step in enumerate(semantic_steps, start=1):
         action = step["action"]
@@ -1703,6 +2067,69 @@ def emit_steps(semantic_steps: List[Dict[str, Any]], vessels: VesselRegistry) ->
             record = _emit_add_reagent_solution(step, primary)
         elif action == "stir":
             record = _emit_stir(step, primary)
+        elif action == "wait":
+            record = {
+                "action": "wait",
+                "raw": step["raw"],
+                "vessel": primary,
+                "reagents": [],
+                "minutes": step.get("minutes"),
+                "ops": (
+                    [{"op": "wait", "minutes": step["minutes"]}]
+                    if step.get("minutes")
+                    else []
+                ),
+            }
+            if not step.get("minutes"):
+                record.update(review_required=True, review_reason="missing_duration")
+        elif action == "mix_prepared_solution":
+            target = prepared_solution["vessel"] if prepared_solution else primary
+            record = {
+                "action": "dissolve",
+                "raw": step["raw"],
+                "vessel": target,
+                "reagents": [],
+                "ops": [
+                    {
+                        "op": "resuspend",
+                        "tube": target,
+                        "executable": False,
+                        "review_required": True,
+                        "review_reason": "unsupported_dispersion_primitive",
+                    }
+                ],
+            }
+        elif action == "transfer_prepared_solution":
+            op = {"op": "pour", "vessel": primary, "to": primary}
+            if prepared_solution:
+                op.update(
+                    {
+                        "from": prepared_solution["vessel"],
+                        "volume": prepared_solution["volume"],
+                        "volume_units": prepared_solution["volume_units"],
+                    }
+                )
+            else:
+                op.update(
+                    executable=False,
+                    review_required=True,
+                    review_reason="unresolved_prepared_solution_source",
+                )
+            if step.get("max_delay_minutes") is not None:
+                op.update(
+                    max_delay_minutes=step["max_delay_minutes"],
+                    timing_reference="solvent_addition_to_prepared_solution",
+                    executable=False,
+                    review_required=True,
+                    review_reason="transfer_deadline_requires_executor_support",
+                )
+            record = {
+                "action": "transfer",
+                "raw": step["raw"],
+                "vessel": primary,
+                "ops": [op],
+                "reagents": [],
+            }
         elif action == "cool_to":
             record = _emit_cool_to(step, primary)
         elif action == "heat_hold":
@@ -1730,13 +2157,32 @@ def emit_steps(semantic_steps: List[Dict[str, Any]], vessels: VesselRegistry) ->
         else:
             record = _emit_fallback(step, primary)
 
+        for field in (
+            "source_protocol_step",
+            "source_text",
+            "instruction_type",
+            "review_required",
+            "with_stirring",
+        ):
+            if field in step:
+                record[field] = step[field]
+        if step.get("review_required"):
+            record["review_reason"] = step.get("review_reason", "unparsed_instruction")
+        _ensure_gt_stir_ops(record)
+
         _normalize_reagents_inplace(record)
         if "reagents_structured" not in record:
             _add_structured_reagents_inplace(record)
         emitted.append(record)
 
         if detail_payload is not None:
-            vessels.contents_detailed[primary] = {
+            target = record.get("vessel", primary)
+            prepared_solution = {
+                "vessel": target,
+                "volume": record.get("volume"),
+                "volume_units": record.get("volume_units"),
+            }
+            vessels.contents_detailed[target] = {
                 "description": detail_payload["description"],
                 "prepared_in_source_step": idx,
                 "components": detail_payload["components"],
@@ -1820,31 +2266,78 @@ def generate_minimal_plan(doc: Dict[str, Any]) -> Tuple[List[Dict[str, Any]], Li
 
 def validate_execution_plan(plan: Dict[str, Any]) -> List[str]:
     errors: List[str] = []
-    for step in plan.get("micro_plan", []):
+    micro_plan = plan.get("micro_plan", [])
+    if not micro_plan:
+        errors.append("No executable operations were parsed")
+    sources = [
+        op.get("source_step_index")
+        for op in micro_plan
+        if op.get("source_step_index") is not None
+    ]
+    if any(a > b for a, b in zip(sources, sources[1:])):
+        errors.append("Operations are out of source-step order")
+    registered = set(plan.get("vessel_registry", {}))
+    available_devices = set(plan.get("devices", {}).values())
+    for index, step in enumerate(micro_plan, start=1):
+        label = f"Action {step.get('step_index', index)}"
+        if step.get("review_required") or step.get("executable") is False:
+            errors.append(
+                f"{label} requires review: {step.get('review_reason', 'unsupported_operation')}"
+            )
+        if step.get("verb") == "pour":
+            quantity = step.get("volume", step.get("amount"))
+            if quantity is None:
+                errors.append(f"{label} is missing a transfer volume or reagent amount")
+            elif not isinstance(quantity, (int, float)) or quantity <= 0:
+                errors.append(f"{label} has an invalid reagent quantity")
+            elif not (step.get("volume_units") or step.get("amount_unit")):
+                errors.append(f"{label} is missing quantity units")
+        targets = [step.get(field) for field in ("vessel", "tube", "from", "to")]
+        targets.extend(step.get("tubes", []))
+        for target in targets:
+            if (
+                isinstance(target, str)
+                and target.startswith("V")
+                and target not in registered
+            ):
+                errors.append(f"{label} references unregistered vessel {target}")
         if step.get("verb") == "set":
             device = step.get("device")
             param = step.get("param")
             value = step.get("value")
+            if not isinstance(value, (int, float)):
+                errors.append(f"{label} is missing a numeric setpoint")
+                continue
             if device == "HP1" and param == "temperature_C":
                 if value > 200:
-                    errors.append(f"Temperature {value}°C exceeds safety limit of 200°C")
+                    errors.append(
+                        f"Temperature {value}°C exceeds safety limit of 200°C"
+                    )
                 if value < -20:
                     errors.append(f"Temperature {value}°C below safety limit of -20°C")
             if device == "SP1" and param == "rpm":
                 if value > 2000:
-                    errors.append(f"Stir speed {value} rpm exceeds equipment limit of 2000 rpm")
+                    errors.append(
+                        f"Stir speed {value} rpm exceeds equipment limit of 2000 rpm"
+                    )
                 if value < 0:
                     errors.append(f"Stir speed {value} rpm cannot be negative")
             if device == "OV1" and param == "temperature_C" and value > 300:
-                errors.append(f"Oven temperature {value}°C exceeds safety limit of 300°C")
+                errors.append(
+                    f"Oven temperature {value}°C exceeds safety limit of 300°C"
+                )
 
-    available_devices = set(plan.get("devices", {}).values())
-    for step in plan.get("micro_plan", []):
+    for source_step, step in enumerate(plan.get("steps", []), start=1):
+        if step.get("review_required"):
+            errors.append(
+                f"Source step {source_step} requires review: {step.get('review_reason', 'unparsed_instruction')}"
+            )
+    for step in micro_plan:
         if step.get("device") and step["device"] not in available_devices:
-            errors.append(f"Required device {step['device']} not available in device registry")
-    return errors
-
-
+            errors.append(
+                f"Required device {step['device']} not available in device registry"
+            )
+    return list(dict.fromkeys(errors))
 
 
 def detect_oven_dry(line: str) -> Optional[Dict[str, Any]]:
@@ -1945,108 +2438,203 @@ def _micro_from_ops(steps: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
 def _infer_micro_from_raw(steps: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
     inferred: List[Dict[str, Any]] = []
     for source_step_index, step in enumerate(steps, start=1):
-        action = step.get('action')
-        raw = step.get('raw', '') or ''
+        action = step.get("action")
+        raw = step.get("raw", "") or ""
         s = strip_tags(_clean_unicode(raw))
 
+        if action in {"process", "wait", "prepare_solution"}:
+            continue
+
         # Avoid duplicating primitives already emitted from semantic steps.
-        if action in {'heat_hold', 'autotitrator_rate', 'oven_dry'}:
+        if action in {"heat_hold", "autotitrator_rate", "oven_dry"}:
             continue
 
         # Heat / maintain / water bath instructions
-        if action not in {'add_solvent'} and re.search(r"\b(heat|maintain|hold|continue\s+heating?|water\s+bath)\b", s, re.I):
+        if action not in {"add_solvent"} and re.search(
+            r"\b(heat|maintain|hold|continue\s+heating?|water\s+bath)\b", s, re.I
+        ):
             temp_candidates = _temperature_candidates_c(s)
             temp = temp_candidates[0] if temp_candidates else None
             minutes = find_minutes(s)
-            device = 'HP1'
-            if re.search(r'water\s+bath', s, re.I):
-                device = 'water bath'
+            device = "HP1"
+            if re.search(r"water\s+bath", s, re.I):
+                device = "water bath"
             if temp is not None:
-                inferred.append({
-                    'verb': 'set',
-                    'device': device,
-                    'param': 'temperature_C',
-                    'value': temp,
-                    'unit': 'C',
-                    'source_step_index': source_step_index,
-                })
+                inferred.append(
+                    {
+                        "verb": "set",
+                        "device": device,
+                        "param": "temperature_C",
+                        "value": temp,
+                        "unit": "C",
+                        "source_step_index": source_step_index,
+                    }
+                )
             if minutes:
-                inferred.append({'verb': 'wait', 'minutes': minutes, 'source_step_index': source_step_index})
+                inferred.append(
+                    {
+                        "verb": "wait",
+                        "minutes": minutes,
+                        "source_step_index": source_step_index,
+                    }
+                )
 
         # Stir-only instructions with duration
-        if action not in {'stir', 'add_solvent'} and re.search(r"\bstir\b", s, re.I) and not re.search(r"\b(heat|oven|dry)\b", s, re.I):
+        if (
+            action not in {"stir", "add_solvent"}
+            and re.search(r"\bstir\b", s, re.I)
+            and not re.search(r"\b(heat|oven|dry)\b", s, re.I)
+        ):
             minutes = find_minutes(s)
             explicit_temps = _temperature_candidates_c(s)
             temp = explicit_temps[0] if explicit_temps else None
             if temp is not None:
-                inferred.append({
-                    'verb': 'set',
-                    'device': 'HP1',
-                    'param': 'temperature_C',
-                    'value': temp,
-                    'unit': 'C',
-                    'source_step_index': source_step_index,
-                })
+                inferred.append(
+                    {
+                        "verb": "set",
+                        "device": "HP1",
+                        "param": "temperature_C",
+                        "value": temp,
+                        "unit": "C",
+                        "source_step_index": source_step_index,
+                    }
+                )
             if minutes:
-                inferred.append({'verb': 'wait', 'minutes': minutes, 'source_step_index': source_step_index})
+                inferred.append(
+                    {
+                        "verb": "wait",
+                        "minutes": minutes,
+                        "source_step_index": source_step_index,
+                    }
+                )
 
         # Solvent / reagent additions -> pour primitive
-        if action not in {'add', 'add_solvent', 'transfer', 'postprocess', 'cool_to'}:
-            m_add_solvent = re.search(r"\badd\s+(\d+(?:\.\d+)?)\s*(µ?u?L|mL|ml|L|l)?\s*(?:of\s+)?([^.;]+?)\s+to\b", s, re.I)
+        if action not in {"add", "add_solvent", "transfer", "postprocess", "cool_to"}:
+            m_add_solvent = re.search(
+                r"\badd\s+(\d+(?:\.\d+)?)\s*(µ?u?L|mL|ml|L|l)?\s*(?:of\s+)?([^.;]+?)\s+to\b",
+                s,
+                re.I,
+            )
             if m_add_solvent:
-                inferred.append({
-                    'verb': 'pour',
-                    'reagent': _clean_solvent_tail(m_add_solvent.group(3).strip()),
-                    'volume': float(m_add_solvent.group(1)),
-                    'volume_units': m_add_solvent.group(2) or 'mL',
-                    'vessel': step.get('vessel', 'V1'),
-                    'source_step_index': source_step_index,
-                })
+                inferred.append(
+                    {
+                        "verb": "pour",
+                        "reagent": _clean_solvent_tail(m_add_solvent.group(3).strip()),
+                        "volume": float(m_add_solvent.group(1)),
+                        "volume_units": m_add_solvent.group(2) or "mL",
+                        "vessel": step.get("vessel", "V1"),
+                        "source_step_index": source_step_index,
+                    }
+                )
             elif re.search(r"\btransfer\b", s, re.I):
-                inferred.append({'verb': 'pour', 'vessel': step.get('vessel', 'V1'), 'source_step_index': source_step_index})
+                inferred.append(
+                    {
+                        "verb": "pour",
+                        "vessel": step.get("vessel", "V1"),
+                        "source_step_index": source_step_index,
+                    }
+                )
 
         # Oven drying
         oven = detect_oven_dry(s)
         if oven:
             tube = f"{step.get('vessel', 'V1')}_tube"
-            inferred.extend([
-                {'verb': 'pick_up', 'vessel': tube, 'source_step_index': source_step_index},
-                {'verb': 'place', 'vessel': tube, 'to': 'oven', 'device': 'OV1', 'source_step_index': source_step_index},
-                {'verb': 'set', 'device': 'OV1', 'param': 'temperature_C', 'value': oven['temperature_C'], 'unit': 'C', 'source_step_index': source_step_index},
-                {'verb': 'wait', 'minutes': oven['minutes'], 'source_step_index': source_step_index},
-            ])
+            inferred.extend(
+                [
+                    {
+                        "verb": "pick_up",
+                        "vessel": tube,
+                        "source_step_index": source_step_index,
+                    },
+                    {
+                        "verb": "place",
+                        "vessel": tube,
+                        "to": "oven",
+                        "device": "OV1",
+                        "source_step_index": source_step_index,
+                    },
+                    {
+                        "verb": "set",
+                        "device": "OV1",
+                        "param": "temperature_C",
+                        "value": oven["temperature_C"],
+                        "unit": "C",
+                        "source_step_index": source_step_index,
+                    },
+                    {
+                        "verb": "wait",
+                        "minutes": oven["minutes"],
+                        "source_step_index": source_step_index,
+                    },
+                ]
+            )
 
         # pH monitoring fallback
-        if re.search(r'\bph\b', s, re.I):
-            inferred.append({
-                'verb': 'monitor_ph',
-                'device': 'PH1',
-                'vessel': step.get('vessel', 'V1'),
-                'source_step_index': source_step_index,
-            })
+        if re.search(r"\bph\b", s, re.I):
+            inferred.append(
+                {
+                    "verb": "monitor_ph",
+                    "device": "PH1",
+                    "vessel": step.get("vessel", "V1"),
+                    "source_step_index": source_step_index,
+                }
+            )
 
         # Autotitrator rate
-        m_rate = re.search(r"(?:rate(?:\s+of)?|at)\s+([0-9]+(?:\.[0-9]+)?)\s*mL\s*/\s*min", s, re.I)
-        if (re.search(r'autotitrator', s, re.I) or re.search(r'titrat', s, re.I)) and m_rate:
-            inferred.append({
-                'verb': 'set',
-                'device': 'AT1',
-                'param': 'rate_mL_per_min',
-                'value': float(m_rate.group(1)),
-                'source_step_index': source_step_index,
-            })
+        m_rate = re.search(
+            r"(?:rate(?:\s+of)?|at)\s+([0-9]+(?:\.[0-9]+)?)\s*mL\s*/\s*min", s, re.I
+        )
+        if (
+            re.search(r"autotitrator", s, re.I) or re.search(r"titrat", s, re.I)
+        ) and m_rate:
+            inferred.append(
+                {
+                    "verb": "set",
+                    "device": "AT1",
+                    "param": "rate_mL_per_min",
+                    "value": float(m_rate.group(1)),
+                    "source_step_index": source_step_index,
+                }
+            )
 
         # Generic final fallback: any remaining explicit temperature should yield a set op.
         temp_candidates = _temperature_candidates_c(s)
-        if temp_candidates and not any(op.get('source_step_index') == source_step_index and op.get('verb') == 'set' and op.get('param') == 'temperature_C' for op in inferred):
+        if temp_candidates and not any(
+            op.get("source_step_index") == source_step_index
+            and op.get("verb") == "set"
+            and op.get("param") == "temperature_C"
+            for op in inferred
+        ):
             temp = temp_candidates[0]
-            device = 'OV1' if re.search(r'\boven\b', s, re.I) else ('water bath' if re.search(r'water\s+bath', s, re.I) else 'HP1')
-            inferred.append({'verb': 'set', 'device': device, 'param': 'temperature_C', 'value': temp, 'unit': 'C', 'source_step_index': source_step_index})
+            device = (
+                "OV1"
+                if re.search(r"\boven\b", s, re.I)
+                else ("water bath" if re.search(r"water\s+bath", s, re.I) else "HP1")
+            )
+            inferred.append(
+                {
+                    "verb": "set",
+                    "device": device,
+                    "param": "temperature_C",
+                    "value": temp,
+                    "unit": "C",
+                    "source_step_index": source_step_index,
+                }
+            )
             minutes = find_minutes(s)
-            if minutes and not any(op.get('source_step_index') == source_step_index and op.get('verb') == 'wait' for op in inferred):
-                inferred.append({'verb': 'wait', 'minutes': minutes, 'source_step_index': source_step_index})
+            if minutes and not any(
+                op.get("source_step_index") == source_step_index
+                and op.get("verb") == "wait"
+                for op in inferred
+            ):
+                inferred.append(
+                    {
+                        "verb": "wait",
+                        "minutes": minutes,
+                        "source_step_index": source_step_index,
+                    }
+                )
     return inferred
-
 
 
 def _dedupe_micro_ops(micro_plan: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
@@ -2127,18 +2715,23 @@ def _insert_required_placements(micro_plan: List[Dict[str, Any]]) -> Tuple[List[
     return out, repairs
 
 
-def _compress_micro_plan_for_gt_style(micro_plan: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+def _compress_micro_plan_for_gt_style(
+    micro_plan: List[Dict[str, Any]],
+) -> List[Dict[str, Any]]:
     compressed: List[Dict[str, Any]] = []
     last_temp_by_target: Dict[Tuple[Any, Any], Any] = {}
     for op in micro_plan:
-        verb = op.get('verb')
-        if verb in {'decant_supernatant', 'resuspend'}:
-            continue
-        if verb == 'set' and op.get('param') == 'temperature_C':
-            target = (op.get('device'), op.get('vessel'))
-            value = op.get('value')
+        verb = op.get("verb")
+        if verb == "set" and op.get("param") == "temperature_C":
+            target = (op.get("device"), op.get("vessel"))
+            value = op.get("value")
             if last_temp_by_target.get(target) == value:
-                while compressed and compressed[-1].get('source_step_index') == op.get('source_step_index') and compressed[-1].get('verb') in {'pick_up', 'place'}:
+                while (
+                    compressed
+                    and compressed[-1].get("source_step_index")
+                    == op.get("source_step_index")
+                    and compressed[-1].get("verb") in {"pick_up", "place"}
+                ):
                     compressed.pop()
                 continue
             last_temp_by_target[target] = value
@@ -2148,153 +2741,269 @@ def _compress_micro_plan_for_gt_style(micro_plan: List[Dict[str, Any]]) -> List[
 
 def apply_postprocessing(doc: Dict[str, Any]) -> Dict[str, Any]:
     result = copy.deepcopy(doc)
-    result.setdefault('_executor', {})
-    result['_executor'].setdefault('schema_version', 'executor.v1')
-    result['_executor'].setdefault('repairs', [])
-    result['_executor']['postprocessing_applied'] = True
-    result.setdefault('defaults', {})
+    result.pop("generated_pddl", None)
+    result.setdefault("_executor", {})
+    result["_executor"].setdefault("schema_version", "executor.v1")
+    result["_executor"].setdefault("repairs", [])
+    result["_executor"]["postprocessing_applied"] = True
+    result.setdefault("defaults", {})
     for k, v in DEFAULTS.items():
-        result['defaults'].setdefault(k, v)
-    result.setdefault('devices', {})
+        result["defaults"].setdefault(k, v)
+    result.setdefault("devices", {})
     for k, v in DEVICE_IDS.items():
-        result['devices'].setdefault(k, v)
+        result["devices"].setdefault(k, v)
 
-    steps = result.get('steps', []) or []
-    micro_plan = copy.deepcopy(result.get('micro_plan') or [])
+    steps = result.get("steps", []) or []
+    micro_plan = copy.deepcopy(result.get("micro_plan") or [])
     repairs: List[str] = []
 
     if not micro_plan:
         micro_plan = _micro_from_ops(steps)
         if micro_plan:
-            repairs.append('rebuilt_micro_plan_from_step_ops')
+            repairs.append("rebuilt_micro_plan_from_step_ops")
 
     inferred = _infer_micro_from_raw(steps)
     if inferred:
         micro_plan.extend(inferred)
-        repairs.append('inferred_micro_ops_from_raw_steps')
+        repairs.append("inferred_micro_ops_from_raw_steps")
 
     # Canonicalize devices and add default units
     for op in micro_plan:
-        if 'device' in op:
-            canon = _canonicalize_device_name(op.get('device'))
-            if canon != op.get('device'):
-                repairs.append(f"canonicalized_device_{str(op.get('device')).replace(' ', '_')}_to_{canon}")
-                op['device'] = canon
-        if op.get('verb') == 'set' and op.get('param') == 'temperature_C' and 'unit' not in op:
-            op['unit'] = 'C'
-        if op.get('verb') == 'pour' and op.get('volume') is not None and 'volume_units' not in op:
-            op['volume_units'] = 'mL'
-        if op.get('verb') == 'place' and op.get('to') == 'oven':
-            op.setdefault('device', 'OV1')
-
-    micro_plan, placement_repairs = _insert_required_placements(micro_plan)
-    repairs.extend(placement_repairs)
+        if "device" in op:
+            canon = _canonicalize_device_name(op.get("device"))
+            if canon != op.get("device"):
+                repairs.append(
+                    f"canonicalized_device_{str(op.get('device')).replace(' ', '_')}_to_{canon}"
+                )
+                op["device"] = canon
+        if (
+            op.get("verb") == "set"
+            and op.get("param") == "temperature_C"
+            and "unit" not in op
+        ):
+            op["unit"] = "C"
+        if (
+            op.get("verb") == "pour"
+            and op.get("volume") is not None
+            and "volume_units" not in op
+        ):
+            op["volume_units"] = "mL"
+        if op.get("verb") == "place" and op.get("to") == "oven":
+            op.setdefault("device", "OV1")
 
     # Final coverage pass for oven placement / temperature and generic temperature or pH fallback.
     for i, step in enumerate(steps, start=1):
-        raw = strip_tags(_clean_unicode(step.get('raw', '') or ''))
+        if step.get("action") in {"process", "wait", "prepare_solution", "dissolve"}:
+            continue
+        raw = strip_tags(_clean_unicode(step.get("raw", "") or ""))
         has_temp = any(
-            op.get('source_step_index') == i and (
-                (op.get('verb') == 'set' and op.get('param') == 'temperature_C') or
-                (op.get('verb') == 'set_oven_temperature')
+            op.get("source_step_index") == i
+            and (
+                (op.get("verb") == "set" and op.get("param") == "temperature_C")
+                or (op.get("verb") == "set_oven_temperature")
             )
             for op in micro_plan
         )
         has_place = any(
-            op.get('source_step_index') == i and (
-                (op.get('verb') == 'place' and (op.get('to') == 'oven' or op.get('device') == 'OV1')) or
-                (op.get('verb') == 'move_to_oven')
+            op.get("source_step_index") == i
+            and (
+                (
+                    op.get("verb") == "place"
+                    and (op.get("to") == "oven" or op.get("device") == "OV1")
+                )
+                or (op.get("verb") == "move_to_oven")
             )
             for op in micro_plan
         )
-        if re.search(r'\boven\b', raw, re.I):
+        if re.search(r"\boven\b", raw, re.I):
             if not has_place:
-                micro_plan.append({'verb': 'pick_up', 'vessel': f"{step.get('vessel', 'V1')}_tube", 'source_step_index': i})
-                micro_plan.append({'verb': 'place', 'vessel': f"{step.get('vessel', 'V1')}_tube", 'to': 'oven', 'device': 'OV1', 'source_step_index': i})
-                repairs.append('added_oven_pickup_place_fallback')
+                micro_plan.append(
+                    {
+                        "verb": "pick_up",
+                        "vessel": f"{step.get('vessel', 'V1')}_tube",
+                        "source_step_index": i,
+                    }
+                )
+                micro_plan.append(
+                    {
+                        "verb": "place",
+                        "vessel": f"{step.get('vessel', 'V1')}_tube",
+                        "to": "oven",
+                        "device": "OV1",
+                        "source_step_index": i,
+                    }
+                )
+                repairs.append("added_oven_pickup_place_fallback")
             if not has_temp and find_temp_c(raw) is not None:
                 temp_candidates = _temperature_candidates_c(raw)
                 if temp_candidates:
-                    micro_plan.append({'verb': 'set', 'device': 'OV1', 'param': 'temperature_C', 'value': temp_candidates[0], 'unit': 'C', 'source_step_index': i})
-                repairs.append('added_oven_temperature_fallback')
+                    micro_plan.append(
+                        {
+                            "verb": "set",
+                            "device": "OV1",
+                            "param": "temperature_C",
+                            "value": temp_candidates[0],
+                            "unit": "C",
+                            "source_step_index": i,
+                        }
+                    )
+                repairs.append("added_oven_temperature_fallback")
         elif not has_temp:
             temp_candidates = _temperature_candidates_c(raw)
             if temp_candidates:
-                device = 'HP1'
-                if re.search(r'water\s+bath', raw, re.I):
-                    device = 'water bath'
-                elif re.search(r'\boven\b', raw, re.I):
-                    device = 'OV1'
-                micro_plan.append({'verb': 'set', 'device': device, 'param': 'temperature_C', 'value': temp_candidates[0], 'unit': 'C', 'source_step_index': i})
-                repairs.append('added_temperature_fallback')
-        if re.search(r'\bph\b', raw, re.I) and not any(op.get('source_step_index') == i and op.get('verb') == 'monitor_ph' for op in micro_plan):
-            micro_plan.append({'verb': 'monitor_ph', 'device': 'PH1', 'vessel': step.get('vessel', 'V1'), 'source_step_index': i})
-            repairs.append('added_ph_monitor_fallback')
+                device = "HP1"
+                if re.search(r"water\s+bath", raw, re.I):
+                    device = "water bath"
+                elif re.search(r"\boven\b", raw, re.I):
+                    device = "OV1"
+                micro_plan.append(
+                    {
+                        "verb": "set",
+                        "device": device,
+                        "param": "temperature_C",
+                        "value": temp_candidates[0],
+                        "unit": "C",
+                        "source_step_index": i,
+                    }
+                )
+                repairs.append("added_temperature_fallback")
+        if re.search(r"\bph\b", raw, re.I) and not any(
+            op.get("source_step_index") == i and op.get("verb") == "monitor_ph"
+            for op in micro_plan
+        ):
+            micro_plan.append(
+                {
+                    "verb": "monitor_ph",
+                    "device": "PH1",
+                    "vessel": step.get("vessel", "V1"),
+                    "source_step_index": i,
+                }
+            )
+            repairs.append("added_ph_monitor_fallback")
 
     # Re-canonicalize after fallback additions.
     for op in micro_plan:
-        if 'device' in op:
-            op['device'] = _canonicalize_device_name(op.get('device'))
+        if "device" in op:
+            op["device"] = _canonicalize_device_name(op.get("device"))
+
+    # Repairs belong to their source step, not at the end of the protocol.
+    micro_plan.sort(key=lambda op: op.get("source_step_index") or 0)
+    micro_plan, placement_repairs = _insert_required_placements(micro_plan)
+    repairs.extend(placement_repairs)
 
     micro_plan = _compress_micro_plan_for_gt_style(micro_plan)
     micro_plan = _dedupe_micro_ops(micro_plan)
     _assign_unique_action_step_indices(micro_plan)
-    result['micro_plan'] = micro_plan
+    result["micro_plan"] = micro_plan
 
     # Build minimal plan with collapse + mapping.
-    map_generic = __import__('os').environ.get('MIN_PLAN_MAP_GENERIC') == '1'
-    device_mapping = {'HP1': 'hotplate', 'SP1': 'stir_plate', 'OV1': 'oven', 'CF1': 'centrifuge', 'AT1': 'autotitrator'}
+    map_generic = __import__("os").environ.get("MIN_PLAN_MAP_GENERIC") == "1"
+    device_mapping = {
+        "HP1": "hotplate",
+        "SP1": "stir_plate",
+        "OV1": "oven",
+        "CF1": "centrifuge",
+        "AT1": "autotitrator",
+    }
     micro_plan_min: List[Dict[str, Any]] = []
     timing_delays: List[Dict[str, Any]] = []
     seen_sets = set()
     for op in micro_plan:
-        verb = op.get('verb')
-        if verb == 'wait' and op.get('minutes', 0) > 0:
-            timing_delays.append({'step_index': op.get('step_index', 1), 'verb': 'wait', 'minutes': op.get('minutes')})
-        if verb not in {'pick_up', 'place', 'pour', 'set'}:
+        verb = op.get("verb")
+        if verb == "wait" and op.get("minutes", 0) > 0:
+            timing_delays.append(
+                {
+                    "step_index": op.get("step_index", 1),
+                    "verb": "wait",
+                    "minutes": op.get("minutes"),
+                }
+            )
+        if verb not in {"pick_up", "place", "pour", "set"}:
             continue
         entry = copy.deepcopy(op)
         if map_generic:
-            if entry.get('device') in device_mapping:
-                entry['device'] = device_mapping[entry['device']]
-            if entry.get('to') in device_mapping:
-                entry['to'] = device_mapping[entry['to']]
-        if entry.get('verb') == 'set':
-            key = (entry.get('device') or entry.get('to'), entry.get('param'), entry.get('value'))
+            if entry.get("device") in device_mapping:
+                entry["device"] = device_mapping[entry["device"]]
+            if entry.get("to") in device_mapping:
+                entry["to"] = device_mapping[entry["to"]]
+        if entry.get("verb") == "set":
+            key = (
+                entry.get("device") or entry.get("to"),
+                entry.get("param"),
+                entry.get("value"),
+            )
             if key in seen_sets:
                 continue
             seen_sets.add(key)
         micro_plan_min.append(entry)
 
     # Ensure primitive pours appear for add / add_solvent / transfer even if parser only created structured steps.
-    existing_pour_sources = {op.get('source_step_index') for op in micro_plan_min if op.get('verb') == 'pour'}
-    next_idx = max([op.get('step_index', 0) for op in micro_plan_min] + [0]) + 1
+    existing_pour_sources = {
+        op.get("source_step_index") for op in micro_plan_min if op.get("verb") == "pour"
+    }
+    next_idx = max([op.get("step_index", 0) for op in micro_plan_min] + [0]) + 1
     for i, step in enumerate(steps, start=1):
-        action = step.get('action')
-        if action in {'add', 'add_solvent', 'transfer', 'add_prepared_solution', 'add_reagent_solution'} and i not in existing_pour_sources:
-            entry = {'verb': 'pour', 'step_index': next_idx, 'source_step_index': i}
-            if step.get('volume') is not None:
-                entry['volume'] = step.get('volume')
-                entry['volume_units'] = step.get('volume_units', 'mL')
+        action = step.get("action")
+        if (
+            action
+            in {
+                "add",
+                "add_solvent",
+                "transfer",
+                "add_prepared_solution",
+                "add_reagent_solution",
+            }
+            and i not in existing_pour_sources
+        ):
+            entry = {"verb": "pour", "step_index": next_idx, "source_step_index": i}
+            if step.get("volume") is not None:
+                entry["volume"] = step.get("volume")
+                entry["volume_units"] = step.get("volume_units", "mL")
             micro_plan_min.append(entry)
             next_idx += 1
-        if action == 'oven_dry' and not any(op.get('source_step_index') == i and op.get('verb') == 'place' for op in micro_plan_min):
-            dev = 'oven' if map_generic else 'OV1'
-            micro_plan_min.append({'verb': 'place', 'device': dev, 'to': 'oven', 'source_step_index': i, 'step_index': next_idx}); next_idx += 1
-            micro_plan_min.append({'verb': 'set', 'device': dev, 'param': 'temperature_C', 'value': step.get('temperature_C', 80), 'unit': 'C', 'source_step_index': i, 'step_index': next_idx}); next_idx += 1
+        if action == "oven_dry" and not any(
+            op.get("source_step_index") == i and op.get("verb") == "place"
+            for op in micro_plan_min
+        ):
+            dev = "oven" if map_generic else "OV1"
+            micro_plan_min.append(
+                {
+                    "verb": "place",
+                    "device": dev,
+                    "to": "oven",
+                    "source_step_index": i,
+                    "step_index": next_idx,
+                }
+            )
+            next_idx += 1
+            micro_plan_min.append(
+                {
+                    "verb": "set",
+                    "device": dev,
+                    "param": "temperature_C",
+                    "value": step.get("temperature_C", 80),
+                    "unit": "C",
+                    "source_step_index": i,
+                    "step_index": next_idx,
+                }
+            )
+            next_idx += 1
 
     _assign_unique_action_step_indices(micro_plan_min)
-    result['micro_plan_min'] = micro_plan_min
+    result["micro_plan_min"] = micro_plan_min
     deduped_timing: List[Dict[str, Any]] = []
     seen_timing = set()
     for delay in timing_delays:
-        key = (delay.get('verb'), delay.get('minutes'), delay.get('step_index'))
+        key = (delay.get("verb"), delay.get("minutes"), delay.get("step_index"))
         if key in seen_timing:
             continue
         seen_timing.add(key)
         deduped_timing.append(delay)
-    result['timing_delays'] = deduped_timing
-    result['_executor']['repairs'].extend(repairs)
+    result["timing_delays"] = deduped_timing
+    result["_executor"]["repairs"] = list(
+        dict.fromkeys(result["_executor"]["repairs"] + repairs)
+    )
+    _update_execution_metadata(result)
     return result
 
 
@@ -2324,7 +3033,10 @@ def _enrich_step_scalar_fields(steps: List[Dict[str, Any]]) -> None:
 def _base_convert_text_to_robot_ops(text: str) -> Dict[str, Any]:
     hardware = parse_hardware(text)
     vessels = VesselRegistry(hardware)
-    primary_vessel = vessels.ensure_glassware("Beaker")
+    primary_label = next(
+        (h["name"] for h in hardware if h.get("type") in {"flask", "beaker"}), "Beaker"
+    )
+    primary_vessel = vessels.ensure_glassware(primary_label)
     semantic_steps, _context = semantic_parse(text, vessels)
     records = emit_steps(semantic_steps, vessels)
     _enrich_step_scalar_fields(records)
@@ -2346,58 +3058,33 @@ def _base_convert_text_to_robot_ops(text: str) -> Dict[str, Any]:
 
     if "V1" not in result["vessel_registry"]:
         result["vessel_registry"]["V1"] = "Beaker"
-    if any(step.get("action") == "postprocess" for step in records):
-        result["vessel_registry"].setdefault("V1_tube", "Centrifuge Tube")
+    for step in records:
+        for op in step.get("ops", []):
+            refs = [op.get(k) for k in ("vessel", "tube", "from", "to")]
+            refs.extend(op.get("tubes", []))
+            for ref in refs:
+                if isinstance(ref, str) and re.fullmatch(r"V\d+_tube(?:_\d+)?", ref):
+                    label = "Centrifuge Tube"
+                    if step.get("tube_capacity_mL"):
+                        label += f" {step['tube_capacity_mL']:g} mL"
+                    result["vessel_registry"].setdefault(ref, label)
 
     result["micro_plan"] = build_micro_plan(records)
     result = apply_postprocessing(result)
     result.setdefault("micro_plan_min", [])
     result.setdefault("timing_delays", [])
 
-    # Last-resort document-level temperature fallback for broad fallback tests.
-    has_temp_set = any(
-        op.get("verb") == "set" and op.get("param") == "temperature_C"
-        for op in result.get("micro_plan", [])
-    )
-    if not has_temp_set:
-        doc_temps = _temperature_candidates_c(text)
-        if doc_temps:
-            temp_op = {
-                "verb": "set",
-                "device": "HP1",
-                "param": "temperature_C",
-                "value": doc_temps[0],
-                "unit": "C",
-                "source_step_index": 1,
-            }
-            result.setdefault("micro_plan", []).append(temp_op)
-            _assign_unique_action_step_indices(result["micro_plan"])
-            generic_map = __import__('os').environ.get('MIN_PLAN_MAP_GENERIC') == '1'
-            min_device = 'hotplate' if generic_map else 'HP1'
-            result.setdefault("micro_plan_min", []).append({
-                "verb": "set",
-                "device": min_device,
-                "param": "temperature_C",
-                "value": doc_temps[0],
-                "unit": "C",
-                "source_step_index": 1,
-                "step_index": len(result.get("micro_plan_min", [])) + 1,
-            })
-            if not any(d.get("minutes") for d in result.get("timing_delays", [])):
-                doc_minutes = find_minutes(text)
-                if doc_minutes:
-                    result.setdefault("timing_delays", []).append({
-                        "step_index": 1,
-                        "verb": "wait",
-                        "minutes": doc_minutes,
-                    })
-            result.setdefault("_executor", {}).setdefault("repairs", []).append("added_document_level_temperature_fallback")
-
-    errors = validate_execution_plan(result)
-    if errors:
-        result["_executor"]["validation_errors"] = errors
+    _update_execution_metadata(result)
 
     return result
+
+
+def _update_execution_metadata(result: Dict[str, Any]) -> None:
+    errors = validate_execution_plan(result)
+    meta = result.setdefault("_executor", {})
+    meta["validation_errors"] = errors
+    meta["valid"] = not errors
+    meta["review_required"] = bool(errors)
 
 
 def validate_step(text: str) -> Dict[str, Any]:
@@ -2447,25 +3134,6 @@ def validate_file(path: str) -> List[Dict[str, Any]]:
     return items
 
 
-if __name__ == "__main__":
-    import argparse
-
-    ap = argparse.ArgumentParser(description="Convert a TXT/MD protocol to robot JSON ops")
-    ap.add_argument("path", help="Input file path")
-    ap.add_argument("-o", "--out", default="-", help="Output JSON path (default stdout)")
-    args = ap.parse_args()
-
-    txt = pathlib.Path(args.path).read_text(encoding="utf-8", errors="ignore")
-    obj = convert_text_to_robot_ops(txt)
-    js = json.dumps(obj, indent=2, ensure_ascii=False)
-    if args.out == "-":
-        print(js)
-    else:
-        with open(args.out, "w", encoding="utf-8") as f:
-            f.write(js)
-        print(f"Wrote {args.out}")
-
-
 # ===== Ground-truth schema alignment layer =====
 
 ROLE_HINTS = {
@@ -2477,102 +3145,49 @@ ROLE_HINTS = {
     'ethylene glycol': 'solvent',
 }
 
-def _strip_executor_only_keys(obj: Any) -> Any:
-    if isinstance(obj, dict):
-        return {k: _strip_executor_only_keys(v) for k, v in obj.items()
-                if k not in {'executable', 'review_required', 'review_reason'}}
-    if isinstance(obj, list):
-        return [_strip_executor_only_keys(v) for v in obj]
-    return obj
 
 def _op_exists(ops: List[Dict[str, Any]], op_name: str) -> bool:
     return any(op.get('op') == op_name for op in ops)
 
 def _ensure_gt_stir_ops(step: Dict[str, Any]) -> None:
-    action = step.get('action')
-    raw = (step.get('raw') or '').lower()
+    action = step.get("action")
+    raw = (step.get("raw") or "").lower()
     needs_stir = False
-    if action == 'stir':
+    if action == "stir":
         needs_stir = True
-    elif action == 'add_solvent' and 'stir' in raw:
+    elif action == "add_solvent" and step.get("with_stirring"):
         needs_stir = True
-    elif action == 'add' and (step.get('with_stirring') or 'under stirring' in raw or 'while stirring' in raw):
+    elif action == "add" and (
+        step.get("with_stirring") or "under stirring" in raw or "while stirring" in raw
+    ):
         needs_stir = True
     if not needs_stir:
         return
 
-    ops = step.setdefault('ops', [])
+    ops = step.setdefault("ops", [])
     new_prefix = []
-    if not _op_exists(ops, 'move_to_stir_plate'):
-        new_prefix.append({'op': 'move_to_stir_plate', 'stir_plate_id': 'SP1', 'vessel': step.get('vessel', 'V1')})
-    if not _op_exists(ops, 'set_stir_rate'):
-        new_prefix.append({'op': 'set_stir_rate', 'vessel': step.get('vessel', 'V1'), 'rpm': step.get('rpm', DEFAULTS['stir_rpm']), 'inferred': True})
+    if not _op_exists(ops, "move_to_stir_plate"):
+        new_prefix.append(
+            {
+                "op": "move_to_stir_plate",
+                "stir_plate_id": "SP1",
+                "vessel": step.get("vessel", "V1"),
+            }
+        )
+    if not _op_exists(ops, "set_stir_rate"):
+        new_prefix.append(
+            {
+                "op": "set_stir_rate",
+                "vessel": step.get("vessel", "V1"),
+                "rpm": step.get("rpm", DEFAULTS["stir_rpm"]),
+                "inferred": True,
+            }
+        )
     if new_prefix:
-        step['ops'] = new_prefix + ops
-    if action == 'add':
-        step['with_stirring'] = True
+        step["ops"] = new_prefix + ops
+    if action == "add":
+        step["with_stirring"] = True
 
-def _infer_formula_or_short_name(name: str) -> str:
-    if not name:
-        return name
-    m = re.search(r'\(([^)]+)\)', name)
-    if m:
-        return m.group(1)
-    return name
-
-def _parse_materials_section(text: str) -> List[Dict[str, Any]]:
-    lines = text.splitlines()
-    in_materials = False
-    items = []
-    for line in lines:
-        stripped = line.strip()
-        if re.search(r'\*\*?\s*Materials\s*:?', stripped, re.I) or re.match(r'^\d+\.\s+\*\*Materials', stripped, re.I):
-            in_materials = True
-            continue
-        if in_materials and (re.search(r'\*\*?\s*Procedure\s*:?', stripped, re.I) or re.match(r'^\d+\.\s+\*\*Procedure', stripped, re.I)):
-            break
-        if in_materials and re.match(r'^-\s+', stripped):
-            items.append(re.sub(r'^-\s*', '', stripped))
-    out = []
-    for item in items:
-        # Example: Platinum(II) acetylacetonate (Pt(acac)2), 1.5 mM
-        parts = [p.strip() for p in item.split(',')]
-        full_name = parts[0]
-        short = _infer_formula_or_short_name(full_name)
-        conc = conc_unit = purity = None
-        for p in parts[1:]:
-            m = re.search(r'([0-9]+(?:\.[0-9]+)?)\s*(mM|M|mg|g|mL|mmol)', p, re.I)
-            if m and m.group(2).lower() in {'mm','mg','g','ml','mmol'}:
-                pass
-            if m and m.group(2).lower() in {'mmol','mg','g','ml'}:
-                # not concentration; keep as None for schema parity
-                pass
-            if m and m.group(2).lower() in {'mm', 'm'}:
-                pass
-            m2 = re.search(r'([0-9]+(?:\.[0-9]+)?)\s*(mM|M)\b', p, re.I)
-            if m2:
-                conc = float(m2.group(1))
-                conc_unit = m2.group(2)
-            p2 = re.search(r'([0-9]+(?:\.[0-9]+)?)\s*%', p)
-            if p2:
-                purity = p2.group(1) + '%'
-        role = None
-        lname = full_name.lower()
-        for k, v in ROLE_HINTS.items():
-            if k in lname or k == short.lower():
-                role = v
-                break
-        if role is None and any(tok in lname for tok in ['pt(', 'ru(', 'acetylacetonate', 'chloride', 'acetate']):
-            role = 'metal precursor'
-        out.append({
-            'name': re.sub(r'\s*\([^)]*\)$', '', full_name).strip() if '(' in full_name and ')' in full_name else full_name,
-            'formula_or_short_name': short,
-            'concentration': conc,
-            'concentration_unit': conc_unit,
-            'purity': purity,
-            'role': role,
-        })
-    return out
 
 def _format_executor_repr(op: Dict[str, Any]) -> str:
     verb = op.get('op') or op.get('verb')
@@ -2612,150 +3227,110 @@ def _format_executor_repr(op: Dict[str, Any]) -> str:
 
 def _build_chemistry_summary(text: str, result: Dict[str, Any]) -> Dict[str, Any]:
     materials = _parse_materials_section(text)
+    known_materials = {
+        (m.get("formula_or_short_name") or m.get("name") or "").lower()
+        for m in materials
+    }
+    for material in _materials_from_steps_fallback(result["steps"]):
+        key = (
+            material.get("formula_or_short_name") or material.get("name") or ""
+        ).lower()
+        if key not in known_materials:
+            materials.append(material)
+            known_materials.add(key)
     procedure = []
     assumptions = []
     ambiguities = set()
 
-    if any(op.get('op') == 'set_stir_rate' and op.get('inferred') for step in result['steps'] for op in step.get('ops', [])):
-        assumptions.append({
-            'item': 'stirring speed',
-            'chosen_value': f"{DEFAULTS['stir_rpm']} rpm",
-            'reason': 'The executor schema requires an explicit set_stir_rate value, but the source text does not state one.',
-        })
+    if any(
+        op.get("op") == "set_stir_rate" and op.get("inferred")
+        for step in result["steps"]
+        for op in step.get("ops", [])
+    ):
+        assumptions.append(
+            {
+                "item": "stirring speed",
+                "chosen_value": f"{DEFAULTS['stir_rpm']} rpm",
+                "reason": "The executor schema requires an explicit set_stir_rate value, but the source text does not state one.",
+            }
+        )
 
-    for idx, step in enumerate(result['steps'], start=1):
-        ops = step.get('ops', [])
+    for idx, step in enumerate(result["steps"], start=1):
+        ops = step.get("ops", [])
         proc = {
-            'step_number': idx,
-            'source_text': (step.get('raw') or '').strip(),
-            'explicit_from_text': {
-                'operation': step.get('action'),
+            "step_number": idx,
+            "source_text": (step.get("raw") or "").strip(),
+            "explicit_from_text": {
+                "operation": step.get("action"),
             },
-            'inferred_for_json': {
-                'executor_representation': [_format_executor_repr(op) for op in ops],
+            "inferred_for_json": {
+                "executor_representation": [_format_executor_repr(op) for op in ops],
             },
-            'notes': [],
+            "notes": [],
         }
-        if step.get('reagents_structured'):
+        if step.get("source_protocol_step") is not None:
+            proc["source_protocol_step"] = step["source_protocol_step"]
+        if step.get("review_required"):
+            proc["notes"].append(step.get("review_reason", "unparsed_instruction"))
+        if step.get("reagents_structured"):
             comps = []
-            for rs in step['reagents_structured']:
-                comp = {'name': rs.get('name')}
-                if rs.get('concentration') is not None:
-                    comp['concentration'] = rs.get('concentration')
-                    comp['concentration_unit'] = rs.get('conc_unit')
-                if rs.get('amount') is not None:
-                    comp['amount'] = rs.get('amount')
-                    comp['amount_unit'] = rs.get('amount_unit')
-                if rs.get('solvent'):
-                    comp['solvent'] = rs.get('solvent')
-                if rs.get('is_solution') is not None:
-                    comp['form'] = 'solution' if rs.get('is_solution') else None
+            for rs in step["reagents_structured"]:
+                comp = {"name": rs.get("name")}
+                if rs.get("concentration") is not None:
+                    comp["concentration"] = rs.get("concentration")
+                    comp["concentration_unit"] = rs.get("conc_unit")
+                if rs.get("amount") is not None:
+                    comp["amount"] = rs.get("amount")
+                    comp["amount_unit"] = rs.get("amount_unit")
+                if rs.get("solvent"):
+                    comp["solvent"] = rs.get("solvent")
+                if rs.get("is_solution") is not None:
+                    comp["form"] = "solution" if rs.get("is_solution") else None
                 comps.append({k: v for k, v in comp.items() if v is not None})
             if len(comps) == 1:
-                proc['explicit_from_text']['component'] = comps[0]
-                if step['action'] in {'add', 'add_solvent', 'redisperse'}:
-                    proc['explicit_from_text']['added_component'] = comps[0]
+                proc["explicit_from_text"]["component"] = comps[0]
+                if step["action"] in {"add", "add_solvent", "redisperse"}:
+                    proc["explicit_from_text"]["added_component"] = comps[0]
             else:
-                proc['explicit_from_text']['components'] = comps
-        if step.get('solvent'):
-            proc['explicit_from_text']['solvent'] = step.get('solvent')
-        if step.get('minutes') is not None:
-            proc['explicit_from_text']['time'] = {'value': step['minutes'], 'unit': 'minutes'}
-        if step.get('rpm'):
-            proc['explicit_from_text']['stirring'] = True
-        if step.get('temperature_C') is not None:
-            proc['explicit_from_text']['temperature_C'] = step.get('temperature_C')
+                proc["explicit_from_text"]["components"] = comps
+        if step.get("solvent"):
+            proc["explicit_from_text"]["solvent"] = step.get("solvent")
+        if step.get("minutes") is not None:
+            proc["explicit_from_text"]["time"] = {
+                "value": step["minutes"],
+                "unit": "minutes",
+            }
+        if step.get("rpm"):
+            proc["explicit_from_text"]["stirring"] = True
+        if step.get("temperature_C") is not None:
+            proc["explicit_from_text"]["temperature_C"] = step.get("temperature_C")
         procedure.append(proc)
 
-        raw = (step.get('raw') or '').lower()
-        if 'not stated' in raw:
-            pass
-        if step['action'] == 'prepare_solution':
-            if not any(rs.get('amount') for rs in step.get('reagents_structured', []) if rs.get('name') == 'chloroform'):
-                ambiguities.add('The chloroform volume used to prepare the metal precursor solution is not stated.')
-        if step['action'] == 'add' and any((rs.get('name') or '').lower() == 'nabh4' for rs in step.get('reagents_structured', [])):
-            ambiguities.add('The concentration and volume of the aqueous NaBH4 solution are not stated.')
-        if step['action'] == 'redisperse':
-            ambiguities.add('The final ethanol volume used for redispersion is not stated.')
+        if step.get("review_required"):
+            ambiguities.add(
+                step.get("review_reason", "unparsed_instruction").replace("_", " ")
+            )
+        for op in ops:
+            if (
+                op.get("op") == "pour"
+                and op.get("volume") is None
+                and op.get("amount") is None
+            ):
+                material = (
+                    op.get("reagent") or op.get("solvent") or "transferred material"
+                )
+                ambiguities.add(
+                    f"The quantity of {material} is not stated for source step {idx}."
+                )
 
     return {
-        'hardware': [h['name'] for h in result.get('hardware', [])],
-        'materials': materials,
-        'procedure': procedure,
-        'assumptions': assumptions,
-        'known_ambiguities': sorted(ambiguities),
+        "hardware": [h["name"] for h in result.get("hardware", [])],
+        "materials": materials,
+        "procedure": procedure,
+        "assumptions": assumptions,
+        "known_ambiguities": sorted(ambiguities),
     }
 
-def _action_goal_predicates(op: Dict[str, Any]) -> List[str]:
-    verb = op.get('verb')
-    if verb == 'pour':
-        target = op.get('vessel', op.get('tube', 'V1'))
-        material = op.get('reagent') or op.get('solvent') or 'material'
-        safe = re.sub(r'[^A-Za-z0-9_]+', '_', str(material))
-        return [f"(in {target} {safe})", "(open-hand handL)", "(ready-hand handL)"]
-    if verb == 'wait':
-        return [f"(waited t1)", "(open-hand handL)", "(ready-hand handL)"]
-    if verb == 'centrifuge':
-        tgt = op.get('tube', 'V1_tube')
-        return [f"(centrifuged {tgt})", "(open-hand handL)", "(ready-hand handL)"]
-    if verb == 'transfer_to_centrifuge_tube':
-        return [f"(in {op.get('to','V1_tube')} transferred_material)", "(open-hand handL)", "(ready-hand handL)"]
-    if verb == 'decant_supernatant':
-        tgt = op.get('tube', 'V1_tube')
-        return [f"(decanted {tgt})", "(open-hand handL)", "(ready-hand handL)"]
-    if verb == 'resuspend':
-        tgt = op.get('tube', 'V1_tube')
-        return [f"(mixed {tgt})", "(open-hand handL)", "(ready-hand handL)"]
-    return ["(open-hand handL)", "(ready-hand handL)"]
-
-def _pddl_text_for_problem(name: str, goal_predicates: List[str], dependencies: List[str]) -> str:
-    deps = f"; Dependencies: {', '.join(dependencies)}\n" if dependencies else ""
-    goals = "\n    ".join(goal_predicates)
-    return f"; File: {name.replace('_', '')}.pddl\n{deps}(define (problem {name})\n  (:domain robot-hand)\n  (:objects handL V1 V1_tube CF1 SP1)\n  (:init\n    (hand handL)\n    (open-hand handL)\n    (ready-hand handL)\n  )\n  (:goal (and\n    {goals}\n  ))\n)"
-
-def _build_generated_pddl(result: Dict[str, Any]) -> Dict[str, Any]:
-    plan_ops = [op for op in result.get('micro_plan', []) if op.get('verb') not in {'move_to_stir_plate', 'set_stir_rate'}]
-    problems = []
-    pddl_chunks = []
-    for i, op in enumerate(plan_ops, start=1):
-        deps = [] if i == 1 else [f"problem_{i-1}"]
-        action_type = 'wait' if op.get('verb') == 'wait' else 'action'
-        action_entry = {
-            'type': action_type,
-            'value': str(op.get('minutes')) if action_type == 'wait' else op.get('verb'),
-            'step_index': op.get('step_index'),
-            'source_step_index': op.get('source_step_index'),
-            'source_verb': op.get('verb'),
-            'wash_cycle': op.get('wash_cycle'),
-        }
-        goal_preds = _action_goal_predicates(op)
-        prob = {
-            'problem_number': i,
-            'name': f'problem_{i}',
-            'filename': f'problem{i}.pddl',
-            'dependencies': deps,
-            'actions': [action_entry],
-            'goal_predicates': goal_preds,
-            'state_before': ['(hand handL)', '(open-hand handL)', '(ready-hand handL)'],
-            'state_after': goal_preds,
-            'stable_boundary_reason': 'single-executable-step',
-        }
-        problems.append(prob)
-        pddl_chunks.append({
-            'filename': f'problem{i}.pddl',
-            'problem_name': f'problem_{i}',
-            'dependencies': deps,
-            'goal_predicates': goal_preds,
-            'text': _pddl_text_for_problem(f'problem_{i}', goal_preds, deps),
-        })
-    return {
-        'source_file': None,
-        'workflow_step_count': len(plan_ops),
-        'problem_count': len(problems),
-        'chunk_count': len(pddl_chunks),
-        'problems': problems,
-        'pddl_chunks': pddl_chunks,
-    }
 
 def _used_devices_from_steps_and_plan(result: Dict[str, Any]) -> Dict[str, str]:
     needed = set()
@@ -2801,59 +3376,6 @@ def _flatten_ops_as_micro_plan(steps: List[Dict[str, Any]]) -> Tuple[List[Dict[s
             step_idx += 1
     return micro_plan, timing
 
-def convert_text_to_robot_ops(text: str) -> Dict[str, Any]:
-    """Convert free-text protocols into executor JSON.
-
-    Default behavior is *hybrid*: preserve the legacy executor-compatible schema
-    expected by the test suite (`defaults`, `micro_plan_min`, rich `_executor`),
-    while also appending the richer ground-truth-style planning layers
-    (`chemistry_summary`, `generated_pddl`).
-
-    If the environment variable ``GT_SCHEMA_STRICT=1`` is set, emit the leaner
-    ground-truth-shaped top-level document instead. This keeps CI compatibility
-    by default while still allowing strict GT exports when explicitly requested.
-    """
-    import os
-
-    base = _base_convert_text_to_robot_ops(text)
-
-    # Compatibility-first default: keep the legacy executor shape and enrich it.
-    if os.environ.get('GT_SCHEMA_STRICT') != '1':
-        gt_context = {
-            'steps': copy.deepcopy(base.get('steps', [])),
-            'micro_plan': copy.deepcopy(base.get('micro_plan', [])),
-            'hardware': copy.deepcopy(base.get('hardware', [])),
-            'devices': copy.deepcopy(base.get('devices', {})),
-            'vessel_registry': copy.deepcopy(base.get('vessel_registry', {})),
-            'vessel_contents_detailed': copy.deepcopy(base.get('vessel_contents_detailed', {})),
-        }
-        base['chemistry_summary'] = _build_chemistry_summary(text, gt_context)
-        base['generated_pddl'] = _build_generated_pddl(gt_context)
-        return base
-
-    # Optional strict GT mode: trim back to a ground-truth-like top-level shape.
-    steps = copy.deepcopy(base.get('steps', []))
-    for step in steps:
-        step['raw'] = (step.get('raw') or '').strip()
-        if step['raw'].endswith(' .'):
-            step['raw'] = step['raw'][:-2] + '.'
-        step['ops'] = _strip_executor_only_keys(step.get('ops', []))
-        _ensure_gt_stir_ops(step)
-    micro_plan, timing_delays = _flatten_ops_as_micro_plan(steps)
-    result = {
-        '_executor': {'schema_version': 'executor.v1'},
-        'devices': _used_devices_from_steps_and_plan({'steps': steps, 'micro_plan': micro_plan}),
-        'hardware': base.get('hardware', []),
-        'vessel_registry': base.get('vessel_registry', {}),
-        'vessel_contents_detailed': base.get('vessel_contents_detailed', {}),
-        'steps': steps,
-        'micro_plan': micro_plan,
-        'timing_delays': timing_delays,
-    }
-    result['chemistry_summary'] = _build_chemistry_summary(text, result)
-    result['generated_pddl'] = _build_generated_pddl(result)
-    return result
-
 
 # ===== Final GT strict alignment patch =====
 
@@ -2895,63 +3417,82 @@ def _infer_formula_or_short_name(name: str) -> str:
     return name
 
 def _parse_materials_section(text: str) -> List[Dict[str, Any]]:
-    lines = text.splitlines()
+    """Extract stocks and reagents without turning explanatory labels into chemicals."""
+    items = []
     in_materials = False
-    items: List[str] = []
-    for line in lines:
-        stripped = line.strip()
-        if re.search(r'\*\*?\s*Materials\s*:?', stripped, re.I) or re.match(r'^\d+\.\s+\*\*Materials', stripped, re.I):
+    for line in text.splitlines():
+        plain = strip_tags(line.strip())
+        if re.match(r"^(?:\d+\.\s*)?Materials\s*:?$", plain, re.I):
             in_materials = True
             continue
-        if in_materials and (re.search(r'\*\*?\s*Procedure\s*:?', stripped, re.I) or re.match(r'^\d+\.\s+\*\*Procedure', stripped, re.I)):
+        if in_materials and re.match(r"^(?:\d+\.\s*)?Procedure\s*:?$", plain, re.I):
             break
-        if in_materials and re.match(r'^-\s+', stripped):
-            items.append(re.sub(r'^-\s*', '', stripped))
+        if in_materials and re.match(r"^\s*[-*]\s+", line):
+            items.append(re.sub(r"^[-*]\s+", "", plain))
 
-    out: List[Dict[str, Any]] = []
+    out = []
+    seen = set()
+
+    def add(name, source, concentration=None, concentration_unit=None, **fields):
+        name = strip_tags(name).strip(" ,;.")
+        short = _infer_formula_or_short_name(name)
+        key = (short.lower(), concentration, concentration_unit)
+        if not name or key in seen:
+            return
+        seen.add(key)
+        row = {
+            "name": name,
+            "formula_or_short_name": short,
+            "concentration": concentration,
+            "concentration_unit": concentration_unit,
+            "purity": None,
+            "role": _gt_role_for_name(name),
+            "source_text": source,
+        }
+        row.update(fields)
+        out.append(row)
+
     for item in items:
-        # Split on commas that are not inside parentheses.
-        parts: List[str] = []
-        buf = []
-        depth = 0
-        for ch in item:
-            if ch == '(':
-                depth += 1
-            elif ch == ')':
-                depth = max(0, depth - 1)
-            if ch == ',' and depth == 0:
-                parts.append(''.join(buf).strip())
-                buf = []
-            else:
-                buf.append(ch)
-        if buf:
-            parts.append(''.join(buf).strip())
-
-        full_name = parts[0] if parts else item.strip()
-        short = _infer_formula_or_short_name(full_name)
-        conc = conc_unit = purity = None
-        for p in parts[1:]:
-            m2 = re.search(r'([0-9]+(?:\.\d+)?)\s*(mM|M|µM|uM)\b', p, re.I)
-            if m2:
-                conc = float(m2.group(1))
-                conc_unit = _canon_unit(m2.group(2))
-            p2 = re.search(r'([0-9]+(?:\.\d+)?)\s*%', p)
-            if p2:
-                purity = p2.group(1) + '%'
-
-        material_name = full_name
-        if short and isinstance(material_name, str):
-            material_name = re.sub(r'\s*\(' + re.escape(short) + r'\)\s*$', '', material_name).strip()
-
-        out.append({
-            'name': material_name,
-            'formula_or_short_name': short,
-            'concentration': conc,
-            'concentration_unit': conc_unit,
-            'purity': purity,
-            'role': _gt_role_for_name(full_name),
-        })
+        # Support '20 mM NiCl2 in water and 20 mM H2PtCl6 in water'.
+        stocks = list(
+            re.finditer(
+                r"(\d+(?:\.\d+)?)\s*(mM|M|µM|uM)\s+(?:of\s+)?([A-Za-z][A-Za-z0-9()·_-]*)\b",
+                item,
+            )
+        )
+        for stock in stocks:
+            add(
+                stock.group(3), item, float(stock.group(1)), _canon_unit(stock.group(2))
+            )
+        for mass in re.finditer(
+            r"(\d+(?:\.\d+)?)\s*(mg|g|kg)\s+(?:of\s+)?([A-Za-z][A-Za-z0-9()·_-]*)\b",
+            item,
+        ):
+            add(
+                mass.group(3),
+                item,
+                amount=float(mass.group(1)),
+                amount_unit=mass.group(2),
+            )
+        for mixture in re.finditer(
+            r"\b([A-Za-z][A-Za-z0-9()]*)/([A-Za-z][A-Za-z0-9_-]*)\b", item
+        ):
+            add(mixture.group(1), item, solvent=mixture.group(2))
+            add(mixture.group(2), item)
+        if stocks or ":" in item:
+            continue
+        # Ordinary reagent bullets retain their names, concentrations and purity.
+        name = re.split(r",(?![^()]*\))", item, maxsplit=1)[0]
+        name = re.split(r"\s+for\s+", name, maxsplit=1, flags=re.I)[0]
+        conc = re.search(r"(\d+(?:\.\d+)?)\s*(mM|M|µM|uM)\b", item)
+        add(
+            name,
+            item,
+            float(conc.group(1)) if conc else None,
+            _canon_unit(conc.group(2)) if conc else None,
+        )
     return out
+
 
 def _materials_from_steps_fallback(steps: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
     materials: List[Dict[str, Any]] = []
@@ -2978,219 +3519,6 @@ def _materials_from_steps_fallback(steps: List[Dict[str, Any]]) -> List[Dict[str
             })
     return materials
 
-def _infer_crude_product_token(result: Dict[str, Any]) -> Optional[str]:
-    shape = None
-    for step in result.get('steps', []):
-        raw = step.get('raw') or ''
-        m = re.search(r'\bas-synthesized\s+([A-Za-z0-9 _-]+?)(?:,| and|\.)', raw, re.I)
-        if m:
-            shape = m.group(1).strip()
-            break
-    if not shape:
-        return None
-
-    metals: List[str] = []
-    steps = result.get('steps', [])
-    if steps:
-        for rs in steps[0].get('reagents_structured', []) or []:
-            nm = (rs.get('name') or '').strip()
-            if not nm:
-                continue
-            low = nm.lower()
-            if low in {'chloroform', 'water', 'ethanol'}:
-                continue
-            # Prefer short metal-ish leading symbol tokens.
-            m = re.match(r'([A-Z][a-z]?)', nm)
-            if m:
-                metals.append(m.group(1).lower())
-    prefix = "_".join(metals[:3]) if metals else ""
-    base = _slug_gt(shape)
-    if prefix:
-        return f"{prefix}_{base[:-1] if base.endswith('s') else base}_crude_suspension"
-    return f"{base[:-1] if base.endswith('s') else base}_crude_suspension"
-
-def _gt_problem_items(result: Dict[str, Any]) -> Tuple[List[Dict[str, Any]], List[str], Dict[str, int]]:
-    micro_plan = result.get('micro_plan', [])
-    steps_by_idx = {i + 1: step for i, step in enumerate(result.get('steps', []))}
-    items: List[Dict[str, Any]] = []
-    time_symbols: List[str] = []
-    time_counter = 1
-    skipped_resuspend = 0
-    synthetic_stir_count = 0
-
-    def next_meaningful(start: int) -> Optional[Dict[str, Any]]:
-        for j in range(start + 1, len(micro_plan)):
-            if micro_plan[j].get('verb') not in {'move_to_stir_plate', 'set_stir_rate'}:
-                return micro_plan[j]
-        return None
-
-    for idx, op in enumerate(micro_plan):
-        verb = op.get('verb')
-        if verb in {'move_to_stir_plate', 'set_stir_rate'}:
-            continue
-        step = steps_by_idx.get(op.get('source_step_index'))
-        raw = (step.get('raw') or '').lower() if step else ''
-
-        if verb == 'resuspend':
-            nxt = next_meaningful(idx)
-            if nxt and nxt.get('verb') == 'centrifuge' and nxt.get('source_step_index') == op.get('source_step_index') and nxt.get('wash_cycle') == op.get('wash_cycle'):
-                skipped_resuspend += 1
-                continue
-            items.append({'kind': 'action', 'op': op, 'action_value': 'mix'})
-            continue
-
-        if verb == 'wait':
-            # GT-style synthetic stir appears for "continue stirring ..." after addition steps,
-            # but not for a standalone stir step.
-            if step and step.get('action') != 'stir' and ('stirr' in raw or step.get('with_stirring') or step.get('rpm')):
-                items.append({'kind': 'synthetic_stir', 'op': op, 'action_value': 'stir'})
-                synthetic_stir_count += 1
-            sym = f"t{time_counter}"
-            time_symbols.append(sym)
-            items.append({'kind': 'wait', 'op': op, 'time_symbol': sym})
-            time_counter += 1
-            continue
-
-        action_value = verb
-        if verb == 'transfer_to_centrifuge_tube':
-            action_value = 'transfer'
-        elif verb == 'decant_supernatant':
-            action_value = 'decant'
-        items.append({'kind': 'action', 'op': op, 'action_value': action_value})
-
-    meta = {'skipped_resuspend_count': skipped_resuspend, 'synthetic_stir_count': synthetic_stir_count}
-    return items, time_symbols, meta
-
-def _gt_objects(result: Dict[str, Any], time_symbols: List[str]) -> List[str]:
-    objs = {'handL', 'upright', 'upside-down'}
-    objs.update(time_symbols)
-    objs.update(result.get('vessel_registry', {}).keys())
-    objs.update(result.get('devices', {}).values())
-    for op in result.get('micro_plan', []):
-        for key in ('reagent', 'solvent'):
-            if op.get(key):
-                objs.add(_slug_gt(op[key]))
-    for detail in result.get('vessel_contents_detailed', {}).values():
-        if isinstance(detail, dict) and detail.get('description'):
-            objs.add(_slug_gt(detail['description']))
-    iso = _infer_isolated_product_token(result)
-    if iso:
-        objs.add(iso)
-    crude = _infer_crude_product_token(result)
-    if crude:
-        objs.add(crude)
-    return sorted(objs)
-
-def _gt_goal_predicates(item: Dict[str, Any], result: Dict[str, Any]) -> List[str]:
-    op = item['op']
-    verb = op.get('verb')
-    steps = result.get('steps', [])
-    step = steps[op.get('source_step_index', 1) - 1] if op.get('source_step_index') else {}
-    vessel = op.get('vessel') or step.get('vessel') or 'V1'
-    tube = op.get('tube') or op.get('to') or 'V1_tube'
-    goals: List[str] = []
-
-    if item['kind'] == 'synthetic_stir':
-        goals.append(f'(stirred {vessel})')
-    elif item['kind'] == 'wait':
-        goals.append(f"(waited {item['time_symbol']})")
-        if step and step.get('action') == 'stir':
-            crude = _infer_crude_product_token(result)
-            if crude:
-                goals.insert(0, f'(in {vessel} {crude})')
-    elif verb == 'pour':
-        material = op.get('reagent') or op.get('solvent') or 'material'
-        goals.append(f"(in {vessel} {_slug_gt(material)})")
-        soln = _solution_token_for_vessel(result, op.get('source_step_index'), vessel)
-        if soln and op.get('solvent'):
-            goals.append(f"(in {vessel} {soln})")
-    elif verb == 'centrifuge':
-        goals.append(f'(centrifuged {tube})')
-        iso = _infer_isolated_product_token(result)
-        if iso and op.get('wash_cycle') is None:
-            goals.append(f'(in {tube} {iso})')
-    elif verb == 'transfer_to_centrifuge_tube':
-        crude = _infer_crude_product_token(result)
-        if crude:
-            goals.append(f'(in {tube} {crude})')
-        else:
-            goals.append(f'(in {tube} transferred_material)')
-    elif verb == 'decant_supernatant':
-        goals.append(f'(decanted {tube})')
-    elif item.get('action_value') == 'mix':
-        goals.append(f'(stirred {tube})')
-    else:
-        goals.append('(open-hand handL)')
-
-    goals.extend(['(open-hand handL)', '(ready-hand handL)'])
-    out: List[str] = []
-    for g in goals:
-        if g not in out:
-            out.append(g)
-    return out
-
-def _build_generated_pddl(result: Dict[str, Any]) -> Dict[str, Any]:
-    items, time_symbols, meta = _gt_problem_items(result)
-    objects = _gt_objects(result, time_symbols)
-    base_state = _gt_base_state(objects, time_symbols)
-    dynamic: List[str] = []
-    problems: List[Dict[str, Any]] = []
-    pddl_chunks: List[Dict[str, Any]] = []
-
-    for i, item in enumerate(items, start=1):
-        op = item['op']
-        deps = [] if i == 1 else [f'problem_{i-1}']
-        state_before = base_state + dynamic.copy()
-        goals = _gt_goal_predicates(item, result)
-        state_after_dyn = dynamic.copy()
-        state_after_dyn = _gt_update_dynamic_state(state_after_dyn, item, goals)
-        state_after = base_state + state_after_dyn.copy()
-
-        action_type = 'wait' if item['kind'] == 'wait' else 'action'
-        if item['kind'] == 'wait':
-            mins = op.get('minutes', 0)
-            action_value = str(int(mins)) if isinstance(mins, (int, float)) and float(mins).is_integer() else str(mins)
-        else:
-            action_value = item.get('action_value', op.get('verb'))
-        action_entry = {
-            'type': action_type,
-            'value': action_value,
-            'step_index': op.get('step_index'),
-            'source_step_index': op.get('source_step_index'),
-            'source_verb': op.get('verb'),
-            'wash_cycle': op.get('wash_cycle'),
-        }
-
-        prob = {
-            'problem_number': i,
-            'name': f'problem_{i}',
-            'filename': f'problem{i}.pddl',
-            'dependencies': deps,
-            'actions': [action_entry],
-            'goal_predicates': goals,
-            'state_before': state_before,
-            'state_after': state_after,
-            'stable_boundary_reason': _gt_stable_boundary_reason(item),
-        }
-        problems.append(prob)
-        pddl_chunks.append({
-            'filename': f'problem{i}.pddl',
-            'problem_name': f'problem_{i}',
-            'dependencies': deps,
-            'goal_predicates': goals,
-            'text': _pddl_text_for_problem(f'problem_{i}', objects, state_before, goals, deps),
-        })
-        dynamic = state_after_dyn
-
-    workflow_step_count = len(items) + meta.get('skipped_resuspend_count', 0) + meta.get('synthetic_stir_count', 0)
-    return {
-        'source_file': None,
-        'workflow_step_count': workflow_step_count,
-        'problem_count': len(problems),
-        'chunk_count': len(pddl_chunks),
-        'problems': problems,
-        'pddl_chunks': pddl_chunks,
-    }
 
 def _gt_hardware(base_hardware: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
     out = copy.deepcopy(base_hardware)
@@ -3204,20 +3532,24 @@ def _gt_hardware(base_hardware: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
 
 def _convert_text_gt_strict(text: str) -> Dict[str, Any]:
     base = _base_convert_text_to_robot_ops(text)
-    steps = _gt_prepare_steps(base.get('steps', []))
+    steps = _gt_prepare_steps(base.get("steps", []))
     micro_plan, timing_delays = _flatten_ops_as_micro_plan(steps)
     result = {
-        '_executor': {'schema_version': 'executor.v1'},
-        'devices': _used_devices_from_steps_and_plan({'steps': steps, 'micro_plan': micro_plan}),
-        'hardware': _gt_hardware(base.get('hardware', [])),
-        'vessel_registry': copy.deepcopy(base.get('vessel_registry', {})),
-        'vessel_contents_detailed': copy.deepcopy(base.get('vessel_contents_detailed', {})),
-        'steps': steps,
-        'micro_plan': micro_plan,
-        'timing_delays': timing_delays,
+        "_executor": copy.deepcopy(base["_executor"]),
+        "devices": _used_devices_from_steps_and_plan(
+            {"steps": steps, "micro_plan": micro_plan}
+        ),
+        "hardware": _gt_hardware(base.get("hardware", [])),
+        "vessel_registry": copy.deepcopy(base.get("vessel_registry", {})),
+        "vessel_contents_detailed": copy.deepcopy(
+            base.get("vessel_contents_detailed", {})
+        ),
+        "steps": steps,
+        "micro_plan": micro_plan,
+        "timing_delays": timing_delays,
     }
-    result['chemistry_summary'] = _build_chemistry_summary(text, result)
-    result['generated_pddl'] = _build_generated_pddl(result)
+    result["chemistry_summary"] = _build_chemistry_summary(text, result)
+    _update_execution_metadata(result)
     return result
 
 def convert_text_to_gt_schema(text: str) -> Dict[str, Any]:
@@ -3225,21 +3557,22 @@ def convert_text_to_gt_schema(text: str) -> Dict[str, Any]:
 
 def convert_text_to_robot_ops(text: str) -> Dict[str, Any]:
     import os
+
     base = _base_convert_text_to_robot_ops(text)
-    if os.environ.get('GT_SCHEMA_STRICT') == '1':
+    if os.environ.get("GT_SCHEMA_STRICT") == "1":
         return _convert_text_gt_strict(text)
 
     gt_context = {
-        'steps': _gt_prepare_steps(base.get('steps', [])),
-        'micro_plan': copy.deepcopy(base.get('micro_plan', [])),
-        'hardware': _gt_hardware(base.get('hardware', [])),
-        'devices': copy.deepcopy(base.get('devices', {})),
-        'vessel_registry': copy.deepcopy(base.get('vessel_registry', {})),
-        'vessel_contents_detailed': copy.deepcopy(base.get('vessel_contents_detailed', {})),
+        "steps": _gt_prepare_steps(base.get("steps", [])),
+        "micro_plan": copy.deepcopy(base.get("micro_plan", [])),
+        "hardware": _gt_hardware(base.get("hardware", [])),
+        "devices": copy.deepcopy(base.get("devices", {})),
+        "vessel_registry": copy.deepcopy(base.get("vessel_registry", {})),
+        "vessel_contents_detailed": copy.deepcopy(
+            base.get("vessel_contents_detailed", {})
+        ),
     }
-    gt_context['generated_pddl'] = _build_generated_pddl(gt_context)
-    base['chemistry_summary'] = _build_chemistry_summary(text, gt_context)
-    base['generated_pddl'] = gt_context['generated_pddl']
+    base["chemistry_summary"] = _build_chemistry_summary(text, gt_context)
     return base
 
 
@@ -3276,74 +3609,6 @@ def _gt_prepare_steps(base_steps: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
             step['vessel'] = step.get('vessel', 'V1_tube')
     return steps
 
-def _infer_isolated_product_token(result: Dict[str, Any]) -> Optional[str]:
-    for step in result.get('steps', []):
-        raw = step.get('raw') or ''
-        m = re.search(r'\bisolated\s+([A-Za-z0-9 _-]+?)\s+in\s+', raw, re.I)
-        if m:
-            return _slug_gt('isolated_' + m.group(1).strip())
-    for step in result.get('steps', []):
-        raw = step.get('raw') or ''
-        m = re.search(r'\bas-synthesized\s+([A-Za-z0-9 _-]+?)(?:,| and|\.)', raw, re.I)
-        if m:
-            return _slug_gt('isolated_' + m.group(1).strip())
-    return None
-
-def _solution_token_for_vessel(result: Dict[str, Any], source_step_index: int, vessel: str) -> Optional[str]:
-    detail = result.get('vessel_contents_detailed', {}).get(vessel)
-    if isinstance(detail, dict) and detail.get('prepared_in_source_step') == source_step_index and detail.get('description'):
-        return _slug_gt(str(detail['description']))
-    return None
-
-def _gt_base_state(objects: List[str], time_symbols: List[str]) -> List[str]:
-    base = ['(hand handL)', '(open-hand handL)', '(ready-hand handL)', '(orientation upright)', '(orientation upside-down)']
-    for obj in objects:
-        if obj in {'handL', 'upright', 'upside-down'} or obj in time_symbols:
-            continue
-        base.append(f'(movable {obj})')
-    for obj in objects:
-        if obj in {'handL', 'upright', 'upside-down'} or obj in time_symbols:
-            continue
-        base.append(f'(reachable handL {obj})')
-    for ts in time_symbols:
-        base.append(f'(time {ts})')
-    return base
-
-def _gt_update_dynamic_state(dynamic: List[str], item: Dict[str, Any], goals: List[str]) -> List[str]:
-    for g in goals:
-        if g not in dynamic and g not in {'(open-hand handL)', '(ready-hand handL)'}:
-            dynamic.append(g)
-    return dynamic
-
-def _gt_stable_boundary_reason(item: Dict[str, Any]) -> str:
-    op = item['op']
-    if op.get('verb') == 'decant_supernatant':
-        wc = op.get('wash_cycle')
-        if wc:
-            return f'wash-{wc}-decant'
-        return 'post-centrifuge-decant'
-    return 'single-executable-step'
-
-def _pddl_text_for_problem(name: str, objects: List[str], state_before: List[str], goal_predicates: List[str], dependencies: List[str]) -> str:
-    deps = f"; Dependencies: {', '.join(dependencies)}\n" if dependencies else ""
-    objs = " ".join(objects)
-    init_lines = "\n    ".join(state_before)
-    goal_lines = "\n    ".join(goal_predicates)
-    return (
-        f"; File: {name.replace('_', '')}.pddl\n"
-        f"{deps}"
-        f"(define (problem {name})\n"
-        f"  (:domain robot-hand)\n\n"
-        f"  (:objects {objs})\n\n"
-        f"  (:init\n"
-        f"    {init_lines}\n"
-        f"  )\n\n"
-        f"  (:goal (and\n"
-        f"    {goal_lines}\n"
-        f"  ))\n"
-        f")"
-    )
-
 
 def _gt_normalize_token(token: Any) -> Any:
     if not isinstance(token, str):
@@ -3356,20 +3621,45 @@ def _gt_normalize_token(token: Any) -> Any:
         return 'NaBH4'
     return stripped
 
-def _gt_normalize_op(op: Dict[str, Any], *, step: Optional[Dict[str, Any]] = None, op_index: int = 0) -> Dict[str, Any]:
-    cleaned = _strip_executor_only_keys(copy.deepcopy(op))
-    if 'reagent' in cleaned:
-        cleaned['reagent'] = _gt_normalize_token(cleaned.get('reagent'))
-    if 'solvent' in cleaned:
-        cleaned['solvent'] = _gt_normalize_token(cleaned.get('solvent'))
-    if cleaned.get('op') == 'pour' and cleaned.get('reagent') == 'NaBH4 aqueous solution':
-        cleaned['reagent'] = 'NaBH4_aqueous_solution'
-    if step and step.get('action') == 'postprocess' and cleaned.get('op') == 'centrifuge' and cleaned.get('wash_cycle') is None:
-        raw = (step.get('raw') or '').lower()
-        if 'followed by centrifugation' in raw or 'wash' in raw:
-            cleaned['inferred'] = True
+def _gt_normalize_op(
+    op: Dict[str, Any], *, step: Optional[Dict[str, Any]] = None, op_index: int = 0
+) -> Dict[str, Any]:
+    cleaned = copy.deepcopy(op)
+    if "reagent" in cleaned:
+        cleaned["reagent"] = _gt_normalize_token(cleaned.get("reagent"))
+    if "solvent" in cleaned:
+        cleaned["solvent"] = _gt_normalize_token(cleaned.get("solvent"))
+    if (
+        cleaned.get("op") == "pour"
+        and cleaned.get("reagent") == "NaBH4 aqueous solution"
+    ):
+        cleaned["reagent"] = "NaBH4_aqueous_solution"
+    if (
+        step
+        and step.get("action") == "postprocess"
+        and cleaned.get("op") == "centrifuge"
+        and cleaned.get("wash_cycle") is None
+    ):
+        raw = (step.get("raw") or "").lower()
+        if "followed by centrifugation" in raw or "wash" in raw:
+            cleaned["inferred"] = True
     return cleaned
 
-def _slug_gt(s: str) -> str:
-    s = _gt_normalize_token(s)
-    return re.sub(r'[^A-Za-z0-9_]+', '_', str(s)).strip('_')
+
+if __name__ == "__main__":
+    import argparse
+
+    ap = argparse.ArgumentParser(description="Convert a TXT/MD protocol to robot JSON ops")
+    ap.add_argument("path", help="Input file path")
+    ap.add_argument("-o", "--out", default="-", help="Output JSON path (default stdout)")
+    args = ap.parse_args()
+
+    txt = pathlib.Path(args.path).read_text(encoding="utf-8", errors="ignore")
+    obj = convert_text_to_robot_ops(txt)
+    js = json.dumps(obj, indent=2, ensure_ascii=False)
+    if args.out == "-":
+        print(js)
+    else:
+        with open(args.out, "w", encoding="utf-8") as f:
+            f.write(js)
+        print(f"Wrote {args.out}")

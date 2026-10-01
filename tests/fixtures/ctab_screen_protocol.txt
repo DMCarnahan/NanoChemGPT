@@ -1,0 +1,46 @@
+## Synthesis Protocol:
+1. **Hardware & Glassware**:
+[
+- Retain the attachment’s 500 mL three-neck round-bottom flask, PTFE stir bar, stir plate, and fume hood.
+- Glass vessels for the CTAB/chloroform stocks; a vented glass vessel for preparing fresh NaBH4 solution.
+- Four 50 mL centrifuge tubes compatible with the chloroform-containing mixture, and a compatible rotor rated for 9000 rpm.
+- TEM access for length/diameter measurements; STEM–EDS or equivalent elemental analysis to check Pt/Ni incorporation.
+]
+
+2. **Materials**:
+[
+- **Scale basis:** retain the attached batch scale: 120 mL DI water, 15 mL CTAB/chloroform stock, 15 mL combined aqueous metal stocks, and subsequently 15 mL aqueous reductant—165 mL nominal final volume. [A1.1][A1.2]
+- **Metal stocks:** 20 mM NiCl2 in DI water and 20 mM H2PtCl6 in DI water. Keep the same precursor ratio in every screening batch. The attachment’s example uses 13.5 mL H2PtCl6 stock and 1.5 mL NiCl2 stock. [A1.1] **Calculated feed:** 0.270 mmol Pt and 0.030 mmol Ni, or nominal Pt:Ni = 9:1; this does not establish the product composition.
+- **CTAB screen—proposed starting points:** use 15 mL of each of the following CTAB/chloroform stocks in separate batches:
+  - 20 mM: 0.300 mmol CTAB.
+  - **40 mM: 0.600 mmol CTAB—the attached baseline.** [A1.1]
+  - 60 mM: 0.900 mmol CTAB.
+  The 20 and 60 mM concentrations are unvalidated screening conditions, not reported conditions for aspect ratio 6.
+- **Reductant, per batch:** 600 mg NaBH4 and 15 mL DI water cooled to approximately 4 °C. [A1.2]
+- Ethanol for three additional washes and final redispersion; wash volumes are not specified in the attachment. [A1.2]
+]
+
+3. **Procedure**
+[
+1. **Define the target before modifying the synthesis.** Use aspect ratio \(AR=L/d\), measured for individual objects. **Proposed starting point:** target a median AR near 6, while separately reporting the distribution and the fraction of particles that are wire-like. The attachment provides no baseline dimensions or validated AR-control relationship.
+
+2. **Prepare the three CTAB stocks.** Prepare the original 40 mM stock in glass as specified, and prepare the proposed 20 and 60 mM stocks in glass. Confirm that each stock is homogeneous at the working temperature. If a proposed concentration does not dissolve reproducibly, do not treat its nominal concentration as an available surfactant concentration; narrow the screen instead.
+
+3. **Hold the other variables constant.** Use the same flask geometry, stirring setting, precursor ratio, reagent addition method, and temperature across all batches. The attachment does not specify reaction temperature or atmosphere. **Proposed starting point:** conduct the screen at 20–25 °C in a vented, ambient-air apparatus in the hood, recording the actual temperature. Do not seal the reaction or introduce an inert purge solely as an assumed requirement.
+
+4. **Prepare one reaction mixture.** Add 120 mL DI water to the flask containing the stir bar. Add 15 mL of the selected CTAB/chloroform stock. Then add the combined 15 mL of metal precursor stocks, preserving the attachment’s addition order. [A1.1]
+
+5. **Stir for 30 minutes before reduction.** Retain this preassembly period for all three batches so that CTAB concentration is the only intended synthesis variable. [A1.1]
+
+6. **Prepare the reductant immediately before use.** After the 30-minute stirring period, add 15 mL approximately 4 °C DI water to 600 mg NaBH4 and dissolve rapidly. Transfer the dissolved solution to the stirred reaction within two minutes of adding the water. [A1.2] **Safety modification:** use a vented preparation vessel and mix without tightly capping it; aqueous NaBH4 can generate hydrogen.
+
+7. **Allow reduction to proceed.** Keep the apparatus vented in the fume hood, away from ignition sources. The attachment specifies 20–30 minutes of hydrogen evolution. [A1.2] For consistency, use **30 minutes**, within that reported interval, for every screening batch. Do not shorten the reaction as an assumed method of shortening the wires; no growth-time relationship is supplied.
+
+8. **Collect and wash.** Divide the mixture among four balanced 50 mL centrifuge tubes. Centrifuge at 9000 rpm for 5 minutes and decant. Perform three additional ethanol washes, then redisperse the collected material in ethanol. [A1.2] Record the rotor used because rpm alone does not define centrifugal force. Use a consistent, recorded ethanol wash volume; the attachment does not provide one.
+
+9. **Repeat Steps 4–8 for the other CTAB concentrations.** Do not change metal feed, chloroform volume, NaBH4 loading, or reaction duration during this first screen.
+
+10. **Measure morphology before selecting a condition.** **Proposed starting point:** measure at least 100 individually resolved objects per batch across multiple TEM fields. Measure each object’s length and diameter, calculate its individual AR, and report the median, distribution, and wire-like fraction. Do not count bundles as single thick wires. Check Pt/Ni incorporation separately; morphology alone cannot establish a PtNi alloy.
+
+11. **Refine around the measured result.** If two CTAB concentrations give median aspect ratios on opposite sides of 6, test intermediate concentrations while keeping the other conditions fixed. If no trend or no wire-like product appears, do not extrapolate blindly. **Proposed second-stage screen:** vary the preassembly period to 10, 30, and 60 minutes at the best-performing CTAB concentration; only 30 minutes is attachment-backed. Repeat any apparent AR ≈ 6 condition in independent batches before treating it as reproducible.
+]
